@@ -13,13 +13,18 @@ import theano.tensor as T
 
 import matplotlib.pyplot as plt
 
-magtoflux  = numpy.exp(numpy.log(10)/2.5)
+ln10_2p5 = numpy.log(10)/2.5
+magtoflux  = numpy.exp(ln10_2p5)
+
+params = [0.28,-1, 0.5,numpy.log(1.), 0.1, numpy.log(0.5), 0.4,0]
+
+fluxthreshold = 0.4e-8
 
 def luminosity_distance(z, Om0, w0):
     cosmo = FlatwCDM(H0=72, Om0=Om0, w0=w0)
     return cosmo.luminosity_distance(z).value
 
-def normalization_integrand(n, lnL0, sigma_lnL, Z, threshold, ld):
+def normalization_integrand(n, lnL0, sigma_lnL, Z, threshold, ld, dcounts):
     #   The L value being sampled:
     #   lnL = n*sigma_lnL+lnL0
     #   exp(lnL) = exp(n)**sigma_lnL * exp(lnL0)
@@ -35,15 +40,14 @@ def normalization_integrand(n, lnL0, sigma_lnL, Z, threshold, ld):
     #   counts = 1/4/pi exp(lnL)/ld**2 [exp(ln10/2.5)]**Z
     #   counts = 1/4/pi exp(n)**sigma_lnL * exp(lnL0)/ld**2 [exp(ln10/2.5)]**Z
 
-    expn = numpy.exp(n)
-    counts = (1./4/numpy.pi)* numpy.power(expn, sigma_lnL) * numpy.exp(lnL0) / ld**2 * numpy.power(magtoflux,Z)
-#    ccdf  = 0.5 - 0.5*T.erf((threshold-counts)/ (numpy.sqrt(2.)*1e-9))
-#    return numpy.exp(-n**2/2.)*ccdf/sigma_lnL
+    # the gaussian on logL (leaving out the sqrt 2pi)
 
-    factor =  numpy.exp(-n**2/2.)*0.5 / sigma_lnL
-    divisor = numpy.sqrt(2.)*1e-9
-    return factor - factor*scipy.special.erf(threshold/divisor-counts/divisor) # return the incorrect answer since the integral multiplies by sigma_lnL
-
+    firstterm  = numpy.exp(-n**2/2) #the sigma_lnL here cancels with the normalization factor
+    L = numpy.exp(lnL0+n*sigma_lnL)
+    flux = L/4/numpy.pi/ld**2
+    counts = flux * 10**(Z/2.5)
+    ccdf  = 0.5 * (1- scipy.special.erf((threshold-counts)/ numpy.sqrt(2.)/dcounts))
+    return firstterm*ccdf
 
 def lognormal_logp(value, mu=None, tau=None):
     return -0.5 * tau * (numpy.log(value) - mu)**2 + 0.5 * numpy.log(tau/(2. * numpy.pi))   \
@@ -63,6 +67,8 @@ def LogLuminosityMarginalizedOverType_logp(value, mus=None, taus=None, p=None):
 
 
     This class should be generalized to handle multiple types each with its own model
+
+    Count does not depend explicitly on Type, so the summation over type is done here
 
     Parameters
     -----------
@@ -147,7 +153,7 @@ def Counts_logp(value, fluxes=None, pzs = None, Z=None, csigma=None):
     #return numpy.log(ans)
 
 def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, logL_snII=None, sigma_snII=None,\
-            luminosity_distances=None, Z=None, pzs=None, prob=None):
+            luminosity_distances=None, Z=None, pzs=None, prob=None, dcounts=None):
     r""" Renormalization factor from sample selection for a typed supernova with fixed
     redshift.
 
@@ -160,8 +166,8 @@ def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, l
     """
     for ld, pz, indz in zip(luminosity_distances,pzs,xrange(len(pzs))):
         #sum over type
-        tsum = prob*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snIa, sigma_snIa, Z, threshold, ld))[0] + \
-            (1-prob)*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snII, sigma_snII, Z, threshold, ld))[0]
+        tsum = prob*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snIa, sigma_snIa, Z, threshold, ld, dcounts))[0] + \
+            (1-prob)*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snII, sigma_snII, Z, threshold, ld, dcounts))[0]
         if indz == 0:
             ans = pz*tsum
         else: 
@@ -247,8 +253,11 @@ def pgm():
 
 
 def simulateData():
+
+    Om0, w0,  rate_II_r, logL_snIa, sigma_snIa, logL_snII, sigma_snII, Z = params
+
     # the number of transients
-    nTrans = 15
+    nTrans = 150
 
     # set the state of the random number generator
     seed=0
@@ -264,16 +273,16 @@ def simulateData():
     observation['zprob'] = numpy.zeros(nTrans)+1.
     spectype = numpy.random.uniform(low=0, high=1, size=nTrans)
     observation['spectype'] = spectype.round().astype('int')
-    luminosity = (1.-observation['spectype'])*10**(numpy.random.normal(0, 0.1/2.5, size=nTrans)) \
-        + observation['spectype']*.5**10**(numpy.random.normal(0, 0.4/2.5,size=nTrans))
-    cosmo = FlatwCDM(H0=72, Om0=0.28, w0=-1)
+    luminosity = (1.-observation['spectype'])*numpy.exp(logL_snIa)*10**(numpy.random.normal(0, sigma_snIa/2.5, size=nTrans)) \
+        + observation['spectype']*numpy.exp(logL_snII)*10**(numpy.random.normal(0, sigma_snII/2.5,size=nTrans))
+    cosmo = FlatwCDM(H0=72, Om0=Om0, w0=w0)
     ld = cosmo.luminosity_distance(observation['specz']).value
     h0 = (const.c/cosmo.H0).to(u.Mpc).value
 
 
-    observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(0.02/2.5)
+    observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(Z/2.5)
 
-    count_lim = .4e-8
+    count_lim = fluxthreshold
     found  = observation['counts'] >= count_lim
     nTrans =  found.sum()
     observation['specz'] = numpy.reshape(observation['specz'][found],(nTrans,1))
@@ -291,7 +300,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # basic_model = Model()
 
     # with basic_model:
-
+    ans = 0.
     r"""
     Cosmology Node.
 
@@ -314,11 +323,11 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     if Om0 < 0 or Om0 >1:
         return -numpy.inf
 
-    ans = lognormal_logp(Om0, numpy.log(0.28), tau=0.1**(-2))
+    #ans = lognormal_logp(Om0, numpy.log(0.28), tau=0.1**(-2))
 
-    if w0< -1.5 or w0>=0:
+    if w0< -1.5 or w0>=-0.1:
         return -numpy.inf
-    ans += normal_logp(w0, 1, 0.05**(-2))
+    #ans += normal_logp(w0, 1, 0.05**(-2))
 
     """
     Calibration Node.
@@ -336,7 +345,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
 
     """
     # _Z = Normal('zeropoints', mu=0, sd=.02, observed=Z)
-    ans += normal_logp(Z, 0, .02**(-2))
+    ans += normal_logp(Z, 0, (ln10_2p5*.02)**(-2))
 
     """
     SN Ia Rate Node.  
@@ -397,11 +406,11 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # _logL_snIa = Normal('logL_snIa', mu=numpy.log(1), sd = 0.02, observed = logL_snIa)
     # _sigma_snIa = Lognormal('sigma_snIa', mu=numpy.log(0.1), tau=1./0.1/0.1, observed = sigma_snIa)
 
-    ans+= normal_logp(logL_snIa, numpy.log(1), 0.02**(-2))
+    ans+= normal_logp(logL_snIa,  numpy.log(1.),  (ln10_2p5*0.02)**(-2))
 
     if sigma_snIa < 0:
         return -numpy.inf
-    ans+= lognormal_logp(sigma_snIa, numpy.log(0.1), 0.1**(-2))
+    ans+= lognormal_logp(sigma_snIa, numpy.log(0.1), (ln10_2p5*.2)**(-2))
 
     """
     SN Ia luminosity Node.  (actually working in log-L)
@@ -418,10 +427,10 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # _logL_snII = Normal('logL_snII', mu=numpy.log(0.5), sd=0.02, observed  = logL_snII)
     # _sigma_snII = Lognormal('sigma_snII', mu=numpy.log(0.4), tau=1./0.1/0.1, observed = sigma_snII)
 
-    ans+= normal_logp(logL_snII, numpy.log(0.5), 0.02**(-2))
+    ans+= normal_logp(logL_snII, numpy.log(0.5), (ln10_2p5*0.1)**(-2))
     if sigma_snII < 0:
         return -numpy.inf
-    ans+= lognormal_logp(sigma_snII, numpy.log(0.4), 0.1**(-2))
+    ans+= lognormal_logp(sigma_snII, numpy.log(0.4), (ln10_2p5*0.2)**(-2))
 
     """
     Enter the plate that considers one supernova at a time
@@ -508,15 +517,15 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
             #     sds = [numpy.log(10)/2.5*sigma_snIa,numpy.log(10)/2.5*sigma_snII], p=prob, \
             #     testval = 1., observed  = lnL)
             ans += LogLuminosityMarginalizedOverType_logp(lnL, mus=[logL_snIa, logL_snII], \
-                taus = numpy.power([numpy.log(10)/2.5*sigma_snIa,numpy.log(10)/2.5*sigma_snII],-2), p=prob)
+                taus = numpy.power([ln10_2p5*sigma_snIa,ln10_2p5*sigma_snII],-2), p=prob)
         else:
             if spectype == 0:
                 usemu = logL_snIa
-                usesd = numpy.log(10)/2.5*sigma_snIa
+                usesd = ln10_2p5*sigma_snIa
                 usep = prob
             else:
                 usemu = logL_snII
-                usesd = numpy.log(10)/2.5*sigma_snII
+                usesd = ln10_2p5*sigma_snII
                 usep = 1-prob
 
             # logluminosity = LogLuminosityGivenSpectype('logluminosity'+str(i), \
@@ -588,14 +597,15 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
         # normalization=SampleRenormalization('normalization'+str(i), threshold = 1e-9, 
         #     logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,
         #     luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, observed=1)
-        ans += SampleRenormalization_logp(threshold = 1e-9, \
+        ans += SampleRenormalization_logp(threshold = fluxthreshold, \
             logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,\
-            luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob)
+            luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, dcounts=dcounts)
 
-    print 'Done', ans
+    # print 'Done', ans
     return ans
 
 import pickle
+import corner
 
 def runModel():
 
@@ -603,7 +613,9 @@ def runModel():
     nTrans = len(observation['spectype'])
 
     ndim, nwalkers = 8+ nTrans, 100
-    p0 = [numpy.random.rand(ndim) for i in range(nwalkers)]
+    mns = numpy.concatenate((params, -.35*numpy.zeros(nTrans)))
+    sigs = numpy.concatenate(([.1,.2,.1, 1, .02, 1,.02, 0.02], .35+numpy.zeros(nTrans)))
+    p0 = [numpy.random.randn(ndim)*sigs + mns for i in range(nwalkers)]
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
         observation['specz'], numpy.zeros(nTrans)+1e-9, observation['zprob'], observation['spectype']])
@@ -613,7 +625,15 @@ def runModel():
     output.close()
 
 
-
+def results():
+    pkl_file = open('data.pkl', 'rb')
+    data = pickle.load(pkl_file)
+    samples = data[:, 50:, :].reshape((-1, data.shape[2]))
+    pkl_file.close()
+    fig = corner.corner(samples[:,:8], labels=["$\Omega_M$", "$w_0$", "$r_{snII}$", "$\ln{L_{snIa}}$","$\sigma_{snIa}$", "$\log{L_{snII}}$", "$\sigma_{snII}$", "$Z$"])
+                      #truths=[m_true, b_true, np.log(f_true)])
+    fig.savefig("triangle.png")
 
 runModel()
+results()
 #pgm()

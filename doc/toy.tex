@@ -106,8 +106,9 @@ p(z_o|S_c, S_T, z, X) = \sum_j p_j\delta(z_j-z).
 Then
 \begin{align}
 \mathcal{L}(z_o,c_o | S_c, z, X) & =  \sum_j p_j \int dL \sum_{i} p(c_o | T_i, L, S_c, z=z_j, X) p(L |  T_i,  S_c,  z=z_j, X) P(T_i|S_c, z=z_j, X) \\
-&=  \frac{\sum_j p_j \int dL \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)  p(c_o, S_c | T=T_i, L, z=z_j, X) }{P(S_c| z=z_j, X)}
+&=  \frac{\sum_j p_j \int dL p(c_o, S_c | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c| z=z_j, X)},
 \end{align}
+where we use the fact that the counts do not directly depend on type.
 
 The normalization term is
 \begin{align}
@@ -252,4 +253,25 @@ in the PGM, they are treated as nodes who contribute
 $-\ln{P(S_c, S_T| z=z_o, X)}$ to the log-likelihood, where the negative sign reflects that this is a normalization
 factor.
 
+\subsection{Implementation Notes}
+The following integral appears in the normalization
+\begin{equation}
+\int dL p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right].
+\end{equation}
+We actually work with $\ln{L_X}$ and $\sigma_X$.  Setting
+\begin{equation}
+n=\frac{\ln{L}-\ln{L_X}}{\sigma_X}
+\end{equation}
+the integral becomes
+ \begin{equation}
+\sigma_X \int dn p(n\sigma_X + \ln{L_X} |T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L_Xe^{n\sigma_X}, z=z_o, X)\right].
+\end{equation}
+The two probability distributions are normal so that this reduces to
+ \begin{equation}
+\frac{1}{2\sqrt{2\pi}} \int dn\, e^{-0.5n^2} \left(1-erf\left(\frac{(c_T - c_\star)}{\sqrt{2}\sigma_c}\right)\right),
+\end{equation}
+where
+\begin{equation}
+c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
+\end{equation}
 \end{document}
