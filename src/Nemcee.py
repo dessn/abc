@@ -16,7 +16,12 @@ import matplotlib.pyplot as plt
 ln10_2p5 = numpy.log(10)/2.5
 magtoflux  = numpy.exp(ln10_2p5)
 
-params = [0.28,-1, 0.5,numpy.log(1.), 0.1, numpy.log(0.5), 0.4,0]
+
+class Inputs:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+inputs = Inputs(Om0 = 0.28, w0=-1., rate_II_r=2., logL_snIa=numpy.log(1.), sigma_snIa=0.1, logL_snII = numpy.log(0.5), sigma_snII=0.4, Z=0.)
 
 fluxthreshold = 0.4e-8
 
@@ -254,7 +259,6 @@ def pgm():
 
 def simulateData():
 
-    Om0, w0,  rate_II_r, logL_snIa, sigma_snIa, logL_snII, sigma_snII, Z = params
 
     # the number of transients
     nTrans = 150
@@ -272,15 +276,18 @@ def simulateData():
     observation['specz'] = numpy.random.uniform(low=0.1, high=0.8, size=nTrans)
     observation['zprob'] = numpy.zeros(nTrans)+1.
     spectype = numpy.random.uniform(low=0, high=1, size=nTrans)
-    observation['spectype'] = spectype.round().astype('int')
-    luminosity = (1.-observation['spectype'])*numpy.exp(logL_snIa)*10**(numpy.random.normal(0, sigma_snIa/2.5, size=nTrans)) \
-        + observation['spectype']*numpy.exp(logL_snII)*10**(numpy.random.normal(0, sigma_snII/2.5,size=nTrans))
-    cosmo = FlatwCDM(H0=72, Om0=Om0, w0=w0)
+    snIarate = 1./(1+inputs.rate_II_r)
+    observation['spectype'] = numpy.zeros(nTrans,dtype=int)
+    observation['spectype'][spectype > snIarate]=1
+
+    luminosity = (1.-observation['spectype'])*numpy.exp(inputs.logL_snIa)*10**(numpy.random.normal(0, inputs.sigma_snIa/2.5, size=nTrans)) \
+        + observation['spectype']*numpy.exp(inputs.logL_snII)*10**(numpy.random.normal(0, inputs.sigma_snII/2.5,size=nTrans))
+    cosmo = FlatwCDM(H0=72, Om0=inputs.Om0, w0=inputs.w0)
     ld = cosmo.luminosity_distance(observation['specz']).value
     h0 = (const.c/cosmo.H0).to(u.Mpc).value
 
 
-    observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(Z/2.5)
+    observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
 
     count_lim = fluxthreshold
     found  = observation['counts'] >= count_lim
@@ -288,7 +295,7 @@ def simulateData():
     observation['specz'] = numpy.reshape(observation['specz'][found],(nTrans,1))
     observation['zprob'] = numpy.reshape(observation['zprob'][found],(nTrans,1))
     observation['spectype'] =observation['spectype'][found]
-    observation['spectype'][0] = -1   # case of no spectral type
+#    observation['spectype'][0] = -1   # case of no spectral type
     observation['counts'] =observation['counts'][found]
     return observation
 
@@ -406,11 +413,11 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # _logL_snIa = Normal('logL_snIa', mu=numpy.log(1), sd = 0.02, observed = logL_snIa)
     # _sigma_snIa = Lognormal('sigma_snIa', mu=numpy.log(0.1), tau=1./0.1/0.1, observed = sigma_snIa)
 
-    ans+= normal_logp(logL_snIa,  numpy.log(1.),  (ln10_2p5*0.02)**(-2))
+    ans+= normal_logp(logL_snIa,  inputs.logL_snIa,  (ln10_2p5*0.02)**(-2))
 
     if sigma_snIa < 0:
         return -numpy.inf
-    ans+= lognormal_logp(sigma_snIa, numpy.log(0.1), (ln10_2p5*.2)**(-2))
+    ans+= lognormal_logp(sigma_snIa, numpy.log(inputs.sigma_snIa), (ln10_2p5*.2)**(-2))
 
     """
     SN Ia luminosity Node.  (actually working in log-L)
@@ -427,10 +434,10 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # _logL_snII = Normal('logL_snII', mu=numpy.log(0.5), sd=0.02, observed  = logL_snII)
     # _sigma_snII = Lognormal('sigma_snII', mu=numpy.log(0.4), tau=1./0.1/0.1, observed = sigma_snII)
 
-    ans+= normal_logp(logL_snII, numpy.log(0.5), (ln10_2p5*0.1)**(-2))
+    ans+= normal_logp(logL_snII, inputs.logL_snII, (ln10_2p5*0.1)**(-2))
     if sigma_snII < 0:
         return -numpy.inf
-    ans+= lognormal_logp(sigma_snII, numpy.log(0.4), (ln10_2p5*0.2)**(-2))
+    ans+= lognormal_logp(sigma_snII, numpy.log(inputs.sigma_snII), (ln10_2p5*0.2)**(-2))
 
     """
     Enter the plate that considers one supernova at a time
@@ -612,14 +619,15 @@ def runModel():
     observation = simulateData()
     nTrans = len(observation['spectype'])
 
-    ndim, nwalkers = 8+ nTrans, 100
-    mns = numpy.concatenate((params, -.35*numpy.zeros(nTrans)))
+    ndim, nwalkers = 8+ nTrans, 400
+    mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
+                inputs.logL_snII,inputs.sigma_snII,inputs.Z], -.35*numpy.zeros(nTrans)))
     sigs = numpy.concatenate(([.1,.2,.1, 1, .02, 1,.02, 0.02], .35+numpy.zeros(nTrans)))
     p0 = [numpy.random.randn(ndim)*sigs + mns for i in range(nwalkers)]
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
         observation['specz'], numpy.zeros(nTrans)+1e-9, observation['zprob'], observation['spectype']])
-    sampler.run_mcmc(p0, 1000)
+    sampler.run_mcmc(p0, 500)
     output = open('data.pkl', 'wb')
     pickle.dump(sampler.chain, output)
     output.close()
