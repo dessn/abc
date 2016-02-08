@@ -7,11 +7,13 @@ from astropy.cosmology import FlatwCDM
 from astropy import constants as const
 from astropy import units as u
 
-from pymc3 import Model, Normal, Lognormal, Uniform
-from pymc3.distributions import Continuous
-import theano.tensor as T
+from emcee.utils import MPIPool
 
-import matplotlib.pyplot as plt
+# from pymc3 import Model, Normal, Lognormal, Uniform
+# from pymc3.distributions import Continuous
+# import theano.tensor as T
+
+
 
 ln10_2p5 = numpy.log(10)/2.5
 magtoflux  = numpy.exp(ln10_2p5)
@@ -21,9 +23,10 @@ class Inputs:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
-inputs = Inputs(Om0 = 0.28, w0=-1., rate_II_r=2., logL_snIa=numpy.log(1.), sigma_snIa=0.1, logL_snII = numpy.log(0.5), sigma_snII=0.4, Z=0.)
+inputs = Inputs(Om0 = 0.28, w0=-1., rate_II_r=2., logL_snIa=numpy.log(1.), sigma_snIa=0.01, logL_snII = numpy.log(0.5), sigma_snII=0.4, Z=0.)
+uncertainties = Inputs(logL_snIa=0.01, sigma_snIa=0.1, logL_snII = 0.1, sigma_snII=0.1, Z=0.01)
 
-fluxthreshold = 0.4e-8
+fluxthreshold = -1 # 0.4e-8
 
 def luminosity_distance(z, Om0, w0):
     cosmo = FlatwCDM(H0=72, Om0=Om0, w0=w0)
@@ -177,7 +180,7 @@ def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, l
             ans = pz*tsum
         else: 
             ans = ans + pz*tsum
-        # print 'SR',-numpy.log(ans)
+#    print 'SR',-numpy.log(ans)
     return -numpy.log(ans)
 
 def pgm():
@@ -261,7 +264,7 @@ def simulateData():
 
 
     # the number of transients
-    nTrans = 150
+    nTrans = 30
 
     # set the state of the random number generator
     seed=0
@@ -289,8 +292,9 @@ def simulateData():
 
     observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
 
-    count_lim = fluxthreshold
-    found  = observation['counts'] >= count_lim
+    # plt.scatter(observation['specz'],-2.5*numpy.log10(observation['counts']))
+
+    found  = observation['counts'] >= fluxthreshold
     nTrans =  found.sum()
     observation['specz'] = numpy.reshape(observation['specz'][found],(nTrans,1))
     observation['zprob'] = numpy.reshape(observation['zprob'][found],(nTrans,1))
@@ -352,7 +356,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
 
     """
     # _Z = Normal('zeropoints', mu=0, sd=.02, observed=Z)
-    ans += normal_logp(Z, 0, (ln10_2p5*.02)**(-2))
+    ans += normal_logp(Z, inputs.Z, (ln10_2p5*uncertainties.Z)**(-2))
 
     """
     SN Ia Rate Node.  
@@ -413,11 +417,11 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # _logL_snIa = Normal('logL_snIa', mu=numpy.log(1), sd = 0.02, observed = logL_snIa)
     # _sigma_snIa = Lognormal('sigma_snIa', mu=numpy.log(0.1), tau=1./0.1/0.1, observed = sigma_snIa)
 
-    ans+= normal_logp(logL_snIa,  inputs.logL_snIa,  (ln10_2p5*0.02)**(-2))
+    ans+= normal_logp(logL_snIa,  inputs.logL_snIa,  (ln10_2p5*uncertainties.logL_snIa)**(-2))
 
     if sigma_snIa < 0:
         return -numpy.inf
-    ans+= lognormal_logp(sigma_snIa, numpy.log(inputs.sigma_snIa), (ln10_2p5*.2)**(-2))
+    ans+= lognormal_logp(sigma_snIa, numpy.log(inputs.sigma_snIa), (ln10_2p5*uncertainties.sigma_snIa)**(-2))
 
     """
     SN Ia luminosity Node.  (actually working in log-L)
@@ -434,10 +438,10 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     # _logL_snII = Normal('logL_snII', mu=numpy.log(0.5), sd=0.02, observed  = logL_snII)
     # _sigma_snII = Lognormal('sigma_snII', mu=numpy.log(0.4), tau=1./0.1/0.1, observed = sigma_snII)
 
-    ans+= normal_logp(logL_snII, inputs.logL_snII, (ln10_2p5*0.1)**(-2))
+    ans+= normal_logp(logL_snII, inputs.logL_snII, (ln10_2p5*uncertainties.logL_snII)**(-2))
     if sigma_snII < 0:
         return -numpy.inf
-    ans+= lognormal_logp(sigma_snII, numpy.log(inputs.sigma_snII), (ln10_2p5*0.2)**(-2))
+    ans+= lognormal_logp(sigma_snII, numpy.log(inputs.sigma_snII), (ln10_2p5*uncertainties.sigma_snII)**(-2))
 
     """
     Enter the plate that considers one supernova at a time
@@ -604,30 +608,56 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
         # normalization=SampleRenormalization('normalization'+str(i), threshold = 1e-9, 
         #     logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,
         #     luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, observed=1)
+
         ans += SampleRenormalization_logp(threshold = fluxthreshold, \
             logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,\
             luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, dcounts=dcounts)
 
-    # print 'Done', ans
+    print 'Done', ans
     return ans
 
 import pickle
 import corner
+import matplotlib.pyplot as plt
 
 def runModel():
+
+    pool = MPIPool()
+    if not pool.is_master():
+        pool.wait()
+        sys.exit(0)
+    # pool=None
 
     observation = simulateData()
     nTrans = len(observation['spectype'])
 
-    ndim, nwalkers = 8+ nTrans, 400
-    mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
-                inputs.logL_snII,inputs.sigma_snII,inputs.Z], -.35*numpy.zeros(nTrans)))
-    sigs = numpy.concatenate(([.1,.2,.1, 1, .02, 1,.02, 0.02], .35+numpy.zeros(nTrans)))
-    p0 = [numpy.random.randn(ndim)*sigs + mns for i in range(nwalkers)]
+    ndim, nwalkers = 8+ nTrans, 500
+
+    # mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
+    #             inputs.logL_snII,inputs.sigma_snII,inputs.Z], -.35*numpy.zeros(nTrans)))
+    sigs = numpy.concatenate(([.1,.2,.1, uncertainties.logL_snIa, uncertainties.sigma_snIa, uncertainties.logL_snII, uncertainties.sigma_snII, uncertainties.Z], .05+numpy.zeros(nTrans)))
+
+    p0=[]
+    for i in range(nwalkers):
+        dum = numpy.random.rand(nTrans)
+        dum = numpy.array(numpy.round(dum),dtype='int')
+        lnL_init = dum + (1-dum)*0.5
+        lnL_init = numpy.log(lnL_init)
+
+        mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
+            inputs.logL_snII,inputs.sigma_snII,inputs.Z], lnL_init))
+        p0.append(numpy.random.randn(ndim)*sigs + mns )
+    # p0 = [numpy.random.randn(ndim)*sigs + mns for i in range(nwalkers)]
+
+    dco = 1e-11 #measurement error very small
+
+
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
-        observation['specz'], numpy.zeros(nTrans)+1e-9, observation['zprob'], observation['spectype']])
+        observation['specz'], numpy.zeros(nTrans)+dco, observation['zprob'], observation['spectype']], pool=pool)
     sampler.run_mcmc(p0, 500)
+    pool.close()
+
     output = open('data.pkl', 'wb')
     pickle.dump(sampler.chain, output)
     output.close()
@@ -636,7 +666,7 @@ def runModel():
 def results():
     pkl_file = open('data.pkl', 'rb')
     data = pickle.load(pkl_file)
-    samples = data[:, 50:, :].reshape((-1, data.shape[2]))
+    samples = data[:, 100:, :].reshape((-1, data.shape[2]))
     pkl_file.close()
     fig = corner.corner(samples[:,:8], labels=["$\Omega_M$", "$w_0$", "$r_{snII}$", "$\ln{L_{snIa}}$","$\sigma_{snIa}$", "$\log{L_{snII}}$", "$\sigma_{snII}$", "$Z$"])
                       #truths=[m_true, b_true, np.log(f_true)])
