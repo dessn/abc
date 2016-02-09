@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import numpy
 import scipy.special
 import scipy.integrate
@@ -26,7 +27,7 @@ class Inputs:
 inputs = Inputs(Om0 = 0.28, w0=-1., rate_II_r=2., logL_snIa=numpy.log(1.), sigma_snIa=0.01, logL_snII = numpy.log(0.5), sigma_snII=0.4, Z=0.)
 uncertainties = Inputs(logL_snIa=0.01, sigma_snIa=0.1, logL_snII = 0.1, sigma_snII=0.1, Z=0.01)
 
-fluxthreshold = -1 # 0.4e-8
+fluxthreshold = 0.4e-8
 
 def luminosity_distance(z, Om0, w0):
     cosmo = FlatwCDM(H0=72, Om0=Om0, w0=w0)
@@ -181,6 +182,8 @@ def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, l
         else: 
             ans = ans + pz*tsum
 #    print 'SR',-numpy.log(ans)
+    if ans ==0.:
+	return -numpy.inf
     return -numpy.log(ans)
 
 def pgm():
@@ -613,7 +616,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
             logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,\
             luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, dcounts=dcounts)
 
-    print 'Done', ans
+   # print 'Done', ans
     return ans
 
 import pickle
@@ -631,7 +634,7 @@ def runModel():
     observation = simulateData()
     nTrans = len(observation['spectype'])
 
-    ndim, nwalkers = 8+ nTrans, 500
+    ndim, nwalkers = 8+ nTrans, 1000
 
     # mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
     #             inputs.logL_snII,inputs.sigma_snII,inputs.Z], -.35*numpy.zeros(nTrans)))
@@ -655,7 +658,7 @@ def runModel():
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
         observation['specz'], numpy.zeros(nTrans)+dco, observation['zprob'], observation['spectype']], pool=pool)
-    sampler.run_mcmc(p0, 500)
+    sampler.run_mcmc(p0, 2000)
     pool.close()
 
     output = open('data.pkl', 'wb')
@@ -673,5 +676,5 @@ def results():
     fig.savefig("triangle.png")
 
 runModel()
-results()
+#results()
 #pgm()
