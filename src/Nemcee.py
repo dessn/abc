@@ -183,7 +183,7 @@ def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, l
             ans = ans + pz*tsum
 #    print 'SR',-numpy.log(ans)
     if ans ==0.:
-	return -numpy.inf
+    	return -numpy.inf
     return -numpy.log(ans)
 
 def pgm():
@@ -290,7 +290,7 @@ def simulateData():
         + observation['spectype']*numpy.exp(inputs.logL_snII)*10**(numpy.random.normal(0, inputs.sigma_snII/2.5,size=nTrans))
     cosmo = FlatwCDM(H0=72, Om0=inputs.Om0, w0=inputs.w0)
     ld = cosmo.luminosity_distance(observation['specz']).value
-    h0 = (const.c/cosmo.H0).to(u.Mpc).value
+    # h0 = (const.c/cosmo.H0).to(u.Mpc).value
 
 
     observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
@@ -544,7 +544,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
 
             # logluminosity = LogLuminosityGivenSpectype('logluminosity'+str(i), \
             #         mu=usemu,sd=usesd, p=usep, observed = lnL)
-            ans+= LogLuminosityGivenSpectype_logp(lnL, usemu, usesd, usep)
+            ans+= LogLuminosityGivenSpectype_logp(lnL, mu=usemu, tau=usesd**(-2), p=usep)
             
         #luminosity = numpy.exp(logluminosity)
 
