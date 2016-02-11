@@ -25,7 +25,7 @@ class Inputs:
         self.__dict__.update(kwargs)
 
 inputs = Inputs(Om0 = 0.28, w0=-1., rate_II_r=2., logL_snIa=numpy.log(1.), sigma_snIa=0.01, logL_snII = numpy.log(0.5), sigma_snII=0.4, Z=0.)
-uncertainties = Inputs(logL_snIa=0.01, sigma_snIa=0.1, logL_snII = 0.1, sigma_snII=0.1, Z=0.01)
+uncertainties = Inputs(logL_snIa=0.01, sigma_snIa=0.002, logL_snII = 0.1, sigma_snII=0.02, Z=0.01)
 
 fluxthreshold = 0.4e-8
 
@@ -649,7 +649,9 @@ def runModel():
 
         mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
             inputs.logL_snII,inputs.sigma_snII,inputs.Z], lnL_init))
-        p0.append(numpy.random.randn(ndim)*sigs + mns )
+
+        p0.append((numpy.random.rand(ndim)-0.5)*sigs + mns )
+
     # p0 = [numpy.random.randn(ndim)*sigs + mns for i in range(nwalkers)]
 
     dco = 1e-11 #measurement error very small
