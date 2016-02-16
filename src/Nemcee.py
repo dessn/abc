@@ -299,10 +299,18 @@ def simulateData():
 
     found  = observation['counts'] >= fluxthreshold
     nTrans =  found.sum()
-    observation['specz'] = numpy.reshape(observation['specz'][found],(nTrans,1))
-    observation['zprob'] = numpy.reshape(observation['zprob'][found],(nTrans,1))
+    observation['specz'] = [numpy.array([dum]) for dum in observation['specz'][found]]
+    observation['zprob'] = [numpy.array([dum]) for dum in observation['zprob'][found]]
     observation['spectype'] =observation['spectype'][found]
-#    observation['spectype'][0] = -1   # case of no spectral type
+
+    observation['spectype'][0] = -1   # case of no spectral type
+    observation['specz'][0] = numpy.array([observation['specz'][0][0], 0.2])
+    observation['zprob'][0] = numpy.array([0.6,0.4])
+
+    observation['spectype'][1] = -1   # case of no spectral type
+    observation['specz'][1] = numpy.array([observation['specz'][1][0], 0.8])
+    observation['zprob'][1] = numpy.array([0.3,0.7])
+
     observation['counts'] =observation['counts'][found]
     return observation
 
@@ -634,7 +642,7 @@ def runModel():
     observation = simulateData()
     nTrans = len(observation['spectype'])
 
-    ndim, nwalkers = 8+ nTrans, 1000
+    ndim, nwalkers = 8+ nTrans, 100
 
     # mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
     #             inputs.logL_snII,inputs.sigma_snII,inputs.Z], -.35*numpy.zeros(nTrans)))
@@ -660,12 +668,29 @@ def runModel():
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
         observation['specz'], numpy.zeros(nTrans)+dco, observation['zprob'], observation['spectype']], pool=pool)
-    sampler.run_mcmc(p0, 2000)
+    
+    if pool.is_master():
+        output = open('data.dat','w')
+        output.close()
+
+    for result in sampler.sample(p0, iterations=2, storechain=False):
+        position = result[0]
+        if pool.is_master():
+            f = open("data.dat", "a")
+            for k in range(position.shape[0]):
+                st=""
+                for blah in position[k]:
+                    st = st + str(blah)+" "
+                f.write("{0:4d} {1:s}\n".format(k, st))
+            f.close()
+    
+    # sampler.run_mcmc(p0, 2000)
+
     pool.close()
 
-    output = open('data.pkl', 'wb')
-    pickle.dump(sampler.chain, output)
-    output.close()
+    # output = open('data.pkl', 'wb')
+    # pickle.dump(sampler.chain, output)
+    # output.close()
 
 
 def results():
