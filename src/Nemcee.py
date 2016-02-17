@@ -65,6 +65,7 @@ def lognormal_logp(value, mu=None, tau=None):
 def normal_logp(value, mu=None, tau=None):
     return (-tau * (value - mu)**2 + numpy.log(tau / numpy.pi / 2.)) / 2
 
+
 def LogLuminosityMarginalizedOverType_logp(value, mus=None, taus=None, p=None):
     r"""The distribution for the luminosity marginalized over two kinds
     of astronomical sources:
@@ -127,7 +128,7 @@ def LogLuminosityGivenSpectype_logp(value, mu=None, tau=None, p=None):
     # print 'LLGST', numpy.log(p) + normal_logp(value, mu, tau)
     return numpy.log(p) + normal_logp(value, mu, tau)
 
-def Counts_logp(value, fluxes=None, pzs = None, Z=None, csigma=None):
+def Counts_logp(value, fluxes=None, pzs = None, Z=None, counts_invcov=None):
     r"""The distribution for the joint spectype and log-luminosity
 
     pdf of counts given a threshold
@@ -142,27 +143,49 @@ def Counts_logp(value, fluxes=None, pzs = None, Z=None, csigma=None):
         minimum counts in order to be discovered
 
     """
-    ans=0.
     logterms = []
     for index in xrange(len(pzs)):
         flux = fluxes[index]
         counts  = flux*magtoflux**Z
-        tau = csigma**(-2)
-        logterms.append(normal_logp(value, counts, tau))
+
+        # implement diagonal covariance matrix for now
+        ans = 0.
+        for i in xrange(len(value)):
+            tau = counts_invcov[i,i]
+            ans += normal_logp(value[i], counts, tau)
+        logterms.append(ans)
     logterms = numpy.array(logterms)
     logterm_max = numpy.max(logterms)
     logterms = pzs * numpy.exp(logterms-logterm_max)
     # print 'C',logterm_max + numpy.log(logterms.sum())
     return logterm_max + numpy.log(logterms.sum())
 
-    #ans = ans + pzs[index] *numpy.exp(normal_logp(value, counts, tau))
 
-    #need to add threshold
+"""
+A generator of all combinations of observation success given a minimum number of successes. 
+"""     
+import itertools
+# def sampleCombinations(obs_list, ntrue):
+#   num = ntrue
+#   while num <= len(obs_list):
+#       for a in itertools.combinations(obs_list,num):
+#           yield a
+#       num+=1
 
-    #return numpy.log(ans)
+def sampleCombinations(nlist, ntrue):
+    num = ntrue
+    indeces=xrange(nlist)
+    while num <= nlist:
+        for a in itertools.combinations(indeces,num):
+            a = numpy.array(a)
+            ans = numpy.zeros(nlist,dtype='bool')
+            if len(a) != 0:
+                ans[a]=True
+            yield ans
+        num+=1
 
 def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, logL_snII=None, sigma_snII=None,\
-            luminosity_distances=None, Z=None, pzs=None, prob=None, dcounts=None):
+            luminosity_distances=None, Z=None, pzs=None, prob=None, counts_invcov=None):
     r""" Renormalization factor from sample selection for a typed supernova with fixed
     redshift.
 
@@ -173,14 +196,53 @@ def SampleRenormalization_logp(threshold = 0, logL_snIa=None, sigma_snIa=None, l
 
 
     """
-    for ld, pz, indz in zip(luminosity_distances,pzs,xrange(len(pzs))):
-        #sum over type
-        tsum = prob*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snIa, sigma_snIa, Z, threshold, ld, dcounts))[0] + \
-            (1-prob)*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snII, sigma_snII, Z, threshold, ld, dcounts))[0]
-        if indz == 0:
-            ans = pz*tsum
-        else: 
-            ans = ans + pz*tsum
+    ntrue = 1               #require one point above threshold
+    nlist = counts_invcov.shape[0]      # should throw exception of number of photometry points is less than the number required for sample selection
+    gaussnorm = numpy.sqrt(2*numpy.pi)
+
+    ans= 0.
+    #sum over redshifts
+    for ld, pz in zip(luminosity_distances,pzs):
+        # print ld, pz
+        #sum over types
+        tsum = 0.
+        for p, logL, sigma in zip([prob,1-prob], [logL_snIa, logL_snII], [sigma_snIa, sigma_snII]):
+            # print p, logL, sigma
+            combosum = 0.
+            #sum over successful configurations
+            # the same integrals appear multiple times within combinations so calculate them once and store
+            integrals = numpy.zeros(nlist)
+            for pin in xrange(nlist):
+                integrals[pin] = scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL, sigma, Z, threshold, ld, 1./numpy.sqrt(counts_invcov[pin,pin])))[0]
+
+            for combo in sampleCombinations(nlist, ntrue):
+                # print combo
+                combo = numpy.array(combo)
+                iprod = 1.
+                # product over each photometry point ASSUMING INDEPENDENCE!!
+                for pin in xrange(nlist):
+                    # print pin, 
+                    # integrate over the appropriate configurations
+                    if combo[pin]:
+                        iprod *= integrals[pin]
+                        # print integrals[pin]
+                    else:
+                        iprod *= (gaussnorm-integrals[pin])
+                        # print (gaussnorm-integrals[pin])
+                # print 'iprod', iprod
+                combosum += iprod
+            # print 'combosum', combosum
+            tsum += p* combosum
+        # print 'tsum', tsum
+        ans += pz * tsum
+
+        # #sum over type
+        # tsum = prob*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snIa, sigma_snIa, Z, threshold, ld, dcounts))[0] + \
+        #     (1-prob)*scipy.integrate.quad(normalization_integrand, -5., 5., args=(logL_snII, sigma_snII, Z, threshold, ld, dcounts))[0]
+        # if indz == 0:
+        #     ans = pz*tsum
+        # else: 
+        #     ans = ans + pz*tsum
 #    print 'SR',-numpy.log(ans)
     if ans ==0.:
     	return -numpy.inf
@@ -293,11 +355,34 @@ def simulateData():
     # h0 = (const.c/cosmo.H0).to(u.Mpc).value
 
 
-    observation['counts'] = luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
+    npts = 2
+    cov = numpy.zeros((2,2))
+    cov[0,0] = 1e-20
+    cov[1,1] = 1e-20
+    cov[0,1] = 0     #for now uncorrelated as algorithm handles that 
+    cov[1,0] = 0     #for now uncorrelated as algorithm handles that 
+    invcov = numpy.linalg.inv(cov)
+
+    observation['counts'] = []
+    observation['counts_invcov']=[]
+    for i in xrange(nTrans):
+        ans =numpy.random.multivariate_normal(numpy.zeros(npts)+ luminosity[i] / 4/numpy.pi/ld[i]/ld[i]*10**(inputs.Z/2.5), cov)
+        observation['counts'].append(ans)
+        observation['counts_invcov'].append(invcov)
+        #luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
 
     # plt.scatter(observation['specz'],-2.5*numpy.log10(observation['counts']))
 
-    found  = observation['counts'] >= fluxthreshold
+    #at least one must be above threshold
+    nthreshold = 1
+    found = []
+
+#    found  = observation['counts'] >= fluxthreshold
+    for i in xrange(nTrans):
+        nabove = (observation['counts'][i] >= fluxthreshold).sum()
+        found.append(nabove >= nthreshold)
+    found = numpy.array(found)
+
     nTrans =  found.sum()
     observation['specz'] = [numpy.array([dum]) for dum in observation['specz'][found]]
     observation['zprob'] = [numpy.array([dum]) for dum in observation['zprob'][found]]
@@ -311,10 +396,13 @@ def simulateData():
     observation['specz'][1] = numpy.array([observation['specz'][1][0], 0.8])
     observation['zprob'][1] = numpy.array([0.3,0.7])
 
-    observation['counts'] =observation['counts'][found]
+    # observation['counts'] =observation['counts'][found]
+    # observation['counts_cov'] =observation['counts_cov'][found]
+    observation['counts'] =[observation['counts'][i] for i in xrange(len(found)) if found[i]]
+    observation['counts_invcov'] = [observation['counts_invcov'][i] for i in xrange(len(found)) if found[i]]
     return observation
 
-def lnprob(theta, co, zo, dco, pzo, spectypeo):
+def lnprob(theta, co, zo, cinvcovo, pzo, spectypeo):
 
     Om0, w0, rate_II_r, logL_snIa, sigma_snIa, logL_snII, sigma_snII, Z = theta[0:8]
     lnLs = theta[8:]
@@ -458,7 +546,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
     Enter the plate that considers one supernova at a time
     """
 
-    for lnL, counts, zs, dcounts, pzs, spectype in zip(lnLs, co, zo, dco, pzo, spectypeo):
+    for lnL, counts, zs, cinvcov, pzs, spectype in zip(lnLs, co, zo, cinvcovo, pzo, spectypeo):
 
         """
         Type Probability Node.
@@ -614,7 +702,9 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
         # c = Counts('counts'+str(i),fluxes =fluxes,  \
         #     pzs = pzs, Z=Z, csigma = dcounts, observed  =counts)
 
-        ans+= Counts_logp(counts, fluxes =fluxes, pzs = pzs, Z=Z, csigma = dcounts)
+        # replace csigma with cov
+
+        ans+= Counts_logp(counts, fluxes =fluxes, pzs = pzs, Z=Z, counts_invcov = cinvcov)
 
         # normalization=SampleRenormalization('normalization'+str(i), threshold = 1e-9, 
         #     logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,
@@ -622,7 +712,7 @@ def lnprob(theta, co, zo, dco, pzo, spectypeo):
 
         ans += SampleRenormalization_logp(threshold = fluxthreshold, \
             logL_snIa=logL_snIa, sigma_snIa=sigma_snIa, logL_snII=logL_snII, sigma_snII=sigma_snII,\
-            luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, dcounts=dcounts)
+            luminosity_distances=lds, Z=Z, pzs=pzs, prob=prob, counts_invcov = cinvcov)
 
    # print 'Done', ans
     return ans
@@ -662,12 +752,10 @@ def runModel():
 
     # p0 = [numpy.random.randn(ndim)*sigs + mns for i in range(nwalkers)]
 
-    dco = 1e-11 #measurement error very small
-
 
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
-        observation['specz'], numpy.zeros(nTrans)+dco, observation['zprob'], observation['spectype']], pool=pool)
+        observation['specz'], observation['counts_invcov'], observation['zprob'], observation['spectype']], pool=pool)
     
     # if pool.is_master():
     #     output = open('data.dat','w')
@@ -692,16 +780,6 @@ def runModel():
         output.close()
     pool.close()
 
-
-
-def results():
-    pkl_file = open('data.pkl', 'rb')
-    data = pickle.load(pkl_file)
-    samples = data[:, 100:, :].reshape((-1, data.shape[2]))
-    pkl_file.close()
-    fig = corner.corner(samples[:,:8], labels=["$\Omega_M$", "$w_0$", "$r_{snII}$", "$\ln{L_{snIa}}$","$\sigma_{snIa}$", "$\log{L_{snII}}$", "$\sigma_{snII}$", "$Z$"])
-                      #truths=[m_true, b_true, np.log(f_true)])
-    fig.savefig("triangle.png")
 
 runModel()
 #results()

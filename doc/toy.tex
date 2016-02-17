@@ -75,20 +75,53 @@ p(z_o|z) & =\delta(z_o-z);
 practically $T$ and $z$ are no longer probabilistic but are fixed.
 Then
 \begin{align}
-\mathcal{L}(T_o,z_o,c_o | S_c, S_T, z, X) & =  \int dL p(c_o | T=T_o, L, S_c, S_T, z=z_o, X) p(L| T=T_o, S_c, S_T, z=z_o, X)  P(T_o|S_c, S_T, z=z_o, X) \\
-&= \int dL \frac{ p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) }{P(S_c, S_T, | T=T_o, L,  z=z_o, X) }
+\mathcal{L}(T_o,z_o,c_o | S_c, S_T, z, X) & =  \int dL\, p(c_o | T=T_o, L, S_c, S_T, z=z_o, X) p(L| T=T_o, S_c, S_T, z=z_o, X)  P(T_o|S_c, S_T, z=z_o, X) \\
+&= \int dL\, \frac{ p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) }{P(S_c, S_T, | T=T_o, L,  z=z_o, X) }
 \frac{p(L, S_c, S_T | T=T_o, z=z_o, X)}{P(S_c, S_T| T=T_o,  z=z_o, X)}
 \frac{p(T_o, S_c, S_T | z=z_o, X)}{P(S_c, S_T| z=z_o, X)} \\
-&= \frac{\int dL p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o, S_c, S_T | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}
+&= \frac{\int dL\, p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o, S_c, S_T | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}\\
+&= \frac{\int dL\, p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}.
 \end{align}
 
-The normalization term is determined by
+The  normalization term sums/integrates over all possible observed types/counts 
 \begin{align}
-P(S_c, S_T| z=z_o, X) & =\sum_i \int_{-\infty}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X) \\
-& = \sum_i \int_{c_T}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X)\\
-& = \sum_i  P(T_i|z=z_o, X)\int dL p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right]
+P(S_c, S_T| z=z_o, X) & =\sum_i \int dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X) \\
+% & =\sum_i \int_{-\infty}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X) \\
+%& = \sum_i \int_{c_T}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X)\\
+& = \sum_i  P(T_i|z=z_o, X)\int dL\, p(L|T_i, z=z_o, X)  \left[\int dc_o\,  p(c_o,S_c, S_T | T=T_i, L, z=z_o, X)\right].
 \end{align}
-as $p(c_o | T=T_o, L, z)=0$ when $c_o < c_T$.
+
+In the case of a single count measurement per transient and neglecting the typing selection criteria,
+\begin{align}
+ p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) &=  p(c_o, c_o \ge  c_T | T=T_o, L, z=z_o, X) \\
+ &= \begin{cases}
+   p(c_o | T=T_o, L, z=z_o, X) & \text{if } c_o \ge c_T \\
+   0 & \text{if }  c_o < c_T
+ \end{cases}
+\end{align}
+so that the integral in brackets is
+\begin{equation}
+\int dc_o \, p(c_o,S_c, S_T | T=T_i, L, z=z_o, X) = \int_{c_T}^\infty dc_o\,  p(c_o | T=T_i, L, z=z_o, X).
+\end{equation}
+
+For the more general case, suppose a transient has $N$ independent count measurements\footnote{The independence of count measurements  depends on the flux extraction method; regardless the
+noise of a single observation is expected to be dominated by its own photon noise making this
+supposition a good approximation.} and $k$ of those must be above threshold in order to be
+included in the sample.
+Consider arrays of length $N$ in which each element has a value of True or False: there are $2^N$ possible configurations for this array
+of which $\sum_{i=k}^N {N \choose i}$ have $k$ or more True's.  Let the set $\mathcal{G}$ represent the latter possible configurations.
+Then
+\begin{align}
+p(c_o, S_c| T=T_o, L, z=z_o, X) &= \sum_{g \in \mathcal{G}} \prod_{\alpha} p(c_{o, \alpha}, g | T=T_o, L, z=z_o, X)\\
+ &=  \sum_{g \in \mathcal{G}}  \prod_{\alpha} \begin{cases}
+   p(c_{o,\alpha} | T=T_o, L, z=z_o, X) & \text{if } c_{o,\alpha} \ge c_T == g_\alpha \\
+   0 & \text{if }  c_{o,\alpha} \ge c_T\  != g_\alpha
+ \end{cases}
+\end{align}
+and the normalization integral is composed of the sum over all possible configurations of the integrated probability of the truncated distributions
+of the measured counts.  This simplifies to the the single-count case considered earlier in the case of $N=1$, $k=1$.
+
+
 
 \subsection{Case Not Typed}
 
@@ -105,16 +138,17 @@ p(z_o|S_c, S_T, z, X) = \sum_j p_j\delta(z_j-z).
 \end{equation}
 Then
 \begin{align}
-\mathcal{L}(z_o,c_o | S_c, z, X) & =  \sum_j p_j \int dL \sum_{i} p(c_o | T_i, L, S_c, z=z_j, X) p(L |  T_i,  S_c,  z=z_j, X) P(T_i|S_c, z=z_j, X) \\
-&=  \frac{\sum_j p_j \int dL p(c_o, S_c | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c| z=z_j, X)},
+\mathcal{L}(z_o,c_o | S_c, z, X) & =  \sum_j p_j \int dL \,\sum_{i} p(c_o | T_i, L, S_c, z=z_j, X) p(L |  T_i,  S_c,  z=z_j, X) P(T_i|S_c, z=z_j, X) \\
+&=  \frac{\sum_j p_j \int dL \, p(c_o, S_c | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c| z=z_j, X)}\\
+&=  \frac{\sum_j p_j \int dL \, p(c_o | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c| z=z_j, X)},
 \end{align}
 where we use the fact that the counts do not directly depend on type.
 
 The normalization term is
 \begin{align}
-P(S_c| z=z_o, X) & = \int_{c_T}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X)\\
-& =  \sum_j p_j  \sum_{i} P(T_i|z=z_j, X)  \int dL  p(L|T_i, z=z_j, X) 
-\left[ \int_{c_T}^\infty dc_o p(c_o| T=T_i, L, z=z_j, X) \right].
+P(S_c| z=z_o, X) & = \int dc_o \, \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X)\\
+& =  \sum_j p_j  \sum_{i} P(T_i|z=z_j, X)  \int dL \, p(L|T_i, z=z_j, X) 
+\left[ \int dc_o \, p(c_o, S_c| T=T_i, L, z=z_j, X) \right].
 \end{align}
 
 
