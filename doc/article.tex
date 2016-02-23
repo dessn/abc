@@ -267,15 +267,19 @@ transient $\nu$, and photometric point $i$.
 
 Assembling this together, the likelihood is
 \begin{align}
-\mathcal{L}(data|\mathcal{S}, model) & = \frac{\sum_{k=1}^{\prod_\nu \sum_{k=N}^{M_{\nu}} \binom{M_{\nu}}{k}} \epsilon(Photometry_o, b_k)p(data| model)}{\int ddata'\,
-\sum_{k=1}^{\prod_\nu \sum_{k=N}^{M_{\nu}} \binom{M_{\nu}}{k}} \epsilon(Photometry_o', b_k)p(data'| model)
-}\\
+\mathcal{L}(data|\mathcal{S}, model)
+% & = \frac{\sum_{k=1}^{\prod_\nu \sum_{k=N}^{M_{\nu}} \binom{M_{\nu}}{k}} \epsilon(Photometry_o, b_k)p(data| model)}{\int ddata'\,
+%\sum_{k=1}^{\prod_\nu \sum_{k=N}^{M_{\nu}} \binom{M_{\nu}}{k}} \epsilon(Photometry_o', b_k)p(data'| model)
+%}\\
 & = \frac{p(data| model)}{\int ddata'\,
 \sum_{k=1}^{\prod_\nu \sum_{k=N}^{M_{\nu}} \binom{M_{\nu}}{k}} \epsilon(Photometry_o', b_k)p(data'| model)
-}
+},
 \end{align}
 where the normalizing factor is included explicitly as it has 
 parameter dependence and must not be neglected in calculations.
+The numerator is $\le 1$, where the equality occurs when there are no selection criteria.
+If $p(data|model)$ is a multi-dimensional normal distribution, the numerator is
+the sum of error functions.
 
 Consider the traditional case of Malmquist bias of a single object,
 where a single measurement has

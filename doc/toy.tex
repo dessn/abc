@@ -30,7 +30,8 @@
 \label{likelihood:sec}
 
 The ambition is to construct a model to determine the likelihood of DES-like
-supernova data.
+supernova data.  We start with a toy model and plan to evolve its complexity to
+have the fidelity necessary for the DES analysis.
 The conceptual structure of the model is shown in Figure~\ref{pgm:fig}. 
 \begin{figure}[htbp] %  figure placement: here, top, bottom, or page
    \centering
@@ -42,7 +43,7 @@ The conceptual structure of the model is shown in Figure~\ref{pgm:fig}.
 In the toy model there are three types of data that
 may be observed for each supernova:
 \begin{itemize}
-\item $c_o$: Counts at peak brightness.
+\item $c_o$: Counts at peak brightness, one or more independent measurements.
 \item $z_o$: Redshift.
 \item $T_o$: Transient type.
 \end{itemize}
@@ -50,13 +51,13 @@ may be observed for each supernova:
 There are selection criteria $S_c$ and $S_T$ for the inclusion of an object in the
 sample and for a successul typing.
 In what follows we assume that the typed objects are drawn from the same underlying
-distribution as the sample $S_c=S_T$, and that the selection criterion is a brightness
+distribution as the sample $S_c=S_T$, and that the selection criterion depends on a  brightness
 threshold $S_c = c_o \ge c_T$.  (The spectroscopic sample $S_T$ 
 eventually should depend on the
 photometry and the quality of the spectroscopic data.)
 
 For this preliminary discussion the top-level parameters are denoted by $X$,
-latent parameters $L$ and $T$.  
+the latent parameters are $L$ and $T$ (for luminosity and type).  
 
 It is useful to split the data into two cases depending on whether or not
 the transient has a type measurement $T_o$.
@@ -72,7 +73,7 @@ so that
 p(T_o|T) & =\delta(T_o-T)\\
 p(z_o|z) & =\delta(z_o-z);
 \end{align}
-practically $T$ and $z$ are no longer probabilistic but are fixed.
+$T$ and $z$ are no longer probabilistic but are fixed.
 Then
 \begin{align}
 \mathcal{L}(T_o,z_o,c_o | S_c, S_T, z, X) & =  \int dL\, p(c_o | T=T_o, L, S_c, S_T, z=z_o, X) p(L| T=T_o, S_c, S_T, z=z_o, X)  P(T_o|S_c, S_T, z=z_o, X) \\
@@ -91,38 +92,6 @@ P(S_c, S_T| z=z_o, X) & =\sum_i \int dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z,
 & = \sum_i  P(T_i|z=z_o, X)\int dL\, p(L|T_i, z=z_o, X)  \left[\int dc_o\,  p(c_o,S_c, S_T | T=T_i, L, z=z_o, X)\right].
 \end{align}
 
-In the case of a single count measurement per transient and neglecting the typing selection criteria,
-\begin{align}
- p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) &=  p(c_o, c_o \ge  c_T | T=T_o, L, z=z_o, X) \\
- &= \begin{cases}
-   p(c_o | T=T_o, L, z=z_o, X) & \text{if } c_o \ge c_T \\
-   0 & \text{if }  c_o < c_T
- \end{cases}
-\end{align}
-so that the integral in brackets is
-\begin{equation}
-\int dc_o \, p(c_o,S_c, S_T | T=T_i, L, z=z_o, X) = \int_{c_T}^\infty dc_o\,  p(c_o | T=T_i, L, z=z_o, X).
-\end{equation}
-
-For the more general case, suppose a transient has $N$ independent count measurements\footnote{The independence of count measurements  depends on the flux extraction method; regardless the
-noise of a single observation is expected to be dominated by its own photon noise making this
-supposition a good approximation.} and $k$ of those must be above threshold in order to be
-included in the sample.
-Consider arrays of length $N$ in which each element has a value of True or False: there are $2^N$ possible configurations for this array
-of which $\sum_{i=k}^N {N \choose i}$ have $k$ or more True's.  Let the set $\mathcal{G}$ represent the latter possible configurations.
-Then
-\begin{align}
-p(c_o, S_c| T=T_o, L, z=z_o, X) &= \sum_{g \in \mathcal{G}} \prod_{\alpha} p(c_{o, \alpha}, g | T=T_o, L, z=z_o, X)\\
- &=  \sum_{g \in \mathcal{G}}  \prod_{\alpha} \begin{cases}
-   p(c_{o,\alpha} | T=T_o, L, z=z_o, X) & \text{if } c_{o,\alpha} \ge c_T == g_\alpha \\
-   0 & \text{if }  c_{o,\alpha} \ge c_T\  != g_\alpha
- \end{cases}
-\end{align}
-and the normalization integral is composed of the sum over all possible configurations of the integrated probability of the truncated distributions
-of the measured counts.  This simplifies to the the single-count case considered earlier in the case of $N=1$, $k=1$.
-
-
-
 \subsection{Case Not Typed}
 
 
@@ -134,13 +103,13 @@ For Case Not Typed the likelihood is
 For the redshift measurement, we take a set of potential host galaxies, where galaxy $j$
 are redshift $z_j$ has probability $p_j$ of being the host
 \begin{equation}
-p(z_o|S_c, S_T, z, X) = \sum_j p_j\delta(z_j-z).
+p(z_o|S_c, S_T, z, X) = \sum_j   p_j\delta(z_j-z).
 \end{equation}
 Then
 \begin{align}
-\mathcal{L}(z_o,c_o | S_c, z, X) & =  \sum_j p_j \int dL \,\sum_{i} p(c_o | T_i, L, S_c, z=z_j, X) p(L |  T_i,  S_c,  z=z_j, X) P(T_i|S_c, z=z_j, X) \\
-&=  \frac{\sum_j p_j \int dL \, p(c_o, S_c | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c| z=z_j, X)}\\
-&=  \frac{\sum_j p_j \int dL \, p(c_o | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c| z=z_j, X)},
+\mathcal{L}(z_o,c_o | S_c, S_T, z, X) & =  \sum_j p_j \int dL \,\sum_{i} p(c_o | T_i, L, S_c, S_T, z=z_j, X) p(L |  T_i,  S_c, S_T,  z=z_j, X) P(T_i|S_c, S_T, z=z_j, X) \\
+&=  \frac{\sum_j p_j \int dL \, p(c_o, S_c, S_T | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c, S_T| z=z_j, X)}\\
+&=  \frac{\sum_j p_j \int dL \, p(c_o | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c, S_T| z=z_j, X)},
 \end{align}
 where we use the fact that the counts do not directly depend on type.
 
@@ -150,6 +119,47 @@ P(S_c| z=z_o, X) & = \int dc_o \, \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X)\\
 & =  \sum_j p_j  \sum_{i} P(T_i|z=z_j, X)  \int dL \, p(L|T_i, z=z_j, X) 
 \left[ \int dc_o \, p(c_o, S_c| T=T_i, L, z=z_j, X) \right].
 \end{align}
+
+\subsection{Sample Selection}
+Both the Typed and Not Typed cases have in their normalizations the term
+\begin{equation}
+\int dc_o \, p(c_o,S_c, S_T | T=T_i, L, z=z_o, X),
+\end{equation}
+which is the fraction of objects whose counts satisfy the sample selection criteria.
+
+
+In the case of a single count measurement per transient and neglecting the typing selection criteria,
+\begin{align}
+ p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) &=  p(c_o, c_o \ge  c_T | T=T_o, L, z=z_o, X) \\
+ &= \begin{cases}
+   p(c_o | T=T_o, L, z=z_o, X) & \text{if } c_o \ge c_T \\
+   0 & \text{if }  c_o < c_T
+ \end{cases}
+\end{align}
+so that the integral is
+\begin{equation}
+\int dc_o \, p(c_o,S_c, S_T | T=T_i, L, z=z_o, X) = \int_{c_T}^\infty dc_o\,  p(c_o | T=T_i, L, z=z_o, X).
+\end{equation}
+Our count measurements come from a Normal distribution, so that integral is simply related to the error function.
+
+For the more general case, suppose a transient has $N$ independent count measurements\footnote{The independence of count measurements  depends on the flux extraction method; regardless the
+noise of a single observation is expected to be dominated by its own photon noise making this
+supposition a good approximation.} and $k$ of those must be above threshold in order to be
+included in the sample.
+Consider arrays of length $N$ in which each element has a value of True or False: there are $2^N$ possible configurations for this array
+of which $\sum_{i=k}^N {N \choose i}$ have $k$ or more True's.  Let the set $\mathcal{G}$ represent the latter possible configurations.
+Then
+\begin{align}
+p(c_o, S_c| T=T_o, L, z=z_o, X) &= \sum_{g \in \mathcal{G}} \prod_{\alpha} p(c_{o, \alpha}, g | T=T_o, L, z=z_o, X)\\
+ &=  \sum_{g \in \mathcal{G}}  \prod_{\alpha} \begin{cases}
+   p(c_{o,\alpha} | T=T_o, L, z=z_o, X) & \text{if } (c_{o,\alpha} \ge c_T) = g_\alpha\\
+   0 & \text{if }  (c_{o,\alpha} \ge c_T)  \ne g_\alpha
+ \end{cases}
+\end{align}
+and the normalization integral is composed of the sum over all possible configurations of the integrated probability of the truncated distributions
+of the measured counts.  This simplifies to the the single-count case considered earlier in the case of $N=1$, $k=1$.
+If the count measurement uncertainties are independent, which may not be exactly but is approximately the case when we have high
+signal-to-noise references, the integral because a sum of products of normalized error functions.
 
 
 
@@ -162,17 +172,17 @@ into the likelihoods described in \S\ref{likelihood:sec}.
 A description of the nodes follow.  Numbers are illustrative. 
 
 \subsection{Cosmology}
-The Flat $w$CDM cosmology.
-
+The Flat $w$CDM cosmological parameters are drawn from top-hat distributions
 \begin{align}
-\Omega_M & \sim \ln{\mathcal{N}}(\ln{0.28},0.1)\\
-w_0 & \sim \mathcal{N}(-1,0.05)
+\Omega_M & \sim  {\mathcal{U}}(0,1)\\
+w_0 & \sim \mathcal{U}(-1.5, -0.1).
 \end{align}
+
 
 \subsection{Calibration}
 Photometric zeropoints for each band.
 \begin{equation}
-Z \sim \mathcal{N}(0,0.02)
+Z \sim \mathcal{N}(0,\frac{\ln{10}}{2.5}0.01)
 \end{equation}
 
 \subsection{SNIa Rate}
@@ -278,7 +288,7 @@ c_o | c_\star, \sigma_c \sim \mathcal{N}(c_\star, \sigma_c),
 \end{equation}
 where $\sigma_c$ is the measurement noise.
 
-\subsection{Sample Selection Normalization}
+\subsection{Implementation Notes}
 Anticipating the use of available statistical packages, the likelihoods have been constructed
 from standard distribution functions.  The truncated distributions from sample selection
 are accounted by the normalization 
@@ -287,7 +297,7 @@ in the PGM, they are treated as nodes who contribute
 $-\ln{P(S_c, S_T| z=z_o, X)}$ to the log-likelihood, where the negative sign reflects that this is a normalization
 factor.
 
-\subsection{Implementation Notes}
+
 The following integral appears in the normalization
 \begin{equation}
 \int dL p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right].
@@ -308,4 +318,5 @@ where
 \begin{equation}
 c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
 \end{equation}
+
 \end{document}
