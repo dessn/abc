@@ -319,4 +319,59 @@ where
 c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
 \end{equation}
 
+\section{Adding Complexity}
+\subsection{SALT2 Model for Transient Luminosity}
+The SALT2 model for supernova luminosity as a function of SN-frame time $t$  and wavelength $\lambda$ is
+\begin{equation}
+L(t-t_0, \lambda; M-x_0-\alpha x_1 + \beta c, x_1, c),
+\label{SALTL:eqn}
+\end{equation}
+where $\alpha$ and $\beta$ are global parameters and $t_0$, $x_0$, $x_1$ and $c$ are per-supernova parameters.
+
+Incorporating the SALT2 model leads to changes to the PGM in Figure~\ref{pgm:fig}, specifically in the following Nodes.
+UNITY notation and priors are taken.
+\subsubsection{SNX Luminosity}
+There are parameters for the global supernova parameters.  For SNe~Ia
+\begin{align}
+M_{SNIa} & \sim \mathcal{U}(-20, -18) \\
+\arctan{\alpha_{SNIa}} & \sim \mathcal{U}(-0.2, 0.3) \\
+\arctan{\beta_{SNIa}} & \sim \mathcal{U}(-1.4, 1.4)
+\end{align}
+and for ``hyperparameters'' that describe the distributions of the per-supernova parameters
+\begin{align}
+\log_{10}{R^{x_0}_{SNIa}} & \sim \mathcal{U}({-2}, {-0.5})\\
+\log_{10}{R^{x_1}_{SNIa}} & \sim \mathcal{U}({-0.5}, {0.5})\\
+\log_{10}{R^{c}_{SNIa}} & \sim \mathcal{U}({-1.5}, {-0.5})\\
+x_{1,SNIa}^\star& \sim \text{Cauchy}(0,1)\\
+c^\star_{SNIa} & \sim \text{Cauchy}(0,0.3).
+\end{align}
+
+
+\subsubsection{Type}
+The type of the object is still obtained as before.  Now we have the parameters that specify the sub-type.
+\begin{align}
+t_0 & \sim \mathcal{U}\\
+x_{0, SNIa} & \sim \mathcal{N}(0,R^{x_0}_{SNX})\\
+x_{1,SNIa} & \sim \mathcal{N}(x_{1,SNIa}^\star,R^{x_1}_{SNIa})\\
+c_{SNIa} & \sim \text{SkewNormal}(c^\star_{SNIa},R^{c}_{SNIa} )
+\end{align}
+
+\subsubsection{Luminosity}
+The luminosity is now fixed by Eqn.\ \ref{SALTL:eqn}.  It may be made probabilistic if an error snake is considered.
+
+\subsubsection{Likelihood}
+The likelihood for typed objects is
+\begin{multline}
+\mathcal{L}(T_o,z_o,c_o | S_c, S_T, z, X)
+ \propto \int dt_0 \, dx_{0,T_o} \, dx_{1,T_o} dc_{T_o} 
+ p(t_0, x_{0,T_o}, x_{1,T_o}, c_{T_o} |T_o, z=z_o, X) \\ P(T_o|z=z_o, X) p(c_o, S_c, S_T | T=T_o, L_{T_o}(t_0, x_{0,T_o}, x_{1,T_o}, c_{T_o}), z=z_o, X)
+\end{multline}
+and for non-typed
+\begin{multline}
+\mathcal{L}(z_o,c_o | S_c, S_T, z, X)
+ \propto \sum_j p_j \sum_i P(T_i|z=z_j, X)   \int dt_0 \, dx_{0,T_i} \, dx_{1,T_i} dc_{T_i} 
+ p(t_0, x_{0,T_i}, x_{1,T_i}, c_{T_i} |T_i, z=z_j, X) \\  p(c_o, S_c, S_T | T=T_o, L_{T_i}(t_0, x_{0,T_i}, x_{1,T_i}, c_{T_i}), z=z_j, X),
+ \end{multline}
+where both likelihoods must be normalized.
+
 \end{document}
