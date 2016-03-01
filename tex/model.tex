@@ -74,7 +74,7 @@ but are included in Figure~\ref{pgm:fig} to encompass the case of self-calibrati
 
 \begin{figure}[htbp] %  figure placement: here, top, bottom, or page
    \centering
-   \includegraphics[width=7in]{/Users/akim/project/abc/results/hdpgm.pdf} 
+   \includegraphics[width=7in]{../results/hdpgm.pdf} 
    \caption{Probabilistic Graphical Model for the SN~Ia analysis.  
    The forward modeling
    flow goes from left to right, starting with the description of the universe, observatory,
@@ -178,7 +178,7 @@ Light-curve shape and color are not considered in this simple model.
 
 \begin{figure}[htbp] %  figure placement: here, top, bottom, or page
    \centering
-   \includegraphics[width=5in]{/Users/akim/project/abc/results/toy_pgm.pdf} 
+   \includegraphics[width=5in]{../results/toy_pgm.pdf} 
    \caption{Probabilistic Graphical Model for the simple SN~Ia analysis. The
    parameters include the cosmological parameters $\Omega_M$ and $w$,
    the luminosities $\alpha$ and intrinsic dispersions $\sigma$ of SNe~Ia and non-Ia's,
@@ -383,18 +383,18 @@ are faded.  The solid points
 represent those objects spectroscopically typed for the case of 20\% follow-up.
 The green X's represent the 2\% among those without spectroscopy that
 are assigned an incorrect redshift.
-
-\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
-   \centering
-   \includegraphics[scale=0.4]{/Users/akim/project/abc/doc/seed2.pdf}
-   \includegraphics[scale=0.4]{/Users/akim/project/abc/doc/seed2_pop2.pdf}  
-\caption{Hubble diagrams for a realization drawn from the baseline Model 1 (left)
-and Model 2 with a second non-Ia population (right).
-Type~Ia's are shown in blue and non-Ia's in red, those that fall below detection threshold
-are faded.  The green X's represent the 2\% among those without spectroscopy that
-are assigned an incorrect redshift.
-   \label{hd:fig}}
-\end{figure}
+%
+%\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
+%   \centering
+%   \includegraphics[scale=0.4]{/Users/akim/project/abc/doc/seed2.pdf}
+%   \includegraphics[scale=0.4]{/Users/akim/project/abc/doc/seed2_pop2.pdf}  
+%\caption{Hubble diagrams for a realization drawn from the baseline Model 1 (left)
+%and Model 2 with a second non-Ia population (right).
+%Type~Ia's are shown in blue and non-Ia's in red, those that fall below detection threshold
+%are faded.  The green X's represent the 2\% among those without spectroscopy that
+%are assigned an incorrect redshift.
+%   \label{hd:fig}}
+%\end{figure}
 
 The simulated data are analyzed using 
 \citet{stan-software:2015},
@@ -419,16 +419,16 @@ spectroscopic classification.  Table~\ref{seed2:tab} lists the modes
 of the $w$ distribution for varying spectroscopic coverage: there is no appreciable
 bias relative to the statistical uncertainties.
 
-\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
-   \centering
-   \includegraphics[scale=0.17]{/Users/akim/project/abc/results/seed2/{contour.2000.1.0}.pdf}
-   \includegraphics[scale=0.17]{/Users/akim/project/abc/results/seed2_pop2/{contour.2000.1.0}.pdf} 
-\caption{Probability distribution functions of the model parameters for the case of
- 100\% spectroscopy for Model 1 (left) and Model 2 (right).
-    Solid lines represent the input parameters.  Dashed lines in the
-   histograms are the 0.16 and 0.84 quantiles. 
-   \label{contour1:fig}}
-\end{figure}
+%\begin{figure}[htbp] %  figure placement: here, top, bottom, or page
+%   \centering
+%   \includegraphics[scale=0.17]{/Users/akim/project/abc/results/seed2/{contour.2000.1.0}.pdf}
+%   \includegraphics[scale=0.17]{/Users/akim/project/abc/results/seed2_pop2/{contour.2000.1.0}.pdf} 
+%\caption{Probability distribution functions of the model parameters for the case of
+% 100\% spectroscopy for Model 1 (left) and Model 2 (right).
+%    Solid lines represent the input parameters.  Dashed lines in the
+%   histograms are the 0.16 and 0.84 quantiles. 
+%   \label{contour1:fig}}
+%\end{figure}
 
 \begin{table}
 \centering

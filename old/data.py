@@ -2,17 +2,6 @@
 
 #import matplotlib
 #matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-import pystan
-import numpy.random
-from astropy.cosmology import FlatwCDM
-import scipy
-import sncosmo
-import pickle
-import astropy.units as u
-import abc
-import copy
 import Sim
 		
 

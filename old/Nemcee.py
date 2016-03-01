@@ -366,7 +366,7 @@ def simulateData():
     observation['counts'] = []
     observation['counts_invcov']=[]
     for i in xrange(nTrans):
-        ans =numpy.random.multivariate_normal(numpy.zeros(npts)+ luminosity[i] / 4/numpy.pi/ld[i]/ld[i]*10**(inputs.Z/2.5), cov)
+        ans = numpy.random.multivariate_normal(numpy.zeros(npts)+ luminosity[i] / 4/numpy.pi/ld[i]/ld[i]*10**(inputs.Z/2.5), cov)
         observation['counts'].append(ans)
         observation['counts_invcov'].append(invcov)
         #luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
@@ -386,7 +386,7 @@ def simulateData():
     nTrans =  found.sum()
     observation['specz'] = [numpy.array([dum]) for dum in observation['specz'][found]]
     observation['zprob'] = [numpy.array([dum]) for dum in observation['zprob'][found]]
-    observation['spectype'] =observation['spectype'][found]
+    observation['spectype'] = observation['spectype'][found]
 
     observation['spectype'][0] = -1   # case of no spectral type
     observation['specz'][0] = numpy.array([observation['specz'][0][0], 0.2])
@@ -723,17 +723,17 @@ import matplotlib.pyplot as plt
 
 def runModel():
 
-    pool = MPIPool()
-    if not pool.is_master():
-        pool.wait()
-        sys.exit(0)
-    # pool=None
+    #pool = MPIPool()
+    #if not pool.is_master():
+    #    pool.wait()
+    #    sys.exit(0)
+    #pool=None
 
     observation = simulateData()
     nTrans = len(observation['spectype'])
 
-    ndim, nwalkers = 8+ nTrans, 1000
-
+    ndim, nwalkers = 8+ nTrans, 70
+    print("1")
     # mns = numpy.concatenate(([inputs.Om0, inputs.w0, inputs.rate_II_r, inputs.logL_snIa, inputs.sigma_snIa, \
     #             inputs.logL_snII,inputs.sigma_snII,inputs.Z], -.35*numpy.zeros(nTrans)))
     sigs = numpy.concatenate(([.1,.2,.1, uncertainties.logL_snIa, uncertainties.sigma_snIa, uncertainties.logL_snII, uncertainties.sigma_snII, uncertainties.Z], .05+numpy.zeros(nTrans)))
@@ -755,8 +755,9 @@ def runModel():
 
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[observation['counts'],
-        observation['specz'], observation['counts_invcov'], observation['zprob'], observation['spectype']], pool=pool)
-    
+        observation['specz'], observation['counts_invcov'], observation['zprob'], observation['spectype']])
+    print("6")
+
     # if pool.is_master():
     #     output = open('data.dat','w')
     #     output.close()
@@ -773,12 +774,18 @@ def runModel():
     #         f.close()
     # pool.close()
 
-    sampler.run_mcmc(p0, 1500)
-    if pool.is_master():
-        output = open('data.pkl', 'wb')
-        pickle.dump(sampler.chain, output)
-        output.close()
-    pool.close()
+    from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
+    N = 500
+    pbar = ProgressBar(widgets=[Counter(), "/"+str(N)+" " , Percentage(), Bar(), Timer(), " ", ETA()], maxval=N).start()
+    for i, result in enumerate(sampler.sample(p0, iterations=N)):
+        pbar.update(i)
+    print("7")
+
+    #if pool.is_master():
+    output = open('data.pkl', 'wb')
+    pickle.dump(sampler.chain, output)
+    output.close()
+    #pool.close()
 
 
 runModel()
