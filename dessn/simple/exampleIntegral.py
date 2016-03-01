@@ -51,22 +51,25 @@ class ExampleIntegral(object):
     Working in log space for as much as possible will assist in numerical precision, so we can rewrite this as
 
     .. math::
-        \log\left(P(D|\theta)\right) =  \sum_{i=1}^N  \left[ -\log(2\pi\theta_2\sigma_i) +
-        \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -\frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i \right]
+        \log\left(P(D|\theta)\right) =  \sum_{i=1}^N  \left[
+                \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -
+        \frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]
 
-    Creating this class will set up observations from an underlying distribution. Invoke `emcee` by calling the object.
+    Creating this class will set up observations from an underlying distribution.
+    Invoke ``emcee`` by calling the object. Notice that performing the marginalisation over
+    :math:`dL_i` requires computing :math:`n` integrals for each step in the MCMC.
 
     Parameters
     ----------
-    n : int, optional (100)
+    n : int, optional
         The number of supernova to 'observe'
-    theta_1 : float, optional (300.0)
+    theta_1 : float, optional
         The mean of the underlying supernova luminosity distribution
-    theta_2 : float, optional (20.0)
+    theta_2 : float, optional
         The standard deviation of the underlying supernova luminosity distribution
     """
 
-    def __init__(self, n=500, theta_1=100.0, theta_2=30.0):
+    def __init__(self, n=900, theta_1=100.0, theta_2=30.0):
         self.n = n
         self.theta_1 = theta_1
         self.theta_2 = theta_2
@@ -79,7 +82,8 @@ class ExampleIntegral(object):
         self.sample = None
 
     def plot_observations(self):
-
+        """Plot the observations and observation distribution.
+        """
         fig, ax = plt.subplots(figsize=(6, 4), ncols=2)
         x = np.arange(self.n)
         ax[0].errorbar(x, self.data, yerr=self.error, fmt='o')
@@ -91,40 +95,86 @@ class ExampleIntegral(object):
 
         plt.show()
 
-    def integrand(self, l, theta, d, e):
+    def _integrand(self, l, theta, d, e):
         return -((d - l) * (d - l) / (e * e)) - (l - theta[0]) * (l - theta[0]) / (theta[1] * theta[1])
 
-    def plus(self, x, y):
+    def _plus(self, x, y):
         if x > y:
             return x + np.log(1 + np.exp(y - x))
         else:
             return y + np.log(1 + np.exp(x - y))
 
-    def integrate(self, d, e, theta):
+    def _integrate(self, d, e, theta):
         step = np.linspace(0, 200, 100)
         diff = step[1] - step[0]
-        r = self.integrand(step[0], theta, d, e) - diff
+        r = self._integrand(step[0], theta, d, e) # - diff
         for s in step[1:]:
-            r = self.plus(r, self.integrand(s, theta, d, e) - diff)
+            r = self._plus(r, self._integrand(s, theta, d, e)) # - diff)
         return r
 
     def get_likelihood(self, theta, data, error):
+        r""" Gets the log likelihood given the supplied input parameters.
+
+        Parameters
+        ----------
+        theta : array of size 2
+            An array representing :math:`[\theta_1,\theta_2]`
+        data : array of length `n`
+            An array of observed luminosities
+        error : array of length `n`
+            An array of observed luminosity errors
+
+        Returns
+        -------
+        float
+            the log likelihood probability
+        """
         result = 0
         for d, e in zip(data, error):
             result -= np.log(2 * np.pi * e * theta[1])
-            result += self.integrate(d, e, theta)
+            result += self._integrate(d, e, theta)
 
         if not np.isfinite(result):
             return -np.inf
         return result
 
     def get_prior(self, theta):
+        r""" Get the log prior probability given the input.
+
+        The prior distribution is currently implemented as flat prior.
+
+        Parameters
+        ----------
+        theta : array of size 2
+            An array representing :math:`[\theta_1,\theta_2]`
+
+        Returns
+        -------
+        float
+            the log prior probability
+        """
         if theta[0] < 0 or theta[0] > 200 or theta[1] < 0 or theta[1] > 50:
             return -np.inf
         else:
             return 1
 
     def get_posterior(self, theta, data, error):
+        r""" Gives the log posterior probability given the supplied input parameters.
+
+        Parameters
+        ----------
+        theta : array of size 2
+            An array representing :math:`[\theta_1,\theta_2]`
+        data : array of length `n`
+            An array of observed luminosities
+        error : array of length `n`
+            An array of observed luminosity errors
+
+        Returns
+        -------
+        float
+            the log posterior probability
+        """
         prior = self.get_prior(theta)
         if np.isfinite(prior):
             likelihood = self.get_likelihood(theta, data, error)
@@ -132,7 +182,20 @@ class ExampleIntegral(object):
         else:
             return prior
 
-    def do_emcee(self, nwalkers=8, nburn=500, nsteps=1000):
+    def do_emcee(self, nwalkers=6, nburn=300, nsteps=700):
+        """ Run the `emcee` chain and produce a corner plot.
+
+        Saves a png image of the corner plot to plots/exampleIntegration.png.
+
+        Parameters
+        ----------
+        nwalkers : int, optional
+            The number of walkers to use. Minimum of four.
+        nburn : int, optional
+            The burn in period of the chains.
+        nsteps : int, optional
+            The number of steps to run
+        """
         ndim = 2
         starting_guesses = np.random.normal(1, 0.2, (nwalkers, ndim))
         starting_guesses[:, 0] *= self.theta_1
@@ -147,8 +210,9 @@ class ExampleIntegral(object):
         sample = sample.reshape((-1, ndim))
         self.sampler = sampler
         self.sample = sample
-        corner.corner(sample, truths=[self.theta_1, self.theta_2])
+        fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
         plt.show()
+        fig.savefig("../../plots/exampleIntegration.png", bbox_inches='tight', dpi=300)
 
 
 
