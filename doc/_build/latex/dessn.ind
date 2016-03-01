@@ -1,0 +1,87 @@
+\begin{theindex}
+\def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
+
+  \bigletter A
+  \item add\_dependency() (dessn.model.node.Node method), \hyperpage{2}
+
+  \indexspace
+  \bigletter C
+  \item check\_kwargs() (dessn.simulation.observationFactory.ObservationFactory method), 
+		\hyperpage{5}
+  \item Cosmology (class in dessn.model.nodes.cosmology), \hyperpage{1}
+
+  \indexspace
+  \bigletter D
+  \item dessn (module), \hyperpage{5}
+  \item dessn.entry (module), \hyperpage{1}
+  \item dessn.entry.sim (module), \hyperpage{1}
+  \item dessn.model (module), \hyperpage{3}
+  \item dessn.model.abstracts (module), \hyperpage{2}
+  \item dessn.model.model (module), \hyperpage{2}
+  \item dessn.model.node (module), \hyperpage{2}
+  \item dessn.model.nodes (module), \hyperpage{2}
+  \item dessn.model.nodes.cosmology (module), \hyperpage{1}
+  \item dessn.model.nodes.supernova (module), \hyperpage{1}
+  \item dessn.model.nodes.typeProb (module), \hyperpage{2}
+  \item dessn.simple (module), \hyperpage{5}
+  \item dessn.simple.exampleIntegral (module), \hyperpage{3}
+  \item dessn.simulation (module), \hyperpage{5}
+  \item dessn.simulation.observationFactory (module), \hyperpage{5}
+  \item dessn.simulation.simulation (module), \hyperpage{5}
+  \item do\_emcee() (dessn.simple.exampleIntegral.ExampleIntegral method), \hyperpage{4}
+
+  \indexspace
+  \bigletter E
+  \item ExampleIntegral (class in dessn.simple.exampleIntegral), \hyperpage{3}
+
+  \indexspace
+  \bigletter F
+  \item FlatWCDM (class in dessn.model.nodes.cosmology), \hyperpage{1}
+
+  \indexspace
+  \bigletter G
+  \item get\_dependencies() (dessn.model.node.Node method), \hyperpage{3}
+  \item get\_likelihood() (dessn.simple.exampleIntegral.ExampleIntegral method), \hyperpage{4}
+  \item get\_luminosity\_prob() (dessn.model.nodes.supernova.SupernovaIa method), \hyperpage{2}
+  \item get\_name() (dessn.model.node.Node method), \hyperpage{3}
+  \item get\_name() (dessn.model.nodes.cosmology.Cosmology method), \hyperpage{1}
+  \item get\_name() (dessn.model.nodes.typeProb.TypeProbability method), \hyperpage{2}
+  \item get\_observations() (dessn.simulation.observationFactory.ObservationFactory method), 
+		\hyperpage{5}
+  \item get\_posterior() (dessn.simple.exampleIntegral.ExampleIntegral method), \hyperpage{4}
+  \item get\_prior() (dessn.simple.exampleIntegral.ExampleIntegral method), \hyperpage{4}
+  \item get\_simulation() (dessn.simulation.simulation.Simulation method), \hyperpage{5}
+
+  \indexspace
+  \bigletter M
+  \item Model (class in dessn.model.model), \hyperpage{2}
+
+  \indexspace
+  \bigletter N
+  \item Node (class in dessn.model.node), \hyperpage{2}
+
+  \indexspace
+  \bigletter O
+  \item ObservationFactory (class in dessn.simulation.observationFactory), \hyperpage{5}
+
+  \indexspace
+  \bigletter P
+  \item plot\_observations() (dessn.simple.exampleIntegral.ExampleIntegral method), \hyperpage{5}
+
+  \indexspace
+  \bigletter S
+  \item Simulation (class in dessn.simulation.simulation), \hyperpage{5}
+  \item snIa (dessn.model.nodes.typeProb.Types attribute), \hyperpage{2}
+  \item snII (dessn.model.nodes.typeProb.Types attribute), \hyperpage{2}
+  \item Supernova (class in dessn.model.nodes.supernova), \hyperpage{1}
+  \item SupernovaIa (class in dessn.model.nodes.supernova), \hyperpage{1}
+
+  \indexspace
+  \bigletter T
+  \item type (dessn.model.nodes.supernova.Supernova attribute), \hyperpage{1}
+  \item type() (dessn.model.nodes.supernova.SupernovaIa method), \hyperpage{2}
+  \item TypeProbability (class in dessn.model.nodes.typeProb), \hyperpage{2}
+  \item TypeProbabilitySimple (class in dessn.model.nodes.typeProb), \hyperpage{2}
+  \item Types (class in dessn.model.nodes.typeProb), \hyperpage{2}
+
+\end{theindex}
