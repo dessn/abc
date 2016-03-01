@@ -48,7 +48,7 @@ source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'modules'
-
+numpydoc_show_class_members = False
 # General information about the project.
 project = u'dessn'
 copyright = u'2016, dessn'
