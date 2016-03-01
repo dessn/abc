@@ -1,8 +1,7 @@
 import numpy as np
 import emcee
-from scipy.integrate import quad
 from scipy import stats
-import matplotlib, matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from progressbar import Bar, Counter, ETA, Percentage, ProgressBar, Timer
 import corner
 
@@ -107,9 +106,9 @@ class ExampleIntegral(object):
     def _integrate(self, d, e, theta):
         step = np.linspace(0, 200, 100)
         diff = step[1] - step[0]
-        r = self._integrand(step[0], theta, d, e) # - diff
+        r = self._integrand(step[0], theta, d, e) - diff
         for s in step[1:]:
-            r = self._plus(r, self._integrand(s, theta, d, e)) # - diff)
+            r = self._plus(r, self._integrand(s, theta, d, e) - diff)
         return r
 
     def get_likelihood(self, theta, data, error):
@@ -182,7 +181,7 @@ class ExampleIntegral(object):
         else:
             return prior
 
-    def do_emcee(self, nwalkers=6, nburn=300, nsteps=700):
+    def do_emcee(self, nwalkers=20, nburn=500, nsteps=3000):
         """ Run the `emcee` chain and produce a corner plot.
 
         Saves a png image of the corner plot to plots/exampleIntegration.png.
@@ -212,7 +211,7 @@ class ExampleIntegral(object):
         self.sample = sample
         fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
         plt.show()
-        fig.savefig("../../plots/exampleIntegration.png", bbox_inches='tight', dpi=300)
+        fig.savefig("plots/exampleIntegration.png", bbox_inches='tight', dpi=300)
 
 
 
