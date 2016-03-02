@@ -1,9 +1,4 @@
 import numpy as np
-import emcee
-import matplotlib.pyplot as plt
-from progressbar import Bar, Counter, ETA, Percentage, ProgressBar, Timer
-import corner
-import os
 from example import Example
 
     
