@@ -4,6 +4,7 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from progressbar import Bar, Counter, ETA, Percentage, ProgressBar, Timer
 import corner
+import os
 
 class ExampleIntegral(object):
     r"""An example implementation using integration over a latent parameter.
@@ -91,7 +92,6 @@ class ExampleIntegral(object):
         xs = np.linspace(self.data.min(), self.data.max(), 100)
         ys = (1 / (np.sqrt(2 * np.pi) * self.theta_2)) * np.exp(-(xs - self.theta_1)**2 / (self.theta_2**2))
         ax[1].plot(xs, ys, alpha=0.5)
-
         plt.show()
 
     def _integrand(self, l, theta, d, e):
@@ -181,7 +181,7 @@ class ExampleIntegral(object):
         else:
             return prior
 
-    def do_emcee(self, nwalkers=20, nburn=500, nsteps=3000):
+    def do_emcee(self, nwalkers=20, nburn=500, nsteps=2000):
         """ Run the `emcee` chain and produce a corner plot.
 
         Saves a png image of the corner plot to plots/exampleIntegration.png.
@@ -211,7 +211,9 @@ class ExampleIntegral(object):
         self.sample = sample
         fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
         plt.show()
-        fig.savefig("plots/exampleIntegration.png", bbox_inches='tight', dpi=300)
+        
+        filename = os.path.dirname(__file__) + os.sep + "../../plots/exampleIntegration.png"
+        fig.savefig(filename, bbox_inches='tight', dpi=300)
 
 
 
