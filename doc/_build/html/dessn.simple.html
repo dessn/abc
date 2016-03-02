@@ -89,7 +89,9 @@
 <li class="toctree-l3"><a class="reference internal" href="dessn.model.html">dessn.model package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.simple package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.example">dessn.simple.example module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.exampleIntegral">dessn.simple.exampleIntegral module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.exampleLatent">dessn.simple.exampleLatent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple">Module contents</a></li>
 </ul>
 </li>
@@ -150,11 +152,11 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-dessn.simple.exampleIntegral">
-<span id="dessn-simple-exampleintegral-module"></span><h2>dessn.simple.exampleIntegral module<a class="headerlink" href="#module-dessn.simple.exampleIntegral" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-dessn.simple.example">
+<span id="dessn-simple-example-module"></span><h2>dessn.simple.example module<a class="headerlink" href="#module-dessn.simple.example" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="dessn.simple.exampleIntegral.ExampleIntegral">
-<em class="property">class </em><code class="descclassname">dessn.simple.exampleIntegral.</code><code class="descname">ExampleIntegral</code><span class="sig-paren">(</span><em>n=900</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral" title="Permalink to this definition">¶</a></dt>
+<dt id="dessn.simple.example.Example">
+<em class="property">class </em><code class="descclassname">dessn.simple.example.</code><code class="descname">Example</code><span class="sig-paren">(</span><em>n=300</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>An example implementation using integration over a latent parameter.</p>
 <p>Let us assume that we are observing supernova that a drawn from an underlying
@@ -186,9 +188,112 @@ parameterised by <span class="math">\(\theta\)</span>.</p>
 \[\log\left(P(D|\theta)\right) =  \sum_{i=1}^N  \left[
         \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -
 \frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]\]</div>
-<p>Creating this class will set up observations from an underlying distribution.
-Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by calling the object. Notice that performing the marginalisation over
-<span class="math">\(dL_i\)</span> requires computing <span class="math">\(n\)</span> integrals for each step in the MCMC.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of supernova to &#8216;observe&#8217;</p>
+</div></blockquote>
+<p><strong>theta_1</strong> : float, optional</p>
+<blockquote>
+<div><p>The mean of the underlying supernova luminosity distribution</p>
+</div></blockquote>
+<p><strong>theta_2</strong> : float, optional</p>
+<blockquote class="last">
+<div><p>The standard deviation of the underlying supernova luminosity distribution</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dessn.simple.example.Example.do_emcee">
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=None</em>, <em>nburn=None</em>, <em>nsteps=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.do_emcee" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.simple.example.Example.get_likelihood">
+<code class="descname">get_likelihood</code><span class="sig-paren">(</span><em>theta</em>, <em>data</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.get_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.get_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.simple.example.Example.get_posterior">
+<code class="descname">get_posterior</code><span class="sig-paren">(</span><em>theta</em>, <em>data</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.get_posterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.get_posterior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives the log posterior probability given the supplied input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : array of model parameters</p>
+<p><strong>data</strong> : array of length <cite>n</cite></p>
+<blockquote>
+<div><p>An array of observed luminosities</p>
+</div></blockquote>
+<p><strong>error</strong> : array of length <cite>n</cite></p>
+<blockquote>
+<div><p>An array of observed luminosity errors</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>the log posterior probability</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.simple.example.Example.get_prior">
+<code class="descname">get_prior</code><span class="sig-paren">(</span><em>theta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.get_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.get_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the log prior probability given the input.</p>
+<p>The prior distribution is currently implemented as flat prior.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : array of model parameters</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>the log prior probability</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.simple.example.Example.plot_observations">
+<code class="descname">plot_observations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.plot_observations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.plot_observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the observations and observation distribution.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-dessn.simple.exampleIntegral">
+<span id="dessn-simple-exampleintegral-module"></span><h2>dessn.simple.exampleIntegral module<a class="headerlink" href="#module-dessn.simple.exampleIntegral" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.simple.exampleIntegral.ExampleIntegral">
+<em class="property">class </em><code class="descclassname">dessn.simple.exampleIntegral.</code><code class="descname">ExampleIntegral</code><span class="sig-paren">(</span><em>n=900</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">dessn.simple.example.Example</span></code></a></p>
+<p>An example implementation using integration over a latent parameter.</p>
+<p>Building off the math from <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">Example</span></code></a>
+Creating this class will set up observations from an underlying distribution.
+Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by calling the object. In this example, we perform the marginalisation
+inside the likelihood calculation, which gives us dimensionality only of two (the length of
+the <span class="math">\(\theta\)</span> array). However, this is at the expense of  performing the marginalisation over
+<span class="math">\(dL_i\)</span>, as this requires computing <span class="math">\(n\)</span> integrals for each step in the MCMC.</p>
+<div class="figure align-center">
+<img alt="_images/exampleIntegration.png" src="_images/exampleIntegration.png" />
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -211,7 +316,7 @@ Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by c
 </table>
 <dl class="method">
 <dt id="dessn.simple.exampleIntegral.ExampleIntegral.do_emcee">
-<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=20</em>, <em>nburn=500</em>, <em>nsteps=3000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=20</em>, <em>nburn=500</em>, <em>nsteps=2000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the <cite>emcee</cite> chain and produce a corner plot.</p>
 <p>Saves a png image of the corner plot to plots/exampleIntegration.png.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -268,23 +373,94 @@ Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by c
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="dessn.simple.exampleIntegral.ExampleIntegral.get_posterior">
-<code class="descname">get_posterior</code><span class="sig-paren">(</span><em>theta</em>, <em>data</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.get_posterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.get_posterior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gives the log posterior probability given the supplied input parameters.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dessn.simple.exampleLatent">
+<span id="dessn-simple-examplelatent-module"></span><h2>dessn.simple.exampleLatent module<a class="headerlink" href="#module-dessn.simple.exampleLatent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.simple.exampleLatent.ExampleLatent">
+<em class="property">class </em><code class="descclassname">dessn.simple.exampleLatent.</code><code class="descname">ExampleLatent</code><span class="sig-paren">(</span><em>n=300</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">dessn.simple.example.Example</span></code></a></p>
+<p>An example implementation using marginalisation over latent parameters.</p>
+<p>Building off the math from <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">Example</span></code></a>, instead of performing the integration numerically in the computation of the likelihood, we can
+instead use Monte Carlo integration by simply setting the latent parameters <span class="math">\(\vec{L}\)</span> as 
+free parameters, giving us</p>
+<div class="math">
+\[\log\left(P(D|\theta,\vec{L})\right) = - \sum_{i=1}^N  \left[
+        \frac{(x_i-L_i)^2}{\sigma_i^2} +
+\frac{(L_i-\theta_1)^2}{\theta_2^2} + \log(2\pi\theta_2\sigma_i) \right]\]</div>
+<p>Creating this class will set up observations from an underlying distribution.
+Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by calling the object. In this example, we marginalise over <span class="math">\(L_i\)</span> after
+running our MCMC, and so we no longer have to compute integrals in our chain, but instead have
+dimensionality of <span class="math">\(2 + n\)</span>, where <span class="math">\(n\)</span> are the number of observations.</p>
+<div class="figure align-center">
+<img alt="_images/exampleLatent.png" src="_images/exampleLatent.png" />
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : array of size 2</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n</strong> : int, optional</p>
 <blockquote>
-<div><p>An array representing <span class="math">\([\theta_1,\theta_2]\)</span></p>
+<div><p>The number of supernova to &#8216;observe&#8217;</p>
 </div></blockquote>
-<p><strong>data</strong> : array of length <cite>n</cite></p>
+<p><strong>theta_1</strong> : float, optional</p>
+<blockquote>
+<div><p>The mean of the underlying supernova luminosity distribution</p>
+</div></blockquote>
+<p><strong>theta_2</strong> : float, optional</p>
+<blockquote class="last">
+<div><p>The standard deviation of the underlying supernova luminosity distribution</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dessn.simple.exampleLatent.ExampleLatent.do_emcee">
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=200</em>, <em>nburn=1000</em>, <em>nsteps=4000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent.do_emcee" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the <cite>emcee</cite> chain and produce a corner plot.</p>
+<p>Saves a png image of the corner plot to plots/exampleLatent.png.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>nwalkers</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of walkers to use.</p>
+</div></blockquote>
+<p><strong>nburn</strong> : int, optional</p>
+<blockquote>
+<div><p>The burn in period of the chains.</p>
+</div></blockquote>
+<p><strong>nsteps</strong> : int, optional</p>
+<blockquote class="last">
+<div><p>The number of steps to run</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.simple.exampleLatent.ExampleLatent.get_likelihood">
+<code class="descname">get_likelihood</code><span class="sig-paren">(</span><em>theta</em>, <em>data</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent.get_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent.get_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the log likelihood given the supplied input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : array of length 2 + <span class="math">\(n\)</span></p>
+<blockquote>
+<div><p>An array representing <span class="math">\([\theta_1,\theta_2,\vec{L}]\)</span></p>
+</div></blockquote>
+<p><strong>data</strong> : array of length <span class="math">\(n\)</span></p>
 <blockquote>
 <div><p>An array of observed luminosities</p>
 </div></blockquote>
-<p><strong>error</strong> : array of length <cite>n</cite></p>
+<p><strong>error</strong> : array of length <span class="math">\(n\)</span></p>
 <blockquote>
 <div><p>An array of observed luminosity errors</p>
 </div></blockquote>
@@ -292,43 +468,12 @@ Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by c
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
 <blockquote class="last">
-<div><p>the log posterior probability</p>
+<div><p>the log likelihood probability</p>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="method">
-<dt id="dessn.simple.exampleIntegral.ExampleIntegral.get_prior">
-<code class="descname">get_prior</code><span class="sig-paren">(</span><em>theta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.get_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.get_prior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the log prior probability given the input.</p>
-<p>The prior distribution is currently implemented as flat prior.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>theta</strong> : array of size 2</p>
-<blockquote>
-<div><p>An array representing <span class="math">\([\theta_1,\theta_2]\)</span></p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
-<blockquote class="last">
-<div><p>the log prior probability</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="dessn.simple.exampleIntegral.ExampleIntegral.plot_observations">
-<code class="descname">plot_observations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.plot_observations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.plot_observations" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot the observations and observation distribution.</p>
 </dd></dl>
 
 </dd></dl>
@@ -336,6 +481,7 @@ Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by c
 </div>
 <div class="section" id="module-dessn.simple">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dessn.simple" title="Permalink to this headline">¶</a></h2>
+<p>INIT DOCO</p>
 </div>
 </div>
 
