@@ -1,6 +1,11 @@
 dessn.model package
 ===================
 
+.. automodule:: dessn.model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -36,10 +41,3 @@ dessn.model.node module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: dessn.model
-    :members:
-    :undoc-members:
-    :show-inheritance:

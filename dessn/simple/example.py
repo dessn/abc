@@ -8,9 +8,9 @@ import os
 import abc
 
 class Example(object):
-    r"""An example implementation using integration over a latent parameter.
+    r"""Setting up the math for some examples.
 
-    Let us assume that we are observing supernova that a drawn from an underlying
+    Let us assume that we are observing supernova that are drawn from an underlying
     supernova distribution parameterised by :math:`\theta`,
     where the supernova itself simply a luminosity :math:`L`. We measure the luminosity
     of multiple supernovas, giving us an array of measurements :math:`D`. If we wish to recover
@@ -105,6 +105,7 @@ class Example(object):
 
     @abc.abstractmethod
     def get_likelihood(self, theta, data, error):
+        """ Abstract method to return the log likelihood """
         return -np.inf
 
     def get_prior(self, theta):
@@ -151,4 +152,23 @@ class Example(object):
 
     @abc.abstractmethod
     def do_emcee(self, nwalkers=None, nburn=None, nsteps=None):
+        """ Abstract method to configure the emcee parameters """
         pass
+
+    def _run_emcee(self, ndim, nburn, nsteps, nwalkers, starting_guesses, ndim_final, filename):
+
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, self.get_posterior, args=[self.data, self.error], live_dangerously=True)
+        pbar = ProgressBar(widgets=[Counter(), "/" + str(nsteps) + " ", Percentage(), Bar(), Timer(), " ", ETA()],
+                           maxval=nsteps).start()
+        for i, result in enumerate(sampler.sample(starting_guesses, iterations=nsteps)):
+            pbar.update(i)
+
+        sample = sampler.chain[:, nburn:, :ndim_final]  # discard burn-in points
+        sample = sample.reshape((-1, ndim_final))
+        self.sampler = sampler
+        self.sample = sample
+        fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
+        plt.show()
+
+        filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
+        fig.savefig(filename, bbox_inches='tight', dpi=300)

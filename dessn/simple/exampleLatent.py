@@ -1,9 +1,4 @@
 import numpy as np
-import emcee
-import matplotlib.pyplot as plt
-from progressbar import Bar, Counter, ETA, Percentage, ProgressBar, Timer
-import corner
-import os
 from example import Example
 
     
@@ -90,21 +85,7 @@ class ExampleLatent(Example):
         starting_guesses[:, 1] *= self.theta_2
         starting_guesses[:, 2:] *= self.theta_1
 
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, self.get_posterior, args=[self.data, self.error], live_dangerously=True)
-        pbar = ProgressBar(widgets=[Counter(), "/" + str(nsteps) + " ", Percentage(), Bar(), Timer(), " ", ETA()],
-                           maxval=nsteps).start()
-        for i, result in enumerate(sampler.sample(starting_guesses, iterations=nsteps)):
-            pbar.update(i)
-
-        sample = sampler.chain[:, nburn:, :ndim_final]  # discard burn-in points
-        sample = sample.reshape((-1, ndim_final))
-        self.sampler = sampler
-        self.sample = sample
-        fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
-        plt.show()
-
-        filename = os.path.dirname(__file__) + os.sep + "../../plots/exampleLatent.png"
-        fig.savefig(filename, bbox_inches='tight', dpi=300)
+        self._run_emcee(ndim, nburn, nsteps, nwalkers, starting_guesses, ndim_final, "exampleLatent")
 
 
 if __name__ == "__main__":

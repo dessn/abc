@@ -1,6 +1,11 @@
 dessn.simulation package
 ========================
 
+.. automodule:: dessn.simulation
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Submodules
 ----------
 
@@ -21,10 +26,3 @@ dessn.simulation.simulation module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: dessn.simulation
-    :members:
-    :undoc-members:
-    :show-inheritance:

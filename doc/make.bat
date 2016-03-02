@@ -81,7 +81,7 @@ if "%1" == "html" (
 )
 
 if "%1" == "rst" (
-	sphinx-apidoc -f -o . ../dessn
+	sphinx-apidoc -fM -o . ../dessn
 	if errorlevel 1 exit /b 1
 	echo.
 	echo.Made rst

@@ -1,6 +1,11 @@
 dessn.simple package
 ====================
 
+.. automodule:: dessn.simple
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Submodules
 ----------
 
@@ -28,11 +33,3 @@ dessn.simple.exampleLatent module
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: dessn.simple
-    :members:
-    :undoc-members:
-    :show-inheritance:

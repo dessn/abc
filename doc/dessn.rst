@@ -1,6 +1,11 @@
 dessn package
 =============
 
+.. automodule:: dessn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Subpackages
 -----------
 
@@ -11,10 +16,3 @@ Subpackages
     dessn.simple
     dessn.simulation
 
-Module contents
----------------
-
-.. automodule:: dessn
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -92,13 +92,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.example">dessn.simple.example module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.exampleIntegral">dessn.simple.exampleIntegral module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.exampleLatent">dessn.simple.exampleLatent module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.simulation.html">dessn.simulation package</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="dessn.html#module-dessn">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -147,8 +145,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="dessn-simple-package">
-<h1>dessn.simple package<a class="headerlink" href="#dessn-simple-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-dessn.simple">
+<span id="dessn-simple-package"></span><h1>dessn.simple package<a class="headerlink" href="#module-dessn.simple" title="Permalink to this headline">¶</a></h1>
+<p>This module is designed to give a step by step overview of a very simplified example
+Bayesian model.</p>
+<p>The basic example model is laid out in the parent class <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">Example</span></code></a>,
+and there are three implementations. The first implementation, <a class="reference internal" href="#dessn.simple.exampleIntegral.ExampleIntegral" title="dessn.simple.exampleIntegral.ExampleIntegral"><code class="xref py py-class docutils literal"><span class="pre">ExampleIntegral</span></code></a>, shows
+how the problem might be approached in a simple model, where numerical integration is simply done
+as part of the likelihood calculation.</p>
+<p>However, if there are multiple latent parameters, we get polynomial growth of the number of numerical
+integrations we have to do, and so this does not scale well at all.</p>
+<p>This leads us to the implementation in <a class="reference internal" href="#dessn.simple.exampleLatent.ExampleLatent" title="dessn.simple.exampleLatent.ExampleLatent"><code class="xref py py-class docutils literal"><span class="pre">ExampleLatent</span></code></a>, where we use the MCMC algorithm to
+essentially do Monte Carlo integration via marginalisation. This means we do not need to perform
+the numerical integration in the likelihood calculation, however the cost of doing so is increase
+dimensionality of our MCMC.</p>
+<p>Finally, the <code class="xref py py-class docutils literal"><span class="pre">ExampleLatentClass</span></code> implementation shows how the <a class="reference internal" href="#dessn.simple.exampleLatent.ExampleLatent" title="dessn.simple.exampleLatent.ExampleLatent"><code class="xref py py-class docutils literal"><span class="pre">ExampleLatent</span></code></a> class
+might be written to make use of Nodes. This is done in preparation for more complicated models, which will
+have more than one layer and needs to be configurable.</p>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -158,8 +171,8 @@
 <dt id="dessn.simple.example.Example">
 <em class="property">class </em><code class="descclassname">dessn.simple.example.</code><code class="descname">Example</code><span class="sig-paren">(</span><em>n=300</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>An example implementation using integration over a latent parameter.</p>
-<p>Let us assume that we are observing supernova that a drawn from an underlying
+<p>Setting up the math for some examples.</p>
+<p>Let us assume that we are observing supernova that are drawn from an underlying
 supernova distribution parameterised by <span class="math">\(\theta\)</span>,
 where the supernova itself simply a luminosity <span class="math">\(L\)</span>. We measure the luminosity
 of multiple supernovas, giving us an array of measurements <span class="math">\(D\)</span>. If we wish to recover
@@ -211,12 +224,14 @@ parameterised by <span class="math">\(\theta\)</span>.</p>
 <dl class="method">
 <dt id="dessn.simple.example.Example.do_emcee">
 <code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=None</em>, <em>nburn=None</em>, <em>nsteps=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.do_emcee" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Abstract method to configure the emcee parameters</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.simple.example.Example.get_likelihood">
 <code class="descname">get_likelihood</code><span class="sig-paren">(</span><em>theta</em>, <em>data</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.get_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.get_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Abstract method to return the log likelihood</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.simple.example.Example.get_posterior">
@@ -478,10 +493,6 @@ dimensionality of <span class="math">\(2 + n\)</span>, where <span class="math">
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-dessn.simple">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dessn.simple" title="Permalink to this headline">¶</a></h2>
-<p>INIT DOCO</p>
 </div>
 </div>
 

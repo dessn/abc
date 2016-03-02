@@ -53,7 +53,7 @@ clean:
 
 .PHONY: rst
 rst:
-    sphinx-apidoc -f -o . ../dessn
+    sphinx-apidoc -fM -o . ../dessn
     @echo "Made rst"
 .PHONY: html
 html:

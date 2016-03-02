@@ -1,6 +1,11 @@
 dessn.model.nodes package
 =========================
 
+.. automodule:: dessn.model.nodes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Submodules
 ----------
 
@@ -29,10 +34,3 @@ dessn.model.nodes.typeProb module
     :show-inheritance:
 
 
-Module contents
----------------
-
-.. automodule:: dessn.model.nodes
-    :members:
-    :undoc-members:
-    :show-inheritance:
