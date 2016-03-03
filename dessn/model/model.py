@@ -110,11 +110,13 @@ class Model(object):
     def _get_log_likelihood(self, theta_dict):
         result = []
         for edge in self.edges:
+            # TODO: Change it so that node transformations are called first and in order
+            # and invoke get_transformation and inject the results into data
             result.append(edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of}))
         return np.sum(result)
 
     def fit_model(self, num_walkers=None, num_steps=1000, num_burn=500, filename=None):
-
+        # TODO: Refactor this section, it should not be encoded in the model
         num_dim = len(self._theta_names)
         if num_walkers is None:
             num_walkers = 2 * num_dim

@@ -32,6 +32,8 @@ class Node(object):
 
 class NodeObserved(Node):
     def __init__(self, names, labels, datas):
+        if type(names) == list:
+            assert len(names) == len(labels) and len(names) == len(datas)
         super(NodeObserved, self).__init__(names, labels, NodeType.OBSERVED)
         self.datas = datas
 
@@ -53,7 +55,7 @@ class NodeTransformation(Node):
         super(NodeTransformation, self).__init__(names, labels, NodeType.TRANSFORMATION)
 
     @abc.abstractmethod
-    def get_num_latent(self):
+    def get_transformation(self):
         pass
 
 
