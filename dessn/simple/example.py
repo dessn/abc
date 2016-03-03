@@ -7,6 +7,7 @@ import corner
 import os
 import abc
 
+
 class Example(object):
     r"""Setting up the math for some examples.
 
@@ -157,7 +158,8 @@ class Example(object):
 
     def _run_emcee(self, ndim, nburn, nsteps, nwalkers, starting_guesses, ndim_final, filename):
 
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, self.get_posterior, args=[self.data, self.error], live_dangerously=True)
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, self.get_posterior, args=[self.data, self.error],
+                                        live_dangerously=True)
         pbar = ProgressBar(widgets=[Counter(), "/" + str(nsteps) + " ", Percentage(), Bar(), Timer(), " ", ETA()],
                            maxval=nsteps).start()
         for i, result in enumerate(sampler.sample(starting_guesses, iterations=nsteps)):

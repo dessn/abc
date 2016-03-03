@@ -10,23 +10,23 @@ pgm = PGM([4.5, 4.5], origin=[0., 0.2], observed_style='inner')
 
 
 
-pgm.add_node(Node('Pars',r"$\theta_G$", 1, 3))
-pgm.add_node(Node('mu',r"$\mu_G$", 1, 1))
-pgm.add_node(Node('SNpars',r"$\theta^{dist}$", 1, 4))
-pgm.add_node(Node('^z',r"$\hat{z_i}$", 3,1))
+pgm.add_node(Node('Pars', r"$\theta_G$", 1, 3))
+pgm.add_node(Node('mu', r"$\mu_G$", 1, 1))
+pgm.add_node(Node('SNpars', r"$\theta^{dist}$", 1, 4))
+pgm.add_node(Node('^z', r"$\hat{z_i}$", 3, 1))
 
-pgm.add_node(Node('Spars',r"$\hat{T}_{Si}$,$\hat{z_{Si}},\hat{\theta}_{Si}$", 3, 2, scale=1.8,observed=True))
-pgm.add_node(Node('^Counts',r"$\hat{f_i}$", 2, 2, observed=True))
-pgm.add_node(Node('^Host',r"$\hat{z_{Hi}},\hat{\theta}_{Hi}$", 3, 3, observed=True,scale=1.5))
+pgm.add_node(Node('Spars', r"$\hat{T}_{Si}$,$\hat{z_{Si}},\hat{\theta}_{Si}$", 3, 2, scale=1.8, observed=True))
+pgm.add_node(Node('^Counts', r"$\hat{f_i}$", 2, 2, observed=True))
+pgm.add_node(Node('^Host', r"$\hat{z_{Hi}},\hat{\theta}_{Hi}$", 3, 3, observed=True, scale=1.5))
 
-pgm.add_node(Node('^mu',r"$\hat{\mu_i}$", 2, 1))
+pgm.add_node(Node('^mu', r"$\hat{\mu_i}$", 2, 1))
 
-pgm.add_node(Node('SNpars_i',r"$\theta^{true}_i$", 2, 3))
-
-
+pgm.add_node(Node('SNpars_i', r"$\theta^{true}_i$", 2, 3))
 
 
-pgm.add_node(Node('^Type',r"$\hat{T_i}$", 2, 4))
+
+
+pgm.add_node(Node('^Type', r"$\hat{T_i}$", 2, 4))
 
 
 

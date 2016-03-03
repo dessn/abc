@@ -286,28 +286,28 @@ def pgm():
     pgm = PGM([9.5, 8.5], origin=[0., 0.2], observed_style='inner')
 
     #pgm.add_node(Node('dispersion',r"\center{$\sigma_{Ia}$ \newline $\sigma_{!Ia}$}", 1,6,scale=1.2,aspect=1.8))
-    pgm.add_node(Node('Rate_Ia',r"{SNIa Rate}", 1,8, fixed=1))
-    pgm.add_node(Node('Rate_II',r"{SNII Rate}", 2,8,scale=1.6,aspect=1.2))
-    pgm.add_node(Node('L_Ia',r"{SNIa L, $\sigma_L$}", 3,8,scale=1.6,aspect=1.2))
-    pgm.add_node(Node('L_II',r"{SNII L, $\sigma_L$}", 4,8,scale=1.6,aspect=1.2))
-    pgm.add_node(Node('Cosmology',r"Cosmology", 7,8, scale=1.6,aspect=1.2))
-    pgm.add_node(Node('Calibration',r"Calibration", 8, 8, scale=1.6,aspect=1.2))
+    pgm.add_node(Node('Rate_Ia', r"{SNIa Rate}", 1, 8, fixed=1))
+    pgm.add_node(Node('Rate_II', r"{SNII Rate}", 2, 8, scale=1.6, aspect=1.2))
+    pgm.add_node(Node('L_Ia', r"{SNIa L, $\sigma_L$}", 3, 8, scale=1.6, aspect=1.2))
+    pgm.add_node(Node('L_II', r"{SNII L, $\sigma_L$}", 4, 8, scale=1.6, aspect=1.2))
+    pgm.add_node(Node('Cosmology', r"Cosmology", 7, 8, scale=1.6, aspect=1.2))
+    pgm.add_node(Node('Calibration', r"Calibration", 8, 8, scale=1.6, aspect=1.2))
 
  #   pgm.add_node(Node('Neighbors',r"\centering{Neighbor \newline Redshifts}", 5,7, scale=1.6,aspect=1.2))
-    pgm.add_node(Node('Redshift',r"{Redshift}", 6,7, scale=1.6,aspect=1.2))
+    pgm.add_node(Node('Redshift', r"{Redshift}", 6, 7, scale=1.6, aspect=1.2))
 
-    pgm.add_node(Node('Type_prob',r"Type prob", 1,6, fixed=1,offset=(20,-10)))
-    pgm.add_node(Node('Distance',r"$L_D$", 7,6, fixed=1,offset=(10,10)))
+    pgm.add_node(Node('Type_prob', r"Type prob", 1, 6, fixed=1, offset=(20, -10)))
+    pgm.add_node(Node('Distance', r"$L_D$", 7, 6, fixed=1, offset=(10, 10)))
 
-    pgm.add_node(Node('Type',r"Type", 1, 5, scale=1.6,aspect=1.2))
+    pgm.add_node(Node('Type', r"Type", 1, 5, scale=1.6, aspect=1.2))
 
-    pgm.add_node(Node('Luminosity',r"Luminosity", 4, 4, scale=1.6,aspect=1.2))
-    pgm.add_node(Node('Flux',r"Flux", 7, 3, scale=1.2,fixed=True,offset=(-20,-20)))
+    pgm.add_node(Node('Luminosity', r"Luminosity", 4, 4, scale=1.6, aspect=1.2))
+    pgm.add_node(Node('Flux', r"Flux", 7, 3, scale=1.2, fixed=True, offset=(-20, -20)))
 
 
-    pgm.add_node(Node('Obs_Type',r"Obs type", 1, 1, scale=1.6,aspect=1.2,observed=1))
-    pgm.add_node(Node('Obs_Redshift',r"Obs redshift", 6, 1, scale=1.6,aspect=1.2,observed=1))
-    pgm.add_node(Node('Counts',r"Counts", 8, 1, scale=1.2,observed=1))
+    pgm.add_node(Node('Obs_Type', r"Obs type", 1, 1, scale=1.6, aspect=1.2, observed=1))
+    pgm.add_node(Node('Obs_Redshift', r"Obs redshift", 6, 1, scale=1.6, aspect=1.2, observed=1))
+    pgm.add_node(Node('Counts', r"Counts", 8, 1, scale=1.2, observed=1))
 
 
     pgm.add_edge("Rate_Ia","Type_prob")

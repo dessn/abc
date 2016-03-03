@@ -33,3 +33,12 @@ dessn.simple.exampleLatent module
     :undoc-members:
     :show-inheritance:
 
+dessn.simple.exampleLatentClass module
+--------------------------------------
+
+.. automodule:: dessn.simple.exampleLatentClass
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

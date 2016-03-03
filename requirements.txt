@@ -3,3 +3,5 @@ progressbar
 numpy
 matplotlib
 numpydoc
+scipy
+emcee
