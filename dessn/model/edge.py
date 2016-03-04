@@ -20,3 +20,14 @@ class Edge(object):
     def get_log_likelihood(self, data):
         return
 
+
+class EdgeTransformation(Edge):
+    def __init__(self, inputs, transform_to):
+        super(EdgeTransformation, self).__init__(inputs, transform_to)
+
+    @abc.abstractmethod
+    def get_transformation(self, data):
+        pass
+
+    def get_log_likelihood(self, data):
+        return 0

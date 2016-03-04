@@ -33,7 +33,7 @@ class Node(object):
 class NodeObserved(Node):
     def __init__(self, names, labels, datas):
         if type(names) == list:
-            assert len(names) == len(labels) and len(names) == len(datas)
+            assert len(names) == len(labels) and len(names) == len(datas), "If you pass in a list of names, you need to pass in a list of data for each name"
         super(NodeObserved, self).__init__(names, labels, NodeType.OBSERVED)
         self.datas = datas
 
@@ -54,9 +54,6 @@ class NodeTransformation(Node):
     def __init__(self, names, labels):
         super(NodeTransformation, self).__init__(names, labels, NodeType.TRANSFORMATION)
 
-    @abc.abstractmethod
-    def get_transformation(self):
-        pass
 
 
 class NodeLatent(Node):

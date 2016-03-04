@@ -25,7 +25,7 @@ class ExampleIntegral(Example):
         The standard deviation of the underlying supernova luminosity distribution
     """
 
-    def __init__(self, n=900, theta_1=100.0, theta_2=30.0):
+    def __init__(self, n=200, theta_1=100.0, theta_2=30.0):
         super(ExampleIntegral, self).__init__(n, theta_1, theta_2)
 
 
