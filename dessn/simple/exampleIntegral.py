@@ -25,12 +25,12 @@ class ExampleIntegral(Example):
         The standard deviation of the underlying supernova luminosity distribution
     """
 
-    def __init__(self, n=30, theta_1=100.0, theta_2=30.0):
+    def __init__(self, n=10, theta_1=100.0, theta_2=30.0):
         super(ExampleIntegral, self).__init__(n, theta_1, theta_2)
 
 
     def _integrate(self, d, e, theta):
-        step = np.linspace(0, 200, 100)
+        step = np.linspace(0, 200, 400)
         diff = step[1] - step[0]
         r = self._integrand(step[0], theta, d, e) - diff
         for s in step[1:]:
