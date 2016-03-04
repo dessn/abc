@@ -10,7 +10,7 @@ class ObservedFlux(NodeObserved):
     def __init__(self, n=100):
         self.n = n
         flux = stats.norm.rvs(size=n, loc=100, scale=20) / 2
-        error = 0.001 * np.sqrt(flux)
+        error = 0.3 * np.sqrt(flux)
         flux += stats.norm.rvs(size=n) * error
 
         super(ObservedFlux, self).__init__(["flux", "flux_error"], ["$f$", r"$\sigma_f$"], [flux, error])
@@ -78,13 +78,13 @@ class ExampleModel(Model):
     def __init__(self):
         super(ExampleModel, self).__init__()
 
-        n = 200
+        n = 30
 
-        flux = ObservedFlux(n=n)
+        self.flux = ObservedFlux(n=n)
         luminosity = LatentLuminosity(n=n)
         useless = UselessTransformation()
         supernova = UnderlyingSupernovaDistribution()
-        self.add_node(flux)
+        self.add_node(self.flux)
         self.add_node(luminosity)
         self.add_node(useless)
         self.add_node(supernova)
@@ -99,4 +99,4 @@ class ExampleModel(Model):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     exampleModel = ExampleModel()
-    exampleModel.fit_model(filename="exampleLatentClass")
+    exampleModel.fit_model(num_steps=5000, num_burn=2500, filename="exampleLatentClass")

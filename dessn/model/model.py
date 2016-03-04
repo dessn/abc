@@ -149,28 +149,40 @@ class Model(object):
     def _get_log_likelihood(self, theta_dict, edge):
         return edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
 
-    def fit_model(self, num_walkers=None, num_steps=1000, num_burn=200, filename=None):
+    def fit_model(self, num_walkers=None, num_steps=30000, num_burn=27000, filename=None):
         # TODO: Refactor this section, it should not be encoded in the model
         num_dim = len(self._theta_names)
         self.logger.debug("Fitting model with %d dimensions" % num_dim)
         if num_walkers is None:
-            num_walkers = 10 * num_dim
+            num_walkers = num_dim * 16
         start = np.zeros((num_walkers, num_dim))
         self.logger.debug("Generating starting guesses")
         for row in range(num_walkers):
             for i, name in enumerate(self._theta_names):
-                start[row, i] = np.random.normal(100,20)
+                if name == "SN_theta_1":
+                    start[row, i] = np.random.normal(1,0.2) * 100
+                    # print(start[row,i])
+                elif name == "SN_theta_2":
+                    start[row, i] = np.random.normal(1,0.2) * 20
+                elif name =="luminosity":
+                    start[row, i] = np.random.normal(1,0.3) * 100
+
                 # TODO: Actual start guesses
         self.logger.debug("Running emcee")
         sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, live_dangerously=True)
         for i, result in enumerate(sampler.sample(start, iterations=num_steps)):
-            if i % 10 == 0:
+            if i % 100 == 0:
                 print(i)
         self.logger.debug("Getting emcee chain")
         sample = sampler.chain[:, num_burn:, :self._num_actual]  # discard burn-in points
         sample = sample.reshape((-1, self._num_actual))
         self.sampler = sampler
         self.sample = sample
+        means = np.mean(sampler.chain[:, num_burn:, :].reshape((-1, num_dim)), axis=0)
+        print (means)
+        diffs = means[2:] - self.flux.datas[0]
+        print(diffs)
+
         self.logger.debug("Creating corner plot")
         fig = corner.corner(sample, labels=self._theta_labels[:self._num_actual])
         if filename is not None:
