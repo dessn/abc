@@ -1,5 +1,5 @@
 import numpy as np
-from example import Example
+from dessn.simple.example import Example
 
 
 class ExampleIntegral(Example):
@@ -25,7 +25,7 @@ class ExampleIntegral(Example):
         The standard deviation of the underlying supernova luminosity distribution
     """
 
-    def __init__(self, n=200, theta_1=100.0, theta_2=30.0):
+    def __init__(self, n=30, theta_1=100.0, theta_2=30.0):
         super(ExampleIntegral, self).__init__(n, theta_1, theta_2)
 
 
@@ -63,7 +63,7 @@ class ExampleIntegral(Example):
             return -np.inf
         return result
 
-    def do_emcee(self, nwalkers=20, nburn=500, nsteps=2000):
+    def do_emcee(self, nwalkers=20, nburn=2500, nsteps=3000):
         """ Run the `emcee` chain and produce a corner plot.
 
         Saves a png image of the corner plot to plots/exampleIntegration.png.

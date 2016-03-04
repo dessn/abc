@@ -1,5 +1,5 @@
 import numpy as np
-from example import Example
+from dessn.simple.example import Example
 
     
 class ExampleLatent(Example):
@@ -34,7 +34,7 @@ class ExampleLatent(Example):
         The standard deviation of the underlying supernova luminosity distribution
     """
 
-    def __init__(self, n=300, theta_1=100.0, theta_2=30.0):
+    def __init__(self, n=30, theta_1=100.0, theta_2=20.0):
         super(ExampleLatent, self).__init__(n, theta_1, theta_2)
 
     def get_likelihood(self, theta, data, error):
@@ -64,7 +64,7 @@ class ExampleLatent(Example):
             return -np.inf
         return result
 
-    def do_emcee(self, nwalkers=200, nburn=1000, nsteps=4000):
+    def do_emcee(self, nwalkers=500, nburn=2000, nsteps=2500):
         """ Run the `emcee` chain and produce a corner plot.
 
         Saves a png image of the corner plot to plots/exampleLatent.png.

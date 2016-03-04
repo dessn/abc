@@ -70,13 +70,13 @@ class Example(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, n=300, theta_1=100.0, theta_2=30.0):
+    def __init__(self, n=30, theta_1=100.0, theta_2=20.0):
         self.n = n
         self.theta_1 = theta_1
         self.theta_2 = theta_2
 
         self.data = stats.norm.rvs(size=n, loc=theta_1, scale=theta_2)
-        self.error = 0.2 * np.sqrt(self.data)
+        self.error = 0.3 * np.sqrt(self.data)
         self.data += stats.norm.rvs(size=n) * self.error
 
         self.sampler = None
@@ -160,10 +160,9 @@ class Example(object):
 
         sampler = emcee.EnsembleSampler(nwalkers, ndim, self.get_posterior, args=[self.data, self.error],
                                         live_dangerously=True)
-        pbar = ProgressBar(widgets=[Counter(), "/" + str(nsteps) + " ", Percentage(), Bar(), Timer(), " ", ETA()],
-                           maxval=nsteps).start()
         for i, result in enumerate(sampler.sample(starting_guesses, iterations=nsteps)):
-            pbar.update(i)
+            if i % 100 == 0:
+                print(i)
 
         sample = sampler.chain[:, nburn:, :ndim_final]  # discard burn-in points
         sample = sample.reshape((-1, ndim_final))
