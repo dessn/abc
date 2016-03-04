@@ -80,11 +80,11 @@ class ExampleModel(Model):
 
         n = 30
 
-        self.flux = ObservedFlux(n=n)
+        flux = ObservedFlux(n=n)
         luminosity = LatentLuminosity(n=n)
         useless = UselessTransformation()
         supernova = UnderlyingSupernovaDistribution()
-        self.add_node(self.flux)
+        self.add_node(flux)
         self.add_node(luminosity)
         self.add_node(useless)
         self.add_node(supernova)

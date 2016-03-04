@@ -178,10 +178,7 @@ class Model(object):
         sample = sample.reshape((-1, self._num_actual))
         self.sampler = sampler
         self.sample = sample
-        means = np.mean(sampler.chain[:, num_burn:, :].reshape((-1, num_dim)), axis=0)
-        print (means)
-        diffs = means[2:] - self.flux.datas[0]
-        print(diffs)
+
 
         self.logger.debug("Creating corner plot")
         fig = corner.corner(sample, labels=self._theta_labels[:self._num_actual])
