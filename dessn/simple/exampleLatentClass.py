@@ -76,7 +76,7 @@ class ExampleModel(Model):
     """
 
     def __init__(self):
-        super(ExampleModel, self).__init__()
+        super(ExampleModel, self).__init__("ExampleModel")
 
         n = 30
 
@@ -100,4 +100,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     exampleModel = ExampleModel()
     exampleModel.get_pgm("examplePGM.png")
-    # exampleModel.fit_model(num_steps=5000, num_burn=2500, filename="exampleLatentClass")
+    exampleModel.fit_model(num_steps=3000, num_burn=2500, filename="exampleLatentClass")

@@ -1,6 +1,7 @@
 from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
 from dessn.model.edge import EdgeTransformation
 from dessn.utility.newtonian import NewtonianPosition
+from dessn.utility.hdemcee import EmceeWrapper
 import numpy as np
 import logging
 import emcee
@@ -9,11 +10,14 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import os
 import daft
+from emcee.utils import MPIPool
+import sys
 
 
 class Model(object):
 
-    def __init__(self):
+    def __init__(self, model_name):
+        self.model_name = model_name
         self.logger = logging.getLogger(__name__)
         self.nodes = []
         self.edges = []
@@ -206,11 +210,22 @@ class Model(object):
             pgm.figure.savefig("../../plots/%s" % filename)
 
     def fit_model(self, num_walkers=None, num_steps=30000, num_burn=27000, filename=None):
+        pool = None
+        try:
+            pool = MPIPool()
+            if not pool.is_master():
+                pool.wait()
+                sys.exit(0)
+        except ImportError:
+            self.logger.info("mpi4py is not installed or not configured properly. Ignore if running through python, not mpirun")
+        except ValueError:
+            self.logger.info("Unable to start MPI pool, expected normal python execution")
+
         # TODO: Refactor this section, it should not be encoded in the model
         num_dim = len(self._theta_names)
         self.logger.debug("Fitting model with %d dimensions" % num_dim)
         if num_walkers is None:
-            num_walkers = num_dim * 16
+            num_walkers = num_dim * 8
         start = np.zeros((num_walkers, num_dim))
         self.logger.debug("Generating starting guesses")
         for row in range(num_walkers):
@@ -225,19 +240,11 @@ class Model(object):
 
                 # TODO: Actual start guesses
         self.logger.debug("Running emcee")
-        sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, live_dangerously=True)
-        for i, result in enumerate(sampler.sample(start, iterations=num_steps)):
-            if i % 100 == 0:
-                print(i)
-        self.logger.debug("Getting emcee chain")
-        sample = sampler.chain[:, num_burn:, :self._num_actual]  # discard burn-in points
-        sample = sample.reshape((-1, self._num_actual))
-        self.sampler = sampler
-        self.sample = sample
-
-
+        sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
+        emcee_wrapper = EmceeWrapper(sampler, "../../temp/%s" % self.model_name)
+        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=start, save_dim=self._num_actual, save_interval=1)
         self.logger.debug("Creating corner plot")
-        fig = corner.corner(sample, labels=self._theta_labels[:self._num_actual])
+        fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual])
         if filename is not None:
             filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
         fig.savefig(filename, bbox_inches='tight', dpi=300)
