@@ -52,7 +52,7 @@ class EdgeTransformation(Edge):
     """ This specialised edge is used to connect to transformation nodes.
 
     A transformation edge does not give a likelihood, but - as it is a known transformation - returns a dictionary
-    when `get_transformation` is invoked that is injected into the data dictionary gvien to regular edges.
+    when `get_transformation` is invoked that is injected into the data dictionary given to regular edges.
 
     See :class:`.LuminosityToAdjusted` for a simple example.
 

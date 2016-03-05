@@ -87,7 +87,7 @@ class NodeUnderlying(Node):
     r""" A node representing an underlying parameter in your model.
 
     On the PGM, these nodes would be at the very top, and would represent the variables
-    we are trying to fit for, such as :math:`$\Omega_M$`.
+    we are trying to fit for, such as :math:`\Omega_M`.
 
     These nodes are required to implement the abstract method ``get_log_prior``
 
