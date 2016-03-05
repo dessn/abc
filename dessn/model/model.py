@@ -1,11 +1,14 @@
 from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
 from dessn.model.edge import EdgeTransformation
+from dessn.utility.newtonian import NewtonianPosition
 import numpy as np
 import logging
 import emcee
 import corner
 import matplotlib.pyplot as plt
+from matplotlib import rc
 import os
+import daft
 
 
 class Model(object):
@@ -148,6 +151,59 @@ class Model(object):
 
     def _get_log_likelihood(self, theta_dict, edge):
         return edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
+
+    def get_pgm(self, filename=None):
+        rc("font", family="serif", size=8)
+        rc("text", usetex=True)
+
+        x_size = 9
+        y_size = 8
+        border = 1
+        pgm = daft.PGM([x_size, y_size], origin=[0., 0.2], observed_style='inner')
+        node_name_dict = {}
+
+        n = []
+        e = []
+        t = []
+        b = []
+        for node in self.nodes:
+            n.append(node.node_name)
+            if node in self._observed_nodes:
+                b.append(node.node_name)
+            if node in self._underlying_nodes:
+                t.append(node.node_name)
+            for name in node.names:
+                node_name_dict[name] = node.node_name
+
+        for edge in self.edges:
+            for g in edge.given:
+                for p in edge.probability_of:
+                    e.append([node_name_dict[g], node_name_dict[p]])
+
+        positioner = NewtonianPosition(n,e, top=t, bottom=b)
+        x, y = positioner.fit()
+        print(x)
+        print(y)
+        x = (x_size - 2 * border) * x + border
+        y = (y_size - 2 * border) * y + border
+        print(x)
+        print(y)
+
+        for node, x, y in zip(self.nodes, x, y):
+            obs = node in self._observed_nodes
+            fixed = node in self._transformation_nodes
+            node_name = node.node_name
+            node_label = node_name.replace(" ", "\n") + "\n" + ", ".join(node.labels)
+
+            pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3, observed=obs, fixed=fixed))
+
+        for edge in self.edges:
+            for g in edge.given:
+                for p in edge.probability_of:
+                    pgm.add_edge(node_name_dict[g], node_name_dict[p])
+        pgm.render()
+        if filename is not None:
+            pgm.figure.savefig("../../plots/%s" % filename)
 
     def fit_model(self, num_walkers=None, num_steps=30000, num_burn=27000, filename=None):
         # TODO: Refactor this section, it should not be encoded in the model

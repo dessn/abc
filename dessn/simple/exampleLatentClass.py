@@ -13,12 +13,12 @@ class ObservedFlux(NodeObserved):
         error = 0.3 * np.sqrt(flux)
         flux += stats.norm.rvs(size=n) * error
 
-        super(ObservedFlux, self).__init__(["flux", "flux_error"], ["$f$", r"$\sigma_f$"], [flux, error])
+        super(ObservedFlux, self).__init__("Flux", ["flux", "flux_error"], ["$f$", r"$\sigma_f$"], [flux, error])
 
 
 class LatentLuminosity(NodeLatent):
     def __init__(self, n=100):
-        super(LatentLuminosity, self).__init__("luminosity", "$L$")
+        super(LatentLuminosity, self).__init__("Luminosity", "luminosity", "$L$")
         self.n = n
 
     def get_num_latent(self):
@@ -30,13 +30,13 @@ class UnderlyingSupernovaDistribution(NodeUnderlying):
         return 1
 
     def __init__(self):
-        super(UnderlyingSupernovaDistribution, self).__init__(["SN_theta_1", "SN_theta_2"],
+        super(UnderlyingSupernovaDistribution, self).__init__("Supernova", ["SN_theta_1", "SN_theta_2"],
                                                               [r"$\theta_1$", r"$\theta_2$"])
 
 
 class UselessTransformation(NodeTransformation):
     def __init__(self):
-        super(UselessTransformation, self).__init__("double_luminosity", "$2L$")
+        super(UselessTransformation, self).__init__("Transformed Luminosity", "double_luminosity", "$2L$")
 
 
 class LuminosityToAdjusted(EdgeTransformation):
@@ -99,4 +99,5 @@ class ExampleModel(Model):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     exampleModel = ExampleModel()
-    exampleModel.fit_model(num_steps=5000, num_burn=2500, filename="exampleLatentClass")
+    exampleModel.get_pgm("examplePGM.png")
+    # exampleModel.fit_model(num_steps=5000, num_burn=2500, filename="exampleLatentClass")

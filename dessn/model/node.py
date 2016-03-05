@@ -12,7 +12,8 @@ class NodeType(Enum):
 class Node(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, names, labels, parameter_type):
+    def __init__(self, node_name, names, labels, parameter_type):
+        assert type(node_name) == str, "The name of this node, %s, is not a string" % node_name
         assert type(names) == list or type(names) == str, "Supplied name %s is not a string or list" % names
         assert type(labels) == list or type(labels) == str, "Supplied label text %s is not a string or list" % labels
         assert type(parameter_type) == NodeType, "Supplied parameter_type should be an enum from ParameterType"
@@ -28,13 +29,14 @@ class Node(object):
             for label in labels:
                 assert type(label) == str, "Entry in list %s is not a string" % labels
             self.labels = labels
+        self.node_name = node_name
 
 
 class NodeObserved(Node):
-    def __init__(self, names, labels, datas):
+    def __init__(self, node_name, names, labels, datas):
         if type(names) == list:
             assert len(names) == len(labels) and len(names) == len(datas), "If you pass in a list of names, you need to pass in a list of data for each name"
-        super(NodeObserved, self).__init__(names, labels, NodeType.OBSERVED)
+        super(NodeObserved, self).__init__(node_name, names, labels, NodeType.OBSERVED)
         self.datas = datas
 
     def get_data(self):
@@ -42,8 +44,8 @@ class NodeObserved(Node):
 
 
 class NodeUnderlying(Node):
-    def __init__(self, names, labels):
-        super(NodeUnderlying, self).__init__(names, labels, NodeType.UNDERLYING)
+    def __init__(self, node_name, names, labels):
+        super(NodeUnderlying, self).__init__(node_name, names, labels, NodeType.UNDERLYING)
 
     @abc.abstractmethod
     def get_log_prior(self, data):
@@ -51,14 +53,13 @@ class NodeUnderlying(Node):
 
 
 class NodeTransformation(Node):
-    def __init__(self, names, labels):
-        super(NodeTransformation, self).__init__(names, labels, NodeType.TRANSFORMATION)
-
+    def __init__(self, node_name, names, labels):
+        super(NodeTransformation, self).__init__(node_name, names, labels, NodeType.TRANSFORMATION)
 
 
 class NodeLatent(Node):
-    def __init__(self, names, labels):
-        super(NodeLatent, self).__init__(names, labels, NodeType.LATENT)
+    def __init__(self, node_name, names, labels):
+        super(NodeLatent, self).__init__(node_name, names, labels, NodeType.LATENT)
 
     @abc.abstractmethod
     def get_num_latent(self):
