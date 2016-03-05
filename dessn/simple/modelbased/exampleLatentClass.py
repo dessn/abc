@@ -81,6 +81,14 @@ class ExampleModel(Model):
 
     I leave the documentation for :class:`.Node`s and :class:`.Edge`s to those classes, and encourage viewing the code directly
     to understand exactly what is happening.
+
+    Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:
+
+    .. figure::     ../plots/exampleModel.png
+        :align:     center
+
+    .. figure::     ../plots/examplePGM.png
+        :align:     center
     """
 
     def __init__(self):
@@ -108,4 +116,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     exampleModel = ExampleModel()
     exampleModel.get_pgm("examplePGM.png")
-    exampleModel.fit_model(num_steps=3000, num_burn=2500, filename="exampleLatentClass")
+    exampleModel.fit_model(num_steps=3000, num_burn=2500, filename="exampleModel")
