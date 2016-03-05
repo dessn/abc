@@ -73,6 +73,14 @@ class LuminosityToSupernovaDistribution(Edge):
 
 class ExampleModel(Model):
     r"""An implementation of :class:`.ExampleLatent` using classes instead of procedural code.
+
+    The model is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the model
+    to verify its correctness.
+
+    This is the primary class in this package, and you can see that other classes inherit from either :class:`.Node` or from :class:`.Edge`.
+
+    I leave the documentation for :class:`.Node`s and :class:`.Edge`s to those classes, and encourage viewing the code directly
+    to understand exactly what is happening.
     """
 
     def __init__(self):

@@ -32,8 +32,8 @@
   
     <link rel="top" title="dessn 0.0.1 documentation" href="index.html"/>
         <link rel="up" title="dessn package" href="dessn.html"/>
-        <link rel="next" title="dessn.simulation package" href="dessn.simulation.html"/>
-        <link rel="prev" title="dessn.model.nodes package" href="dessn.model.nodes.html"/> 
+        <link rel="next" title="dessn.simple.modelbased package" href="dessn.simple.modelbased.html"/>
+        <link rel="prev" title="dessn.model package" href="dessn.model.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.model.html">dessn.model package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.simple package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.example">dessn.simple.example module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.simple.exampleIntegral">dessn.simple.exampleIntegral module</a></li>
@@ -95,6 +96,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.simulation.html">dessn.simulation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dessn.utility.html">dessn.utility package</a></li>
 </ul>
 </li>
 </ul>
@@ -159,9 +161,21 @@ integrations we have to do, and so this does not scale well at all.</p>
 essentially do Monte Carlo integration via marginalisation. This means we do not need to perform
 the numerical integration in the likelihood calculation, however the cost of doing so is increase
 dimensionality of our MCMC.</p>
-<p>Finally, the <code class="xref py py-class docutils literal"><span class="pre">ExampleLatentClass</span></code> implementation shows how the <a class="reference internal" href="#dessn.simple.exampleLatent.ExampleLatent" title="dessn.simple.exampleLatent.ExampleLatent"><code class="xref py py-class docutils literal"><span class="pre">ExampleLatent</span></code></a> class
+<p>Finally, the <a class="reference internal" href="dessn.simple.modelbased.html#dessn.simple.modelbased.exampleLatentClass.ExampleModel" title="dessn.simple.modelbased.exampleLatentClass.ExampleModel"><code class="xref py py-class docutils literal"><span class="pre">ExampleModel</span></code></a> implementation shows how the <a class="reference internal" href="#dessn.simple.exampleLatent.ExampleLatent" title="dessn.simple.exampleLatent.ExampleLatent"><code class="xref py py-class docutils literal"><span class="pre">ExampleLatent</span></code></a> class
 might be written to make use of Nodes. This is done in preparation for more complicated models, which will
 have more than one layer and needs to be configurable.</p>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dessn.simple.modelbased.html">dessn.simple.modelbased package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dessn.simple.modelbased.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dessn.simple.modelbased.html#module-dessn.simple.modelbased.exampleLatentClass">dessn.simple.modelbased.exampleLatentClass module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -169,7 +183,7 @@ have more than one layer and needs to be configurable.</p>
 <span id="dessn-simple-example-module"></span><h2>dessn.simple.example module<a class="headerlink" href="#module-dessn.simple.example" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dessn.simple.example.Example">
-<em class="property">class </em><code class="descclassname">dessn.simple.example.</code><code class="descname">Example</code><span class="sig-paren">(</span><em>n=300</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.simple.example.</code><code class="descname">Example</code><span class="sig-paren">(</span><em>n=30</em>, <em>theta_1=100.0</em>, <em>theta_2=20.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Setting up the math for some examples.</p>
 <p>Let us assume that we are observing supernova that are drawn from an underlying
@@ -297,7 +311,7 @@ parameterised by <span class="math">\(\theta\)</span>.</p>
 <span id="dessn-simple-exampleintegral-module"></span><h2>dessn.simple.exampleIntegral module<a class="headerlink" href="#module-dessn.simple.exampleIntegral" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dessn.simple.exampleIntegral.ExampleIntegral">
-<em class="property">class </em><code class="descclassname">dessn.simple.exampleIntegral.</code><code class="descname">ExampleIntegral</code><span class="sig-paren">(</span><em>n=900</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.simple.exampleIntegral.</code><code class="descname">ExampleIntegral</code><span class="sig-paren">(</span><em>n=10</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">dessn.simple.example.Example</span></code></a></p>
 <p>An example implementation using integration over a latent parameter.</p>
 <p>Building off the math from <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">Example</span></code></a>
@@ -331,7 +345,7 @@ the <span class="math">\(\theta\)</span> array). However, this is at the expense
 </table>
 <dl class="method">
 <dt id="dessn.simple.exampleIntegral.ExampleIntegral.do_emcee">
-<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=20</em>, <em>nburn=500</em>, <em>nsteps=2000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=20</em>, <em>nburn=2500</em>, <em>nsteps=3000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the <cite>emcee</cite> chain and produce a corner plot.</p>
 <p>Saves a png image of the corner plot to plots/exampleIntegration.png.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -395,7 +409,7 @@ the <span class="math">\(\theta\)</span> array). However, this is at the expense
 <span id="dessn-simple-examplelatent-module"></span><h2>dessn.simple.exampleLatent module<a class="headerlink" href="#module-dessn.simple.exampleLatent" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dessn.simple.exampleLatent.ExampleLatent">
-<em class="property">class </em><code class="descclassname">dessn.simple.exampleLatent.</code><code class="descname">ExampleLatent</code><span class="sig-paren">(</span><em>n=300</em>, <em>theta_1=100.0</em>, <em>theta_2=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.simple.exampleLatent.</code><code class="descname">ExampleLatent</code><span class="sig-paren">(</span><em>n=30</em>, <em>theta_1=100.0</em>, <em>theta_2=20.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">dessn.simple.example.Example</span></code></a></p>
 <p>An example implementation using marginalisation over latent parameters.</p>
 <p>Building off the math from <a class="reference internal" href="#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">Example</span></code></a>, instead of performing the integration numerically in the computation of the likelihood, we can
@@ -434,7 +448,7 @@ dimensionality of <span class="math">\(2 + n\)</span>, where <span class="math">
 </table>
 <dl class="method">
 <dt id="dessn.simple.exampleLatent.ExampleLatent.do_emcee">
-<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=200</em>, <em>nburn=1000</em>, <em>nsteps=4000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent.do_emcee" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=500</em>, <em>nburn=2000</em>, <em>nsteps=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent.do_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the <cite>emcee</cite> chain and produce a corner plot.</p>
 <p>Saves a png image of the corner plot to plots/exampleLatent.png.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -503,10 +517,10 @@ dimensionality of <span class="math">\(2 + n\)</span>, where <span class="math">
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="dessn.simulation.html" class="btn btn-neutral float-right" title="dessn.simulation package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dessn.simple.modelbased.html" class="btn btn-neutral float-right" title="dessn.simple.modelbased package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="dessn.model.nodes.html" class="btn btn-neutral" title="dessn.model.nodes package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="dessn.model.html" class="btn btn-neutral" title="dessn.model package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

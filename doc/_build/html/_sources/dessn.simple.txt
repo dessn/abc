@@ -6,6 +6,13 @@ dessn.simple package
     :undoc-members:
     :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+
+    dessn.simple.modelbased
+
 Submodules
 ----------
 
@@ -32,4 +39,5 @@ dessn.simple.exampleLatent module
     :members:
     :undoc-members:
     :show-inheritance:
+
 

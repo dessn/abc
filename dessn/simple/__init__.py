@@ -14,7 +14,7 @@ essentially do Monte Carlo integration via marginalisation. This means we do not
 the numerical integration in the likelihood calculation, however the cost of doing so is increase
 dimensionality of our MCMC.
 
-Finally, the :class:`.ExampleLatentClass` implementation shows how the :class:`.ExampleLatent` class
+Finally, the :class:`.ExampleModel` implementation shows how the :class:`.ExampleLatent` class
 might be written to make use of Nodes. This is done in preparation for more complicated models, which will
 have more than one layer and needs to be configurable.
 """

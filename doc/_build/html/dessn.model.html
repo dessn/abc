@@ -32,7 +32,7 @@
   
     <link rel="top" title="dessn 0.0.1 documentation" href="index.html"/>
         <link rel="up" title="dessn package" href="dessn.html"/>
-        <link rel="next" title="dessn.model.nodes package" href="dessn.model.nodes.html"/>
+        <link rel="next" title="dessn.simple package" href="dessn.simple.html"/>
         <link rel="prev" title="dessn.entry package" href="dessn.entry.html"/> 
 
   
@@ -87,15 +87,15 @@
 <li class="toctree-l2 current"><a class="reference internal" href="dessn.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.model package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-dessn.model.abstracts">dessn.model.abstracts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.model.edge">dessn.model.edge module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.model.model">dessn.model.model module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.model.node">dessn.model.node module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.simple.html">dessn.simple package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.simulation.html">dessn.simulation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dessn.utility.html">dessn.utility package</a></li>
 </ul>
 </li>
 </ul>
@@ -148,32 +148,140 @@
             
   <div class="section" id="module-dessn.model">
 <span id="dessn-model-package"></span><h1>dessn.model package<a class="headerlink" href="#module-dessn.model" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="dessn.model.nodes.html">dessn.model.nodes package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dessn.model.nodes.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dessn.model.nodes.html#module-dessn.model.nodes.cosmology">dessn.model.nodes.cosmology module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dessn.model.nodes.html#module-dessn.model.nodes.supernova">dessn.model.nodes.supernova module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dessn.model.nodes.html#module-dessn.model.nodes.typeProb">dessn.model.nodes.typeProb module</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-dessn.model.abstracts">
-<span id="dessn-model-abstracts-module"></span><h2>dessn.model.abstracts module<a class="headerlink" href="#module-dessn.model.abstracts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-dessn.model.edge">
+<span id="dessn-model-edge-module"></span><h2>dessn.model.edge module<a class="headerlink" href="#module-dessn.model.edge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.model.edge.Edge">
+<em class="property">class </em><code class="descclassname">dessn.model.edge.</code><code class="descname">Edge</code><span class="sig-paren">(</span><em>probability_of</em>, <em>given</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#Edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.Edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An edge connection one or more parameters to one or more different parameters.</p>
+<p>An edge is a connection between parameters (<em>not</em> Nodes), and signifies a joint probability distribution.
+That is, if in our mathematical definition of our model, we find the term <span class="math">\(P(a,b|c,d,e)\)</span>, this
+would be represented by a single edge. Similarly, <span class="math">\(P(a|b)P(b|c,d)\)</span> would be two edges.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>probability_of</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The dependent parameters. With the example <span class="math">\(P(a,b|c,d)\)</span>, this input would be <code class="docutils literal"><span class="pre">['a','b']</span></code>.</p>
+</div></blockquote>
+<p><strong>given</strong> : str or list[str]</p>
+<blockquote class="last">
+<div><p>In the example <span class="math">\(P(a,b|c,d)\)</span>, this input would be <code class="docutils literal"><span class="pre">['c','d']</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dessn.model.edge.Edge.get_log_likelihood">
+<code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#Edge.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.Edge.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the log likelihood of this edge.</p>
+<p>For example, if we had</p>
+<div class="math">
+\[P(a,b|c,d) = \frac{1}{\sqrt{2\pi}d} \exp\left(-\frac{(ab-c)^2}{d^2}\right),\]</div>
+<p>we could implement this function as <code class="docutils literal"><span class="pre">return</span> <span class="pre">-np.log(np.sqrt(2*np.pi)*data['d'])</span> <span class="pre">-</span> <span class="pre">(data['a']*data['b']</span> <span class="pre">-</span> <span class="pre">data['c'])**2/(data['d']**2)</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>the log likelihood given the supplied data and the model parametrisation.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.model.edge.EdgeTransformation">
+<em class="property">class </em><code class="descclassname">dessn.model.edge.</code><code class="descname">EdgeTransformation</code><span class="sig-paren">(</span><em>inputs</em>, <em>transform_to</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#EdgeTransformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.EdgeTransformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.edge.Edge</span></code></a></p>
+<p>This specialised edge is used to connect to transformation nodes.</p>
+<p>A transformation edge does not give a likelihood, but - as it is a known transformation - returns a dictionary
+when <cite>get_transformation</cite> is invoked that is injected into the data dictionary gvien to regular edges.</p>
+<p>See <a class="reference internal" href="dessn.simple.modelbased.html#dessn.simple.modelbased.exampleLatentClass.LuminosityToAdjusted" title="dessn.simple.modelbased.exampleLatentClass.LuminosityToAdjusted"><code class="xref py py-class docutils literal"><span class="pre">LuminosityToAdjusted</span></code></a> for a simple example.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>inputs</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The required parameter inputs to do the transformation.</p>
+</div></blockquote>
+<p><strong>transform_to</strong> : str or list[str]</p>
+<blockquote class="last">
+<div><p>The parameters that will be added to the data dictionary after transformation</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dessn.model.edge.EdgeTransformation.get_log_likelihood">
+<code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#EdgeTransformation.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.EdgeTransformation.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.edge.EdgeTransformation.get_transformation">
+<code class="descname">get_transformation</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#EdgeTransformation.get_transformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.EdgeTransformation.get_transformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the new parameters from the given data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">dict</p>
+<blockquote class="last">
+<div><p>a dictionary containing a value for each parameter given in <code class="docutils literal"><span class="pre">transform_to</span></code></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-dessn.model.model">
 <span id="dessn-model-model-module"></span><h2>dessn.model.model module<a class="headerlink" href="#module-dessn.model.model" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dessn.model.model.Model">
-<em class="property">class </em><code class="descclassname">dessn.model.model.</code><code class="descname">Model</code><a class="reference internal" href="_modules/dessn/model/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.model.model.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>model_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="dessn.model.model.Model.add_edge">
+<code class="descname">add_edge</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.add_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.add_edge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.model.Model.add_node">
+<code class="descname">add_node</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.add_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.add_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.model.Model.finalise">
+<code class="descname">finalise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.finalise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.finalise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.model.Model.fit_model">
+<code class="descname">fit_model</code><span class="sig-paren">(</span><em>num_walkers=None</em>, <em>num_steps=30000</em>, <em>num_burn=27000</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.fit_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.fit_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.model.Model.get_pgm">
+<code class="descname">get_pgm</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.get_pgm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.get_pgm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -181,22 +289,249 @@
 <span id="dessn-model-node-module"></span><h2>dessn.model.node module<a class="headerlink" href="#module-dessn.model.node" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dessn.model.node.Node">
-<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">Node</code><a class="reference internal" href="_modules/dessn/model/node.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.Node" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">Node</code><span class="sig-paren">(</span><em>node_name</em>, <em>names</em>, <em>labels</em>, <em>parameter_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.Node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A node represented on a PGM model. Normally encapsulated by a single parameter, or several related parameters.</p>
+<p>The Node class can essentially be thought of as a wrapper around a parameter or variable in your model. However,
+as some parameters are highly related (for example, flux and flux error), Nodes allow you to declare multiple
+parameters.</p>
+<p>This class is an abstract class, and cannot be directly instantiated. Instead, instantiate one of the provided
+subclasses, as detailed below.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>node_name</strong> : str</p>
+<blockquote>
+<div><p>The node name, only used when plotting on a PGM</p>
+</div></blockquote>
+<p><strong>names</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The model parameter encapsulated by the node, or list of model parameters</p>
+</div></blockquote>
+<p><strong>labels</strong> : str or list[str]</p>
+<blockquote>
+<div><p>Latex ready labels for the given names. Used in the PGM and corner plots.</p>
+</div></blockquote>
+<p><strong>parameter_type</strong> : <a class="reference internal" href="#dessn.model.node.NodeType" title="dessn.model.node.NodeType"><code class="xref py py-class docutils literal"><span class="pre">NodeType</span></code></a></p>
+<blockquote class="last">
+<div><p>The type of subclass. Informs the model how to utilise the node.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.model.node.NodeLatent">
+<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">NodeLatent</code><span class="sig-paren">(</span><em>node_name</em>, <em>names</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeLatent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeLatent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.model.node.Node" title="dessn.model.node.Node"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.Node</span></code></a></p>
+<p>A node representing a latent, or hidden, variable in our model.</p>
+<p>Given infinitely powerful computers, these nodes would not be necessary, for they represent
+marginalisation over unknown / kidden / latent parameters in the model, and we would simple integrate them
+out when computing the likelihood probability. However, this is not the case, and it is more efficient to
+simply incorporate latent parameters into our model and essentially marginalise over them using Monte Carlo
+integration. We thus trade explicit numerical integration in each step of our calculation for increased dimensionality.</p>
+<p>For examples on why and how to use latent parameters, see the examples beginning in <a class="reference internal" href="dessn.simple.html#dessn.simple.example.Example" title="dessn.simple.example.Example"><code class="xref py py-class docutils literal"><span class="pre">Example</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>node_name</strong> : str</p>
+<blockquote>
+<div><p>The node name, only used when plotting on a PGM</p>
+</div></blockquote>
+<p><strong>names</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The model parameter encapsulated by the node, or list of model parameters</p>
+</div></blockquote>
+<p><strong>labels</strong> : str or list[str]</p>
+<blockquote class="last">
+<div><p>Latex ready labels for the given names. Used in the PGM and corner plots.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
-<dt id="dessn.model.node.Node.add_dependency">
-<code class="descname">add_dependency</code><span class="sig-paren">(</span><em>dependency_class</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#Node.add_dependency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.Node.add_dependency" title="Permalink to this definition">¶</a></dt>
+<dt id="dessn.model.node.NodeLatent.get_num_latent">
+<code class="descname">get_num_latent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeLatent.get_num_latent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeLatent.get_num_latent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of latent parameters to include in the model.</p>
+<p>Running MCMC requires knowing the dimensionality of our model, which means knowing how many
+latent parameters (realisations of an underlying hidden distribution) we require.</p>
+<p>For example, if we observe a hundred supernova drawn from an underlying supernova distribution,
+we would have to realise a hundred latent variables - one per data point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">int</p>
+<blockquote class="last">
+<div><p>the number of latent parameters required by this node</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.model.node.NodeObserved">
+<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">NodeObserved</code><span class="sig-paren">(</span><em>node_name</em>, <em>names</em>, <em>labels</em>, <em>datas</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeObserved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeObserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.model.node.Node" title="dessn.model.node.Node"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.Node</span></code></a></p>
+<p>A node representing one or more observed variables</p>
+<p>This node is used for all observables in the model. In addition to a normal node, it also contains data,
+which can be in arbitrary format. This data is what is given to the incoming and outgoing node edges
+to calculate likelihoods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>node_name</strong> : str</p>
+<blockquote>
+<div><p>The node name, only used when plotting on a PGM</p>
+</div></blockquote>
+<p><strong>names</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The model parameter encapsulated by the node, or list of model parameters</p>
+</div></blockquote>
+<p><strong>labels</strong> : str or list[str]</p>
+<blockquote>
+<div><p>Latex ready labels for the given names. Used in the PGM and corner plots.</p>
+</div></blockquote>
+<p><strong>datas</strong> : object or list[obj]</p>
+<blockquote class="last">
+<div><p>One data object for each supplied parameter name. <strong>Must</strong> be the same length as names if names is a list.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dessn.model.node.NodeObserved.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeObserved.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeObserved.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary containing keys of the parameter names and values of the parameter data object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.model.node.NodeTransformation">
+<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">NodeTransformation</code><span class="sig-paren">(</span><em>node_name</em>, <em>names</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeTransformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeTransformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.model.node.Node" title="dessn.model.node.Node"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.Node</span></code></a></p>
+<p>A node representing a variable transformation.</p>
+<p>This node essentially represents latent variables which are fully determined - their probability is given by
+a delta function. Examples of this might be the luminosity distance, as it is known exactly when given cosmology
+and redshift. Or it might represent a conversion between observed flux and actual flux, given we have a well
+defined flux correction.</p>
+<p>On a PGM, this node would be represented by a point, not an ellipse.</p>
+<p>Note that this node declares all associated parameters to be transformation parameters,
+although the transformation functions themselves are defined by the edges into and out of this node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>node_name</strong> : str</p>
+<blockquote>
+<div><p>The node name, only used when plotting on a PGM</p>
+</div></blockquote>
+<p><strong>names</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The model parameter encapsulated by the node, or list of model parameters</p>
+</div></blockquote>
+<p><strong>labels</strong> : str or list[str]</p>
+<blockquote class="last">
+<div><p>Latex ready labels for the given names. Used in the PGM and corner plots.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.model.node.NodeType">
+<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">NodeType</code><a class="reference internal" href="_modules/dessn/model/node.html#NodeType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<dl class="attribute">
+<dt id="dessn.model.node.NodeType.LATENT">
+<code class="descname">LATENT</code><em class="property"> = &lt;NodeType.LATENT: 3&gt;</em><a class="headerlink" href="#dessn.model.node.NodeType.LATENT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="dessn.model.node.Node.get_dependencies">
-<code class="descname">get_dependencies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#Node.get_dependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.Node.get_dependencies" title="Permalink to this definition">¶</a></dt>
+<dl class="attribute">
+<dt id="dessn.model.node.NodeType.OBSERVED">
+<code class="descname">OBSERVED</code><em class="property"> = &lt;NodeType.OBSERVED: 2&gt;</em><a class="headerlink" href="#dessn.model.node.NodeType.OBSERVED" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="dessn.model.node.Node.get_name">
-<code class="descname">get_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#Node.get_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.Node.get_name" title="Permalink to this definition">¶</a></dt>
+<dl class="attribute">
+<dt id="dessn.model.node.NodeType.TRANSFORMATION">
+<code class="descname">TRANSFORMATION</code><em class="property"> = &lt;NodeType.TRANSFORMATION: 4&gt;</em><a class="headerlink" href="#dessn.model.node.NodeType.TRANSFORMATION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dessn.model.node.NodeType.UNDERLYING">
+<code class="descname">UNDERLYING</code><em class="property"> = &lt;NodeType.UNDERLYING: 1&gt;</em><a class="headerlink" href="#dessn.model.node.NodeType.UNDERLYING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.model.node.NodeUnderlying">
+<em class="property">class </em><code class="descclassname">dessn.model.node.</code><code class="descname">NodeUnderlying</code><span class="sig-paren">(</span><em>node_name</em>, <em>names</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeUnderlying"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeUnderlying" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dessn.model.node.Node" title="dessn.model.node.Node"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.Node</span></code></a></p>
+<p>A node representing an underlying parameter in your model.</p>
+<p>On the PGM, these nodes would be at the very top, and would represent the variables
+we are trying to fit for, such as <span class="math">\($\Omega_M$\)</span>.</p>
+<p>These nodes are required to implement the abstract method <code class="docutils literal"><span class="pre">get_log_prior</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>node_name</strong> : str</p>
+<blockquote>
+<div><p>The node name, only used when plotting on a PGM</p>
+</div></blockquote>
+<p><strong>names</strong> : str or list[str]</p>
+<blockquote>
+<div><p>The model parameter encapsulated by the node, or list of model parameters</p>
+</div></blockquote>
+<p><strong>labels</strong> : str or list[str]</p>
+<blockquote class="last">
+<div><p>Latex ready labels for the given names. Used in the PGM and corner plots.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dessn.model.node.NodeUnderlying.get_log_prior">
+<code class="descname">get_log_prior</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/node.html#NodeUnderlying.get_log_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.node.NodeUnderlying.get_log_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the log prior for the parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : dic</p>
+<blockquote>
+<div><p>A dictionary containing all data and the model parameters being tested at a given step
+in the MCMC chain. For this class, if the class was instantiated with a name of &#8220;omega_m&#8221;,
+the input dictionary would have the key &#8220;omega_m&#8221;, and the value of &#8220;omega_m&#8221; at that
+particular step in your chain.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>the log prior probability given the current value of the parameters</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -210,7 +545,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="dessn.model.nodes.html" class="btn btn-neutral float-right" title="dessn.model.nodes package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dessn.simple.html" class="btn btn-neutral float-right" title="dessn.simple package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="dessn.entry.html" class="btn btn-neutral" title="dessn.entry package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

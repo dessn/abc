@@ -6,20 +6,13 @@ dessn.model package
     :undoc-members:
     :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-
-    dessn.model.nodes
-
 Submodules
 ----------
 
-dessn.model.abstracts module
-----------------------------
+dessn.model.edge module
+-----------------------
 
-.. automodule:: dessn.model.abstracts
+.. automodule:: dessn.model.edge
     :members:
     :undoc-members:
     :show-inheritance:
