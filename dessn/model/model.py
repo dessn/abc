@@ -229,14 +229,10 @@ class Model(object):
                 for p in edge.probability_of:
                     e.append([node_name_dict[g], node_name_dict[p]])
 
-        positioner = NewtonianPosition(n,e, top=t, bottom=b)
+        positioner = NewtonianPosition(n, e, top=t, bottom=b)
         x, y = positioner.fit()
-        print(x)
-        print(y)
         x = (x_size - 2 * border) * x + border
         y = (y_size - 2 * border) * y + border
-        print(x)
-        print(y)
 
         for node, x, y in zip(self.nodes, x, y):
             obs = node in self._observed_nodes

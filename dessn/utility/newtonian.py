@@ -23,8 +23,6 @@ class NewtonianPosition(object):
                 if n in bottom:
                     self.bottom[i] = 1.0
 
-        print(self.nodes)
-        print(self.edges)
 
     def iterate(self, p, v):
         repulse = 0.1
@@ -80,4 +78,6 @@ class NewtonianPosition(object):
         else:
             x = x - x.min() + 0.5
         y = (y - y.min()) / (y.max() - y.min())
+        x = np.round(x, decimals=1)
+        y = np.round(y, decimals=1)
         return x, y
