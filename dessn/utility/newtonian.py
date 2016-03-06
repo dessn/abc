@@ -24,11 +24,11 @@ class NewtonianPosition(object):
                     self.bottom[i] = 1.0
 
 
-    def iterate(self, p, v):
-        repulse = 0.1
+    def iterate(self, p, v, i):
+        repulse = 0.5
         attract = 1.0
-        top = 1.5
-        bottom = 1.5
+        top = 0.1 * i
+        bottom = 0.2 * i
         dt = 0.1
         center = 0.1
         min_d = 0.01
@@ -66,7 +66,7 @@ class NewtonianPosition(object):
         v = np.zeros(p.shape)
 
         for i in range(101):
-            self.iterate(p, v)
+            self.iterate(p, v, i)
             if plot and i % 10 == 0:
                 self.plot(p, i)
                 print(i)

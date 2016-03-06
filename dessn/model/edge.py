@@ -58,13 +58,13 @@ class EdgeTransformation(Edge):
 
     Parameters
     ----------
-    inputs : str or list[str]
-        The required parameter inputs to do the transformation.
-    transform_to : str or list[str]
-        The parameters that will be added to the data dictionary after transformation
+    probability_of : str or list[str]
+        The dependent parameters. With the example :math:`P(a,b|c,d)`, (assuming the functional form is a delta), this input would be ``['a','b']``.
+    given : str or list[str]
+        In the example :math:`P(a,b|c,d)`, (assuming the functional form is a delta), this input would be ``['c','d']``.
     """
-    def __init__(self, inputs, transform_to):
-        super(EdgeTransformation, self).__init__(inputs, transform_to)
+    def __init__(self, probability_of, given):
+        super(EdgeTransformation, self).__init__(probability_of, given)
 
     @abc.abstractmethod
     def get_transformation(self, data):

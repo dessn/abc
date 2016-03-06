@@ -102,7 +102,7 @@ class Model(object):
                     assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
                 elif isinstance(node, NodeLatent) or isinstance(node, NodeTransformation):
                     assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
-                    assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
+                    # assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
                 elif isinstance(node, NodeUnderlying):
                     assert len(self._in[name]) > 0, "Underlying parameter %s has no incoming edges" % name
                     assert len(self._out[name]) == 0, "Underlying parameter %s should not have an outgoing edge" % name
