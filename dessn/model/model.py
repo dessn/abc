@@ -212,19 +212,21 @@ class Model(object):
         """
         if not self._finalised:
             self.finalise()
+
+        self.logger.info("Generating PGM")
         rc("font", family="serif", size=8)
         rc("text", usetex=True)
 
         x_size = 9
         y_size = 8
         border = 1
-        pgm = daft.PGM([x_size, y_size], origin=[0., 0.2], observed_style='inner')
         node_name_dict = {}
 
         n = []
         e = []
         t = []
         b = []
+
         for node in self.nodes:
             n.append(node.node_name)
             if node in self._observed_nodes:
@@ -239,11 +241,15 @@ class Model(object):
                 for p in edge.probability_of:
                     e.append([node_name_dict[g], node_name_dict[p]])
 
+        self.logger.debug("Using Newtonian positioner to position %d nodes and %d edges" % (len(n), len(e)))
+
         positioner = NewtonianPosition(n, e, top=t, bottom=b)
         x, y = positioner.fit()
         x = (x_size - 2 * border) * x + border
         y = (y_size - 2 * border) * y + border
 
+        self.logger.debug("Creating PGM from positioner results")
+        pgm = daft.PGM([x_size, y_size], origin=[0., 0.2], observed_style='inner')
         for node, x, y in zip(self.nodes, x, y):
             obs = node in self._observed_nodes
             fixed = node in self._transformation_nodes
@@ -258,7 +264,9 @@ class Model(object):
                     pgm.add_edge(node_name_dict[g], node_name_dict[p])
         pgm.render()
         if filename is not None:
-            pgm.figure.savefig("../../plots/%s" % filename)
+            output_filename = "../../plots/%s" % filename
+            self.logger.debug("Saving figure to %s" % output_filename)
+            pgm.figure.savefig(output_filename, transparent=True)
 
         return pgm
 
@@ -326,7 +334,7 @@ class Model(object):
         fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual])
         if filename is not None:
             filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
-        fig.savefig(filename, bbox_inches='tight', dpi=300)
+        fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
         plt.show()
 
         return flat_chain

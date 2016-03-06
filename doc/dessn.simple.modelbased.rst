@@ -9,10 +9,10 @@ dessn.simple.modelbased package
 Submodules
 ----------
 
-dessn.simple.modelbased.exampleLatentClass module
--------------------------------------------------
+dessn.simple.modelbased.exampleModel module
+-------------------------------------------
 
-.. automodule:: dessn.simple.modelbased.exampleLatentClass
+.. automodule:: dessn.simple.modelbased.exampleModel
     :members:
     :undoc-members:
     :show-inheritance:

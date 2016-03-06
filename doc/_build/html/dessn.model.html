@@ -208,7 +208,7 @@ would be represented by a single edge. Similarly, <span class="math">\(P(a|b)P(b
 <p>This specialised edge is used to connect to transformation nodes.</p>
 <p>A transformation edge does not give a likelihood, but - as it is a known transformation - returns a dictionary
 when <cite>get_transformation</cite> is invoked that is injected into the data dictionary given to regular edges.</p>
-<p>See <a class="reference internal" href="dessn.simple.modelbased.html#dessn.simple.modelbased.exampleLatentClass.LuminosityToAdjusted" title="dessn.simple.modelbased.exampleLatentClass.LuminosityToAdjusted"><code class="xref py py-class docutils literal"><span class="pre">LuminosityToAdjusted</span></code></a> for a simple example.</p>
+<p>See <a class="reference internal" href="dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.LuminosityToAdjusted" title="dessn.simple.modelbased.exampleModel.LuminosityToAdjusted"><code class="xref py py-class docutils literal"><span class="pre">LuminosityToAdjusted</span></code></a> for a simple example.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -295,6 +295,9 @@ for managing the <code class="docutils literal"><span class="pre">emcee</span></
 <p>This method runs consistency checks on the model (making sure there are not orphaned
 nodes, edges to parameters that do not exist, etc), and in doing so links the right
 edges to the right nodes and determines the order in which edges should be evaluated.</p>
+<p>You can manually call this method after setting all nodes and edges to confirm as early
+as possible that the model is valid. If you do not call it manually, this method
+is invoked by the model when requesting concrete information, such as the PGM or model fits.</p>
 </dd></dl>
 
 <dl class="method">

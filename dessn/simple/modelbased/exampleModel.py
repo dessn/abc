@@ -116,4 +116,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     exampleModel = ExampleModel()
     exampleModel.get_pgm("examplePGM.png")
-    exampleModel.fit_model(num_steps=3000, num_burn=2500, filename="exampleModel")
+    # exampleModel.fit_model(num_steps=3000, num_burn=2500, filename="exampleModel")
