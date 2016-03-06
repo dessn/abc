@@ -50,6 +50,7 @@ class Model(object):
         self._num_actual = None
         self.data = {}
         self._data_edges = {}
+        self._finalised = False
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -74,6 +75,7 @@ class Model(object):
             self._transformation_nodes.append(node)
         elif isinstance(node, NodeUnderlying):
             self._underlying_nodes.append(node)
+        self._finalised = False
 
     def add_edge(self, edge):
         """ Adds an edge into the models collection of edges
@@ -87,6 +89,7 @@ class Model(object):
             for g in edge.given:
                 self._in[g].append(p)
                 self._out[p].append(g)
+        self._finalised = False
 
     def _validate_model(self):
         assert len(self._underlying_nodes) > 0, "No underlying model to constrain"
@@ -146,9 +149,14 @@ class Model(object):
         This method runs consistency checks on the model (making sure there are not orphaned
         nodes, edges to parameters that do not exist, etc), and in doing so links the right
         edges to the right nodes and determines the order in which edges should be evaluated.
+
+        You can manually call this method after setting all nodes and edges to confirm as early
+        as possible that the model is valid. If you do not call it manually, this method
+        is invoked by the model when requesting concrete information, such as the PGM or model fits.
         """
         self._validate_model()
         self._create_data_structures()
+        self._finalised = True
         self.logger.info("Model validation passed")
 
     def _get_theta_dict(self, theta):
@@ -202,6 +210,8 @@ class Model(object):
         :class:`daft.PGM`
             The ``daft`` PGM class, for further customisation if required.
         """
+        if not self._finalised:
+            self.finalise()
         rc("font", family="serif", size=8)
         rc("text", usetex=True)
 
@@ -277,6 +287,8 @@ class Model(object):
         ndarray
             The final flattened chain of dimensions ``(num_dimensions, num_walkers * (num_steps - num_burn))``
         """
+        if not self._finalised:
+            self.finalise()
         pool = None
         try:
             pool = MPIPool()
