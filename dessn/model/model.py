@@ -266,7 +266,7 @@ class Model(object):
         if filename is not None:
             output_filename = "../../plots/%s" % filename
             self.logger.debug("Saving figure to %s" % output_filename)
-            pgm.figure.savefig(output_filename, transparent=True)
+            pgm.figure.savefig(output_filename, transparent=True, dpi=300)
 
         return pgm
 
