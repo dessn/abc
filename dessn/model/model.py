@@ -5,13 +5,14 @@ from dessn.utility.hdemcee import EmceeWrapper
 import numpy as np
 import logging
 import emcee
+from emcee.utils import MPIPool
 import corner
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import os
 import daft
-from emcee.utils import MPIPool
 import sys
+from scipy.optimize import fmin_bfgs
 
 
 class Model(object):
@@ -185,6 +186,20 @@ class Model(object):
                 probability += self._get_log_likelihood(theta_dict, edge)
         return probability
 
+    def _get_negative_log_posterior(self, theta):
+        return -self._get_log_posterior(theta)
+
+    def _get_starting_position(self, num_walkers):
+        num_dim = len(self._theta_names)
+        self.logger.debug("Generating starting guesses")
+        p0 = np.ones(num_dim)
+        optimised = fmin_bfgs(self._get_negative_log_posterior, p0, disp=False)
+        self.logger.debug("Starting position is: %s" % optimised)
+
+        std = np.random.uniform(0.5, 1.5, size=(num_walkers, num_dim))
+        start = std * optimised
+        return start
+
     def _get_log_prior(self, theta_dict):
         result = []
         for node in self._underlying_nodes:
@@ -270,7 +285,7 @@ class Model(object):
 
         return pgm
 
-    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, filename=None):
+    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, filename=None, save_interval=300):
         """ Uses ``emcee`` to fit the supplied model.
 
         This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for
@@ -289,6 +304,8 @@ class Model(object):
             The number of steps to discard for burn in
         filename : str, optional
             If set, saves a corner plot to that filename in the top level plots directory.
+        save_interval : float
+            The amount of seconds between saving the chain to file. Setting to ``None`` disables serialisation.
 
         Returns
         -------
@@ -308,28 +325,17 @@ class Model(object):
         except ValueError:
             self.logger.info("Unable to start MPI pool, expected normal python execution")
 
-        # TODO: Refactor this section, it should not be encoded in the model
         num_dim = len(self._theta_names)
         self.logger.debug("Fitting model with %d dimensions" % num_dim)
         if num_walkers is None:
             num_walkers = num_dim * 8
-        start = np.zeros((num_walkers, num_dim))
-        self.logger.debug("Generating starting guesses")
-        for row in range(num_walkers):
-            for i, name in enumerate(self._theta_names):
-                if name == "SN_theta_1":
-                    start[row, i] = np.random.normal(1,0.2) * 100
-                    # print(start[row,i])
-                elif name == "SN_theta_2":
-                    start[row, i] = np.random.normal(1,0.2) * 20
-                elif name =="luminosity":
-                    start[row, i] = np.random.normal(1,0.3) * 100
 
-                # TODO: Actual start guesses
+        start = self._get_starting_position(num_walkers)
+
         self.logger.debug("Running emcee")
         sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler, "../../temp/%s" % self.model_name)
-        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=start, save_dim=self._num_actual, save_interval=300)
+        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=start, save_dim=self._num_actual, save_interval=save_interval)
         self.logger.debug("Creating corner plot")
         fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual])
         if filename is not None:

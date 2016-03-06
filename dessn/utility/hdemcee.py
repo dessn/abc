@@ -40,12 +40,12 @@ class EmceeWrapper(object):
         self.chain = np.zeros((num_walkers, num_steps, save_dim))
         if past_chain is not None and past_chain.shape[1] <= num_steps:
             step = past_chain.shape[1]
-            print(step)
             num = num_steps - step
-            print(num)
             self.chain[:, :step, :] = past_chain
+            self.logger.debug("A further %d steps are required" % num)
         else:
             num = num_steps
+            self.logger.debug("Running full chain of %d steps" % num)
 
         t = time()
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
