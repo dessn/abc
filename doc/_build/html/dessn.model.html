@@ -302,7 +302,7 @@ is invoked by the model when requesting concrete information, such as the PGM or
 
 <dl class="method">
 <dt id="dessn.model.model.Model.fit_model">
-<code class="descname">fit_model</code><span class="sig-paren">(</span><em>num_walkers=None</em>, <em>num_steps=5000</em>, <em>num_burn=3000</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.fit_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.fit_model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fit_model</code><span class="sig-paren">(</span><em>num_walkers=None</em>, <em>num_steps=5000</em>, <em>num_burn=3000</em>, <em>filename=None</em>, <em>save_interval=300</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.fit_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.fit_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses <code class="docutils literal"><span class="pre">emcee</span></code> to fit the supplied model.</p>
 <p>This method sets an emcee run using the <code class="docutils literal"><span class="pre">EnsembleSampler</span></code> and manual chain management to allow for
 very high dimension models. MPI running is detected automatically for less hassle, and chain progress is
@@ -328,11 +328,19 @@ serialised to disk automatically for convenience.</p>
 <blockquote>
 <div><p>If set, saves a corner plot to that filename in the top level plots directory.</p>
 </div></blockquote>
+<p><strong>save_interval</strong> : float</p>
+<blockquote>
+<div><p>The amount of seconds between saving the chain to file. Setting to <code class="docutils literal"><span class="pre">None</span></code> disables serialisation.</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ndarray</p>
-<blockquote class="last">
+<blockquote>
 <div><p>The final flattened chain of dimensions <code class="docutils literal"><span class="pre">(num_dimensions,</span> <span class="pre">num_walkers</span> <span class="pre">*</span> <span class="pre">(num_steps</span> <span class="pre">-</span> <span class="pre">num_burn))</span></code></p>
+</div></blockquote>
+<p>fig</p>
+<blockquote class="last">
+<div><p>The corner plot figure returned from <code class="docutils literal"><span class="pre">corner.corner(...)</span></code></p>
 </div></blockquote>
 </td>
 </tr>

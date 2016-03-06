@@ -311,6 +311,8 @@ class Model(object):
         -------
         ndarray
             The final flattened chain of dimensions ``(num_dimensions, num_walkers * (num_steps - num_burn))``
+        fig
+            The corner plot figure returned from ``corner.corner(...)``
         """
         if not self._finalised:
             self.finalise()
@@ -330,17 +332,15 @@ class Model(object):
         if num_walkers is None:
             num_walkers = num_dim * 8
 
-        start = self._get_starting_position(num_walkers)
-
         self.logger.debug("Running emcee")
         sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler, "../../temp/%s" % self.model_name)
-        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=start, save_dim=self._num_actual, save_interval=save_interval)
+        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, save_interval=save_interval)
         self.logger.debug("Creating corner plot")
-        fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual])
+        fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual], quantiles=[0.16, 0.5, 0.84], bins=100)
         if filename is not None:
             filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
         fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
         plt.show()
 
-        return flat_chain
+        return flat_chain, fig

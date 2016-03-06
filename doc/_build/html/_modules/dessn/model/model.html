@@ -134,13 +134,14 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">emcee</span>
+<span class="kn">from</span> <span class="nn">emcee.utils</span> <span class="kn">import</span> <span class="n">MPIPool</span>
 <span class="kn">import</span> <span class="nn">corner</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rc</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">daft</span>
-<span class="kn">from</span> <span class="nn">emcee.utils</span> <span class="kn">import</span> <span class="n">MPIPool</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">fmin_bfgs</span>
 
 
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -314,6 +315,20 @@
                 <span class="n">probability</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_likelihood</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">probability</span>
 
+    <span class="k">def</span> <span class="nf">_get_negative_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_starting_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">):</span>
+        <span class="n">num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Generating starting guesses&quot;</span><span class="p">)</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_dim</span><span class="p">)</span>
+        <span class="n">optimised</span> <span class="o">=</span> <span class="n">fmin_bfgs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_negative_log_posterior</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting position is: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">optimised</span><span class="p">)</span>
+
+        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">std</span> <span class="o">*</span> <span class="n">optimised</span>
+        <span class="k">return</span> <span class="n">start</span>
+
     <span class="k">def</span> <span class="nf">_get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span><span class="p">:</span>
@@ -399,7 +414,7 @@
 
         <span class="k">return</span> <span class="n">pgm</span></div>
 
-<div class="viewcode-block" id="Model.fit_model"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.fit_model">[docs]</a>    <span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_walkers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.fit_model"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.fit_model">[docs]</a>    <span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_walkers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Uses ``emcee`` to fit the supplied model.</span>
 
 <span class="sd">        This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for</span>
@@ -418,11 +433,15 @@
 <span class="sd">            The number of steps to discard for burn in</span>
 <span class="sd">        filename : str, optional</span>
 <span class="sd">            If set, saves a corner plot to that filename in the top level plots directory.</span>
+<span class="sd">        save_interval : float</span>
+<span class="sd">            The amount of seconds between saving the chain to file. Setting to ``None`` disables serialisation.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        ndarray</span>
 <span class="sd">            The final flattened chain of dimensions ``(num_dimensions, num_walkers * (num_steps - num_burn))``</span>
+<span class="sd">        fig</span>
+<span class="sd">            The corner plot figure returned from ``corner.corner(...)``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finalised</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">finalise</span><span class="p">()</span>
@@ -437,36 +456,23 @@
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Unable to start MPI pool, expected normal python execution&quot;</span><span class="p">)</span>
 
-        <span class="c1"># TODO: Refactor this section, it should not be encoded in the model</span>
         <span class="n">num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fitting model with </span><span class="si">%d</span><span class="s2"> dimensions&quot;</span> <span class="o">%</span> <span class="n">num_dim</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">num_walkers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">num_walkers</span> <span class="o">=</span> <span class="n">num_dim</span> <span class="o">*</span> <span class="mi">8</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Generating starting guesses&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;SN_theta_1&quot;</span><span class="p">:</span>
-                    <span class="n">start</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
-                    <span class="c1"># print(start[row,i])</span>
-                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;SN_theta_2&quot;</span><span class="p">:</span>
-                    <span class="n">start</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">20</span>
-                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span><span class="s2">&quot;luminosity&quot;</span><span class="p">:</span>
-                    <span class="n">start</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
 
-                <span class="c1"># TODO: Actual start guesses</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running emcee&quot;</span><span class="p">)</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">,</span> <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">)</span>
         <span class="n">emcee_wrapper</span> <span class="o">=</span> <span class="n">EmceeWrapper</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="s2">&quot;../../temp/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span>
-        <span class="n">flat_chain</span> <span class="o">=</span> <span class="n">emcee_wrapper</span><span class="o">.</span><span class="n">run_chain</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_burn</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">save_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <span class="n">flat_chain</span> <span class="o">=</span> <span class="n">emcee_wrapper</span><span class="o">.</span><span class="n">run_chain</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_burn</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_starting_position</span><span class="p">,</span> <span class="n">save_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="n">save_interval</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating corner plot&quot;</span><span class="p">)</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span><span class="n">flat_chain</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">])</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span><span class="n">flat_chain</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">],</span> <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.84</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;../../plots/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">flat_chain</span></div></div>
+        <span class="k">return</span> <span class="n">flat_chain</span><span class="p">,</span> <span class="n">fig</span></div></div>
 </pre></div>
 
            </div>

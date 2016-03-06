@@ -24,17 +24,16 @@ class EmceeWrapper(object):
             position_file = self.filename + ".pos.npy"
             try:
                 pos = np.load(position_file)
-                print(pos)
                 past_chain = np.load(chain_file)
                 self.logger.info("Found chain of %d steps" % past_chain.shape[1])
             except IOError:
                 self.logger.info("Prior chain and/or does not exist")
 
         if start is None and pos is None:
-            raise ValueError("You need to have either a starting position or existing chains")
+            raise ValueError("You need to have either a starting function or existing chains")
 
         if pos is None:
-            pos = start
+            pos = start(num_walkers)
 
         step = 0
         self.chain = np.zeros((num_walkers, num_steps, save_dim))

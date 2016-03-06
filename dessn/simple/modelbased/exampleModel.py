@@ -115,5 +115,5 @@ class ExampleModel(Model):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     exampleModel = ExampleModel()
-    exampleModel.get_pgm("examplePGM.png")
-    exampleModel.fit_model(num_steps=3000, num_burn=2500, filename="exampleModel", save_interval=5)
+    # exampleModel.get_pgm("examplePGM.png")
+    exampleModel.fit_model(num_steps=6000, num_burn=2000, filename="exampleModel", save_interval=5)
