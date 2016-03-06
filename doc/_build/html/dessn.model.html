@@ -95,6 +95,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.simple.html">dessn.simple package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.simulation.html">dessn.simulation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dessn.toy.html">dessn.toy package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.utility.html">dessn.utility package</a></li>
 </ul>
 </li>
@@ -203,7 +204,7 @@ would be represented by a single edge. Similarly, <span class="math">\(P(a|b)P(b
 
 <dl class="class">
 <dt id="dessn.model.edge.EdgeTransformation">
-<em class="property">class </em><code class="descclassname">dessn.model.edge.</code><code class="descname">EdgeTransformation</code><span class="sig-paren">(</span><em>inputs</em>, <em>transform_to</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#EdgeTransformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.EdgeTransformation" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.model.edge.</code><code class="descname">EdgeTransformation</code><span class="sig-paren">(</span><em>probability_of</em>, <em>given</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/edge.html#EdgeTransformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.edge.EdgeTransformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.edge.Edge</span></code></a></p>
 <p>This specialised edge is used to connect to transformation nodes.</p>
 <p>A transformation edge does not give a likelihood, but - as it is a known transformation - returns a dictionary
@@ -213,13 +214,13 @@ when <cite>get_transformation</cite> is invoked that is injected into the data d
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>inputs</strong> : str or list[str]</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>probability_of</strong> : str or list[str]</p>
 <blockquote>
-<div><p>The required parameter inputs to do the transformation.</p>
+<div><p>The dependent parameters. With the example <span class="math">\(P(a,b|c,d)\)</span>, (assuming the functional form is a delta), this input would be <code class="docutils literal"><span class="pre">['a','b']</span></code>.</p>
 </div></blockquote>
-<p><strong>transform_to</strong> : str or list[str]</p>
+<p><strong>given</strong> : str or list[str]</p>
 <blockquote class="last">
-<div><p>The parameters that will be added to the data dictionary after transformation</p>
+<div><p>In the example <span class="math">\(P(a,b|c,d)\)</span>, (assuming the functional form is a delta), this input would be <code class="docutils literal"><span class="pre">['c','d']</span></code>.</p>
 </div></blockquote>
 </td>
 </tr>

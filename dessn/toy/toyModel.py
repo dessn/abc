@@ -6,7 +6,14 @@ from dessn.toy.transformations import Flux, LuminosityDistance
 from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
 import logging
 
+
 class ToyModel(Model):
+    """ A modified toy model.
+
+
+    .. figure::     ../plots/toyModelPGM.png
+        :align:     center
+    """
     def __init__(self):
         super(ToyModel, self).__init__("ToyModel")
 

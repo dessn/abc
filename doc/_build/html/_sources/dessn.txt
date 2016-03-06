@@ -15,5 +15,6 @@ Subpackages
     dessn.model
     dessn.simple
     dessn.simulation
+    dessn.toy
     dessn.utility
 
