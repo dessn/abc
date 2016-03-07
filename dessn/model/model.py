@@ -279,13 +279,12 @@ class Model(object):
                     pgm.add_edge(node_name_dict[g], node_name_dict[p])
         pgm.render()
         if filename is not None:
-            output_filename = "../../plots/%s" % filename
-            self.logger.debug("Saving figure to %s" % output_filename)
-            pgm.figure.savefig(output_filename, transparent=True, dpi=300)
+            self.logger.debug("Saving figure to %s" % filename)
+            pgm.figure.savefig(filename, transparent=True, dpi=300)
 
         return pgm
 
-    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, filename=None, save_interval=300):
+    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, filename=None, temp_dir=None, save_interval=300):
         """ Uses ``emcee`` to fit the supplied model.
 
         This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for
@@ -334,13 +333,12 @@ class Model(object):
 
         self.logger.debug("Running emcee")
         sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
-        emcee_wrapper = EmceeWrapper(sampler, "../../temp/%s" % self.model_name)
-        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, save_interval=save_interval)
+        emcee_wrapper = EmceeWrapper(sampler)
+        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
         self.logger.debug("Creating corner plot")
         fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual], quantiles=[0.16, 0.5, 0.84], bins=100)
         if filename is not None:
-            filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
-        fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
+            fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
         plt.show()
 
         return flat_chain, fig

@@ -5,6 +5,7 @@ from dessn.toy.underlying import Cosmology, SupernovaIaDist, SupernovaIIDist, Su
 from dessn.toy.transformations import Flux, LuminosityDistance
 from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
 import logging
+import os
 
 
 class ToyModel(Model):
@@ -47,5 +48,7 @@ class ToyModel(Model):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    dir_name = os.path.dirname(__file__)
     toy_model = ToyModel()
-    fig = toy_model.get_pgm("toyModelPGM.png")
+    pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
+    fig = toy_model.get_pgm(pgm_file)

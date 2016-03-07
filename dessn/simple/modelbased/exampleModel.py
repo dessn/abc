@@ -4,6 +4,7 @@ from dessn.model.node import NodeObserved, NodeLatent, NodeUnderlying, NodeTrans
 from dessn.model.edge import Edge, EdgeTransformation
 from scipy import stats
 import logging
+import os
 
 
 class ObservedFlux(NodeObserved):
@@ -114,6 +115,10 @@ class ExampleModel(Model):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    dir_name = os.path.dirname(__file__)
     exampleModel = ExampleModel()
-    exampleModel.get_pgm("examplePGM.png")
-    # exampleModel.fit_model(num_steps=6000, num_burn=2000, filename="exampleModel", save_interval=5)
+    corner_file = os.path.abspath(dir_name + "/../../../exampleModel.png")
+    temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
+    pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
+    exampleModel.get_pgm(pgm_file)
+    exampleModel.fit_model(num_steps=6000, num_burn=2000, filename=corner_file, temp_dir=temp_dir, save_interval=5)

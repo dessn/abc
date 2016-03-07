@@ -4,13 +4,12 @@ import numpy as np
 
 
 class EmceeWrapper(object):
-    def __init__(self, sampler, filename=None):
+    def __init__(self, sampler):
         self.sampler = sampler
-        self.filename = filename
         self.logger = logging.getLogger(__name__)
         self.chain = None
 
-    def run_chain(self, num_steps, num_burn, num_walkers, num_dim, start=None, save_interval=300, save_dim=None):
+    def run_chain(self, num_steps, num_burn, num_walkers, num_dim, start=None, save_interval=300, save_dim=None, temp_dir=None):
         assert num_steps > num_burn, "num_steps has to be larger than num_burn"
         if save_dim is not None:
             assert save_dim <= num_dim, "You cannot save more dimensions than you actually have"
@@ -19,9 +18,9 @@ class EmceeWrapper(object):
 
         past_chain = None
         pos = None
-        if self.filename is not None:
-            chain_file = self.filename + ".chain.npy"
-            position_file = self.filename + ".pos.npy"
+        if temp_dir is not None:
+            chain_file = temp_dir + ".chain.npy"
+            position_file = temp_dir + ".pos.npy"
             try:
                 pos = np.load(position_file)
                 past_chain = np.load(chain_file)
@@ -50,7 +49,7 @@ class EmceeWrapper(object):
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
             self.chain[:, step, :] = result[0][:, :save_dim]
             step += 1
-            if self.filename is not None:
+            if temp_dir is not None:
                 t2 = time()
                 if t2 - t > save_interval or step == num_steps:
                     t = t2
