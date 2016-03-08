@@ -6,3 +6,4 @@ numpydoc
 scipy
 emcee
 daft
+enum34
