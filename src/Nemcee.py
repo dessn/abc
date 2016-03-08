@@ -8,6 +8,9 @@ from astropy.cosmology import FlatwCDM
 from astropy import constants as const
 from astropy import units as u
 
+import sncosmo
+model = sncosmo.Model(source='salt2')
+
 from emcee.utils import MPIPool
 
 # from pymc3 import Model, Normal, Lognormal, Uniform
@@ -365,10 +368,12 @@ def simulateData():
 
     observation['counts'] = []
     observation['counts_invcov']=[]
+    observation['mjds']=[]
     for i in xrange(nTrans):
         ans =numpy.random.multivariate_normal(numpy.zeros(npts)+ luminosity[i] / 4/numpy.pi/ld[i]/ld[i]*10**(inputs.Z/2.5), cov)
         observation['counts'].append(ans)
         observation['counts_invcov'].append(invcov)
+        observation['mjds'].append(numpy.arange(2.))
         #luminosity / 4/numpy.pi/ld/ld*10**(inputs.Z/2.5)
 
     # plt.scatter(observation['specz'],-2.5*numpy.log10(observation['counts']))
@@ -400,6 +405,7 @@ def simulateData():
     # observation['counts_cov'] =observation['counts_cov'][found]
     observation['counts'] =[observation['counts'][i] for i in xrange(len(found)) if found[i]]
     observation['counts_invcov'] = [observation['counts_invcov'][i] for i in xrange(len(found)) if found[i]]
+    observation['mjds'] = [observation['mjds'][i] for i in xrange(len(found)) if found[i]]        
     return observation
 
 def lnprob(theta, co, zo, cinvcovo, pzo, spectypeo):
@@ -723,11 +729,11 @@ import matplotlib.pyplot as plt
 
 def runModel():
 
-    pool = MPIPool()
-    if not pool.is_master():
-        pool.wait()
-        sys.exit(0)
-    # pool=None
+    # pool = MPIPool()
+    # if not pool.is_master():
+    #     pool.wait()
+    #     sys.exit(0)
+    pool=None
 
     observation = simulateData()
     nTrans = len(observation['spectype'])
