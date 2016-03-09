@@ -78,7 +78,7 @@ class ExampleModel(Model):
 
     This is the primary class in this package, and you can see that other classes inherit from either :class:`.Node` or from :class:`.Edge`.
 
-    I leave the documentation for :class:`.Node`s and :class:`.Edge`s to those classes, and encourage viewing the code directly
+    I leave the documentation for :class:`.Node` and :class:`.Edge` to those classes, and encourage viewing the code directly
     to understand exactly what is happening.
 
     Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:

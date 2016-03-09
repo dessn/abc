@@ -7,6 +7,9 @@ import matplotlib.cm as cm
 
 
 class ChainConsumer(object):
+    """ A class for consuming chains produced by an MCMC walk
+
+    """
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.all_colours = ["#1E88E5", "#D32F2F", "#4CAF50", "#673AB7", "#FFC107", "#795548", "#64B5F6", "#8BC34A", "#757575", "#CDDC39"]
@@ -17,7 +20,29 @@ class ChainConsumer(object):
         self.default_parameters = None
 
     def add_chain(self, chain, parameters=None, name=None):
+        """ Add a chain to the consumer.
+
+        Parameters
+        ----------
+        chain : str|ndarray
+            The chain to load. Normally a ``numpy.ndarray``, but can also accept a string. If a string is found, it
+            interprets the string as a filename and attempts to load it in.
+        parameters : list[str], optional
+            A list of parameter names, one for each column (dimension) in the chain.
+        name : str, optional
+            The name of the chain. Used when plotting multiple chains at once.
+
+        Returns
+        -------
+        ChainConsumer
+            Itself, to allow chaining calls.
+        """
         assert chain is not None, "You cannot have a chain of None"
+        if isinstance(chain, str):
+            if chain.endswith("txt"):
+                chain = np.loadtxt(chain)
+            else:
+                chain = np.load(chain)
         self.chains.append(chain)
         self.names.append(name)
         if self.default_parameters is None and parameters is not None:
@@ -47,7 +72,7 @@ class ChainConsumer(object):
             colours = self.all_colours[:num_chains]
         return colours
 
-    def get_figure(self, figsize=(5, 5), max_ticks=5):
+    def _get_figure(self, figsize=(5, 5), max_ticks=5):
         n = len(self.all_parameters)
         fig, axes = plt.subplots(n, n, figsize=figsize)
         fig.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1, wspace=0.05, hspace=0.05)
@@ -57,6 +82,8 @@ class ChainConsumer(object):
             min_val = None
             max_val = None
             for chain, parameters in zip(self.chains, self.parameters):
+                if p not in parameters:
+                    continue
                 index = parameters.index(p)
                 mean = np.mean(chain[:, index])
                 std = np.std(chain[:, index])
@@ -101,11 +128,37 @@ class ChainConsumer(object):
 
         return fig, axes
 
-    def get_bins(self):
+    def _get_bins(self):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", filename=None, display=True, rainbow=False, contour_kwargs={}):
+    def plot(self, figsize="COLUMN", filename=None, display=False, rainbow=False, contour_kwargs=None):
+        """ Plot the chain
+
+        Parameters
+        ----------
+        figsize : str|tuple(float), optional
+            The figure size to generate. Accepts a regular two tuple of size in inches, or one of several key words.
+            The default value of ``COLUMN`` creates a figure of appropriate size of insertion into an A4 LaTeX document
+            in two-column mode. ``PAGE`` creates a full page width figure. String arguments are not case sensitive.
+        filename : str, optional
+            If set, saves the figure to this location
+        display : bool
+            If True, shows the figure using ``plt.show()``.
+        rainbow : bool
+            If true, forces the use of rainbow colours when displaying multiple chains. By default, under a certain
+            number of chains to show, this method uses a predefined list of colours.
+        contour_kwargs : dict
+            A dictionary of optional arguments to pass to the :func:`plot_contour` function.
+
+        Returns
+        -------
+        figure
+            the matplotlib figure
+
+        """
+        if contour_kwargs is None:
+            contour_kwargs = {}
         if isinstance(figsize, str):
             if figsize.upper() == "COLUMN":
                 figsize = (5, 5)
@@ -113,9 +166,9 @@ class ChainConsumer(object):
                 figsize = (10, 10)
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
-        fig, axes = self.get_figure(figsize=figsize)
+        fig, axes = self._get_figure(figsize=figsize)
 
-        num_bins = self.get_bins()
+        num_bins = self._get_bins()
         fit_values = self.get_summary()
         colours = self._get_colours(rainbow=rainbow)
         
@@ -152,7 +205,27 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
-    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='k', fit_values=None):
+    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None):
+        """ Method responsible for plotting the marginalised distributions
+
+        Parameters
+        ----------
+        ax : matplotlib axis
+            Upon which the plot is drawn
+        parameter : str
+            The parameter label, if it exists
+        chain_row : np.ndarray
+            The data corresponding to the parameter
+        bins : int, optional
+            The number of bins to use. Default value is overridden by :func:`plot`
+        colour : str
+            The colour to use when plotting. Default value is overridden
+
+        Returns
+        -------
+        float
+            the maximum value of the histogram plot (used to ensure vertical spacing)
+        """
         hist, edges = np.histogram(chain_row, bins=bins, normed=True)
         edge_center = 0.5 * (edges[:-1] + edges[1:])
         ax.hist(edge_center, weights=hist, bins=edges, histtype="step", color=colour)
@@ -167,56 +240,73 @@ class ChainConsumer(object):
                     ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
         return hist.max()
         
-    def clamp(self, val, minimum=0, maximum=255):
+    def _clamp(self, val, minimum=0, maximum=255):
         if val < minimum:
             return minimum
         if val > maximum:
             return maximum
         return val
     
-    def scale_colours(self, colour, num):
+    def _scale_colours(self, colour, num):
         # http://thadeusb.com/weblog/2010/10/10/python_scale_hex_color
         scales = np.logspace(np.log(0.7), np.log(1.4), num)
-        colours = [self.scale_colour(colour, scale) for scale in scales]
+        colours = [self._scale_colour(colour, scale) for scale in scales]
         return colours
 
-    def scale_colour(self, colour, scalefactor):
+    def _scale_colour(self, colour, scalefactor):
         hex = colour.strip('#')
         if scalefactor < 0 or len(hex) != 6:
             return hex
 
         r, g, b = int(hex[:2], 16), int(hex[2:4], 16), int(hex[4:], 16)
-        r = self.clamp(r * scalefactor)
-        g = self.clamp(g * scalefactor)
-        b = self.clamp(b * scalefactor)
+        r = self._clamp(r * scalefactor)
+        g = self._clamp(g * scalefactor)
+        b = self._clamp(b * scalefactor)
         return "#%02x%02x%02x" % (r, g, b)
         
     def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False):
+        r""" Plots contours of the probability surface between two parameters
+
+        Parameters
+        ----------
+        ax : figure.axis
+            The axis to plot to
+        x : np.ndarray
+            The ``x`` axis array of data
+        y : np.ndarray
+            The ``y`` axis array of data
+        bins : int, optional
+            The number of bins to use. Overridden by the :func:`plot` method.
+        sigmas : np.array, optional
+            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3]
+        colour : str(hex code), optional
+            The colour to plot the contours in. Overridden by the :func:`plot` method.
+        fit_values : np.array, optional
+            An array representing the lower bound, maximum, and upper bound of the marignliased parameters
+        force_contourf : bool
+            Can force the plotting method to plot filled contours even when it would normally be disabled.
+            It is normally disabled when plotting multiple chains.
+
+        """
         if sigmas is None:
             sigmas = np.array([0, 0.5, 1, 2, 3])
         sigmas = np.sort(sigmas)
         levels = 1.0 - np.exp(-0.5 * sigmas ** 2)
 
-        colours = self.scale_colours(colour, len(levels))
-        colours2 = [self.scale_colour(c, 0.7) for c in colours]
+        colours = self._scale_colours(colour, len(levels))
+        colours2 = [self._scale_colour(c, 0.7) for c in colours]
 
         hist, x_bins, y_bins = np.histogram2d(x, y, bins=bins)
         x_centers = 0.5 * (x_bins[:-1] + x_bins[1:])
         y_centers = 0.5 * (y_bins[:-1] + y_bins[1:])
         hist[hist == 0] = 1E-16
-        vals = self.convert_to_stdev(hist.T)
+        vals = self._convert_to_stdev(hist.T)
         if len(self.chains) == 1 or force_contourf:
             cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=0.8)
         c = ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
 
-    def convert_to_stdev(self, sigma):
-        """
-        From astroML
-    
-        Given a grid of log-likelihood values, convert them to cumulative
-        standard deviation.  This is useful for drawing contours from a
-        grid of likelihoods.
-        """
+    def _convert_to_stdev(self, sigma):
+        # From astroML
         shape = sigma.shape
         sigma = sigma.ravel()
         i_sort = np.argsort(sigma)[::-1]
@@ -227,7 +317,7 @@ class ChainConsumer(object):
     
         return sigma_cumsum[i_unsort].reshape(shape)
 
-    def get_parameter_summary(self, data, parameter, bins=50, desired_area=0.6827):
+    def _get_parameter_summary(self, data, parameter, bins=50, desired_area=0.6827):
         hist, edges = np.histogram(data, bins=bins, normed=True)
         edge_centers = 0.5 * (edges[1:] + edges[:-1])
         
@@ -269,16 +359,34 @@ class ChainConsumer(object):
         return [x1, xs[startIndex], x2]
         
     def get_summary(self):
+        """  Gets a summary of the marginalised parameter distributions.
+
+        Returns
+        -------
+        list of dictionaries
+            One entry per chain, parameter bounds stored in dictionary with parameter as key
+        """
         results = []
         for chain, parameters in zip(self.chains, self.parameters):
             res = {}
             for i, p in enumerate(parameters):
-                summary = self.get_parameter_summary(chain[:, i], p)
+                summary = self._get_parameter_summary(chain[:, i], p)
                 res[p] = summary
             results.append(res)
         return results
 
     def get_parameter_text(self, lower, maximum, upper):
+        """ Generates LaTeX appropriate text from marginalised parameter bounds.
+
+        Parameters
+        ----------
+        lower : float
+            The lower bound on the parameter
+        maximum : float
+            The value of the parameter with maximum probability
+        upper : float
+            The upper bound on the parameter
+        """
         if lower is None or upper is None:
             return ""
         upper_error = upper - maximum
@@ -304,29 +412,3 @@ class ChainConsumer(object):
         if factor != 0:
             text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
         return text
-
-
-
-                
-                
-if __name__ == "__main__":
-    ndim, nsamples = 3, 100000
-    
-    # Generate some fake data.
-    data1 = np.random.randn(ndim * 4 * nsamples / 5).reshape([4 * nsamples / 5, ndim])
-    data2 = (5 * np.random.rand(ndim)[None, :] + np.random.randn(ndim * nsamples / 5).reshape([nsamples / 5, ndim]))
-    data = np.vstack([data1, data2])
-    
-    adata1 = np.random.randn(ndim * 2 * nsamples / 5).reshape([2 * nsamples / 5, ndim])
-    adata2 = (1 - 1 * np.random.rand(ndim)[None, :] + np.random.randn(ndim * nsamples / 5).reshape([nsamples / 5, ndim]))
-    adata = np.vstack([adata1, adata2])
-
-    labels = ["$x$","$y$",r"$\log\alpha$"]
-    
-    c = ChainConsumer([data, adata], labels, names=["Chain one", "chain two"])
-    c.get_parameter_text(0.00000789, 0.00000801, 0.00000912)
-    c.get_parameter_text(0.555553, 0.555555, 0.555559)
-    print(c.get_parameter_text(3123210000, 3223210000, 3654310000))
-    fig = c.plot()
-    fig.savefig("doom.png", bbox_inches="tight", dpi=250)
-    #c.get_summary()

@@ -88,8 +88,9 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.chain package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.chain">dessn.chain.chain module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoMultichainChain">dessn.chain.demoMultichainChain module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoSingleChain">dessn.chain.demoSingleChain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoOneChain">dessn.chain.demoOneChain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoThreeChains">dessn.chain.demoThreeChains module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoTwoDisjointChains">dessn.chain.demoTwoDisjointChains module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
@@ -159,83 +160,273 @@
 <dt id="dessn.chain.chain.ChainConsumer">
 <em class="property">class </em><code class="descclassname">dessn.chain.chain.</code><code class="descname">ChainConsumer</code><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class for consuming chains produced by an MCMC walk</p>
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.add_chain">
 <code class="descname">add_chain</code><span class="sig-paren">(</span><em>chain</em>, <em>parameters=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.add_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.add_chain" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.clamp">
-<code class="descname">clamp</code><span class="sig-paren">(</span><em>val</em>, <em>minimum=0</em>, <em>maximum=255</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.clamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.clamp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.convert_to_stdev">
-<code class="descname">convert_to_stdev</code><span class="sig-paren">(</span><em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.convert_to_stdev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.convert_to_stdev" title="Permalink to this definition">¶</a></dt>
-<dd><p>From astroML</p>
-<p>Given a grid of log-likelihood values, convert them to cumulative
-standard deviation.  This is useful for drawing contours from a
-grid of likelihoods.</p>
+<dd><p>Add a chain to the consumer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>chain</strong> : str|ndarray</p>
+<blockquote>
+<div><p>The chain to load. Normally a <code class="docutils literal"><span class="pre">numpy.ndarray</span></code>, but can also accept a string. If a string is found, it
+interprets the string as a filename and attempts to load it in.</p>
+</div></blockquote>
+<p><strong>parameters</strong> : list[str], optional</p>
+<blockquote>
+<div><p>A list of parameter names, one for each column (dimension) in the chain.</p>
+</div></blockquote>
+<p><strong>name</strong> : str, optional</p>
+<blockquote>
+<div><p>The name of the chain. Used when plotting multiple chains at once.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ChainConsumer</p>
+<blockquote class="last">
+<div><p>Itself, to allow chaining calls.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.get_bins">
-<code class="descname">get_bins</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_bins" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.get_figure">
-<code class="descname">get_figure</code><span class="sig-paren">(</span><em>figsize=(5</em>, <em>5)</em>, <em>max_ticks=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_figure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_figure" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.get_parameter_summary">
-<code class="descname">get_parameter_summary</code><span class="sig-paren">(</span><em>data</em>, <em>parameter</em>, <em>bins=50</em>, <em>desired_area=0.6827</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_parameter_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_parameter_summary" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.get_parameter_text">
 <code class="descname">get_parameter_text</code><span class="sig-paren">(</span><em>lower</em>, <em>maximum</em>, <em>upper</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_parameter_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_parameter_text" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Generates LaTeX appropriate text from marginalised parameter bounds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lower</strong> : float</p>
+<blockquote>
+<div><p>The lower bound on the parameter</p>
+</div></blockquote>
+<p><strong>maximum</strong> : float</p>
+<blockquote>
+<div><p>The value of the parameter with maximum probability</p>
+</div></blockquote>
+<p><strong>upper</strong> : float</p>
+<blockquote class="last">
+<div><p>The upper bound on the parameter</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.get_summary">
 <code class="descname">get_summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_summary" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets a summary of the marginalised parameter distributions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of dictionaries</p>
+<blockquote class="last">
+<div><p>One entry per chain, parameter bounds stored in dictionary with parameter as key</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>filename=None</em>, <em>display=True</em>, <em>rainbow=False</em>, <em>contour_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>filename=None</em>, <em>display=False</em>, <em>rainbow=False</em>, <em>contour_kwargs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the chain</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>figsize</strong> : str|tuple(float), optional</p>
+<blockquote>
+<div><p>The figure size to generate. Accepts a regular two tuple of size in inches, or one of several key words.
+The default value of <code class="docutils literal"><span class="pre">COLUMN</span></code> creates a figure of appropriate size of insertion into an A4 LaTeX document
+in two-column mode. <code class="docutils literal"><span class="pre">PAGE</span></code> creates a full page width figure. String arguments are not case sensitive.</p>
+</div></blockquote>
+<p><strong>filename</strong> : str, optional</p>
+<blockquote>
+<div><p>If set, saves the figure to this location</p>
+</div></blockquote>
+<p><strong>display</strong> : bool</p>
+<blockquote>
+<div><p>If True, shows the figure using <code class="docutils literal"><span class="pre">plt.show()</span></code>.</p>
+</div></blockquote>
+<p><strong>rainbow</strong> : bool</p>
+<blockquote>
+<div><p>If true, forces the use of rainbow colours when displaying multiple chains. By default, under a certain
+number of chains to show, this method uses a predefined list of colours.</p>
+</div></blockquote>
+<p><strong>contour_kwargs</strong> : dict</p>
+<blockquote>
+<div><p>A dictionary of optional arguments to pass to the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="dessn.chain.chain.ChainConsumer.plot_contour"><code class="xref py py-func docutils literal"><span class="pre">plot_contour()</span></code></a> function.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">figure</p>
+<blockquote class="last">
+<div><p>the matplotlib figure</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot_bars">
-<code class="descname">plot_bars</code><span class="sig-paren">(</span><em>ax</em>, <em>parameter</em>, <em>chain_row</em>, <em>bins=50</em>, <em>colour='k'</em>, <em>fit_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_bars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_bars" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">plot_bars</code><span class="sig-paren">(</span><em>ax</em>, <em>parameter</em>, <em>chain_row</em>, <em>bins=50</em>, <em>colour='#222222'</em>, <em>fit_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_bars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_bars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method responsible for plotting the marginalised distributions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib axis</p>
+<blockquote>
+<div><p>Upon which the plot is drawn</p>
+</div></blockquote>
+<p><strong>parameter</strong> : str</p>
+<blockquote>
+<div><p>The parameter label, if it exists</p>
+</div></blockquote>
+<p><strong>chain_row</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The data corresponding to the parameter</p>
+</div></blockquote>
+<p><strong>bins</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of bins to use. Default value is overridden by <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a></p>
+</div></blockquote>
+<p><strong>colour</strong> : str</p>
+<blockquote>
+<div><p>The colour to use when plotting. Default value is overridden</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>the maximum value of the histogram plot (used to ensure vertical spacing)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot_contour">
 <code class="descname">plot_contour</code><span class="sig-paren">(</span><em>ax</em>, <em>x</em>, <em>y</em>, <em>bins=50</em>, <em>sigmas=None</em>, <em>colour='#222222'</em>, <em>fit_values=None</em>, <em>force_contourf=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.scale_colour">
-<code class="descname">scale_colour</code><span class="sig-paren">(</span><em>colour</em>, <em>scalefactor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.scale_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.scale_colour" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.scale_colours">
-<code class="descname">scale_colours</code><span class="sig-paren">(</span><em>colour</em>, <em>num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.scale_colours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.scale_colours" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Plots contours of the probability surface between two parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ax</strong> : figure.axis</p>
+<blockquote>
+<div><p>The axis to plot to</p>
+</div></blockquote>
+<p><strong>x</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The <code class="docutils literal"><span class="pre">x</span></code> axis array of data</p>
+</div></blockquote>
+<p><strong>y</strong> : np.ndarray</p>
+<blockquote>
+<div><p>The <code class="docutils literal"><span class="pre">y</span></code> axis array of data</p>
+</div></blockquote>
+<p><strong>bins</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of bins to use. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
+</div></blockquote>
+<p><strong>sigmas</strong> : np.array, optional</p>
+<blockquote>
+<div><p>The <span class="math">\(\sigma\)</span> contour levels to plot. Defaults to [0.5, 1, 2, 3]</p>
+</div></blockquote>
+<p><strong>colour</strong> : str(hex code), optional</p>
+<blockquote>
+<div><p>The colour to plot the contours in. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
+</div></blockquote>
+<p><strong>fit_values</strong> : np.array, optional</p>
+<blockquote>
+<div><p>An array representing the lower bound, maximum, and upper bound of the marignliased parameters</p>
+</div></blockquote>
+<p><strong>force_contourf</strong> : bool</p>
+<blockquote class="last">
+<div><p>Can force the plotting method to plot filled contours even when it would normally be disabled.
+It is normally disabled when plotting multiple chains.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-dessn.chain.demoMultichainChain">
-<span id="dessn-chain-demomultichainchain-module"></span><h2>dessn.chain.demoMultichainChain module<a class="headerlink" href="#module-dessn.chain.demoMultichainChain" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-dessn.chain.demoOneChain">
+<span id="dessn-chain-demoonechain-module"></span><h2>dessn.chain.demoOneChain module<a class="headerlink" href="#module-dessn.chain.demoOneChain" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.chain.demoOneChain.DemoOneChain">
+<em class="property">class </em><code class="descclassname">dessn.chain.demoOneChain.</code><code class="descname">DemoOneChain</code><a class="reference internal" href="_modules/dessn/chain/demoOneChain.html#DemoOneChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoOneChain.DemoOneChain" title="Permalink to this definition">¶</a></dt>
+<dd><p>The single chain demo for Chain Consumer. Dummy class used to get documentation caught by <code class="docutils literal"><span class="pre">sphinx-apidoc</span></code>,
+it servers no other purpose.</p>
+<p>Running this file in python creates a random data set, representing a single MCMC chain, such as you might get from <code class="docutils literal"><span class="pre">emcee</span></code>.</p>
+<p>First, we create a consumer and load the chain, and tell it to plot the chain without knowing the parameter labels.
+It is set to so that the plot should pop up. To continue running the code, close the plot.</p>
+<p>The second thing we do is create a different consumer, and load the chain into it. We also supply the
+parameter labels. By default, as we only have a single chain, contours are filled, the marginalised
+histograms are shaded, and the best fit parameter bounds are shown as axis titles.</p>
+<p>The plot for this is saved to the png file below:</p>
+<div class="figure align-center">
+<img alt="_images/demoOneChain.png" src="_images/demoOneChain.png" />
 </div>
-<div class="section" id="module-dessn.chain.demoSingleChain">
-<span id="dessn-chain-demosinglechain-module"></span><h2>dessn.chain.demoSingleChain module<a class="headerlink" href="#module-dessn.chain.demoSingleChain" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dessn.chain.demoThreeChains">
+<span id="dessn-chain-demothreechains-module"></span><h2>dessn.chain.demoThreeChains module<a class="headerlink" href="#module-dessn.chain.demoThreeChains" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.chain.demoThreeChains.DemoThreeChains">
+<em class="property">class </em><code class="descclassname">dessn.chain.demoThreeChains.</code><code class="descname">DemoThreeChains</code><a class="reference internal" href="_modules/dessn/chain/demoThreeChains.html#DemoThreeChains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoThreeChains.DemoThreeChains" title="Permalink to this definition">¶</a></dt>
+<dd><p>The multiple chain demo for Chain Consumer. Dummy class used to get documentation caught by <code class="docutils literal"><span class="pre">sphinx-apidoc</span></code>,
+it servers no other purpose.</p>
+<p>Running this file in python creates three random data sets, representing three separate chains.</p>
+<p>First, we create a consumer and load the first two chains, and tell it to plot with filled contours.</p>
+<p>The second thing we do is create a different consumer, and load all three chains into it. We also supply the
+parameter labels the first time we load in a chain. The plot for this is saved to the png file below:</p>
+<div class="figure align-center">
+<img alt="_images/demoThreeChains.png" src="_images/demoThreeChains.png" />
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dessn.chain.demoTwoDisjointChains">
+<span id="dessn-chain-demotwodisjointchains-module"></span><h2>dessn.chain.demoTwoDisjointChains module<a class="headerlink" href="#module-dessn.chain.demoTwoDisjointChains" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.chain.demoTwoDisjointChains.DemoTwoDisjointChains">
+<em class="property">class </em><code class="descclassname">dessn.chain.demoTwoDisjointChains.</code><code class="descname">DemoTwoDisjointChains</code><a class="reference internal" href="_modules/dessn/chain/demoTwoDisjointChains.html#DemoTwoDisjointChains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoTwoDisjointChains.DemoTwoDisjointChains" title="Permalink to this definition">¶</a></dt>
+<dd><p>The multiple chain demo for Chain Consumer. Dummy class used to get documentation caught by <code class="docutils literal"><span class="pre">sphinx-apidoc</span></code>,
+it servers no other purpose.</p>
+<p>Running this file in python creates two random data sets, representing two separate chains, <em>for two separate models</em>.</p>
+<p>It is sometimes the case that we wish to compare models which have partially overlapping parameters. For example,
+we might fit a model which depends has cosmology dependend on <span class="math">\(\Omega_m\)</span> and <span class="math">\(\Omega_\Lambda\)</span>, where we
+assume <span class="math">\(w = 1\)</span>. Alternatively, we might assume flatness, and therefore fix <span class="math">\(\Omega_\Lambda\)</span> but instead
+vary the equation of state <span class="math">\(w\)</span>. The good news is, you can visualise them both at once!</p>
+<p>The second thing we do is create a consumer, and load both chains into it. As we have different parameters for each
+chain we supply the right parameters for each chain. The plot for this is saved to the png file below:</p>
+<div class="figure align-center">
+<img alt="_images/demoTwoDisjointChains.png" src="_images/demoTwoDisjointChains.png" />
+</div>
+</dd></dl>
+
 </div>
 </div>
 
