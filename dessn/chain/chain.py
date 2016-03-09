@@ -3,57 +3,50 @@ import numpy as np
 import logging
 from scipy.interpolate import interp1d
 from matplotlib.ticker import MaxNLocator
+import matplotlib.cm as cm
 
 
 class ChainConsumer(object):
-    def __init__(self, chains, parameters=None, names=None):
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.all_colours = ["#1E88E5", "#D32F2F", "#4CAF50", "#673AB7", "#FFC107", "#795548", "#64B5F6", "#8BC34A", "#757575", "#CDDC39"]
-        self.format_data(chains, parameters, names=names)
-        self.round_to_n = lambda x, n: round(x, -int(np.floor(np.log10(x))) + (n - 1))
+        self.chains = []
+        self.names = []
+        self.parameters = []
+        self.all_parameters = []
+        self.default_parameters = None
 
-    def format_data(self, chains, parameters, names=None):
-        if chains is None:
-            raise ValueError("You cannot have a chain of None")
-        if isinstance(chains, np.ndarray) or isinstance(chains, str):
-            logging.info("Single chain and parameters")
-            chains = [chains]
-            parameters = [parameters]
-        else:
-            assert len(chains) == len(names), "Please ensure you have the same number of names as you do chains"
-            logging.info("Found %d chains" % len(chains))
-    
-        for i, chain in enumerate(chains):
-            if isinstance(chain, str):
-                if chain.endswith("txt"):
-                    chains[i] = np.loadtxt(chain)
-                else:
-                    chains[i] = np.load(chain)
-        if parameters[0] is None or isinstance(parameters[0], str):
-            num_parameters = [chain.shape[1] for chain in chains]
-            assert np.unique(num_parameters).size == 1, "If you don't specific parameters for each chain, your chains have to have identical dimensionality"
-            if parameters[0] is None:
-                parameters = [list(np.arange(chain.shape[1])) for chain in chains]
+    def add_chain(self, chain, parameters=None, name=None):
+        assert chain is not None, "You cannot have a chain of None"
+        self.chains.append(chain)
+        self.names.append(name)
+        if self.default_parameters is None and parameters is not None:
+            self.default_parameters = parameters
+
+        if parameters is None:
+            if self.default_parameters is not None:
+                assert chain.shape[1] == len(self.default_parameters), "Chain has %d dimensions, but default parameters have %d dimesions" % (chain.shape[1], len(self.default_parameters))
+                parameters = self.default_parameters
+                self.logger.debug("Adding chain using default parameters")
             else:
-                parameters = [parameters for chain in chains]
-        elif len(chains) > 1:
-            for chain, params in zip(chains, parameters):
-                assert chain.shape[1] == len(params), "Chain has dimension %d but received %d parameters" % (chain.shape[1], len(params))
-    
-        all_parameters = []
+                self.logger.debug("Adding chain with no parameter names")
+                parameters = [x for x in range(chain.shape[1])]
+        else:
+            self.logger.debug("Adding chain with defined parameters")
         for p in parameters:
+            if p not in self.all_parameters:
+                self.all_parameters.append(p)
+        self.parameters.append(parameters)
+        return self
 
-            for val in p:
-                if val not in all_parameters:
-                    all_parameters.append(val)
-            
-            
-        self.all_parameters = all_parameters
-        self.parameters = parameters
-        self.chains = chains
-        self.names = names
-        self.colours = self.all_colours[:len(self.chains)]
-        
+    def _get_colours(self, rainbow=False):
+        num_chains = len(self.chains)
+        if rainbow or num_chains > 5:
+            colours = cm.rainbow(np.linspace(0, 1, num_chains))
+        else:
+            colours = self.all_colours[:num_chains]
+        return colours
+
     def get_figure(self, figsize=(5, 5), max_ticks=5):
         n = len(self.all_parameters)
         fig, axes = plt.subplots(n, n, figsize=figsize)
@@ -112,7 +105,7 @@ class ChainConsumer(object):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", filename=None, display=True):
+    def plot(self, figsize="COLUMN", filename=None, display=True, rainbow=False, contour_kwargs={}):
         if isinstance(figsize, str):
             if figsize.upper() == "COLUMN":
                 figsize = (5, 5)
@@ -124,13 +117,14 @@ class ChainConsumer(object):
 
         num_bins = self.get_bins()
         fit_values = self.get_summary()
+        colours = self._get_colours(rainbow=rainbow)
         
         for i, p1 in enumerate(self.all_parameters):
             for j, p2 in enumerate(self.all_parameters):
                 ax = axes[i, j]
                 if i == j:
                     max_val = None
-                    for chain, parameters, colour, bins, fit in zip(self.chains, self.parameters, self.colours, num_bins, fit_values):
+                    for chain, parameters, colour, bins, fit in zip(self.chains, self.parameters, colours, num_bins, fit_values):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
@@ -140,16 +134,16 @@ class ChainConsumer(object):
                     ax.set_ylim(0, 1.1 * max_val)
                     
                 if i > j:
-                    for chain, parameters, colour in zip(self.chains, self.parameters, self.colours):
+                    for chain, parameters, colour in zip(self.chains, self.parameters, colours):
                         if p1 not in parameters or p2 not in parameters:
                             continue
                         i1 = parameters.index(p1)
                         i2 = parameters.index(p2)
-                        self.plot_contour(ax, chain[:, i2], chain[:, i1], colour=colour, bins=bins, fit_values=fit)
+                        self.plot_contour(ax, chain[:, i2], chain[:, i1], colour=colour, bins=bins, fit_values=fit, **contour_kwargs)
 
         if self.names is not None:
             ax = axes[0, -1]
-            artists = [plt.Line2D((0,1),(0,0), color=c) for c in self.colours]
+            artists = [plt.Line2D((0,1),(0,0), color=c) for n,c in zip(self.names, colours) if n is not None]
             ax.legend(artists, self.names, loc="center", frameon=False)
 
         if filename is not None:
@@ -169,7 +163,8 @@ class ChainConsumer(object):
             if lower is not None and upper is not None:
                 x = np.linspace(lower, upper, 1000)
                 ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
-                ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
+                if isinstance(parameter, str):
+                    ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
         return hist.max()
         
     def clamp(self, val, minimum=0, maximum=255):
@@ -196,7 +191,7 @@ class ChainConsumer(object):
         b = self.clamp(b * scalefactor)
         return "#%02x%02x%02x" % (r, g, b)
         
-    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None):
+    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False):
         if sigmas is None:
             sigmas = np.array([0, 0.5, 1, 2, 3])
         sigmas = np.sort(sigmas)
@@ -210,7 +205,8 @@ class ChainConsumer(object):
         y_centers = 0.5 * (y_bins[:-1] + y_bins[1:])
         hist[hist == 0] = 1E-16
         vals = self.convert_to_stdev(hist.T)
-        cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=0.8)
+        if len(self.chains) == 1 or force_contourf:
+            cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=0.8)
         c = ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
 
     def convert_to_stdev(self, sigma):
