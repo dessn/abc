@@ -323,7 +323,7 @@ number of chains to show, this method uses a predefined list of colours.</p>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot_contour">
-<code class="descname">plot_contour</code><span class="sig-paren">(</span><em>ax</em>, <em>x</em>, <em>y</em>, <em>bins=50</em>, <em>sigmas=None</em>, <em>colour='#222222'</em>, <em>fit_values=None</em>, <em>force_contourf=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_contour</code><span class="sig-paren">(</span><em>ax</em>, <em>x</em>, <em>y</em>, <em>bins=50</em>, <em>sigmas=None</em>, <em>colour='#222222'</em>, <em>fit_values=None</em>, <em>force_contourf=False</em>, <em>cloud=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots contours of the probability surface between two parameters</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -359,9 +359,14 @@ decreases with the number of chains to show.</p>
 <div><p>An array representing the lower bound, maximum, and upper bound of the marignliased parameters</p>
 </div></blockquote>
 <p><strong>force_contourf</strong> : bool</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Can force the plotting method to plot filled contours even when it would normally be disabled.
 It is normally disabled when plotting multiple chains.</p>
+</div></blockquote>
+<p><strong>cloud</strong> : bool</p>
+<blockquote class="last">
+<div><p>If true and there is only one chain, plots the cloud of points. If false, or there are more than
+one chain, does not plot the cloud.</p>
 </div></blockquote>
 </td>
 </tr>

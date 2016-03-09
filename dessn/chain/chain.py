@@ -264,7 +264,7 @@ class ChainConsumer(object):
         b = self._clamp(b * scalefactor)
         return "#%02x%02x%02x" % (r, g, b)
         
-    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False):
+    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False, cloud=True):
         r""" Plots contours of the probability surface between two parameters
 
         Parameters
@@ -287,12 +287,14 @@ class ChainConsumer(object):
         force_contourf : bool
             Can force the plotting method to plot filled contours even when it would normally be disabled.
             It is normally disabled when plotting multiple chains.
-
+        cloud : bool
+            If true and there is only one chain, plots the cloud of points. If false, or there are more than
+            one chain, does not plot the cloud.
         """
+        num_chains = len(self.chains)
         if sigmas is None:
-            num_chains = len(self.chains)
             if num_chains == 1:
-                sigmas = np.array([0, 0.5, 1, 2, 3])
+                sigmas = np.array([0, 0.5, 1, 1.5, 2])
             elif num_chains < 4:
                 sigmas = np.array([0, 0.5, 1, 2])
             else:
@@ -301,15 +303,20 @@ class ChainConsumer(object):
         levels = 1.0 - np.exp(-0.5 * sigmas ** 2)
 
         colours = self._scale_colours(colour, len(levels))
-        colours2 = [self._scale_colour(c, 0.7) for c in colours]
+        colours2 = [self._scale_colour(colours[0], 0.7)] + [self._scale_colour(c, 0.8) for c in colours[:-1]]
 
         hist, x_bins, y_bins = np.histogram2d(x, y, bins=bins)
         x_centers = 0.5 * (x_bins[:-1] + x_bins[1:])
         y_centers = 0.5 * (y_bins[:-1] + y_bins[1:])
         hist[hist == 0] = 1E-16
         vals = self._convert_to_stdev(hist.T)
+        if cloud and num_chains == 1:
+            point_mag = np.floor(np.log10(x.size))
+            skip = int(np.power(10, point_mag - 6))
+            skip = max(skip, 1)
+            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.05, c=colours[1], marker=".", edgecolors="none")
         if len(self.chains) == 1 or force_contourf:
-            cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=0.8)
+            cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=1.0)
         c = ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
 
     def _convert_to_stdev(self, sigma):
