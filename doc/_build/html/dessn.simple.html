@@ -85,6 +85,7 @@
                 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="dessn.html">dessn package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="dessn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dessn.chain.html">dessn.chain package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.model.html">dessn.model package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.simple package</a><ul>
@@ -205,17 +206,17 @@ luminosity, and the supernova luminosity is drawn from an underlying gaussian di
 parameterised by <span class="math">\(\theta\)</span>.</p>
 <blockquote>
 <div><div class="math">
-\[P(D_i|L_i) = \frac{1}{\sqrt{2\pi}\sigma_i}\exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2}\right)\]\[P(L_i|\theta) = \frac{1}{\sqrt{2\pi}\theta_2}\exp\left(-\frac{(L_i-\theta_1)^2}{\theta_2^2}\right)\]</div>
+\[P(D_i|L_i) = \frac{1}{\sqrt{2\pi}\sigma_i}\exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2}\right)\]\[P(L_i|\theta) = \frac{1}{\sqrt{2\pi}\theta_2}\exp\left(-\frac{(L_i-\theta_1)^2}{2\theta_2^2}\right)\]</div>
 </div></blockquote>
 <p>This gives us a likelihood of</p>
 <div class="math">
 \[P(D|\theta) = \prod_{i=1}^N  \frac{1}{2\pi \theta_2 \sigma_i}  \int_{-\infty}^\infty
-\exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -\frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i\]</div>
+\exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2} -\frac{(L_i-\theta_1)^2}{2\theta_2^2} \right) dL_i\]</div>
 <p>Working in log space for as much as possible will assist in numerical precision, so we can rewrite this as</p>
 <div class="math">
 \[\log\left(P(D|\theta)\right) =  \sum_{i=1}^N  \left[
-        \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -
-\frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]\]</div>
+        \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2} -
+\frac{(L_i-\theta_1)^2}{2\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -241,6 +242,11 @@ parameterised by <span class="math">\(\theta\)</span>.</p>
 <code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=None</em>, <em>nburn=None</em>, <em>nsteps=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.do_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Abstract method to configure the emcee parameters</p>
 </dd></dl>
+
+<dl class="staticmethod">
+<dt id="dessn.simple.example.Example.get_data">
+<em class="property">static </em><code class="descname">get_data</code><span class="sig-paren">(</span><em>n=50</em>, <em>theta_1=100.0</em>, <em>theta_2=20.0</em>, <em>scale=1.0</em>, <em>seed=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/example.html#Example.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.example.Example.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="dessn.simple.example.Example.get_likelihood">
@@ -321,6 +327,9 @@ Invoke <code class="docutils literal"><span class="pre">emcee</span></code> by c
 inside the likelihood calculation, which gives us dimensionality only of two (the length of
 the <span class="math">\(\theta\)</span> array). However, this is at the expense of  performing the marginalisation over
 <span class="math">\(dL_i\)</span>, as this requires computing <span class="math">\(n\)</span> integrals for each step in the MCMC.</p>
+<p>Note that I believe my numerical integration is not working properly, hence the weird output results.
+The moral of the story - it takes far, far longer to run than any other way of doing it, should still
+be the take home message from this.</p>
 <div class="figure align-center">
 <img alt="_images/exampleIntegration.png" src="_images/exampleIntegration.png" />
 </div>
@@ -346,7 +355,7 @@ the <span class="math">\(\theta\)</span> array). However, this is at the expense
 </table>
 <dl class="method">
 <dt id="dessn.simple.exampleIntegral.ExampleIntegral.do_emcee">
-<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=20</em>, <em>nburn=2500</em>, <em>nsteps=3000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=16</em>, <em>nburn=500</em>, <em>nsteps=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleIntegral.html#ExampleIntegral.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the <cite>emcee</cite> chain and produce a corner plot.</p>
 <p>Saves a png image of the corner plot to plots/exampleIntegration.png.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -449,7 +458,7 @@ dimensionality of <span class="math">\(2 + n\)</span>, where <span class="math">
 </table>
 <dl class="method">
 <dt id="dessn.simple.exampleLatent.ExampleLatent.do_emcee">
-<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=500</em>, <em>nburn=2000</em>, <em>nsteps=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent.do_emcee" title="Permalink to this definition">¶</a></dt>
+<code class="descname">do_emcee</code><span class="sig-paren">(</span><em>nwalkers=500</em>, <em>nburn=500</em>, <em>nsteps=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/exampleLatent.html#ExampleLatent.do_emcee"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.exampleLatent.ExampleLatent.do_emcee" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the <cite>emcee</cite> chain and produce a corner plot.</p>
 <p>Saves a png image of the corner plot to plots/exampleLatent.png.</p>
 <table class="docutils field-list" frame="void" rules="none">

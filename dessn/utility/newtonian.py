@@ -23,7 +23,6 @@ class NewtonianPosition(object):
                             self.anti_directional[i, j] = -1.0
         for i in range(self.directional.shape[0]):
             self.mass[i] = max(0, self.directional[i, :].sum() + self.anti_directional[i, :].sum())
-            print(self.nodes[i], self.mass[i])
         if top is not None:
             for i, n in enumerate(nodes):
                 if n in top:

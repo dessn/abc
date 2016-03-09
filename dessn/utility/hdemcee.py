@@ -49,7 +49,7 @@ class EmceeWrapper(object):
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
             self.chain[:, step, :] = result[0][:, :save_dim]
             step += 1
-            if temp_dir is not None:
+            if temp_dir is not None and save_interval is not None:
                 t2 = time()
                 if t2 - t > save_interval or step == num_steps:
                     t = t2

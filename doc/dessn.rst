@@ -11,6 +11,7 @@ Subpackages
 
 .. toctree::
 
+    dessn.chain
     dessn.entry
     dessn.model
     dessn.simple

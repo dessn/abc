@@ -12,6 +12,10 @@ class ExampleIntegral(Example):
     the :math:`\theta` array). However, this is at the expense of  performing the marginalisation over
     :math:`dL_i`, as this requires computing :math:`n` integrals for each step in the MCMC.
 
+    Note that I believe my numerical integration is not working properly, hence the weird output results.
+    The moral of the story - it takes far, far longer to run than any other way of doing it, should still
+    be the take home message from this.
+
     .. figure::     ../plots/exampleIntegration.png
         :align:     center
 
@@ -28,13 +32,13 @@ class ExampleIntegral(Example):
     def __init__(self, n=10, theta_1=100.0, theta_2=30.0):
         super(ExampleIntegral, self).__init__(n, theta_1, theta_2)
 
-
     def _integrate(self, d, e, theta):
         step = np.linspace(0, 200, 400)
         diff = step[1] - step[0]
-        r = self._integrand(step[0], theta, d, e) - diff
+        log_diff = np.log(diff)
+        r = self._integrand(step[0], theta, d, e) + log_diff
         for s in step[1:]:
-            r = self._plus(r, self._integrand(s, theta, d, e) - diff)
+            r = self._plus(r, self._integrand(s, theta, d, e) + log_diff)
         return r
 
     def get_likelihood(self, theta, data, error):
@@ -63,7 +67,7 @@ class ExampleIntegral(Example):
             return -np.inf
         return result
 
-    def do_emcee(self, nwalkers=20, nburn=2500, nsteps=3000):
+    def do_emcee(self, nwalkers=16, nburn=500, nsteps=1000):
         """ Run the `emcee` chain and produce a corner plot.
 
         Saves a png image of the corner plot to plots/exampleIntegration.png.
@@ -86,6 +90,5 @@ class ExampleIntegral(Example):
 
 if __name__ == "__main__":
     example = ExampleIntegral()
-    # example.plot_observations()
     example.do_emcee()
 

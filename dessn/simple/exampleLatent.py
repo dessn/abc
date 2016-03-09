@@ -64,7 +64,7 @@ class ExampleLatent(Example):
             return -np.inf
         return result
 
-    def do_emcee(self, nwalkers=500, nburn=2000, nsteps=2500):
+    def do_emcee(self, nwalkers=500, nburn=500, nsteps=1000):
         """ Run the `emcee` chain and produce a corner plot.
 
         Saves a png image of the corner plot to plots/exampleLatent.png.
@@ -90,5 +90,4 @@ class ExampleLatent(Example):
 
 if __name__ == "__main__":
     example = ExampleLatent()
-    # example.plot_observations()
     example.do_emcee()

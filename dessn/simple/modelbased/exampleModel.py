@@ -2,7 +2,7 @@ import numpy as np
 from dessn.model.model import Model
 from dessn.model.node import NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
 from dessn.model.edge import Edge, EdgeTransformation
-from scipy import stats
+from dessn.simple.example import Example
 import logging
 import os
 
@@ -10,9 +10,7 @@ import os
 class ObservedFlux(NodeObserved):
     def __init__(self, n=100):
         self.n = n
-        flux = stats.norm.rvs(size=n, loc=100, scale=20) / 2
-        error = 0.3 * np.sqrt(flux)
-        flux += stats.norm.rvs(size=n) * error
+        flux, error = Example.get_data(n=n, scale=0.5)
 
         super(ObservedFlux, self).__init__("Flux", ["flux", "flux_error"], ["$f$", r"$\sigma_f$"], [flux, error])
 
@@ -56,7 +54,7 @@ class FluxToLuminosity(Edge):
         luminosity = data["luminosity"]
         flux = data["flux"]
         flux_error = data["flux_error"]
-        return -np.sum((flux - luminosity) * (flux - luminosity) / (flux_error * flux_error) + np.log(np.sqrt(2 * np.pi) * flux_error))
+        return -np.sum((flux - luminosity) * (flux - luminosity) / (2.0 * flux_error * flux_error) + np.log(np.sqrt(2 * np.pi) * flux_error))
 
 
 class LuminosityToSupernovaDistribution(Edge):
@@ -69,7 +67,7 @@ class LuminosityToSupernovaDistribution(Edge):
         theta2 = data["SN_theta_2"]
         if theta2 < 0:
             return -np.inf
-        return -np.sum((luminosity - theta1) * (luminosity - theta1) / (theta2 * theta2)) - luminosity.size * np.log(np.sqrt(2 * np.pi) * theta2)
+        return -np.sum((luminosity - theta1) * (luminosity - theta1) / (2.0 * theta2 * theta2)) - luminosity.size * np.log(np.sqrt(2 * np.pi) * theta2)
 
 
 class ExampleModel(Model):
@@ -117,8 +115,11 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     exampleModel = ExampleModel()
-    corner_file = os.path.abspath(dir_name + "/../../../exampleModel.png")
+    corner_file = os.path.abspath(dir_name + "/../../../plots/exampleModel.png")
     temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
     pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
     exampleModel.get_pgm(pgm_file)
-    exampleModel.fit_model(num_steps=6000, num_burn=2000, filename=corner_file, temp_dir=temp_dir, save_interval=5)
+    exampleModel.fit_model(num_steps=1000, num_burn=500, temp_dir=temp_dir, save_interval=5)
+    exampleModel.corner(corner_file)
+    exampleModel.chain_plot()
+    exampleModel.chain_summary()

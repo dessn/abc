@@ -2,6 +2,7 @@ from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, Nod
 from dessn.model.edge import EdgeTransformation
 from dessn.utility.newtonian import NewtonianPosition
 from dessn.utility.hdemcee import EmceeWrapper
+from dessn.chain.chain import ChainPlotter
 import numpy as np
 import logging
 import emcee
@@ -9,7 +10,6 @@ from emcee.utils import MPIPool
 import corner
 import matplotlib.pyplot as plt
 from matplotlib import rc
-import os
 import daft
 import sys
 from scipy.optimize import fmin_bfgs
@@ -52,6 +52,7 @@ class Model(object):
         self.data = {}
         self._data_edges = {}
         self._finalised = False
+        self.flat_chain = None
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -284,7 +285,7 @@ class Model(object):
 
         return pgm
 
-    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, filename=None, temp_dir=None, save_interval=300):
+    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None, save_interval=300):
         """ Uses ``emcee`` to fit the supplied model.
 
         This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for
@@ -301,8 +302,8 @@ class Model(object):
             The number of steps to run
         num_burn : int, optional
             The number of steps to discard for burn in
-        filename : str, optional
-            If set, saves a corner plot to that filename in the top level plots directory.
+        temp_dir : str
+            If set, specifies a directory in which to save temporary results, like the emcee chain
         save_interval : float
             The amount of seconds between saving the chain to file. Setting to ``None`` disables serialisation.
 
@@ -335,10 +336,22 @@ class Model(object):
         sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
+        self.logger.debug("Fit finished")
+        self.flat_chain = flat_chain
+        return flat_chain, self._theta_names[:self._num_actual], self._theta_labels[:self._num_actual]
+
+    def corner(self, filename=None):
+        assert self.flat_chain is not None, "You have to run fit_model before calling corner"
         self.logger.debug("Creating corner plot")
-        fig = corner.corner(flat_chain, labels=self._theta_labels[:self._num_actual], quantiles=[0.16, 0.5, 0.84], bins=100)
+        fig = corner.corner(self.flat_chain, labels=self._theta_labels[:self._num_actual], quantiles=[0.16, 0.5, 0.84], bins=100)
         if filename is not None:
             fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
         plt.show()
 
-        return flat_chain, fig
+    def chain_plot(self):
+        chain_plotter = ChainPlotter(self.flat_chain, self._theta_labels[:self._num_actual])
+        chain_plotter.plot()
+
+    def chain_summary(self):
+        chain_plotter = ChainPlotter(self.flat_chain, self._theta_labels[:self._num_actual])
+        print(chain_plotter.get_summary())

@@ -36,9 +36,9 @@ class Example(object):
     parameterised by :math:`\theta`.
 
      .. math::
-        P(D_i|L_i) = \frac{1}{\sqrt{2\pi}\sigma_i}\exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2}\right)
+        P(D_i|L_i) = \frac{1}{\sqrt{2\pi}\sigma_i}\exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2}\right)
 
-        P(L_i|\theta) = \frac{1}{\sqrt{2\pi}\theta_2}\exp\left(-\frac{(L_i-\theta_1)^2}{\theta_2^2}\right)
+        P(L_i|\theta) = \frac{1}{\sqrt{2\pi}\theta_2}\exp\left(-\frac{(L_i-\theta_1)^2}{2\theta_2^2}\right)
 
 
 
@@ -47,15 +47,15 @@ class Example(object):
     .. math::
 
         P(D|\theta) = \prod_{i=1}^N  \frac{1}{2\pi \theta_2 \sigma_i}  \int_{-\infty}^\infty
-        \exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -\frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i
+        \exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2} -\frac{(L_i-\theta_1)^2}{2\theta_2^2} \right) dL_i
 
 
     Working in log space for as much as possible will assist in numerical precision, so we can rewrite this as
 
     .. math::
         \log\left(P(D|\theta)\right) =  \sum_{i=1}^N  \left[
-                \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{\sigma_i^2} -
-        \frac{(L_i-\theta_1)^2}{\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]
+                \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2} -
+        \frac{(L_i-\theta_1)^2}{2\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]
         
         
     Parameters
@@ -75,12 +75,20 @@ class Example(object):
         self.theta_1 = theta_1
         self.theta_2 = theta_2
 
-        self.data = stats.norm.rvs(size=n, loc=theta_1, scale=theta_2)
-        self.error = 0.3 * np.sqrt(self.data)
-        self.data += stats.norm.rvs(size=n) * self.error
+        self.data, self.error = Example.get_data(n, theta_1, theta_2)
 
         self.sampler = None
         self.sample = None
+
+    @staticmethod
+    def get_data(n=50, theta_1=100.0, theta_2=20.0, scale=1.0, seed=1):
+        np.random.seed(seed)
+
+        data = stats.norm.rvs(size=n, loc=theta_1, scale=theta_2) * scale
+        error = 0.2 * np.sqrt(data)
+        data += stats.norm.rvs(size=n) * error
+
+        return data, error
 
     def plot_observations(self):
         """Plot the observations and observation distribution.
@@ -96,7 +104,7 @@ class Example(object):
         plt.show()
 
     def _integrand(self, l, theta, d, e):
-        return -((d - l) * (d - l) / (e * e)) - (l - theta[0]) * (l - theta[0]) / (theta[1] * theta[1])
+        return -((d - l) * (d - l) / (2.0 * e * e)) - (l - theta[0]) * (l - theta[0]) / (2.0 * theta[1] * theta[1])
 
     def _plus(self, x, y):
         if x > y:

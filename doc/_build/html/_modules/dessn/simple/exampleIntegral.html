@@ -141,6 +141,10 @@
 <span class="sd">    the :math:`\theta` array). However, this is at the expense of  performing the marginalisation over</span>
 <span class="sd">    :math:`dL_i`, as this requires computing :math:`n` integrals for each step in the MCMC.</span>
 
+<span class="sd">    Note that I believe my numerical integration is not working properly, hence the weird output results.</span>
+<span class="sd">    The moral of the story - it takes far, far longer to run than any other way of doing it, should still</span>
+<span class="sd">    be the take home message from this.</span>
+
 <span class="sd">    .. figure::     ../plots/exampleIntegration.png</span>
 <span class="sd">        :align:     center</span>
 
@@ -157,13 +161,13 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">theta_1</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">theta_2</span><span class="o">=</span><span class="mf">30.0</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ExampleIntegral</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">theta_1</span><span class="p">,</span> <span class="n">theta_2</span><span class="p">)</span>
 
-
     <span class="k">def</span> <span class="nf">_integrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
         <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
         <span class="n">diff</span> <span class="o">=</span> <span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integrand</span><span class="p">(</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">-</span> <span class="n">diff</span>
+        <span class="n">log_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integrand</span><span class="p">(</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="n">log_diff</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plus</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integrand</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">-</span> <span class="n">diff</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plus</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integrand</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="n">log_diff</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">r</span>
 
 <div class="viewcode-block" id="ExampleIntegral.get_likelihood"><a class="viewcode-back" href="../../../dessn.simple.html#dessn.simple.exampleIntegral.ExampleIntegral.get_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
@@ -192,7 +196,7 @@
             <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="ExampleIntegral.do_emcee"><a class="viewcode-back" href="../../../dessn.simple.html#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee">[docs]</a>    <span class="k">def</span> <span class="nf">do_emcee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nwalkers</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">nburn</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="n">nsteps</span><span class="o">=</span><span class="mi">3000</span><span class="p">):</span>
+<div class="viewcode-block" id="ExampleIntegral.do_emcee"><a class="viewcode-back" href="../../../dessn.simple.html#dessn.simple.exampleIntegral.ExampleIntegral.do_emcee">[docs]</a>    <span class="k">def</span> <span class="nf">do_emcee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nwalkers</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">nburn</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">nsteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Run the `emcee` chain and produce a corner plot.</span>
 
 <span class="sd">        Saves a png image of the corner plot to plots/exampleIntegration.png.</span>
@@ -215,7 +219,6 @@
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">example</span> <span class="o">=</span> <span class="n">ExampleIntegral</span><span class="p">()</span>
-    <span class="c1"># example.plot_observations()</span>
     <span class="n">example</span><span class="o">.</span><span class="n">do_emcee</span><span class="p">()</span>
 
 </pre></div>

@@ -85,6 +85,7 @@
                 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="dessn.html">dessn package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="dessn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dessn.chain.html">dessn.chain package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.model package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -290,6 +291,21 @@ for managing the <code class="docutils literal"><span class="pre">emcee</span></
 </dd></dl>
 
 <dl class="method">
+<dt id="dessn.model.model.Model.chain_plot">
+<code class="descname">chain_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.chain_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.chain_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.model.Model.chain_summary">
+<code class="descname">chain_summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.chain_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.chain_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.model.model.Model.corner">
+<code class="descname">corner</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.corner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.corner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="dessn.model.model.Model.finalise">
 <code class="descname">finalise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.finalise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.finalise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finalises the model.</p>
@@ -303,7 +319,7 @@ is invoked by the model when requesting concrete information, such as the PGM or
 
 <dl class="method">
 <dt id="dessn.model.model.Model.fit_model">
-<code class="descname">fit_model</code><span class="sig-paren">(</span><em>num_walkers=None</em>, <em>num_steps=5000</em>, <em>num_burn=3000</em>, <em>filename=None</em>, <em>save_interval=300</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.fit_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.fit_model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fit_model</code><span class="sig-paren">(</span><em>num_walkers=None</em>, <em>num_steps=5000</em>, <em>num_burn=3000</em>, <em>temp_dir=None</em>, <em>save_interval=300</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.fit_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.fit_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses <code class="docutils literal"><span class="pre">emcee</span></code> to fit the supplied model.</p>
 <p>This method sets an emcee run using the <code class="docutils literal"><span class="pre">EnsembleSampler</span></code> and manual chain management to allow for
 very high dimension models. MPI running is detected automatically for less hassle, and chain progress is
@@ -325,9 +341,9 @@ serialised to disk automatically for convenience.</p>
 <blockquote>
 <div><p>The number of steps to discard for burn in</p>
 </div></blockquote>
-<p><strong>filename</strong> : str, optional</p>
+<p><strong>temp_dir</strong> : str</p>
 <blockquote>
-<div><p>If set, saves a corner plot to that filename in the top level plots directory.</p>
+<div><p>If set, specifies a directory in which to save temporary results, like the emcee chain</p>
 </div></blockquote>
 <p><strong>save_interval</strong> : float</p>
 <blockquote>
