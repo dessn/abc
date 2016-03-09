@@ -469,17 +469,48 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span> <span class="o">=</span> <span class="n">flat_chain</span>
         <span class="k">return</span> <span class="n">flat_chain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Model.corner"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.corner">[docs]</a>    <span class="k">def</span> <span class="nf">corner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.corner"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.corner">[docs]</a>    <span class="k">def</span> <span class="nf">corner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a corner plot from the model&#39;s chain.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str, optional</span>
+<span class="sd">            If set, saves the figure to this filename</span>
+<span class="sd">        display : bool, optional</span>
+<span class="sd">            If true, shows the plot. If false, simply return the figure</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        figure</span>
+<span class="sd">            a matplotlib figure of the corner plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;You have to run fit_model before calling corner&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating corner plot&quot;</span><span class="p">)</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">],</span> <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.84</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
 
 <div class="viewcode-block" id="Model.chain_plot"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.chain_plot">[docs]</a>    <span class="k">def</span> <span class="nf">chain_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a chain plot of the model&#39;s chain.</span>
+
+<span class="sd">        This is my own implementation of a corner plot.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Arguments to pass to the :func:`~dessn.chain.chain.ChainConsumer.plot` method. See the method</span>
+<span class="sd">            link for more details.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        figure</span>
+<span class="sd">            a matplotlib figure of the chain plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">chain_plotter</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">])</span>
-        <span class="n">chain_plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">chain_plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Model.chain_summary"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.chain_summary">[docs]</a>    <span class="k">def</span> <span class="nf">chain_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">chain_plotter</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">])</span>

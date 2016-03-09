@@ -293,7 +293,28 @@ for managing the <code class="docutils literal"><span class="pre">emcee</span></
 <dl class="method">
 <dt id="dessn.model.model.Model.chain_plot">
 <code class="descname">chain_plot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.chain_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.chain_plot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Creates a chain plot of the model&#8217;s chain.</p>
+<p>This is my own implementation of a corner plot.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>kwargs</strong> : dict</p>
+<blockquote>
+<div><p>Arguments to pass to the <a class="reference internal" href="dessn.chain.html#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method. See the method
+link for more details.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">figure</p>
+<blockquote class="last">
+<div><p>a matplotlib figure of the chain plot</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.model.model.Model.chain_summary">
@@ -302,8 +323,31 @@ for managing the <code class="docutils literal"><span class="pre">emcee</span></
 
 <dl class="method">
 <dt id="dessn.model.model.Model.corner">
-<code class="descname">corner</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.corner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.corner" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">corner</code><span class="sig-paren">(</span><em>filename=None</em>, <em>display=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/model/model.html#Model.corner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.model.model.Model.corner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a corner plot from the model&#8217;s chain.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str, optional</p>
+<blockquote>
+<div><p>If set, saves the figure to this filename</p>
+</div></blockquote>
+<p><strong>display</strong> : bool, optional</p>
+<blockquote>
+<div><p>If true, shows the plot. If false, simply return the figure</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">figure</p>
+<blockquote class="last">
+<div><p>a matplotlib figure of the corner plot</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="dessn.model.model.Model.finalise">

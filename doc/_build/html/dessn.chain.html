@@ -88,6 +88,8 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="">dessn.chain package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.chain">dessn.chain.chain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoMultichainChain">dessn.chain.demoMultichainChain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoSingleChain">dessn.chain.demoSingleChain module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
@@ -155,8 +157,13 @@
 <span id="dessn-chain-chain-module"></span><h2>dessn.chain.chain module<a class="headerlink" href="#module-dessn.chain.chain" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="dessn.chain.chain.ChainConsumer">
-<em class="property">class </em><code class="descclassname">dessn.chain.chain.</code><code class="descname">ChainConsumer</code><span class="sig-paren">(</span><em>chains</em>, <em>parameters=None</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.chain.chain.</code><code class="descname">ChainConsumer</code><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.add_chain">
+<code class="descname">add_chain</code><span class="sig-paren">(</span><em>chain</em>, <em>parameters=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.add_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.add_chain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.clamp">
 <code class="descname">clamp</code><span class="sig-paren">(</span><em>val</em>, <em>minimum=0</em>, <em>maximum=255</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.clamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.clamp" title="Permalink to this definition">¶</a></dt>
@@ -170,11 +177,6 @@
 standard deviation.  This is useful for drawing contours from a
 grid of likelihoods.</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.format_data">
-<code class="descname">format_data</code><span class="sig-paren">(</span><em>chains</em>, <em>parameters</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.format_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.format_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.get_bins">
@@ -203,7 +205,7 @@ grid of likelihoods.</p>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>filename=None</em>, <em>display=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>filename=None</em>, <em>display=True</em>, <em>rainbow=False</em>, <em>contour_kwargs={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -213,7 +215,7 @@ grid of likelihoods.</p>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot_contour">
-<code class="descname">plot_contour</code><span class="sig-paren">(</span><em>ax</em>, <em>x</em>, <em>y</em>, <em>bins=50</em>, <em>sigmas=None</em>, <em>colour='#222222'</em>, <em>fit_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_contour</code><span class="sig-paren">(</span><em>ax</em>, <em>x</em>, <em>y</em>, <em>bins=50</em>, <em>sigmas=None</em>, <em>colour='#222222'</em>, <em>fit_values=None</em>, <em>force_contourf=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -228,6 +230,12 @@ grid of likelihoods.</p>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-dessn.chain.demoMultichainChain">
+<span id="dessn-chain-demomultichainchain-module"></span><h2>dessn.chain.demoMultichainChain module<a class="headerlink" href="#module-dessn.chain.demoMultichainChain" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dessn.chain.demoSingleChain">
+<span id="dessn-chain-demosinglechain-module"></span><h2>dessn.chain.demoSingleChain module<a class="headerlink" href="#module-dessn.chain.demoSingleChain" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

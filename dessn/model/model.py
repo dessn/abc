@@ -340,18 +340,54 @@ class Model(object):
         self.flat_chain = flat_chain
         return flat_chain, self._theta_names[:self._num_actual], self._theta_labels[:self._num_actual]
 
-    def corner(self, filename=None):
+    def corner(self, filename=None, display=True):
+        """ Creates a corner plot from the model's chain.
+
+        Parameters
+        ----------
+        filename : str, optional
+            If set, saves the figure to this filename
+        display : bool, optional
+            If true, shows the plot. If false, simply return the figure
+
+        Returns
+        -------
+        figure
+            a matplotlib figure of the corner plot
+        """
         assert self.flat_chain is not None, "You have to run fit_model before calling corner"
         self.logger.debug("Creating corner plot")
         fig = corner.corner(self.flat_chain, labels=self._theta_labels[:self._num_actual], quantiles=[0.16, 0.5, 0.84], bins=100)
         if filename is not None:
             fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
-        plt.show()
+        if display:
+            plt.show()
+        return fig
 
     def chain_plot(self, **kwargs):
-        chain_plotter = ChainConsumer(self.flat_chain, self._theta_labels[:self._num_actual])
-        chain_plotter.plot(**kwargs)
+        """ Creates a chain plot of the model's chain.
+
+        This is my own implementation of a corner plot.
+
+        Parameters
+        ----------
+        kwargs : dict
+            Arguments to pass to the :func:`~dessn.chain.chain.ChainConsumer.plot` method. See the method
+            link for more details.
+
+        Returns
+        -------
+        figure
+            a matplotlib figure of the chain plot
+        """
+        chain_plotter = ChainConsumer()
+        chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
+        return chain_plotter.plot(**kwargs)
 
     def chain_summary(self):
-        chain_plotter = ChainConsumer(self.flat_chain, self._theta_labels[:self._num_actual])
+        """ Gets a summary of fit parameters through :class:`.ChainConsumer` and the
+        :func:`~dessn.chain.chain.ChainConsumer.get_summary` method. See the method link for more details
+        """
+        chain_plotter = ChainConsumer()
+        chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
         print(chain_plotter.get_summary())

@@ -17,4 +17,20 @@ dessn.chain.chain module
     :undoc-members:
     :show-inheritance:
 
+dessn.chain.demoMultichainChain module
+--------------------------------------
+
+.. automodule:: dessn.chain.demoMultichainChain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dessn.chain.demoSingleChain module
+----------------------------------
+
+.. automodule:: dessn.chain.demoSingleChain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
