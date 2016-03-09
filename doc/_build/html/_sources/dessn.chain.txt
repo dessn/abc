@@ -1,0 +1,20 @@
+dessn.chain package
+===================
+
+.. automodule:: dessn.chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+dessn.chain.chain module
+------------------------
+
+.. automodule:: dessn.chain.chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
