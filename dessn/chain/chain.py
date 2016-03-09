@@ -278,7 +278,8 @@ class ChainConsumer(object):
         bins : int, optional
             The number of bins to use. Overridden by the :func:`plot` method.
         sigmas : np.array, optional
-            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3]
+            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3]. Number of contours shown
+            decreases with the number of chains to show.
         colour : str(hex code), optional
             The colour to plot the contours in. Overridden by the :func:`plot` method.
         fit_values : np.array, optional
@@ -289,7 +290,13 @@ class ChainConsumer(object):
 
         """
         if sigmas is None:
-            sigmas = np.array([0, 0.5, 1, 2, 3])
+            num_chains = len(self.chains)
+            if num_chains == 1:
+                sigmas = np.array([0, 0.5, 1, 2, 3])
+            elif num_chains < 4:
+                sigmas = np.array([0, 0.5, 1, 2])
+            else:
+                sigmas = np.array([0, 1, 2])
         sigmas = np.sort(sigmas)
         levels = 1.0 - np.exp(-0.5 * sigmas ** 2)
 

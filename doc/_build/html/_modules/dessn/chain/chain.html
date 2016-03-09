@@ -407,7 +407,8 @@
 <span class="sd">        bins : int, optional</span>
 <span class="sd">            The number of bins to use. Overridden by the :func:`plot` method.</span>
 <span class="sd">        sigmas : np.array, optional</span>
-<span class="sd">            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3]</span>
+<span class="sd">            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3]. Number of contours shown</span>
+<span class="sd">            decreases with the number of chains to show.</span>
 <span class="sd">        colour : str(hex code), optional</span>
 <span class="sd">            The colour to plot the contours in. Overridden by the :func:`plot` method.</span>
 <span class="sd">        fit_values : np.array, optional</span>
@@ -418,7 +419,13 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sigmas</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="n">num_chains</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_chains</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">num_chains</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
         <span class="n">sigmas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sigmas</span><span class="p">)</span>
         <span class="n">levels</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sigmas</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
