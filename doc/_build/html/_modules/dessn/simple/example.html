@@ -136,6 +136,8 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">abc</span>
 
+<span class="kn">from</span> <span class="nn">dessn.chain.chain</span> <span class="kn">import</span> <span class="n">ChainConsumer</span>
+
 
 <div class="viewcode-block" id="Example"><a class="viewcode-back" href="../../../dessn.simple.html#dessn.simple.example.Example">[docs]</a><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;Setting up the math for some examples.</span>
@@ -305,11 +307,12 @@
         <span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ndim_final</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="n">sampler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample</span> <span class="o">=</span> <span class="n">sample</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">r&quot;$\theta_1$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\theta_2$&quot;</span><span class="p">],</span> <span class="n">truths</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_2</span><span class="p">])</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">[</span><span class="s2">r&quot;$\theta_1$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\theta_2$&quot;</span><span class="p">])</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;../../plots/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span></div>
+        <span class="n">c</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span></div>
+        <span class="c1">#fig = corner.corner(sample, labels=[r&quot;$\theta_1$&quot;, r&quot;$\theta_2$&quot;], truths=[self.theta_1, self.theta_2])</span>
+        <span class="c1">#plt.show()</span>
+
 </pre></div>
 
            </div>

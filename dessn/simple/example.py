@@ -7,6 +7,8 @@ import corner
 import os
 import abc
 
+from dessn.chain.chain import ChainConsumer
+
 
 class Example(object):
     r"""Setting up the math for some examples.
@@ -176,8 +178,9 @@ class Example(object):
         sample = sample.reshape((-1, ndim_final))
         self.sampler = sampler
         self.sample = sample
-        fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
-        plt.show()
-
+        c = ChainConsumer(sample, parameters=[r"$\theta_1$", r"$\theta_2$"])
         filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
-        fig.savefig(filename, bbox_inches='tight', dpi=300)
+        c.plot(filename=filename)
+        #fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
+        #plt.show()
+

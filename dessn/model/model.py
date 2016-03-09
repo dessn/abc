@@ -2,7 +2,7 @@ from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, Nod
 from dessn.model.edge import EdgeTransformation
 from dessn.utility.newtonian import NewtonianPosition
 from dessn.utility.hdemcee import EmceeWrapper
-from dessn.chain.chain import ChainPlotter
+from dessn.chain.chain import ChainConsumer
 import numpy as np
 import logging
 import emcee
@@ -348,10 +348,10 @@ class Model(object):
             fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
         plt.show()
 
-    def chain_plot(self):
-        chain_plotter = ChainPlotter(self.flat_chain, self._theta_labels[:self._num_actual])
-        chain_plotter.plot()
+    def chain_plot(self, **kwargs):
+        chain_plotter = ChainConsumer(self.flat_chain, self._theta_labels[:self._num_actual])
+        chain_plotter.plot(**kwargs)
 
     def chain_summary(self):
-        chain_plotter = ChainPlotter(self.flat_chain, self._theta_labels[:self._num_actual])
+        chain_plotter = ChainConsumer(self.flat_chain, self._theta_labels[:self._num_actual])
         print(chain_plotter.get_summary())
