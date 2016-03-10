@@ -17,6 +17,14 @@ dessn.utility.hdemcee module
     :undoc-members:
     :show-inheritance:
 
+dessn.utility.math module
+-------------------------
+
+.. automodule:: dessn.utility.math
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 dessn.utility.newtonian module
 ------------------------------
 

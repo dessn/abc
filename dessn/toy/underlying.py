@@ -3,7 +3,7 @@ from dessn.model.node import NodeUnderlying
 
 class Cosmology(NodeUnderlying):
     def __init__(self):
-        super(Cosmology, self).__init__("Cosmology", ["omega_m", "w"], [r"$\Omega_m$", "$w$"])
+        super(Cosmology, self).__init__("Cosmology", ["omega_m", "w", "H0"], [r"$\Omega_m$", "$w$", "$H_0$"])
 
     def get_log_prior(self, data):
         return 1

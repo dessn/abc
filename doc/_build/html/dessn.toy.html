@@ -166,7 +166,10 @@
 <dl class="method">
 <dt id="dessn.toy.edges.ToCount.get_transformation">
 <code class="descname">get_transformation</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToCount.get_transformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToCount.get_transformation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Given CCD efficiency, convert from count to flux <span class="math">\(f\)</span> and flux error <span class="math">\(\sigma_f\)</span>.</p>
+<div class="math">
+\[f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}\]\[\sigma_f = \sqrt{f}\]</div>
+</dd></dl>
 
 </dd></dl>
 
@@ -177,7 +180,10 @@
 <dl class="method">
 <dt id="dessn.toy.edges.ToFlux.get_transformation">
 <code class="descname">get_transformation</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToFlux.get_transformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToFlux.get_transformation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets flux from the luminosity distance and luminosity.</p>
+<div class="math">
+\[f = \frac{L}{4\pi D_L^2}\]</div>
+</dd></dl>
 
 </dd></dl>
 
@@ -221,7 +227,13 @@
 <dl class="method">
 <dt id="dessn.toy.edges.ToRedshift.get_log_likelihood">
 <code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToRedshift.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToRedshift.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Assume the redshift distribution follows a uniform distribution (for misidentification)
+with a tight Gaussian peak around the observed redshift.</p>
+<p>Assumes the misidentifiation range is between <span class="math">\(z=0\)</span> and <span class="math">\(z=2\)</span>.
+Also assumes the success rate is 99% for observed spectra</p>
+<div class="math">
+\[P(z_o|z) = \frac{0.01}{2} + \frac{0.99}{\sqrt{2\pi} z_{o,{\rm err}}} \exp\left(  -\frac{(z-z_o)^2}{2z^2_{o,{\rm err}}}  \right)\]</div>
+</dd></dl>
 
 </dd></dl>
 
@@ -283,7 +295,7 @@
 
 <dl class="class">
 <dt id="dessn.toy.observed.ObservedRedshift">
-<em class="property">class </em><code class="descclassname">dessn.toy.observed.</code><code class="descname">ObservedRedshift</code><span class="sig-paren">(</span><em>redshifts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/observed.html#ObservedRedshift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.observed.ObservedRedshift" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">dessn.toy.observed.</code><code class="descname">ObservedRedshift</code><span class="sig-paren">(</span><em>redshifts</em>, <em>redshift_errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/observed.html#ObservedRedshift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.observed.ObservedRedshift" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.NodeObserved" title="dessn.model.node.NodeObserved"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.NodeObserved</span></code></a></p>
 </dd></dl>
 

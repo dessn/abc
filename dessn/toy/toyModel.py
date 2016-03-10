@@ -21,7 +21,7 @@ class ToyModel(Model):
         n = 30
 
         self.add_node(ObservedType([None]))
-        self.add_node(ObservedRedshift([None]))
+        self.add_node(ObservedRedshift([None], [None]))
         self.add_node(ObservedCounts([None]))
 
         self.add_node(Flux())
@@ -51,4 +51,4 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     toy_model = ToyModel()
     pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-    fig = toy_model.get_pgm(pgm_file)
+    #fig = toy_model.get_pgm(pgm_file)

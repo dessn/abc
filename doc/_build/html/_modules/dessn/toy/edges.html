@@ -127,15 +127,30 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dessn.toy.edges</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatwCDM</span>
+
+<span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span>
+<span class="kn">from</span> <span class="nn">dessn.utility.math</span> <span class="kn">import</span> <span class="n">plus</span>
 
 
 <div class="viewcode-block" id="ToCount"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount">[docs]</a><span class="k">class</span> <span class="nc">ToCount</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToCount</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ocount&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToCount</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ocount&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;flux_error&quot;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="ToCount.get_transformation"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount.get_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+        <span class="sd">r&quot;&quot;&quot; Given CCD efficiency, convert from count to flux :math:`f` and flux error :math:`\sigma_f`.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}</span>
+
+<span class="sd">            \sigma_f = \sqrt{f}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="mf">0.9</span>
+        <span class="n">conversion</span> <span class="o">=</span> <span class="mi">1000</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span><span class="p">)</span>
+        <span class="n">flux_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">flux</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="n">flux</span><span class="p">,</span> <span class="s2">&quot;flux_error&quot;</span><span class="p">:</span> <span class="n">flux_error</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="ToFlux"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToFlux">[docs]</a><span class="k">class</span> <span class="nc">ToFlux</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
@@ -143,23 +158,44 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ToFlux</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">,</span> <span class="s2">&quot;luminosity&quot;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="ToFlux.get_transformation"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToFlux.get_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+        <span class="sd">r&quot;&quot;&quot; Gets flux from the luminosity distance and luminosity.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            f = \frac{L}{4\pi D_L^2}</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="n">flux</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="ToLuminosityDistance"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosityDistance">[docs]</a><span class="k">class</span> <span class="nc">ToLuminosityDistance</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToLuminosityDistance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;lumdist&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToLuminosityDistance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;lumdist&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;H0&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="ToLuminosityDistance.get_transformation"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosityDistance.get_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+        <span class="n">cosmology</span> <span class="o">=</span> <span class="n">FlatwCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;H0&quot;</span><span class="p">],</span> <span class="n">Om0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">],</span> <span class="n">w0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;lumdist&quot;</span><span class="p">:</span> <span class="n">cosmology</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;redshift&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">value</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="ToRedshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRedshift">[docs]</a><span class="k">class</span> <span class="nc">ToRedshift</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToRedshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;oredshift&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToRedshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">([</span><span class="s2">&quot;oredshift&quot;</span><span class="p">,</span> <span class="s2">&quot;oredshift_error&quot;</span><span class="p">],</span> <span class="s2">&quot;redshift&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ToRedshift.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRedshift.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+        <span class="sd">r&quot;&quot;&quot; Assume the redshift distribution follows a uniform distribution (for misidentification)</span>
+<span class="sd">        with a tight Gaussian peak around the observed redshift.</span>
+
+<span class="sd">        Assumes the misidentifiation range is between :math:`z=0` and :math:`z=2`.</span>
+<span class="sd">        Also assumes the success rate is 99% for observed spectra</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            P(z_o|z) = \frac{0.01}{2} + \frac{0.99}{\sqrt{2\pi} z_{o,{\rm err}}} \exp\left(  -\frac{(z-z_o)^2}{2z^2_{o,{\rm err}}}  \right)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">gauss</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;redshift&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;redshift&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift_error&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift_error&quot;</span><span class="p">])</span>\
+                <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift_error&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">plus</span><span class="p">(</span><span class="n">uniform</span><span class="p">,</span> <span class="n">gauss</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ToLuminosity"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosity">[docs]</a><span class="k">class</span> <span class="nc">ToLuminosity</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
