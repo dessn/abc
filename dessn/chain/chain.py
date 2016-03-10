@@ -72,9 +72,12 @@ class ChainConsumer(object):
             colours = self.all_colours[:num_chains]
         return colours
 
-    def _get_figure(self, figsize=(5, 5), max_ticks=5):
+    def _get_figure(self, figsize=(5, 5), max_ticks=5, serif=True):
         n = len(self.all_parameters)
         fig, axes = plt.subplots(n, n, figsize=figsize)
+        if serif:
+            plt.rc('text', usetex=True)
+            plt.rc('font', family='serif')
         fig.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1, wspace=0.05, hspace=0.05)
         
         extents = []
@@ -132,7 +135,7 @@ class ChainConsumer(object):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", filename=None, display=False, rainbow=False, contour_kwargs=None):
+    def plot(self, figsize="COLUMN", filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None):
         """ Plot the chain
 
         Parameters
@@ -150,6 +153,8 @@ class ChainConsumer(object):
             number of chains to show, this method uses a predefined list of colours.
         contour_kwargs : dict
             A dictionary of optional arguments to pass to the :func:`plot_contour` function.
+        serif : bool
+            Sets all plot text to serif.
 
         Returns
         -------
@@ -166,7 +171,7 @@ class ChainConsumer(object):
                 figsize = (10, 10)
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
-        fig, axes = self._get_figure(figsize=figsize)
+        fig, axes = self._get_figure(figsize=figsize, serif=serif)
 
         num_bins = self._get_bins()
         fit_values = self.get_summary()
@@ -311,10 +316,8 @@ class ChainConsumer(object):
         hist[hist == 0] = 1E-16
         vals = self._convert_to_stdev(hist.T)
         if cloud and num_chains == 1:
-            point_mag = np.floor(np.log10(x.size))
-            skip = int(np.power(10, point_mag - 6))
-            skip = max(skip, 1)
-            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.05, c=colours[1], marker=".", edgecolors="none")
+            skip = x.size / 50000
+            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.2, c=colours[1], marker=".", edgecolors="none")
         if len(self.chains) == 1 or force_contourf:
             cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=1.0)
         c = ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
