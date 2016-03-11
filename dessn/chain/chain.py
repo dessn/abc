@@ -64,12 +64,13 @@ class ChainConsumer(object):
         self.parameters.append(parameters)
         return self
 
-    def _get_colours(self, rainbow=False):
+    def _get_colours(self, colours, rainbow=False):
         num_chains = len(self.chains)
-        if rainbow or num_chains > 5:
+        c = colours if colours is not None else self.all_colours
+        if rainbow or num_chains > len(c):
             colours = cm.rainbow(np.linspace(0, 1, num_chains))
         else:
-            colours = self.all_colours[:num_chains]
+            colours = c[:num_chains]
         return colours
 
     def _get_figure(self, all_parameters, figsize=(5, 5), max_ticks=5, serif=True, plot_hists=True, flip=False):
@@ -151,7 +152,7 @@ class ChainConsumer(object):
         return proposal
 
     def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False,
-             serif=True, contour_kwargs=None, plot_hists=True, dont_flip=False, force_summary=None):
+             serif=True, contour_kwargs=None, plot_hists=True, dont_flip=False, force_summary=None, colours=None):
         """ Plot the chain
 
         Parameters
@@ -182,6 +183,9 @@ class ChainConsumer(object):
         force_summary : bool, optional
             Overriding the default value of None will force the ``plot`` method to use your bool value. If more than
             one chain is being plotted, summaries are still not printed.
+        colours : list[str(hex)]
+            If supplied, uses the supplied colours for chains instead of the default. Do not set both this parameter
+            and the ``rainbow`` parameter.
 
         Returns
         -------
@@ -189,6 +193,7 @@ class ChainConsumer(object):
             the matplotlib figure
 
         """
+        assert rainbow is False or colours is None, "You cannot both ask for rainbow colours and then give explicit colours"
         if contour_kwargs is None:
             contour_kwargs = {}
         if isinstance(figsize, str):
@@ -208,7 +213,7 @@ class ChainConsumer(object):
 
         num_bins = self._get_bins()
         fit_values = self.get_summary()
-        colours = self._get_colours(rainbow=rainbow)
+        colours = self._get_colours(colours, rainbow=rainbow)
 
         summary = len(self.chains) == 1 and ((force_summary is None and len(parameters) < 5) or force_summary)
 
@@ -322,7 +327,7 @@ class ChainConsumer(object):
         b = self._clamp(b * scalefactor)
         return "#%02x%02x%02x" % (r, g, b)
         
-    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False, cloud=True):
+    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False, cloud=True, contourf_alpha=1.0):
         r""" Plots contours of the probability surface between two parameters
 
         Parameters
@@ -372,8 +377,8 @@ class ChainConsumer(object):
             skip = x.size / 50000
             ax.scatter(x[::skip], y[::skip], s=10, alpha=0.2, c=colours[1], marker=".", edgecolors="none")
         if len(self.chains) == 1 or force_contourf:
-            cf = ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=1.0)
-        c = ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
+            ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=contourf_alpha)
+        ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
 
     def _convert_to_stdev(self, sigma):
         # From astroML

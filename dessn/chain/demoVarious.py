@@ -71,6 +71,22 @@ class DemoVarious(object):
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(filename="demoVarious4_ForceSummary.png", force_summary=False, contour_kwargs={"cloud": False, "sigmas": np.linspace(0, 3, 10)})
 
+    def various5_custom_colours(self):
+        r""" You can supply custom colours to the plotting. Be warned, if you have more chains than colours, you *will* get a
+        rainbow instead!
+
+        Note that, due to colour scaling, you **must** supply custom colours as full six digit hex colours, such as ``#A87B20``.
+
+        As colours get scaled, it is a good idea to pick something neither too light, dark, or saturated.
+
+        In this example, I also force contour filling and set contour filling opactiy to 0.5, so we can see overlap.
+
+        .. figure::     ../dessn/chain/demoVarious5_CustomColours.png
+            :align:     center
+        """
+        c = ChainConsumer().add_chain(self.data, parameters=self.parameters).add_chain(self.data2)
+        c.plot(filename="demoVarious5_CustomColours.png", colours=["#B32222", "#D1D10D"], contour_kwargs={"force_contourf": True, "contourf_alpha": 0.6})
+
 if __name__ == "__main__":
 
     demo = DemoVarious()
@@ -81,4 +97,6 @@ if __name__ == "__main__":
 
     # demo.various3_flip_histgram()
 
-    demo.various4_summaries()
+    # demo.various4_summaries()
+
+    demo.various5_custom_colours()
