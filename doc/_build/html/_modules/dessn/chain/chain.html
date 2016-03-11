@@ -207,8 +207,10 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        bins : int, optional</span>
+<span class="sd">        bins : int|float, optional</span>
 <span class="sd">            The number of bins to use. By default uses :math:`\frac{\sqrt{n}}{10}`, where :math:`n` are the number of data points.</span>
+<span class="sd">            Giving an integer will set the number of bins to the given value. Giving a float will scale the number of bins, such that</span>
+<span class="sd">            giving ``bins=1.5`` will result in using :math:`\frac{1.5\sqrt{n}}{10}` bins.</span>
 <span class="sd">        flip : bool, optional</span>
 <span class="sd">            Set to false if, when plotting only two parameters, you do not want it to rotate the histogram</span>
 <span class="sd">            so that it is horizontal.</span>
@@ -229,8 +231,12 @@
 
         <span class="k">if</span> <span class="n">bins</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bins</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="o">*</span> <span class="n">bins</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bins</span><span class="p">()]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bins value is not a recognised class (float or int)&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters_general</span><span class="p">[</span><span class="s2">&quot;bins&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bins</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters_general</span><span class="p">[</span><span class="s2">&quot;max_ticks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_ticks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters_general</span><span class="p">[</span><span class="s2">&quot;flip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flip</span>

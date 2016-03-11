@@ -273,11 +273,14 @@
         <span class="sd">r&quot;&quot;&quot; An example on using customised extents. Similarly to the example for truth values in</span>
 <span class="sd">        :func:`various7_truth_values`, you can pass a list in, or a dictionary.</span>
 
+<span class="sd">        Also modifying the number of bins using a float value to scale, rather than set, the number of bins.</span>
+
 <span class="sd">        .. figure::     ../dessn/chain/demoVarious8_Extents.png</span>
 <span class="sd">            :align:     center</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">()</span>
         <span class="n">c</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">configure_general</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;demoVarious8_Extents.png&quot;</span><span class="p">,</span> <span class="n">extents</span><span class="o">=</span><span class="p">[(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)])</span></div></div>
 
 
@@ -297,9 +300,9 @@
 
     <span class="c1"># demo.various6_truth_values()</span>
 
-    <span class="c1"># demo.various7_rainbow()</span>
+    <span class="n">demo</span><span class="o">.</span><span class="n">various7_rainbow</span><span class="p">()</span>
 
-    <span class="c1"># demo.various8_extents()</span>
+    <span class="n">demo</span><span class="o">.</span><span class="n">various8_extents</span><span class="p">()</span>
 </pre></div>
 
            </div>

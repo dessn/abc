@@ -251,9 +251,11 @@ the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" t
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>bins</strong> : int, optional</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>bins</strong> : int|float, optional</p>
 <blockquote>
-<div><p>The number of bins to use. By default uses <span class="math">\(\frac{\sqrt{n}}{10}\)</span>, where <span class="math">\(n\)</span> are the number of data points.</p>
+<div><p>The number of bins to use. By default uses <span class="math">\(\frac{\sqrt{n}}{10}\)</span>, where <span class="math">\(n\)</span> are the number of data points.
+Giving an integer will set the number of bins to the given value. Giving a float will scale the number of bins, such that
+giving <code class="docutils literal"><span class="pre">bins=1.5</span></code> will result in using <span class="math">\(\frac{1.5\sqrt{n}}{10}\)</span> bins.</p>
 </div></blockquote>
 <p><strong>flip</strong> : bool, optional</p>
 <blockquote>
@@ -608,6 +610,7 @@ The figures are respectively</p>
 <code class="descname">various8_extents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious.various8_extents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious.various8_extents" title="Permalink to this definition">¶</a></dt>
 <dd><p>An example on using customised extents. Similarly to the example for truth values in
 <code class="xref py py-func docutils literal"><span class="pre">various7_truth_values()</span></code>, you can pass a list in, or a dictionary.</p>
+<p>Also modifying the number of bins using a float value to scale, rather than set, the number of bins.</p>
 <div class="figure align-center">
 <img alt="_images/demoVarious8_Extents.png" src="_images/demoVarious8_Extents.png" />
 </div>
