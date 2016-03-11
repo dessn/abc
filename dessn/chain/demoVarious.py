@@ -87,6 +87,27 @@ class DemoVarious(object):
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters).add_chain(self.data2)
         c.plot(filename="demoVarious5_CustomColours.png", colours=["#B32222", "#D1D10D"], contour_kwargs={"force_contourf": True, "contourf_alpha": 0.5})
 
+    def various6_truth_values(self):
+        r""" The reward for scrolling down so far, the first customised argument that will be frequently used; truth values.
+
+        Truth values can be given as a list the same length of the input parameters, or as a dictionary, keyed by the parameters.
+
+        In the code there are two examples. The first, where a list is passed in, and the second, where an incomplete dictionary
+        of truth values is passed in. The figures are respectively
+
+        .. figure::     ../dessn/chain/demoVarious6_TruthValues.png
+            :align:     center
+
+        .. figure::     ../dessn/chain/demoVarious6_TruthValues2.png
+            :align:     center
+        """
+        c = ChainConsumer().add_chain(self.data, parameters=self.parameters)#.add_chain(self.data2)
+        c.plot(filename="demoVarious6_TruthValues.png", truth=[0.0, 5.0, 0.0, 0.0])
+
+        # You can also set truth using a dictionary, like below. If you do it this way, you do not need to
+        # set truth values for all parameters
+        c.plot(filename="demoVarious6_TruthValues2.png", truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
+
 if __name__ == "__main__":
 
     demo = DemoVarious()
@@ -99,4 +120,6 @@ if __name__ == "__main__":
 
     # demo.various4_summaries()
 
-    demo.various5_custom_colours()
+    # demo.various5_custom_colours()
+
+    demo.various6_truth_values()

@@ -41,4 +41,12 @@ dessn.chain.demoTwoDisjointChains module
     :undoc-members:
     :show-inheritance:
 
+dessn.chain.demoVarious module
+------------------------------
+
+.. automodule:: dessn.chain.demoVarious
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

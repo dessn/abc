@@ -151,8 +151,8 @@ class ChainConsumer(object):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False,
-             serif=True, contour_kwargs=None, plot_hists=True, dont_flip=False, force_summary=None, colours=None):
+    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False, serif=True,
+             contour_kwargs=None, plot_hists=True, dont_flip=False, force_summary=None, colours=None, truth=None):
         """ Plot the chain
 
         Parameters
@@ -186,6 +186,8 @@ class ChainConsumer(object):
         colours : list[str(hex)]
             If supplied, uses the supplied colours for chains instead of the default. Do not set both this parameter
             and the ``rainbow`` parameter.
+        truth : list[float] or dict[str], optional
+            A list of truth values corresponding to parameters, or a dictionary of truth values indexed by key
 
         Returns
         -------
@@ -206,6 +208,12 @@ class ChainConsumer(object):
 
         if parameters is None:
             parameters = self.all_parameters
+
+        assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
+            "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
+
+        if truth is not None and isinstance(truth, list):
+            truth = {p: t for p, t in zip(parameters, truth)}
 
         flip = (len(parameters) == 2 and plot_hists and not dont_flip)
 
@@ -229,7 +237,7 @@ class ChainConsumer(object):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
-                        m = self.plot_bars(ax, p1, chain[:, index], colour=colour, bins=bins, fit_values=fit[p1], flip=do_flip, summary=summary)
+                        m = self.plot_bars(ax, p1, chain[:, index], colour=colour, bins=bins, fit_values=fit[p1], flip=do_flip, summary=summary, truth=truth)
                         if max_val is None or m > max_val:
                             max_val = m
                     if do_flip:
@@ -243,7 +251,7 @@ class ChainConsumer(object):
                             continue
                         i1 = parameters.index(p1)
                         i2 = parameters.index(p2)
-                        self.plot_contour(ax, chain[:, i2], chain[:, i1], colour=colour, bins=bins, fit_values=fit, **contour_kwargs)
+                        self.plot_contour(ax, chain[:, i2], chain[:, i1], p1, p2, colour=colour, bins=bins, fit_values=fit, truth=truth, **contour_kwargs)
 
         if self.names is not None:
             ax = axes[0, -1]
@@ -256,7 +264,7 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
-    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None, flip=False, summary=True):
+    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None, flip=False, summary=True, truth=None):
         """ Method responsible for plotting the marginalised distributions
 
         Parameters
@@ -276,6 +284,8 @@ class ChainConsumer(object):
         summary : bool, optional
             Whether to print summaries. Default value is overridden by :func:`plot`.
             Note that only parameters with defined labels are given summaries.
+        truth : dict, optional
+            A dictionary of parameter labels and truth values
 
         Returns
         -------
@@ -301,6 +311,13 @@ class ChainConsumer(object):
                     ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
                 if summary and isinstance(parameter, str):
                     ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
+        if truth is not None:
+            truth_value = truth.get(parameter)
+            if truth_value is not None:
+                if flip:
+                    ax.axhline(truth_value, ls="--", color="k", dashes=(3, 3))
+                else:
+                    ax.axvline(truth_value, ls="--", color="k", dashes=(3, 3))
         return hist.max()
         
     def _clamp(self, val, minimum=0, maximum=255):
@@ -327,7 +344,8 @@ class ChainConsumer(object):
         b = self._clamp(b * scalefactor)
         return "#%02x%02x%02x" % (r, g, b)
         
-    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=None, cloud=True, contourf_alpha=1.0):
+    def plot_contour(self, ax, x, y, px, py, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=None, cloud=True,
+                     contourf_alpha=1.0, truth=None):
         r""" Plots contours of the probability surface between two parameters
 
         Parameters
@@ -338,6 +356,10 @@ class ChainConsumer(object):
             The ``x`` axis array of data
         y : np.ndarray
             The ``y`` axis array of data
+        px : str|int
+            The parameter name for the ``x`` axis
+        py : str|int
+            The parameter name for the ``y`` axis
         bins : int, optional
             The number of bins to use. Overridden by the :func:`plot` method.
         sigmas : np.array, optional
@@ -353,6 +375,8 @@ class ChainConsumer(object):
         cloud : bool
             If true and there is only one chain, plots the cloud of points. If false, or there are more than
             one chain, does not plot the cloud.
+        truth : dict, optional
+            A dictionary of truth values, keyed by parameter name. Overridden by the :func:`plot` method.
         """
         num_chains = len(self.chains)
         if sigmas is None:
@@ -379,6 +403,14 @@ class ChainConsumer(object):
         if (len(self.chains) == 1 and force_contourf is None) or force_contourf:
             ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=contourf_alpha)
         ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
+
+        if truth is not None:
+            truth_value = truth.get(px)
+            if truth_value is not None:
+                ax.axhline(truth_value, ls="--", color="k", dashes=(3, 3))
+            truth_value = truth.get(py)
+            if truth_value is not None:
+                ax.axvline(truth_value, ls="--", color="k", dashes=(3, 3))
 
     def _convert_to_stdev(self, sigma):
         # From astroML
