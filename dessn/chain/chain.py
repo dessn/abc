@@ -72,15 +72,18 @@ class ChainConsumer(object):
             colours = self.all_colours[:num_chains]
         return colours
 
-    def _get_figure(self, figsize=(5, 5), max_ticks=5, serif=True):
+    def _get_figure(self, figsize=(5, 5), max_ticks=5, serif=True, plot_hists=True):
         n = len(self.all_parameters)
+        if not plot_hists:
+            n -= 1
         fig, axes = plt.subplots(n, n, figsize=figsize)
+
         if serif:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
         fig.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1, wspace=0.05, hspace=0.05)
         
-        extents = []
+        extents = {}
         for p in self.all_parameters:
             min_val = None
             max_val = None
@@ -96,10 +99,16 @@ class ChainConsumer(object):
                     min_val = min_prop
                 if max_val is None or max_prop > max_val:
                     max_val = max_prop
-            extents.append((min_val, max_val))
-            
-        for i in range(n):
-            for j in range(n):
+            extents[p] = (min_val, max_val)
+
+        if plot_hists:
+            params1 = self.all_parameters
+            params2 = self.all_parameters
+        else:
+            params1 = self.all_parameters[1:]
+            params2 = self.all_parameters[:-1]
+        for i, p1 in enumerate(params1):
+            for j, p2 in enumerate(params2):
                 ax = axes[i, j]
                 display_x_ticks = False
                 display_y_ticks = False
@@ -107,27 +116,28 @@ class ChainConsumer(object):
                     ax.set_frame_on(False)
                     ax.set_xticks([])
                     ax.set_yticks([])
-                if i != n - 1:
-                    ax.set_xticks([])
                 else:
-                    display_x_ticks = True
-                    if isinstance(self.all_parameters[j], str):
-                        ax.set_xlabel(self.all_parameters[j], fontsize=14)
-                if j != 0 or i == 0:
-                    ax.set_yticks([])
-                else:
-                    display_y_ticks = True
-                    if isinstance(self.all_parameters[i], str):
-                        ax.set_ylabel(self.all_parameters[i], fontsize=14)
-                if display_x_ticks:
-                    [l.set_rotation(45) for l in ax.get_xticklabels()]
-                    ax.xaxis.set_major_locator(MaxNLocator(max_ticks, prune="lower"))
-                if display_y_ticks:
-                    [l.set_rotation(45) for l in ax.get_yticklabels()]
-                    ax.yaxis.set_major_locator(MaxNLocator(max_ticks, prune="lower"))
-                if i != j:
-                    ax.set_ylim(extents[i])
-                ax.set_xlim(extents[j])
+                    if i != n - 1:
+                        ax.set_xticks([])
+                    else:
+                        display_x_ticks = True
+                        if isinstance(p2, str):
+                            ax.set_xlabel(p2, fontsize=14)
+                    if j != 0 or (plot_hists and i == 0):
+                        ax.set_yticks([])
+                    else:
+                        display_y_ticks = True
+                        if isinstance(p1, str):
+                            ax.set_ylabel(p1, fontsize=14)
+                    if display_x_ticks:
+                        [l.set_rotation(45) for l in ax.get_xticklabels()]
+                        ax.xaxis.set_major_locator(MaxNLocator(max_ticks, prune="lower"))
+                    if display_y_ticks:
+                        [l.set_rotation(45) for l in ax.get_yticklabels()]
+                        ax.yaxis.set_major_locator(MaxNLocator(max_ticks, prune="lower"))
+                    if i != j or not plot_hists:
+                        ax.set_ylim(extents[p1])
+                    ax.set_xlim(extents[p2])
 
         return fig, axes
 
@@ -135,7 +145,7 @@ class ChainConsumer(object):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None):
+    def plot(self, figsize="COLUMN", filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None, plot_hists=True):
         """ Plot the chain
 
         Parameters
@@ -151,10 +161,12 @@ class ChainConsumer(object):
         rainbow : bool
             If true, forces the use of rainbow colours when displaying multiple chains. By default, under a certain
             number of chains to show, this method uses a predefined list of colours.
-        contour_kwargs : dict
-            A dictionary of optional arguments to pass to the :func:`plot_contour` function.
         serif : bool
             Sets all plot text to serif.
+        contour_kwargs : dict
+            A dictionary of optional arguments to pass to the :func:`plot_contour` function.
+        plot_hists : bool
+            Whether to plot histograms or not
 
         Returns
         -------
@@ -171,16 +183,24 @@ class ChainConsumer(object):
                 figsize = (10, 10)
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
-        fig, axes = self._get_figure(figsize=figsize, serif=serif)
+        fig, axes = self._get_figure(figsize=figsize, serif=serif, plot_hists=plot_hists)
 
         num_bins = self._get_bins()
         fit_values = self.get_summary()
         colours = self._get_colours(rainbow=rainbow)
-        
-        for i, p1 in enumerate(self.all_parameters):
-            for j, p2 in enumerate(self.all_parameters):
+
+        if plot_hists:
+            params1 = self.all_parameters
+            params2 = self.all_parameters
+        else:
+            params1 = self.all_parameters[1:]
+            params2 = self.all_parameters[:-1]
+        for i, p1 in enumerate(params1):
+            for j, p2 in enumerate(params2):
+                if i < j or (plot_hists and i == j):
+                    continue
                 ax = axes[i, j]
-                if i == j:
+                if plot_hists and i == j:
                     max_val = None
                     for chain, parameters, colour, bins, fit in zip(self.chains, self.parameters, colours, num_bins, fit_values):
                         if p1 not in parameters:
@@ -191,8 +211,8 @@ class ChainConsumer(object):
                             max_val = m
                     ax.set_ylim(0, 1.1 * max_val)
                     
-                if i > j:
-                    for chain, parameters, colour in zip(self.chains, self.parameters, colours):
+                else:
+                    for chain, parameters, bins, colour, fit in zip(self.chains, self.parameters, num_bins, colours, fit_values):
                         if p1 not in parameters or p2 not in parameters:
                             continue
                         i1 = parameters.index(p1)
@@ -205,7 +225,7 @@ class ChainConsumer(object):
             ax.legend(artists, self.names, loc="center", frameon=False)
 
         if filename is not None:
-            fig.savefig(filename, bbox_inches="tight", dpi=300, transparent=True)
+            fig.savefig(filename, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
         if display:
             plt.show()
         return fig
