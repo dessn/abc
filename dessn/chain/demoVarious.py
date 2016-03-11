@@ -5,8 +5,6 @@ from chain import ChainConsumer
 class DemoVarious(object):
     r""" The demo for various functions and usages of Chain Consumer.
 
-    Running this file in python creates two random data sets, representing two separate chains, *for two separate models*.
-
     This file should show some examples of how to use ChainConsumer in more unusual ways with extra customisation.
 
     The methods of this class should provide context as to what is being done.
@@ -27,8 +25,18 @@ class DemoVarious(object):
         data2[:, 1] = data2[:, 1] * 2 - 5
         data2[:, 3] = data2[:, 3] * 1.5 + 2
 
+        data3 = np.random.randn(nsamples, ndim)
+        data3[:, 2] -= 1
+        data3[:, 0] += np.abs(data3[:, 1])
+        data3[:, 1] += 2
+        data3[:, 1] = data3[:, 2] * 2 - 5
+
+        data4 = (data[:] + 1.0) * 1.5
+
         self.data = data
         self.data2 = data2
+        self.data3 = data3
+        self.data4 = data4
         self.parameters = ["$x$", "$y$", r"$\alpha$", r"$\beta$"]
 
     def various1_no_histogram(self):
@@ -99,7 +107,8 @@ class DemoVarious(object):
         Truth values can be given as a list the same length of the input parameters, or as a dictionary, keyed by the parameters.
 
         In the code there are two examples. The first, where a list is passed in, and the second, where an incomplete dictionary
-        of truth values is passed in. The figures are respectively
+        of truth values is passed in. In the second case, customised values for truth line plotting are used.
+        The figures are respectively
 
         .. figure::     ../dessn/chain/demoVarious6_TruthValues.png
             :align:     center
@@ -114,6 +123,19 @@ class DemoVarious(object):
         # set truth values for all parameters
         c.configure_truth(color='w', ls=":", alpha=0.5).plot(filename="demoVarious6_TruthValues2.png", truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
 
+    def various7_rainbow(self):
+        r""" An example on using the rainbow with serif fonts and too many bins!
+
+        .. figure::     ../dessn/chain/demoVarious7_Rainbow.png
+            :align:     center
+        """
+        c = ChainConsumer()
+        c.add_chain(self.data, name="A")
+        c.add_chain(self.data2, name="B")
+        c.add_chain(self.data3, name="C")
+        c.add_chain(self.data4, name="D")
+        c.configure_general(bins=150, serif=True, rainbow=True)
+        c.plot(filename="demoVarious7_Rainbow.png")
 if __name__ == "__main__":
 
     demo = DemoVarious()
@@ -129,3 +151,5 @@ if __name__ == "__main__":
     # demo.various5_custom_colours()
 
     # demo.various6_truth_values()
+
+    demo.various7_rainbow()

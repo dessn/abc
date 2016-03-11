@@ -79,7 +79,7 @@ class ChainConsumer(object):
         Parameters
         ----------
         bins : int, optional
-            The number of bins to use. Overridden by the :func:`plot` method.
+            The number of bins to use. By default uses :math:`\frac{\sqrt{n}}{10}`, where :math:`n` are the number of data points.
         flip : bool, optional
             Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
             so that it is horizontal.
@@ -190,6 +190,61 @@ class ChainConsumer(object):
         self._configured_truth = True
         return self
 
+    def get_summary(self):
+        """  Gets a summary of the marginalised parameter distributions.
+
+        Returns
+        -------
+        list of dictionaries
+            One entry per chain, parameter bounds stored in dictionary with parameter as key
+        """
+        results = []
+        for chain, parameters in zip(self.chains, self.parameters):
+            res = {}
+            for i, p in enumerate(parameters):
+                summary = self._get_parameter_summary(chain[:, i], p)
+                res[p] = summary
+            results.append(res)
+        return results
+
+    def get_parameter_text(self, lower, maximum, upper):
+        """ Generates LaTeX appropriate text from marginalised parameter bounds.
+
+        Parameters
+        ----------
+        lower : float
+            The lower bound on the parameter
+        maximum : float
+            The value of the parameter with maximum probability
+        upper : float
+            The upper bound on the parameter
+        """
+        if lower is None or upper is None:
+            return ""
+        upper_error = upper - maximum
+        lower_error = maximum - lower
+        resolution = min(np.floor(np.log10(np.abs(upper_error))), np.floor(np.log10(np.abs(lower_error))))
+        factor = 0
+        if np.abs(resolution) > 3:
+            factor = -resolution - 1
+        upper_error *= 10 ** factor
+        lower_error *= 10 ** factor
+        maximum *= 10 ** factor
+        upper_error = round(upper_error, 1)
+        lower_error = round(lower_error, 1)
+        maximum = round(maximum, 1)
+        if maximum == -0.0:
+            maximum = 0.0
+        upper_error_text = "%0.1f" % upper_error
+        lower_error_text = "%0.1f" % lower_error
+        if upper_error_text == lower_error_text:
+            text = r"%0.1f\pm %s" % (maximum, lower_error_text)
+        else:
+            text = r"%0.1f^{+%s}_{-%s}" % (maximum, upper_error_text, lower_error_text)
+        if factor != 0:
+            text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
+        return text
+
     def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, truth=None):
         """ Plot the chain
 
@@ -246,7 +301,7 @@ class ChainConsumer(object):
 
         fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, flip=flip)
 
-        num_bins = self._get_bins()
+        num_bins = self.parameters_general["bins"]
         fit_values = self.get_summary()
         colours = self._get_colours(self.parameters_general["colours"], rainbow=self.parameters_general["rainbow"])
         summary = self.parameters_bar["summary"]
@@ -349,61 +404,6 @@ class ChainConsumer(object):
             if truth_value is not None:
                 ax.axvline(truth_value, **self.parameters_truth)
 
-    def get_summary(self):
-        """  Gets a summary of the marginalised parameter distributions.
-
-        Returns
-        -------
-        list of dictionaries
-            One entry per chain, parameter bounds stored in dictionary with parameter as key
-        """
-        results = []
-        for chain, parameters in zip(self.chains, self.parameters):
-            res = {}
-            for i, p in enumerate(parameters):
-                summary = self._get_parameter_summary(chain[:, i], p)
-                res[p] = summary
-            results.append(res)
-        return results
-
-    def get_parameter_text(self, lower, maximum, upper):
-        """ Generates LaTeX appropriate text from marginalised parameter bounds.
-
-        Parameters
-        ----------
-        lower : float
-            The lower bound on the parameter
-        maximum : float
-            The value of the parameter with maximum probability
-        upper : float
-            The upper bound on the parameter
-        """
-        if lower is None or upper is None:
-            return ""
-        upper_error = upper - maximum
-        lower_error = maximum - lower
-        resolution = min(np.floor(np.log10(np.abs(upper_error))), np.floor(np.log10(np.abs(lower_error))))
-        factor = 0
-        if np.abs(resolution) > 3:
-            factor = -resolution - 1
-        upper_error *= 10 ** factor
-        lower_error *= 10 ** factor
-        maximum *= 10 ** factor
-        upper_error = round(upper_error, 1)
-        lower_error = round(lower_error, 1)
-        maximum = round(maximum, 1)
-        if maximum == -0.0:
-            maximum = 0.0
-        upper_error_text = "%0.1f" % upper_error
-        lower_error_text = "%0.1f" % lower_error
-        if upper_error_text == lower_error_text:
-            text = r"%0.1f\pm %s" % (maximum, lower_error_text)
-        else:
-            text = r"%0.1f^{+%s}_{-%s}" % (maximum, upper_error_text, lower_error_text)
-        if factor != 0:
-            text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
-        return text
-
     def _get_colours(self, colours, rainbow=False):
         num_chains = len(self.chains)
         if rainbow or num_chains > len(colours):
@@ -505,11 +505,13 @@ class ChainConsumer(object):
         return colours
 
     def _scale_colour(self, colour, scalefactor):
-        hex = colour.strip('#')
-        if scalefactor < 0 or len(hex) != 6:
-            return hex
-
-        r, g, b = int(hex[:2], 16), int(hex[2:4], 16), int(hex[4:], 16)
+        if isinstance(colour, np.ndarray):
+            r, g, b = colour[:3]*255.0
+        else:
+            hex = colour.strip('#')
+            if scalefactor < 0 or len(hex) != 6:
+                return hex
+            r, g, b = int(hex[:2], 16), int(hex[2:4], 16), int(hex[4:], 16)
         r = self._clamp(r * scalefactor)
         g = self._clamp(g * scalefactor)
         b = self._clamp(b * scalefactor)
