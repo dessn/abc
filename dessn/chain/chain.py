@@ -327,7 +327,7 @@ class ChainConsumer(object):
         b = self._clamp(b * scalefactor)
         return "#%02x%02x%02x" % (r, g, b)
         
-    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=False, cloud=True, contourf_alpha=1.0):
+    def plot_contour(self, ax, x, y, bins=50, sigmas=None, colour='#222222', fit_values=None, force_contourf=None, cloud=True, contourf_alpha=1.0):
         r""" Plots contours of the probability surface between two parameters
 
         Parameters
@@ -376,7 +376,7 @@ class ChainConsumer(object):
         if cloud and num_chains == 1:
             skip = x.size / 50000
             ax.scatter(x[::skip], y[::skip], s=10, alpha=0.2, c=colours[1], marker=".", edgecolors="none")
-        if len(self.chains) == 1 or force_contourf:
+        if (len(self.chains) == 1 and force_contourf is None) or force_contourf:
             ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=contourf_alpha)
         ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
 
