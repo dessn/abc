@@ -72,14 +72,17 @@ class ChainConsumer(object):
             colours = self.all_colours[:num_chains]
         return colours
 
-    def _get_figure(self, all_parameters, figsize=(5, 5), max_ticks=5, serif=True, plot_hists=True):
+    def _get_figure(self, all_parameters, figsize=(5, 5), max_ticks=5, serif=True, plot_hists=True, flip=False):
         n = len(all_parameters)
         if not plot_hists:
             n -= 1
-        fig, axes = plt.subplots(n, n, figsize=figsize)
-        if not isinstance(axes, list) and not isinstance(axes, np.ndarray):
-            self.logger.debug("Only one axis generated")
-            axes = np.array([[axes]])
+
+        if n == 2 and plot_hists and flip:
+            gridspec_kw = {'width_ratios': [3, 1], 'height_ratios': [1, 3]}
+        else:
+            gridspec_kw = {}
+        fig, axes = plt.subplots(n, n, figsize=figsize, squeeze=False, gridspec_kw=gridspec_kw)
+
         if serif:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
@@ -119,7 +122,7 @@ class ChainConsumer(object):
                     ax.set_xticks([])
                     ax.set_yticks([])
                 else:
-                    if i != n - 1:
+                    if i != n - 1 or (flip and j == n - 1):
                         ax.set_xticks([])
                     else:
                         display_x_ticks = True
@@ -147,7 +150,7 @@ class ChainConsumer(object):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None, plot_hists=True):
+    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None, plot_hists=True, dont_flip=False):
         """ Plot the chain
 
         Parameters
@@ -171,6 +174,10 @@ class ChainConsumer(object):
             A dictionary of optional arguments to pass to the :func:`plot_contour` function.
         plot_hists : bool, optional
             Whether to plot histograms or not
+        dont_flip : bool, optional
+            By default, if you are only two parameters and display histograms, the bottom histogram will be flipped and
+            the relative sizes of the plots changed so that the contour plot becomes larger.
+            Setting this to true suppresses this behaviour.
 
         Returns
         -------
@@ -190,7 +197,10 @@ class ChainConsumer(object):
 
         if parameters is None:
             parameters = self.all_parameters
-        fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, serif=serif, plot_hists=plot_hists)
+
+        flip = (len(parameters) == 2 and plot_hists and not dont_flip)
+
+        fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, serif=serif, plot_hists=plot_hists, flip=flip)
 
         num_bins = self._get_bins()
         fit_values = self.get_summary()
@@ -200,16 +210,20 @@ class ChainConsumer(object):
                 if i < j:
                     continue
                 ax = axes[i, j]
+                do_flip = (flip and i == len(params1) - 1)
                 if plot_hists and i == j:
                     max_val = None
                     for chain, parameters, colour, bins, fit in zip(self.chains, self.parameters, colours, num_bins, fit_values):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
-                        m = self.plot_bars(ax, p1, chain[:, index], colour=colour, bins=bins, fit_values=fit[p1])
+                        m = self.plot_bars(ax, p1, chain[:, index], colour=colour, bins=bins, fit_values=fit[p1], flip=do_flip)
                         if max_val is None or m > max_val:
                             max_val = m
-                    ax.set_ylim(0, 1.1 * max_val)
+                    if do_flip:
+                        ax.set_xlim(0, 1.1 * max_val)
+                    else:
+                        ax.set_ylim(0, 1.1 * max_val)
                     
                 else:
                     for chain, parameters, bins, colour, fit in zip(self.chains, self.parameters, num_bins, colours, fit_values):
@@ -230,7 +244,7 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
-    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None):
+    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None, flip=False):
         """ Method responsible for plotting the marginalised distributions
 
         Parameters
@@ -243,8 +257,10 @@ class ChainConsumer(object):
             The data corresponding to the parameter
         bins : int, optional
             The number of bins to use. Default value is overridden by :func:`plot`
-        colour : str
+        colour : str, optional
             The colour to use when plotting. Default value is overridden
+        flip : bool, optional
+            Whether to flip the histogram. Default value is overridden by :func:`plot`
 
         Returns
         -------
@@ -253,14 +269,21 @@ class ChainConsumer(object):
         """
         hist, edges = np.histogram(chain_row, bins=bins, normed=True)
         edge_center = 0.5 * (edges[:-1] + edges[1:])
-        ax.hist(edge_center, weights=hist, bins=edges, histtype="step", color=colour)
+        if flip:
+            orientation = "horizontal"
+        else:
+            orientation = "vertical"
+        ax.hist(edge_center, weights=hist, bins=edges, histtype="step", color=colour, orientation=orientation)
         interpolator = interp1d(edge_center, hist, kind="nearest")
         if len(self.chains) == 1 and fit_values is not None:
             lower = fit_values[0]
             upper = fit_values[2]
             if lower is not None and upper is not None:
                 x = np.linspace(lower, upper, 1000)
-                ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
+                if flip:
+                    ax.fill_betweenx(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
+                else:
+                    ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
                 if isinstance(parameter, str):
                     ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
         return hist.max()

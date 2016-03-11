@@ -41,14 +41,24 @@ class DemoVarious(object):
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(plot_hists=False, filename="demoVarious1_NoHist.png", contour_kwargs={"cloud": False})
 
-
     def various2_select_parameters(self):
         """ You can chose to only display a select number of parameters.
 
-        .. figure:: ../dessn/chain/demoVarious2_SelectParameters.png
+        .. figure::     ../dessn/chain/demoVarious2_SelectParameters.png
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(parameters=self.parameters[:2], filename="demoVarious2_SelectParameters.png", contour_kwargs={"cloud": False})
+
+    def various3_flip_histgram(self):
+        """ YWhen you only display two parameters and don't disable histograms, your plot will look different.
+
+        You can suppress this by passing to plot ``dont_flip=True``.
+
+        .. figure::     ../dessn/chain/demoVarious3_Flip.png
+            :align:     center
+        """
+        c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
+        c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png", contour_kwargs={"cloud": False})
 
 if __name__ == "__main__":
 
@@ -56,4 +66,6 @@ if __name__ == "__main__":
 
     # demo.various1_no_histogram()
 
-    demo.various2_select_parameters()
+    # demo.various2_select_parameters()
+
+    demo.various3_flip_histgram()
