@@ -60,6 +60,17 @@ class DemoVarious(object):
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png", contour_kwargs={"cloud": False})
 
+    def various4_summaries(self):
+        r""" If there is only one chain to analyse, and you only chose to plot a small number of parameters,
+        the parameter summary will be shown above the relevent axis. You can set this to always show or always not show
+        by using the ``force_summary`` flag. Also, here we demonstrate more :math:`\sigma` levels!
+
+        .. figure::     ../dessn/chain/demoVarious4_ForceSummary.png
+            :align:     center
+        """
+        c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
+        c.plot(filename="demoVarious4_ForceSummary.png", force_summary=False, contour_kwargs={"cloud": False, "sigmas": np.linspace(0, 3, 10)})
+
 if __name__ == "__main__":
 
     demo = DemoVarious()
@@ -68,4 +79,6 @@ if __name__ == "__main__":
 
     # demo.various2_select_parameters()
 
-    demo.various3_flip_histgram()
+    # demo.various3_flip_histgram()
+
+    demo.various4_summaries()

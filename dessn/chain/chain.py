@@ -150,7 +150,8 @@ class ChainConsumer(object):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None, plot_hists=True, dont_flip=False):
+    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False,
+             serif=True, contour_kwargs=None, plot_hists=True, dont_flip=False, force_summary=None):
         """ Plot the chain
 
         Parameters
@@ -178,6 +179,9 @@ class ChainConsumer(object):
             By default, if you are only two parameters and display histograms, the bottom histogram will be flipped and
             the relative sizes of the plots changed so that the contour plot becomes larger.
             Setting this to true suppresses this behaviour.
+        force_summary : bool, optional
+            Overriding the default value of None will force the ``plot`` method to use your bool value. If more than
+            one chain is being plotted, summaries are still not printed.
 
         Returns
         -------
@@ -205,6 +209,9 @@ class ChainConsumer(object):
         num_bins = self._get_bins()
         fit_values = self.get_summary()
         colours = self._get_colours(rainbow=rainbow)
+
+        summary = len(self.chains) == 1 and ((force_summary is None and len(parameters) < 5) or force_summary)
+
         for i, p1 in enumerate(params1):
             for j, p2 in enumerate(params2):
                 if i < j:
@@ -217,7 +224,7 @@ class ChainConsumer(object):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
-                        m = self.plot_bars(ax, p1, chain[:, index], colour=colour, bins=bins, fit_values=fit[p1], flip=do_flip)
+                        m = self.plot_bars(ax, p1, chain[:, index], colour=colour, bins=bins, fit_values=fit[p1], flip=do_flip, summary=summary)
                         if max_val is None or m > max_val:
                             max_val = m
                     if do_flip:
@@ -244,7 +251,7 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
-    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None, flip=False):
+    def plot_bars(self, ax, parameter, chain_row, bins=50, colour='#222222', fit_values=None, flip=False, summary=True):
         """ Method responsible for plotting the marginalised distributions
 
         Parameters
@@ -261,6 +268,9 @@ class ChainConsumer(object):
             The colour to use when plotting. Default value is overridden
         flip : bool, optional
             Whether to flip the histogram. Default value is overridden by :func:`plot`
+        summary : bool, optional
+            Whether to print summaries. Default value is overridden by :func:`plot`.
+            Note that only parameters with defined labels are given summaries.
 
         Returns
         -------
@@ -284,7 +294,7 @@ class ChainConsumer(object):
                     ax.fill_betweenx(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
                 else:
                     ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
-                if isinstance(parameter, str):
+                if summary and isinstance(parameter, str):
                     ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
         return hist.max()
         
