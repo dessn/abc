@@ -134,8 +134,6 @@
 <div class="viewcode-block" id="DemoVarious"><a class="viewcode-back" href="../../../dessn.chain.html#dessn.chain.demoVarious.DemoVarious">[docs]</a><span class="k">class</span> <span class="nc">DemoVarious</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot; The demo for various functions and usages of Chain Consumer.</span>
 
-<span class="sd">    Running this file in python creates two random data sets, representing two separate chains, *for two separate models*.</span>
-
 <span class="sd">    This file should show some examples of how to use ChainConsumer in more unusual ways with extra customisation.</span>
 
 <span class="sd">    The methods of this class should provide context as to what is being done.</span>
@@ -156,8 +154,18 @@
         <span class="n">data2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data2</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">5</span>
         <span class="n">data2</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">data2</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="mi">2</span>
 
+        <span class="n">data3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nsamples</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
+        <span class="n">data3</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">data3</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data3</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">data3</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="n">data3</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data3</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">5</span>
+
+        <span class="n">data4</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[:]</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data2</span> <span class="o">=</span> <span class="n">data2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data3</span> <span class="o">=</span> <span class="n">data3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data4</span> <span class="o">=</span> <span class="n">data4</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;$x$&quot;</span><span class="p">,</span> <span class="s2">&quot;$y$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\alpha$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\beta$&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="DemoVarious.various1_no_histogram"><a class="viewcode-back" href="../../../dessn.chain.html#dessn.chain.demoVarious.DemoVarious.various1_no_histogram">[docs]</a>    <span class="k">def</span> <span class="nf">various1_no_histogram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -185,11 +193,14 @@
 <span class="sd">        You can suppress this by passing to ``flip=False`` to :func:`ChainConsumer.configure_general`. See the</span>
 <span class="sd">        commented out line in code for the actual line to disable this.</span>
 
+<span class="sd">        The max number of ticks is also modified in this example.</span>
+
 <span class="sd">        .. figure::     ../dessn/chain/demoVarious3_Flip.png</span>
 <span class="sd">            :align:     center</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">()</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
-        <span class="c1"># c.configure_general(flip=False)</span>
+        <span class="c1"># c.configure_general(flip=False, max_ticks=5)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">configure_general</span><span class="p">(</span><span class="n">max_ticks</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;demoVarious3_Flip.png&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DemoVarious.various4_summaries"><a class="viewcode-back" href="../../../dessn.chain.html#dessn.chain.demoVarious.DemoVarious.various4_summaries">[docs]</a>    <span class="k">def</span> <span class="nf">various4_summaries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -228,7 +239,8 @@
 <span class="sd">        Truth values can be given as a list the same length of the input parameters, or as a dictionary, keyed by the parameters.</span>
 
 <span class="sd">        In the code there are two examples. The first, where a list is passed in, and the second, where an incomplete dictionary</span>
-<span class="sd">        of truth values is passed in. The figures are respectively</span>
+<span class="sd">        of truth values is passed in. In the second case, customised values for truth line plotting are used.</span>
+<span class="sd">        The figures are respectively</span>
 
 <span class="sd">        .. figure::     ../dessn/chain/demoVarious6_TruthValues.png</span>
 <span class="sd">            :align:     center</span>
@@ -241,7 +253,33 @@
 
         <span class="c1"># You can also set truth using a dictionary, like below. If you do it this way, you do not need to</span>
         <span class="c1"># set truth values for all parameters</span>
-        <span class="n">c</span><span class="o">.</span><span class="n">configure_truth</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;demoVarious6_TruthValues2.png&quot;</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;$x$&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;$y$&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span> <span class="s2">r&quot;$\beta$&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">})</span></div></div>
+        <span class="n">c</span><span class="o">.</span><span class="n">configure_truth</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;demoVarious6_TruthValues2.png&quot;</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;$x$&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;$y$&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span> <span class="s2">r&quot;$\beta$&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="DemoVarious.various7_rainbow"><a class="viewcode-back" href="../../../dessn.chain.html#dessn.chain.demoVarious.DemoVarious.various7_rainbow">[docs]</a>    <span class="k">def</span> <span class="nf">various7_rainbow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; An example on using the rainbow with serif fonts and too many bins!</span>
+
+<span class="sd">        .. figure::     ../dessn/chain/demoVarious7_Rainbow.png</span>
+<span class="sd">            :align:     center</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">()</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data4</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">configure_general</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">serif</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">rainbow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;demoVarious7_Rainbow.png&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DemoVarious.various8_extents"><a class="viewcode-back" href="../../../dessn.chain.html#dessn.chain.demoVarious.DemoVarious.various8_extents">[docs]</a>    <span class="k">def</span> <span class="nf">various8_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; An example on using customised extents. Similarly to the example for truth values in</span>
+<span class="sd">        :func:`various7_truth_values`, you can pass a list in, or a dictionary.</span>
+
+<span class="sd">        .. figure::     ../dessn/chain/demoVarious8_Extents.png</span>
+<span class="sd">            :align:     center</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">()</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;demoVarious8_Extents.png&quot;</span><span class="p">,</span> <span class="n">extents</span><span class="o">=</span><span class="p">[(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)])</span></div></div>
+
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
@@ -258,6 +296,10 @@
     <span class="c1"># demo.various5_custom_colours()</span>
 
     <span class="c1"># demo.various6_truth_values()</span>
+
+    <span class="c1"># demo.various7_rainbow()</span>
+
+    <span class="n">demo</span><span class="o">.</span><span class="n">various8_extents</span><span class="p">()</span>
 </pre></div>
 
            </div>

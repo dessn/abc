@@ -72,7 +72,7 @@ class ChainConsumer(object):
         self.parameters.append(parameters)
         return self
 
-    def configure_general(self, bins=None, flip=True, rainbow=None, colours=None, serif=True, plot_hists=True):
+    def configure_general(self, bins=None, flip=True, rainbow=None, colours=None, serif=True, plot_hists=True, max_ticks=5):
         """ Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
         the :func:`plot` method will invoke this method automatically.
 
@@ -92,6 +92,8 @@ class ChainConsumer(object):
             Whether to display ticks and labels with serif font.
         plot_hists : bool, optional
             Whether to plot marginalised distributions or not
+        max_ticks : int, optional
+            The maximum number of ticks to use on the plots
 
         """
         assert rainbow is None or colours is None, "You cannot both ask for rainbow colours and then give explicit colours"
@@ -101,7 +103,7 @@ class ChainConsumer(object):
         else:
             bins = [bins] * len(self.chains)
         self.parameters_general["bins"] = bins
-
+        self.parameters_general["max_ticks"] = max_ticks
         self.parameters_general["flip"] = flip
         self.parameters_general["serif"] = serif
         self.parameters_general["rainbow"] = rainbow
@@ -245,7 +247,7 @@ class ChainConsumer(object):
             text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
         return text
 
-    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, truth=None):
+    def plot(self, figsize="COLUMN", parameters=None, extents=None, filename=None, display=False, truth=None):
         """ Plot the chain
 
         Parameters
@@ -256,6 +258,9 @@ class ChainConsumer(object):
             in two-column mode. ``PAGE`` creates a full page width figure. String arguments are not case sensitive.
         parameters : list[str], optional
             If set, only creates a plot for those specific parameters
+        extents : list[tuple[float]] or dict[str], optional
+            Extents are given as two-tuples. You can pass in a list the same size as parameters (or default
+            parameters if you don't specify parameters), or as a dictionary.
         filename : str, optional
             If set, saves the figure to this location
         display : bool, optional
@@ -293,13 +298,19 @@ class ChainConsumer(object):
         assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
             "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
 
+        assert extents is None or isinstance(extents, dict) or (isinstance(extents, list) and len(extents) == len(parameters)), \
+            "Have a list of %d parameters and %d extent values" % (len(parameters), len(extents))
+
         if truth is not None and isinstance(truth, list):
             truth = {p: t for p, t in zip(parameters, truth)}
+
+        if extents is not None and isinstance(extents, list):
+            extents = {p: e for p, e in zip(parameters, extents)}
 
         plot_hists = self.parameters_general["plot_hists"]
         flip = (len(parameters) == 2 and plot_hists and self.parameters_general["flip"])
 
-        fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, flip=flip)
+        fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, flip=flip, external_extents=extents)
 
         num_bins = self.parameters_general["bins"]
         fit_values = self.get_summary()
@@ -412,8 +423,9 @@ class ChainConsumer(object):
             colours = colours[:num_chains]
         return colours
 
-    def _get_figure(self, all_parameters, flip, figsize=(5, 5), max_ticks=5):
+    def _get_figure(self, all_parameters, flip, figsize=(5, 5), external_extents=None):
         n = len(all_parameters)
+        max_ticks = self.parameters_general["max_ticks"]
         plot_hists = self.parameters_general["plot_hists"]
         if not plot_hists:
             n -= 1
@@ -433,18 +445,21 @@ class ChainConsumer(object):
         for p in all_parameters:
             min_val = None
             max_val = None
-            for chain, parameters in zip(self.chains, self.parameters):
-                if p not in parameters:
-                    continue
-                index = parameters.index(p)
-                mean = np.mean(chain[:, index])
-                std = np.std(chain[:, index])
-                min_prop = mean - 3 * std
-                max_prop = mean + 3 * std
-                if min_val is None or min_prop < min_val:
-                    min_val = min_prop
-                if max_val is None or max_prop > max_val:
-                    max_val = max_prop
+            if external_extents is not None and p in external_extents:
+                min_val, max_val = external_extents[p]
+            else:
+                for chain, parameters in zip(self.chains, self.parameters):
+                    if p not in parameters:
+                        continue
+                    index = parameters.index(p)
+                    mean = np.mean(chain[:, index])
+                    std = np.std(chain[:, index])
+                    min_prop = mean - 3 * std
+                    max_prop = mean + 3 * std
+                    if min_val is None or min_prop < min_val:
+                        min_val = min_prop
+                    if max_val is None or max_prop > max_val:
+                        max_val = max_prop
             extents[p] = (min_val, max_val)
 
         if plot_hists:

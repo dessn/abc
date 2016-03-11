@@ -243,38 +243,43 @@ decreases with the number of chains to show.</p>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.configure_general">
-<code class="descname">configure_general</code><span class="sig-paren">(</span><em>bins=None</em>, <em>flip=True</em>, <em>rainbow=None</em>, <em>colours=None</em>, <em>serif=True</em>, <em>plot_hists=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_general"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_general" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
-the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</p>
+<code class="descname">configure_general</code><span class="sig-paren">(</span><em>bins=None</em>, <em>flip=True</em>, <em>rainbow=None</em>, <em>colours=None</em>, <em>serif=True</em>, <em>plot_hists=True</em>, <em>max_ticks=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_general"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_general" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,</dt>
+<dd>the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>bins</strong> : int, optional</p>
 <blockquote>
-<div><p>The number of bins to use. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
+<div><p>The number of bins to use. By default uses :math:<a href="#id1"><span class="problematic" id="id2">`</span></a></p>
 </div></blockquote>
-<p><strong>flip</strong> : bool, optional</p>
-<blockquote>
-<div><p>Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
-so that it is horizontal.</p>
-</div></blockquote>
-<p><strong>rainbow</strong> : bool, optional</p>
-<blockquote>
-<div><p>Set to True to force use of rainbow colours</p>
-</div></blockquote>
-<p><strong>colours</strong> : list[str(hex)], optional</p>
-<blockquote>
-<div><p>Provide a list of colours to use for each chain. If you provide more chains than colours,
-you <em>will</em> get the rainbow colour spectrum.</p>
-</div></blockquote>
-<p><strong>serif</strong> : bool, optional</p>
-<blockquote>
-<div><p>Whether to display ticks and labels with serif font.</p>
-</div></blockquote>
-<p><strong>plot_hists</strong> : bool, optional</p>
+<p><strong>rac{sqrt{n}}{10}`, where :math:`n` are the number of data points.</strong></p>
 <blockquote class="last">
-<div><p>Whether to plot marginalised distributions or not</p>
+<div><dl class="docutils">
+<dt>flip <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd><p class="first last">Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
+so that it is horizontal.</p>
+</dd>
+<dt>rainbow <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd><p class="first last">Set to True to force use of rainbow colours</p>
+</dd>
+<dt>colours <span class="classifier-delimiter">:</span> <span class="classifier">list[str(hex)], optional</span></dt>
+<dd><p class="first last">Provide a list of colours to use for each chain. If you provide more chains than colours,
+you <em>will</em> get the rainbow colour spectrum.</p>
+</dd>
+<dt>serif <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd><p class="first last">Whether to display ticks and labels with serif font.</p>
+</dd>
+<dt>plot_hists <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd><p class="first last">Whether to plot marginalised distributions or not</p>
+</dd>
+<dt>max_ticks <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
+<dd><p class="first last">The maximum number of ticks to use on the plots</p>
+</dd>
+</dl>
 </div></blockquote>
 </td>
 </tr>
@@ -337,7 +342,7 @@ If you do not call this explicitly, the <a class="reference internal" href="#des
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>parameters=None</em>, <em>filename=None</em>, <em>display=False</em>, <em>truth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>parameters=None</em>, <em>extents=None</em>, <em>filename=None</em>, <em>display=False</em>, <em>truth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the chain</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -352,6 +357,11 @@ in two-column mode. <code class="docutils literal"><span class="pre">PAGE</span>
 <p><strong>parameters</strong> : list[str], optional</p>
 <blockquote>
 <div><p>If set, only creates a plot for those specific parameters</p>
+</div></blockquote>
+<p><strong>extents</strong> : list[tuple[float]] or dict[str], optional</p>
+<blockquote>
+<div><p>Extents are given as two-tuples. You can pass in a list the same size as parameters (or default
+parameters if you don&#8217;t specify parameters), or as a dictionary.</p>
 </div></blockquote>
 <p><strong>filename</strong> : str, optional</p>
 <blockquote>
@@ -444,7 +454,6 @@ chain we supply the right parameters for each chain. The plot for this is saved 
 <em class="property">class </em><code class="descclassname">dessn.chain.demoVarious.</code><code class="descname">DemoVarious</code><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The demo for various functions and usages of Chain Consumer.</p>
-<p>Running this file in python creates two random data sets, representing two separate chains, <em>for two separate models</em>.</p>
 <p>This file should show some examples of how to use ChainConsumer in more unusual ways with extra customisation.</p>
 <p>The methods of this class should provide context as to what is being done.</p>
 <dl class="method">
@@ -471,6 +480,7 @@ chain we supply the right parameters for each chain. The plot for this is saved 
 <dd><p>YWhen you only display two parameters and don&#8217;t disable histograms, your plot will look different.</p>
 <p>You can suppress this by passing to <code class="docutils literal"><span class="pre">flip=False</span></code> to <code class="xref py py-func docutils literal"><span class="pre">ChainConsumer.configure_general()</span></code>. See the
 commented out line in code for the actual line to disable this.</p>
+<p>The max number of ticks is also modified in this example.</p>
 <div class="figure align-center">
 <img alt="_images/demoVarious3_Flip.png" src="_images/demoVarious3_Flip.png" />
 </div>
@@ -506,12 +516,32 @@ rainbow instead!</p>
 <dd><p>The reward for scrolling down so far, the first customised argument that will be frequently used; truth values.</p>
 <p>Truth values can be given as a list the same length of the input parameters, or as a dictionary, keyed by the parameters.</p>
 <p>In the code there are two examples. The first, where a list is passed in, and the second, where an incomplete dictionary
-of truth values is passed in. The figures are respectively</p>
+of truth values is passed in. In the second case, customised values for truth line plotting are used.
+The figures are respectively</p>
 <div class="figure align-center">
 <img alt="_images/demoVarious6_TruthValues.png" src="_images/demoVarious6_TruthValues.png" />
 </div>
 <div class="figure align-center">
 <img alt="_images/demoVarious6_TruthValues2.png" src="_images/demoVarious6_TruthValues2.png" />
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.chain.demoVarious.DemoVarious.various7_rainbow">
+<code class="descname">various7_rainbow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious.various7_rainbow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious.various7_rainbow" title="Permalink to this definition">¶</a></dt>
+<dd><p>An example on using the rainbow with serif fonts and too many bins!</p>
+<div class="figure align-center">
+<img alt="_images/demoVarious7_Rainbow.png" src="_images/demoVarious7_Rainbow.png" />
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.chain.demoVarious.DemoVarious.various8_extents">
+<code class="descname">various8_extents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious.various8_extents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious.various8_extents" title="Permalink to this definition">¶</a></dt>
+<dd><p>An example on using customised extents. Similarly to the example for truth values in
+<code class="xref py py-func docutils literal"><span class="pre">various7_truth_values()</span></code>, you can pass a list in, or a dictionary.</p>
+<div class="figure align-center">
+<img alt="_images/demoVarious8_Extents.png" src="_images/demoVarious8_Extents.png" />
 </div>
 </dd></dl>
 

@@ -64,11 +64,14 @@ class DemoVarious(object):
         You can suppress this by passing to ``flip=False`` to :func:`ChainConsumer.configure_general`. See the
         commented out line in code for the actual line to disable this.
 
+        The max number of ticks is also modified in this example.
+
         .. figure::     ../dessn/chain/demoVarious3_Flip.png
             :align:     center
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
-        # c.configure_general(flip=False)
+        # c.configure_general(flip=False, max_ticks=5)
+        c.configure_general(max_ticks=10)
         c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png")
 
     def various4_summaries(self):
@@ -136,6 +139,19 @@ class DemoVarious(object):
         c.add_chain(self.data4, name="D")
         c.configure_general(bins=150, serif=True, rainbow=True)
         c.plot(filename="demoVarious7_Rainbow.png")
+
+    def various8_extents(self):
+        r""" An example on using customised extents. Similarly to the example for truth values in
+        :func:`various7_truth_values`, you can pass a list in, or a dictionary.
+
+        .. figure::     ../dessn/chain/demoVarious8_Extents.png
+            :align:     center
+        """
+        c = ChainConsumer()
+        c.add_chain(self.data)
+        c.plot(filename="demoVarious8_Extents.png", extents=[(-5, 5), (0, 15), (-3, 3), (-6, 6)])
+
+
 if __name__ == "__main__":
 
     demo = DemoVarious()
@@ -152,4 +168,6 @@ if __name__ == "__main__":
 
     # demo.various6_truth_values()
 
-    demo.various7_rainbow()
+    # demo.various7_rainbow()
+
+    demo.various8_extents()
