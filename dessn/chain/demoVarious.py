@@ -85,7 +85,7 @@ class DemoVarious(object):
             :align:     center
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters).add_chain(self.data2)
-        c.plot(filename="demoVarious5_CustomColours.png", colours=["#B32222", "#D1D10D"], contour_kwargs={"force_contourf": True, "contourf_alpha": 0.6})
+        c.plot(filename="demoVarious5_CustomColours.png", colours=["#B32222", "#D1D10D"], contour_kwargs={"force_contourf": True, "contourf_alpha": 0.5})
 
 if __name__ == "__main__":
 
