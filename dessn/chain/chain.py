@@ -73,7 +73,7 @@ class ChainConsumer(object):
         return self
 
     def configure_general(self, bins=None, flip=True, rainbow=None, colours=None, serif=True, plot_hists=True, max_ticks=5):
-        """ Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
+        r""" Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
         the :func:`plot` method will invoke this method automatically.
 
         Parameters
@@ -209,7 +209,96 @@ class ChainConsumer(object):
             results.append(res)
         return results
 
-    def get_parameter_text(self, lower, maximum, upper):
+    def get_latex_table(self, parameters=None, transpose=False, caption=None, label=None, hlines=True, blank_fill="--"):
+        """ Generates a LaTeX table from parameter summaries.
+
+        For an example output, see the image below:
+
+        .. figure::     ../dessn/chain/demoTable.png
+            :align:     center
+
+        Parameters
+        ----------
+        parameters : list[str], optional
+            A list of what parameters to include in the table. By default, includes all parameters
+        transpose : bool, optional
+            Defaults to False, which gives each column as a parameter, each chain (model) as a row. You can swap it so
+            that you have a parameter each row and a model each column by setting this to True
+        caption : str, optional
+            If you want to generate a caption for the table through Python, use this. Defaults to an empty string
+        label : str, optional
+            If you want to generate a label for the table through Python, use this. Defaults to an empty string
+        hlines : bool, optional
+            Inserts ``\\hline`` before and after the header, and at the end of table.
+        blank_fill : str, optional
+            If a model does not have a particular parameter, will fill that cell of the table with this string.
+
+        Returns
+        -------
+        str
+            the LaTeX table.
+        """
+        if parameters is None:
+            parameters = self.all_parameters
+        assert len(self.names) == len(self.chains), "Generating a LaTeX table requires all chains to have names"
+        for p in parameters:
+            assert isinstance(p, str), "Generating a LaTeX table requires all parameters have labels"
+        num_parameters = len(parameters)
+        num_chains = len(self.chains)
+        fit_values = self.get_summary()
+        if label is None:
+            label = ""
+        if caption is None:
+            caption = ""
+
+        base_string = r"""\begin{table}[]
+        \centering
+        \caption{%s}
+        \label{%s}
+        \begin{tabular}{%s}
+        %s      \end{tabular}
+\end{table}"""
+        end_text = " \\\\ \n"
+        if transpose:
+            column_text = "c" * (num_chains + 1)
+        else:
+            column_text = "c" * (num_parameters + 1)
+
+        center_text = ""
+        hline_text = "\\hline\n"
+        if hlines:
+            center_text += hline_text + "\t\t"
+        if transpose:
+            center_text += " & ".join(["Parameter"] + self.names) + end_text
+            if hlines:
+                center_text += "\t\t" + hline_text
+            for p in parameters:
+                arr = ["\t\t" + p]
+                for chain_res in fit_values:
+                    if p in chain_res:
+                        arr.append(self.get_parameter_text(*chain_res[p], wrap=True))
+                    else:
+                        arr.append(blank_fill)
+                center_text += " & ".join(arr) + end_text
+        else:
+            center_text += " & ".join(["Model"] + parameters) + end_text
+            if hlines:
+                center_text += "\t\t" + hline_text
+            for name, chain_res in zip(self.names, fit_values):
+                arr = ["\t\t" + name]
+                for p in parameters:
+                    if p in chain_res:
+                        arr.append(self.get_parameter_text(*chain_res[p], wrap=True))
+                    else:
+                        arr.append(blank_fill)
+                center_text += " & ".join(arr) + end_text
+        if hlines:
+            center_text += "\t\t" + hline_text
+        final_text = base_string % (caption, label, column_text, center_text)
+
+        return final_text
+
+    def get_parameter_text(self, lower, maximum, upper, wrap=False):
         """ Generates LaTeX appropriate text from marginalised parameter bounds.
 
         Parameters
@@ -220,6 +309,8 @@ class ChainConsumer(object):
             The value of the parameter with maximum probability
         upper : float
             The upper bound on the parameter
+        wrap : bool
+            Wrap output text in dollar signs for LaTeX
         """
         if lower is None or upper is None:
             return ""
@@ -245,6 +336,8 @@ class ChainConsumer(object):
             text = r"%0.1f^{+%s}_{-%s}" % (maximum, upper_error_text, lower_error_text)
         if factor != 0:
             text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
+        if wrap:
+            text = "$%s$" % text
         return text
 
     def plot(self, figsize="COLUMN", parameters=None, extents=None, filename=None, display=False, truth=None):

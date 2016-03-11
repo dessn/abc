@@ -89,6 +89,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.chain">dessn.chain.chain module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoOneChain">dessn.chain.demoOneChain module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoTable">dessn.chain.demoTable module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoThreeChains">dessn.chain.demoThreeChains module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoTwoDisjointChains">dessn.chain.demoTwoDisjointChains module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoVarious">dessn.chain.demoVarious module</a></li>
@@ -244,42 +245,41 @@ decreases with the number of chains to show.</p>
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.configure_general">
 <code class="descname">configure_general</code><span class="sig-paren">(</span><em>bins=None</em>, <em>flip=True</em>, <em>rainbow=None</em>, <em>colours=None</em>, <em>serif=True</em>, <em>plot_hists=True</em>, <em>max_ticks=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_general"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_general" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,</dt>
-<dd>the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</dd>
-</dl>
+<dd><p>Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
+the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>bins</strong> : int, optional</p>
 <blockquote>
-<div><p>The number of bins to use. By default uses :math:<a href="#id1"><span class="problematic" id="id2">`</span></a></p>
+<div><p>The number of bins to use. By default uses <span class="math">\(\frac{\sqrt{n}}{10}\)</span>, where <span class="math">\(n\)</span> are the number of data points.</p>
 </div></blockquote>
-<p><strong>rac{sqrt{n}}{10}`, where :math:`n` are the number of data points.</strong></p>
-<blockquote class="last">
-<div><dl class="docutils">
-<dt>flip <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
-<dd><p class="first last">Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
+<p><strong>flip</strong> : bool, optional</p>
+<blockquote>
+<div><p>Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
 so that it is horizontal.</p>
-</dd>
-<dt>rainbow <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
-<dd><p class="first last">Set to True to force use of rainbow colours</p>
-</dd>
-<dt>colours <span class="classifier-delimiter">:</span> <span class="classifier">list[str(hex)], optional</span></dt>
-<dd><p class="first last">Provide a list of colours to use for each chain. If you provide more chains than colours,
+</div></blockquote>
+<p><strong>rainbow</strong> : bool, optional</p>
+<blockquote>
+<div><p>Set to True to force use of rainbow colours</p>
+</div></blockquote>
+<p><strong>colours</strong> : list[str(hex)], optional</p>
+<blockquote>
+<div><p>Provide a list of colours to use for each chain. If you provide more chains than colours,
 you <em>will</em> get the rainbow colour spectrum.</p>
-</dd>
-<dt>serif <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
-<dd><p class="first last">Whether to display ticks and labels with serif font.</p>
-</dd>
-<dt>plot_hists <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
-<dd><p class="first last">Whether to plot marginalised distributions or not</p>
-</dd>
-<dt>max_ticks <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
-<dd><p class="first last">The maximum number of ticks to use on the plots</p>
-</dd>
-</dl>
+</div></blockquote>
+<p><strong>serif</strong> : bool, optional</p>
+<blockquote>
+<div><p>Whether to display ticks and labels with serif font.</p>
+</div></blockquote>
+<p><strong>plot_hists</strong> : bool, optional</p>
+<blockquote>
+<div><p>Whether to plot marginalised distributions or not</p>
+</div></blockquote>
+<p><strong>max_ticks</strong> : int, optional</p>
+<blockquote class="last">
+<div><p>The maximum number of ticks to use on the plots</p>
 </div></blockquote>
 </td>
 </tr>
@@ -297,8 +297,57 @@ If you do not call this explicitly, the <a class="reference internal" href="#des
 </dd></dl>
 
 <dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.get_latex_table">
+<code class="descname">get_latex_table</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>transpose=False</em>, <em>caption=None</em>, <em>label=None</em>, <em>hlines=True</em>, <em>blank_fill='--'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_latex_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_latex_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a LaTeX table from parameter summaries.</p>
+<p>For an example output, see the image below:</p>
+<div class="figure align-center">
+<img alt="_images/demoTable.png" src="_images/demoTable.png" />
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>parameters</strong> : list[str], optional</p>
+<blockquote>
+<div><p>A list of what parameters to include in the table. By default, includes all parameters</p>
+</div></blockquote>
+<p><strong>transpose</strong> : bool, optional</p>
+<blockquote>
+<div><p>Defaults to False, which gives each column as a parameter, each chain (model) as a row. You can swap it so
+that you have a parameter each row and a model each column by setting this to True</p>
+</div></blockquote>
+<p><strong>caption</strong> : str, optional</p>
+<blockquote>
+<div><p>If you want to generate a caption for the table through Python, use this. Defaults to an empty string</p>
+</div></blockquote>
+<p><strong>label</strong> : str, optional</p>
+<blockquote>
+<div><p>If you want to generate a label for the table through Python, use this. Defaults to an empty string</p>
+</div></blockquote>
+<p><strong>hlines</strong> : bool, optional</p>
+<blockquote>
+<div><p>Inserts <code class="docutils literal"><span class="pre">\hline</span></code> before and after the header, and at the end of table.</p>
+</div></blockquote>
+<p><strong>blank_fill</strong> : str, optional</p>
+<blockquote>
+<div><p>If a model does not have a particular parameter, will fill that cell of the table with this string.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">str</p>
+<blockquote class="last">
+<div><p>the LaTeX table.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.get_parameter_text">
-<code class="descname">get_parameter_text</code><span class="sig-paren">(</span><em>lower</em>, <em>maximum</em>, <em>upper</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_parameter_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_parameter_text" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_parameter_text</code><span class="sig-paren">(</span><em>lower</em>, <em>maximum</em>, <em>upper</em>, <em>wrap=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_parameter_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_parameter_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates LaTeX appropriate text from marginalised parameter bounds.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -313,8 +362,12 @@ If you do not call this explicitly, the <a class="reference internal" href="#des
 <div><p>The value of the parameter with maximum probability</p>
 </div></blockquote>
 <p><strong>upper</strong> : float</p>
-<blockquote class="last">
+<blockquote>
 <div><p>The upper bound on the parameter</p>
+</div></blockquote>
+<p><strong>wrap</strong> : bool</p>
+<blockquote class="last">
+<div><p>Wrap output text in dollar signs for LaTeX</p>
 </div></blockquote>
 </td>
 </tr>
@@ -410,6 +463,21 @@ histograms are shaded, and the best fit parameter bounds are shown as axis title
 </dd></dl>
 
 </div>
+<div class="section" id="module-dessn.chain.demoTable">
+<span id="dessn-chain-demotable-module"></span><h2>dessn.chain.demoTable module<a class="headerlink" href="#module-dessn.chain.demoTable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.chain.demoTable.DemoTable">
+<em class="property">class </em><code class="descclassname">dessn.chain.demoTable.</code><code class="descname">DemoTable</code><a class="reference internal" href="_modules/dessn/chain/demoTable.html#DemoTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoTable.DemoTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>The multiple chain demo for Chain Consumer. Dummy class used to get documentation caught by <code class="docutils literal"><span class="pre">sphinx-apidoc</span></code>,
+it servers no other purpose.</p>
+<p>Running this file in python creates two random data sets, representing two separate chains, <em>for two separate models</em>.</p>
+<p>This example shows the output of calling the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.get_latex_table" title="dessn.chain.chain.ChainConsumer.get_latex_table"><code class="xref py py-func docutils literal"><span class="pre">get_latex_table()</span></code></a> method.</p>
+<div class="figure align-center">
+<img alt="_images/demoTable.png" src="_images/demoTable.png" />
+</div>
+</dd></dl>
+
+</div>
 <div class="section" id="module-dessn.chain.demoThreeChains">
 <span id="dessn-chain-demothreechains-module"></span><h2>dessn.chain.demoThreeChains module<a class="headerlink" href="#module-dessn.chain.demoThreeChains" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -475,8 +543,8 @@ chain we supply the right parameters for each chain. The plot for this is saved 
 </dd></dl>
 
 <dl class="method">
-<dt id="dessn.chain.demoVarious.DemoVarious.various3_flip_histgram">
-<code class="descname">various3_flip_histgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious.various3_flip_histgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious.various3_flip_histgram" title="Permalink to this definition">¶</a></dt>
+<dt id="dessn.chain.demoVarious.DemoVarious.various3_flip_histogram">
+<code class="descname">various3_flip_histogram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious.various3_flip_histogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious.various3_flip_histogram" title="Permalink to this definition">¶</a></dt>
 <dd><p>YWhen you only display two parameters and don&#8217;t disable histograms, your plot will look different.</p>
 <p>You can suppress this by passing to <code class="docutils literal"><span class="pre">flip=False</span></code> to <code class="xref py py-func docutils literal"><span class="pre">ChainConsumer.configure_general()</span></code>. See the
 commented out line in code for the actual line to disable this.</p>

@@ -25,6 +25,14 @@ dessn.chain.demoOneChain module
     :undoc-members:
     :show-inheritance:
 
+dessn.chain.demoTable module
+----------------------------
+
+.. automodule:: dessn.chain.demoTable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 dessn.chain.demoThreeChains module
 ----------------------------------
 
