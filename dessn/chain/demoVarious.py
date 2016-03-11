@@ -39,7 +39,8 @@ class DemoVarious(object):
 
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
-        c.plot(plot_hists=False, filename="demoVarious1_NoHist.png", contour_kwargs={"cloud": False})
+        c.configure_general(plot_hists=False).configure_contour(cloud=False)
+        c.plot(filename="demoVarious1_NoHist.png")
 
     def various2_select_parameters(self):
         """ You can chose to only display a select number of parameters.
@@ -47,18 +48,20 @@ class DemoVarious(object):
         .. figure::     ../dessn/chain/demoVarious2_SelectParameters.png
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
-        c.plot(parameters=self.parameters[:2], filename="demoVarious2_SelectParameters.png", contour_kwargs={"cloud": False})
+        c.plot(parameters=self.parameters[:3], filename="demoVarious2_SelectParameters.png")
 
     def various3_flip_histgram(self):
         """ YWhen you only display two parameters and don't disable histograms, your plot will look different.
 
-        You can suppress this by passing to plot ``dont_flip=True``.
+        You can suppress this by passing to ``flip=False`` to :func:`ChainConsumer.configure_general`. See the
+        commented out line in code for the actual line to disable this.
 
         .. figure::     ../dessn/chain/demoVarious3_Flip.png
             :align:     center
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
-        c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png", contour_kwargs={"cloud": False})
+        # c.configure_general(flip=False)
+        c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png")
 
     def various4_summaries(self):
         r""" If there is only one chain to analyse, and you only chose to plot a small number of parameters,
@@ -69,7 +72,8 @@ class DemoVarious(object):
             :align:     center
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
-        c.plot(filename="demoVarious4_ForceSummary.png", force_summary=False, contour_kwargs={"cloud": False, "sigmas": np.linspace(0, 3, 10)})
+        c.configure_bar(summary=False).configure_contour(cloud=False, sigmas=np.linspace(0, 3, 10))
+        c.plot(filename="demoVarious4_ForceSummary.png")
 
     def various5_custom_colours(self):
         r""" You can supply custom colours to the plotting. Be warned, if you have more chains than colours, you *will* get a
@@ -85,7 +89,9 @@ class DemoVarious(object):
             :align:     center
         """
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters).add_chain(self.data2)
-        c.plot(filename="demoVarious5_CustomColours.png", colours=["#B32222", "#D1D10D"], contour_kwargs={"force_contourf": True, "contourf_alpha": 0.5})
+        c.configure_general(colours=["#B32222", "#D1D10D"])
+        c.configure_contour(contourf=True, contourf_alpha=0.5)
+        c.plot(filename="demoVarious5_CustomColours.png")
 
     def various6_truth_values(self):
         r""" The reward for scrolling down so far, the first customised argument that will be frequently used; truth values.
@@ -101,12 +107,12 @@ class DemoVarious(object):
         .. figure::     ../dessn/chain/demoVarious6_TruthValues2.png
             :align:     center
         """
-        c = ChainConsumer().add_chain(self.data, parameters=self.parameters)#.add_chain(self.data2)
+        c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(filename="demoVarious6_TruthValues.png", truth=[0.0, 5.0, 0.0, 0.0])
 
         # You can also set truth using a dictionary, like below. If you do it this way, you do not need to
         # set truth values for all parameters
-        c.plot(filename="demoVarious6_TruthValues2.png", truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
+        c.configure_truth(color='w', ls=":", alpha=0.5).plot(filename="demoVarious6_TruthValues2.png", truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
 
 if __name__ == "__main__":
 
@@ -122,4 +128,4 @@ if __name__ == "__main__":
 
     # demo.various5_custom_colours()
 
-    demo.various6_truth_values()
+    # demo.various6_truth_values()

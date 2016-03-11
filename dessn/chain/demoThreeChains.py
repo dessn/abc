@@ -40,7 +40,7 @@ if __name__ == "__main__":
     data3[:, 1] = data3[:, 2] * 2 - 5
 
     # You can plot the data directly without worrying about labels like the single chain example
-    ChainConsumer().add_chain(data).add_chain(data2).plot(display=True, contour_kwargs={"force_contourf": True})
+    ChainConsumer().add_chain(data).add_chain(data2).configure_contour(contourf=True).plot(display=True)
 
     # If you pass in parameter labels and only one chain, you can also get parameter bounds
     c = ChainConsumer()\

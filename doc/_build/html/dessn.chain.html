@@ -196,6 +196,102 @@ interprets the string as a filename and attempts to load it in.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.configure_bar">
+<code class="descname">configure_bar</code><span class="sig-paren">(</span><em>summary=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the bar plots showing the marginalised distributions. If you do not call this explicitly,
+the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</p>
+<dl class="docutils">
+<dt>summary <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd>If overridden, sets whether parameter summaries should be set as axis titles.
+Will not work if you have multiple chains</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.configure_contour">
+<code class="descname">configure_contour</code><span class="sig-paren">(</span><em>sigmas=None</em>, <em>cloud=None</em>, <em>contourf=None</em>, <em>contourf_alpha=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_contour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the default variables for the contour plots. If you do not call this explicitly,
+the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</p>
+<p>Please ensure that you call this method after adding all the relevant datae to the chain consumer,
+as the consume changes configuration values depending on the presupplied data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sigmas</strong> : np.array, optional</p>
+<blockquote>
+<div><p>The <span class="math">\(\sigma\)</span> contour levels to plot. Defaults to [0.5, 1, 2, 3]. Number of contours shown
+decreases with the number of chains to show.</p>
+</div></blockquote>
+<p><strong>cloud</strong> : bool, optional</p>
+<blockquote>
+<div><p>If set, overrides the default behaviour and plots the cloud or not</p>
+</div></blockquote>
+<p><strong>contourf</strong> : bool, optional</p>
+<blockquote>
+<div><p>If set, overrides the default behaviour and plots filled contours or not</p>
+</div></blockquote>
+<p><strong>contourf_alpha</strong> : float, optional</p>
+<blockquote class="last">
+<div><p>Filled contour alpha value override.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.configure_general">
+<code class="descname">configure_general</code><span class="sig-paren">(</span><em>bins=None</em>, <em>flip=True</em>, <em>rainbow=None</em>, <em>colours=None</em>, <em>serif=True</em>, <em>plot_hists=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_general"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_general" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
+the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>bins</strong> : int, optional</p>
+<blockquote>
+<div><p>The number of bins to use. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
+</div></blockquote>
+<p><strong>flip</strong> : bool, optional</p>
+<blockquote>
+<div><p>Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
+so that it is horizontal.</p>
+</div></blockquote>
+<p><strong>rainbow</strong> : bool, optional</p>
+<blockquote>
+<div><p>Set to True to force use of rainbow colours</p>
+</div></blockquote>
+<p><strong>colours</strong> : list[str(hex)], optional</p>
+<blockquote>
+<div><p>Provide a list of colours to use for each chain. If you provide more chains than colours,
+you <em>will</em> get the rainbow colour spectrum.</p>
+</div></blockquote>
+<p><strong>serif</strong> : bool, optional</p>
+<blockquote>
+<div><p>Whether to display ticks and labels with serif font.</p>
+</div></blockquote>
+<p><strong>plot_hists</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>Whether to plot marginalised distributions or not</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.configure_truth">
+<code class="descname">configure_truth</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.configure_truth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.configure_truth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the arguments passed to the <code class="docutils literal"><span class="pre">axvline</span></code> and <code class="docutils literal"><span class="pre">axhline</span></code> methods when plotting truth values.
+If you do not call this explicitly, the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method will invoke this method automatically.</p>
+<p>Recommended to set the parameters <code class="docutils literal"><span class="pre">linestyle</span></code>, <code class="docutils literal"><span class="pre">color</span></code> and/or <code class="docutils literal"><span class="pre">alpha</span></code> if you want some basic control.</p>
+<p>Default is to use an opaque black dashed line.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.get_parameter_text">
 <code class="descname">get_parameter_text</code><span class="sig-paren">(</span><em>lower</em>, <em>maximum</em>, <em>upper</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.get_parameter_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.get_parameter_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates LaTeX appropriate text from marginalised parameter bounds.</p>
@@ -241,7 +337,7 @@ interprets the string as a filename and attempts to load it in.</p>
 
 <dl class="method">
 <dt id="dessn.chain.chain.ChainConsumer.plot">
-<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>parameters=None</em>, <em>filename=None</em>, <em>display=False</em>, <em>rainbow=False</em>, <em>serif=True</em>, <em>contour_kwargs=None</em>, <em>plot_hists=True</em>, <em>dont_flip=False</em>, <em>force_summary=None</em>, <em>colours=None</em>, <em>truth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot</code><span class="sig-paren">(</span><em>figsize='COLUMN'</em>, <em>parameters=None</em>, <em>filename=None</em>, <em>display=False</em>, <em>truth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the chain</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -265,39 +361,6 @@ in two-column mode. <code class="docutils literal"><span class="pre">PAGE</span>
 <blockquote>
 <div><p>If True, shows the figure using <code class="docutils literal"><span class="pre">plt.show()</span></code>.</p>
 </div></blockquote>
-<p><strong>rainbow</strong> : bool, optional</p>
-<blockquote>
-<div><p>If true, forces the use of rainbow colours when displaying multiple chains. By default, under a certain
-number of chains to show, this method uses a predefined list of colours.</p>
-</div></blockquote>
-<p><strong>serif</strong> : bool, optional</p>
-<blockquote>
-<div><p>Sets all plot text to serif.</p>
-</div></blockquote>
-<p><strong>contour_kwargs</strong> : dict, optional</p>
-<blockquote>
-<div><p>A dictionary of optional arguments to pass to the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="dessn.chain.chain.ChainConsumer.plot_contour"><code class="xref py py-func docutils literal"><span class="pre">plot_contour()</span></code></a> function.</p>
-</div></blockquote>
-<p><strong>plot_hists</strong> : bool, optional</p>
-<blockquote>
-<div><p>Whether to plot histograms or not</p>
-</div></blockquote>
-<p><strong>dont_flip</strong> : bool, optional</p>
-<blockquote>
-<div><p>By default, if you are only two parameters and display histograms, the bottom histogram will be flipped and
-the relative sizes of the plots changed so that the contour plot becomes larger.
-Setting this to true suppresses this behaviour.</p>
-</div></blockquote>
-<p><strong>force_summary</strong> : bool, optional</p>
-<blockquote>
-<div><p>Overriding the default value of None will force the <code class="docutils literal"><span class="pre">plot</span></code> method to use your bool value. If more than
-one chain is being plotted, summaries are still not printed.</p>
-</div></blockquote>
-<p><strong>colours</strong> : list[str(hex)]</p>
-<blockquote>
-<div><p>If supplied, uses the supplied colours for chains instead of the default. Do not set both this parameter
-and the <code class="docutils literal"><span class="pre">rainbow</span></code> parameter.</p>
-</div></blockquote>
 <p><strong>truth</strong> : list[float] or dict[str], optional</p>
 <blockquote>
 <div><p>A list of truth values corresponding to parameters, or a dictionary of truth values indexed by key</p>
@@ -307,124 +370,6 @@ and the <code class="docutils literal"><span class="pre">rainbow</span></code> p
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">figure</p>
 <blockquote class="last">
 <div><p>the matplotlib figure</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.plot_bars">
-<code class="descname">plot_bars</code><span class="sig-paren">(</span><em>ax</em>, <em>parameter</em>, <em>chain_row</em>, <em>bins=50</em>, <em>colour='#222222'</em>, <em>fit_values=None</em>, <em>flip=False</em>, <em>summary=True</em>, <em>truth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_bars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_bars" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method responsible for plotting the marginalised distributions</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib axis</p>
-<blockquote>
-<div><p>Upon which the plot is drawn</p>
-</div></blockquote>
-<p><strong>parameter</strong> : str</p>
-<blockquote>
-<div><p>The parameter label, if it exists</p>
-</div></blockquote>
-<p><strong>chain_row</strong> : np.ndarray</p>
-<blockquote>
-<div><p>The data corresponding to the parameter</p>
-</div></blockquote>
-<p><strong>bins</strong> : int, optional</p>
-<blockquote>
-<div><p>The number of bins to use. Default value is overridden by <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a></p>
-</div></blockquote>
-<p><strong>colour</strong> : str, optional</p>
-<blockquote>
-<div><p>The colour to use when plotting. Default value is overridden</p>
-</div></blockquote>
-<p><strong>flip</strong> : bool, optional</p>
-<blockquote>
-<div><p>Whether to flip the histogram. Default value is overridden by <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a></p>
-</div></blockquote>
-<p><strong>summary</strong> : bool, optional</p>
-<blockquote>
-<div><p>Whether to print summaries. Default value is overridden by <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a>.
-Note that only parameters with defined labels are given summaries.</p>
-</div></blockquote>
-<p><strong>truth</strong> : dict, optional</p>
-<blockquote>
-<div><p>A dictionary of parameter labels and truth values</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">float</p>
-<blockquote class="last">
-<div><p>the maximum value of the histogram plot (used to ensure vertical spacing)</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="dessn.chain.chain.ChainConsumer.plot_contour">
-<code class="descname">plot_contour</code><span class="sig-paren">(</span><em>ax</em>, <em>x</em>, <em>y</em>, <em>px</em>, <em>py</em>, <em>bins=50</em>, <em>sigmas=None</em>, <em>colour='#222222'</em>, <em>fit_values=None</em>, <em>force_contourf=None</em>, <em>cloud=True</em>, <em>contourf_alpha=1.0</em>, <em>truth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_contour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_contour" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots contours of the probability surface between two parameters</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ax</strong> : figure.axis</p>
-<blockquote>
-<div><p>The axis to plot to</p>
-</div></blockquote>
-<p><strong>x</strong> : np.ndarray</p>
-<blockquote>
-<div><p>The <code class="docutils literal"><span class="pre">x</span></code> axis array of data</p>
-</div></blockquote>
-<p><strong>y</strong> : np.ndarray</p>
-<blockquote>
-<div><p>The <code class="docutils literal"><span class="pre">y</span></code> axis array of data</p>
-</div></blockquote>
-<p><strong>px</strong> : str|int</p>
-<blockquote>
-<div><p>The parameter name for the <code class="docutils literal"><span class="pre">x</span></code> axis</p>
-</div></blockquote>
-<p><strong>py</strong> : str|int</p>
-<blockquote>
-<div><p>The parameter name for the <code class="docutils literal"><span class="pre">y</span></code> axis</p>
-</div></blockquote>
-<p><strong>bins</strong> : int, optional</p>
-<blockquote>
-<div><p>The number of bins to use. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
-</div></blockquote>
-<p><strong>sigmas</strong> : np.array, optional</p>
-<blockquote>
-<div><p>The <span class="math">\(\sigma\)</span> contour levels to plot. Defaults to [0.5, 1, 2, 3]. Number of contours shown
-decreases with the number of chains to show.</p>
-</div></blockquote>
-<p><strong>colour</strong> : str(hex code), optional</p>
-<blockquote>
-<div><p>The colour to plot the contours in. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
-</div></blockquote>
-<p><strong>fit_values</strong> : np.array, optional</p>
-<blockquote>
-<div><p>An array representing the lower bound, maximum, and upper bound of the marignliased parameters</p>
-</div></blockquote>
-<p><strong>force_contourf</strong> : bool</p>
-<blockquote>
-<div><p>Can force the plotting method to plot filled contours even when it would normally be disabled.
-It is normally disabled when plotting multiple chains.</p>
-</div></blockquote>
-<p><strong>cloud</strong> : bool</p>
-<blockquote>
-<div><p>If true and there is only one chain, plots the cloud of points. If false, or there are more than
-one chain, does not plot the cloud.</p>
-</div></blockquote>
-<p><strong>truth</strong> : dict, optional</p>
-<blockquote class="last">
-<div><p>A dictionary of truth values, keyed by parameter name. Overridden by the <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> method.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -524,7 +469,8 @@ chain we supply the right parameters for each chain. The plot for this is saved 
 <dt id="dessn.chain.demoVarious.DemoVarious.various3_flip_histgram">
 <code class="descname">various3_flip_histgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/demoVarious.html#DemoVarious.various3_flip_histgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoVarious.DemoVarious.various3_flip_histgram" title="Permalink to this definition">¶</a></dt>
 <dd><p>YWhen you only display two parameters and don&#8217;t disable histograms, your plot will look different.</p>
-<p>You can suppress this by passing to plot <code class="docutils literal"><span class="pre">dont_flip=True</span></code>.</p>
+<p>You can suppress this by passing to <code class="docutils literal"><span class="pre">flip=False</span></code> to <code class="xref py py-func docutils literal"><span class="pre">ChainConsumer.configure_general()</span></code>. See the
+commented out line in code for the actual line to disable this.</p>
 <div class="figure align-center">
 <img alt="_images/demoVarious3_Flip.png" src="_images/demoVarious3_Flip.png" />
 </div>

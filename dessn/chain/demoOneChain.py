@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # You can plot the data directly without worrying about labels
     # Code follows the fluent pattern, so you can string calls together
-    ChainConsumer().add_chain(data).plot(display=True, contour_kwargs={"cloud": False})
+    ChainConsumer().add_chain(data).configure_contour(cloud=False).plot(display=True)
 
     # If you pass in parameter labels and only one chain, you can also get parameter bounds
     ChainConsumer().add_chain(data, parameters=["$x$", "$y$", r"$\epsilon$"], name="Test chain").plot(filename="demoOneChain.png")
