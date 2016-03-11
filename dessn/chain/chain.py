@@ -72,19 +72,21 @@ class ChainConsumer(object):
             colours = self.all_colours[:num_chains]
         return colours
 
-    def _get_figure(self, figsize=(5, 5), max_ticks=5, serif=True, plot_hists=True):
-        n = len(self.all_parameters)
+    def _get_figure(self, all_parameters, figsize=(5, 5), max_ticks=5, serif=True, plot_hists=True):
+        n = len(all_parameters)
         if not plot_hists:
             n -= 1
         fig, axes = plt.subplots(n, n, figsize=figsize)
-
+        if not isinstance(axes, list) and not isinstance(axes, np.ndarray):
+            self.logger.debug("Only one axis generated")
+            axes = np.array([[axes]])
         if serif:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
         fig.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1, wspace=0.05, hspace=0.05)
         
         extents = {}
-        for p in self.all_parameters:
+        for p in all_parameters:
             min_val = None
             max_val = None
             for chain, parameters in zip(self.chains, self.parameters):
@@ -102,11 +104,11 @@ class ChainConsumer(object):
             extents[p] = (min_val, max_val)
 
         if plot_hists:
-            params1 = self.all_parameters
-            params2 = self.all_parameters
+            params1 = all_parameters
+            params2 = all_parameters
         else:
-            params1 = self.all_parameters[1:]
-            params2 = self.all_parameters[:-1]
+            params1 = all_parameters[1:]
+            params2 = all_parameters[:-1]
         for i, p1 in enumerate(params1):
             for j, p2 in enumerate(params2):
                 ax = axes[i, j]
@@ -139,13 +141,13 @@ class ChainConsumer(object):
                         ax.set_ylim(extents[p1])
                     ax.set_xlim(extents[p2])
 
-        return fig, axes
+        return fig, axes, params1, params2
 
     def _get_bins(self):
         proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
         return proposal
 
-    def plot(self, figsize="COLUMN", filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None, plot_hists=True):
+    def plot(self, figsize="COLUMN", parameters=None, filename=None, display=False, rainbow=False, serif=True, contour_kwargs=None, plot_hists=True):
         """ Plot the chain
 
         Parameters
@@ -154,18 +156,20 @@ class ChainConsumer(object):
             The figure size to generate. Accepts a regular two tuple of size in inches, or one of several key words.
             The default value of ``COLUMN`` creates a figure of appropriate size of insertion into an A4 LaTeX document
             in two-column mode. ``PAGE`` creates a full page width figure. String arguments are not case sensitive.
+        parameters : list[str], optional
+            If set, only creates a plot for those specific parameters
         filename : str, optional
             If set, saves the figure to this location
-        display : bool
+        display : bool, optional
             If True, shows the figure using ``plt.show()``.
-        rainbow : bool
+        rainbow : bool, optional
             If true, forces the use of rainbow colours when displaying multiple chains. By default, under a certain
             number of chains to show, this method uses a predefined list of colours.
-        serif : bool
+        serif : bool, optional
             Sets all plot text to serif.
-        contour_kwargs : dict
+        contour_kwargs : dict, optional
             A dictionary of optional arguments to pass to the :func:`plot_contour` function.
-        plot_hists : bool
+        plot_hists : bool, optional
             Whether to plot histograms or not
 
         Returns
@@ -183,21 +187,17 @@ class ChainConsumer(object):
                 figsize = (10, 10)
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
-        fig, axes = self._get_figure(figsize=figsize, serif=serif, plot_hists=plot_hists)
+
+        if parameters is None:
+            parameters = self.all_parameters
+        fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, serif=serif, plot_hists=plot_hists)
 
         num_bins = self._get_bins()
         fit_values = self.get_summary()
         colours = self._get_colours(rainbow=rainbow)
-
-        if plot_hists:
-            params1 = self.all_parameters
-            params2 = self.all_parameters
-        else:
-            params1 = self.all_parameters[1:]
-            params2 = self.all_parameters[:-1]
         for i, p1 in enumerate(params1):
             for j, p2 in enumerate(params2):
-                if i < j or (plot_hists and i == j):
+                if i < j:
                     continue
                 ax = axes[i, j]
                 if plot_hists and i == j:

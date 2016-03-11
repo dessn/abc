@@ -38,12 +38,22 @@ class DemoVarious(object):
             :align:     center
 
         """
-        # Playing around with only one chain
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(plot_hists=False, filename="demoVarious1_NoHist.png", contour_kwargs={"cloud": False})
+
+
+    def various2_select_parameters(self):
+        """ You can chose to only display a select number of parameters.
+
+        .. figure:: ../dessn/chain/demoVarious2_SelectParameters.png
+        """
+        c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
+        c.plot(parameters=self.parameters[:2], filename="demoVarious2_SelectParameters.png", contour_kwargs={"cloud": False})
 
 if __name__ == "__main__":
 
     demo = DemoVarious()
 
-    demo.various1_no_histogram()
+    # demo.various1_no_histogram()
+
+    demo.various2_select_parameters()
