@@ -78,8 +78,10 @@ class ChainConsumer(object):
 
         Parameters
         ----------
-        bins : int, optional
+        bins : int|float, optional
             The number of bins to use. By default uses :math:`\frac{\sqrt{n}}{10}`, where :math:`n` are the number of data points.
+            Giving an integer will set the number of bins to the given value. Giving a float will scale the number of bins, such that
+            giving ``bins=1.5`` will result in using :math:`\frac{1.5\sqrt{n}}{10}` bins.
         flip : bool, optional
             Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
             so that it is horizontal.
@@ -100,8 +102,12 @@ class ChainConsumer(object):
 
         if bins is None:
             bins = self._get_bins()
-        else:
+        elif isinstance(bins, float):
+            bins = [b * bins for b in self._get_bins()]
+        elif isinstance(bins, int):
             bins = [bins] * len(self.chains)
+        else:
+            raise ValueError("bins value is not a recognised class (float or int)")
         self.parameters_general["bins"] = bins
         self.parameters_general["max_ticks"] = max_ticks
         self.parameters_general["flip"] = flip

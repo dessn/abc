@@ -144,11 +144,14 @@ class DemoVarious(object):
         r""" An example on using customised extents. Similarly to the example for truth values in
         :func:`various7_truth_values`, you can pass a list in, or a dictionary.
 
+        Also modifying the number of bins using a float value to scale, rather than set, the number of bins.
+
         .. figure::     ../dessn/chain/demoVarious8_Extents.png
             :align:     center
         """
         c = ChainConsumer()
         c.add_chain(self.data)
+        c.configure_general(bins=1.5)
         c.plot(filename="demoVarious8_Extents.png", extents=[(-5, 5), (0, 15), (-3, 3), (-6, 6)])
 
 
@@ -168,6 +171,6 @@ if __name__ == "__main__":
 
     # demo.various6_truth_values()
 
-    # demo.various7_rainbow()
+    demo.various7_rainbow()
 
-    # demo.various8_extents()
+    demo.various8_extents()
