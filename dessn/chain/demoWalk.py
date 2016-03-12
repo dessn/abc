@@ -10,7 +10,7 @@ class DemoWalk:
 
     We want to see if our walks are behaving as expected, which means we should see them scattered around the underlying
     truth value (or actual truth value if supplied). This is a good consistency check, because if the burn in period
-    (which should have alredy been removed from the chain) was insufficiently long, you would expect to see tails
+    (which should have already been removed from the chain) was insufficiently long, you would expect to see tails
     appear in this plot.
 
     Because individual samples can be noisy, there is also the option to pass an integer via parameter ``convolve``, which
