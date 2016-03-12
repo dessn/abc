@@ -159,17 +159,17 @@ if __name__ == "__main__":
 
     demo = DemoVarious()
 
-    # demo.various1_no_histogram()
+    demo.various1_no_histogram()
 
-    # demo.various2_select_parameters()
+    demo.various2_select_parameters()
 
-    # demo.various3_flip_histgram()
+    demo.various3_flip_histogram()
 
-    # demo.various4_summaries()
+    demo.various4_summaries()
 
-    # demo.various5_custom_colours()
+    demo.various5_custom_colours()
 
-    # demo.various6_truth_values()
+    demo.various6_truth_values()
 
     demo.various7_rainbow()
 

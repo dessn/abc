@@ -561,14 +561,14 @@ class ChainConsumer(object):
         if extents is not None:
             ax.set_ylim(extents)
         assert convolve is None or isinstance(convolve, int), "Convolve must be an integer pixel window width"
-
+        x = np.arange(data.size)
+        ax.set_xlim(0, x[-1])
         ax.set_ylabel(parameter)
-
-        ax.plot(data, 'b', alpha=0.5)
+        ax.scatter(x, data, c="#0345A1", s=2, marker=".", edgecolors="none", alpha=0.2)
         if convolve is not None:
             filt = np.ones(convolve) / convolve
             filtered = np.convolve(data, filt, mode="same")
-            ax.plot(filtered, ls=':', color="#9C1919", alpha=0.8)
+            ax.plot(x, filtered, ls=':', color="#9C1919", alpha=0.8)
         if truth is not None:
             ax.axhline(truth, **self.parameters_truth)
 
