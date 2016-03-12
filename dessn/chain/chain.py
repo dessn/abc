@@ -457,6 +457,121 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
+    def plot_walks(self, parameters=None, truth=None, extents=None, display=False, filename=None, chain=None, convolve=None, figsize=None):
+        """ Plots the chain walk; the parameter values as a function of step index.
+
+        This plot is more for a sanity or consistency check than for use with final results. Plotting this before plotting
+        with :func:`plot` allows you to quickly see if the chains are well behaved, or if certain parameters are suspect
+        or require a greater burn in period.
+
+        The desired outcome is to see an unchanging distribution along the x-axis of the plot. If there are obvious tails
+        or features in the parameters, you probably want to investigate.
+
+        See :class:`.dessn.chain.demoWalk.DemoWalk` for example usage.
+
+        Parameters
+        ----------
+        parameters : list[str], optional
+            Specifiy a subset of parameters to plot. If not set, all parameters are plotted.
+        truth : list[float]|dict[str], optional
+            A list of truth values corresponding to parameters, or a dictionary of truth values keyed by the parameter.
+        extents : list[tuple]|dict[str], optional
+            A list of two-tuples for plot extents per parameter, or a dictionary of extents keyed by the parameter.
+        display : bool, optional
+            If set, shows the plot using ``plt.show()``
+        filename : str, optional
+            If set, saves the figure to the filename
+        chain : int|str, optional
+            Used to specify which chain to show if more than one chain is loaded in. Can be an integer, specifying the
+            chain index, or a str, specifying the chain name.
+        convolve : int, optional
+            If set, overplots a smoothed version of the steps using ``convolve`` as the width of the smoothing filter.
+        figsize : tuple, optional
+            If set, sets the created figure size.
+
+        Returns
+        -------
+        figure
+            the matplotlib figure created
+
+        """
+        if not self._configured_general:
+            self.configure_general()
+        if not self._configured_bar:
+            self.configure_bar()
+        if not self._configured_contour:
+            self.configure_contour()
+        if not self._configured_truth:
+            self.configure_truth()
+
+        if parameters is None:
+            parameters = self.all_parameters
+
+        assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
+            "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
+
+        assert extents is None or isinstance(extents, dict) or (isinstance(extents, list) and len(extents) == len(parameters)), \
+            "Have a list of %d parameters and %d extent values" % (len(parameters), len(extents))
+
+        if truth is not None and isinstance(truth, list):
+            truth = {p: t for p, t in zip(parameters, truth)}
+        if truth is None:
+            truth = {}
+
+        if extents is not None and isinstance(extents, list):
+            extents = {p: e for p, e in zip(parameters, extents)}
+        if extents is None:
+            extents = {}
+
+        if figsize is None:
+            figsize = (5, 0.5 + len(parameters))
+
+        if chain is None:
+            if len(self.chains) == 1:
+                chain = 0
+            else:
+                raise ValueError("You can only plot walks for one chain at a time. If you have multiple chains, please pass an index or a chain name via the chain parameter")
+
+        if isinstance(chain, str):
+            assert chain in self.names, "A chain with name %s is not found in available names: %s" % (chain, self.names)
+            chain = self.names.index(chain)
+
+        chain_data = self.chains[chain]
+        chain_parameters = self.parameters[chain]
+
+        fig, axes = plt.subplots(figsize=figsize, nrows=len(parameters), squeeze=False, sharex=True)
+
+        if self.parameters_general["serif"]:
+            plt.rc('text', usetex=True)
+            plt.rc('font', family='serif')
+
+        for p, axes_row in zip(parameters, axes):
+            ax = axes_row[0]
+            assert p in chain_parameters, "Chain does not have parameter %s, it has %s" % (p, chain_parameters)
+            chain_row = chain_data[:, chain_parameters.index(p)]
+            self._plot_walk(ax, p, chain_row, truth=truth.get(p), extents=extents.get(p), convolve=convolve)
+
+        if filename is not None:
+            fig.savefig(filename, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+        if display:
+            plt.show()
+        return fig
+
+    def _plot_walk(self, ax, parameter, data, truth=None, extents=None, convolve=None):
+        if extents is not None:
+            ax.set_ylim(extents)
+        assert convolve is None or isinstance(convolve, int), "Convolve must be an integer pixel window width"
+
+        ax.set_ylabel(parameter)
+
+        ax.plot(data, 'b', alpha=0.5)
+        if convolve is not None:
+            filt = np.ones(convolve) / convolve
+            filtered = np.convolve(data, filt, mode="same")
+            ax.plot(filtered, ls=':', color="#9C1919", alpha=0.8)
+        if truth is not None:
+            ax.axhline(truth, **self.parameters_truth)
+
     def _plot_bars(self, ax, parameter, chain_row, colour, bins=25, flip=False, summary=False, fit_values=None, truth=None):
 
         hist, edges = np.histogram(chain_row, bins=bins, normed=True)

@@ -57,4 +57,12 @@ dessn.chain.demoVarious module
     :undoc-members:
     :show-inheritance:
 
+dessn.chain.demoWalk module
+---------------------------
+
+.. automodule:: dessn.chain.demoWalk
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

@@ -93,6 +93,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoThreeChains">dessn.chain.demoThreeChains module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoTwoDisjointChains">dessn.chain.demoTwoDisjointChains module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoVarious">dessn.chain.demoVarious module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-dessn.chain.demoWalk">dessn.chain.demoWalk module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dessn.entry.html">dessn.entry package</a></li>
@@ -442,6 +443,65 @@ parameters if you don&#8217;t specify parameters), or as a dictionary.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="dessn.chain.chain.ChainConsumer.plot_walks">
+<code class="descname">plot_walks</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>truth=None</em>, <em>extents=None</em>, <em>display=False</em>, <em>filename=None</em>, <em>chain=None</em>, <em>convolve=None</em>, <em>figsize=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/chain/chain.html#ChainConsumer.plot_walks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.chain.ChainConsumer.plot_walks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the chain walk; the parameter values as a function of step index.</p>
+<p>This plot is more for a sanity or consistency check than for use with final results. Plotting this before plotting
+with <a class="reference internal" href="#dessn.chain.chain.ChainConsumer.plot" title="dessn.chain.chain.ChainConsumer.plot"><code class="xref py py-func docutils literal"><span class="pre">plot()</span></code></a> allows you to quickly see if the chains are well behaved, or if certain parameters are suspect
+or require a greater burn in period.</p>
+<p>The desired outcome is to see an unchanging distribution along the x-axis of the plot. If there are obvious tails
+or features in the parameters, you probably want to investigate.</p>
+<p>See <a class="reference internal" href="#dessn.chain.demoWalk.DemoWalk" title="dessn.chain.demoWalk.DemoWalk"><code class="xref py py-class docutils literal"><span class="pre">dessn.chain.demoWalk.DemoWalk</span></code></a> for example usage.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>parameters</strong> : list[str], optional</p>
+<blockquote>
+<div><p>Specifiy a subset of parameters to plot. If not set, all parameters are plotted.</p>
+</div></blockquote>
+<p><strong>truth</strong> : list[float]|dict[str], optional</p>
+<blockquote>
+<div><p>A list of truth values corresponding to parameters, or a dictionary of truth values keyed by the parameter.</p>
+</div></blockquote>
+<p><strong>extents</strong> : list[tuple]|dict[str], optional</p>
+<blockquote>
+<div><p>A list of two-tuples for plot extents per parameter, or a dictionary of extents keyed by the parameter.</p>
+</div></blockquote>
+<p><strong>display</strong> : bool, optional</p>
+<blockquote>
+<div><p>If set, shows the plot using <code class="docutils literal"><span class="pre">plt.show()</span></code></p>
+</div></blockquote>
+<p><strong>filename</strong> : str, optional</p>
+<blockquote>
+<div><p>If set, saves the figure to the filename</p>
+</div></blockquote>
+<p><strong>chain</strong> : int|str, optional</p>
+<blockquote>
+<div><p>Used to specify which chain to show if more than one chain is loaded in. Can be an integer, specifying the
+chain index, or a str, specifying the chain name.</p>
+</div></blockquote>
+<p><strong>convolve</strong> : int, optional</p>
+<blockquote>
+<div><p>If set, overplots a smoothed version of the steps using <code class="docutils literal"><span class="pre">convolve</span></code> as the width of the smoothing filter.</p>
+</div></blockquote>
+<p><strong>figsize</strong> : tuple, optional</p>
+<blockquote>
+<div><p>If set, sets the created figure size.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">figure</p>
+<blockquote class="last">
+<div><p>the matplotlib figure created</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -616,6 +676,27 @@ The figures are respectively</p>
 </div>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-dessn.chain.demoWalk">
+<span id="dessn-chain-demowalk-module"></span><h2>dessn.chain.demoWalk module<a class="headerlink" href="#module-dessn.chain.demoWalk" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.chain.demoWalk.DemoWalk">
+<em class="property">class </em><code class="descclassname">dessn.chain.demoWalk.</code><code class="descname">DemoWalk</code><a class="reference internal" href="_modules/dessn/chain/demoWalk.html#DemoWalk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.chain.demoWalk.DemoWalk" title="Permalink to this definition">¶</a></dt>
+<dd><p>The single chain demo for Chain Consumer. Dummy class used to get documentation caught by <code class="docutils literal"><span class="pre">sphinx-apidoc</span></code>,
+it servers no other purpose.</p>
+<p>Running this file in python creates a random data set, representing a single MCMC chain, such as you might get from <code class="docutils literal"><span class="pre">emcee</span></code>.</p>
+<p>We want to see if our walks are behaving as expected, which means we should see them scattered around the underlying
+truth value (or actual truth value if supplied). This is a good consistency check, because if the burn in period
+(which should have alredy been removed from the chain) was insufficiently long, you would expect to see tails
+appear in this plot.</p>
+<p>Because individual samples can be noisy, there is also the option to pass an integer via parameter <code class="docutils literal"><span class="pre">convolve</span></code>, which
+overplots a boxcar smoothed version of the steps, where <code class="docutils literal"><span class="pre">convolve</span></code> sets the smooth window size.</p>
+<p>The plot for this is saved to the png file below:</p>
+<div class="figure align-center">
+<img alt="_images/demoWalks.png" src="_images/demoWalks.png" />
+</div>
 </dd></dl>
 
 </div>
