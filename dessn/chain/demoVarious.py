@@ -127,7 +127,7 @@ class DemoVarious(object):
         c.configure_truth(color='w', ls=":", alpha=0.5).plot(filename="demoVarious6_TruthValues2.png", truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
 
     def various7_rainbow(self):
-        r""" An example on using the rainbow with serif fonts and too many bins!
+        r""" An example on using the rainbow with sans-serif fonts and too many bins!
 
         .. figure::     ../dessn/chain/demoVarious7_Rainbow.png
             :align:     center
@@ -137,7 +137,7 @@ class DemoVarious(object):
         c.add_chain(self.data2, name="B")
         c.add_chain(self.data3, name="C")
         c.add_chain(self.data4, name="D")
-        c.configure_general(bins=150, serif=True, rainbow=True)
+        c.configure_general(bins=150, serif=False, rainbow=True)
         c.plot(filename="demoVarious7_Rainbow.png")
 
     def various8_extents(self):
