@@ -1,7 +1,14 @@
 **/build
+.idea/*
 *.aux
 *.bbl
 *log
 *.out
 *.spl
 *.synctex.gz
+*.ilg
+*.idx
+*.toc
+*.ist
+*.cls
+*.sty

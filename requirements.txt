@@ -1,0 +1,9 @@
+corner
+progressbar
+numpy
+matplotlib
+numpydoc
+scipy
+emcee
+daft
+enum34
