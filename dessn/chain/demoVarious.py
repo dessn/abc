@@ -51,7 +51,7 @@ class DemoVarious(object):
         c.plot(filename="demoVarious1_NoHist.png")
 
     def various2_select_parameters(self):
-        """ You can chose to only display a select number of parameters.
+        """ You can chose to only display a select number of parameters. Here the :math:`\\beta` parameter is not displayed.
 
         .. figure::     ../dessn/chain/demoVarious2_SelectParameters.png
         """
@@ -59,7 +59,7 @@ class DemoVarious(object):
         c.plot(parameters=self.parameters[:3], filename="demoVarious2_SelectParameters.png")
 
     def various3_flip_histogram(self):
-        """ YWhen you only display two parameters and don't disable histograms, your plot will look different.
+        """ When you only display two parameters and don't disable histograms, your plot will look different.
 
         You can suppress this by passing to ``flip=False`` to :func:`ChainConsumer.configure_general`. See the
         commented out line in code for the actual line to disable this.
