@@ -347,7 +347,7 @@ class ChainConsumer(object):
             text = "$%s$" % text
         return text
 
-    def plot(self, figsize="COLUMN", parameters=None, extents=None, filename=None, display=False, truth=None):
+    def plot(self, figsize="COLUMN", parameters=None, extents=None, filename=None, display=False, truth=None, legend=True):
         """ Plot the chain
 
         Parameters
@@ -367,6 +367,8 @@ class ChainConsumer(object):
             If True, shows the figure using ``plt.show()``.
         truth : list[float] or dict[str], optional
             A list of truth values corresponding to parameters, or a dictionary of truth values indexed by key
+        legend : bool, optional
+            If true, creates a legend in your plot using the chain names.
 
         Returns
         -------
@@ -445,11 +447,11 @@ class ChainConsumer(object):
                             continue
                         i1 = parameters.index(p1)
                         i2 = parameters.index(p2)
-                        self._plot_contour(ax, chain[:, i2], chain[:, i1], p1, p2, colour, bins=bins, fit_values=fit, truth=truth)
+                        self._plot_contour(ax, chain[:, i2], chain[:, i1], p1, p2, colour, bins=bins, truth=truth)
 
-        if self.names is not None:
+        if self.names is not None and legend:
             ax = axes[0, -1]
-            artists = [plt.Line2D((0, 1), (0, 0), color=c) for n,c in zip(self.names, colours) if n is not None]
+            artists = [plt.Line2D((0, 1), (0, 0), color=c) for n, c in zip(self.names, colours) if n is not None]
             ax.legend(artists, self.names, loc="center", frameon=False)
 
         if filename is not None:
@@ -603,7 +605,7 @@ class ChainConsumer(object):
                     ax.axvline(truth_value, **self.parameters_truth)
         return hist.max()
 
-    def _plot_contour(self, ax, x, y, px, py, colour, bins=25, fit_values=None, truth=None):
+    def _plot_contour(self, ax, x, y, px, py, colour, bins=25, truth=None):
 
         levels = 1.0 - np.exp(-0.5 * self.parameters_contour["sigmas"] ** 2)
 
