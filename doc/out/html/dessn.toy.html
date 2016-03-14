@@ -225,7 +225,16 @@ actually the <strong>log luminosity</strong></p>
 <dl class="method">
 <dt id="dessn.toy.edges.ToRate.get_log_likelihood">
 <code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToRate.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToRate.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The likelihood of having the supernova types <span class="math">\(T\)</span> given supernova rate <span class="math">\(r\)</span>.</p>
+<p>We model the supernova rate as a binomial process, with rate <span class="math">\(r\)</span>. That is, given <span class="math">\(x\)</span> type
+Ia supernova and <span class="math">\(y\)</span> type II supernova, our pdf is given by</p>
+<div class="math">
+\[\begin{split}P(T|r) = \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} r^{N_{\rm SnIa}} (1 - r)^{N_{\rm SnII}}\end{split}\]</div>
+<p>In log space, this is</p>
+<div class="math">
+\[\begin{split}\log(P(T|r)) = \log \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} + N_{\rm SnIa} \log(r) + N_{\rm SnII} \log(1-r)\end{split}\]</div>
+<p>In the code, I approximate the choose function using the log gamma functions.</p>
+</dd></dl>
 
 </dd></dl>
 

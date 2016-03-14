@@ -129,7 +129,7 @@
   <h1>Source code for dessn.toy.edges</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatwCDM</span>
-
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span>
 <span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span>
 <span class="kn">from</span> <span class="nn">dessn.utility.math</span> <span class="kn">import</span> <span class="n">plus</span>
 
@@ -271,7 +271,31 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ToRate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;sn_rate&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ToRate.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRate.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+        <span class="sd">r&quot;&quot;&quot; The likelihood of having the supernova types :math:`T` given supernova rate :math:`r`.</span>
+
+<span class="sd">        We model the supernova rate as a binomial process, with rate :math:`r`. That is, given :math:`x` type</span>
+<span class="sd">        Ia supernova and :math:`y` type II supernova, our pdf is given by</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            P(T|r) = \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} r^{N_{\rm SnIa}} (1 - r)^{N_{\rm SnII}}</span>
+
+<span class="sd">        In log space, this is</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \log(P(T|r)) = \log \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} + N_{\rm SnIa} \log(r) + N_{\rm SnII} \log(1-r)</span>
+
+<span class="sd">        In the code, I approximate the choose function using the log gamma functions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sn_type</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">n_snIa</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">n_snII</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">sn_type</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sn_rate&quot;</span><span class="p">]</span>
+
+        <span class="c1"># TODO: Probably want generic classes for Normals, log normals, binomial, etc</span>
+        <span class="n">log_choose</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">gammaln</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">special</span><span class="o">.</span><span class="n">gammaln</span><span class="p">(</span><span class="n">n_snII</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">special</span><span class="o">.</span><span class="n">gammaln</span><span class="p">(</span><span class="n">n_snIa</span> <span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">log_choose</span> <span class="o">+</span> <span class="n">n_snIa</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_snII</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">r</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

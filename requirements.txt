@@ -1,3 +1,4 @@
+astropy
 corner
 progressbar
 numpy

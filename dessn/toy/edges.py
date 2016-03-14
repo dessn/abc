@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.cosmology import FlatwCDM
-
+from scipy import special
 from dessn.model.edge import Edge, EdgeTransformation
 from dessn.utility.math import plus
 
@@ -142,4 +142,28 @@ class ToRate(Edge):
         super(ToRate, self).__init__("type", "sn_rate")
 
     def get_log_likelihood(self, data):
-        pass
+        r""" The likelihood of having the supernova types :math:`T` given supernova rate :math:`r`.
+
+        We model the supernova rate as a binomial process, with rate :math:`r`. That is, given :math:`x` type
+        Ia supernova and :math:`y` type II supernova, our pdf is given by
+
+        .. math::
+            P(T|r) = \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} r^{N_{\rm SnIa}} (1 - r)^{N_{\rm SnII}}
+
+        In log space, this is
+
+        .. math::
+            \log(P(T|r)) = \log \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} + N_{\rm SnIa} \log(r) + N_{\rm SnII} \log(1-r)
+
+        In the code, I approximate the choose function using the log gamma functions.
+        """
+        sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
+        n_snIa = (sn_type != 1.0).sum()
+        n_snII = (sn_type == 1.0).sum()
+        n = sn_type.size
+        r = data["sn_rate"]
+
+        # TODO: Probably want generic classes for Normals, log normals, binomial, etc
+        log_choose = special.gammaln(n + 1) - special.gammaln(n_snII + 1) - special.gammaln(n_snIa + 1)
+
+        return log_choose + n_snIa * np.log(r) + n_snII * np.log(1-r)
