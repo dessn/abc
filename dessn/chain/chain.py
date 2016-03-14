@@ -246,7 +246,8 @@ class ChainConsumer(object):
         """
         if parameters is None:
             parameters = self.all_parameters
-        assert len(self.names) == len(self.chains), "Generating a LaTeX table requires all chains to have names"
+        for i, name in enumerate(self.names):
+            assert name is not None, "Generating a LaTeX table requires all chains to have names. Ensure you have `name=` in your `add_chain` call"
         for p in parameters:
             assert isinstance(p, str), "Generating a LaTeX table requires all parameters have labels"
         num_parameters = len(parameters)
