@@ -110,7 +110,6 @@ class ToLuminosity(Edge):
         return np.sum(snIa_mask * snIa_prob + snII_mask * snII_prob)
 
 
-
 class ToType(Edge):
     def __init__(self):
         super(ToType, self).__init__("otype", "type")
