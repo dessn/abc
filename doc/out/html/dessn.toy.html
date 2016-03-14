@@ -168,7 +168,7 @@
 <code class="descname">get_transformation</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToCount.get_transformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToCount.get_transformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given CCD efficiency, convert from count to flux <span class="math">\(f\)</span> and flux error <span class="math">\(\sigma_f\)</span>.</p>
 <div class="math">
-\[f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}\]\[\sigma_f = \sqrt{f}\]</div>
+\[f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}\]\[\sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}\]</div>
 </dd></dl>
 
 </dd></dl>
@@ -180,7 +180,8 @@
 <dl class="method">
 <dt id="dessn.toy.edges.ToFlux.get_transformation">
 <code class="descname">get_transformation</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToFlux.get_transformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToFlux.get_transformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets flux from the luminosity distance and luminosity.</p>
+<dd><p>Gets flux from the luminosity distance and luminosity. Note that the luminosity here is
+actually the <strong>log luminosity</strong></p>
 <div class="math">
 \[f = \frac{L}{4\pi D_L^2}\]</div>
 </dd></dl>
@@ -194,7 +195,15 @@
 <dl class="method">
 <dt id="dessn.toy.edges.ToLuminosity.get_log_likelihood">
 <code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToLuminosity.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToLuminosity.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Assume type is 0 for a Type SnIa, or 1 for SnII. It will be continuous, so we round the variable.</p>
+<p>If we have a type SnIa supernova, we use the type SnIa distribution, which is modelled as a gaussian.</p>
+<p>We should also note clearly that luminosity here is actually <strong>log luminosity</strong>, we work in log space.</p>
+<div class="math">
+\[P(L|\mu_{\rm SnIa}, \sigma_{\rm SnIa}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnIa}} \exp\left( - \frac{(L - \mu_{\rm SnIa})^2}{2\sigma_{\rm SnIa}} \right)\]</div>
+<p>If we have a type SnII supernova, we use the type SnII distribution, which is also modelled as a gaussian.</p>
+<div class="math">
+\[P(L|\mu_{\rm SnII}, \sigma_{\rm SnII}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnII}} \exp\left( - \frac{(L - \mu_{\rm SnII})^2}{2\sigma_{\rm SnII}} \right)\]</div>
+</dd></dl>
 
 </dd></dl>
 

@@ -15,12 +15,12 @@ class ToCount(EdgeTransformation):
         .. math::
             f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}
 
-            \sigma_f = \sqrt{f}
+            \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}
         """
         efficiency = 0.9
         conversion = 1000
-        flux = (data["ocount"] / efficiency / conversion)
-        flux_error = np.sqrt(flux)
+        flux = data["ocount"] / efficiency / conversion
+        flux_error = np.sqrt(data["ocount"]) / efficiency / conversion
         return {"flux": flux, "flux_error": flux_error}
 
 
@@ -29,13 +29,14 @@ class ToFlux(EdgeTransformation):
         super(ToFlux, self).__init__("flux", ["lumdist", "luminosity"])
 
     def get_transformation(self, data):
-        r""" Gets flux from the luminosity distance and luminosity.
+        r""" Gets flux from the luminosity distance and luminosity. Note that the luminosity here is
+        actually the **log luminosity**
 
         .. math::
             f = \frac{L}{4\pi D_L^2}
 
         """
-        flux = data["luminosity"] / (4 * np.pi * data["lumdist"] * data["lumdist"])
+        flux = np.exp(data["luminosity"]) / (4 * np.pi * data["lumdist"] * data["lumdist"])
         return {"flux": flux}
 
 
@@ -74,7 +75,40 @@ class ToLuminosity(Edge):
         super(ToLuminosity, self).__init__("luminosity", ["type", "snIa_luminosity", "snIa_sigma", "snII_luminosity", "snII_sigma"])
 
     def get_log_likelihood(self, data):
-        pass
+        r""" Assume type is 0 for a Type SnIa, or 1 for SnII. It will be continuous, so we round the variable.
+
+        If we have a type SnIa supernova, we use the type SnIa distribution, which is modelled as a gaussian.
+
+        We should also note clearly that luminosity here is actually **log luminosity**, we work in log space.
+
+        .. math::
+            P(L|\mu_{\rm SnIa}, \sigma_{\rm SnIa}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnIa}} \exp\left( - \frac{(L - \mu_{\rm SnIa})^2}{2\sigma_{\rm SnIa}} \right)
+
+        If we have a type SnII supernova, we use the type SnII distribution, which is also modelled as a gaussian.
+
+        .. math::
+            P(L|\mu_{\rm SnII}, \sigma_{\rm SnII}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnII}} \exp\left( - \frac{(L - \mu_{\rm SnII})^2}{2\sigma_{\rm SnII}} \right)
+
+        """
+
+        # TODO: Where should we consistency check parameters. In this example, type should be between 0 and 1, but this class does not enforce that
+        sn_type = np.round(data["type"])
+
+        # Note that we are working with arrays for type and luminosity, one element per supernova
+        snIa_mask = (sn_type == 0)
+        snII_mask = (sn_type == 1)
+
+        luminosity = data["luminosity"]
+        snIa_mean = data["snIa_luminosity"]
+        snIa_std = data["snIa_sigma"]
+        snII_mean = data["snII_luminosity"]
+        snII_std = data["snII_sigma"]
+
+        snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(np.sqrt(2 * np.pi) * snIa_std)
+        snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(np.sqrt(2 * np.pi) * snII_std)
+
+        return snIa_mask * snIa_prob + snII_mask * snII_prob
+
 
 
 class ToType(Edge):
