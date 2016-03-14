@@ -91,7 +91,7 @@ class ToLuminosity(Edge):
 
         """
 
-        # TODO: Where should we consistency check parameters. In this example, type should be between 0 and 1, but this class does not enforce that
+        # TODO: Where should we consistency check parameters? Should we need to?
         sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
 
         # Note that we are working with arrays for type and luminosity, one element per supernova
