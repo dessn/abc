@@ -253,7 +253,15 @@ Also assumes the success rate is 99% for observed spectra</p>
 <dl class="method">
 <dt id="dessn.toy.edges.ToType.get_log_likelihood">
 <code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/edges.html#ToType.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.edges.ToType.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Gets the probability of the actual object being of one type, given we observe a singular other type.</p>
+<p>That is, if we think we observe a type Ia supernova, what is the probability it is actually a type Ia, and
+what is the probability it is a different type of supernova.</p>
+<p>At the moment, this is a trivial function, where we assume that we are correct 90% of the time.</p>
+<p>Also note that the input types (accessed by the <code class="docutils literal"><span class="pre">type</span></code> key) are continuous, and we therefore round them
+to get the discrete type. The method of changing from continuous to discrete will probably update in the future.</p>
+<div class="math">
+\[P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}\]</div>
+</dd></dl>
 
 </dd></dl>
 

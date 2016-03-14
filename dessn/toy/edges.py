@@ -92,7 +92,7 @@ class ToLuminosity(Edge):
         """
 
         # TODO: Where should we consistency check parameters. In this example, type should be between 0 and 1, but this class does not enforce that
-        sn_type = np.round(data["type"])
+        sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
 
         # Note that we are working with arrays for type and luminosity, one element per supernova
         snIa_mask = (sn_type == 0)
@@ -107,7 +107,7 @@ class ToLuminosity(Edge):
         snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(np.sqrt(2 * np.pi) * snIa_std)
         snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(np.sqrt(2 * np.pi) * snII_std)
 
-        return snIa_mask * snIa_prob + snII_mask * snII_prob
+        return np.sum(snIa_mask * snIa_prob + snII_mask * snII_prob)
 
 
 
@@ -116,7 +116,25 @@ class ToType(Edge):
         super(ToType, self).__init__("otype", "type")
 
     def get_log_likelihood(self, data):
-        pass
+        r""" Gets the probability of the actual object being of one type, given we observe a singular other type.
+
+        That is, if we think we observe a type Ia supernova, what is the probability it is actually a type Ia, and
+        what is the probability it is a different type of supernova.
+
+        At the moment, this is a trivial function, where we assume that we are correct 90% of the time.
+
+        Also note that the input types (accessed by the ``type`` key) are continuous, and we therefore round them
+        to get the discrete type. The method of changing from continuous to discrete will probably update in the future.
+
+        .. math::
+            P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}
+        """
+        sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
+
+        o_type = data["otype"]
+        probs = 0.9 * (sn_type == o_type) + 0.1 * (sn_type != o_type)
+
+        return np.sum(np.log(probs))
 
 
 class ToRate(Edge):

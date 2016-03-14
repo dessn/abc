@@ -221,7 +221,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># TODO: Where should we consistency check parameters. In this example, type should be between 0 and 1, but this class does not enforce that</span>
-        <span class="n">sn_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+        <span class="n">sn_type</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
 
         <span class="c1"># Note that we are working with arrays for type and luminosity, one element per supernova</span>
         <span class="n">snIa_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
@@ -236,7 +236,7 @@
         <span class="n">snIa_prob</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snIa_mean</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snIa_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">snIa_std</span> <span class="o">*</span> <span class="n">snIa_std</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">snIa_std</span><span class="p">)</span>
         <span class="n">snII_prob</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snII_mean</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snII_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">snII_std</span> <span class="o">*</span> <span class="n">snII_std</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">snII_std</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">snIa_mask</span> <span class="o">*</span> <span class="n">snIa_prob</span> <span class="o">+</span> <span class="n">snII_mask</span> <span class="o">*</span> <span class="n">snII_prob</span></div></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snIa_mask</span> <span class="o">*</span> <span class="n">snIa_prob</span> <span class="o">+</span> <span class="n">snII_mask</span> <span class="o">*</span> <span class="n">snII_prob</span><span class="p">)</span></div></div>
 
 
 
@@ -245,7 +245,25 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ToType</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;otype&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ToType.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToType.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">pass</span></div></div>
+        <span class="sd">r&quot;&quot;&quot; Gets the probability of the actual object being of one type, given we observe a singular other type.</span>
+
+<span class="sd">        That is, if we think we observe a type Ia supernova, what is the probability it is actually a type Ia, and</span>
+<span class="sd">        what is the probability it is a different type of supernova.</span>
+
+<span class="sd">        At the moment, this is a trivial function, where we assume that we are correct 90% of the time.</span>
+
+<span class="sd">        Also note that the input types (accessed by the ``type`` key) are continuous, and we therefore round them</span>
+<span class="sd">        to get the discrete type. The method of changing from continuous to discrete will probably update in the future.</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sn_type</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">o_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;otype&quot;</span><span class="p">]</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="n">o_type</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">!=</span> <span class="n">o_type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="p">))</span></div></div>
 
 
 <div class="viewcode-block" id="ToRate"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRate">[docs]</a><span class="k">class</span> <span class="nc">ToRate</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
