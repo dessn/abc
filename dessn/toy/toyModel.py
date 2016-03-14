@@ -4,6 +4,7 @@ from dessn.toy.latent import Luminosity, Redshift, Type
 from dessn.toy.underlying import Cosmology, SupernovaIaDist, SupernovaIIDist, SupernovaRate
 from dessn.toy.transformations import Flux, LuminosityDistance
 from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
+from dessn.simulation.simulation import Simulation
 import logging
 import os
 
@@ -15,14 +16,19 @@ class ToyModel(Model):
     .. figure::     ../plots/toyModelPGM.png
         :align:     center
     """
-    def __init__(self):
+    def __init__(self, observations):
         super(ToyModel, self).__init__("ToyModel")
 
-        n = 30
+        z_o = observations["z_o"]
+        z_o_err = observations["z_o_err"]
+        count_o = observations["count_o"]
+        type_o = observations["type_o"]
 
-        self.add_node(ObservedType([None]))
-        self.add_node(ObservedRedshift([None], [None]))
-        self.add_node(ObservedCounts([None]))
+        n = z_o.size
+
+        self.add_node(ObservedType(type_o))
+        self.add_node(ObservedRedshift(z_o, z_o_err))
+        self.add_node(ObservedCounts(count_o))
 
         self.add_node(Flux())
         self.add_node(LuminosityDistance())
@@ -49,6 +55,18 @@ class ToyModel(Model):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    toy_model = ToyModel()
     pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-    #fig = toy_model.get_pgm(pgm_file)
+    temp_dir = os.path.abspath(dir_name + "/../../../temp/toyModel")
+    plot_file = os.path.abspath(dir_name + "/../../../plots/toyModelChain.png")
+
+    simulation = Simulation()
+    observations = simulation.get_simulation(50)
+
+    toy_model = ToyModel(observations)
+    # fig = toy_model.get_pgm(pgm_file)
+
+    toy_model.fit_model(num_steps=2000, num_burn=500, temp_dir=temp_dir, save_interval=5)
+    toy_model.chain_plot(filename=plot_file, display=False)
+    toy_model.chain_summary()
+
+
