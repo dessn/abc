@@ -53,8 +53,8 @@ clean:
 
 .PHONY: rst
 rst:
-    sphinx-apidoc -fM -o . ../dessn
-    @echo "Made rst"
+	sphinx-apidoc -fM -o . ../dessn
+	@echo "Made rst"
 .PHONY: html
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
