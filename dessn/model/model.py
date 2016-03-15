@@ -123,27 +123,27 @@ class Model(object):
                 self._theta_names += [name] * node.get_num_latent()
 
         num_edges = len(self.edges)
-        observed_names = [key for key in self._in if len(self._in[key]) == 0]
+        observed_names = [parameter for node in self.nodes for parameter in node.names if not isinstance(node, NodeTransformation)]
         self._ordered_edges = []
-        sort_req = {}
         count = 0
-        max_count = 1000
+        max_count = 100
         while len(self._ordered_edges) < num_edges:
             for edge in self.edges:
-                unsatisfied_requirements = [r for r in edge.probability_of if r not in observed_names]
+                if isinstance(edge, EdgeTransformation):
+                    requirements = edge.given
+                else:
+                    requirements = edge.given + edge.probability_of
+                unsatisfied_requirements = [r for r in requirements if r not in observed_names]
+
                 if len(unsatisfied_requirements) == 0:
                     self._ordered_edges.append(edge)
-                    for p in edge.probability_of:
-                        for g in edge.given:
-                            if g not in sort_req:
-                                sort_req[g] = []
-                            sort_req[g].append(p)
-                    for g in edge.given:
-                        if set(self._in[g]) == set(sort_req[g]):
-                            observed_names.append(g)
+                    if isinstance(edge, EdgeTransformation):
+                        for val in edge.probability_of:
+                            observed_names.append(val)
             count += 1
             if count > max_count:
                 raise ValueError("Model edges cannot be ordered. Please double check your edges")
+        # print(self._ordered_edges)
 
     def finalise(self):
         """ Finalises the model.
@@ -177,41 +177,59 @@ class Model(object):
         return result
 
     def _get_log_posterior(self, theta):
-
         theta_dict = self._get_theta_dict(theta)
         probability = self._get_log_prior(theta_dict)
-        for edge in self._ordered_edges:
-            if isinstance(edge, EdgeTransformation):
-                theta_dict.update(self._get_transformation(theta_dict, edge))
-            else:
-                probability += self._get_log_likelihood(theta_dict, edge)
+        if np.isfinite(probability):
+            for edge in self._ordered_edges:
+                if isinstance(edge, EdgeTransformation):
+                    theta_dict.update(self._get_transformation(theta_dict, edge))
+                else:
+                    result = self._get_log_likelihood(theta_dict, edge)
+                    # print(edge, result)
+
+                    probability += result
         return probability
 
     def _get_negative_log_posterior(self, theta):
-        return -self._get_log_posterior(theta)
+        val = self._get_log_posterior(theta)
+        # print(val)#, theta)
+        return -val
+
+    def _get_suggestion(self, data):
+        pass
 
     def _get_starting_position(self, num_walkers):
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
-        p0 = np.ones(num_dim)
+        p0 = np.random.rand(num_dim)
+        p0 = np.array([0.28,-1.,72.,-23.,0.2,-21.,1.,0.98,-23.23123649,-22.84376038,-22.70110309,-23.41399701,-22.91474825,-22.86461839,-23.12748741,-23.07945436,-23.02657612,-23.05955818,-23.06180259,-23.33520076,-22.76953369,-22.78407628,-23.16267285,-23.29328487,-22.89578702,-23.11515759,-22.97160937,-23.06386568,-22.86169225,-22.86105017,-23.14511948,-23.27667279,-23.31658768,-22.87792412,-23.23777185,-23.10136327,-23.11926281,-23.01051346,-23.38725596,-22.96224428,-22.8952218,-22.98231558,-23.06217723,-22.98051997,-22.92019073,-23.55451855,-22.60881754,-22.92198134,-23.13048172,-23.07819068,-22.90125164,-23.02322079,-23.40613689,-22.58710143,-23.02210813,-22.79596546,-23.13840997,-22.69272459,1.14274566,1.4588598,1.24525041,1.13527805,0.90494412,1.32719881,0.9314157,1.7943687,1.93095924,0.82853889,1.60427757,1.10490035,1.17928467,1.85863361,0.23496851,0.26554567,0.13841496,1.68197771,1.57849783,1.75302308,1.95937485,1.61840127,0.97681079,1.58300543,0.32472141,1.31584994,0.37237125,1.89487094,1.09151181,0.88785769,0.60265566,1.57104401,0.96668563,1.1800245,0.13570062,1.27350744,1.26298187,1.27217459,1.89312135,1.39545857,0.78306501,0.93036071,1.42549927,0.2144284,1.36685676,1.37421195,0.49972687,0.34495997,0.69931387,0.79105046,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.])
         optimised = fmin_bfgs(self._get_negative_log_posterior, p0, disp=False)
         self.logger.debug("Starting position is: %s" % optimised)
 
-        std = np.random.uniform(0.5, 1.5, size=(num_walkers, num_dim))
+        std = np.random.uniform(0.8, 1.2, size=(num_walkers, num_dim))
         start = std * optimised
         return start
 
     def _get_log_prior(self, theta_dict):
         result = []
         for node in self._underlying_nodes:
-            result.append(node.get_log_prior({key: theta_dict[key] for key in node.names}))
+            p = node.get_log_prior({key: theta_dict[key] for key in node.names})
+            if np.isnan(p):
+                self.logger.error("Got NaN probability from %s: %s" % (node, theta_dict))
+                raise ValueError("NaN")
+
+            result.append(p)
         return np.sum(result)
 
     def _get_transformation(self, theta_dict, edge):
-        return edge.get_transformation({key: theta_dict[key] for key in edge.probability_of})
+        return edge.get_transformation({key: theta_dict[key] for key in edge.given})
 
     def _get_log_likelihood(self, theta_dict, edge):
-        return edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
+        result = edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
+        if np.isnan(result):
+            self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
+            raise ValueError("NaN")
+        return result
 
     def get_pgm(self, filename=None):
         """ Renders (and returns) a PGM of the current model.
@@ -363,6 +381,11 @@ class Model(object):
         if display:
             plt.show()
         return fig
+
+    def get_consumer(self):
+        chain_plotter = ChainConsumer()
+        chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
+        return chain_plotter
 
     def chain_plot(self, **kwargs):
         """ Creates a chain plot of the model's chain.

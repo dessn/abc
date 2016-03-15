@@ -347,7 +347,7 @@ class ChainConsumer(object):
             text = "$%s$" % text
         return text
 
-    def plot(self, figsize="COLUMN", parameters=None, extents=None, filename=None, display=False, truth=None, legend=True):
+    def plot(self, figsize="GROW", parameters=None, extents=None, filename=None, display=False, truth=None, legend=True):
         """ Plot the chain
 
         Parameters
@@ -355,7 +355,8 @@ class ChainConsumer(object):
         figsize : str|tuple(float), optional
             The figure size to generate. Accepts a regular two tuple of size in inches, or one of several key words.
             The default value of ``COLUMN`` creates a figure of appropriate size of insertion into an A4 LaTeX document
-            in two-column mode. ``PAGE`` creates a full page width figure. String arguments are not case sensitive.
+            in two-column mode. ``PAGE`` creates a full page width figure. ``GROW`` creates an image that
+            scales with parameters (1.5 inches per parameter). String arguments are not case sensitive.
         parameters : list[str], optional
             If set, only creates a plot for those specific parameters
         extents : list[tuple[float]] or dict[str], optional
@@ -386,16 +387,20 @@ class ChainConsumer(object):
         if not self._configured_truth:
             self.configure_truth()
 
+        if parameters is None:
+            parameters = self.all_parameters
+
+
         if isinstance(figsize, str):
             if figsize.upper() == "COLUMN":
                 figsize = (5, 5)
             elif figsize.upper() == "PAGE":
                 figsize = (10, 10)
+            elif figsize.upper() == "GROW":
+                figsize = (1.5 * len(parameters), 1.5 * len(parameters))
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
 
-        if parameters is None:
-            parameters = self.all_parameters
 
         assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
             "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))

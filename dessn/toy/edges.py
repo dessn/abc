@@ -2,26 +2,33 @@ import numpy as np
 from astropy.cosmology import FlatwCDM
 from scipy import special
 from dessn.model.edge import Edge, EdgeTransformation
-from dessn.utility.math import plus
 
 
-class ToCount(EdgeTransformation):
+class ToCount(Edge):
+
     def __init__(self):
-        super(ToCount, self).__init__("ocount", ["flux", "flux_error"])
+        super(ToCount, self).__init__("ocount", "flux")
 
-    def get_transformation(self, data):
-        r""" Given CCD efficiency, convert from count to flux :math:`f` and flux error :math:`\sigma_f`.
+    def get_log_likelihood(self, data):
+        r""" Given CCD efficiency, convert from count to flux :math:`f`. We go from counts, assume Poisson error, to get
+        an observed flux and flux error from counts. From that, we can calculate the likelihood of an actual flux, given
+        our observed flux and observed flux error, assuming a normal distribution:
 
         .. math::
-            f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}
+            f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}
 
             \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}
+
+            P ({\rm count}_o | f_ = \frac{1}{\sqrt{2\pi}} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)
+
         """
         efficiency = 0.9
         conversion = 1000
-        flux = data["ocount"] / efficiency / conversion
-        flux_error = np.sqrt(data["ocount"]) / efficiency / conversion
-        return {"flux": flux, "flux_error": flux_error}
+        flux = data["flux"]
+        f = data["ocount"] / efficiency / conversion
+        fe = np.sqrt(data["ocount"]) / efficiency / conversion
+
+        return np.sum(-(flux - f) * (flux - f) / (2 * fe * fe) - np.log(np.sqrt(2 * np.pi) * fe))
 
 
 class ToFlux(EdgeTransformation):
@@ -64,10 +71,11 @@ class ToRedshift(Edge):
             P(z_o|z) = \frac{0.01}{2} + \frac{0.99}{\sqrt{2\pi} z_{o,{\rm err}}} \exp\left(  -\frac{(z-z_o)^2}{2z^2_{o,{\rm err}}}  \right)
 
         """
-        uniform = np.log(0.01/2)
-        gauss = -(data["oredshift"] - data["redshift"]) * (data["oredshift"] - data["redshift"]) / (2 * data["oredshift_error"] * data["oredshift_error"])\
-                - np.log(np.sqrt(2 * np.pi) * data["oredshift_error"])
-        return plus(uniform, gauss)
+        uniform = np.log(0.01 / 2)
+        gauss = -(data["oredshift"] - data["redshift"]) * (data["oredshift"] - data["redshift"]) / (2 * data["oredshift_error"] * data["oredshift_error"])
+        gauss -= np.log(np.sqrt(2 * np.pi) * data["oredshift_error"])
+        result = np.logaddexp(gauss, uniform)
+        return np.sum(result)
 
 
 class ToLuminosity(Edge):
@@ -106,7 +114,7 @@ class ToLuminosity(Edge):
 
         snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(np.sqrt(2 * np.pi) * snIa_std)
         snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(np.sqrt(2 * np.pi) * snII_std)
-
+        # print(snIa_prob, snII_prob)
         return np.sum(snIa_mask * snIa_prob + snII_mask * snII_prob)
 
 
@@ -156,6 +164,9 @@ class ToRate(Edge):
 
         In the code, I approximate the choose function using the log gamma functions.
         """
+        if data["sn_rate"] < 0 or data["sn_rate"] > 1:
+            return -np.inf
+
         sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
         n_snIa = (sn_type != 1.0).sum()
         n_snII = (sn_type == 1.0).sum()
@@ -164,5 +175,5 @@ class ToRate(Edge):
 
         # TODO: Probably want generic classes for Normals, log normals, binomial, etc
         log_choose = special.gammaln(n + 1) - special.gammaln(n_snII + 1) - special.gammaln(n_snIa + 1)
-
+        # print(log_choose, n_snIa, n_snII, r, n, data["sn_rate"], data["type"])
         return log_choose + n_snIa * np.log(r) + n_snII * np.log(1-r)

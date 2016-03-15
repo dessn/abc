@@ -11,22 +11,28 @@ class Cosmology(NodeUnderlying):
         super(Cosmology, self).__init__("Cosmology", ["omega_m", "w", "H0"], [r"$\Omega_m$", "$w$", "$H_0$"])
 
     def get_log_prior(self, data):
+        if data["omega_m"] < 0:
+            return -np.inf
         return 1
 
 
 class SupernovaIaDist(NodeUnderlying):
     def __init__(self):
-        super(SupernovaIaDist, self).__init__("SNIa", ["snIa_luminosity", "snIa_sigma"], ["$L$", r"$\sigma_L$"])
+        super(SupernovaIaDist, self).__init__("SNIa", ["snIa_luminosity", "snIa_sigma"], [r"$L_{\rm SnIa}$", r"$\sigma_{\rm SnIa}$"])
 
     def get_log_prior(self, data):
+        if data["snIa_sigma"] < 0:
+            return -np.inf
         return 1
 
 
 class SupernovaIIDist(NodeUnderlying):
     def __init__(self):
-        super(SupernovaIIDist, self).__init__("SNII", ["snII_luminosity", "snII_sigma"], ["$L$", r"$\sigma_L$"])
+        super(SupernovaIIDist, self).__init__("SNII", ["snII_luminosity", "snII_sigma"], [r"$L_{\rm SnII}$", r"$\sigma_{\rm SnII}$"])
 
     def get_log_prior(self, data):
+        if data["snII_sigma"] < 0:
+            return -np.inf
         return 1
 
 
