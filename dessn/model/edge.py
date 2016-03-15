@@ -47,12 +47,6 @@ class Edge(object):
         """
         return
 
-    @abc.abstractmethod
-    def get_start_suggestion(self, data):
-        r""" Suggest a starting position by injecting it into the data
-        """
-        return
-
 
 class EdgeTransformation(Edge):
     """ This specialised edge is used to connect to transformation nodes.

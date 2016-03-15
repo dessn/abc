@@ -23,7 +23,7 @@ class ToCount(Edge):
 
         """
         efficiency = 0.9
-        conversion = 1000
+        conversion = 1e10
         flux = data["flux"]
         f = data["ocount"] / efficiency / conversion
         fe = np.sqrt(data["ocount"]) / efficiency / conversion
@@ -103,8 +103,8 @@ class ToLuminosity(Edge):
         sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
 
         # Note that we are working with arrays for type and luminosity, one element per supernova
-        snIa_mask = (sn_type == 0)
-        snII_mask = (sn_type == 1)
+        snIa_mask = (sn_type == 1)
+        snII_mask = (sn_type == 0)
 
         luminosity = data["luminosity"]
         snIa_mean = data["snIa_luminosity"]
@@ -136,10 +136,16 @@ class ToType(Edge):
         .. math::
             P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}
         """
-        sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
+        # sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
+        sn_type = np.round(data["type"])
 
         o_type = data["otype"]
         probs = 0.9 * (sn_type == o_type) + 0.1 * (sn_type != o_type)
+
+        # Adding constraints
+        mask = (data["type"] > 1.4) | (data["type"] < -0.4)
+        if mask.sum() > 0:
+            return -np.inf
 
         return np.sum(np.log(probs))
 
@@ -167,9 +173,9 @@ class ToRate(Edge):
         if data["sn_rate"] < 0 or data["sn_rate"] > 1:
             return -np.inf
 
-        sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
-        n_snIa = (sn_type != 1.0).sum()
-        n_snII = (sn_type == 1.0).sum()
+        sn_type = np.round(data["type"])
+        n_snIa = (sn_type == 1.0).sum()
+        n_snII = (sn_type != 1.0).sum()
         n = sn_type.size
         r = data["sn_rate"]
 

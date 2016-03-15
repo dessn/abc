@@ -11,7 +11,7 @@ class Simulation(object):
         self.logger.info('Getting data for %d transients' % num_trans)
 
         efficiency = 0.9
-        conversion = 1000
+        conversion = 1e10
 
         np.random.seed(0)
 

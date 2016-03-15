@@ -9,6 +9,12 @@ class Redshift(NodeLatent):
     def get_num_latent(self):
         return self.n
 
+    def get_suggestion_requirements(self):
+        return ["oredshift"]
+
+    def get_suggestion(self, data):
+        return data["oredshift"].tolist()
+
 
 class Luminosity(NodeLatent):
     def __init__(self, n):
@@ -17,6 +23,13 @@ class Luminosity(NodeLatent):
 
     def get_num_latent(self):
         return self.n
+
+    def get_suggestion_requirements(self):
+        return ["otype"]
+
+    def get_suggestion(self, data):
+        typeIa = data["otype"] == 1.0
+        return (typeIa * 10 + (1 - typeIa) * 5.0).tolist()
 
 
 class Type(NodeLatent):
@@ -27,4 +40,8 @@ class Type(NodeLatent):
     def get_num_latent(self):
         return self.n
 
+    def get_suggestion_requirements(self):
+        return ["otype"]
 
+    def get_suggestion(self, data):
+        return data["otype"].tolist()
