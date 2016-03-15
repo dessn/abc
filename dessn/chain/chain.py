@@ -103,7 +103,7 @@ class ChainConsumer(object):
         if bins is None:
             bins = self._get_bins()
         elif isinstance(bins, float):
-            bins = [b * bins for b in self._get_bins()]
+            bins = [np.floor(b * bins) for b in self._get_bins()]
         elif isinstance(bins, int):
             bins = [bins] * len(self.chains)
         else:

@@ -62,13 +62,13 @@ if __name__ == "__main__":
     vals = [0.28, -1.0, 72, 10, 0.1, 5, 0.2, 0.8]
     simulation = Simulation()
     observations, theta = simulation.get_simulation(*vals, num_trans=50)
-    print(observations)
     toy_model = ToyModel(observations)
     # fig = toy_model.get_pgm(pgm_file)
     if True:
-        toy_model.fit_model(num_steps=160, num_burn=100, temp_dir=temp_dir, save_interval=20)
+        toy_model.fit_model(num_steps=3900, num_burn=2000, temp_dir=temp_dir, save_interval=20)
         chain_consumer = toy_model.get_consumer()
         # chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(8, 12))
         chain_consumer.configure_contour(cloud=False)
+        chain_consumer.configure_general(bins=0.15)
         chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
 
