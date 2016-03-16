@@ -119,6 +119,6 @@ if __name__ == "__main__":
     temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
     pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
     exampleModel.get_pgm(pgm_file)
-    exampleModel.fit_model(num_steps=2000, num_burn=500, temp_dir=temp_dir, save_interval=5)
+    exampleModel.fit_model(num_steps=5000, num_burn=500, temp_dir=temp_dir, save_interval=5)
     exampleModel.chain_plot(filename=plot_file, display=False)
     exampleModel.chain_summary()

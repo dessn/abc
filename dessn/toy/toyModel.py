@@ -23,7 +23,6 @@ class ToyModel(Model):
         z_o_err = observations["z_o_err"]
         count_o = observations["count_o"]
         type_o = observations["type_o"]
-
         n = z_o.size
 
         self.add_node(ObservedType(type_o))
@@ -56,17 +55,20 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-    temp_dir = os.path.abspath(dir_name + "/../../../temp/toyModel")
-    plot_file = os.path.abspath(dir_name + "/../../../plots/toyModelChain.png")
+    temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel")
+    plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
+    walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
 
+    vals = [0.28, -1.0, 72, 10, 0.1, 5, 0.2, 0.6]
     simulation = Simulation()
-    observations = simulation.get_simulation(50)
-
+    observations, theta = simulation.get_simulation(*vals, num_trans=50)
     toy_model = ToyModel(observations)
     # fig = toy_model.get_pgm(pgm_file)
-
-    toy_model.fit_model(num_steps=2000, num_burn=500, temp_dir=temp_dir, save_interval=5)
-    toy_model.chain_plot(filename=plot_file, display=False)
-    toy_model.chain_summary()
-
+    if True:
+        toy_model.fit_model(num_steps=100, num_burn=50, temp_dir=temp_dir, save_interval=20)
+        chain_consumer = toy_model.get_consumer()
+        # chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(8, 12))
+        chain_consumer.configure_contour(cloud=False)
+        chain_consumer.configure_general(bins=0.3)
+        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
 

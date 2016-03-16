@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import daft
 import sys
-from scipy.optimize import fmin_bfgs
+from scipy.optimize import fmin
 
 
 class Model(object):
@@ -123,27 +123,27 @@ class Model(object):
                 self._theta_names += [name] * node.get_num_latent()
 
         num_edges = len(self.edges)
-        observed_names = [key for key in self._in if len(self._in[key]) == 0]
+        observed_names = [parameter for node in self.nodes for parameter in node.names if not isinstance(node, NodeTransformation)]
         self._ordered_edges = []
-        sort_req = {}
         count = 0
-        max_count = 1000
+        max_count = 100
         while len(self._ordered_edges) < num_edges:
             for edge in self.edges:
-                unsatisfied_requirements = [r for r in edge.probability_of if r not in observed_names]
+                if isinstance(edge, EdgeTransformation):
+                    requirements = edge.given
+                else:
+                    requirements = edge.given + edge.probability_of
+                unsatisfied_requirements = [r for r in requirements if r not in observed_names]
+
                 if len(unsatisfied_requirements) == 0:
                     self._ordered_edges.append(edge)
-                    for p in edge.probability_of:
-                        for g in edge.given:
-                            if g not in sort_req:
-                                sort_req[g] = []
-                            sort_req[g].append(p)
-                    for g in edge.given:
-                        if set(self._in[g]) == set(sort_req[g]):
-                            observed_names.append(g)
+                    if isinstance(edge, EdgeTransformation):
+                        for val in edge.probability_of:
+                            observed_names.append(val)
             count += 1
             if count > max_count:
                 raise ValueError("Model edges cannot be ordered. Please double check your edges")
+        # print(self._ordered_edges)
 
     def finalise(self):
         """ Finalises the model.
@@ -177,26 +177,48 @@ class Model(object):
         return result
 
     def _get_log_posterior(self, theta):
-
         theta_dict = self._get_theta_dict(theta)
         probability = self._get_log_prior(theta_dict)
-        for edge in self._ordered_edges:
-            if isinstance(edge, EdgeTransformation):
-                theta_dict.update(self._get_transformation(theta_dict, edge))
-            else:
-                probability += self._get_log_likelihood(theta_dict, edge)
+        if np.isfinite(probability):
+            for edge in self._ordered_edges:
+                if isinstance(edge, EdgeTransformation):
+                    theta_dict.update(self._get_transformation(theta_dict, edge))
+                else:
+                    result = self._get_log_likelihood(theta_dict, edge)
+                    # print(edge, result)
+
+                    probability += result
         return probability
 
     def _get_negative_log_posterior(self, theta):
-        return -self._get_log_posterior(theta)
+        val = self._get_log_posterior(theta)
+        # print(val)#, theta)
+        return -val
+
+    def _get_suggestion(self):
+        node_sorted = []
+        for name in self._theta_names:
+            node = self._node_dict[name]
+            if node not in node_sorted:
+                node_sorted.append(node)
+
+        theta = []
+        data = self.data
+        for node in node_sorted:
+            node_data = {key: data[key] for key in data if key in node.get_suggestion_requirements()}
+            temp_arr = node.get_suggestion(node_data)
+            theta += temp_arr
+
+        return theta
 
     def _get_starting_position(self, num_walkers):
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
-        p0 = np.ones(num_dim)
-        optimised = fmin_bfgs(self._get_negative_log_posterior, p0, disp=False)
-        self.logger.debug("Starting position is: %s" % optimised)
-
+        p0 = self._get_suggestion()
+        self.logger.debug("Initial position is:  %s" % p0)
+        #optimised = fmin(self._get_negative_log_posterior, p0, disp=True, ftol=0.05, xtol=0.1)
+        #self.logger.debug("Starting position is: %s" % optimised)
+        optimised = p0
         std = np.random.uniform(0.5, 1.5, size=(num_walkers, num_dim))
         start = std * optimised
         return start
@@ -204,14 +226,23 @@ class Model(object):
     def _get_log_prior(self, theta_dict):
         result = []
         for node in self._underlying_nodes:
-            result.append(node.get_log_prior({key: theta_dict[key] for key in node.names}))
+            p = node.get_log_prior({key: theta_dict[key] for key in node.names})
+            if np.isnan(p):
+                self.logger.error("Got NaN probability from %s: %s" % (node, theta_dict))
+                raise ValueError("NaN")
+
+            result.append(p)
         return np.sum(result)
 
     def _get_transformation(self, theta_dict, edge):
-        return edge.get_transformation({key: theta_dict[key] for key in edge.probability_of})
+        return edge.get_transformation({key: theta_dict[key] for key in edge.given})
 
     def _get_log_likelihood(self, theta_dict, edge):
-        return edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
+        result = edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
+        if np.isnan(result):
+            self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
+            raise ValueError("NaN")
+        return result
 
     def get_pgm(self, filename=None):
         """ Renders (and returns) a PGM of the current model.
@@ -363,6 +394,11 @@ class Model(object):
         if display:
             plt.show()
         return fig
+
+    def get_consumer(self):
+        chain_plotter = ChainConsumer()
+        chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
+        return chain_plotter
 
     def chain_plot(self, **kwargs):
         """ Creates a chain plot of the model's chain.

@@ -7,21 +7,11 @@ class Simulation(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def get_simulation(self, num_trans=50):
+    def get_simulation(self, omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r, num_trans=50):
         self.logger.info('Getting data for %d transients' % num_trans)
 
-        # Define our underlying parameters
-        omega_m = 0.28
-        w_0 = -1.0
-        h_0 = 72
-        r = 0.98
-        snIa_mean = -23
-        snIa_sigma = 0.2
-        snII_mean = -21
-        snII_sigma = 1
-
         efficiency = 0.9
-        conversion = 1000
+        conversion = 1e10
 
         np.random.seed(0)
 
@@ -65,6 +55,7 @@ class Simulation(object):
             "type_o": type_o,
             "count_o": count_o
         }
-        return observations
+        theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist() + z.tolist() + type_Ias.tolist()
+        return observations, theta
 
 

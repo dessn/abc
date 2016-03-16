@@ -52,6 +52,16 @@ class Node(object):
             self.labels = labels
         self.node_name = node_name
 
+    @abc.abstractmethod
+    def get_suggestion_requirements(self):
+        """ Returns suggestion parameter requirements. Must be only observed parameters
+        """
+        return
+
+    @abc.abstractmethod
+    def get_suggestion(self, data):
+        return
+
 
 class NodeObserved(Node):
     """ A node representing one or more observed variables
@@ -75,12 +85,21 @@ class NodeObserved(Node):
         if type(names) == list:
             assert len(names) == len(labels) and len(names) == len(datas), "If you pass in a list of names, you need to pass in a list of data for each name"
         super(NodeObserved, self).__init__(node_name, names, labels, NodeType.OBSERVED)
-        self.datas = datas
+        if isinstance(datas, list):
+            self.datas = datas
+        else:
+            self.datas = [datas]
 
     def get_data(self):
         """ Returns a dictionary containing keys of the parameter names and values of the parameter data object
         """
         return {name: data for name, data in zip(self.names, self.datas)}
+
+    def get_suggestion(self, data):
+        return []
+
+    def get_suggestion_requirements(self):
+        return []
 
 
 class NodeUnderlying(Node):
@@ -100,6 +119,8 @@ class NodeUnderlying(Node):
     labels : str or list[str]
         Latex ready labels for the given names. Used in the PGM and corner plots.
     """
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, node_name, names, labels):
         super(NodeUnderlying, self).__init__(node_name, names, labels, NodeType.UNDERLYING)
 
@@ -148,6 +169,12 @@ class NodeTransformation(Node):
     def __init__(self, node_name, names, labels):
         super(NodeTransformation, self).__init__(node_name, names, labels, NodeType.TRANSFORMATION)
 
+    def get_suggestion_requirements(self):
+        return []
+
+    def get_suggestion(self, data):
+        return []
+
 
 class NodeLatent(Node):
     """ A node representing a latent, or hidden, variable in our model.
@@ -169,6 +196,8 @@ class NodeLatent(Node):
     labels : str or list[str]
         Latex ready labels for the given names. Used in the PGM and corner plots.
     """
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, node_name, names, labels):
         super(NodeLatent, self).__init__(node_name, names, labels, NodeType.LATENT)
 
