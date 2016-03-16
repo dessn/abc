@@ -1,16 +1,10 @@
 from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
 from dessn.model.edge import EdgeTransformation
-from dessn.utility.newtonian import NewtonianPosition
 from dessn.utility.hdemcee import EmceeWrapper
-from dessn.chain.chain import ChainConsumer
 import numpy as np
 import logging
 import emcee
 from emcee.utils import MPIPool
-import corner
-import matplotlib.pyplot as plt
-from matplotlib import rc
-import daft
 import sys
 from scipy.optimize import fmin_bfgs
 
@@ -223,7 +217,7 @@ class Model(object):
         theta = []
         data = self.data
         for node in node_sorted:
-            node_data = {key: data[key] for key in data if key in node.get_suggestion_requirements()}
+            node_data = dict((key, data[key]) for key in data if key in node.get_suggestion_requirements())
             temp_arr = node.get_suggestion(node_data)
             theta += temp_arr
 
@@ -250,7 +244,7 @@ class Model(object):
     def _get_log_prior(self, theta_dict):
         result = []
         for node in self._underlying_nodes:
-            p = node.get_log_prior({key: theta_dict[key] for key in node.names})
+            p = node.get_log_prior(dict((key, theta_dict[key]) for key in node.names))
             if np.isnan(p):
                 self.logger.error("Got NaN probability from %s: %s" % (node, theta_dict))
                 raise ValueError("NaN")
@@ -259,10 +253,10 @@ class Model(object):
         return np.sum(result)
 
     def _get_transformation(self, theta_dict, edge):
-        return edge.get_transformation({key: theta_dict[key] for key in edge.given})
+        return edge.get_transformation(dict((key, theta_dict[key]) for key in edge.given))
 
     def _get_log_likelihood(self, theta_dict, edge):
-        result = edge.get_log_likelihood({key: theta_dict[key] for key in edge.given + edge.probability_of})
+        result = edge.get_log_likelihood(dict((key, theta_dict[key]) for key in edge.given + edge.probability_of))
         if np.isnan(result):
             self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
             raise ValueError("NaN")
@@ -281,6 +275,9 @@ class Model(object):
         :class:`daft.PGM`
             The ``daft`` PGM class, for further customisation if required.
         """
+        from dessn.utility.newtonian import NewtonianPosition
+        from matplotlib import rc
+        import daft
         if not self._finalised:
             self.finalise()
 
@@ -404,59 +401,8 @@ class Model(object):
         self.flat_chain = flat_chain
         return flat_chain, self._theta_names[:self._num_actual], self._theta_labels[:self._num_actual]
 
-    def corner(self, filename=None, display=True):
-        """ Creates a corner plot from the model's chain.
-
-        Parameters
-        ----------
-        filename : str, optional
-            If set, saves the figure to this filename
-        display : bool, optional
-            If true, shows the plot. If false, simply return the figure
-
-        Returns
-        -------
-        figure
-            a matplotlib figure of the corner plot
-        """
-        assert self.flat_chain is not None, "You have to run fit_model before calling corner"
-        self.logger.debug("Creating corner plot")
-        fig = corner.corner(self.flat_chain, labels=self._theta_labels[:self._num_actual], quantiles=[0.16, 0.5, 0.84], bins=100)
-        if filename is not None:
-            fig.savefig(filename, bbox_inches='tight', dpi=300, transparent=True)
-        if display:
-            plt.show()
-        return fig
-
     def get_consumer(self):
+        from dessn.chain.chain import ChainConsumer
         chain_plotter = ChainConsumer()
         chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
         return chain_plotter
-
-    def chain_plot(self, **kwargs):
-        """ Creates a chain plot of the model's chain.
-
-        This is my own implementation of a corner plot.
-
-        Parameters
-        ----------
-        kwargs : dict
-            Arguments to pass to the :func:`~dessn.chain.chain.ChainConsumer.plot` method. See the method
-            link for more details.
-
-        Returns
-        -------
-        figure
-            a matplotlib figure of the chain plot
-        """
-        chain_plotter = ChainConsumer()
-        chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
-        return chain_plotter.plot(**kwargs)
-
-    def chain_summary(self):
-        """ Gets a summary of fit parameters through :class:`.ChainConsumer` and the
-        :func:`~dessn.chain.chain.ChainConsumer.get_summary` method. See the method link for more details
-        """
-        chain_plotter = ChainConsumer()
-        chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
-        print(chain_plotter.get_summary())

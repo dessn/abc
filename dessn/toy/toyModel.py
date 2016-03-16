@@ -1,3 +1,4 @@
+import os
 from dessn.model.model import Model
 from dessn.toy.edges import ToCount, ToFlux, ToLuminosity, ToLuminosityDistance, ToRate, ToRedshift, ToType
 from dessn.toy.latent import Luminosity, Redshift, Type
@@ -6,7 +7,6 @@ from dessn.toy.transformations import Flux, LuminosityDistance
 from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
 from dessn.simulation.simulation import Simulation
 import logging
-import os
 
 
 class ToyModel(Model):
@@ -65,10 +65,10 @@ if __name__ == "__main__":
     toy_model = ToyModel(observations)
     # fig = toy_model.get_pgm(pgm_file)
     if True:
-        toy_model.fit_model(num_steps=100, num_burn=50, temp_dir=temp_dir, save_interval=20)
-        chain_consumer = toy_model.get_consumer()
+        toy_model.fit_model(num_temps=5, num_steps=200, num_burn=50, temp_dir=temp_dir, save_interval=20)
+        #chain_consumer = toy_model.get_consumer()
         # chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(8, 12))
-        chain_consumer.configure_contour(cloud=False)
-        chain_consumer.configure_general(bins=0.3)
-        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
+        #chain_consumer.configure_contour(cloud=False)
+        #chain_consumer.configure_general(bins=0.3)
+        #chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
 

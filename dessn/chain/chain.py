@@ -390,7 +390,6 @@ class ChainConsumer(object):
         if parameters is None:
             parameters = self.all_parameters
 
-
         if isinstance(figsize, str):
             if figsize.upper() == "COLUMN":
                 figsize = (5, 5)
@@ -401,7 +400,6 @@ class ChainConsumer(object):
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
 
-
         assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
             "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
 
@@ -409,10 +407,10 @@ class ChainConsumer(object):
             "Have a list of %d parameters and %d extent values" % (len(parameters), len(extents))
 
         if truth is not None and isinstance(truth, list):
-            truth = {p: t for p, t in zip(parameters, truth)}
+            truth = dict((p, t) for p, t in zip(parameters, truth))
 
         if extents is not None and isinstance(extents, list):
-            extents = {p: e for p, e in zip(parameters, extents)}
+            extents = dict((p, e) for p, e in zip(parameters, extents))
 
         plot_hists = self.parameters_general["plot_hists"]
         flip = (len(parameters) == 2 and plot_hists and self.parameters_general["flip"])
@@ -522,12 +520,12 @@ class ChainConsumer(object):
             "Have a list of %d parameters and %d extent values" % (len(parameters), len(extents))
 
         if truth is not None and isinstance(truth, list):
-            truth = {p: t for p, t in zip(parameters, truth)}
+            truth = dict((p, t) for p, t in zip(parameters, truth))
         if truth is None:
             truth = {}
 
         if extents is not None and isinstance(extents, list):
-            extents = {p: e for p, e in zip(parameters, extents)}
+            extents = dict((p, e) for p, e in zip(parameters, extents))
         if extents is None:
             extents = {}
 
