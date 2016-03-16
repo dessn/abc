@@ -48,6 +48,7 @@ class Model(object):
         self._finalised = False
         self.flat_chain = None
         self.num_temps = None
+        self._labels = []
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -59,6 +60,10 @@ class Model(object):
         assert isinstance(node, Node), "Supplied parameter is not a recognised Node object"
         for name in node.names:
             assert name not in self._node_dict.keys(), "Parameter %s is already in the model" % name
+        for label in node.labels:
+            assert label not in self._labels, "Label %s is already in the model" % label
+        for label in node.labels:
+            self._labels.append(label)
         self.nodes.append(node)
         for name in node.names:
             self._node_dict[name] = node
