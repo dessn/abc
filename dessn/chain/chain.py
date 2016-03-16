@@ -595,10 +595,11 @@ class ChainConsumer(object):
             upper = fit_values[2]
             if lower is not None and upper is not None:
                 x = np.linspace(lower, upper, 1000)
-                if flip:
-                    ax.fill_betweenx(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
-                else:
-                    ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
+                if lower > edge_center.min() and upper < edge_center.max():
+                    if flip:
+                        ax.fill_betweenx(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
+                    else:
+                        ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
                 if summary and isinstance(parameter, str):
                     ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
         if truth is not None:
@@ -623,7 +624,7 @@ class ChainConsumer(object):
         hist[hist == 0] = 1E-16
         vals = self._convert_to_stdev(hist.T)
         if self.parameters_contour["cloud"]:
-            skip = x.size / 50000
+            skip = max(1, x.size / 50000)
             ax.scatter(x[::skip], y[::skip], s=10, alpha=0.2, c=colours[1], marker=".", edgecolors="none")
         if self.parameters_contour["contourf"]:
             ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=self.parameters_contour["contourf_alpha"])
@@ -727,7 +728,7 @@ class ChainConsumer(object):
         return fig, axes, params1, params2
 
     def _get_bins(self):
-        proposal = [np.floor(0.1 * np.sqrt(chain.shape[0])) for chain in self.chains]
+        proposal = [np.floor(0.5 * np.sqrt(chain.shape[0]) / chain.shape[1]) for chain in self.chains]
         return proposal
         
     def _clamp(self, val, minimum=0, maximum=255):

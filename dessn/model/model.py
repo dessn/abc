@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import daft
 import sys
-from scipy.optimize import fmin
+from scipy.optimize import fmin_bfgs
 
 
 class Model(object):
@@ -53,6 +53,7 @@ class Model(object):
         self._data_edges = {}
         self._finalised = False
         self.flat_chain = None
+        self.num_temps = None
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -102,7 +103,8 @@ class Model(object):
                     assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
                     assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
                 elif isinstance(node, NodeLatent) or isinstance(node, NodeTransformation):
-                    assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
+                    pass
+                    # assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
                     # assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
                 elif isinstance(node, NodeUnderlying):
                     assert len(self._in[name]) > 0, "Underlying parameter %s has no incoming edges" % name
@@ -129,12 +131,13 @@ class Model(object):
         max_count = 100
         while len(self._ordered_edges) < num_edges:
             for edge in self.edges:
+                if edge in self._ordered_edges:
+                    continue
                 if isinstance(edge, EdgeTransformation):
                     requirements = edge.given
                 else:
                     requirements = edge.given + edge.probability_of
                 unsatisfied_requirements = [r for r in requirements if r not in observed_names]
-
                 if len(unsatisfied_requirements) == 0:
                     self._ordered_edges.append(edge)
                     if isinstance(edge, EdgeTransformation):
@@ -176,6 +179,21 @@ class Model(object):
             result[m] = np.array(result[m])
         return result
 
+    def get_log_prior(self, theta):
+        theta_dict = self._get_theta_dict(theta)
+        return self._get_log_prior(theta_dict)
+
+    def get_log_likelihood(self, theta):
+        theta_dict = self._get_theta_dict(theta)
+        probability = 0
+        for edge in self._ordered_edges:
+            if isinstance(edge, EdgeTransformation):
+                theta_dict.update(self._get_transformation(theta_dict, edge))
+            else:
+                result = self._get_log_likelihood(theta_dict, edge)
+                probability += result
+        return probability
+
     def _get_log_posterior(self, theta):
         theta_dict = self._get_theta_dict(theta)
         probability = self._get_log_prior(theta_dict)
@@ -214,12 +232,18 @@ class Model(object):
     def _get_starting_position(self, num_walkers):
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
-        p0 = self._get_suggestion()
+        p0 = np.array(len(self._theta_names) * [1])
         self.logger.debug("Initial position is:  %s" % p0)
-        #optimised = fmin(self._get_negative_log_posterior, p0, disp=True, ftol=0.05, xtol=0.1)
-        #self.logger.debug("Starting position is: %s" % optimised)
-        optimised = p0
-        std = np.random.uniform(0.5, 1.5, size=(num_walkers, num_dim))
+        if self.num_temps is None:
+            optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
+            self.logger.debug("Starting position is: %s" % optimised)
+        else:
+            optimised = p0
+
+        if self.num_temps is not None:
+            std = np.random.uniform(0.7, 1.3, size=(self.num_temps, num_walkers, num_dim))
+        else:
+            std = np.random.uniform(0.7, 1.3, size=(num_walkers, num_dim))
         start = std * optimised
         return start
 
@@ -316,7 +340,7 @@ class Model(object):
 
         return pgm
 
-    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None, save_interval=300):
+    def fit_model(self, num_temps=None, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None, save_interval=300):
         """ Uses ``emcee`` to fit the supplied model.
 
         This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for
@@ -327,6 +351,8 @@ class Model(object):
 
         Parameters
         ----------
+        num_temps : int, optional
+            The number of temperature to run. If none, does not use PTSampler
         num_walkers : int, optional
             The number of walkers to run. If not supplied, it defaults to eight times the model dimensionality
         num_steps : int, optional
@@ -359,12 +385,19 @@ class Model(object):
             self.logger.info("Unable to start MPI pool, expected normal python execution")
 
         num_dim = len(self._theta_names)
-        self.logger.debug("Fitting model with %d dimensions" % num_dim)
+
+        self.num_temps = num_temps
+        self.logger.debug("Fitting model with %d dimensions using %d temperature levels" % (num_dim, 0 if self.num_temps is None else self.num_temps))
         if num_walkers is None:
             num_walkers = num_dim * 8
 
         self.logger.debug("Running emcee")
-        sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
+        if num_temps is None:
+            self.logger.info("Using Ensemble Sampler")
+            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
+        else:
+            self.logger.info("Using PTSampler")
+            sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
         self.logger.debug("Fit finished")

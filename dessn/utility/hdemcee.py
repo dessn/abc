@@ -1,6 +1,7 @@
 from time import time
 import logging
 import numpy as np
+from emcee import PTSampler
 
 
 class EmceeWrapper(object):
@@ -47,7 +48,10 @@ class EmceeWrapper(object):
 
         t = time()
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
-            self.chain[:, step, :] = result[0][:, :save_dim]
+            if isinstance(self.sampler, PTSampler):
+                self.chain[:, step, :] = result[0][0, :, :save_dim]
+            else:
+                self.chain[:, step, :] = result[0][:, :save_dim]
             step += 1
             if temp_dir is not None and save_interval is not None:
                 t2 = time()

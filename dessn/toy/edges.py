@@ -52,6 +52,8 @@ class ToLuminosityDistance(EdgeTransformation):
         super(ToLuminosityDistance, self).__init__("lumdist", ["omega_m", "w", "H0", "redshift"])
 
     def get_transformation(self, data):
+        if data["omega_m"] < 0:
+            return -np.inf
         cosmology = FlatwCDM(H0=data["H0"], Om0=data["omega_m"], w0=data["w"])
         return {"lumdist": cosmology.luminosity_distance(data['redshift']).value}
 

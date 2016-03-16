@@ -23,14 +23,31 @@ class LatentLuminosity(NodeLatent):
     def get_num_latent(self):
         return self.n
 
+    def get_suggestion_requirements(self):
+        return ["flux"]
+
+    def get_suggestion(self, data):
+        return data["flux"][:].tolist()
+
 
 class UnderlyingSupernovaDistribution(NodeUnderlying):
     def get_log_prior(self, data):
+        """ We model the prior enforcing realistic values"""
+        mean = data["SN_theta_1"]
+        sigma = data["SN_theta_2"]
+        if mean < 0 or sigma < 0 or mean > 200 or sigma > 100:
+            return -np.inf
         return 1
 
     def __init__(self):
         super(UnderlyingSupernovaDistribution, self).__init__("Supernova", ["SN_theta_1", "SN_theta_2"],
                                                               [r"$\theta_1$", r"$\theta_2$"])
+
+    def get_suggestion_requirements(self):
+        return []
+
+    def get_suggestion(self, data):
+        return [100, 20]
 
 
 class UselessTransformation(NodeTransformation):
@@ -40,7 +57,7 @@ class UselessTransformation(NodeTransformation):
 
 class LuminosityToAdjusted(EdgeTransformation):
     def __init__(self):
-        super(LuminosityToAdjusted, self).__init__("luminosity", "double_luminosity")
+        super(LuminosityToAdjusted, self).__init__("double_luminosity", "luminosity")
 
     def get_transformation(self, data):
         return {"double_luminosity": data["luminosity"] * 2.0}
@@ -119,6 +136,8 @@ if __name__ == "__main__":
     temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
     pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
     exampleModel.get_pgm(pgm_file)
-    exampleModel.fit_model(num_steps=5000, num_burn=500, temp_dir=temp_dir, save_interval=5)
-    exampleModel.chain_plot(filename=plot_file, display=False)
+    exampleModel.fit_model(num_steps=5000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
+    chain_consumer = exampleModel.get_consumer()
+    chain_consumer.configure_general(bins=0.2)
     exampleModel.chain_summary()
+    chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])
