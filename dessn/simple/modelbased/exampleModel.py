@@ -105,6 +105,9 @@ class ExampleModel(Model):
 
     .. figure::     ../plots/examplePGM.png
         :align:     center
+
+    We could also run the example model using the PT sampler by specifying a number of temperature to the ``fit_model``
+    method. You would get similar results.
     """
 
     def __init__(self):

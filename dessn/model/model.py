@@ -232,7 +232,7 @@ class Model(object):
     def _get_starting_position(self, num_walkers):
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
-        p0 = np.array(len(self._theta_names) * [1])
+        p0 = self._get_suggestion()
         self.logger.debug("Initial position is:  %s" % p0)
         if self.num_temps is None:
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
