@@ -1,13 +1,9 @@
 import numpy as np
 import emcee
 from scipy import stats
-import matplotlib.pyplot as plt
-from progressbar import Bar, Counter, ETA, Percentage, ProgressBar, Timer
-import corner
 import os
 import abc
 
-from dessn.chain.chain import ChainConsumer
 
 
 class Example(object):
@@ -167,7 +163,7 @@ class Example(object):
         pass
 
     def _run_emcee(self, ndim, nburn, nsteps, nwalkers, starting_guesses, ndim_final, filename):
-
+        from dessn.chain.chain import ChainConsumer
         sampler = emcee.EnsembleSampler(nwalkers, ndim, self.get_posterior, args=[self.data, self.error],
                                         live_dangerously=True)
         for i, result in enumerate(sampler.sample(starting_guesses, iterations=nsteps)):
@@ -181,6 +177,5 @@ class Example(object):
         c = ChainConsumer(sample, parameters=[r"$\theta_1$", r"$\theta_2$"])
         filename = os.path.dirname(__file__) + os.sep + ("../../plots/%s" % filename)
         c.plot(filename=filename)
-        #fig = corner.corner(sample, labels=[r"$\theta_1$", r"$\theta_2$"], truths=[self.theta_1, self.theta_2])
-        #plt.show()
+
 

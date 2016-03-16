@@ -5,6 +5,7 @@ from dessn.model.edge import Edge, EdgeTransformation
 from dessn.simple.example import Example
 import logging
 import os
+import sys
 
 
 class ObservedFlux(NodeObserved):
@@ -132,15 +133,24 @@ class ExampleModel(Model):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    only_data = len(sys.argv) > 1
+    if only_data:
+        logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+    else:
+        logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     exampleModel = ExampleModel()
-    plot_file = os.path.abspath(dir_name + "/../../../plots/exampleModel.png")
     temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
-    pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
-    exampleModel.get_pgm(pgm_file)
+
+    if not only_data:
+        plot_file = os.path.abspath(dir_name + "/../../../plots/exampleModel.png")
+        pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
+        exampleModel.get_pgm(pgm_file)
+
     exampleModel.fit_model(num_steps=5000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
-    chain_consumer = exampleModel.get_consumer()
-    chain_consumer.configure_general(bins=0.2)
-    exampleModel.chain_summary()
-    chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])
+
+    if not only_data:
+        chain_consumer = exampleModel.get_consumer()
+        chain_consumer.configure_general(bins=0.2)
+        exampleModel.chain_summary()
+        chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])

@@ -379,8 +379,11 @@ class Model(object):
         try:
             pool = MPIPool()
             if not pool.is_master():
+                self.logger.info("Slave waiting")
                 pool.wait()
                 sys.exit(0)
+            else:
+                self.logger.info("Master found")
         except ImportError:
             self.logger.info("mpi4py is not installed or not configured properly. Ignore if running through python, not mpirun")
         except ValueError:

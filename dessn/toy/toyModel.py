@@ -1,4 +1,3 @@
-import os
 from dessn.model.model import Model
 from dessn.toy.edges import ToCount, ToFlux, ToLuminosity, ToLuminosityDistance, ToRate, ToRedshift, ToType
 from dessn.toy.latent import Luminosity, Redshift, Type
@@ -7,6 +6,8 @@ from dessn.toy.transformations import Flux, LuminosityDistance
 from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
 from dessn.simulation.simulation import Simulation
 import logging
+import sys
+import os
 
 
 class ToyModel(Model):
@@ -52,7 +53,11 @@ class ToyModel(Model):
         self.finalise()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    only_data = len(sys.argv) > 1
+    if only_data:
+        logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+    else:
+        logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
     temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel")
@@ -63,9 +68,12 @@ if __name__ == "__main__":
     simulation = Simulation()
     observations, theta = simulation.get_simulation(*vals, num_trans=50)
     toy_model = ToyModel(observations)
-    # fig = toy_model.get_pgm(pgm_file)
-    if True:
-        toy_model.fit_model(num_temps=5, num_steps=200, num_burn=50, temp_dir=temp_dir, save_interval=20)
+    if not only_data:
+        fig = toy_model.get_pgm(pgm_file)
+
+    toy_model.fit_model(num_temps=5, num_steps=200, num_burn=50, temp_dir=temp_dir, save_interval=20)
+
+    if not only_data:
         chain_consumer = toy_model.get_consumer()
         # chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(8, 12))
         chain_consumer.configure_contour(cloud=False)
