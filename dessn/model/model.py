@@ -216,10 +216,10 @@ class Model(object):
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
         self.logger.debug("Initial position is:  %s" % p0)
-        optimised = fmin(self._get_negative_log_posterior, p0, disp=True, ftol=0.05, xtol=0.1)
-        self.logger.debug("Starting position is: %s" % optimised)
-
-        std = np.random.uniform(0.8, 1.2, size=(num_walkers, num_dim))
+        #optimised = fmin(self._get_negative_log_posterior, p0, disp=True, ftol=0.05, xtol=0.1)
+        #self.logger.debug("Starting position is: %s" % optimised)
+        optimised = p0
+        std = np.random.uniform(0.5, 1.5, size=(num_walkers, num_dim))
         start = std * optimised
         return start
 

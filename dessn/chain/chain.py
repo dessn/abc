@@ -720,6 +720,8 @@ class ChainConsumer(object):
                         ax.yaxis.set_major_locator(MaxNLocator(max_ticks, prune="lower"))
                     if i != j or not plot_hists:
                         ax.set_ylim(extents[p1])
+                    elif flip and i == 1:
+                        ax.set_ylim(extents[p1])
                     ax.set_xlim(extents[p2])
 
         return fig, axes, params1, params2

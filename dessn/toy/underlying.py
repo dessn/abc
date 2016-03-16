@@ -83,7 +83,7 @@ class SupernovaRate(NodeUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return [0.9]
+        return [0.8]
 
 if __name__ == "__main__":
     rate = SupernovaRate()
