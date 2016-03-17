@@ -139,6 +139,7 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
+    logging.info("Creating model")
     exampleModel = ExampleModel()
     temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
 
@@ -147,10 +148,11 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
         exampleModel.get_pgm(pgm_file)
 
-    exampleModel.fit_model(num_steps=5000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
+    logging.info("Starting fit")
+    exampleModel.fit_model(num_steps=20000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = exampleModel.get_consumer()
-        chain_consumer.configure_general(bins=0.2)
-        exampleModel.chain_summary()
+        chain_consumer.configure_general(bins=1.0)
+        print(chain_consumer.get_summary())
         chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])

@@ -5,14 +5,13 @@ args = sys.argv
 
 assert len(args) >= 2, "You need to supply the filename to run"
 filename = args[1]
+cores = 60
 if len(args) > 2:
-    queue = args[2]
+    cores = int(args[2])
+if len(args) > 3:
+    queue = args[3]
 else:
     queue = "low.q"
-cores = 60
-if len(args) > 3:
-    cores = int(args[3])
-
 
 directory = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.abspath(directory + os.sep + filename)

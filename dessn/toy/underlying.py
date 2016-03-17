@@ -1,6 +1,4 @@
 from dessn.model.node import NodeUnderlying
-from scipy.stats import beta
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 
@@ -57,21 +55,6 @@ class SupernovaIIDist(NodeUnderlying):
 class SupernovaRate(NodeUnderlying):
     def __init__(self):
         super(SupernovaRate, self).__init__("SN Rates", "sn_rate", "$r$")
-        self.b = beta(30, 2)
-
-    def plot_dist(self):
-        """ Plots the distribution for easy visualisation.
-        """
-        f = os.path.dirname(__file__) + "/../../plots/SupernovaRateDist.png"
-
-        xs = np.linspace(0, 1, 1000)
-        ys = self.b.pdf(xs)
-
-        fig, ax = plt.subplots(figsize=(6, 3))
-        ax.plot(xs, ys)
-        ax.set_xlabel("$r$")
-        ax.set_ylabel("$P(r)$")
-        fig.savefig(f, dpi=300, transparent=True, bbox_inches="tight")
 
     def get_log_prior(self, data):
         r = data["sn_rate"]
@@ -84,7 +67,3 @@ class SupernovaRate(NodeUnderlying):
 
     def get_suggestion(self, data):
         return [0.8]
-
-if __name__ == "__main__":
-    rate = SupernovaRate()
-    rate.plot_dist()

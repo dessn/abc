@@ -71,7 +71,7 @@ if __name__ == "__main__":
     if not only_data:
         fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_temps=5, num_steps=200, num_burn=50, temp_dir=temp_dir, save_interval=20)
+    toy_model.fit_model(num_temps=4, num_steps=5000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()

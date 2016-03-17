@@ -20,6 +20,7 @@ class EmceeWrapper(object):
         past_chain = None
         pos = None
         if temp_dir is not None:
+            self.logger.debug("Looking in tempr dir %s" % temp_dir)
             chain_file = temp_dir + ".chain.npy"
             position_file = temp_dir + ".pos.npy"
             try:
@@ -27,7 +28,7 @@ class EmceeWrapper(object):
                 past_chain = np.load(chain_file)
                 self.logger.info("Found chain of %d steps" % past_chain.shape[1])
             except IOError:
-                self.logger.info("Prior chain and/or does not exist")
+                self.logger.info("Prior chain and/or does not exist. Looked in %s" % position_file)
 
         if start is None and pos is None:
             raise ValueError("You need to have either a starting function or existing chains")
@@ -47,6 +48,7 @@ class EmceeWrapper(object):
             self.logger.debug("Running full chain of %d steps" % num)
 
         t = time()
+        self.logger.debug("Starting sampling. Saving to %s ever %d seconds" % (temp_dir, save_interval))
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
             if isinstance(self.sampler, PTSampler):
                 self.chain[:, step, :] = result[0][0, :, :save_dim]

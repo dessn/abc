@@ -7,7 +7,8 @@ import emcee
 from emcee.utils import MPIPool
 import sys
 from scipy.optimize import fmin_bfgs
-
+import types
+import copy_reg
 
 class Model(object):
     """ A generalised model for use in arbitrary situations.
@@ -49,6 +50,7 @@ class Model(object):
         self.flat_chain = None
         self.num_temps = None
         self._labels = []
+        self.master = True
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -380,21 +382,26 @@ class Model(object):
             pool = MPIPool()
             if not pool.is_master():
                 self.logger.info("Slave waiting")
+                self.master = False
                 pool.wait()
                 sys.exit(0)
             else:
-                self.logger.info("Master found")
+                self.logger.info("MPIPool successful initialised and master found. Running with %d cores." % pool.size)
         except ImportError:
             self.logger.info("mpi4py is not installed or not configured properly. Ignore if running through python, not mpirun")
-        except ValueError:
+        except ValueError as e:
             self.logger.info("Unable to start MPI pool, expected normal python execution")
+            self.logger.info(str(e))
 
         num_dim = len(self._theta_names)
 
         self.num_temps = num_temps
         self.logger.debug("Fitting model with %d dimensions using %d temperature levels" % (num_dim, 0 if self.num_temps is None else self.num_temps))
         if num_walkers is None:
-            num_walkers = num_dim * 8
+            if num_temps is None:
+                num_walkers = num_dim * 8
+            else:
+                num_walkers = num_dim * 2
 
         self.logger.debug("Running emcee")
         if num_temps is None:
@@ -406,6 +413,9 @@ class Model(object):
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
         self.logger.debug("Fit finished")
+        if pool is not None:
+            pool.close()
+            self.logger.debug("Pool closed")
         self.flat_chain = flat_chain
         return flat_chain, self._theta_names[:self._num_actual], self._theta_labels[:self._num_actual]
 
@@ -414,3 +424,22 @@ class Model(object):
         chain_plotter = ChainConsumer()
         chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
         return chain_plotter
+
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        del d['logger']
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        if self.master:
+            self.logger = logging.getLogger(__name__)
+
+
+def _pickle_method(m):
+    if m.im_self is None:
+        return getattr, (m.im_class, m.im_func.func_name)
+    else:
+        return getattr, (m.im_self, m.im_func.func_name)
+
+copy_reg.pickle(types.MethodType, _pickle_method)
