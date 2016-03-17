@@ -58,10 +58,15 @@ class ToLuminosityDistance(EdgeTransformation):
         return {"lumdist": cosmology.luminosity_distance(data['redshift']).value}
 
 
-class ToRedshift(Edge):
-    def __init__(self):
-        super(ToRedshift, self).__init__(["oredshift", "oredshift_error"], "redshift")
+# class ToRedshift(Edge):
+class ToRedshift(EdgeTransformation):
+    def get_transformation(self, data):
+        return {"redshift": data["oredshift"]}
 
+    def __init__(self):
+        #super(ToRedshift, self).__init__(["oredshift", "oredshift_error"], "redshift")
+        super(ToRedshift, self).__init__("redshift", ["oredshift", "oredshift_error"])
+        '''
     def get_log_likelihood(self, data):
         r""" Assume the redshift distribution follows a uniform distribution (for misidentification)
         with a tight Gaussian peak around the observed redshift.
@@ -77,7 +82,7 @@ class ToRedshift(Edge):
         gauss = -(data["oredshift"] - data["redshift"]) * (data["oredshift"] - data["redshift"]) / (2 * data["oredshift_error"] * data["oredshift_error"])
         gauss -= np.log(np.sqrt(2 * np.pi) * data["oredshift_error"])
         result = np.logaddexp(gauss, uniform)
-        return np.sum(result)
+        return np.sum(result)'''
 
 
 class ToLuminosity(Edge):
@@ -120,10 +125,15 @@ class ToLuminosity(Edge):
         return np.sum(snIa_mask * snIa_prob + snII_mask * snII_prob)
 
 
-class ToType(Edge):
-    def __init__(self):
-        super(ToType, self).__init__("otype", "type")
+# class ToType(Edge):
+class ToType(EdgeTransformation):
+    def get_transformation(self, data):
+        return {"type": data["otype"]}
 
+    def __init__(self):
+        # super(ToType, self).__init__("otype", "type")
+        super(ToType, self).__init__("type", "otype")
+        '''
     def get_log_likelihood(self, data):
         r""" Gets the probability of the actual object being of one type, given we observe a singular other type.
 
@@ -149,7 +159,7 @@ class ToType(Edge):
         if mask.sum() > 0:
             return -np.inf
 
-        return np.sum(np.log(probs))
+        return np.sum(np.log(probs))'''
 
 
 class ToRate(Edge):

@@ -66,12 +66,12 @@ if __name__ == "__main__":
 
     vals = [0.28, -1.0, 72, 10, 0.1, 5, 0.2, 0.6]
     simulation = Simulation()
-    observations, theta = simulation.get_simulation(*vals, num_trans=50)
+    observations, theta = simulation.get_simulation(*vals, num_trans=30)
     toy_model = ToyModel(observations)
     if not only_data:
         fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_temps=4, num_steps=5000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=20000, num_burn=0, temp_dir=temp_dir, save_interval=120)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()

@@ -101,8 +101,9 @@ class Model(object):
         for node in self.nodes:
             for name in node.names:
                 if isinstance(node, NodeObserved):
-                    assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
-                    assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
+                    pass
+                    # assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
+                    # assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
                 elif isinstance(node, NodeLatent) or isinstance(node, NodeTransformation):
                     pass
                     # assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
@@ -139,6 +140,7 @@ class Model(object):
                 else:
                     requirements = edge.given + edge.probability_of
                 unsatisfied_requirements = [r for r in requirements if r not in observed_names]
+                print(edge, unsatisfied_requirements, edge.given, edge.probability_of)
                 if len(unsatisfied_requirements) == 0:
                     self._ordered_edges.append(edge)
                     if isinstance(edge, EdgeTransformation):
@@ -235,7 +237,7 @@ class Model(object):
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
         self.logger.debug("Initial position is:  %s" % p0)
-        if self.num_temps is None:
+        if False and self.num_temps is None:
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
             self.logger.debug("Starting position is: %s" % optimised)
         else:
@@ -401,12 +403,12 @@ class Model(object):
             if num_temps is None:
                 num_walkers = num_dim * 8
             else:
-                num_walkers = num_dim * 2
+                num_walkers = num_dim * 4
 
         self.logger.debug("Running emcee")
         if num_temps is None:
             self.logger.info("Using Ensemble Sampler")
-            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool)
+            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)
         else:
             self.logger.info("Using PTSampler")
             sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)

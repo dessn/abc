@@ -28,7 +28,7 @@ class LatentLuminosity(NodeLatent):
         return ["flux"]
 
     def get_suggestion(self, data):
-        return data["flux"][:].tolist()
+        return (data["flux"] * np.random.uniform(0.5, 1.5, data["flux"].shape)).tolist() # Deliberately given wrong
 
 
 class UnderlyingSupernovaDistribution(NodeUnderlying):
@@ -48,7 +48,7 @@ class UnderlyingSupernovaDistribution(NodeUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return [100, 20]
+        return [50, 5] # This is deliberately given wrong to ensure that we can recover the actual posterior.
 
 
 class UselessTransformation(NodeTransformation):
@@ -149,7 +149,7 @@ if __name__ == "__main__":
         exampleModel.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    exampleModel.fit_model(num_steps=20000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
+    exampleModel.fit_model(num_steps=20000, num_burn=5000, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = exampleModel.get_consumer()

@@ -1,7 +1,7 @@
-from dessn.model.node import NodeLatent
+from dessn.model.node import NodeLatent, NodeTransformation
 
-
-class Redshift(NodeLatent):
+# class Redshift(NodeLatent):
+class Redshift(NodeTransformation):
     def __init__(self, n):
         super(Redshift, self).__init__("Redshift", "redshift", "$z$")
         self.n = n
@@ -32,7 +32,8 @@ class Luminosity(NodeLatent):
         return (typeIa * 10 + (1 - typeIa) * 5.0).tolist()
 
 
-class Type(NodeLatent):
+# class Type(NodeLatent):
+class Type(NodeTransformation):
     def __init__(self, n):
         super(Type, self).__init__("Type", "type", "$T$")
         self.n = n

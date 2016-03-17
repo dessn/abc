@@ -18,7 +18,8 @@ class Simulation(object):
         cosmology = FlatwCDM(Om0=omega_m, w0=w_0, H0=h_0)
 
         # Get redshifts with some errors in them
-        z_err_rate = 0.02
+        # z_err_rate = 0.02
+        z_err_rate = 0.0
         z = np.random.uniform(0.1, 2.0, num_trans)
         z2 = np.random.uniform(0.1, 2.0, num_trans)
         z_err = 2e-5 * np.ones(num_trans)
@@ -31,7 +32,8 @@ class Simulation(object):
 
         # Get the types from the underlying type rate
         type_Ias = 1.0 * (np.random.random(num_trans) < r)
-        misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
+        #misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
+        misidentification = 1.0 * (np.random.random(num_trans) < 0.0)
         type_o = type_Ias * (1 - misidentification) + (1 - type_Ias) * misidentification
 
         # Get luminosities from type
