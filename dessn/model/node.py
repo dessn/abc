@@ -167,6 +167,19 @@ class NodeTransformation(Node):
         return []
 
 
+class NodeDiscrete(Node):
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, node_name, name, label):
+        super(NodeLatent, self).__init__(node_name, name, label)
+
+    @abc.abstractmethod
+    def get_types(self):
+        pass
+
+
+
 class NodeLatent(Node):
     """ A node representing a latent, or hidden, variable in our model.
 

@@ -71,12 +71,12 @@ if __name__ == "__main__":
     if not only_data:
         fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=47896, num_burn=10000, temp_dir=temp_dir, save_interval=120)
+    toy_model.fit_model(num_steps=47896, num_burn=0, temp_dir=temp_dir, save_interval=120)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()
-        # chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(8, 12))
+        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 12))
         chain_consumer.configure_contour(cloud=False)
         chain_consumer.configure_general(bins=0.3)
-        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
+        #chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
 

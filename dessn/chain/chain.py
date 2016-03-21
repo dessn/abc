@@ -543,6 +543,7 @@ class ChainConsumer(object):
             chain = self.names.index(chain)
 
         chain_data = self.chains[chain]
+        self.logger.debug("Plotting chain of size %s" % chain_data.shape)
         chain_parameters = self.parameters[chain]
 
         fig, axes = plt.subplots(figsize=figsize, nrows=len(parameters), squeeze=False, sharex=True)
