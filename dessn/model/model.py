@@ -229,59 +229,43 @@ class Model(object):
             dependencies = edge.given + edge.probability_of
             discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], NodeDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
-            unfilled_nodes = [self._node_dict[n] for n in unfilled]
             if len(unfilled) > 0:
                 first_name = unfilled[0]
                 first_node = self._node_dict[first_name]
-                # print("first", first_name)
                 unfilled_dependencies = first_node.get_discrete_requirements()
-                # print("unfilled dependencies", unfilled_dependencies)
                 to_pass = dict((k, theta_dict[k]) for k in unfilled_dependencies)
                 discrete = first_node.get_discrete(to_pass)
-                # print("discrete", discrete)
                 dependent_edges = self._get_dependencies(edges, first_name)
                 edges = [e for e in edges if e not in dependent_edges]
                 for d in discrete:
                     theta_dict.update({first_name: d})
-                    # print("Doing discrete val ", d)
                     result = self._get_edge_likelihood(theta_dict, dependent_edges)
-                    # print("RESULT:", d, result, theta_dict)
                     if probability == 0.0:
                         probability = result
-                        # print("P1.1 ", probability)
                     else:
                         probability = np.logaddexp(result, probability)
-                        # print("P1.2 ", result, probability)
             else:
                 edgeIndex += 1
                 if isinstance(edge, EdgeTransformation):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
                     result = self._get_log_likelihood(theta_dict, edge)
-                    # print("P1.3 ", result, edge)
                     probability += result
-        # print("P1.4 ", probability)
         return probability
 
     def _get_log_posterior(self, theta):
         theta_dict, data = self._get_theta_dict(theta)
         probability = self._get_log_prior(theta_dict)
-        # print("=================== P1 ", probability)
-        # print(self._ordered_edges)
-        # print(theta_dict, data)
         if np.isfinite(probability):
             for observation in data:
                 t = theta_dict.copy()
                 t.update(observation)
                 result = self._get_edge_likelihood(t, self._ordered_edges[:])
                 probability += result
-                # print("P2 ", result)
-        # print("P3 ", probability)
         return probability
 
     def _get_negative_log_posterior(self, theta):
         val = self._get_log_posterior(theta)
-        # print(val)#, theta)
         return -val
 
     def _get_suggestion(self):
@@ -290,7 +274,6 @@ class Model(object):
             node = self._node_dict[name]
             if node not in node_sorted:
                 node_sorted.append(node)
-
         theta = []
         data = self.data
         for node in node_sorted:
@@ -308,7 +291,6 @@ class Model(object):
         if self.num_temps is None:
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
             self.logger.debug("Starting position is: %s" % optimised)
-            print(optimised)
         else:
             optimised = p0
 

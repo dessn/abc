@@ -132,10 +132,9 @@ if __name__ == "__main__":
         model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    model.fit_model(num_steps=2000, num_burn=100, temp_dir=temp_dir, save_interval=20)
+    model.fit_model(num_steps=3000, num_burn=100, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = model.get_consumer()
-        chain_consumer.configure_general(bins=1.0)
         print(chain_consumer.get_summary())
         chain_consumer.plot(filename=plot_file, display=False, truth=[0.7])
