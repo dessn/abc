@@ -9,9 +9,9 @@ from dessn.model.model import Model
 from dessn.model.node import NodeObserved, NodeUnderlying, NodeDiscrete
 
 
-def get_data(n=50):
+def get_data(n=200):
     np.random.seed(0)
-    rate = 0.6
+    rate = 0.7
     colour = np.random.random(n) <= rate
     size = 1 + 1.0 * colour + np.random.normal(scale=0.3, size=n)
 
@@ -129,23 +129,13 @@ if __name__ == "__main__":
     if not only_data:
         plot_file = os.path.abspath(dir_name + "/../../../plots/discrete.png")
         pgm_file = os.path.abspath(dir_name + "/../../../plots/discretePGM.png")
-        # model.get_pgm(pgm_file)
+        model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
+    model.fit_model(num_steps=2000, num_burn=100, temp_dir=temp_dir, save_interval=20)
 
-    rs = np.linspace(0.1, 0.9, 15)
-    posts = np.array([model._get_log_posterior([r]) for r in rs])
-    posts -= posts.max()
-    for r, p in zip(rs, posts):
-        print(r, p)
-
-
-
-
-    # model.fit_model(num_steps=500, num_burn=100, temp_dir=temp_dir, save_interval=20)
-    '''
     if not only_data:
         chain_consumer = model.get_consumer()
         chain_consumer.configure_general(bins=1.0)
         print(chain_consumer.get_summary())
-        chain_consumer.plot(filename=plot_file, display=False, truth=[0.3])'''
+        chain_consumer.plot(filename=plot_file, display=False, truth=[0.7])
