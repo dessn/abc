@@ -25,27 +25,16 @@ class Node(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, node_name, names, labels):
-        assert type(node_name) == str, "The name of this node, %s, is not a string" % node_name
-        assert type(names) == list or type(names) == str, "Supplied name %s is not a string or list" % names
-        assert type(labels) == list or type(labels) == str, "Supplied label text %s is not a string or list" % labels
-        if type(names) == str:
-            self.names = [names]
-        else:
-            for name in names:
-                assert type(name) == str, "Entry in list %s is not a string" % name
-            self.names = names
-        if type(labels) == str:
-            self.labels = [labels]
-        else:
-            for label in labels:
-                assert type(label) == str, "Entry in list %s is not a string" % labels
-            self.labels = labels
-        self.node_name = node_name
+    def __init__(self, name, label, group=None):
+        assert type(name) == str, "The name of this node, %s, is not a string" % name
+        assert type(label) == str, "Supplied name %s is not a string or list" % label
+        self.name = name
+        self.label = label
+        self.group = group
 
     @abc.abstractmethod
     def get_suggestion_requirements(self):
-        """ Returns suggestion parameter requirements. Must be only observed parameters
+        """ Returns suggestion parameter requirements.
         """
         return
 
@@ -72,19 +61,15 @@ class NodeObserved(Node):
     datas : object or list[obj]
         One data object for each supplied parameter name. **Must** be the same length as names if names is a list.
     """
-    def __init__(self, node_name, names, labels, datas):
-        if type(names) == list:
-            assert len(names) == len(labels) and len(names) == len(datas), "If you pass in a list of names, you need to pass in a list of data for each name"
-        super(NodeObserved, self).__init__(node_name, names, labels)
-        if isinstance(datas, list):
-            self.datas = datas
-        else:
-            self.datas = [datas]
+    def __init__(self, name, label, data, group=None):
+        assert type(data) == list, "Data must be a list"
+        self.data = data
+        super(NodeObserved, self).__init__(name, label, group=group)
 
     def get_data(self):
         """ Returns a dictionary containing keys of the parameter names and values of the parameter data object
         """
-        return dict((name, data) for name, data in zip(self.names, self.datas))
+        return {self.name: self.data}
 
     def get_suggestion(self, data):
         return []
@@ -112,8 +97,8 @@ class NodeUnderlying(Node):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, node_name, names, labels):
-        super(NodeUnderlying, self).__init__(node_name, names, labels)
+    def __init__(self, names, labels, group=None):
+        super(NodeUnderlying, self).__init__(names, labels, group=group)
 
     @abc.abstractmethod
     def get_log_prior(self, data):
@@ -157,27 +142,14 @@ class NodeTransformation(Node):
     labels : str or list[str]
         Latex ready labels for the given names. Used in the PGM and corner plots.
     """
-    def __init__(self, node_name, names, labels):
-        super(NodeTransformation, self).__init__(node_name, names, labels)
+    def __init__(self, names, labels, group=None):
+        super(NodeTransformation, self).__init__(names, labels, group=group)
 
     def get_suggestion_requirements(self):
         return []
 
     def get_suggestion(self, data):
         return []
-
-
-class NodeDiscrete(Node):
-
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, node_name, name, label):
-        super(NodeLatent, self).__init__(node_name, name, label)
-
-    @abc.abstractmethod
-    def get_types(self):
-        pass
-
 
 
 class NodeLatent(Node):
@@ -202,8 +174,8 @@ class NodeLatent(Node):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, node_name, names, labels):
-        super(NodeLatent, self).__init__(node_name, names, labels)
+    def __init__(self, names, labels, group=None):
+        super(NodeLatent, self).__init__(names, labels, group=group)
 
     @abc.abstractmethod
     def get_num_latent(self):
@@ -222,3 +194,25 @@ class NodeLatent(Node):
         """
         pass
 
+
+class NodeDiscrete(Node):
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, label, group=None):
+        # TODO Enforce name and label are not lists for a discrete node
+        super(NodeDiscrete, self).__init__(name, label, group=group)
+
+    @abc.abstractmethod
+    def get_discrete(self):
+        pass
+
+    @abc.abstractmethod
+    def get_discrete_requirements(self):
+        pass
+
+    def get_suggestion_requirements(self):
+        return []
+
+    def get_suggestion(self, data):
+        return []

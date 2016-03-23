@@ -1,5 +1,6 @@
 import numpy as np
-from dessn.simple.example import Example
+
+from dessn.examples.simple import Example
 
 
 class ExampleIntegral(Example):

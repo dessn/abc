@@ -63,6 +63,7 @@ class EdgeTransformation(Edge):
     given : str or list[str]
         In the example :math:`P(a,b|c,d)`, (assuming the functional form is a delta), this input would be ``['c','d']``.
     """
+
     def __init__(self, probability_of, given):
         super(EdgeTransformation, self).__init__(probability_of, given)
 

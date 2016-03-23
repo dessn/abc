@@ -1,4 +1,4 @@
-from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
+from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation, NodeDiscrete
 from dessn.model.edge import EdgeTransformation
 from dessn.utility.hdemcee import EmceeWrapper
 import numpy as np
@@ -9,6 +9,8 @@ import sys
 from scipy.optimize import fmin_bfgs
 import types
 import copy_reg
+import itertools
+
 
 class Model(object):
     """ A generalised model for use in arbitrary situations.
@@ -38,19 +40,21 @@ class Model(object):
         self._latent_nodes = []
         self._transformation_nodes = []
         self._underlying_nodes = []
+        self._discrete_nodes = []
+        self._discrete_params = []
         self._in = {}
         self._out = {}
         self._theta_names = []
         self._theta_labels = []
         self._ordered_edges = []
         self._num_actual = None
-        self.data = {}
-        self._data_edges = {}
+        self.data = []
         self._finalised = False
         self.flat_chain = None
         self.num_temps = None
         self._labels = []
         self.master = True
+        self._node_groups = {}
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -60,25 +64,25 @@ class Model(object):
         node : :class:`.Node`
         """
         assert isinstance(node, Node), "Supplied parameter is not a recognised Node object"
-        for name in node.names:
-            assert name not in self._node_dict.keys(), "Parameter %s is already in the model" % name
-        for label in node.labels:
-            assert label not in self._labels, "Label %s is already in the model" % label
-        for label in node.labels:
-            self._labels.append(label)
+        assert node.name not in self._node_dict.keys(), "Parameter %s is already in the model" % node.name
+        assert node.label not in self._labels, "Label %s is already in the model" % node.label
+        self._labels.append(node.label)
         self.nodes.append(node)
-        for name in node.names:
-            self._node_dict[name] = node
-            self._in[name] = []
-            self._out[name] = []
+        self._node_dict[node.name] = node
+        self._in[node.name] = []
+        self._out[node.name] = []
         if isinstance(node, NodeObserved):
             self._observed_nodes.append(node)
+        elif isinstance(node, NodeDiscrete):
+            self._discrete_nodes.append(node)
+            self._discrete_params.append(node.name)
         elif isinstance(node, NodeLatent):
             self._latent_nodes.append(node)
         elif isinstance(node, NodeTransformation):
             self._transformation_nodes.append(node)
         elif isinstance(node, NodeUnderlying):
             self._underlying_nodes.append(node)
+
         self._finalised = False
 
     def add_edge(self, edge):
@@ -99,35 +103,36 @@ class Model(object):
         assert len(self._underlying_nodes) > 0, "No underlying model to constrain"
         assert len(self._observed_nodes) > 0, "No observed nodes found"
         for node in self.nodes:
-            for name in node.names:
-                if isinstance(node, NodeObserved):
-                    pass
-                    # assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
-                    # assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
-                elif isinstance(node, NodeLatent) or isinstance(node, NodeTransformation):
-                    pass
-                    # assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
-                    # assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
-                elif isinstance(node, NodeUnderlying):
-                    assert len(self._in[name]) > 0, "Underlying parameter %s has no incoming edges" % name
-                    assert len(self._out[name]) == 0, "Underlying parameter %s should not have an outgoing edge" % name
+            name = node.name
+            if isinstance(node, NodeObserved):
+                pass
+                # assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
+                # assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
+            elif isinstance(node, NodeLatent) or isinstance(node, NodeTransformation):
+                pass
+                # assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
+                # assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
+            elif isinstance(node, NodeUnderlying):
+                assert len(self._in[name]) > 0, "Underlying parameter %s has no incoming edges" % name
+                assert len(self._out[name]) == 0, "Underlying parameter %s should not have an outgoing edge" % name
 
     def _create_data_structures(self):
-        for node in self._observed_nodes:
-            self.data.update(node.get_data())
-        for edge in self.edges:
-            self._data_edges[edge] = [self.data[g] for g in edge.given if g in self.data.keys()]
+        names = [node.name for node in self._observed_nodes]
+        datas = [node.data for node in self._observed_nodes]
+        for d in zip(*datas):
+            self.data.append(dict((name, datapoint)for name, datapoint in zip(names, d)))
+        print(self.data)
+
         for node in self._underlying_nodes:
-            for name, label in zip(node.names, node.labels):
-                self._theta_names.append(name)
-                self._theta_labels.append(label)
+            self._theta_names.append(node.name)
+            self._theta_labels.append(node.label)
         self._num_actual = len(self._theta_names)
         for node in self._latent_nodes:
             for name in node.names:
                 self._theta_names += [name] * node.get_num_latent()
 
         num_edges = len(self.edges)
-        observed_names = [parameter for node in self.nodes for parameter in node.names if not isinstance(node, NodeTransformation)]
+        observed_names = [node.name for node in self.nodes if not isinstance(node, NodeTransformation)]
         self._ordered_edges = []
         count = 0
         max_count = 100
@@ -149,7 +154,7 @@ class Model(object):
             count += 1
             if count > max_count:
                 raise ValueError("Model edges cannot be ordered. Please double check your edges")
-        # print(self._ordered_edges)
+        print(self._ordered_edges)
 
     def finalise(self):
         """ Finalises the model.
@@ -167,7 +172,7 @@ class Model(object):
         self._finalised = True
         self.logger.info("Model validation passed")
 
-    def _get_theta_dict(self, theta):
+    def _get_theta_dicts(self, theta):
         result = self.data.copy()
         make_array = []
         for theta, theta_name in zip(theta, self._theta_names):
@@ -197,18 +202,56 @@ class Model(object):
                 probability += result
         return probability
 
-    def _get_log_posterior(self, theta):
-        theta_dict = self._get_theta_dict(theta)
-        probability = self._get_log_prior(theta_dict)
-        if np.isfinite(probability):
-            for edge in self._ordered_edges:
+    def _expand_discrete(self, dictionary):
+        keys = dictionary.keys()
+        product = list(itertools.product(*[dictionary[k] for k in keys]))
+        return keys, product
+
+    def _get_dependencies(self, edges, dependency_name):
+        dep_edge = []
+        for edge in edges:
+            if isinstance(edge, EdgeTransformation) and dependency_name in edge.given:
+                for name in edge.probability_of:
+                    dep_edge += self._get_dependencies(edges, name)
+            elif dependency_name in edge.given + edge.probability_of:
+                dep_edge.append(edge)
+        return dep_edge
+
+    def _get_edge_likelihood(self, theta_dict, edges):
+        probability = 0.0
+        for edge in edges:
+            dependencies = edge.given + edge.probability_of
+            discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], NodeDiscrete)]
+            unfilled = [d for d in discretes if d not in theta_dict]
+            unfilled_nodes = [self._node_dict[n] for n in unfilled]
+            print(unfilled)
+            if len(unfilled) > 0:
+                first_name = unfilled[0]
+                first_node = self._node_dict[first_name]
+                print("first", first_name)
+                unfilled_dependencies = first_node.get_discrete_requirements()
+                print("unfilled dependencies", unfilled_dependencies)
+                to_pass = dict((k, theta_dict[k]) for k in unfilled_dependencies)
+                discrete = first_node.get_discrete(to_pass)
+                print("discrete", discrete)
+                for d in discrete:
+                    theta_dict.update({first_name: d})
+                    dependent_edges = self._get_dependencies(edges, first_name)
+                    edges = [e for e in edges if e not in dependent_edges]
+                    probability += self._get_edge_likelihood(theta_dict, dependent_edges)
+
+            else:
                 if isinstance(edge, EdgeTransformation):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
-                    result = self._get_log_likelihood(theta_dict, edge)
-                    # print(edge, result)
+                    probability += self._get_log_likelihood(theta_dict, edge)
+        return probability
 
-                    probability += result
+    def _get_log_posterior(self, theta):
+        theta_dicts = self._get_theta_dict(theta)
+        probability = self._get_log_prior(theta_dict)
+        if np.isfinite(probability):
+            probability += self._get_edge_likelihood(theta_dict, self._ordered_edges[:])
         return probability
 
     def _get_negative_log_posterior(self, theta):
@@ -305,11 +348,11 @@ class Model(object):
         b = []
 
         for node in self.nodes:
-            n.append(node.node_name)
+            n.append(node.name)
             if node in self._observed_nodes:
-                b.append(node.node_name)
+                b.append(node.name)
             if node in self._underlying_nodes:
-                t.append(node.node_name)
+                t.append(node.name)
             for name in node.names:
                 node_name_dict[name] = node.node_name
 

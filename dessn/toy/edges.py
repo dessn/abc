@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.cosmology import FlatwCDM
 from scipy import special
-from dessn.model.edge import Edge, EdgeTransformation
+from dessn.model.edge import Edge, EdgeTransformation, EdgeDiscrete
 
 
 class ToCount(Edge):
@@ -64,9 +64,10 @@ class ToRedshift(EdgeTransformation):
         return {"redshift": data["oredshift"]}
 
     def __init__(self):
-        #super(ToRedshift, self).__init__(["oredshift", "oredshift_error"], "redshift")
         super(ToRedshift, self).__init__("redshift", ["oredshift", "oredshift_error"])
+
         '''
+        super(ToRedshift, self).__init__(["oredshift", "oredshift_error"], "redshift")
     def get_log_likelihood(self, data):
         r""" Assume the redshift distribution follows a uniform distribution (for misidentification)
         with a tight Gaussian peak around the observed redshift.
@@ -107,7 +108,7 @@ class ToLuminosity(Edge):
         """
 
         # TODO: Where should we consistency check parameters? Should we need to?
-        sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
+        sn_type = data["type"]
 
         # Note that we are working with arrays for type and luminosity, one element per supernova
         snIa_mask = (sn_type == 1)
@@ -126,14 +127,10 @@ class ToLuminosity(Edge):
 
 
 # class ToType(Edge):
-class ToType(EdgeTransformation):
-    def get_transformation(self, data):
-        return {"type": data["otype"]}
-
+class ToType(EdgeDiscrete):
     def __init__(self):
-        # super(ToType, self).__init__("otype", "type")
-        super(ToType, self).__init__("type", "otype")
-        '''
+        super(ToType, self).__init__("otype", "type")
+
     def get_log_likelihood(self, data):
         r""" Gets the probability of the actual object being of one type, given we observe a singular other type.
 
@@ -148,18 +145,12 @@ class ToType(EdgeTransformation):
         .. math::
             P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}
         """
-        # sn_type = 1.0 * (np.sign(data["type"]) == 1.0)
-        sn_type = np.round(data["type"])
 
         o_type = data["otype"]
-        probs = 0.9 * (sn_type == o_type) + 0.1 * (sn_type != o_type)
+        input_type = data["type"]
+        prob = 0.9 * (o_type == input_type) + 0.1
 
-        # Adding constraints
-        mask = (data["type"] > 1.4) | (data["type"] < -0.4)
-        if mask.sum() > 0:
-            return -np.inf
-
-        return np.sum(np.log(probs))'''
+        return np.log(prob)
 
 
 class ToRate(Edge):
@@ -185,7 +176,7 @@ class ToRate(Edge):
         if data["sn_rate"] < 0 or data["sn_rate"] > 1:
             return -np.inf
 
-        sn_type = np.round(data["type"])
+        sn_type = data["type"]
         n_snIa = (sn_type == 1.0).sum()
         n_snII = (sn_type != 1.0).sum()
         n = sn_type.size

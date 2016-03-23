@@ -1,7 +1,8 @@
 import numpy as np
-from dessn.simple.example import Example
 
-    
+from dessn.examples.simple import Example
+
+
 class ExampleLatent(Example):
     r"""An example implementation using marginalisation over latent parameters.
 

@@ -1,11 +1,13 @@
-import numpy as np
-from dessn.model.model import Model
-from dessn.model.node import NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
-from dessn.model.edge import Edge, EdgeTransformation
-from dessn.simple.example import Example
 import logging
 import os
 import sys
+
+import numpy as np
+
+from dessn.examples.simple.example import Example
+from dessn.model.edge import Edge, EdgeTransformation
+from dessn.model.model import Model
+from dessn.model.node import NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
 
 
 class ObservedFlux(NodeObserved):
