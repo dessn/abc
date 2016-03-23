@@ -11,7 +11,8 @@ from dessn.model.node import NodeObserved, NodeUnderlying, NodeDiscrete
 
 def get_data(n=50):
     np.random.seed(0)
-    colour = np.random.random(n) > 0.5
+    rate = 0.6
+    colour = np.random.random(n) <= rate
     size = 1 + 1.0 * colour + np.random.normal(scale=0.3, size=n)
 
     misidentification = np.random.random(n) > 0.9
@@ -68,7 +69,8 @@ class ToColour(Edge):
     def get_log_likelihood(self, data):
         c = data["c"]
         c_o = data["c_o"]
-        return np.log(0.9 if c == c_o else 0.1)
+        m = 0.9
+        return np.log(m if c == c_o else 1 - m)
 
 
 class ToColour2(Edge):
@@ -131,13 +133,17 @@ if __name__ == "__main__":
 
     logging.info("Starting fit")
 
-    for x in np.linspace(0.1, 0.9, 21):
-        pass
-        print(x, model._get_log_posterior([x]))
+    rs = np.linspace(0.1, 0.9, 15)
+    posts = np.array([model._get_log_posterior([r]) for r in rs])
+    posts -= posts.max()
+    for r, p in zip(rs, posts):
+        print(r, p)
 
+
+
+
+    # model.fit_model(num_steps=500, num_burn=100, temp_dir=temp_dir, save_interval=20)
     '''
-    model.fit_model(num_steps=500, num_burn=100, temp_dir=temp_dir, save_interval=20)
-
     if not only_data:
         chain_consumer = model.get_consumer()
         chain_consumer.configure_general(bins=1.0)

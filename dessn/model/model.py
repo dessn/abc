@@ -242,7 +242,7 @@ class Model(object):
                 for d in discrete:
                     theta_dict.update({first_name: d})
                     result = self._get_edge_likelihood(theta_dict, dependent_edges)
-                    # print("RESULT:", d, result, theta_dict, dependent_edges)
+                    print("RESULT:", d, result, theta_dict)
                     if probability == 0.0:
                         probability = result
                     else:
