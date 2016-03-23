@@ -9,15 +9,13 @@ from dessn.model.model import Model
 from dessn.model.node import NodeObserved, NodeUnderlying, NodeDiscrete
 
 
-def get_data(n=100):
+def get_data(n=50):
     np.random.seed(0)
-    colour = np.random.random(n) > 0.7
-    size = 1 + 1.0 * colour + np.random.normal(scale=0.4, size=n)
+    colour = np.random.random(n) > 0.5
+    size = 1 + 1.0 * colour + np.random.normal(scale=0.3, size=n)
 
-    is_red = colour > 0.6
     misidentification = np.random.random(n) > 0.9
-    final = (is_red ^ misidentification)
-    # print(is_red, misidentification, final)
+    final = (colour ^ misidentification)
     colours = ['red' if a else 'blue' for a in final]
     return size.tolist(), colours
 
@@ -25,21 +23,20 @@ def get_data(n=100):
 class ObservedColour(NodeObserved):
     def __init__(self):
         sizes, colours = get_data()
-        super(ObservedColour, self).__init__("c_o", "$c_o$", colours)
+        super(ObservedColour, self).__init__("c_o", "$c_o$", colours, group="Obs. Colour")
 
 
 class ObservedSize(NodeObserved):
     def __init__(self):
         sizes, colours = get_data()
-        super(ObservedSize, self).__init__("s_o", "$s_o$", sizes)
+        super(ObservedSize, self).__init__("s_o", "$s_o$", sizes, group="Obs. Size")
 
 
 class Colour(NodeDiscrete):
     def __init__(self):
-        super(Colour, self).__init__("c", "$c$")
+        super(Colour, self).__init__("c", "$c$", group="Colour")
 
     def get_discrete(self, data):
-        print("GETTING DISCRETE")
         return ["red", "blue"]
 
     def get_discrete_requirements(self):
@@ -48,7 +45,7 @@ class Colour(NodeDiscrete):
 
 class UnderlyingRate(NodeUnderlying):
     def __init__(self):
-        super(UnderlyingRate, self).__init__("r", "$r$")
+        super(UnderlyingRate, self).__init__("r", "$r$", group="Rate")
 
     def get_log_prior(self, data):
         r = data["r"]
@@ -85,7 +82,8 @@ class ToColour2(Edge):
             mid = 2
         else:
             mid = 1
-        ps = -(s_o - mid) * (s_o - mid) / (2 * 0.4 * 0.4) - np.log(np.sqrt(2 * np.pi) * 0.2)
+        sigma = 0.3
+        ps = -(s_o - mid) * (s_o - mid) / (2 * sigma * sigma) - np.log(np.sqrt(2 * np.pi) * sigma)
         return ps
 
 
@@ -114,6 +112,8 @@ class DiscreteModel(Model):
         self.add_edge(ToColour2())
         self.add_edge(ToRate())
 
+        self.finalise()
+
 if __name__ == "__main__":
     model = DiscreteModel()
     only_data = len(sys.argv) > 1
@@ -127,13 +127,19 @@ if __name__ == "__main__":
     if not only_data:
         plot_file = os.path.abspath(dir_name + "/../../../plots/discrete.png")
         pgm_file = os.path.abspath(dir_name + "/../../../plots/discretePGM.png")
-        model.get_pgm(pgm_file)
+        # model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
+
+    for x in np.linspace(0.1, 0.9, 21):
+        pass
+        print(x, model._get_log_posterior([x]))
+
+    '''
     model.fit_model(num_steps=500, num_burn=100, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = model.get_consumer()
         chain_consumer.configure_general(bins=1.0)
         print(chain_consumer.get_summary())
-        chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[0.6])
+        chain_consumer.plot(filename=plot_file, display=False, truth=[0.3])'''

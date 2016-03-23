@@ -172,20 +172,24 @@ class Model(object):
         self._finalised = True
         self.logger.info("Model validation passed")
 
-    def _get_theta_dicts(self, theta):
-        result = self.data.copy()
+    def _get_theta_dict(self, theta):
+        result = {}
+        arrs = {}
+        data = self.data[:]
         make_array = []
         for theta, theta_name in zip(theta, self._theta_names):
             if self._theta_names.count(theta_name) == 1:
                 result[theta_name] = theta
             else:
-                if theta_name not in result:
-                    result[theta_name] = []
+                if theta_name not in arrs:
+                    arrs[theta_name] = []
                     make_array.append(theta_name)
-                result[theta_name].append(theta)
+                arrs[theta_name].append(theta)
         for m in make_array:
-            result[m] = np.array(result[m])
-        return result
+            array = arrs[m]
+            for a, d in zip(array, data):
+                d[m] = a
+        return result, data
 
     def get_log_prior(self, theta):
         theta_dict = self._get_theta_dict(theta)
@@ -224,22 +228,25 @@ class Model(object):
             discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], NodeDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
             unfilled_nodes = [self._node_dict[n] for n in unfilled]
-            print(unfilled)
             if len(unfilled) > 0:
                 first_name = unfilled[0]
                 first_node = self._node_dict[first_name]
-                print("first", first_name)
+                # print("first", first_name)
                 unfilled_dependencies = first_node.get_discrete_requirements()
-                print("unfilled dependencies", unfilled_dependencies)
+                # print("unfilled dependencies", unfilled_dependencies)
                 to_pass = dict((k, theta_dict[k]) for k in unfilled_dependencies)
                 discrete = first_node.get_discrete(to_pass)
-                print("discrete", discrete)
+                # print("discrete", discrete)
+                dependent_edges = self._get_dependencies(edges, first_name)
+                edges = [e for e in edges if e not in dependent_edges]
                 for d in discrete:
                     theta_dict.update({first_name: d})
-                    dependent_edges = self._get_dependencies(edges, first_name)
-                    edges = [e for e in edges if e not in dependent_edges]
-                    probability += self._get_edge_likelihood(theta_dict, dependent_edges)
-
+                    result = self._get_edge_likelihood(theta_dict, dependent_edges)
+                    # print("RESULT:", d, result, theta_dict, dependent_edges)
+                    if probability == 0.0:
+                        probability = result
+                    else:
+                        probability = np.logaddexp(result, probability)
             else:
                 if isinstance(edge, EdgeTransformation):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
@@ -248,10 +255,17 @@ class Model(object):
         return probability
 
     def _get_log_posterior(self, theta):
-        theta_dicts = self._get_theta_dict(theta)
+        theta_dict, data = self._get_theta_dict(theta)
         probability = self._get_log_prior(theta_dict)
+        # print("P1 ", probability)
         if np.isfinite(probability):
-            probability += self._get_edge_likelihood(theta_dict, self._ordered_edges[:])
+            for observation in data:
+                t = theta_dict.copy()
+                t.update(observation)
+                result = self._get_edge_likelihood(t, self._ordered_edges[:])
+                probability += result
+                # print("P2 ", result)
+        # print("P3 ", probability)
         return probability
 
     def _get_negative_log_posterior(self, theta):
@@ -280,9 +294,11 @@ class Model(object):
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
         self.logger.debug("Initial position is:  %s" % p0)
-        if False and self.num_temps is None:
+        if self.num_temps is None:
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
             self.logger.debug("Starting position is: %s" % optimised)
+            print(optimised)
+            assert 1==0, "DOOM"
         else:
             optimised = p0
 
@@ -296,7 +312,7 @@ class Model(object):
     def _get_log_prior(self, theta_dict):
         result = []
         for node in self._underlying_nodes:
-            p = node.get_log_prior(dict((key, theta_dict[key]) for key in node.names))
+            p = node.get_log_prior({node.name: theta_dict[node.name]})
             if np.isnan(p):
                 self.logger.error("Got NaN probability from %s: %s" % (node, theta_dict))
                 raise ValueError("NaN")
@@ -341,20 +357,25 @@ class Model(object):
         y_size = 8
         border = 1
         node_name_dict = {}
-
+        reverse_dict = {}
         n = []
         e = []
         t = []
         b = []
 
         for node in self.nodes:
-            n.append(node.name)
+            value = node.name if node.group is None else node.group
+            if value not in n:
+                n.append(value)
             if node in self._observed_nodes:
-                b.append(node.name)
+                b.append(value)
             if node in self._underlying_nodes:
-                t.append(node.name)
-            for name in node.names:
-                node_name_dict[name] = node.node_name
+                t.append(value)
+            node_name_dict[node.name] = value
+            if value not in reverse_dict:
+                reverse_dict[value] = {"names": [], "labels": []}
+            reverse_dict[value]["node"] = node
+            reverse_dict[value]["labels"].append(node.label)
 
         for edge in self.edges:
             for g in edge.given:
@@ -370,11 +391,12 @@ class Model(object):
 
         self.logger.debug("Creating PGM from positioner results")
         pgm = daft.PGM([x_size, y_size], origin=[0., 0.2], observed_style='inner')
-        for node, x, y in zip(self.nodes, x, y):
+        for value, x, y in zip(n, x, y):
+            node = reverse_dict[value]["node"]
             obs = node in self._observed_nodes
             fixed = node in self._transformation_nodes
-            node_name = node.node_name
-            node_label = node_name.replace(" ", "\n") + "\n" + ", ".join(node.labels)
+            node_name = value
+            node_label = node_name.replace(" ", "\n") + "\n" + ", ".join(reverse_dict[value]["labels"])
 
             pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3, observed=obs, fixed=fixed))
 
@@ -447,6 +469,7 @@ class Model(object):
                 num_walkers = num_dim * 8
             else:
                 num_walkers = num_dim * 4
+        num_walkers = max(num_walkers, 20)
 
         self.logger.debug("Running emcee")
         if num_temps is None:

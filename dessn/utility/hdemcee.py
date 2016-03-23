@@ -55,9 +55,9 @@ class EmceeWrapper(object):
             else:
                 self.chain[:, step, :] = result[0][:, :save_dim]
             step += 1
-            if temp_dir is not None and save_interval is not None:
+            if step == 1 or temp_dir is not None and save_interval is not None:
                 t2 = time()
-                if t2 - t > save_interval or step == num_steps:
+                if step == 1 or t2 - t > save_interval or step == num_steps:
                     t = t2
                     position = result[0]
                     np.save(position_file, position)

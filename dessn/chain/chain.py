@@ -325,22 +325,27 @@ class ChainConsumer(object):
         lower_error = maximum - lower
         resolution = min(np.floor(np.log10(np.abs(upper_error))), np.floor(np.log10(np.abs(lower_error))))
         factor = 0
-        if np.abs(resolution) > 3:
+        fmt = "%0.1f"
+        r = 1
+        if np.abs(resolution) > 2:
             factor = -resolution - 1
+        if resolution == -2:
+            fmt = "%0.2f"
+            r = 2
         upper_error *= 10 ** factor
         lower_error *= 10 ** factor
         maximum *= 10 ** factor
-        upper_error = round(upper_error, 1)
-        lower_error = round(lower_error, 1)
-        maximum = round(maximum, 1)
+        upper_error = round(upper_error, r)
+        lower_error = round(lower_error, r)
+        maximum = round(maximum, r)
         if maximum == -0.0:
             maximum = 0.0
-        upper_error_text = "%0.1f" % upper_error
-        lower_error_text = "%0.1f" % lower_error
+        upper_error_text = fmt % upper_error
+        lower_error_text = fmt % lower_error
         if upper_error_text == lower_error_text:
-            text = r"%0.1f\pm %s" % (maximum, lower_error_text)
+            text = r"%s\pm %s" % (fmt, "%s") % (maximum, lower_error_text)
         else:
-            text = r"%0.1f^{+%s}_{-%s}" % (maximum, upper_error_text, lower_error_text)
+            text = r"%s^{+%s}_{-%s}" % (fmt, "%s", "%s") % (maximum, upper_error_text, lower_error_text)
         if factor != 0:
             text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
         if wrap:
