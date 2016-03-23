@@ -14,13 +14,19 @@ class ObservedFlux(NodeObserved):
     def __init__(self, n=100):
         self.n = n
         flux, error = Example.get_data(n=n, scale=0.5)
+        super(ObservedFlux, self).__init__("flux", "$f$", flux, group="Flux")
 
-        super(ObservedFlux, self).__init__("Flux", ["flux", "flux_error"], ["$f$", r"$\sigma_f$"], [flux, error])
+
+class ObservedFluxError(NodeObserved):
+    def __init__(self, n=100):
+        self.n = n
+        flux, error = Example.get_data(n=n, scale=0.5)
+        super(ObservedFluxError, self).__init__("flux_error", r"$\sigma_f$", error, group="Flux")
 
 
 class LatentLuminosity(NodeLatent):
     def __init__(self, n=100):
-        super(LatentLuminosity, self).__init__("Luminosity", "luminosity", "$L$")
+        super(LatentLuminosity, self).__init__("luminosity", "$L$", group="Luminosity")
         self.n = n
 
     def get_num_latent(self):
@@ -30,32 +36,48 @@ class LatentLuminosity(NodeLatent):
         return ["flux"]
 
     def get_suggestion(self, data):
-        return (data["flux"] * np.random.uniform(0.5, 1.5, data["flux"].shape)).tolist() # Deliberately given wrong
+        return data["flux"] * np.random.uniform(0.5, 1.5)
 
 
-class UnderlyingSupernovaDistribution(NodeUnderlying):
+class UnderlyingSupernovaDistribution1(NodeUnderlying):
     def get_log_prior(self, data):
         """ We model the prior enforcing realistic values"""
         mean = data["SN_theta_1"]
-        sigma = data["SN_theta_2"]
-        if mean < 0 or sigma < 0 or mean > 200 or sigma > 100:
+        if mean < 0 or mean > 200:
             return -np.inf
         return 1
 
     def __init__(self):
-        super(UnderlyingSupernovaDistribution, self).__init__("Supernova", ["SN_theta_1", "SN_theta_2"],
-                                                              [r"$\theta_1$", r"$\theta_2$"])
+        super(UnderlyingSupernovaDistribution1, self).__init__("SN_theta_1", r"$\theta_1$", group="Supernova")
 
     def get_suggestion_requirements(self):
         return []
 
     def get_suggestion(self, data):
-        return [50, 5] # This is deliberately given wrong to ensure that we can recover the actual posterior.
+        return 50
+
+
+class UnderlyingSupernovaDistribution2(NodeUnderlying):
+    def get_log_prior(self, data):
+        """ We model the prior enforcing realistic values"""
+        sigma = data["SN_theta_2"]
+        if sigma < 0 or sigma > 100:
+            return -np.inf
+        return 1
+
+    def __init__(self):
+        super(UnderlyingSupernovaDistribution2, self).__init__("SN_theta_2", r"$\theta_2$", group="Supernova")
+
+    def get_suggestion_requirements(self):
+        return []
+
+    def get_suggestion(self, data):
+        return 5
 
 
 class UselessTransformation(NodeTransformation):
     def __init__(self):
-        super(UselessTransformation, self).__init__("Transformed Luminosity", "double_luminosity", "$2L$")
+        super(UselessTransformation, self).__init__("double_luminosity", "$2L$", group="Transformed Luminosity")
 
 
 class LuminosityToAdjusted(EdgeTransformation):
@@ -71,10 +93,10 @@ class FluxToLuminosity(Edge):
         super(FluxToLuminosity, self).__init__(["flux", "flux_error"], "luminosity")
 
     def get_log_likelihood(self, data):
-        luminosity = data["luminosity"]
-        flux = data["flux"]
-        flux_error = data["flux_error"]
-        return -np.sum((flux - luminosity) * (flux - luminosity) / (2.0 * flux_error * flux_error) + np.log(np.sqrt(2 * np.pi) * flux_error))
+        l = data["luminosity"]
+        f = data["flux"]
+        e = data["flux_error"]
+        return -((f - l) * (f - l) / (2.0 * e * e) - np.log(np.sqrt(2 * np.pi) * e))
 
 
 class LuminosityToSupernovaDistribution(Edge):
@@ -82,12 +104,12 @@ class LuminosityToSupernovaDistribution(Edge):
         super(LuminosityToSupernovaDistribution, self).__init__("double_luminosity", ["SN_theta_1", "SN_theta_2"])
 
     def get_log_likelihood(self, data):
-        luminosity = data["double_luminosity"]
-        theta1 = data["SN_theta_1"]
-        theta2 = data["SN_theta_2"]
-        if theta2 < 0:
+        l = data["double_luminosity"]
+        t1 = data["SN_theta_1"]
+        t2 = data["SN_theta_2"]
+        if t2 < 0:
             return -np.inf
-        return -np.sum((luminosity - theta1) * (luminosity - theta1) / (2.0 * theta2 * theta2)) - luminosity.size * np.log(np.sqrt(2 * np.pi) * theta2)
+        return -(l - t1) * (l - t1) / (2.0 * t2 * t2) - np.log(np.sqrt(2 * np.pi) * t2)
 
 
 class ExampleModel(Model):
@@ -119,13 +141,17 @@ class ExampleModel(Model):
         n = 30
 
         flux = ObservedFlux(n=n)
+        flux_error = ObservedFluxError(n=n)
         luminosity = LatentLuminosity(n=n)
         useless = UselessTransformation()
-        supernova = UnderlyingSupernovaDistribution()
+        supernova1 = UnderlyingSupernovaDistribution1()
+        supernova2 = UnderlyingSupernovaDistribution2()
         self.add_node(flux)
+        self.add_node(flux_error)
         self.add_node(luminosity)
         self.add_node(useless)
-        self.add_node(supernova)
+        self.add_node(supernova1)
+        self.add_node(supernova2)
 
         self.add_edge(FluxToLuminosity())
         self.add_edge(LuminosityToAdjusted())
@@ -143,18 +169,18 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     logging.info("Creating model")
     exampleModel = ExampleModel()
-    temp_dir = os.path.abspath(dir_name + "/../../../temp/exampleModel")
+    temp_dir = os.path.abspath(dir_name + "/../../../../temp/exampleModel")
 
     if not only_data:
-        plot_file = os.path.abspath(dir_name + "/../../../plots/exampleModel.png")
-        pgm_file = os.path.abspath(dir_name + "/../../../plots/examplePGM.png")
-        exampleModel.get_pgm(pgm_file)
+        plot_file = os.path.abspath(dir_name + "/../../../../plots/exampleModel.png")
+        pgm_file = os.path.abspath(dir_name + "/../../../../plots/examplePGM.png")
+        # exampleModel.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    exampleModel.fit_model(num_steps=20000, num_burn=5000, temp_dir=temp_dir, save_interval=20)
+    exampleModel.fit_model(num_steps=2000, num_burn=50, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = exampleModel.get_consumer()
-        chain_consumer.configure_general(bins=1.0)
+        chain_consumer.configure_general(bins=0.8)
         print(chain_consumer.get_summary())
         chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])

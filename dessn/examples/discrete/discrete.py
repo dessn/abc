@@ -3,7 +3,6 @@ import os
 import sys
 
 import numpy as np
-
 from dessn.model.edge import Edge
 from dessn.model.model import Model
 from dessn.model.node import NodeObserved, NodeUnderlying, NodeDiscrete

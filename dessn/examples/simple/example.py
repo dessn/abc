@@ -3,7 +3,7 @@ import emcee
 from scipy import stats
 import os
 import abc
-
+import matplotlib.pyplot as plt
 
 
 class Example(object):
@@ -86,7 +86,7 @@ class Example(object):
         error = 0.2 * np.sqrt(data)
         data += stats.norm.rvs(size=n) * error
 
-        return data, error
+        return data.tolist(), error.tolist()
 
     def plot_observations(self):
         """Plot the observations and observation distribution.

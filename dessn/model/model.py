@@ -128,8 +128,7 @@ class Model(object):
             self._theta_labels.append(node.label)
         self._num_actual = len(self._theta_names)
         for node in self._latent_nodes:
-            for name in node.names:
-                self._theta_names += [name] * node.get_num_latent()
+            self._theta_names += [node.name] * node.get_num_latent()
 
         num_edges = len(self.edges)
         observed_names = [node.name for node in self.nodes if not isinstance(node, NodeTransformation)]
@@ -276,11 +275,16 @@ class Model(object):
                 node_sorted.append(node)
         theta = []
         data = self.data
+        print(data)
+        print(node_sorted)
         for node in node_sorted:
-            node_data = dict((key, data[key]) for key in data if key in node.get_suggestion_requirements())
-            temp_arr = node.get_suggestion(node_data)
-            theta += temp_arr
-
+            reqs = node.get_suggestion_requirements()
+            if len(reqs) == 0:
+                theta.append(node.get_suggestion({}))
+            else:
+                for row in data:
+                    node_data = dict((key, row[key]) for key in reqs)
+                    theta.append(node.get_suggestion(node_data))
         return theta
 
     def _get_starting_position(self, num_walkers):

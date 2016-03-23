@@ -628,8 +628,8 @@ class ChainConsumer(object):
         hist[hist == 0] = 1E-16
         vals = self._convert_to_stdev(hist.T)
         if self.parameters_contour["cloud"]:
-            skip = max(1, x.size / 50000)
-            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.2, c=colours[1], marker=".", edgecolors="none")
+            skip = max(1, x.size / 80000)
+            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.4, c=colours[1], marker=".", edgecolors="none")
         if self.parameters_contour["contourf"]:
             ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=self.parameters_contour["contourf_alpha"])
         ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
