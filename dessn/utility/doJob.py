@@ -26,7 +26,7 @@ if not os.path.exists(error_files):
 
 template = '''#!/bin/bash
 #$ -S /bin/bash
-#$ -pe mpi %d
+#$ -pe orte %d
 #$ -M samuelreay@gmail.com
 #$ -N %s
 #$ -m abe

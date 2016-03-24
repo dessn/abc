@@ -154,7 +154,7 @@ class ChainConsumer(object):
         sigmas = np.sort(sigmas)
         self.parameters_contour["sigmas"] = sigmas
         if cloud is None:
-            cloud = num_chains == 1
+            cloud = False
         self.parameters_contour["cloud"] = cloud
 
         if contourf is None:
@@ -428,7 +428,10 @@ class ChainConsumer(object):
         summary = self.parameters_bar["summary"]
         if summary is None:
             summary = len(parameters) < 5 and len(self.chains) == 1
-
+        if len(self.chains) == 1:
+            self.logger.debug("Plotting surfaces for chain of dimenson %s" % (self.chains[0].shape,))
+        else:
+            self.logger.debug("Plotting surfaces for %d chains" % len(self.chains))
         for i, p1 in enumerate(params1):
             for j, p2 in enumerate(params2):
                 if i < j:
@@ -548,7 +551,7 @@ class ChainConsumer(object):
             chain = self.names.index(chain)
 
         chain_data = self.chains[chain]
-        self.logger.debug("Plotting chain of size %s" % chain_data.shape)
+        self.logger.debug("Plotting chain of size %s" % (chain_data.shape,))
         chain_parameters = self.parameters[chain]
 
         fig, axes = plt.subplots(figsize=figsize, nrows=len(parameters), squeeze=False, sharex=True)
@@ -679,6 +682,8 @@ class ChainConsumer(object):
                     if p not in parameters:
                         continue
                     index = parameters.index(p)
+                    # min_val = chain[:, index].min()
+                    # max_val = chain[:, index].max()
                     mean = np.mean(chain[:, index])
                     std = np.std(chain[:, index])
                     min_prop = mean - 3 * std

@@ -3,58 +3,82 @@ import numpy as np
 import os
 
 
-class Cosmology(NodeUnderlying):
+class OmegaM(NodeUnderlying):
     def __init__(self):
-        super(Cosmology, self).__init__("Cosmology", ["omega_m", "w", "H0"], [r"$\Omega_m$", "$w$", "$H_0$"])
+        super(OmegaM, self).__init__("omega_m", r"$\Omega_m$", group="Cosmology")
 
     def get_log_prior(self, data):
         if data["omega_m"] < 0:
             return -np.inf
         return 1
 
-    def get_suggestion_requirements(self):
-        return []
+    def get_suggestion(self, data):
+        return 0.3
+
+
+class W(NodeUnderlying):
+    def __init__(self):
+        super(W, self).__init__("w", "$w$", group="Cosmology")
 
     def get_suggestion(self, data):
-        return [0.3, -1, 70]
+        return -1
 
 
-class SupernovaIaDist(NodeUnderlying):
+class Hubble(NodeUnderlying):
+    def __init__(self):
+        super(Hubble, self).__init__("H0", "$H_0$", group="Cosmology")
+
+    def get_suggestion(self, data):
+        return 70
+
+
+class SupernovaIaDist1(NodeUnderlying):
 
     def __init__(self):
-        super(SupernovaIaDist, self).__init__("SNIa", ["snIa_luminosity", "snIa_sigma"], [r"$L_{\rm SnIa}$", r"$\sigma_{\rm SnIa}$"])
+        super(SupernovaIaDist1, self).__init__("snIa_luminosity", r"$L_{\rm SnIa}$", group="SNIa")
+
+    def get_suggestion(self, data):
+        return 10
+
+
+class SupernovaIaDist2(NodeUnderlying):
+
+    def __init__(self):
+        super(SupernovaIaDist2, self).__init__("snIa_sigma", r"$\sigma_{\rm SnIa}$", group="SNIa")
 
     def get_log_prior(self, data):
         if data["snIa_sigma"] < 0:
             return -np.inf
         return 1
 
-    def get_suggestion_requirements(self):
-        return []
+    def get_suggestion(self, data):
+        return 0.5
+
+
+class SupernovaIIDist1(NodeUnderlying):
+    def __init__(self):
+        super(SupernovaIIDist1, self).__init__("snII_luminosity", r"$L_{\rm SnII}$", group="SNII")
 
     def get_suggestion(self, data):
-        return [10, 0.5]
+        return 5
 
 
-class SupernovaIIDist(NodeUnderlying):
+class SupernovaIIDist2(NodeUnderlying):
     def __init__(self):
-        super(SupernovaIIDist, self).__init__("SNII", ["snII_luminosity", "snII_sigma"], [r"$L_{\rm SnII}$", r"$\sigma_{\rm SnII}$"])
+        super(SupernovaIIDist2, self).__init__("snII_sigma", r"$\sigma_{\rm SnII}$", group="SNII")
 
     def get_log_prior(self, data):
         if data["snII_sigma"] < 0:
             return -np.inf
         return 1
 
-    def get_suggestion_requirements(self):
-        return []
-
     def get_suggestion(self, data):
-        return [5, 0.3]
+        return 0.3
 
 
 class SupernovaRate(NodeUnderlying):
     def __init__(self):
-        super(SupernovaRate, self).__init__("SN Rates", "sn_rate", "$r$")
+        super(SupernovaRate, self).__init__("sn_rate", "$r$", group="SN Rates")
 
     def get_log_prior(self, data):
         r = data["sn_rate"]
@@ -62,8 +86,5 @@ class SupernovaRate(NodeUnderlying):
             return -np.inf
         return 1
 
-    def get_suggestion_requirements(self):
-        return []
-
     def get_suggestion(self, data):
-        return [0.8]
+        return 0.8

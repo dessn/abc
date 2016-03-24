@@ -1,7 +1,7 @@
 from dessn.model.model import Model
 from dessn.toy.edges import ToCount, ToFlux, ToLuminosity, ToLuminosityDistance, ToRate, ToRedshift, ToType
 from dessn.toy.latent import Luminosity, Redshift, Type
-from dessn.toy.underlying import Cosmology, SupernovaIaDist, SupernovaIIDist, SupernovaRate
+from dessn.toy.underlying import SupernovaRate, OmegaM, W, Hubble, SupernovaIaDist1, SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
 from dessn.toy.transformations import Flux, LuminosityDistance
 from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
 from dessn.simulation.simulation import Simulation
@@ -21,21 +21,24 @@ class ToyModel(Model):
         super(ToyModel, self).__init__("ToyModel")
 
         z_o = observations["z_o"]
-        z_o_err = observations["z_o_err"]
         count_o = observations["count_o"]
         type_o = observations["type_o"]
-        n = z_o.size
+        n = len(z_o)
 
         self.add_node(ObservedType(type_o))
-        self.add_node(ObservedRedshift(z_o, z_o_err))
+        self.add_node(ObservedRedshift(z_o))
         self.add_node(ObservedCounts(count_o))
 
         self.add_node(Flux())
         self.add_node(LuminosityDistance())
 
-        self.add_node(Cosmology())
-        self.add_node(SupernovaIaDist())
-        self.add_node(SupernovaIIDist())
+        self.add_node(OmegaM())
+        self.add_node(W())
+        self.add_node(Hubble())
+        self.add_node(SupernovaIaDist1())
+        self.add_node(SupernovaIaDist2())
+        self.add_node(SupernovaIIDist1())
+        self.add_node(SupernovaIIDist2())
         self.add_node(SupernovaRate())
 
         self.add_node(Luminosity(n=n))
@@ -59,7 +62,6 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
     temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel")
     plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
     walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
@@ -68,15 +70,18 @@ if __name__ == "__main__":
     simulation = Simulation()
     observations, theta = simulation.get_simulation(*vals, num_trans=30)
     toy_model = ToyModel(observations)
-    if not only_data:
-        fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=47896, num_burn=0, temp_dir=temp_dir, save_interval=120)
+    # print(toy_model._get_log_posterior(theta))
+
+    if not only_data:
+        pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
+        # fig = toy_model.get_pgm(pgm_file)
+
+    toy_model.fit_model(num_steps=3811, num_burn=0, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()
-        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 12))
-        chain_consumer.configure_contour(cloud=False)
-        chain_consumer.configure_general(bins=0.3)
-        #chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
+        chain_consumer.configure_general(bins=100)
+        # chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 12))
+        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
 

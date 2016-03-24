@@ -32,9 +32,11 @@ class Simulation(object):
 
         # Get the types from the underlying type rate
         type_Ias = 1.0 * (np.random.random(num_trans) < r)
-        #misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
+        type_Iash = ["Ia" if t == 1 else "II" for t in type_Ias]
+        # misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
         misidentification = 1.0 * (np.random.random(num_trans) < 0.0)
         type_o = type_Ias * (1 - misidentification) + (1 - type_Ias) * misidentification
+        type_oh = ["Ia" if a == 1 else "II" for a in type_o]
 
         # Get luminosities from type
         luminosity_Ia = np.random.normal(snIa_mean, snIa_sigma, num_trans)
@@ -52,12 +54,11 @@ class Simulation(object):
         count_o = count + np.random.normal(0, count_sigma, num_trans)
 
         observations = {
-            "z_o": z_o,
-            "z_o_err": z_err,
-            "type_o": type_o,
-            "count_o": count_o
+            "z_o": z_o.tolist(),
+            "type_o": type_oh,
+            "count_o": count_o.tolist()
         }
-        theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist() + z.tolist() + type_Ias.tolist()
+        theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist() + type_Iash
         return observations, theta
 
 

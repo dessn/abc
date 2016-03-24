@@ -100,7 +100,6 @@ class NodeUnderlying(Node):
     def __init__(self, names, labels, group=None):
         super(NodeUnderlying, self).__init__(names, labels, group=group)
 
-    @abc.abstractmethod
     def get_log_prior(self, data):
         """ Returns the log prior for the parameter.
 
@@ -117,7 +116,10 @@ class NodeUnderlying(Node):
         float
             the log prior probability given the current value of the parameters
         """
-        pass
+        return 1
+
+    def get_suggestion_requirements(self):
+        return []
 
 
 class NodeTransformation(Node):
@@ -204,7 +206,7 @@ class NodeDiscrete(Node):
         super(NodeDiscrete, self).__init__(name, label, group=group)
 
     @abc.abstractmethod
-    def get_discrete(self):
+    def get_discrete(self, data):
         pass
 
     @abc.abstractmethod

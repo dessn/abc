@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.cosmology import FlatwCDM
 from scipy import special
-from dessn.model.edge import Edge, EdgeTransformation, EdgeDiscrete
+from dessn.model.edge import Edge, EdgeTransformation
 
 
 class ToCount(Edge):
@@ -28,7 +28,7 @@ class ToCount(Edge):
         f = data["ocount"] / efficiency / conversion
         fe = np.sqrt(data["ocount"]) / efficiency / conversion
 
-        return np.sum(-(flux - f) * (flux - f) / (2 * fe * fe) - np.log(np.sqrt(2 * np.pi) * fe))
+        return -(flux - f) * (flux - f) / (2 * fe * fe) - np.log(np.sqrt(2 * np.pi) * fe)
 
 
 class ToFlux(EdgeTransformation):
@@ -64,7 +64,7 @@ class ToRedshift(EdgeTransformation):
         return {"redshift": data["oredshift"]}
 
     def __init__(self):
-        super(ToRedshift, self).__init__("redshift", ["oredshift", "oredshift_error"])
+        super(ToRedshift, self).__init__("redshift", ["oredshift"])
 
         '''
         super(ToRedshift, self).__init__(["oredshift", "oredshift_error"], "redshift")
@@ -109,25 +109,23 @@ class ToLuminosity(Edge):
 
         # TODO: Where should we consistency check parameters? Should we need to?
         sn_type = data["type"]
-
-        # Note that we are working with arrays for type and luminosity, one element per supernova
-        snIa_mask = (sn_type == 1)
-        snII_mask = (sn_type == 0)
-
         luminosity = data["luminosity"]
-        snIa_mean = data["snIa_luminosity"]
-        snIa_std = data["snIa_sigma"]
-        snII_mean = data["snII_luminosity"]
-        snII_std = data["snII_sigma"]
-
-        snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(np.sqrt(2 * np.pi) * snIa_std)
-        snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(np.sqrt(2 * np.pi) * snII_std)
-        # print(snIa_prob, snII_prob)
-        return np.sum(snIa_mask * snIa_prob + snII_mask * snII_prob)
+        if sn_type == "Ia":
+            snIa_mean = data["snIa_luminosity"]
+            snIa_std = data["snIa_sigma"]
+            snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(np.sqrt(2 * np.pi) * snIa_std)
+            return snIa_prob
+        elif sn_type == "II":
+            snII_mean = data["snII_luminosity"]
+            snII_std = data["snII_sigma"]
+            snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(np.sqrt(2 * np.pi) * snII_std)
+            return snII_prob
+        else:
+            return -np.inf
 
 
 # class ToType(Edge):
-class ToType(EdgeDiscrete):
+class ToType(Edge):
     def __init__(self):
         super(ToType, self).__init__("otype", "type")
 
@@ -173,16 +171,15 @@ class ToRate(Edge):
 
         In the code, I approximate the choose function using the log gamma functions.
         """
-        if data["sn_rate"] < 0 or data["sn_rate"] > 1:
+        r = data["sn_rate"]
+        if r < 0 or r > 1:
             return -np.inf
 
         sn_type = data["type"]
-        n_snIa = (sn_type == 1.0).sum()
-        n_snII = (sn_type != 1.0).sum()
-        n = sn_type.size
-        r = data["sn_rate"]
+        if sn_type == "Ia":
+            return np.log(r)
+        elif sn_type == "II":
+            return np.log(1 - r)
+        else:
+            return -np.inf
 
-        # TODO: Probably want generic classes for Normals, log normals, binomial, etc
-        log_choose = special.gammaln(n + 1) - special.gammaln(n_snII + 1) - special.gammaln(n_snIa + 1)
-        # print(log_choose, n_snIa, n_snII, r, n, data["sn_rate"], data["type"])
-        return log_choose + n_snIa * np.log(r) + n_snII * np.log(1-r)

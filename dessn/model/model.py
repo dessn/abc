@@ -275,8 +275,6 @@ class Model(object):
                 node_sorted.append(node)
         theta = []
         data = self.data
-        print(data)
-        print(node_sorted)
         for node in node_sorted:
             reqs = node.get_suggestion_requirements()
             if len(reqs) == 0:
@@ -462,12 +460,12 @@ class Model(object):
         self.logger.debug("Fitting model with %d dimensions using %d temperature levels" % (num_dim, 0 if self.num_temps is None else self.num_temps))
         if num_walkers is None:
             if num_temps is None:
-                num_walkers = num_dim * 8
+                num_walkers = num_dim * 2
             else:
                 num_walkers = num_dim * 4
         num_walkers = max(num_walkers, 20)
 
-        self.logger.debug("Running emcee")
+        self.logger.debug("Running emcee with %d walkers" % num_walkers)
         if num_temps is None:
             self.logger.info("Using Ensemble Sampler")
             sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)

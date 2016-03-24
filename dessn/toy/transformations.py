@@ -3,9 +3,9 @@ from dessn.model.node import NodeTransformation
 
 class Flux(NodeTransformation):
     def __init__(self):
-        super(Flux, self).__init__("Flux", ["flux"], ["$f$"])
+        super(Flux, self).__init__("flux", "$f$", group="Flux")
 
 
 class LuminosityDistance(NodeTransformation):
     def __init__(self):
-        super(LuminosityDistance, self).__init__("Luminosity Distance", "lumdist", "$d_L$")
+        super(LuminosityDistance, self).__init__("lumdist", "$d_L$", group="Luminosity Distance")
