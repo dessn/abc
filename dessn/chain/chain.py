@@ -420,9 +420,10 @@ class ChainConsumer(object):
         plot_hists = self.parameters_general["plot_hists"]
         flip = (len(parameters) == 2 and plot_hists and self.parameters_general["flip"])
 
-        fig, axes, params1, params2 = self._get_figure(parameters, figsize=figsize, flip=flip, external_extents=extents)
+        fig, axes, params1, params2, extents = self._get_figure(parameters, figsize=figsize, flip=flip, external_extents=extents)
 
         num_bins = self.parameters_general["bins"]
+        self.logger.info("Plotting surfaces with %s bins" % num_bins)
         fit_values = self.get_summary()
         colours = self._get_colours(self.parameters_general["colours"], rainbow=self.parameters_general["rainbow"])
         summary = self.parameters_bar["summary"]
@@ -444,7 +445,7 @@ class ChainConsumer(object):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
-                        m = self._plot_bars(ax, p1, chain[:, index], colour, bins=bins, fit_values=fit[p1], flip=do_flip, summary=summary, truth=truth)
+                        m = self._plot_bars(ax, p1, chain[:, index], colour, bins=bins, fit_values=fit[p1], flip=do_flip, summary=summary, truth=truth, extents=extents[p1])
                         if max_val is None or m > max_val:
                             max_val = m
                     if do_flip:
@@ -579,7 +580,7 @@ class ChainConsumer(object):
         x = np.arange(data.size)
         ax.set_xlim(0, x[-1])
         ax.set_ylabel(parameter)
-        ax.scatter(x, data, c="#0345A1", s=2, marker=".", edgecolors="none", alpha=0.2)
+        ax.scatter(x, data, c="#0345A1", s=2, marker=".", edgecolors="none", alpha=0.5)
         if convolve is not None:
             filt = np.ones(convolve) / convolve
             filtered = np.convolve(data, filt, mode="same")
@@ -587,8 +588,8 @@ class ChainConsumer(object):
         if truth is not None:
             ax.axhline(truth, **self.parameters_truth)
 
-    def _plot_bars(self, ax, parameter, chain_row, colour, bins=25, flip=False, summary=False, fit_values=None, truth=None):
-
+    def _plot_bars(self, ax, parameter, chain_row, colour, bins=25, flip=False, summary=False, fit_values=None, truth=None, extents=None):
+        bins = np.linspace(extents[0], extents[1], bins + 1)
         hist, edges = np.histogram(chain_row, bins=bins, normed=True)
         edge_center = 0.5 * (edges[:-1] + edges[1:])
         if flip:
@@ -734,10 +735,10 @@ class ChainConsumer(object):
                         ax.set_ylim(extents[p1])
                     ax.set_xlim(extents[p2])
 
-        return fig, axes, params1, params2
+        return fig, axes, params1, params2, extents
 
     def _get_bins(self):
-        proposal = [max(20, np.floor(np.power(chain.shape[0], 0.3))) for chain in self.chains]
+        proposal = [max(20, np.floor(np.power(chain.shape[0] / chain.shape[1], 0.3))) for chain in self.chains]
         return proposal
         
     def _clamp(self, val, minimum=0, maximum=255):

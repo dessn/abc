@@ -1,5 +1,6 @@
 from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation, NodeDiscrete
 from dessn.model.edge import EdgeTransformation
+from dessn.nuts import NUTSSampler
 from dessn.utility.hdemcee import EmceeWrapper
 import numpy as np
 import logging
@@ -10,6 +11,7 @@ from scipy.optimize import fmin_bfgs
 import types
 import copy_reg
 import itertools
+import scipy.optimize
 
 
 class Model(object):
@@ -55,6 +57,7 @@ class Model(object):
         self._labels = []
         self.master = True
         self._node_groups = {}
+        self.epsilon = np.sqrt(np.finfo(float).eps)
 
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
@@ -261,7 +264,26 @@ class Model(object):
                 t.update(observation)
                 result = self._get_edge_likelihood(t, self._ordered_edges[:])
                 probability += result
+                # print(observation, result)
+        if np.random.random() < 0.001:
+            print("P: ", probability, " THETA ", theta)
         return probability
+
+    def _get_log_posterior_grad(self, theta):
+        # dx = self.epsilon
+        # grad = np.zeros(theta.shape)
+        # base = self._get_log_posterior(theta)
+        # for i in range(grad.size):
+        #     t = theta[:]
+        #     t[i] += dx
+        #     a = self._get_log_posterior(t)
+        #     t[i] -= 2 * dx
+        #     b = self._get_log_posterior(t)
+        #     grad[i] = (a - b) / (2 * dx)
+
+        grad = scipy.optimize.approx_fprime(theta, self._get_log_posterior, self.epsilon)
+        # print("grad ", self._get_log_posterior(theta), theta, grad, self.epsilon)
+        return grad
 
     def _get_negative_log_posterior(self, theta):
         val = self._get_log_posterior(theta)
@@ -290,18 +312,22 @@ class Model(object):
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
         self.logger.debug("Initial position is:  %s" % p0)
-        if self.num_temps is None:
+        if False and self.num_temps is None:
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
             self.logger.debug("Starting position is: %s" % optimised)
         else:
             optimised = p0
 
         if self.num_temps is not None:
-            std = np.random.uniform(0.7, 1.3, size=(self.num_temps, num_walkers, num_dim))
+            std = np.random.normal(loc=1, scale=0.2, size=(self.num_temps, num_walkers, num_dim))
         else:
-            std = np.random.uniform(0.7, 1.3, size=(num_walkers, num_dim))
+            std = np.random.normal(loc=1, scale=0.01, size=(num_walkers, num_dim))
+            # std = np.random.normal(loc=1, scale=0.1, size=(num_dim))
+            # std = np.ones((num_walkers, num_dim))
         start = std * optimised
+        print("START ", start)
         return start
+        # return [0.28, 10, 0.3, 10.036047685744489, 10.185160932912225, 10.090051095986748, 9.894325046051945, 9.657244540593357, 9.895197183276137, 9.937331729987566, 10.17598695735466, 10.251695024162352, 10.279330624391067]
 
     def _get_log_prior(self, theta_dict):
         result = []
@@ -315,7 +341,8 @@ class Model(object):
         return np.sum(result)
 
     def _get_transformation(self, theta_dict, edge):
-        return edge.get_transformation(dict((key, theta_dict[key]) for key in edge.given))
+        result = edge.get_transformation(dict((key, theta_dict[key]) for key in edge.given))
+        return result
 
     def _get_log_likelihood(self, theta_dict, edge):
         result = edge.get_log_likelihood(dict((key, theta_dict[key]) for key in edge.given + edge.probability_of))
@@ -405,7 +432,7 @@ class Model(object):
 
         return pgm
 
-    def fit_model(self, num_temps=None, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None, save_interval=300):
+    def fit_model(self, num_temps=None, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None, save_interval=300, p0=None):
         """ Uses ``emcee`` to fit the supplied model.
 
         This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for
@@ -464,14 +491,17 @@ class Model(object):
             else:
                 num_walkers = num_dim * 4
         num_walkers = max(num_walkers, 20)
-
         self.logger.debug("Running emcee with %d walkers" % num_walkers)
-        if num_temps is None:
-            self.logger.info("Using Ensemble Sampler")
-            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)
+        if False:
+            self.logger.debug("Using NUTS sampler with leap-frog algorithm")
+            sampler = NUTSSampler(num_dim, self._get_log_posterior, self._get_log_posterior_grad)
         else:
-            self.logger.info("Using PTSampler")
-            sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)
+            if num_temps is None:
+                self.logger.info("Using Ensemble Sampler")
+                sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)
+            else:
+                self.logger.info("Using PTSampler")
+                sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
         self.logger.debug("Fit finished")

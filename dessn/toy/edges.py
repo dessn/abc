@@ -1,6 +1,5 @@
 import numpy as np
 from astropy.cosmology import FlatwCDM
-from scipy import special
 from dessn.model.edge import Edge, EdgeTransformation
 
 
@@ -23,7 +22,7 @@ class ToCount(Edge):
 
         """
         efficiency = 0.9
-        conversion = 1e10
+        conversion = 1e5
         flux = data["flux"]
         f = data["ocount"] / efficiency / conversion
         fe = np.sqrt(data["ocount"]) / efficiency / conversion
@@ -43,18 +42,18 @@ class ToFlux(EdgeTransformation):
             f = \frac{L}{4\pi D_L^2}
 
         """
-        flux = np.exp(data["luminosity"]) / (4 * np.pi * data["lumdist"] * data["lumdist"])
+        flux = np.exp(data["luminosity"] - np.log(4 * np.pi * data["lumdist"] * data["lumdist"]))
         return {"flux": flux}
 
 
 class ToLuminosityDistance(EdgeTransformation):
     def __init__(self):
-        super(ToLuminosityDistance, self).__init__("lumdist", ["omega_m", "w", "H0", "redshift"])
+        super(ToLuminosityDistance, self).__init__("lumdist", ["omega_m", "H0", "redshift"]) # "w", "H0",
 
     def get_transformation(self, data):
         if data["omega_m"] < 0:
-            return -np.inf
-        cosmology = FlatwCDM(H0=data["H0"], Om0=data["omega_m"], w0=data["w"])
+            return {"lumdist": -np.inf}
+        cosmology = FlatwCDM(H0=data["H0"], Om0=data["omega_m"], w0=-1)
         return {"lumdist": cosmology.luminosity_distance(data['redshift']).value}
 
 
@@ -89,6 +88,7 @@ class ToRedshift(EdgeTransformation):
 class ToLuminosity(Edge):
     def __init__(self):
         super(ToLuminosity, self).__init__("luminosity", ["type", "snIa_luminosity", "snIa_sigma", "snII_luminosity", "snII_sigma"])
+        self.sqrt2pi = np.sqrt(2 * np.pi)
 
     def get_log_likelihood(self, data):
         r""" Assume type is 0 for a Type SnIa, or 1 for SnII. It will be continuous, so we round the variable.
@@ -113,14 +113,15 @@ class ToLuminosity(Edge):
         if sn_type == "Ia":
             snIa_mean = data["snIa_luminosity"]
             snIa_std = data["snIa_sigma"]
-            snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(np.sqrt(2 * np.pi) * snIa_std)
+            snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(self.sqrt2pi * snIa_std)
             return snIa_prob
         elif sn_type == "II":
             snII_mean = data["snII_luminosity"]
             snII_std = data["snII_sigma"]
-            snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(np.sqrt(2 * np.pi) * snII_std)
+            snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(self.sqrt2pi * snII_std)
             return snII_prob
         else:
+            raise ValueError("WTF2")
             return -np.inf
 
 
@@ -146,7 +147,7 @@ class ToType(Edge):
 
         o_type = data["otype"]
         input_type = data["type"]
-        prob = 0.9 * (o_type == input_type) + 0.1
+        prob = 0.99 * (o_type == input_type) + 0.01
 
         return np.log(prob)
 

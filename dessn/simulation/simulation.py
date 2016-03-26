@@ -11,25 +11,26 @@ class Simulation(object):
         self.logger.info('Getting data for %d transients' % num_trans)
 
         efficiency = 0.9
-        conversion = 1e10
+        conversion = 1e5
 
-        np.random.seed(0)
+        np.random.seed(1)
 
         cosmology = FlatwCDM(Om0=omega_m, w0=w_0, H0=h_0)
 
         # Get redshifts with some errors in them
         # z_err_rate = 0.02
         z_err_rate = 0.0
-        z = np.random.uniform(0.1, 2.0, num_trans)
-        z2 = np.random.uniform(0.1, 2.0, num_trans)
-        z_err = 2e-5 * np.ones(num_trans)
+        z = np.exp(np.random.uniform(-5, 3.0, num_trans))
+        z2 = np.exp(np.random.uniform(-5, 3.0, num_trans))
+        z_err = 1e-5 * np.ones(num_trans)
         z_err_realised = z_err * np.random.normal(0, 1, num_trans)
         catastrophic_failures = 1.0 * (np.random.random(num_trans) < z_err_rate)
         z_o = (z * (1 - catastrophic_failures) + z2 * catastrophic_failures) + z_err_realised
 
         # From the actual redshift, grab the luminosity distance
         luminosity_distance = cosmology.luminosity_distance(z).value
-
+        print("sim lum dist: ", luminosity_distance)
+        print("sim z: ", z_o)
         # Get the types from the underlying type rate
         type_Ias = 1.0 * (np.random.random(num_trans) < r)
         type_Iash = ["Ia" if t == 1 else "II" for t in type_Ias]
@@ -39,26 +40,28 @@ class Simulation(object):
         type_oh = ["Ia" if a == 1 else "II" for a in type_o]
 
         # Get luminosities from type
-        luminosity_Ia = np.random.normal(snIa_mean, snIa_sigma, num_trans)
-        luminosity_II = np.random.normal(snII_mean, snII_sigma, num_trans)
+        luminosity_Ia = snIa_mean + np.random.normal(0, snIa_sigma, num_trans)
+        print(luminosity_Ia.mean())
+        luminosity_II = snII_mean + np.random.normal(0, snII_sigma, num_trans)
         actual_lum = type_Ias * luminosity_Ia + (1 - type_Ias) * luminosity_II
 
         # Get flux from luminosity distance and luminosity
         # Remember luminosity is log luminosity
-        log_flux = actual_lum - np.log(4 * np.pi) - 2 * np.log(luminosity_distance)
+        log_flux = actual_lum - np.log(4 * np.pi * luminosity_distance * luminosity_distance)
         flux = np.exp(log_flux)
 
         # Get photon counts from flux
         count = flux * efficiency * conversion
         count_sigma = np.sqrt(count)
-        count_o = count + np.random.normal(0, count_sigma, num_trans)
+        count_o = count #+ np.random.normal(0, count_sigma, num_trans)
 
         observations = {
             "z_o": z_o.tolist(),
             "type_o": type_oh,
             "count_o": count_o.tolist()
         }
-        theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist() + type_Iash
+        # theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist()
+        theta = [omega_m, h_0, snIa_mean, snIa_sigma, r] + actual_lum.tolist()
         return observations, theta
 
 

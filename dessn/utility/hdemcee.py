@@ -49,6 +49,7 @@ class EmceeWrapper(object):
 
         t = time()
         self.logger.debug("Starting sampling. Saving to %s ever %d seconds" % (temp_dir, save_interval))
+        # for result in self.sampler.sample(pos, num_walkers, num_burn, delta=0.6, iterations=num, storechain=False):
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
             if isinstance(self.sampler, PTSampler):
                 self.chain[:, step, :] = result[0][0, :, :save_dim]

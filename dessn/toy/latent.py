@@ -30,7 +30,7 @@ class Luminosity(NodeLatent):
 
     def get_suggestion(self, data):
         typeIa = data["otype"] == "Ia"
-        return typeIa * 10 + (1 - typeIa) * 5.0
+        return typeIa * 10 + (1 - typeIa) * 9.9
 
 
 # class Type(NodeLatent):
