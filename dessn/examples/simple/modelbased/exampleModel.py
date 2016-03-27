@@ -25,6 +25,7 @@ class ObservedFluxError(ParameterObserved):
 
 
 class LatentLuminosity(ParameterLatent):
+
     def __init__(self, n=100):
         super(LatentLuminosity, self).__init__("luminosity", "$L$", group="Luminosity")
         self.n = n
@@ -36,10 +37,14 @@ class LatentLuminosity(ParameterLatent):
         return ["flux"]
 
     def get_suggestion(self, data):
-        return data["flux"] * np.random.uniform(0.5, 1.5)
+        return data["flux"]
+
+    def get_suggestion_sigma(self, data):
+        return data["flux"] * 0.05
 
 
 class UnderlyingSupernovaDistribution1(ParameterUnderlying):
+
     def get_log_prior(self, data):
         """ We model the prior enforcing realistic values"""
         mean = data["SN_theta_1"]
@@ -56,8 +61,12 @@ class UnderlyingSupernovaDistribution1(ParameterUnderlying):
     def get_suggestion(self, data):
         return 50
 
+    def get_suggestion_sigma(self, data):
+        return 5
+
 
 class UnderlyingSupernovaDistribution2(ParameterUnderlying):
+
     def get_log_prior(self, data):
         """ We model the prior enforcing realistic values"""
         sigma = data["SN_theta_2"]
@@ -72,7 +81,10 @@ class UnderlyingSupernovaDistribution2(ParameterUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return 5
+        return 5 # Deliberately wrong
+
+    def get_suggestion_sigma(self, data):
+        return 0.5
 
 
 class UselessTransformation(ParameterTransformation):
@@ -118,10 +130,11 @@ class ExampleModel(Model):
     The model is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the model
     to verify its correctness.
 
-    This is the primary class in this package, and you can see that other classes inherit from either :class:`.Parameter` or from :class:`.Edge`.
+    This is the primary class in this package, and you can see that other classes inherit from either
+    :class:`.Parameter` or from :class:`.Edge`.
 
-    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes, and encourage viewing the code directly
-    to understand exactly what is happening.
+    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes, and encourage viewing the
+    code directly to understand exactly what is happening.
 
     Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:
 
@@ -129,6 +142,9 @@ class ExampleModel(Model):
         :align:     center
 
     .. figure::     ../plots/examplePGM.png
+        :align:     center
+
+    .. figure::     ../plots/exampleModelWalk.png
         :align:     center
 
     We could also run the example model using the PT sampler by specifying a number of temperature to the ``fit_model``
@@ -173,14 +189,16 @@ if __name__ == "__main__":
 
     if not only_data:
         plot_file = os.path.abspath(dir_name + "/../../../../plots/exampleModel.png")
+        plot_file2 = os.path.abspath(dir_name + "/../../../../plots/exampleModelWalk.png")
         pgm_file = os.path.abspath(dir_name + "/../../../../plots/examplePGM.png")
         # exampleModel.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    exampleModel.fit_model(num_steps=2000, num_burn=50, temp_dir=temp_dir, save_interval=20)
+    exampleModel.fit_model(num_steps=15000, num_burn=5000, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = exampleModel.get_consumer()
         chain_consumer.configure_general(bins=0.8)
         print(chain_consumer.get_summary())
+        chain_consumer.plot_walks(filename=plot_file2)
         chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])

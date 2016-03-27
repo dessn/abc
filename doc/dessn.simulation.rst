@@ -9,14 +9,6 @@ dessn.simulation package
 Submodules
 ----------
 
-dessn.simulation.observationFactory module
-------------------------------------------
-
-.. automodule:: dessn.simulation.observationFactory
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 dessn.simulation.simulation module
 ----------------------------------
 

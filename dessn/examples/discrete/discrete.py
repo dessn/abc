@@ -54,7 +54,10 @@ class UnderlyingRate(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return [0.5]
+        return 0.5
+
+    def get_suggestion_sigma(self, data):
+        return 0.05
 
     def get_suggestion_requirements(self):
         return []
@@ -75,6 +78,7 @@ class ToColour(Edge):
 class ToColour2(Edge):
     def __init__(self):
         super(ToColour2, self).__init__("s_o", "c")
+        self.sqrt2pi = np.sqrt(2 * np.pi)
 
     def get_log_likelihood(self, data):
         c = data["c"]
@@ -84,7 +88,7 @@ class ToColour2(Edge):
         else:
             mid = 1
         sigma = 0.3
-        ps = -(s_o - mid) * (s_o - mid) / (2 * sigma * sigma) - np.log(np.sqrt(2 * np.pi) * sigma)
+        ps = -(s_o - mid) * (s_o - mid) / (2 * sigma * sigma) - np.log(self.sqrt2pi * sigma)
         return ps
 
 
@@ -102,6 +106,27 @@ class ToRate(Edge):
 
 
 class DiscreteModel(Model):
+    r"""A small example model illustrating how to use discrete parameters.
+
+    As normal, the model is set up by declaring parameters (which can be thought of like nodes on a PGM),
+    and declaring the edges between parameters (the conditional probabilities).
+
+    This is the primary class in this package, and you can see that other classes
+    inherit from either :class:`.Parameter` or from :class:`.Edge`.
+
+    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes,
+    and encourage viewing the code directly to understand exactly what is happening.
+
+    Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:
+
+    .. figure::     ../plots/discretePGM.png
+        :align:     center
+
+    .. figure::     ../plots/discrete.png
+        :align:     center
+
+    """
+
     def __init__(self):
         super(DiscreteModel, self).__init__("Discrete")
 

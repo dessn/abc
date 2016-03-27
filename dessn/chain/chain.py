@@ -738,7 +738,7 @@ class ChainConsumer(object):
         return fig, axes, params1, params2, extents
 
     def _get_bins(self):
-        proposal = [max(20, np.floor(np.power(chain.shape[0] / chain.shape[1], 0.3))) for chain in self.chains]
+        proposal = [max(20, np.floor(1.2 * np.power(chain.shape[0] / chain.shape[1], 0.3))) for chain in self.chains]
         return proposal
         
     def _clamp(self, val, minimum=0, maximum=255):

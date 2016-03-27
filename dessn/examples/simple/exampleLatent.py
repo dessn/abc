@@ -1,14 +1,14 @@
 import numpy as np
 
-from dessn.examples.simple import Example
+from dessn.examples.simple.example import Example
 
 
 class ExampleLatent(Example):
     r"""An example implementation using marginalisation over latent parameters.
 
-    Building off the math from :class:`.Example`, instead of performing the integration numerically in the computation of the likelihood, we can
-    instead use Monte Carlo integration by simply setting the latent parameters :math:`\vec{L}` as 
-    free parameters, giving us
+    Building off the math from :class:`.Example`, instead of performing the integration numerically in the computation
+    of the likelihood, we can    instead use Monte Carlo integration by simply setting the
+    latent parameters :math:`\vec{L}` as free parameters, giving us
     
     .. math::
         \log\left(P(D|\theta,\vec{L})\right) = - \sum_{i=1}^N  \left[

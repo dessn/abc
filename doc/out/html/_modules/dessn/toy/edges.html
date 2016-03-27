@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../modules.html" class="icon icon-home"> dessn
+            <a href="../../../index.html" class="icon icon-home"> dessn
           
 
           
@@ -80,10 +80,8 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
-</ul>
-
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
             
           
         </div>
@@ -95,7 +93,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../modules.html">dessn</a>
+        <a href="../../../index.html">dessn</a>
       </nav>
 
 
@@ -110,7 +108,7 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../modules.html">Docs</a> &raquo;</li>
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
@@ -129,28 +127,35 @@
   <h1>Source code for dessn.toy.edges</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatwCDM</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span>
 <span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span>
-<span class="kn">from</span> <span class="nn">dessn.utility.math</span> <span class="kn">import</span> <span class="n">plus</span>
 
 
-<div class="viewcode-block" id="ToCount"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount">[docs]</a><span class="k">class</span> <span class="nc">ToCount</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
+<div class="viewcode-block" id="ToCount"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount">[docs]</a><span class="k">class</span> <span class="nc">ToCount</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToCount</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ocount&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;flux_error&quot;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToCount</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ocount&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ToCount.get_transformation"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount.get_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Given CCD efficiency, convert from count to flux :math:`f` and flux error :math:`\sigma_f`.</span>
+<div class="viewcode-block" id="ToCount.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot; Given CCD efficiency, convert from count to flux :math:`f`. We go from counts, assume Poisson error, to get</span>
+<span class="sd">        an observed flux and flux error from counts. From that, we can calculate the likelihood of an actual flux, given</span>
+<span class="sd">        our observed flux and observed flux error, assuming a normal distribution:</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            f = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}</span>
+<span class="sd">            f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}</span>
 
 <span class="sd">            \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}</span>
+
+<span class="sd">            P ({\rm count}_o | f_ = \frac{1}{\sqrt{2\pi}} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">efficiency</span> <span class="o">=</span> <span class="mf">0.9</span>
-        <span class="n">conversion</span> <span class="o">=</span> <span class="mi">1000</span>
-        <span class="n">flux</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span>
-        <span class="n">flux_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="n">flux</span><span class="p">,</span> <span class="s2">&quot;flux_error&quot;</span><span class="p">:</span> <span class="n">flux_error</span><span class="p">}</span></div></div>
+        <span class="n">conversion</span> <span class="o">=</span> <span class="mf">1e7</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span>
+        <span class="n">fe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">flux</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">flux</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">fe</span> <span class="o">*</span> <span class="n">fe</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">*</span> <span class="n">fe</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ToFlux"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToFlux">[docs]</a><span class="k">class</span> <span class="nc">ToFlux</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
@@ -165,25 +170,33 @@
 <span class="sd">            f = \frac{L}{4\pi D_L^2}</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">])</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lumdist&quot;</span><span class="p">]))</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;flux&quot;</span><span class="p">:</span> <span class="n">flux</span><span class="p">}</span></div></div>
 
 
 <div class="viewcode-block" id="ToLuminosityDistance"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosityDistance">[docs]</a><span class="k">class</span> <span class="nc">ToLuminosityDistance</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToLuminosityDistance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;lumdist&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;H0&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToLuminosityDistance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;lumdist&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">,</span> <span class="s2">&quot;H0&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">])</span> <span class="c1"># &quot;w&quot;, &quot;H0&quot;,</span>
 
 <div class="viewcode-block" id="ToLuminosityDistance.get_transformation"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosityDistance.get_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="n">cosmology</span> <span class="o">=</span> <span class="n">FlatwCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;H0&quot;</span><span class="p">],</span> <span class="n">Om0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">],</span> <span class="n">w0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;lumdist&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">}</span>
+        <span class="n">cosmology</span> <span class="o">=</span> <span class="n">FlatwCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;H0&quot;</span><span class="p">],</span> <span class="n">Om0</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">],</span> <span class="n">w0</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;lumdist&quot;</span><span class="p">:</span> <span class="n">cosmology</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;redshift&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">value</span><span class="p">}</span></div></div>
 
 
-<div class="viewcode-block" id="ToRedshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRedshift">[docs]</a><span class="k">class</span> <span class="nc">ToRedshift</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToRedshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">([</span><span class="s2">&quot;oredshift&quot;</span><span class="p">,</span> <span class="s2">&quot;oredshift_error&quot;</span><span class="p">],</span> <span class="s2">&quot;redshift&quot;</span><span class="p">)</span>
+<span class="c1"># class ToRedshift(Edge):</span>
+<div class="viewcode-block" id="ToRedshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRedshift">[docs]</a><span class="k">class</span> <span class="nc">ToRedshift</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
+<div class="viewcode-block" id="ToRedshift.get_transformation"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRedshift.get_transformation">[docs]</a>    <span class="k">def</span> <span class="nf">get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;redshift&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift&quot;</span><span class="p">]}</span></div>
 
-<div class="viewcode-block" id="ToRedshift.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRedshift.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot; Assume the redshift distribution follows a uniform distribution (for misidentification)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToRedshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;redshift&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;oredshift&quot;</span><span class="p">])</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        super(ToRedshift, self).__init__([&quot;oredshift&quot;, &quot;oredshift_error&quot;], &quot;redshift&quot;)</span>
+<span class="sd">    def get_log_likelihood(self, data):</span>
+<span class="sd">        r&quot;&quot;&quot; Assume the redshift distribution follows a uniform distribution (for misidentification)</span>
 <span class="sd">        with a tight Gaussian peak around the observed redshift.</span>
 
 <span class="sd">        Assumes the misidentifiation range is between :math:`z=0` and :math:`z=2`.</span>
@@ -193,15 +206,17 @@
 <span class="sd">            P(z_o|z) = \frac{0.01}{2} + \frac{0.99}{\sqrt{2\pi} z_{o,{\rm err}}} \exp\left(  -\frac{(z-z_o)^2}{2z^2_{o,{\rm err}}}  \right)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.01</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">gauss</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;redshift&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;redshift&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift_error&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift_error&quot;</span><span class="p">])</span>\
-                <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;oredshift_error&quot;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">plus</span><span class="p">(</span><span class="n">uniform</span><span class="p">,</span> <span class="n">gauss</span><span class="p">)</span></div></div>
+<span class="sd">        uniform = np.log(0.01 / 2)</span>
+<span class="sd">        gauss = -(data[&quot;oredshift&quot;] - data[&quot;redshift&quot;]) * (data[&quot;oredshift&quot;] - data[&quot;redshift&quot;]) / (2 * data[&quot;oredshift_error&quot;] * data[&quot;oredshift_error&quot;])</span>
+<span class="sd">        gauss -= np.log(np.sqrt(2 * np.pi) * data[&quot;oredshift_error&quot;])</span>
+<span class="sd">        result = np.logaddexp(gauss, uniform)</span>
+<span class="sd">        return np.sum(result)&#39;&#39;&#39;</span></div>
 
 
 <div class="viewcode-block" id="ToLuminosity"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosity">[docs]</a><span class="k">class</span> <span class="nc">ToLuminosity</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ToLuminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;luminosity&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;snIa_luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;snIa_sigma&quot;</span><span class="p">,</span> <span class="s2">&quot;snII_luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;snII_sigma&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ToLuminosity.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToLuminosity.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">r&quot;&quot;&quot; Assume type is 0 for a Type SnIa, or 1 for SnII. It will be continuous, so we round the variable.</span>
@@ -220,25 +235,25 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># TODO: Where should we consistency check parameters. In this example, type should be between 0 and 1, but this class does not enforce that</span>
-        <span class="n">sn_type</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="c1"># Note that we are working with arrays for type and luminosity, one element per supernova</span>
-        <span class="n">snIa_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">snII_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-
+        <span class="c1"># TODO: Where should we consistency check parameters? Should we need to?</span>
+        <span class="n">sn_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
         <span class="n">luminosity</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span>
-        <span class="n">snIa_mean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snIa_luminosity&quot;</span><span class="p">]</span>
-        <span class="n">snIa_std</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snIa_sigma&quot;</span><span class="p">]</span>
-        <span class="n">snII_mean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snII_luminosity&quot;</span><span class="p">]</span>
-        <span class="n">snII_std</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snII_sigma&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sn_type</span> <span class="o">==</span> <span class="s2">&quot;Ia&quot;</span><span class="p">:</span>
+            <span class="n">snIa_mean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snIa_luminosity&quot;</span><span class="p">]</span>
+            <span class="n">snIa_std</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snIa_sigma&quot;</span><span class="p">]</span>
+            <span class="n">snIa_prob</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snIa_mean</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snIa_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">snIa_std</span> <span class="o">*</span> <span class="n">snIa_std</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">*</span> <span class="n">snIa_std</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">snIa_prob</span>
+        <span class="k">elif</span> <span class="n">sn_type</span> <span class="o">==</span> <span class="s2">&quot;II&quot;</span><span class="p">:</span>
+            <span class="n">snII_mean</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snII_luminosity&quot;</span><span class="p">]</span>
+            <span class="n">snII_std</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;snII_sigma&quot;</span><span class="p">]</span>
+            <span class="n">snII_prob</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snII_mean</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snII_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">snII_std</span> <span class="o">*</span> <span class="n">snII_std</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">*</span> <span class="n">snII_std</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">snII_prob</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognised type: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sn_type</span><span class="p">)</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span></div></div>
 
-        <span class="n">snIa_prob</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snIa_mean</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snIa_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">snIa_std</span> <span class="o">*</span> <span class="n">snIa_std</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">snIa_std</span><span class="p">)</span>
-        <span class="n">snII_prob</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snII_mean</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">luminosity</span> <span class="o">-</span> <span class="n">snII_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">snII_std</span> <span class="o">*</span> <span class="n">snII_std</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">snII_std</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snIa_mask</span> <span class="o">*</span> <span class="n">snIa_prob</span> <span class="o">+</span> <span class="n">snII_mask</span> <span class="o">*</span> <span class="n">snII_prob</span><span class="p">)</span></div></div>
-
-
+<span class="c1"># class ToType(Edge):</span>
 <div class="viewcode-block" id="ToType"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToType">[docs]</a><span class="k">class</span> <span class="nc">ToType</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ToType</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;otype&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">)</span>
@@ -255,14 +270,14 @@
 <span class="sd">        to get the discrete type. The method of changing from continuous to discrete will probably update in the future.</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}</span>
+<span class="sd">            P(T_o|T) = 0.01 + 0.98\delta_{T_o,T}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sn_type</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
 
         <span class="n">o_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;otype&quot;</span><span class="p">]</span>
-        <span class="n">probs</span> <span class="o">=</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="n">o_type</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">!=</span> <span class="n">o_type</span><span class="p">)</span>
+        <span class="n">input_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+        <span class="n">prob</span> <span class="o">=</span> <span class="mf">0.98</span> <span class="o">*</span> <span class="p">(</span><span class="n">o_type</span> <span class="o">==</span> <span class="n">input_type</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.01</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="p">))</span></div></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ToRate"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToRate">[docs]</a><span class="k">class</span> <span class="nc">ToRate</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
@@ -285,16 +300,18 @@
 
 <span class="sd">        In the code, I approximate the choose function using the log gamma functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sn_type</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">n_snIa</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">n_snII</span> <span class="o">=</span> <span class="p">(</span><span class="n">sn_type</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">sn_type</span><span class="o">.</span><span class="n">size</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sn_rate&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
 
-        <span class="c1"># TODO: Probably want generic classes for Normals, log normals, binomial, etc</span>
-        <span class="n">log_choose</span> <span class="o">=</span> <span class="n">special</span><span class="o">.</span><span class="n">gammaln</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">special</span><span class="o">.</span><span class="n">gammaln</span><span class="p">(</span><span class="n">n_snII</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">special</span><span class="o">.</span><span class="n">gammaln</span><span class="p">(</span><span class="n">n_snIa</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sn_type</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sn_type</span> <span class="o">==</span> <span class="s2">&quot;Ia&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">sn_type</span> <span class="o">==</span> <span class="s2">&quot;II&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span></div></div>
 
-        <span class="k">return</span> <span class="n">log_choose</span> <span class="o">+</span> <span class="n">n_snIa</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_snII</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">r</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

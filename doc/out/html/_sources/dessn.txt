@@ -13,8 +13,8 @@ Subpackages
 
     dessn.chain
     dessn.entry
+    dessn.examples
     dessn.model
-    dessn.simple
     dessn.simulation
     dessn.toy
     dessn.utility

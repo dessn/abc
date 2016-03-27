@@ -25,10 +25,10 @@ dessn.model.model module
     :undoc-members:
     :show-inheritance:
 
-dessn.model.node module
------------------------
+dessn.model.parameter module
+----------------------------
 
-.. automodule:: dessn.model.node
+.. automodule:: dessn.model.parameter
     :members:
     :undoc-members:
     :show-inheritance:

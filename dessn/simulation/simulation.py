@@ -11,7 +11,7 @@ class Simulation(object):
         self.logger.info('Getting data for %d transients' % num_trans)
 
         efficiency = 0.9
-        conversion = 1e5
+        conversion = 1e7
 
         np.random.seed(1)
 
@@ -40,7 +40,6 @@ class Simulation(object):
 
         # Get luminosities from type
         luminosity_Ia = snIa_mean + np.random.normal(0, snIa_sigma, num_trans)
-        print(luminosity_Ia.mean())
         luminosity_II = snII_mean + np.random.normal(0, snII_sigma, num_trans)
         actual_lum = type_Ias * luminosity_Ia + (1 - type_Ias) * luminosity_II
 

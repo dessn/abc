@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../modules.html" class="icon icon-home"> dessn
+            <a href="../../../index.html" class="icon icon-home"> dessn
           
 
           
@@ -80,10 +80,8 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
-</ul>
-
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
             
           
         </div>
@@ -95,7 +93,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../modules.html">dessn</a>
+        <a href="../../../index.html">dessn</a>
       </nav>
 
 
@@ -110,7 +108,7 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../modules.html">Docs</a> &raquo;</li>
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
@@ -130,12 +128,14 @@
 <span></span><span class="kn">from</span> <span class="nn">dessn.model.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">dessn.toy.edges</span> <span class="kn">import</span> <span class="n">ToCount</span><span class="p">,</span> <span class="n">ToFlux</span><span class="p">,</span> <span class="n">ToLuminosity</span><span class="p">,</span> <span class="n">ToLuminosityDistance</span><span class="p">,</span> <span class="n">ToRate</span><span class="p">,</span> <span class="n">ToRedshift</span><span class="p">,</span> <span class="n">ToType</span>
 <span class="kn">from</span> <span class="nn">dessn.toy.latent</span> <span class="kn">import</span> <span class="n">Luminosity</span><span class="p">,</span> <span class="n">Redshift</span><span class="p">,</span> <span class="n">Type</span>
-<span class="kn">from</span> <span class="nn">dessn.toy.underlying</span> <span class="kn">import</span> <span class="n">Cosmology</span><span class="p">,</span> <span class="n">SupernovaIaDist</span><span class="p">,</span> <span class="n">SupernovaIIDist</span><span class="p">,</span> <span class="n">SupernovaRate</span>
+<span class="kn">from</span> <span class="nn">dessn.toy.underlying</span> <span class="kn">import</span> <span class="n">SupernovaRate</span><span class="p">,</span> <span class="n">OmegaM</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">Hubble</span><span class="p">,</span> <span class="n">SupernovaIaDist1</span><span class="p">,</span> <span class="n">SupernovaIaDist2</span><span class="p">,</span> <span class="n">SupernovaIIDist1</span><span class="p">,</span> <span class="n">SupernovaIIDist2</span>
 <span class="kn">from</span> <span class="nn">dessn.toy.transformations</span> <span class="kn">import</span> <span class="n">Flux</span><span class="p">,</span> <span class="n">LuminosityDistance</span>
 <span class="kn">from</span> <span class="nn">dessn.toy.observed</span> <span class="kn">import</span> <span class="n">ObservedCounts</span><span class="p">,</span> <span class="n">ObservedRedshift</span><span class="p">,</span> <span class="n">ObservedType</span>
+<span class="kn">from</span> <span class="nn">dessn.simulation.simulation</span> <span class="kn">import</span> <span class="n">Simulation</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
-
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <div class="viewcode-block" id="ToyModel"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.toyModel.ToyModel">[docs]</a><span class="k">class</span> <span class="nc">ToyModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A modified toy model.</span>
@@ -144,21 +144,28 @@
 <span class="sd">    .. figure::     ../plots/toyModelPGM.png</span>
 <span class="sd">        :align:     center</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ToyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ToyModel&quot;</span><span class="p">)</span>
 
-        <span class="n">n</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="n">z_o</span> <span class="o">=</span> <span class="n">observations</span><span class="p">[</span><span class="s2">&quot;z_o&quot;</span><span class="p">]</span>
+        <span class="n">count_o</span> <span class="o">=</span> <span class="n">observations</span><span class="p">[</span><span class="s2">&quot;count_o&quot;</span><span class="p">]</span>
+        <span class="n">type_o</span> <span class="o">=</span> <span class="n">observations</span><span class="p">[</span><span class="s2">&quot;type_o&quot;</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z_o</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedType</span><span class="p">([</span><span class="bp">None</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedRedshift</span><span class="p">([</span><span class="bp">None</span><span class="p">],</span> <span class="p">[</span><span class="bp">None</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedCounts</span><span class="p">([</span><span class="bp">None</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedType</span><span class="p">(</span><span class="n">type_o</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedRedshift</span><span class="p">(</span><span class="n">z_o</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedCounts</span><span class="p">(</span><span class="n">count_o</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">Flux</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">LuminosityDistance</span><span class="p">())</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">Cosmology</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaIaDist</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaIIDist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">OmegaM</span><span class="p">())</span>
+        <span class="c1"># self.add_node(W())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">Hubble</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaIaDist1</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaIaDist2</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaIIDist1</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaIIDist2</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">SupernovaRate</span><span class="p">())</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">))</span>
@@ -176,11 +183,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">finalise</span><span class="p">()</span></div>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">only_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">only_data</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
     <span class="n">dir_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
-    <span class="n">toy_model</span> <span class="o">=</span> <span class="n">ToyModel</span><span class="p">()</span>
-    <span class="n">pgm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelPGM.png&quot;</span><span class="p">)</span>
-    <span class="c1">#fig = toy_model.get_pgm(pgm_file)</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../temp/toyModel4&quot;</span><span class="p">)</span>
+    <span class="n">plot_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelChain4.png&quot;</span><span class="p">)</span>
+    <span class="n">walk_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelWalks4.png&quot;</span><span class="p">)</span>
+
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.28</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+    <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
+    <span class="n">observations</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">get_simulation</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">num_trans</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">toy_model</span> <span class="o">=</span> <span class="n">ToyModel</span><span class="p">(</span><span class="n">observations</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">only_data</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pgm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelPGM4.png&quot;</span><span class="p">)</span>
+        <span class="c1">#fig = toy_model.get_pgm(pgm_file)</span>
+
+    <span class="n">toy_model</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">only_data</span><span class="p">:</span>
+        <span class="n">chain_consumer</span> <span class="o">=</span> <span class="n">toy_model</span><span class="o">.</span><span class="n">get_consumer</span><span class="p">()</span>
+        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot_walks</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">walk_file</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">plot_file</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="p">[</span><span class="mf">0.28</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+
 </pre></div>
 
            </div>

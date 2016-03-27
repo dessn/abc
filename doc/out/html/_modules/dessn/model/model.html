@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../modules.html" class="icon icon-home"> dessn
+            <a href="../../../index.html" class="icon icon-home"> dessn
           
 
           
@@ -80,10 +80,8 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
-</ul>
-
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
             
           
         </div>
@@ -95,7 +93,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../modules.html">dessn</a>
+        <a href="../../../index.html">dessn</a>
       </nav>
 
 
@@ -110,7 +108,7 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../modules.html">Docs</a> &raquo;</li>
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
@@ -127,21 +125,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dessn.model.model</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ParameterObserved</span><span class="p">,</span> <span class="n">ParameterLatent</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">,</span> <span class="n">ParameterTransformation</span>
+<span></span><span class="kn">from</span> <span class="nn">dessn.model.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">ParameterObserved</span><span class="p">,</span> <span class="n">ParameterLatent</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">,</span> <span class="n">ParameterTransformation</span><span class="p">,</span> <span class="n">ParameterDiscrete</span>
 <span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">EdgeTransformation</span>
-<span class="kn">from</span> <span class="nn">dessn.utility.newtonian</span> <span class="kn">import</span> <span class="n">NewtonianPosition</span>
 <span class="kn">from</span> <span class="nn">dessn.utility.hdemcee</span> <span class="kn">import</span> <span class="n">EmceeWrapper</span>
-<span class="kn">from</span> <span class="nn">dessn.chain.chain</span> <span class="kn">import</span> <span class="n">ChainConsumer</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">emcee</span>
 <span class="kn">from</span> <span class="nn">emcee.utils</span> <span class="kn">import</span> <span class="n">MPIPool</span>
-<span class="kn">import</span> <span class="nn">corner</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rc</span>
-<span class="kn">import</span> <span class="nn">daft</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">fmin_bfgs</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">copy_reg</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span>
 
 
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -172,47 +168,57 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_latent_nodes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_transformation_nodes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discrete_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_discrete_params</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_out</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_edges</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_finalised</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">master</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_node_groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Model.add_node"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.add_node">[docs]</a>    <span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Adds a node into the models collection of nodes.</span>
 
-<span class="sd">        Parameter</span>
-<span class="sd">        ---------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        node : :class:`.Parameter`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">),</span> <span class="s2">&quot;Supplied parameter is not a recognised Parameter object&quot;</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s2">&quot;Parameter </span><span class="si">%s</span><span class="s2"> is already in the model&quot;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="s2">&quot;Parameter </span><span class="si">%s</span><span class="s2"> is already in the model&quot;</span> <span class="o">%</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">,</span> <span class="s2">&quot;Label </span><span class="si">%s</span><span class="s2"> is already in the model&quot;</span> <span class="o">%</span> <span class="n">node</span><span class="o">.</span><span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterObserved</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterDiscrete</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_discrete_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_discrete_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterLatent</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_latent_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterTransformation</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_transformation_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_finalised</span> <span class="o">=</span> <span class="bp">False</span></div>
 
 <div class="viewcode-block" id="Model.add_edge"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.add_edge">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Adds an edge into the models collection of edges</span>
 
-<span class="sd">        Parameter</span>
-<span class="sd">        ---------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        edge : :class:`.Edge`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
@@ -226,53 +232,57 @@
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No underlying model to constrain&quot;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No observed nodes found&quot;</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterObserved</span><span class="p">):</span>
-                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Observed parameter </span><span class="si">%s</span><span class="s2"> should not have incoming edges&quot;</span> <span class="o">%</span> <span class="n">name</span>
-                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Observed parameter </span><span class="si">%s</span><span class="s2"> is not utilised in the PGM&quot;</span> <span class="o">%</span> <span class="n">name</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterLatent</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterTransformation</span><span class="p">):</span>
-                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Internal parameter </span><span class="si">%s</span><span class="s2"> has no incoming edges&quot;</span> <span class="o">%</span> <span class="n">name</span>
-                    <span class="c1"># assert len(self._out[name]) &gt; 0, &quot;Internal parameter %s does not have any outgoing edges&quot; % name</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">):</span>
-                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Underlying parameter </span><span class="si">%s</span><span class="s2"> has no incoming edges&quot;</span> <span class="o">%</span> <span class="n">name</span>
-                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Underlying parameter </span><span class="si">%s</span><span class="s2"> should not have an outgoing edge&quot;</span> <span class="o">%</span> <span class="n">name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterObserved</span><span class="p">):</span>
+                <span class="k">pass</span>
+                <span class="c1"># assert len(self._in[name]) == 0, &quot;Observed parameter %s should not have incoming edges&quot; % name</span>
+                <span class="c1"># assert len(self._out[name]) &gt; 0, &quot;Observed parameter %s is not utilised in the PGM&quot; % name</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterLatent</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterTransformation</span><span class="p">):</span>
+                <span class="k">pass</span>
+                <span class="c1"># assert len(self._in[name]) &gt; 0, &quot;Internal parameter %s has no incoming edges&quot; % name</span>
+                <span class="c1"># assert len(self._out[name]) &gt; 0, &quot;Internal parameter %s does not have any outgoing edges&quot; % name</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Underlying parameter </span><span class="si">%s</span><span class="s2"> has no incoming edges&quot;</span> <span class="o">%</span> <span class="n">name</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_out</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Underlying parameter </span><span class="si">%s</span><span class="s2"> should not have an outgoing edge&quot;</span> <span class="o">%</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">_create_data_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data_edges</span><span class="p">[</span><span class="n">edge</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">g</span><span class="p">]</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span><span class="p">]</span>
+        <span class="n">datas</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">datas</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">)</span><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">d</span><span class="p">)))</span>
+        <span class="c1"># print(self.data)</span>
+
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">labels</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latent_nodes</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span> <span class="o">+=</span> <span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">*</span> <span class="n">node</span><span class="o">.</span><span class="n">get_num_latent</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span> <span class="o">+=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">*</span> <span class="n">node</span><span class="o">.</span><span class="n">get_num_latent</span><span class="p">()</span>
 
         <span class="n">num_edges</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
-        <span class="n">observed_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">observed_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ParameterTransformation</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">sort_req</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">max_count</span> <span class="o">=</span> <span class="mi">1000</span>
+        <span class="n">max_count</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">num_edges</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
-                <span class="n">unsatisfied_requirements</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">observed_names</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span><span class="p">):</span>
+                    <span class="n">requirements</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">requirements</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span>
+                <span class="n">unsatisfied_requirements</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">requirements</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">observed_names</span><span class="p">]</span>
+                <span class="c1"># print(edge, unsatisfied_requirements, edge.given, edge.probability_of)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unsatisfied_requirements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">g</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sort_req</span><span class="p">:</span>
-                                <span class="n">sort_req</span><span class="p">[</span><span class="n">g</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-                            <span class="n">sort_req</span><span class="p">[</span><span class="n">g</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_in</span><span class="p">[</span><span class="n">g</span><span class="p">])</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">sort_req</span><span class="p">[</span><span class="n">g</span><span class="p">]):</span>
-                            <span class="n">observed_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">:</span>
+                            <span class="n">observed_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">max_count</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model edges cannot be ordered. Please double check your edges&quot;</span><span class="p">)</span>
+        <span class="c1"># print(self._ordered_edges)</span>
 
 <div class="viewcode-block" id="Model.finalise"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.finalise">[docs]</a>    <span class="k">def</span> <span class="nf">finalise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Finalises the model.</span>
@@ -291,56 +301,183 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Model validation passed&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_theta_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">arrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:]</span>
         <span class="n">make_array</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">theta</span><span class="p">,</span> <span class="n">theta_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">theta_name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">result</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">theta_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">theta_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arrs</span><span class="p">:</span>
+                    <span class="n">arrs</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">make_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta_name</span><span class="p">)</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                <span class="n">arrs</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">make_array</span><span class="p">:</span>
-            <span class="n">result</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">result</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">arrs</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">_get_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
-
+<div class="viewcode-block" id="Model.get_log_prior"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
         <span class="n">theta_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_theta_dict</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-        <span class="n">probability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_prior</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_prior</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Model.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+        <span class="n">theta_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_theta_dict</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span><span class="p">):</span>
                 <span class="n">theta_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_transformation</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">probability</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_likelihood</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_likelihood</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+                <span class="n">probability</span> <span class="o">+=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">probability</span></div>
+
+    <span class="k">def</span> <span class="nf">_expand_discrete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">product</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">dictionary</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">keys</span><span class="p">,</span> <span class="n">product</span>
+
+    <span class="k">def</span> <span class="nf">_get_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">dependency_name</span><span class="p">):</span>
+        <span class="n">dep_edge</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dependency_name</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">:</span>
+                    <span class="n">dep_edge</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dependencies</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dependency_name</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">:</span>
+                <span class="n">dep_edge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dep_edge</span>
+
+    <span class="k">def</span> <span class="nf">_get_edge_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">edgeIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">edgeIndex</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">edgeIndex</span><span class="p">]</span>
+            <span class="n">dependencies</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span>
+            <span class="n">discretes</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameter</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">dependencies</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">parameter</span><span class="p">],</span> <span class="n">ParameterDiscrete</span><span class="p">)]</span>
+            <span class="n">unfilled</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">discretes</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">theta_dict</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unfilled</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">first_name</span> <span class="o">=</span> <span class="n">unfilled</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">first_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">first_name</span><span class="p">]</span>
+                <span class="n">unfilled_dependencies</span> <span class="o">=</span> <span class="n">first_node</span><span class="o">.</span><span class="n">get_discrete_requirements</span><span class="p">()</span>
+                <span class="n">to_pass</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">unfilled_dependencies</span><span class="p">)</span>
+                <span class="n">discrete</span> <span class="o">=</span> <span class="n">first_node</span><span class="o">.</span><span class="n">get_discrete</span><span class="p">(</span><span class="n">to_pass</span><span class="p">)</span>
+                <span class="n">dependent_edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dependencies</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">first_name</span><span class="p">)</span>
+                <span class="n">edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">edges</span> <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dependent_edges</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">discrete</span><span class="p">:</span>
+                    <span class="n">theta_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">first_name</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_edge_likelihood</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">dependent_edges</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">probability</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="n">probability</span> <span class="o">=</span> <span class="n">result</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">probability</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">edgeIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span><span class="p">):</span>
+                    <span class="n">theta_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_transformation</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_likelihood</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+                    <span class="n">probability</span> <span class="o">+=</span> <span class="n">result</span>
         <span class="k">return</span> <span class="n">probability</span>
 
+    <span class="k">def</span> <span class="nf">_get_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+        <span class="n">theta_dict</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_theta_dict</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_prior</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">probability</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">observation</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">theta_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_edge_likelihood</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span><span class="p">[:])</span>
+                <span class="n">probability</span> <span class="o">+=</span> <span class="n">result</span>
+        <span class="c1"># if np.random.random() &lt; 0.001:</span>
+        <span class="c1">#     print(&quot;P: &quot;, probability, &quot; THETA &quot;, theta)</span>
+        <span class="k">return</span> <span class="n">probability</span>
+
+    <span class="k">def</span> <span class="nf">_get_log_posterior_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">approx_fprime</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span>
+
     <span class="k">def</span> <span class="nf">_get_negative_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">val</span>
+
+    <span class="k">def</span> <span class="nf">_get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">node_sorted</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_sorted</span><span class="p">:</span>
+                <span class="n">node_sorted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_sorted</span><span class="p">:</span>
+            <span class="n">reqs</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_suggestion_requirements</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reqs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">theta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_suggestion</span><span class="p">({}))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">node_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">reqs</span><span class="p">)</span>
+                    <span class="n">theta</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_suggestion</span><span class="p">(</span><span class="n">node_data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">theta</span>
+
+    <span class="k">def</span> <span class="nf">_get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">node_sorted</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node_sorted</span><span class="p">:</span>
+                <span class="n">node_sorted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">sigmas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_sorted</span><span class="p">:</span>
+            <span class="n">reqs</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_suggestion_requirements</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reqs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sigmas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_suggestion</span><span class="p">({}))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">node_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">reqs</span><span class="p">)</span>
+                    <span class="n">sigmas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_suggestion</span><span class="p">(</span><span class="n">node_data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">sigmas</span>
 
     <span class="k">def</span> <span class="nf">_get_starting_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">):</span>
         <span class="n">num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Generating starting guesses&quot;</span><span class="p">)</span>
-        <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_dim</span><span class="p">)</span>
-        <span class="n">optimised</span> <span class="o">=</span> <span class="n">fmin_bfgs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_negative_log_posterior</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting position is: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">optimised</span><span class="p">)</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_suggestion</span><span class="p">()</span>
+        <span class="n">sigmas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_suggestion_sigma</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initial position is:  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">p0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span> <span class="c1"># TODO: confirm. Removing this for high dimensions, as it seems to be ineffective</span>
+            <span class="n">optimised</span> <span class="o">=</span> <span class="n">fmin_bfgs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_negative_log_posterior</span><span class="p">,</span> <span class="n">p0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Optimised position is: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">optimised</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optimised</span> <span class="o">=</span> <span class="n">p0</span>
 
-        <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">))</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="n">std</span> <span class="o">*</span> <span class="n">optimised</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigmas</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigmas</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">optimised</span> <span class="o">+</span> <span class="n">std</span>
         <span class="k">return</span> <span class="n">start</span>
 
     <span class="k">def</span> <span class="nf">_get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">):</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">get_log_prior</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">}))</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get_log_prior</span><span class="p">({</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]})</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Got NaN probability from </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
+
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">edge</span><span class="o">.</span><span class="n">get_transformation</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">})</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">get_transformation</span><span class="p">(</span><span class="nb">dict</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">def</span> <span class="nf">_get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">edge</span><span class="o">.</span><span class="n">get_log_likelihood</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">})</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">get_log_likelihood</span><span class="p">(</span><span class="nb">dict</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Got NaN probability from </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="Model.get_pgm"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.get_pgm">[docs]</a>    <span class="k">def</span> <span class="nf">get_pgm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Renders (and returns) a PGM of the current model.</span>
@@ -355,6 +492,9 @@
 <span class="sd">        :class:`daft.PGM`</span>
 <span class="sd">            The ``daft`` PGM class, for further customisation if required.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">dessn.utility.newtonian</span> <span class="kn">import</span> <span class="n">NewtonianPosition</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rc</span>
+        <span class="kn">import</span> <span class="nn">daft</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finalised</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">finalise</span><span class="p">()</span>
 
@@ -366,20 +506,25 @@
         <span class="n">y_size</span> <span class="o">=</span> <span class="mi">8</span>
         <span class="n">border</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">node_name_dict</span> <span class="o">=</span> <span class="p">{}</span>
-
+        <span class="n">reverse_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">n</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">e</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">t</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">b</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
-            <span class="n">n</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">node_name</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">group</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">node</span><span class="o">.</span><span class="n">group</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span><span class="p">:</span>
-                <span class="n">b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">node_name</span><span class="p">)</span>
+                <span class="n">b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_underlying_nodes</span><span class="p">:</span>
-                <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">node_name</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-                <span class="n">node_name_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">node_name</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">node_name_dict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reverse_dict</span><span class="p">:</span>
+                <span class="n">reverse_dict</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;names&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+            <span class="n">reverse_dict</span><span class="p">[</span><span class="n">value</span><span class="p">][</span><span class="s2">&quot;node&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="n">reverse_dict</span><span class="p">[</span><span class="n">value</span><span class="p">][</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span><span class="p">:</span>
@@ -395,13 +540,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating PGM from positioner results&quot;</span><span class="p">)</span>
         <span class="n">pgm</span> <span class="o">=</span> <span class="n">daft</span><span class="o">.</span><span class="n">PGM</span><span class="p">([</span><span class="n">x_size</span><span class="p">,</span> <span class="n">y_size</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">observed_style</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">reverse_dict</span><span class="p">[</span><span class="n">value</span><span class="p">][</span><span class="s2">&quot;node&quot;</span><span class="p">]</span>
             <span class="n">obs</span> <span class="o">=</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observed_nodes</span>
             <span class="n">fixed</span> <span class="o">=</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transformation_nodes</span>
-            <span class="n">node_name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">node_name</span>
-            <span class="n">node_label</span> <span class="o">=</span> <span class="n">node_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+            <span class="n">node_name</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">node_label</span> <span class="o">=</span> <span class="n">node_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reverse_dict</span><span class="p">[</span><span class="n">value</span><span class="p">][</span><span class="s2">&quot;labels&quot;</span><span class="p">])</span>
 
-            <span class="n">pgm</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">daft</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">node_label</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="n">fixed</span><span class="p">))</span>
+            <span class="n">pgm</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">daft</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">node_label</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">obs</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="n">fixed</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span><span class="p">:</span>
@@ -414,7 +560,7 @@
 
         <span class="k">return</span> <span class="n">pgm</span></div>
 
-<div class="viewcode-block" id="Model.fit_model"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.fit_model">[docs]</a>    <span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_walkers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.fit_model"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.fit_model">[docs]</a>    <span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_temps</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_walkers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Uses ``emcee`` to fit the supplied model.</span>
 
 <span class="sd">        This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for</span>
@@ -425,6 +571,8 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        num_temps : int, optional</span>
+<span class="sd">            The number of temperature to run. If none, does not use PTSampler</span>
 <span class="sd">        num_walkers : int, optional</span>
 <span class="sd">            The number of walkers to run. If not supplied, it defaults to eight times the model dimensionality</span>
 <span class="sd">        num_steps : int, optional</span>
@@ -449,77 +597,72 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">pool</span> <span class="o">=</span> <span class="n">MPIPool</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">pool</span><span class="o">.</span><span class="n">is_master</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Slave waiting&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">master</span> <span class="o">=</span> <span class="bp">False</span>
                 <span class="n">pool</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MPIPool successful initialised and master found. Running with </span><span class="si">%d</span><span class="s2"> cores.&quot;</span> <span class="o">%</span> <span class="n">pool</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;mpi4py is not installed or not configured properly. Ignore if running through python, not mpirun&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Unable to start MPI pool, expected normal python execution&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
         <span class="n">num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fitting model with </span><span class="si">%d</span><span class="s2"> dimensions&quot;</span> <span class="o">%</span> <span class="n">num_dim</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">num_walkers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">num_walkers</span> <span class="o">=</span> <span class="n">num_dim</span> <span class="o">*</span> <span class="mi">8</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running emcee&quot;</span><span class="p">)</span>
-        <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">,</span> <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span> <span class="o">=</span> <span class="n">num_temps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fitting model with </span><span class="si">%d</span><span class="s2"> dimensions using </span><span class="si">%d</span><span class="s2"> temperature levels&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_dim</span><span class="p">,</span> <span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">num_walkers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num_temps</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">num_walkers</span> <span class="o">=</span> <span class="n">num_dim</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num_walkers</span> <span class="o">=</span> <span class="n">num_dim</span> <span class="o">*</span> <span class="mi">4</span>
+        <span class="n">num_walkers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="c1"># self.logger.debug(&quot;Running emcee with %d walkers&quot; % num_walkers)</span>
+        <span class="c1"># if False:</span>
+        <span class="c1">#     self.logger.debug(&quot;Using NUTS sampler with leap-frog algorithm&quot;)</span>
+        <span class="c1">#     sampler = NUTSSampler(num_dim, self._get_log_posterior, self._get_log_posterior_grad)</span>
+        <span class="c1"># else:</span>
+        <span class="k">if</span> <span class="n">num_temps</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using Ensemble Sampler&quot;</span><span class="p">)</span>
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_posterior</span><span class="p">,</span> <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">,</span> <span class="n">live_dangerously</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using PTSampler&quot;</span><span class="p">)</span>
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">PTSampler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_temps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_log_likelihood</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_log_prior</span><span class="p">,</span> <span class="n">pool</span><span class="o">=</span><span class="n">pool</span><span class="p">)</span>
         <span class="n">emcee_wrapper</span> <span class="o">=</span> <span class="n">EmceeWrapper</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
         <span class="n">flat_chain</span> <span class="o">=</span> <span class="n">emcee_wrapper</span><span class="o">.</span><span class="n">run_chain</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_burn</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">num_dim</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_starting_position</span><span class="p">,</span> <span class="n">save_dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="n">save_interval</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Fit finished&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Pool closed&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span> <span class="o">=</span> <span class="n">flat_chain</span>
         <span class="k">return</span> <span class="n">flat_chain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_names</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Model.corner"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.corner">[docs]</a>    <span class="k">def</span> <span class="nf">corner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Creates a corner plot from the model&#39;s chain.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        filename : str, optional</span>
-<span class="sd">            If set, saves the figure to this filename</span>
-<span class="sd">        display : bool, optional</span>
-<span class="sd">            If true, shows the plot. If false, simply return the figure</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        figure</span>
-<span class="sd">            a matplotlib figure of the corner plot</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;You have to run fit_model before calling corner&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating corner plot&quot;</span><span class="p">)</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">],</span> <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.84</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">fig</span></div>
-
-<div class="viewcode-block" id="Model.chain_plot"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.chain_plot">[docs]</a>    <span class="k">def</span> <span class="nf">chain_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Creates a chain plot of the model&#39;s chain.</span>
-
-<span class="sd">        This is my own implementation of a corner plot.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        kwargs : dict</span>
-<span class="sd">            Arguments to pass to the :func:`~dessn.chain.chain.ChainConsumer.plot` method. See the method</span>
-<span class="sd">            link for more details.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        figure</span>
-<span class="sd">            a matplotlib figure of the chain plot</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Model.get_consumer"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.get_consumer">[docs]</a>    <span class="k">def</span> <span class="nf">get_consumer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">dessn.chain.chain</span> <span class="kn">import</span> <span class="n">ChainConsumer</span>
         <span class="n">chain_plotter</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">()</span>
         <span class="n">chain_plotter</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">chain_plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">chain_plotter</span></div>
 
-<div class="viewcode-block" id="Model.chain_summary"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.model.Model.chain_summary">[docs]</a>    <span class="k">def</span> <span class="nf">chain_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Gets a summary of fit parameters through :class:`.ChainConsumer` and the</span>
-<span class="sd">        :func:`~dessn.chain.chain.ChainConsumer.get_summary` method. See the method link for more details</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">chain_plotter</span> <span class="o">=</span> <span class="n">ChainConsumer</span><span class="p">()</span>
-        <span class="n">chain_plotter</span><span class="o">.</span><span class="n">add_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flat_chain</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_labels</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_actual</span><span class="p">])</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">chain_plotter</span><span class="o">.</span><span class="n">get_summary</span><span class="p">())</span></div></div>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;logger&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_pickle_method</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">im_self</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">im_class</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">im_func</span><span class="o">.</span><span class="n">func_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">im_self</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">im_func</span><span class="o">.</span><span class="n">func_name</span><span class="p">)</span>
+
+<span class="n">copy_reg</span><span class="o">.</span><span class="n">pickle</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">,</span> <span class="n">_pickle_method</span><span class="p">)</span>
 </pre></div>
 
            </div>

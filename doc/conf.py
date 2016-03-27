@@ -47,7 +47,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'modules'
+master_doc = 'index'
 numpydoc_show_class_members = False
 # General information about the project.
 project = u'dessn'
@@ -78,7 +78,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['out']
+exclude_patterns = ['out', "**entry**"]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

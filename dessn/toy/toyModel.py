@@ -8,7 +8,7 @@ from dessn.simulation.simulation import Simulation
 import logging
 import sys
 import os
-
+import numpy as np
 
 class ToyModel(Model):
     """ A modified toy model.
@@ -62,9 +62,9 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel3")
-    plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain3.png")
-    walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks3.png")
+    temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel4")
+    plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain4.png")
+    walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks4.png")
 
     vals = [0.28, -1.0, 72, 10, 0.01, 9.5, 0.02, 0.5]
     simulation = Simulation()
@@ -72,10 +72,11 @@ if __name__ == "__main__":
     toy_model = ToyModel(observations)
 
     if not only_data:
-        pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM3.png")
-        # fig = toy_model.get_pgm(pgm_file)
+        np.random.seed(0)
+        pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM4.png")
+        #fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=10000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=20000, num_burn=4000, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()

@@ -1,7 +1,6 @@
 from dessn.model.parameter import ParameterLatent, ParameterTransformation, ParameterDiscrete
 
 
-# class Redshift(ParameterLatent):
 class Redshift(ParameterTransformation):
     def __init__(self, n):
         super(Redshift, self).__init__("redshift", "$z$", group="Redshift")
@@ -9,12 +8,6 @@ class Redshift(ParameterTransformation):
 
     def get_num_latent(self):
         return self.n
-
-    def get_suggestion_requirements(self):
-        return ["oredshift"]
-
-    def get_suggestion(self, data):
-        return data["oredshift"].tolist()
 
 
 class Luminosity(ParameterLatent):
@@ -32,8 +25,10 @@ class Luminosity(ParameterLatent):
         typeIa = data["otype"] == "Ia"
         return typeIa * 10 + (1 - typeIa) * 9.5
 
+    def get_suggestion_sigma(self, data):
+        return 0.01
 
-# class Type(ParameterLatent):
+
 class Type(ParameterDiscrete):
     def get_discrete_requirements(self):
         return []

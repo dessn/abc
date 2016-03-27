@@ -9,10 +9,10 @@ dessn.entry package
 Submodules
 ----------
 
-dessn.entry.sim module
-----------------------
+dessn.entry.doJob module
+------------------------
 
-.. automodule:: dessn.entry.sim
+.. automodule:: dessn.entry.doJob
     :members:
     :undoc-members:
     :show-inheritance:

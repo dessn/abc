@@ -7,6 +7,7 @@ class ToCount(Edge):
 
     def __init__(self):
         super(ToCount, self).__init__("ocount", "flux")
+        self.sqrt2pi = np.sqrt(2 * np.pi)
 
     def get_log_likelihood(self, data):
         r""" Given CCD efficiency, convert from count to flux :math:`f`. We go from counts, assume Poisson error, to get
@@ -22,12 +23,12 @@ class ToCount(Edge):
 
         """
         efficiency = 0.9
-        conversion = 1e5
+        conversion = 1e7
         flux = data["flux"]
         f = data["ocount"] / efficiency / conversion
         fe = np.sqrt(data["ocount"]) / efficiency / conversion
 
-        return -(flux - f) * (flux - f) / (2 * fe * fe) - np.log(np.sqrt(2 * np.pi) * fe)
+        return -(flux - f) * (flux - f) / (2 * fe * fe) - np.log(self.sqrt2pi * fe)
 
 
 class ToFlux(EdgeTransformation):
@@ -121,7 +122,7 @@ class ToLuminosity(Edge):
             snII_prob = (-(luminosity - snII_mean) * (luminosity - snII_mean) / (2 * snII_std * snII_std)) - np.log(self.sqrt2pi * snII_std)
             return snII_prob
         else:
-            raise ValueError("WTF2")
+            raise ValueError("Unrecognised type: %s" % sn_type)
             return -np.inf
 
 
@@ -142,12 +143,12 @@ class ToType(Edge):
         to get the discrete type. The method of changing from continuous to discrete will probably update in the future.
 
         .. math::
-            P(T_o|T) = 0.1 + 0.8\delta_{T_o,T}
+            P(T_o|T) = 0.01 + 0.98\delta_{T_o,T}
         """
 
         o_type = data["otype"]
         input_type = data["type"]
-        prob = 0.99 * (o_type == input_type) + 0.01
+        prob = 0.98 * (o_type == input_type) + 0.01
 
         return np.log(prob)
 

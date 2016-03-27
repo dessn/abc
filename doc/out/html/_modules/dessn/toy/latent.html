@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../modules.html" class="icon icon-home"> dessn
+            <a href="../../../index.html" class="icon icon-home"> dessn
           
 
           
@@ -80,10 +80,8 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
-</ul>
-
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
             
           
         </div>
@@ -95,7 +93,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../modules.html">dessn</a>
+        <a href="../../../index.html">dessn</a>
       </nav>
 
 
@@ -110,7 +108,7 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../modules.html">Docs</a> &raquo;</li>
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
@@ -127,12 +125,12 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dessn.toy.latent</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">ParameterLatent</span>
+<span></span><span class="kn">from</span> <span class="nn">dessn.model.parameter</span> <span class="kn">import</span> <span class="n">ParameterLatent</span><span class="p">,</span> <span class="n">ParameterTransformation</span><span class="p">,</span> <span class="n">ParameterDiscrete</span>
 
 
-<div class="viewcode-block" id="Redshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Redshift">[docs]</a><span class="k">class</span> <span class="nc">Redshift</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
+<div class="viewcode-block" id="Redshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Redshift">[docs]</a><span class="k">class</span> <span class="nc">Redshift</span><span class="p">(</span><span class="n">ParameterTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Redshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Redshift&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">,</span> <span class="s2">&quot;$z$&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Redshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;redshift&quot;</span><span class="p">,</span> <span class="s2">&quot;$z$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Redshift&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
 
 <div class="viewcode-block" id="Redshift.get_num_latent"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Redshift.get_num_latent">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -141,22 +139,42 @@
 
 <div class="viewcode-block" id="Luminosity"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity">[docs]</a><span class="k">class</span> <span class="nc">Luminosity</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;$L$&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;$L$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Luminosity&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
 
 <div class="viewcode-block" id="Luminosity.get_num_latent"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity.get_num_latent">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div>
+
+<div class="viewcode-block" id="Luminosity.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;otype&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Luminosity.get_suggestion"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">typeIa</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;otype&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Ia&quot;</span>
+        <span class="k">return</span> <span class="n">typeIa</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">typeIa</span><span class="p">)</span> <span class="o">*</span> <span class="mf">9.5</span></div>
+
+<div class="viewcode-block" id="Luminosity.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.01</span></div></div>
 
 
-<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
+<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">ParameterDiscrete</span><span class="p">):</span>
+<div class="viewcode-block" id="Type.get_discrete_requirements"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type.get_discrete_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="Type.get_discrete"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type.get_discrete">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Ia&quot;</span><span class="p">,</span> <span class="s2">&quot;II&quot;</span><span class="p">]</span></div>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;$T$&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;$T$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Type&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
 
 <div class="viewcode-block" id="Type.get_num_latent"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type.get_num_latent">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div>
 
+<div class="viewcode-block" id="Type.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;otype&quot;</span><span class="p">]</span></div>
 
+<div class="viewcode-block" id="Type.get_suggestion"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;otype&quot;</span><span class="p">]</span></div></div>
 </pre></div>
 
            </div>

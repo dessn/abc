@@ -49,7 +49,7 @@
           
 
           
-            <a href="../../../modules.html" class="icon icon-home"> dessn
+            <a href="../../../index.html" class="icon icon-home"> dessn
           
 
           
@@ -80,10 +80,8 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
-</ul>
-
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
             
           
         </div>
@@ -95,7 +93,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../modules.html">dessn</a>
+        <a href="../../../index.html">dessn</a>
       </nav>
 
 
@@ -110,7 +108,7 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../modules.html">Docs</a> &raquo;</li>
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
       
           <li><a href="../../index.html">Module code</a> &raquo;</li>
       
@@ -128,30 +126,68 @@
             
   <h1>Source code for dessn.simulation.simulation</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatwCDM</span>
-
-<span class="kn">from</span> <span class="nn">observationFactory</span> <span class="kn">import</span> <span class="n">ObservationFactory</span>
 
 
 <div class="viewcode-block" id="Simulation"><a class="viewcode-back" href="../../../dessn.simulation.html#dessn.simulation.simulation.Simulation">[docs]</a><span class="k">class</span> <span class="nc">Simulation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Simulation.get_simulation"><a class="viewcode-back" href="../../../dessn.simulation.html#dessn.simulation.simulation.Simulation.get_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">get_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_trans</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<div class="viewcode-block" id="Simulation.get_simulation"><a class="viewcode-back" href="../../../dessn.simulation.html#dessn.simulation.simulation.Simulation.get_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">get_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega_m</span><span class="p">,</span> <span class="n">w_0</span><span class="p">,</span> <span class="n">h_0</span><span class="p">,</span> <span class="n">snIa_mean</span><span class="p">,</span> <span class="n">snIa_sigma</span><span class="p">,</span> <span class="n">snII_mean</span><span class="p">,</span> <span class="n">snII_sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">num_trans</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Getting data for </span><span class="si">%d</span><span class="s1"> transients&#39;</span> <span class="o">%</span> <span class="n">num_trans</span><span class="p">)</span>
 
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">efficiency</span> <span class="o">=</span> <span class="mf">0.9</span>
+        <span class="n">conversion</span> <span class="o">=</span> <span class="mf">1e7</span>
 
-        <span class="n">cosmology</span> <span class="o">=</span> <span class="n">FlatwCDM</span><span class="p">(</span><span class="n">Om0</span><span class="o">=</span><span class="mf">0.28</span><span class="p">,</span> <span class="n">w0</span><span class="o">=-</span><span class="mf">1.</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mi">72</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">obs_factory</span> <span class="o">=</span> <span class="n">ObservationFactory</span><span class="p">(</span><span class="n">rate_II_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">cosmology</span><span class="o">=</span><span class="n">cosmology</span><span class="p">,</span> <span class="n">logL_snIa</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.</span><span class="p">),</span>
-                                         <span class="n">sigma_snIa</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">logL_snII</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">sigma_snII</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
-        <span class="n">observations</span> <span class="o">=</span> <span class="n">obs_factory</span><span class="o">.</span><span class="n">get_observations</span><span class="p">(</span><span class="n">num_trans</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">observations</span></div></div>
+        <span class="n">cosmology</span> <span class="o">=</span> <span class="n">FlatwCDM</span><span class="p">(</span><span class="n">Om0</span><span class="o">=</span><span class="n">omega_m</span><span class="p">,</span> <span class="n">w0</span><span class="o">=</span><span class="n">w_0</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="n">h_0</span><span class="p">)</span>
 
+        <span class="c1"># Get redshifts with some errors in them</span>
+        <span class="c1"># z_err_rate = 0.02</span>
+        <span class="n">z_err_rate</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">num_trans</span><span class="p">))</span>
+        <span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">num_trans</span><span class="p">))</span>
+        <span class="n">z_err</span> <span class="o">=</span> <span class="mf">1e-5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_trans</span><span class="p">)</span>
+        <span class="n">z_err_realised</span> <span class="o">=</span> <span class="n">z_err</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_trans</span><span class="p">)</span>
+        <span class="n">catastrophic_failures</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">num_trans</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">z_err_rate</span><span class="p">)</span>
+        <span class="n">z_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">catastrophic_failures</span><span class="p">)</span> <span class="o">+</span> <span class="n">z2</span> <span class="o">*</span> <span class="n">catastrophic_failures</span><span class="p">)</span> <span class="o">+</span> <span class="n">z_err_realised</span>
 
+        <span class="c1"># From the actual redshift, grab the luminosity distance</span>
+        <span class="n">luminosity_distance</span> <span class="o">=</span> <span class="n">cosmology</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="c1"># Get the types from the underlying type rate</span>
+        <span class="n">type_Ias</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">num_trans</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">)</span>
+        <span class="n">type_Iash</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ia&quot;</span> <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;II&quot;</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">type_Ias</span><span class="p">]</span>
+
+        <span class="c1"># misidentification = 1.0 * (np.random.random(num_trans) &lt; 0.1)</span>
+        <span class="n">misidentification</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">num_trans</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">type_o</span> <span class="o">=</span> <span class="n">type_Ias</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">misidentification</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">type_Ias</span><span class="p">)</span> <span class="o">*</span> <span class="n">misidentification</span>
+        <span class="n">type_oh</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ia&quot;</span> <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;II&quot;</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">type_o</span><span class="p">]</span>
+
+        <span class="c1"># Get luminosities from type</span>
+        <span class="n">luminosity_Ia</span> <span class="o">=</span> <span class="n">snIa_mean</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">snIa_sigma</span><span class="p">,</span> <span class="n">num_trans</span><span class="p">)</span>
+        <span class="n">luminosity_II</span> <span class="o">=</span> <span class="n">snII_mean</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">snII_sigma</span><span class="p">,</span> <span class="n">num_trans</span><span class="p">)</span>
+        <span class="n">actual_lum</span> <span class="o">=</span> <span class="n">type_Ias</span> <span class="o">*</span> <span class="n">luminosity_Ia</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">type_Ias</span><span class="p">)</span> <span class="o">*</span> <span class="n">luminosity_II</span>
+
+        <span class="c1"># Get flux from luminosity distance and luminosity</span>
+        <span class="c1"># Remember luminosity is log luminosity</span>
+        <span class="n">log_flux</span> <span class="o">=</span> <span class="n">actual_lum</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">luminosity_distance</span> <span class="o">*</span> <span class="n">luminosity_distance</span><span class="p">)</span>
+        <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_flux</span><span class="p">)</span>
+
+        <span class="c1"># Get photon counts from flux</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">flux</span> <span class="o">*</span> <span class="n">efficiency</span> <span class="o">*</span> <span class="n">conversion</span>
+        <span class="n">count_sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+        <span class="n">count_o</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">count_sigma</span><span class="p">,</span> <span class="n">num_trans</span><span class="p">)</span>
+
+        <span class="n">observations</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;z_o&quot;</span><span class="p">:</span> <span class="n">z_o</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;type_o&quot;</span><span class="p">:</span> <span class="n">type_oh</span><span class="p">,</span>
+            <span class="s2">&quot;count_o&quot;</span><span class="p">:</span> <span class="n">count_o</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="c1"># theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist()</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="p">[</span><span class="n">omega_m</span><span class="p">,</span> <span class="n">h_0</span><span class="p">,</span> <span class="n">snIa_mean</span><span class="p">,</span> <span class="n">snIa_sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">actual_lum</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">observations</span><span class="p">,</span> <span class="n">theta</span></div></div>
 
 
 </pre></div>

@@ -1,6 +1,5 @@
-from dessn.model.node import Parameter, ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation, ParameterDiscrete
+from dessn.model.parameter import Parameter, ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation, ParameterDiscrete
 from dessn.model.edge import EdgeTransformation
-from dessn.nuts import NUTSSampler
 from dessn.utility.hdemcee import EmceeWrapper
 import numpy as np
 import logging
@@ -62,8 +61,8 @@ class Model(object):
     def add_node(self, node):
         """ Adds a node into the models collection of nodes.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         node : :class:`.Parameter`
         """
         assert isinstance(node, Parameter), "Supplied parameter is not a recognised Parameter object"
@@ -91,8 +90,8 @@ class Model(object):
     def add_edge(self, edge):
         """ Adds an edge into the models collection of edges
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         edge : :class:`.Edge`
         """
         self.edges.append(edge)
@@ -294,23 +293,41 @@ class Model(object):
                     theta.append(node.get_suggestion(node_data))
         return theta
 
+    def _get_suggestion_sigma(self):
+        node_sorted = []
+        for name in self._theta_names:
+            node = self._node_dict[name]
+            if node not in node_sorted:
+                node_sorted.append(node)
+        sigmas = []
+        data = self.data
+        for node in node_sorted:
+            reqs = node.get_suggestion_requirements()
+            if len(reqs) == 0:
+                sigmas.append(node.get_suggestion({}))
+            else:
+                for row in data:
+                    node_data = dict((key, row[key]) for key in reqs)
+                    sigmas.append(node.get_suggestion(node_data))
+        return sigmas
+
     def _get_starting_position(self, num_walkers):
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
+        sigmas = self._get_suggestion_sigma()
         self.logger.debug("Initial position is:  %s" % p0)
-        if False and self.num_temps is None:
+        if self.num_temps is None and len(p0) < 20: # TODO: confirm. Removing this for high dimensions, as it seems to be ineffective
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
-            self.logger.debug("Starting position is: %s" % optimised)
+            self.logger.debug("Optimised position is: %s" % optimised)
         else:
             optimised = p0
 
         if self.num_temps is not None:
-            std = np.random.normal(loc=1, scale=0.2, size=(self.num_temps, num_walkers, num_dim))
+            std = np.random.normal(size=(self.num_temps, num_walkers, num_dim)) * np.array(sigmas).reshape((1, 1, -1))
         else:
-            std = np.random.normal(loc=1, scale=0.01, size=(num_walkers, num_dim))
-            # std = np.ones((num_walkers, num_dim))
-        start = std * optimised
+            std = np.random.normal(size=(num_walkers, num_dim)) * np.array(sigmas).reshape((1, -1))
+        start = optimised + std
         return start
 
     def _get_log_prior(self, theta_dict):

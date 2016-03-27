@@ -1,8 +1,0 @@
-from dessn.simulation.simulation import Simulation
-import logging
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    sim = Simulation()
-    observations = sim.get_simulation()
-

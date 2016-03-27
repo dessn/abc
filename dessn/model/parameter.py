@@ -37,10 +37,47 @@ class Parameter(object):
 
     @abc.abstractmethod
     def get_suggestion(self, data):
+        """ This function is used when finding a good starting position for the sampler.
+
+        The better this suggestion is, the less burn in time is needed. As parameters can
+        vary by orders of magnitude, and have allowed ranges (some parameters cannot be negative
+        for example), local optimisation methods do not always work when starting with some arbitrary
+        and random initial condition. As such, overriding this parameter is required for all
+        latent and underlying parameters.
+
+        Parameters
+        ----------
+        data : dictionary
+            The parameters and observed data to generate a suggested parameter from
+
+        Returns
+        -------
+            float
+                a suggested parameter
+        """
         return
 
     @abc.abstractmethod
     def get_suggestion_sigma(self, data):
+        """ Starting all walkers from the same position is not a good thing to do, so the
+        suggested starting positions given by the :func:`get_suggestion` need to be randomised
+        slightly so that the walkers start in different positions. This is done by taking the suggested
+        parameter and adding gaussian noise to it, where the scale/width/standard deviation of the spread
+        is given by this function. Overestimating this value to try and ensure a proper spread of
+        walker positions can lead to complications and increased convergence, so don't always think
+        bigger is better!
+
+        Parameters
+        ----------
+        data : dictionary
+            The parameters and observed data to generate a suggested parameter from
+
+        Returns
+        -------
+            float
+                a suggested parameter sigma, used to randomise the suggest parameter
+
+        """
         return
 
 
@@ -65,7 +102,8 @@ class ParameterObserved(Parameter):
         The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
     """
     def __init__(self, name, label, data, group=None):
-        assert type(data) == list, "Data must be a list. If you are passing in a :class:`np.ndarray`, call ``.tolist()``"
+        assert type(data) == list, \
+            "Data must be a list. If you are passing in a :class:`np.ndarray`, call ``.tolist()``"
         self.data = data
         super(ParameterObserved, self).__init__(name, label, group=group)
 
@@ -208,6 +246,33 @@ class ParameterLatent(Parameter):
 
 
 class ParameterDiscrete(Parameter):
+    """ A parameter representing a discrete variable in our model.
+
+    Unlike latent variables which can be easy marginalised over, discrete variables simply create more issues than
+    they are worth. Algorithms like Hamiltonian Monte Carlo require continuous posterior surfaces, which - off the bat -
+    simply rule out discrete parameters. As such, discrete parameters in the model are integrated out (really, they
+    are summed over). Examples of discrete parameters might be supernova types, which galaxy is the actual transient
+    host, or trivially whether a coin was flipped to be heads or tails.
+
+    Discrete parameters must implement a :func:`.get_discrete` method, which needs to return the discrete options
+    for the particular step in the model. Some discrete options may be global (for example, we would consider all
+    supernova type combinations with each supernova), however some can be dependent on the current observation
+    (some supernova might have only one possible host, others might have two or more). As the possible types
+    can be dependent on observation, the :func:`.get_discrete_requirements` method also exists and can be
+    overridden. It functions identically to the ``get_suggestion_requirements`` method in the :class:`ParameterLatent`
+    class.
+
+    For examples how to use latent parameters, see the example give by :class:`.DiscreteModel`.
+
+    Parameters
+    ----------
+    name : str
+        The parameter name, used as the key to access this parameter in the data object
+    label : str
+        The parameter label, for use in plotting and PGM creation.
+    group : str, optional
+        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+    """
 
     __metaclass__ = abc.ABCMeta
 
@@ -216,11 +281,29 @@ class ParameterDiscrete(Parameter):
 
     @abc.abstractmethod
     def get_discrete(self, data):
+        """ Returns the possible discrete types for this parameter.
+
+        Parameters
+        ----------
+        data : dictionary
+            Contains parameter values and observations for the particular step in the chain and observation
+
+        Returns
+        -------
+            list
+                A list of types which are iterated over.
+        """
         pass
 
-    @abc.abstractmethod
     def get_discrete_requirements(self):
-        pass
+        """ Gets the data and parameters required for generating the discrete values for this parameters
+
+        Returns
+        -------
+            list
+                Defaults to an empty list.
+        """
+        return []
 
     def get_suggestion_requirements(self):
         return []
