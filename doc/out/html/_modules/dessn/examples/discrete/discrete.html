@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dessn.examples.discrete.discrete &mdash; dessn 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="dessn 0.0.1 documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> dessn
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dessn.model.html">dessn.model package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dessn.chain.html">dessn.chain package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dessn.toy.html">dessn.toy package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dessn.html">dessn package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../../index.html">dessn</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      
+    <li>dessn.examples.discrete.discrete</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dessn.examples.discrete.discrete</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">Edge</span>
+<span class="kn">from</span> <span class="nn">dessn.model.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">dessn.model.parameter</span> <span class="kn">import</span> <span class="n">ParameterObserved</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">,</span> <span class="n">ParameterDiscrete</span>
+
+
+<div class="viewcode-block" id="get_data"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.get_data">[docs]</a><span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="mf">0.7</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">rate</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">colour</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">misidentification</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.9</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="p">(</span><span class="n">colour</span> <span class="o">^</span> <span class="n">misidentification</span><span class="p">)</span>
+    <span class="n">colours</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span> <span class="k">if</span> <span class="n">a</span> <span class="k">else</span> <span class="s1">&#39;blue&#39;</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">final</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">size</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">colours</span></div>
+
+
+<div class="viewcode-block" id="ObservedColour"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ObservedColour">[docs]</a><span class="k">class</span> <span class="nc">ObservedColour</span><span class="p">(</span><span class="n">ParameterObserved</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sizes</span><span class="p">,</span> <span class="n">colours</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ObservedColour</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;c_o&quot;</span><span class="p">,</span> <span class="s2">&quot;$c_o$&quot;</span><span class="p">,</span> <span class="n">colours</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Obs. Colour&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObservedSize"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ObservedSize">[docs]</a><span class="k">class</span> <span class="nc">ObservedSize</span><span class="p">(</span><span class="n">ParameterObserved</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sizes</span><span class="p">,</span> <span class="n">colours</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ObservedSize</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;s_o&quot;</span><span class="p">,</span> <span class="s2">&quot;$s_o$&quot;</span><span class="p">,</span> <span class="n">sizes</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Obs. Size&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Colour"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.Colour">[docs]</a><span class="k">class</span> <span class="nc">Colour</span><span class="p">(</span><span class="n">ParameterDiscrete</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Colour</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;$c$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Colour&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Colour.get_discrete"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.Colour.get_discrete">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Colour.get_discrete_requirements"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.Colour.get_discrete_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div></div>
+
+
+<div class="viewcode-block" id="UnderlyingRate"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.UnderlyingRate">[docs]</a><span class="k">class</span> <span class="nc">UnderlyingRate</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnderlyingRate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;$r$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Rate&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UnderlyingRate.get_log_prior"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.UnderlyingRate.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="UnderlyingRate.get_suggestion"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.5</span></div>
+
+<div class="viewcode-block" id="UnderlyingRate.get_suggestion_sigma"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.05</span></div>
+
+<div class="viewcode-block" id="UnderlyingRate.get_suggestion_requirements"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div></div>
+
+
+<div class="viewcode-block" id="ToColour"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ToColour">[docs]</a><span class="k">class</span> <span class="nc">ToColour</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToColour</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;c_o&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ToColour.get_log_likelihood"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ToColour.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span>
+        <span class="n">c_o</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;c_o&quot;</span><span class="p">]</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="mf">0.9</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">m</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="n">c_o</span> <span class="k">else</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">m</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ToColour2"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ToColour2">[docs]</a><span class="k">class</span> <span class="nc">ToColour2</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToColour2</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;s_o&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ToColour2.get_log_likelihood"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ToColour2.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span>
+        <span class="n">s_o</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;s_o&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;red&quot;</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.3</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">s_o</span> <span class="o">-</span> <span class="n">mid</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">s_o</span> <span class="o">-</span> <span class="n">mid</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ps</span></div></div>
+
+
+<div class="viewcode-block" id="ToRate"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ToRate">[docs]</a><span class="k">class</span> <span class="nc">ToRate</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToRate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ToRate.get_log_likelihood"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.ToRate.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;r&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;red&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DiscreteModel"><a class="viewcode-back" href="../../../../dessn.examples.discrete.html#dessn.examples.discrete.discrete.DiscreteModel">[docs]</a><span class="k">class</span> <span class="nc">DiscreteModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;A small example model illustrating how to use discrete parameters.</span>
+
+<span class="sd">    As normal, the model is set up by declaring parameters (which can be thought of like nodes on a PGM),</span>
+<span class="sd">    and declaring the edges between parameters (the conditional probabilities).</span>
+
+<span class="sd">    This is the primary class in this package, and you can see that other classes</span>
+<span class="sd">    inherit from either :class:`.Parameter` or from :class:`.Edge`.</span>
+
+<span class="sd">    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes,</span>
+<span class="sd">    and encourage viewing the code directly to understand exactly what is happening.</span>
+
+<span class="sd">    Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:</span>
+
+<span class="sd">    .. figure::     ../plots/discretePGM.png</span>
+<span class="sd">        :align:     center</span>
+
+<span class="sd">    .. figure::     ../plots/discrete.png</span>
+<span class="sd">        :align:     center</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DiscreteModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Discrete&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedColour</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ObservedSize</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">Colour</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">UnderlyingRate</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">ToColour</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">ToColour2</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">ToRate</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalise</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">DiscreteModel</span><span class="p">()</span>
+    <span class="n">only_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">only_data</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">dir_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../../temp/discrete&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">only_data</span><span class="p">:</span>
+        <span class="n">plot_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../../plots/discrete.png&quot;</span><span class="p">)</span>
+        <span class="n">pgm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../../plots/discretePGM.png&quot;</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">get_pgm</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting fit&quot;</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">only_data</span><span class="p">:</span>
+        <span class="n">chain_consumer</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_consumer</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">chain_consumer</span><span class="o">.</span><span class="n">get_summary</span><span class="p">())</span>
+        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">plot_file</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="p">[</span><span class="mf">0.7</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, dessn.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

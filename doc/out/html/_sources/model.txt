@@ -1,0 +1,4 @@
+.. _model:
+The Model
+=========
+What the fuck is wrong with this piece of shit

@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dessn.model.parameter &mdash; dessn 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="dessn 0.0.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> dessn
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dessn.model.html">dessn.model package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dessn.chain.html">dessn.chain package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dessn.toy.html">dessn.toy package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">dessn</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>dessn.model.parameter</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dessn.model.parameter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">abc</span>
+
+
+<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A parameter represented on a node on a PGM model. Multiple parameters can be assigned to the same node on a</span>
+<span class="sd">    PGM by giving them the same group.</span>
+
+<span class="sd">    The Parameter class can essentially be thought of as a wrapper around a parameter or variable in your model.</span>
+
+<span class="sd">    This class is an abstract class, and cannot be directly instantiated. Instead, instantiate one of the provided</span>
+<span class="sd">    subclasses, as detailed below.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        The parameter name, used as the key to access this parameter in the data object</span>
+<span class="sd">    label : str</span>
+<span class="sd">        The parameter label, for use in plotting and PGM creation.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;The name of this node, </span><span class="si">%s</span><span class="s2">, is not a string&quot;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;Supplied name </span><span class="si">%s</span><span class="s2"> is not a string or list&quot;</span> <span class="o">%</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+
+    <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Parameter.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.Parameter.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns suggestion parameter requirements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div>
+
+    <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Parameter.get_suggestion"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.Parameter.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This function is used when finding a good starting position for the sampler.</span>
+
+<span class="sd">        The better this suggestion is, the less burn in time is needed. As parameters can</span>
+<span class="sd">        vary by orders of magnitude, and have allowed ranges (some parameters cannot be negative</span>
+<span class="sd">        for example), local optimisation methods do not always work when starting with some arbitrary</span>
+<span class="sd">        and random initial condition. As such, overriding this parameter is required for all</span>
+<span class="sd">        latent and underlying parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : dictionary</span>
+<span class="sd">            The parameters and observed data to generate a suggested parameter from</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            float</span>
+<span class="sd">                a suggested parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div>
+
+    <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="Parameter.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.Parameter.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starting all walkers from the same position is not a good thing to do, so the</span>
+<span class="sd">        suggested starting positions given by the :func:`get_suggestion` need to be randomised</span>
+<span class="sd">        slightly so that the walkers start in different positions. This is done by taking the suggested</span>
+<span class="sd">        parameter and adding gaussian noise to it, where the scale/width/standard deviation of the spread</span>
+<span class="sd">        is given by this function. Overestimating this value to try and ensure a proper spread of</span>
+<span class="sd">        walker positions can lead to complications and increased convergence, so don&#39;t always think</span>
+<span class="sd">        bigger is better!</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : dictionary</span>
+<span class="sd">            The parameters and observed data to generate a suggested parameter from</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            float</span>
+<span class="sd">                a suggested parameter sigma, used to randomise the suggest parameter</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span></div></div>
+
+
+<div class="viewcode-block" id="ParameterObserved"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterObserved">[docs]</a><span class="k">class</span> <span class="nc">ParameterObserved</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A parameter representing an observed variables</span>
+
+<span class="sd">    This parameter is used for all observables in the model. In addition to a normal parameter, it also contains data,</span>
+<span class="sd">    which should be a list of ``n`` elements (for ``n`` data points), with each element allowed to be an</span>
+<span class="sd">    arbitrary data type. This data is what is given to the incoming and outgoing node edges</span>
+<span class="sd">    to calculate likelihoods. It is **very important** that, if your model has multiple observed parameters, each</span>
+<span class="sd">    observed parameter returns lists of the same length.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        The parameter name, used as the key to access this parameter in the data object</span>
+<span class="sd">    label : str</span>
+<span class="sd">        The parameter label, for use in plotting and PGM creation.</span>
+<span class="sd">    data : list[object]</span>
+<span class="sd">        The data list to supply to the edges.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">,</span> \
+            <span class="s2">&quot;Data must be a list. If you are passing in a :class:`np.ndarray`, call ``.tolist()``&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterObserved</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParameterObserved.get_data"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterObserved.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a dictionary containing keys of the parameter names and values of the parameter data object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="ParameterObserved.get_suggestion"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterObserved.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="ParameterObserved.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterObserved.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="ParameterObserved.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterObserved.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span></div></div>
+
+
+<div class="viewcode-block" id="ParameterUnderlying"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterUnderlying">[docs]</a><span class="k">class</span> <span class="nc">ParameterUnderlying</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot; A parameter representing an underlying parameter in your model.</span>
+
+<span class="sd">    On the PGM, these nodes would be at the very top, and would represent the variables</span>
+<span class="sd">    we are trying to fit for, such as :math:`\Omega_M`.</span>
+
+<span class="sd">    These nodes are required to implement the abstract method ``get_log_prior``. In addition,</span>
+<span class="sd">    they must also implement the abstract method ``get_suggestion``, which returns a suggested</span>
+<span class="sd">    value for the parameter, given some input specified by the ``get_suggestion_requirements``.</span>
+<span class="sd">    By default ``get_suggestion_requirements`` specifies no requirements, however you can override</span>
+<span class="sd">    this method, such that it returns a list of required data to generate a suggestion.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        The parameter name, used as the key to access this parameter in the data object</span>
+<span class="sd">    label : str</span>
+<span class="sd">        The parameter label, for use in plotting and PGM creation.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParameterUnderlying.get_log_prior"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterUnderlying.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the log prior for the parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : dic</span>
+<span class="sd">            A dictionary containing all data and the model parameters being tested at a given step</span>
+<span class="sd">            in the MCMC chain. For this class, if the class was instantiated with a name of &quot;omega_m&quot;,</span>
+<span class="sd">            the input dictionary would have the key &quot;omega_m&quot;, and the value of &quot;omega_m&quot; at that</span>
+<span class="sd">            particular step in your chain.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            the log prior probability given the current value of the parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="ParameterUnderlying.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterUnderlying.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div></div>
+
+
+<div class="viewcode-block" id="ParameterTransformation"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterTransformation">[docs]</a><span class="k">class</span> <span class="nc">ParameterTransformation</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A parameter representing a variable transformation.</span>
+
+<span class="sd">    This parameter essentially represents latent variables which are fully determined - their probability is given by</span>
+<span class="sd">    a delta function. Examples of this might be the luminosity distance, as it is known exactly when given cosmology</span>
+<span class="sd">    and redshift. Or it might represent a conversion between observed flux and actual flux, given we have a well</span>
+<span class="sd">    defined flux correction.</span>
+
+<span class="sd">    On a PGM, this parameter would be represented by a point, not an ellipse.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        The parameter name, used as the key to access this parameter in the data object</span>
+<span class="sd">    label : str</span>
+<span class="sd">        The parameter label, for use in plotting and PGM creation.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterTransformation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParameterTransformation.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterTransformation.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="ParameterTransformation.get_suggestion"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterTransformation.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="ParameterTransformation.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterTransformation.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span></div></div>
+
+
+<div class="viewcode-block" id="ParameterLatent"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterLatent">[docs]</a><span class="k">class</span> <span class="nc">ParameterLatent</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A parameter representing a latent, or hidden, variable in our model.</span>
+
+<span class="sd">    Given infinitely powerful computers, these nodes would not be necessary, for they represent</span>
+<span class="sd">    marginalisation over unknown / hidden / latent parameters in the model, and we would simple integrate them</span>
+<span class="sd">    out when computing the likelihood probability. However, this is not the case, and it is more efficient to</span>
+<span class="sd">    simply incorporate latent parameters into our model and essentially marginalise over them using Monte Carlo</span>
+<span class="sd">    integration. We thus trade explicit numerical integration in each step of our calculation for increased dimensionality.</span>
+
+<span class="sd">    For examples on why and how to use latent parameters, see the examples beginning in :class:`.Example`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        The parameter name, used as the key to access this parameter in the data object</span>
+<span class="sd">    label : str</span>
+<span class="sd">        The parameter label, for use in plotting and PGM creation.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+
+    <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="ParameterLatent.get_num_latent"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterLatent.get_num_latent">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; The number of latent parameters to include in the model.</span>
+
+<span class="sd">        Running MCMC requires knowing the dimensionality of our model, which means knowing how many</span>
+<span class="sd">        latent parameters (realisations of an underlying hidden distribution) we require.</span>
+
+<span class="sd">        For example, if we observe a hundred supernova drawn from an underlying supernova distribution,</span>
+<span class="sd">        we would have to realise a hundred latent variables - one per data point.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            the number of latent parameters required by this node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="ParameterDiscrete"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterDiscrete">[docs]</a><span class="k">class</span> <span class="nc">ParameterDiscrete</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A parameter representing a discrete variable in our model.</span>
+
+<span class="sd">    Unlike latent variables which can be easy marginalised over, discrete variables simply create more issues than</span>
+<span class="sd">    they are worth. Algorithms like Hamiltonian Monte Carlo require continuous posterior surfaces, which - off the bat -</span>
+<span class="sd">    simply rule out discrete parameters. As such, discrete parameters in the model are integrated out (really, they</span>
+<span class="sd">    are summed over). Examples of discrete parameters might be supernova types, which galaxy is the actual transient</span>
+<span class="sd">    host, or trivially whether a coin was flipped to be heads or tails.</span>
+
+<span class="sd">    Discrete parameters must implement a :func:`.get_discrete` method, which needs to return the discrete options</span>
+<span class="sd">    for the particular step in the model. Some discrete options may be global (for example, we would consider all</span>
+<span class="sd">    supernova type combinations with each supernova), however some can be dependent on the current observation</span>
+<span class="sd">    (some supernova might have only one possible host, others might have two or more). As the possible types</span>
+<span class="sd">    can be dependent on observation, the :func:`.get_discrete_requirements` method also exists and can be</span>
+<span class="sd">    overridden. It functions identically to the ``get_suggestion_requirements`` method in the :class:`ParameterLatent`</span>
+<span class="sd">    class.</span>
+
+<span class="sd">    For examples how to use latent parameters, see the example give by :class:`.DiscreteModel`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        The parameter name, used as the key to access this parameter in the data object</span>
+<span class="sd">    label : str</span>
+<span class="sd">        The parameter label, for use in plotting and PGM creation.</span>
+<span class="sd">    group : str, optional</span>
+<span class="sd">        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterDiscrete</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+
+    <span class="nd">@abc.abstractmethod</span>
+<div class="viewcode-block" id="ParameterDiscrete.get_discrete"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterDiscrete.get_discrete">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the possible discrete types for this parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : dictionary</span>
+<span class="sd">            Contains parameter values and observations for the particular step in the chain and observation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            list</span>
+<span class="sd">                A list of types which are iterated over.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ParameterDiscrete.get_discrete_requirements"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterDiscrete.get_discrete_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_discrete_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Gets the data and parameters required for generating the discrete values for this parameters</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            list</span>
+<span class="sd">                Defaults to an empty list.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="ParameterDiscrete.get_suggestion_requirements"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterDiscrete.get_suggestion_requirements">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="ParameterDiscrete.get_suggestion"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterDiscrete.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="ParameterDiscrete.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.parameter.ParameterDiscrete.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, dessn.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

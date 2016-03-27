@@ -44,6 +44,6 @@ for :math:`n` data points is
 .. math::
     P(r|s_o,c_o) \propto  \prod_{i=1}^{n} \sum_c P(s_{i}|c) P(c_{i}|c) P(c|r) P(r)
 
-    With three conditional probabilities, we will have three edges in our node, one discrete parameter :math:`c`,
-    one underlying node :math:`r`, and two observed parameters :math:`s_o` and :math:`c_o`.
+With three conditional probabilities, we will have three edges in our node, one discrete parameter :math:`c`,
+one underlying node :math:`r`, and two observed parameters :math:`s_o` and :math:`c_o`.
 """

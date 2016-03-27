@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dessn.examples.discrete package &mdash; dessn 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="dessn 0.0.1 documentation" href="index.html"/>
+        <link rel="next" title="dessn.model package" href="dessn.model.html"/>
+        <link rel="prev" title="dessn.examples.simple.modelbased package" href="dessn.examples.simple.modelbased.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> dessn
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="dessn.examples.simple.html">dessn.examples.simple package</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">dessn.examples.discrete package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-dessn.examples.discrete.discrete">dessn.examples.discrete.discrete module</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dessn.model.html">dessn.model package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dessn.chain.html">dessn.chain package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dessn.toy.html">dessn.toy package</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dessn.html">dessn package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">dessn</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>dessn.examples.discrete package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/dessn.examples.discrete.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-dessn.examples.discrete">
+<span id="dessn-examples-discrete-package"></span><h1>dessn.examples.discrete package<a class="headerlink" href="#module-dessn.examples.discrete" title="Permalink to this headline">¶</a></h1>
+<p>An example used to prototype the inclusion of discrete parameters into the mix.</p>
+<p>The scenario being modelled is thus:</p>
+<p>A bag is filled with an infinite amount of coloured balls, either red or blue,
+where the total fraction of the balls that are red is given by the variable <span class="math">\(r\)</span>. We remove only a few balls
+from this infinite bag and record the colour and size of the ball.</p>
+<p>However, the person writing down the colour is mostly colour blind, and so mistakes do happen (at a known rate).
+Luckily, there is information contained in the physical size of the balls (which is measured perfectly),
+as red balls are generally found to be larger in radius than the blue balls. Knowing the size distribution,
+we can use this information to potentially correct for some misclassifications, and thus determine the
+actual fraction <span class="math">\(r\)</span> of red balls in the bag.</p>
+<p>Firstly, we model misidentification as:</p>
+<div class="math">
+\[\begin{split}P(c_i|c) = \begin{cases} 0.9,&amp; \text{if } c_i = c\\ 0.1, &amp; \text{otherwise} \end{cases}\end{split}\]</div>
+<p>We model the sizes as being Gaussian distributed based on the colour.</p>
+<div class="math">
+\[\begin{split}P(s_i|c) = \begin{cases}
+    \frac{1}{\sqrt{2\pi}0.3} \exp\left( -\frac{(s_i - 2)^2}{2\times 0.3^2} \right)
+    ,&amp; \text{if } c = {\rm red} \\
+    \frac{1}{\sqrt{2\pi}0.3} \exp\left( -\frac{(s_i - 1)^2}{2\times 0.3^2} \right),
+    &amp; \text{if } c = {\rm blue}
+    \end{cases}\end{split}\]</div>
+<p>Following a basic binomial process, given a total fraction rate of <span class="math">\(r\)</span>, we have</p>
+<div class="math">
+\[\begin{split}P(c|r) = \begin{cases}
+    r
+    ,&amp; \text{if } c = {\rm red} \\
+    1-r,
+    &amp; \text{if } c = {\rm blue}
+    \end{cases}\end{split}\]</div>
+<p>Putting a flat prior on the rate between 0 and 1 (<span class="math">\(P(r) = 1\)</span>), the total probability
+for <span class="math">\(n\)</span> data points is</p>
+<div class="math">
+\[P(r|s_o,c_o) \propto  \prod_{i=1}^{n} \sum_c P(s_{i}|c) P(c_{i}|c) P(c|r) P(r)\]</div>
+<p>With three conditional probabilities, we will have three edges in our node, one discrete parameter <span class="math">\(c\)</span>,
+one underlying node <span class="math">\(r\)</span>, and two observed parameters <span class="math">\(s_o\)</span> and <span class="math">\(c_o\)</span>.</p>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dessn.examples.discrete.discrete">
+<span id="dessn-examples-discrete-discrete-module"></span><h2>dessn.examples.discrete.discrete module<a class="headerlink" href="#module-dessn.examples.discrete.discrete" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.Colour">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">Colour</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#Colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.Colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.parameter.ParameterDiscrete" title="dessn.model.parameter.ParameterDiscrete"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.parameter.ParameterDiscrete</span></code></a></p>
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.Colour.get_discrete">
+<code class="descname">get_discrete</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#Colour.get_discrete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.Colour.get_discrete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.Colour.get_discrete_requirements">
+<code class="descname">get_discrete_requirements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#Colour.get_discrete_requirements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.Colour.get_discrete_requirements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.DiscreteModel">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">DiscreteModel</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#DiscreteModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.DiscreteModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.model.Model" title="dessn.model.model.Model"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.model.Model</span></code></a></p>
+<p>A small example model illustrating how to use discrete parameters.</p>
+<p>As normal, the model is set up by declaring parameters (which can be thought of like nodes on a PGM),
+and declaring the edges between parameters (the conditional probabilities).</p>
+<p>This is the primary class in this package, and you can see that other classes
+inherit from either <a class="reference internal" href="dessn.model.html#dessn.model.parameter.Parameter" title="dessn.model.parameter.Parameter"><code class="xref py py-class docutils literal"><span class="pre">Parameter</span></code></a> or from <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">Edge</span></code></a>.</p>
+<p>I leave the documentation for <a class="reference internal" href="dessn.model.html#dessn.model.parameter.Parameter" title="dessn.model.parameter.Parameter"><code class="xref py py-class docutils literal"><span class="pre">Parameter</span></code></a> and <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">Edge</span></code></a> to those classes,
+and encourage viewing the code directly to understand exactly what is happening.</p>
+<p>Running this file in python first generates a PGM of the model, and then runs <code class="docutils literal"><span class="pre">emcee</span></code> and creates a corner plot:</p>
+<div class="figure align-center">
+<img alt="_images/discretePGM.png" src="_images/discretePGM.png" />
+</div>
+<div class="figure align-center">
+<img alt="_images/discrete.png" src="_images/discrete.png" />
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.ObservedColour">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">ObservedColour</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ObservedColour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ObservedColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.parameter.ParameterObserved" title="dessn.model.parameter.ParameterObserved"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.parameter.ParameterObserved</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.ObservedSize">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">ObservedSize</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ObservedSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ObservedSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.parameter.ParameterObserved" title="dessn.model.parameter.ParameterObserved"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.parameter.ParameterObserved</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.ToColour">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">ToColour</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ToColour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ToColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.edge.Edge</span></code></a></p>
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.ToColour.get_log_likelihood">
+<code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ToColour.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ToColour.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.ToColour2">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">ToColour2</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ToColour2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ToColour2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.edge.Edge</span></code></a></p>
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.ToColour2.get_log_likelihood">
+<code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ToColour2.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ToColour2.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.ToRate">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">ToRate</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ToRate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ToRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.edge.Edge</span></code></a></p>
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.ToRate.get_log_likelihood">
+<code class="descname">get_log_likelihood</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#ToRate.get_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.ToRate.get_log_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.examples.discrete.discrete.UnderlyingRate">
+<em class="property">class </em><code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">UnderlyingRate</code><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#UnderlyingRate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.UnderlyingRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.parameter.ParameterUnderlying" title="dessn.model.parameter.ParameterUnderlying"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.parameter.ParameterUnderlying</span></code></a></p>
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.UnderlyingRate.get_log_prior">
+<code class="descname">get_log_prior</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#UnderlyingRate.get_log_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.UnderlyingRate.get_log_prior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion">
+<code class="descname">get_suggestion</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#UnderlyingRate.get_suggestion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion_requirements">
+<code class="descname">get_suggestion_requirements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#UnderlyingRate.get_suggestion_requirements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion_requirements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion_sigma">
+<code class="descname">get_suggestion_sigma</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#UnderlyingRate.get_suggestion_sigma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.UnderlyingRate.get_suggestion_sigma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dessn.examples.discrete.discrete.get_data">
+<code class="descclassname">dessn.examples.discrete.discrete.</code><code class="descname">get_data</code><span class="sig-paren">(</span><em>n=200</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/examples/discrete/discrete.html#get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.examples.discrete.discrete.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dessn.model.html" class="btn btn-neutral float-right" title="dessn.model package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dessn.examples.simple.modelbased.html" class="btn btn-neutral" title="dessn.examples.simple.modelbased package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, dessn.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
