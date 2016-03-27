@@ -163,7 +163,7 @@
 
 <span class="sd">            \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}</span>
 
-<span class="sd">            P ({\rm count}_o | f_ = \frac{1}{\sqrt{2\pi}} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)</span>
+<span class="sd">            P ({\rm count}_o | f) = \frac{1}{\sqrt{2\pi} \sigma_f} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">efficiency</span> <span class="o">=</span> <span class="mf">0.9</span>
@@ -308,14 +308,13 @@
 <span class="sd">        Ia supernova and :math:`y` type II supernova, our pdf is given by</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            P(T|r) = \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} r^{N_{\rm SnIa}} (1 - r)^{N_{\rm SnII}}</span>
+<span class="sd">            P(T|r) = \begin{cases}</span>
+<span class="sd">                r</span>
+<span class="sd">                ,&amp; \text{if } T = {\rm SnIa} \\</span>
+<span class="sd">                1-r,</span>
+<span class="sd">                &amp; \text{if } T = {\rm SnII}</span>
+<span class="sd">                \end{cases}</span>
 
-<span class="sd">        In log space, this is</span>
-
-<span class="sd">        .. math::</span>
-<span class="sd">            \log(P(T|r)) = \log \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} + N_{\rm SnIa} \log(r) + N_{\rm SnII} \log(1-r)</span>
-
-<span class="sd">        In the code, I approximate the choose function using the log gamma functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;sn_rate&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>

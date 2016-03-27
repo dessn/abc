@@ -19,7 +19,7 @@ class ToCount(Edge):
 
             \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}
 
-            P ({\rm count}_o | f_ = \frac{1}{\sqrt{2\pi}} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)
+            P ({\rm count}_o | f) = \frac{1}{\sqrt{2\pi} \sigma_f} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)
 
         """
         efficiency = 0.9
@@ -164,14 +164,13 @@ class ToRate(Edge):
         Ia supernova and :math:`y` type II supernova, our pdf is given by
 
         .. math::
-            P(T|r) = \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} r^{N_{\rm SnIa}} (1 - r)^{N_{\rm SnII}}
+            P(T|r) = \begin{cases}
+                r
+                ,& \text{if } T = {\rm SnIa} \\
+                1-r,
+                & \text{if } T = {\rm SnII}
+                \end{cases}
 
-        In log space, this is
-
-        .. math::
-            \log(P(T|r)) = \log \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} + N_{\rm SnIa} \log(r) + N_{\rm SnII} \log(1-r)
-
-        In the code, I approximate the choose function using the log gamma functions.
         """
         r = data["sn_rate"]
         if r < 0 or r > 1:

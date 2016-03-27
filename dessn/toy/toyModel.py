@@ -62,9 +62,9 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel4")
-    plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain4.png")
-    walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks4.png")
+    temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel")
+    plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
+    walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
 
     vals = [0.28, -1.0, 72, 10, 0.01, 9.5, 0.02, 0.5]
     simulation = Simulation()
@@ -73,13 +73,13 @@ if __name__ == "__main__":
 
     if not only_data:
         np.random.seed(0)
-        pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM4.png")
+        pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
         #fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=20000, num_burn=4000, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=30000, num_burn=4000, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()
-        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(10, 6))
+        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(10, 6), truth=[0.28, 72, 10, 0.01, 9.5, 0.02, 0.5])
         chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=[0.28, 72, 10, 0.01, 9.5, 0.02, 0.5])
 

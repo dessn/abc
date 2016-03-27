@@ -190,7 +190,7 @@
 an observed flux and flux error from counts. From that, we can calculate the likelihood of an actual flux, given
 our observed flux and observed flux error, assuming a normal distribution:</p>
 <div class="math">
-\[f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}\]\[\sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}\]\[P ({\rm count}_o | f_ = \frac{1}{\sqrt{2\pi}} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)\]</div>
+\[f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}\]\[\sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}\]\[P ({\rm count}_o | f) = \frac{1}{\sqrt{2\pi} \sigma_f} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)\]</div>
 </dd></dl>
 
 </dd></dl>
@@ -251,11 +251,12 @@ actually the <strong>log luminosity</strong></p>
 <p>We model the supernova rate as a binomial process, with rate <span class="math">\(r\)</span>. That is, given <span class="math">\(x\)</span> type
 Ia supernova and <span class="math">\(y\)</span> type II supernova, our pdf is given by</p>
 <div class="math">
-\[\begin{split}P(T|r) = \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} r^{N_{\rm SnIa}} (1 - r)^{N_{\rm SnII}}\end{split}\]</div>
-<p>In log space, this is</p>
-<div class="math">
-\[\begin{split}\log(P(T|r)) = \log \begin{pmatrix} N_{\rm Total} \\ N_{\rm SnII} \end{pmatrix} + N_{\rm SnIa} \log(r) + N_{\rm SnII} \log(1-r)\end{split}\]</div>
-<p>In the code, I approximate the choose function using the log gamma functions.</p>
+\[\begin{split}P(T|r) = \begin{cases}
+    r
+    ,&amp; \text{if } T = {\rm SnIa} \\
+    1-r,
+    &amp; \text{if } T = {\rm SnII}
+    \end{cases}\end{split}\]</div>
 </dd></dl>
 
 </dd></dl>
