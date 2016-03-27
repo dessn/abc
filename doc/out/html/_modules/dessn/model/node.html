@@ -138,10 +138,10 @@
     <span class="n">TRANSFORMATION</span> <span class="o">=</span> <span class="mi">4</span></div>
 
 
-<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A node represented on a PGM model. Normally encapsulated by a single parameter, or several related parameters.</span>
 
-<span class="sd">    The Node class can essentially be thought of as a wrapper around a parameter or variable in your model. However,</span>
+<span class="sd">    The Parameter class can essentially be thought of as a wrapper around a parameter or variable in your model. However,</span>
 <span class="sd">    as some parameters are highly related (for example, flux and flux error), Nodes allow you to declare multiple</span>
 <span class="sd">    parameters.</span>
 
@@ -182,7 +182,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="n">node_name</span></div>
 
 
-<div class="viewcode-block" id="NodeObserved"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeObserved">[docs]</a><span class="k">class</span> <span class="nc">NodeObserved</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterObserved"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterObserved">[docs]</a><span class="k">class</span> <span class="nc">ParameterObserved</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A node representing one or more observed variables</span>
 
 <span class="sd">    This node is used for all observables in the model. In addition to a normal node, it also contains data,</span>
@@ -203,16 +203,16 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">datas</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">datas</span><span class="p">),</span> <span class="s2">&quot;If you pass in a list of names, you need to pass in a list of data for each name&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NodeObserved</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">OBSERVED</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterObserved</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">OBSERVED</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datas</span> <span class="o">=</span> <span class="n">datas</span>
 
-<div class="viewcode-block" id="NodeObserved.get_data"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeObserved.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterObserved.get_data"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterObserved.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a dictionary containing keys of the parameter names and values of the parameter data object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">data</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datas</span><span class="p">)}</span></div></div>
 
 
-<div class="viewcode-block" id="NodeUnderlying"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeUnderlying">[docs]</a><span class="k">class</span> <span class="nc">NodeUnderlying</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterUnderlying"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterUnderlying">[docs]</a><span class="k">class</span> <span class="nc">ParameterUnderlying</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot; A node representing an underlying parameter in your model.</span>
 
 <span class="sd">    On the PGM, these nodes would be at the very top, and would represent the variables</span>
@@ -230,10 +230,10 @@
 <span class="sd">        Latex ready labels for the given names. Used in the PGM and corner plots.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NodeUnderlying</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">UNDERLYING</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">UNDERLYING</span><span class="p">)</span>
 
     <span class="nd">@abc.abstractmethod</span>
-<div class="viewcode-block" id="NodeUnderlying.get_log_prior"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeUnderlying.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterUnderlying.get_log_prior"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterUnderlying.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns the log prior for the parameter.</span>
 
 <span class="sd">        Parameters</span>
@@ -252,7 +252,7 @@
         <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="NodeTransformation"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeTransformation">[docs]</a><span class="k">class</span> <span class="nc">NodeTransformation</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterTransformation"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterTransformation">[docs]</a><span class="k">class</span> <span class="nc">ParameterTransformation</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A node representing a variable transformation.</span>
 
 <span class="sd">    This node essentially represents latent variables which are fully determined - their probability is given by</span>
@@ -275,10 +275,10 @@
 <span class="sd">        Latex ready labels for the given names. Used in the PGM and corner plots.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NodeTransformation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">TRANSFORMATION</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterTransformation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">TRANSFORMATION</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="NodeLatent"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeLatent">[docs]</a><span class="k">class</span> <span class="nc">NodeLatent</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterLatent"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterLatent">[docs]</a><span class="k">class</span> <span class="nc">ParameterLatent</span><span class="p">(</span><span class="n">Parameter</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A node representing a latent, or hidden, variable in our model.</span>
 
 <span class="sd">    Given infinitely powerful computers, these nodes would not be necessary, for they represent</span>
@@ -299,10 +299,10 @@
 <span class="sd">        Latex ready labels for the given names. Used in the PGM and corner plots.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NodeLatent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">LATENT</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">node_name</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">NodeType</span><span class="o">.</span><span class="n">LATENT</span><span class="p">)</span>
 
     <span class="nd">@abc.abstractmethod</span>
-<div class="viewcode-block" id="NodeLatent.get_num_latent"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.NodeLatent.get_num_latent">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ParameterLatent.get_num_latent"><a class="viewcode-back" href="../../../dessn.model.html#dessn.model.node.ParameterLatent.get_num_latent">[docs]</a>    <span class="k">def</span> <span class="nf">get_num_latent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; The number of latent parameters to include in the model.</span>
 
 <span class="sd">        Running MCMC requires knowing the dimensionality of our model, which means knowing how many</span>

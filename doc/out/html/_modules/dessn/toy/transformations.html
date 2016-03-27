@@ -127,15 +127,15 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dessn.toy.transformations</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">NodeTransformation</span>
+<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">ParameterTransformation</span>
 
 
-<div class="viewcode-block" id="Flux"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.transformations.Flux">[docs]</a><span class="k">class</span> <span class="nc">Flux</span><span class="p">(</span><span class="n">NodeTransformation</span><span class="p">):</span>
+<div class="viewcode-block" id="Flux"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.transformations.Flux">[docs]</a><span class="k">class</span> <span class="nc">Flux</span><span class="p">(</span><span class="n">ParameterTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Flux</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;flux_error&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;$f$&quot;</span><span class="p">,</span> <span class="s2">&quot;$\sigma_f$&quot;</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="LuminosityDistance"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.transformations.LuminosityDistance">[docs]</a><span class="k">class</span> <span class="nc">LuminosityDistance</span><span class="p">(</span><span class="n">NodeTransformation</span><span class="p">):</span>
+<div class="viewcode-block" id="LuminosityDistance"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.transformations.LuminosityDistance">[docs]</a><span class="k">class</span> <span class="nc">LuminosityDistance</span><span class="p">(</span><span class="n">ParameterTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LuminosityDistance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Luminosity Distance&quot;</span><span class="p">,</span> <span class="s2">&quot;lumdist&quot;</span><span class="p">,</span> <span class="s2">&quot;$d_L$&quot;</span><span class="p">)</span></div>
 </pre></div>

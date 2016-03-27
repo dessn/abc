@@ -1,8 +1,8 @@
-from dessn.model.node import NodeLatent, NodeTransformation, NodeDiscrete
+from dessn.model.parameter import ParameterLatent, ParameterTransformation, ParameterDiscrete
 
 
-# class Redshift(NodeLatent):
-class Redshift(NodeTransformation):
+# class Redshift(ParameterLatent):
+class Redshift(ParameterTransformation):
     def __init__(self, n):
         super(Redshift, self).__init__("redshift", "$z$", group="Redshift")
         self.n = n
@@ -17,7 +17,7 @@ class Redshift(NodeTransformation):
         return data["oredshift"].tolist()
 
 
-class Luminosity(NodeLatent):
+class Luminosity(ParameterLatent):
     def __init__(self, n):
         super(Luminosity, self).__init__("luminosity", "$L$", group="Luminosity")
         self.n = n
@@ -30,11 +30,11 @@ class Luminosity(NodeLatent):
 
     def get_suggestion(self, data):
         typeIa = data["otype"] == "Ia"
-        return typeIa * 10 + (1 - typeIa) * 9.9
+        return typeIa * 10 + (1 - typeIa) * 9.5
 
 
-# class Type(NodeLatent):
-class Type(NodeDiscrete):
+# class Type(ParameterLatent):
+class Type(ParameterDiscrete):
     def get_discrete_requirements(self):
         return []
 

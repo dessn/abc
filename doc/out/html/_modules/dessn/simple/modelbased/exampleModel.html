@@ -129,14 +129,14 @@
   <h1>Source code for dessn.simple.modelbased.exampleModel</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">dessn.model.model</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">NodeObserved</span><span class="p">,</span> <span class="n">NodeLatent</span><span class="p">,</span> <span class="n">NodeUnderlying</span><span class="p">,</span> <span class="n">NodeTransformation</span>
+<span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">ParameterObserved</span><span class="p">,</span> <span class="n">ParameterLatent</span><span class="p">,</span> <span class="n">ParameterUnderlying</span><span class="p">,</span> <span class="n">ParameterTransformation</span>
 <span class="kn">from</span> <span class="nn">dessn.model.edge</span> <span class="kn">import</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span>
 <span class="kn">from</span> <span class="nn">dessn.simple.example</span> <span class="kn">import</span> <span class="n">Example</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 
-<div class="viewcode-block" id="ObservedFlux"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.ObservedFlux">[docs]</a><span class="k">class</span> <span class="nc">ObservedFlux</span><span class="p">(</span><span class="n">NodeObserved</span><span class="p">):</span>
+<div class="viewcode-block" id="ObservedFlux"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.ObservedFlux">[docs]</a><span class="k">class</span> <span class="nc">ObservedFlux</span><span class="p">(</span><span class="n">ParameterObserved</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
         <span class="n">flux</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">Example</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -144,7 +144,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">ObservedFlux</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Flux&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;flux_error&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;$f$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\sigma_f$&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">flux</span><span class="p">,</span> <span class="n">error</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="LatentLuminosity"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.LatentLuminosity">[docs]</a><span class="k">class</span> <span class="nc">LatentLuminosity</span><span class="p">(</span><span class="n">NodeLatent</span><span class="p">):</span>
+<div class="viewcode-block" id="LatentLuminosity"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.LatentLuminosity">[docs]</a><span class="k">class</span> <span class="nc">LatentLuminosity</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LatentLuminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;$L$&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
@@ -153,7 +153,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div></div>
 
 
-<div class="viewcode-block" id="UnderlyingSupernovaDistribution"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution">[docs]</a><span class="k">class</span> <span class="nc">UnderlyingSupernovaDistribution</span><span class="p">(</span><span class="n">NodeUnderlying</span><span class="p">):</span>
+<div class="viewcode-block" id="UnderlyingSupernovaDistribution"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution">[docs]</a><span class="k">class</span> <span class="nc">UnderlyingSupernovaDistribution</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
 <div class="viewcode-block" id="UnderlyingSupernovaDistribution.get_log_prior"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">1</span></div>
 
@@ -162,7 +162,7 @@
                                                               <span class="p">[</span><span class="s2">r&quot;$\theta_1$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\theta_2$&quot;</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="UselessTransformation"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.UselessTransformation">[docs]</a><span class="k">class</span> <span class="nc">UselessTransformation</span><span class="p">(</span><span class="n">NodeTransformation</span><span class="p">):</span>
+<div class="viewcode-block" id="UselessTransformation"><a class="viewcode-back" href="../../../../dessn.simple.modelbased.html#dessn.simple.modelbased.exampleModel.UselessTransformation">[docs]</a><span class="k">class</span> <span class="nc">UselessTransformation</span><span class="p">(</span><span class="n">ParameterTransformation</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">UselessTransformation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Transformed Luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;double_luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;$2L$&quot;</span><span class="p">)</span></div>
 
@@ -205,9 +205,9 @@
 <span class="sd">    The model is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the model</span>
 <span class="sd">    to verify its correctness.</span>
 
-<span class="sd">    This is the primary class in this package, and you can see that other classes inherit from either :class:`.Node` or from :class:`.Edge`.</span>
+<span class="sd">    This is the primary class in this package, and you can see that other classes inherit from either :class:`.Parameter` or from :class:`.Edge`.</span>
 
-<span class="sd">    I leave the documentation for :class:`.Node` and :class:`.Edge` to those classes, and encourage viewing the code directly</span>
+<span class="sd">    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes, and encourage viewing the code directly</span>
 <span class="sd">    to understand exactly what is happening.</span>
 
 <span class="sd">    Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:</span>

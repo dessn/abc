@@ -127,7 +127,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dessn.toy.underlying</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">NodeUnderlying</span>
+<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">ParameterUnderlying</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">beta</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -135,7 +135,7 @@
 
 
 
-<div class="viewcode-block" id="Cosmology"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.Cosmology">[docs]</a><span class="k">class</span> <span class="nc">Cosmology</span><span class="p">(</span><span class="n">NodeUnderlying</span><span class="p">):</span>
+<div class="viewcode-block" id="Cosmology"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.Cosmology">[docs]</a><span class="k">class</span> <span class="nc">Cosmology</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Cosmology</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Cosmology&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;omega_m&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;H0&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">r&quot;$\Omega_m$&quot;</span><span class="p">,</span> <span class="s2">&quot;$w$&quot;</span><span class="p">,</span> <span class="s2">&quot;$H_0$&quot;</span><span class="p">])</span>
 
@@ -143,7 +143,7 @@
         <span class="k">return</span> <span class="mi">1</span></div></div>
 
 
-<div class="viewcode-block" id="SupernovaIaDist"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIaDist</span><span class="p">(</span><span class="n">NodeUnderlying</span><span class="p">):</span>
+<div class="viewcode-block" id="SupernovaIaDist"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIaDist</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SupernovaIaDist</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;SNIa&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;snIa_luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;snIa_sigma&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;$L$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\sigma_L$&quot;</span><span class="p">])</span>
 
@@ -151,7 +151,7 @@
         <span class="k">return</span> <span class="mi">1</span></div></div>
 
 
-<div class="viewcode-block" id="SupernovaIIDist"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIIDist</span><span class="p">(</span><span class="n">NodeUnderlying</span><span class="p">):</span>
+<div class="viewcode-block" id="SupernovaIIDist"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIIDist</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SupernovaIIDist</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;SNII&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;snII_luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;snII_sigma&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;$L$&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\sigma_L$&quot;</span><span class="p">])</span>
 
@@ -159,7 +159,7 @@
         <span class="k">return</span> <span class="mi">1</span></div></div>
 
 
-<div class="viewcode-block" id="SupernovaRate"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaRate">[docs]</a><span class="k">class</span> <span class="nc">SupernovaRate</span><span class="p">(</span><span class="n">NodeUnderlying</span><span class="p">):</span>
+<div class="viewcode-block" id="SupernovaRate"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaRate">[docs]</a><span class="k">class</span> <span class="nc">SupernovaRate</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SupernovaRate</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;SN Rates&quot;</span><span class="p">,</span> <span class="s2">&quot;sn_rate&quot;</span><span class="p">,</span> <span class="s2">&quot;$r$&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">beta</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>

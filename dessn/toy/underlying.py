@@ -1,9 +1,8 @@
-from dessn.model.node import NodeUnderlying
+from dessn.model.parameter import ParameterUnderlying
 import numpy as np
-import os
 
 
-class OmegaM(NodeUnderlying):
+class OmegaM(ParameterUnderlying):
     def __init__(self):
         super(OmegaM, self).__init__("omega_m", r"$\Omega_m$", group="Cosmology")
         self.sigma = 0.0062 * 10
@@ -19,7 +18,7 @@ class OmegaM(NodeUnderlying):
         return 0.30
 
 
-class W(NodeUnderlying):
+class W(ParameterUnderlying):
     def __init__(self):
         super(W, self).__init__("w", "$w$", group="Cosmology")
         self.sigma = 0.08 * 10
@@ -32,7 +31,7 @@ class W(NodeUnderlying):
         return -1.0
 
 
-class Hubble(NodeUnderlying):
+class Hubble(ParameterUnderlying):
     def __init__(self):
         super(Hubble, self).__init__("H0", "$H_0$", group="Cosmology")
         self.sigma = 0.46 * 10
@@ -45,7 +44,7 @@ class Hubble(NodeUnderlying):
         return 72
 
 
-class SupernovaIaDist1(NodeUnderlying):
+class SupernovaIaDist1(ParameterUnderlying):
 
     def __init__(self):
         super(SupernovaIaDist1, self).__init__("snIa_luminosity", r"$L_{\rm SnIa}$", group="SNIa")
@@ -54,7 +53,7 @@ class SupernovaIaDist1(NodeUnderlying):
         return 10
 
 
-class SupernovaIaDist2(NodeUnderlying):
+class SupernovaIaDist2(ParameterUnderlying):
 
     def __init__(self):
         super(SupernovaIaDist2, self).__init__("snIa_sigma", r"$\sigma_{\rm SnIa}$", group="SNIa")
@@ -68,15 +67,15 @@ class SupernovaIaDist2(NodeUnderlying):
         return 0.1
 
 
-class SupernovaIIDist1(NodeUnderlying):
+class SupernovaIIDist1(ParameterUnderlying):
     def __init__(self):
         super(SupernovaIIDist1, self).__init__("snII_luminosity", r"$L_{\rm SnII}$", group="SNII")
 
     def get_suggestion(self, data):
-        return 9.9
+        return 9.5
 
 
-class SupernovaIIDist2(NodeUnderlying):
+class SupernovaIIDist2(ParameterUnderlying):
     def __init__(self):
         super(SupernovaIIDist2, self).__init__("snII_sigma", r"$\sigma_{\rm SnII}$", group="SNII")
 
@@ -89,7 +88,7 @@ class SupernovaIIDist2(NodeUnderlying):
         return 0.02
 
 
-class SupernovaRate(NodeUnderlying):
+class SupernovaRate(ParameterUnderlying):
     def __init__(self):
         super(SupernovaRate, self).__init__("sn_rate", "$r$", group="SN Rates")
 

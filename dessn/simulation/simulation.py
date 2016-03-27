@@ -20,8 +20,8 @@ class Simulation(object):
         # Get redshifts with some errors in them
         # z_err_rate = 0.02
         z_err_rate = 0.0
-        z = np.exp(np.random.uniform(-5, 3.0, num_trans))
-        z2 = np.exp(np.random.uniform(-5, 3.0, num_trans))
+        z = np.exp(np.random.uniform(-3, 3.0, num_trans))
+        z2 = np.exp(np.random.uniform(-3, 3.0, num_trans))
         z_err = 1e-5 * np.ones(num_trans)
         z_err_realised = z_err * np.random.normal(0, 1, num_trans)
         catastrophic_failures = 1.0 * (np.random.random(num_trans) < z_err_rate)
@@ -29,11 +29,10 @@ class Simulation(object):
 
         # From the actual redshift, grab the luminosity distance
         luminosity_distance = cosmology.luminosity_distance(z).value
-        print("sim lum dist: ", luminosity_distance)
-        print("sim z: ", z_o)
         # Get the types from the underlying type rate
         type_Ias = 1.0 * (np.random.random(num_trans) < r)
         type_Iash = ["Ia" if t == 1 else "II" for t in type_Ias]
+
         # misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
         misidentification = 1.0 * (np.random.random(num_trans) < 0.0)
         type_o = type_Ias * (1 - misidentification) + (1 - type_Ias) * misidentification
@@ -53,7 +52,7 @@ class Simulation(object):
         # Get photon counts from flux
         count = flux * efficiency * conversion
         count_sigma = np.sqrt(count)
-        count_o = count #+ np.random.normal(0, count_sigma, num_trans)
+        count_o = count + np.random.normal(0, count_sigma, num_trans)
 
         observations = {
             "z_o": z_o.tolist(),

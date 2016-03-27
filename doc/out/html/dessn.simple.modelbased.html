@@ -174,8 +174,8 @@ represent a perfect 50% mirror absorption on the primary telescope mirror.</p>
 <p>An implementation of <a class="reference internal" href="dessn.simple.html#dessn.simple.exampleLatent.ExampleLatent" title="dessn.simple.exampleLatent.ExampleLatent"><code class="xref py py-class docutils literal"><span class="pre">ExampleLatent</span></code></a> using classes instead of procedural code.</p>
 <p>The model is set up by declaring nodes, the edges between nodes, and then calling <code class="docutils literal"><span class="pre">finalise</span></code> on the model
 to verify its correctness.</p>
-<p>This is the primary class in this package, and you can see that other classes inherit from either <a class="reference internal" href="dessn.model.html#dessn.model.node.Node" title="dessn.model.node.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> or from <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">Edge</span></code></a>.</p>
-<p>I leave the documentation for <a class="reference internal" href="dessn.model.html#dessn.model.node.Node" title="dessn.model.node.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> and <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">Edge</span></code></a> to those classes, and encourage viewing the code directly
+<p>This is the primary class in this package, and you can see that other classes inherit from either <a class="reference internal" href="dessn.model.html#dessn.model.node.Parameter" title="dessn.model.node.Parameter"><code class="xref py py-class docutils literal"><span class="pre">Parameter</span></code></a> or from <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">Edge</span></code></a>.</p>
+<p>I leave the documentation for <a class="reference internal" href="dessn.model.html#dessn.model.node.Parameter" title="dessn.model.node.Parameter"><code class="xref py py-class docutils literal"><span class="pre">Parameter</span></code></a> and <a class="reference internal" href="dessn.model.html#dessn.model.edge.Edge" title="dessn.model.edge.Edge"><code class="xref py py-class docutils literal"><span class="pre">Edge</span></code></a> to those classes, and encourage viewing the code directly
 to understand exactly what is happening.</p>
 <p>Running this file in python first generates a PGM of the model, and then runs <code class="docutils literal"><span class="pre">emcee</span></code> and creates a corner plot:</p>
 <div class="figure align-center">
@@ -200,7 +200,7 @@ to understand exactly what is happening.</p>
 <dl class="class">
 <dt id="dessn.simple.modelbased.exampleModel.LatentLuminosity">
 <em class="property">class </em><code class="descclassname">dessn.simple.modelbased.exampleModel.</code><code class="descname">LatentLuminosity</code><span class="sig-paren">(</span><em>n=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/modelbased/exampleModel.html#LatentLuminosity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.modelbased.exampleModel.LatentLuminosity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.NodeLatent" title="dessn.model.node.NodeLatent"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.NodeLatent</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.ParameterLatent" title="dessn.model.node.ParameterLatent"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.ParameterLatent</span></code></a></p>
 <dl class="method">
 <dt id="dessn.simple.modelbased.exampleModel.LatentLuminosity.get_num_latent">
 <code class="descname">get_num_latent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/modelbased/exampleModel.html#LatentLuminosity.get_num_latent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.modelbased.exampleModel.LatentLuminosity.get_num_latent" title="Permalink to this definition">¶</a></dt>
@@ -233,13 +233,13 @@ to understand exactly what is happening.</p>
 <dl class="class">
 <dt id="dessn.simple.modelbased.exampleModel.ObservedFlux">
 <em class="property">class </em><code class="descclassname">dessn.simple.modelbased.exampleModel.</code><code class="descname">ObservedFlux</code><span class="sig-paren">(</span><em>n=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/modelbased/exampleModel.html#ObservedFlux"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.modelbased.exampleModel.ObservedFlux" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.NodeObserved" title="dessn.model.node.NodeObserved"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.NodeObserved</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.ParameterObserved" title="dessn.model.node.ParameterObserved"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.ParameterObserved</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution">
 <em class="property">class </em><code class="descclassname">dessn.simple.modelbased.exampleModel.</code><code class="descname">UnderlyingSupernovaDistribution</code><a class="reference internal" href="_modules/dessn/simple/modelbased/exampleModel.html#UnderlyingSupernovaDistribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.NodeUnderlying" title="dessn.model.node.NodeUnderlying"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.NodeUnderlying</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.ParameterUnderlying" title="dessn.model.node.ParameterUnderlying"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.ParameterUnderlying</span></code></a></p>
 <dl class="method">
 <dt id="dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution.get_log_prior">
 <code class="descname">get_log_prior</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/simple/modelbased/exampleModel.html#UnderlyingSupernovaDistribution.get_log_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.modelbased.exampleModel.UnderlyingSupernovaDistribution.get_log_prior" title="Permalink to this definition">¶</a></dt>
@@ -250,7 +250,7 @@ to understand exactly what is happening.</p>
 <dl class="class">
 <dt id="dessn.simple.modelbased.exampleModel.UselessTransformation">
 <em class="property">class </em><code class="descclassname">dessn.simple.modelbased.exampleModel.</code><code class="descname">UselessTransformation</code><a class="reference internal" href="_modules/dessn/simple/modelbased/exampleModel.html#UselessTransformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.simple.modelbased.exampleModel.UselessTransformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.NodeTransformation" title="dessn.model.node.NodeTransformation"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.NodeTransformation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.node.ParameterTransformation" title="dessn.model.node.ParameterTransformation"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.node.ParameterTransformation</span></code></a></p>
 </dd></dl>
 
 </div>

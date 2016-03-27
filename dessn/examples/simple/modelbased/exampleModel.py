@@ -7,24 +7,24 @@ import numpy as np
 from dessn.examples.simple.example import Example
 from dessn.model.edge import Edge, EdgeTransformation
 from dessn.model.model import Model
-from dessn.model.node import NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation
+from dessn.model.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation
 
 
-class ObservedFlux(NodeObserved):
+class ObservedFlux(ParameterObserved):
     def __init__(self, n=100):
         self.n = n
         flux, error = Example.get_data(n=n, scale=0.5)
         super(ObservedFlux, self).__init__("flux", "$f$", flux, group="Flux")
 
 
-class ObservedFluxError(NodeObserved):
+class ObservedFluxError(ParameterObserved):
     def __init__(self, n=100):
         self.n = n
         flux, error = Example.get_data(n=n, scale=0.5)
         super(ObservedFluxError, self).__init__("flux_error", r"$\sigma_f$", error, group="Flux")
 
 
-class LatentLuminosity(NodeLatent):
+class LatentLuminosity(ParameterLatent):
     def __init__(self, n=100):
         super(LatentLuminosity, self).__init__("luminosity", "$L$", group="Luminosity")
         self.n = n
@@ -39,7 +39,7 @@ class LatentLuminosity(NodeLatent):
         return data["flux"] * np.random.uniform(0.5, 1.5)
 
 
-class UnderlyingSupernovaDistribution1(NodeUnderlying):
+class UnderlyingSupernovaDistribution1(ParameterUnderlying):
     def get_log_prior(self, data):
         """ We model the prior enforcing realistic values"""
         mean = data["SN_theta_1"]
@@ -57,7 +57,7 @@ class UnderlyingSupernovaDistribution1(NodeUnderlying):
         return 50
 
 
-class UnderlyingSupernovaDistribution2(NodeUnderlying):
+class UnderlyingSupernovaDistribution2(ParameterUnderlying):
     def get_log_prior(self, data):
         """ We model the prior enforcing realistic values"""
         sigma = data["SN_theta_2"]
@@ -75,7 +75,7 @@ class UnderlyingSupernovaDistribution2(NodeUnderlying):
         return 5
 
 
-class UselessTransformation(NodeTransformation):
+class UselessTransformation(ParameterTransformation):
     def __init__(self):
         super(UselessTransformation, self).__init__("double_luminosity", "$2L$", group="Transformed Luminosity")
 
@@ -118,9 +118,9 @@ class ExampleModel(Model):
     The model is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the model
     to verify its correctness.
 
-    This is the primary class in this package, and you can see that other classes inherit from either :class:`.Node` or from :class:`.Edge`.
+    This is the primary class in this package, and you can see that other classes inherit from either :class:`.Parameter` or from :class:`.Edge`.
 
-    I leave the documentation for :class:`.Node` and :class:`.Edge` to those classes, and encourage viewing the code directly
+    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes, and encourage viewing the code directly
     to understand exactly what is happening.
 
     Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:

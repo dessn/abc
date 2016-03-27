@@ -127,10 +127,10 @@
            <div itemprop="articleBody">
             
   <h1>Source code for dessn.toy.latent</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">NodeLatent</span>
+<span></span><span class="kn">from</span> <span class="nn">dessn.model.node</span> <span class="kn">import</span> <span class="n">ParameterLatent</span>
 
 
-<div class="viewcode-block" id="Redshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Redshift">[docs]</a><span class="k">class</span> <span class="nc">Redshift</span><span class="p">(</span><span class="n">NodeLatent</span><span class="p">):</span>
+<div class="viewcode-block" id="Redshift"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Redshift">[docs]</a><span class="k">class</span> <span class="nc">Redshift</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Redshift</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Redshift&quot;</span><span class="p">,</span> <span class="s2">&quot;redshift&quot;</span><span class="p">,</span> <span class="s2">&quot;$z$&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
@@ -139,7 +139,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div></div>
 
 
-<div class="viewcode-block" id="Luminosity"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity">[docs]</a><span class="k">class</span> <span class="nc">Luminosity</span><span class="p">(</span><span class="n">NodeLatent</span><span class="p">):</span>
+<div class="viewcode-block" id="Luminosity"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Luminosity">[docs]</a><span class="k">class</span> <span class="nc">Luminosity</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;luminosity&quot;</span><span class="p">,</span> <span class="s2">&quot;$L$&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
@@ -148,7 +148,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span></div></div>
 
 
-<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">NodeLatent</span><span class="p">):</span>
+<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.latent.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">ParameterLatent</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;$T$&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>

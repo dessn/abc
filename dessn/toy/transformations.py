@@ -1,11 +1,11 @@
-from dessn.model.node import NodeTransformation
+from dessn.model.parameter import ParameterTransformation
 
 
-class Flux(NodeTransformation):
+class Flux(ParameterTransformation):
     def __init__(self):
         super(Flux, self).__init__("flux", "$f$", group="Flux")
 
 
-class LuminosityDistance(NodeTransformation):
+class LuminosityDistance(ParameterTransformation):
     def __init__(self):
         super(LuminosityDistance, self).__init__("lumdist", "$d_L$", group="Luminosity Distance")

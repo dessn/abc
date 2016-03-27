@@ -5,7 +5,7 @@ import sys
 import numpy as np
 from dessn.model.edge import Edge
 from dessn.model.model import Model
-from dessn.model.node import NodeObserved, NodeUnderlying, NodeDiscrete
+from dessn.model.parameter import ParameterObserved, ParameterUnderlying, ParameterDiscrete
 
 
 def get_data(n=200):
@@ -20,19 +20,19 @@ def get_data(n=200):
     return size.tolist(), colours
 
 
-class ObservedColour(NodeObserved):
+class ObservedColour(ParameterObserved):
     def __init__(self):
         sizes, colours = get_data()
         super(ObservedColour, self).__init__("c_o", "$c_o$", colours, group="Obs. Colour")
 
 
-class ObservedSize(NodeObserved):
+class ObservedSize(ParameterObserved):
     def __init__(self):
         sizes, colours = get_data()
         super(ObservedSize, self).__init__("s_o", "$s_o$", sizes, group="Obs. Size")
 
 
-class Colour(NodeDiscrete):
+class Colour(ParameterDiscrete):
     def __init__(self):
         super(Colour, self).__init__("c", "$c$", group="Colour")
 
@@ -43,7 +43,7 @@ class Colour(NodeDiscrete):
         return []
 
 
-class UnderlyingRate(NodeUnderlying):
+class UnderlyingRate(ParameterUnderlying):
     def __init__(self):
         super(UnderlyingRate, self).__init__("r", "$r$", group="Rate")
 

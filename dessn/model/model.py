@@ -1,4 +1,4 @@
-from dessn.model.node import Node, NodeObserved, NodeLatent, NodeUnderlying, NodeTransformation, NodeDiscrete
+from dessn.model.node import Parameter, ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation, ParameterDiscrete
 from dessn.model.edge import EdgeTransformation
 from dessn.nuts import NUTSSampler
 from dessn.utility.hdemcee import EmceeWrapper
@@ -64,9 +64,9 @@ class Model(object):
 
         Parameter
         ---------
-        node : :class:`.Node`
+        node : :class:`.Parameter`
         """
-        assert isinstance(node, Node), "Supplied parameter is not a recognised Node object"
+        assert isinstance(node, Parameter), "Supplied parameter is not a recognised Parameter object"
         assert node.name not in self._node_dict.keys(), "Parameter %s is already in the model" % node.name
         assert node.label not in self._labels, "Label %s is already in the model" % node.label
         self._labels.append(node.label)
@@ -74,16 +74,16 @@ class Model(object):
         self._node_dict[node.name] = node
         self._in[node.name] = []
         self._out[node.name] = []
-        if isinstance(node, NodeObserved):
+        if isinstance(node, ParameterObserved):
             self._observed_nodes.append(node)
-        elif isinstance(node, NodeDiscrete):
+        elif isinstance(node, ParameterDiscrete):
             self._discrete_nodes.append(node)
             self._discrete_params.append(node.name)
-        elif isinstance(node, NodeLatent):
+        elif isinstance(node, ParameterLatent):
             self._latent_nodes.append(node)
-        elif isinstance(node, NodeTransformation):
+        elif isinstance(node, ParameterTransformation):
             self._transformation_nodes.append(node)
-        elif isinstance(node, NodeUnderlying):
+        elif isinstance(node, ParameterUnderlying):
             self._underlying_nodes.append(node)
 
         self._finalised = False
@@ -107,15 +107,15 @@ class Model(object):
         assert len(self._observed_nodes) > 0, "No observed nodes found"
         for node in self.nodes:
             name = node.name
-            if isinstance(node, NodeObserved):
+            if isinstance(node, ParameterObserved):
                 pass
                 # assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
                 # assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
-            elif isinstance(node, NodeLatent) or isinstance(node, NodeTransformation):
+            elif isinstance(node, ParameterLatent) or isinstance(node, ParameterTransformation):
                 pass
                 # assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
                 # assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
-            elif isinstance(node, NodeUnderlying):
+            elif isinstance(node, ParameterUnderlying):
                 assert len(self._in[name]) > 0, "Underlying parameter %s has no incoming edges" % name
                 assert len(self._out[name]) == 0, "Underlying parameter %s should not have an outgoing edge" % name
 
@@ -134,7 +134,7 @@ class Model(object):
             self._theta_names += [node.name] * node.get_num_latent()
 
         num_edges = len(self.edges)
-        observed_names = [node.name for node in self.nodes if not isinstance(node, NodeTransformation)]
+        observed_names = [node.name for node in self.nodes if not isinstance(node, ParameterTransformation)]
         self._ordered_edges = []
         count = 0
         max_count = 100
@@ -229,7 +229,7 @@ class Model(object):
         while edgeIndex < len(edges):
             edge = edges[edgeIndex]
             dependencies = edge.given + edge.probability_of
-            discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], NodeDiscrete)]
+            discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], ParameterDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
             if len(unfilled) > 0:
                 first_name = unfilled[0]
@@ -264,25 +264,12 @@ class Model(object):
                 t.update(observation)
                 result = self._get_edge_likelihood(t, self._ordered_edges[:])
                 probability += result
-                # print(observation, result)
-        if np.random.random() < 0.001:
-            print("P: ", probability, " THETA ", theta)
+        # if np.random.random() < 0.001:
+        #     print("P: ", probability, " THETA ", theta)
         return probability
 
     def _get_log_posterior_grad(self, theta):
-        # dx = self.epsilon
-        # grad = np.zeros(theta.shape)
-        # base = self._get_log_posterior(theta)
-        # for i in range(grad.size):
-        #     t = theta[:]
-        #     t[i] += dx
-        #     a = self._get_log_posterior(t)
-        #     t[i] -= 2 * dx
-        #     b = self._get_log_posterior(t)
-        #     grad[i] = (a - b) / (2 * dx)
-
         grad = scipy.optimize.approx_fprime(theta, self._get_log_posterior, self.epsilon)
-        # print("grad ", self._get_log_posterior(theta), theta, grad, self.epsilon)
         return grad
 
     def _get_negative_log_posterior(self, theta):
@@ -322,12 +309,9 @@ class Model(object):
             std = np.random.normal(loc=1, scale=0.2, size=(self.num_temps, num_walkers, num_dim))
         else:
             std = np.random.normal(loc=1, scale=0.01, size=(num_walkers, num_dim))
-            # std = np.random.normal(loc=1, scale=0.1, size=(num_dim))
             # std = np.ones((num_walkers, num_dim))
         start = std * optimised
-        print("START ", start)
         return start
-        # return [0.28, 10, 0.3, 10.036047685744489, 10.185160932912225, 10.090051095986748, 9.894325046051945, 9.657244540593357, 9.895197183276137, 9.937331729987566, 10.17598695735466, 10.251695024162352, 10.279330624391067]
 
     def _get_log_prior(self, theta_dict):
         result = []
@@ -491,17 +475,17 @@ class Model(object):
             else:
                 num_walkers = num_dim * 4
         num_walkers = max(num_walkers, 20)
-        self.logger.debug("Running emcee with %d walkers" % num_walkers)
-        if False:
-            self.logger.debug("Using NUTS sampler with leap-frog algorithm")
-            sampler = NUTSSampler(num_dim, self._get_log_posterior, self._get_log_posterior_grad)
+        # self.logger.debug("Running emcee with %d walkers" % num_walkers)
+        # if False:
+        #     self.logger.debug("Using NUTS sampler with leap-frog algorithm")
+        #     sampler = NUTSSampler(num_dim, self._get_log_posterior, self._get_log_posterior_grad)
+        # else:
+        if num_temps is None:
+            self.logger.info("Using Ensemble Sampler")
+            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)
         else:
-            if num_temps is None:
-                self.logger.info("Using Ensemble Sampler")
-                sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)
-            else:
-                self.logger.info("Using PTSampler")
-                sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)
+            self.logger.info("Using PTSampler")
+            sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
         self.logger.debug("Fit finished")
