@@ -72,7 +72,7 @@ class DemoVarious(object):
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         # c.configure_general(flip=False, max_ticks=5)
         c.configure_general(max_ticks=10)
-        c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png")
+        c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png", figsize=(6, 6))
 
     def various4_summaries(self):
         r""" If there is only one chain to analyse, and you only chose to plot a small number of parameters,
