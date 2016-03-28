@@ -81,21 +81,6 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.model.html">dessn.model package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.chain.html">dessn.chain package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.toy.html">dessn.toy package</a></li>
-</ul>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
 </ul>
 
@@ -206,7 +191,8 @@
         <span class="sd">&quot;&quot;&quot; Starting all walkers from the same position is not a good thing to do, so the</span>
 <span class="sd">        suggested starting positions given by the :func:`get_suggestion` need to be randomised</span>
 <span class="sd">        slightly so that the walkers start in different positions. This is done by taking the suggested</span>
-<span class="sd">        parameter and adding gaussian noise to it, where the scale/width/standard deviation of the spread</span>
+<span class="sd">        parameter and adding uniform noise (**not** gaussian any more) to it,</span>
+<span class="sd">        where the upper or lower maximum deviation of the suggested parameter</span>
 <span class="sd">        is given by this function. Overestimating this value to try and ensure a proper spread of</span>
 <span class="sd">        walker positions can lead to complications and increased convergence, so don&#39;t always think</span>
 <span class="sd">        bigger is better!</span>

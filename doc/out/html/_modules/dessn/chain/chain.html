@@ -81,21 +81,6 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.model.html">dessn.model package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.chain.html">dessn.chain package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.toy.html">dessn.toy package</a></li>
-</ul>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
 </ul>
 
@@ -725,6 +710,8 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;#0345A1&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">max_ticks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_general</span><span class="p">[</span><span class="s2">&quot;max_ticks&quot;</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">max_ticks</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">convolve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">convolve</span><span class="p">)</span> <span class="o">/</span> <span class="n">convolve</span>
             <span class="n">filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filt</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>

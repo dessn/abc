@@ -18,7 +18,7 @@ class OmegaM(ParameterUnderlying):
         return 0.30
 
     def get_suggestion_sigma(self, data):
-        return 0.02
+        return 0.05
 
 
 class W(ParameterUnderlying):
@@ -34,7 +34,7 @@ class W(ParameterUnderlying):
         return -1.0
 
     def get_suggestion_sigma(self, data):
-        return 0.05
+        return 0.03
 
 
 class Hubble(ParameterUnderlying):
@@ -50,7 +50,7 @@ class Hubble(ParameterUnderlying):
         return 72
 
     def get_suggestion_sigma(self, data):
-        return 2
+        return 5
 
 
 class SupernovaIaDist1(ParameterUnderlying):
@@ -62,7 +62,7 @@ class SupernovaIaDist1(ParameterUnderlying):
         return 10
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.02
 
 
 class SupernovaIaDist2(ParameterUnderlying):
@@ -79,7 +79,7 @@ class SupernovaIaDist2(ParameterUnderlying):
         return 0.03  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.02
 
 
 class SupernovaIIDist1(ParameterUnderlying):
@@ -87,10 +87,10 @@ class SupernovaIIDist1(ParameterUnderlying):
         super(SupernovaIIDist1, self).__init__("snII_luminosity", r"$L_{\rm SnII}$", group="SNII")
 
     def get_suggestion(self, data):
-        return 9.5
+        return 9.8
 
     def get_suggestion_sigma(self, data):
-        return 0.02
+        return 0.05
 
 
 class SupernovaIIDist2(ParameterUnderlying):
@@ -106,7 +106,7 @@ class SupernovaIIDist2(ParameterUnderlying):
         return 0.02
 
     def get_suggestion_sigma(self, data):
-        return 0.002
+        return 0.01
 
 
 class SupernovaRate(ParameterUnderlying):
@@ -123,4 +123,4 @@ class SupernovaRate(ParameterUnderlying):
         return 0.6
 
     def get_suggestion_sigma(self, data):
-        return 0.1
+        return 0.2

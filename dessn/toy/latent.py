@@ -23,7 +23,7 @@ class Luminosity(ParameterLatent):
 
     def get_suggestion(self, data):
         typeIa = data["otype"] == "Ia"
-        return typeIa * 10 + (1 - typeIa) * 9.5
+        return typeIa * 10 + (1 - typeIa) * 9.8
 
     def get_suggestion_sigma(self, data):
         return 0.01

@@ -23,7 +23,7 @@ class ToCount(Edge):
 
         """
         efficiency = 0.9
-        conversion = 1e7
+        conversion = 1e6
         flux = data["flux"]
         f = data["ocount"] / efficiency / conversion
         fe = np.sqrt(data["ocount"]) / efficiency / conversion

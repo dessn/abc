@@ -10,12 +10,22 @@ import sys
 import os
 import numpy as np
 
+
 class ToyModel(Model):
-    """ A modified toy model.
+    """ A modified toy model. The likelihood surfaces and PGM model are given below.
+
+    Probabilities and model details are recorded in the model parameter and edge classes.
 
 
     .. figure::     ../plots/toyModelPGM.png
         :align:     center
+
+    .. figure::     ../plots/toyModelChain.png
+        :align:     center
+
+    .. figure::     ../plots/toyModelWalks.png
+        :align:     center
+
     """
     def __init__(self, observations):
         super(ToyModel, self).__init__("ToyModel")
@@ -66,7 +76,7 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
     walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
 
-    vals = [0.28, -1.0, 72, 10, 0.01, 9.5, 0.02, 0.5]
+    vals = [0.28, 72, 10, 0.01, 9.8, 0.02, 0.5]
     simulation = Simulation()
     observations, theta = simulation.get_simulation(*vals, num_trans=20)
     toy_model = ToyModel(observations)
@@ -74,12 +84,13 @@ if __name__ == "__main__":
     if not only_data:
         np.random.seed(0)
         pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-        #fig = toy_model.get_pgm(pgm_file)
+        fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=30000, num_burn=4000, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=5000, num_burn=0, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()
-        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(10, 6), truth=[0.28, 72, 10, 0.01, 9.5, 0.02, 0.5])
-        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=[0.28, 72, 10, 0.01, 9.5, 0.02, 0.5])
+        chain_consumer.configure_general(max_ticks=4)
+        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(10, 10), truth=vals)
+        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=vals)
 

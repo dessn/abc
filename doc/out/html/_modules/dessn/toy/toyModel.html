@@ -81,21 +81,6 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.model.html">dessn.model package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.chain.html">dessn.chain package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.toy.html">dessn.toy package</a></li>
-</ul>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
 </ul>
 
@@ -154,12 +139,22 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
+
 <div class="viewcode-block" id="ToyModel"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.toyModel.ToyModel">[docs]</a><span class="k">class</span> <span class="nc">ToyModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; A modified toy model.</span>
+    <span class="sd">&quot;&quot;&quot; A modified toy model. The likelihood surfaces and PGM model are given below.</span>
+
+<span class="sd">    Probabilities and model details are recorded in the model parameter and edge classes.</span>
 
 
 <span class="sd">    .. figure::     ../plots/toyModelPGM.png</span>
 <span class="sd">        :align:     center</span>
+
+<span class="sd">    .. figure::     ../plots/toyModelChain.png</span>
+<span class="sd">        :align:     center</span>
+
+<span class="sd">    .. figure::     ../plots/toyModelWalks.png</span>
+<span class="sd">        :align:     center</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ToyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ToyModel&quot;</span><span class="p">)</span>
@@ -206,26 +201,27 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
     <span class="n">dir_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span>
-    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../temp/toyModel4&quot;</span><span class="p">)</span>
-    <span class="n">plot_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelChain4.png&quot;</span><span class="p">)</span>
-    <span class="n">walk_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelWalks4.png&quot;</span><span class="p">)</span>
+    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../temp/toyModel&quot;</span><span class="p">)</span>
+    <span class="n">plot_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelChain.png&quot;</span><span class="p">)</span>
+    <span class="n">walk_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelWalks.png&quot;</span><span class="p">)</span>
 
-    <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.28</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.28</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
     <span class="n">simulation</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">()</span>
     <span class="n">observations</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">get_simulation</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">,</span> <span class="n">num_trans</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
     <span class="n">toy_model</span> <span class="o">=</span> <span class="n">ToyModel</span><span class="p">(</span><span class="n">observations</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">only_data</span><span class="p">:</span>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">pgm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelPGM4.png&quot;</span><span class="p">)</span>
-        <span class="c1">#fig = toy_model.get_pgm(pgm_file)</span>
+        <span class="n">pgm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s2">&quot;/../../plots/toyModelPGM.png&quot;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">toy_model</span><span class="o">.</span><span class="n">get_pgm</span><span class="p">(</span><span class="n">pgm_file</span><span class="p">)</span>
 
-    <span class="n">toy_model</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">4000</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">toy_model</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">num_burn</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">temp_dir</span><span class="o">=</span><span class="n">temp_dir</span><span class="p">,</span> <span class="n">save_interval</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">only_data</span><span class="p">:</span>
         <span class="n">chain_consumer</span> <span class="o">=</span> <span class="n">toy_model</span><span class="o">.</span><span class="n">get_consumer</span><span class="p">()</span>
-        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot_walks</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">walk_file</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">plot_file</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="p">[</span><span class="mf">0.28</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">configure_general</span><span class="p">(</span><span class="n">max_ticks</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot_walks</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">walk_file</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">truth</span><span class="o">=</span><span class="n">vals</span><span class="p">)</span>
+        <span class="n">chain_consumer</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">plot_file</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="s2">&quot;grow&quot;</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="n">vals</span><span class="p">)</span>
 
 </pre></div>
 

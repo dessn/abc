@@ -62,7 +62,8 @@ class Parameter(object):
         """ Starting all walkers from the same position is not a good thing to do, so the
         suggested starting positions given by the :func:`get_suggestion` need to be randomised
         slightly so that the walkers start in different positions. This is done by taking the suggested
-        parameter and adding gaussian noise to it, where the scale/width/standard deviation of the spread
+        parameter and adding uniform noise (**not** gaussian any more) to it,
+        where the upper or lower maximum deviation of the suggested parameter
         is given by this function. Overestimating this value to try and ensure a proper spread of
         walker positions can lead to complications and increased convergence, so don't always think
         bigger is better!

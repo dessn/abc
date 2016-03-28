@@ -7,11 +7,11 @@ class Simulation(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def get_simulation(self, omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r, num_trans=50):
+    def get_simulation(self, omega_m, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r, num_trans=50):
         self.logger.info('Getting data for %d transients' % num_trans)
-
+        w_0 = -1
         efficiency = 0.9
-        conversion = 1e7
+        conversion = 1e6
 
         np.random.seed(1)
 

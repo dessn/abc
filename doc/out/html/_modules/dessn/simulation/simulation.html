@@ -81,21 +81,6 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.model.html">dessn.model package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.chain.html">dessn.chain package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.toy.html">dessn.toy package</a></li>
-</ul>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
 </ul>
 
@@ -151,11 +136,11 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Simulation.get_simulation"><a class="viewcode-back" href="../../../dessn.simulation.html#dessn.simulation.simulation.Simulation.get_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">get_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega_m</span><span class="p">,</span> <span class="n">w_0</span><span class="p">,</span> <span class="n">h_0</span><span class="p">,</span> <span class="n">snIa_mean</span><span class="p">,</span> <span class="n">snIa_sigma</span><span class="p">,</span> <span class="n">snII_mean</span><span class="p">,</span> <span class="n">snII_sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">num_trans</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<div class="viewcode-block" id="Simulation.get_simulation"><a class="viewcode-back" href="../../../dessn.simulation.html#dessn.simulation.simulation.Simulation.get_simulation">[docs]</a>    <span class="k">def</span> <span class="nf">get_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega_m</span><span class="p">,</span> <span class="n">h_0</span><span class="p">,</span> <span class="n">snIa_mean</span><span class="p">,</span> <span class="n">snIa_sigma</span><span class="p">,</span> <span class="n">snII_mean</span><span class="p">,</span> <span class="n">snII_sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">num_trans</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Getting data for </span><span class="si">%d</span><span class="s1"> transients&#39;</span> <span class="o">%</span> <span class="n">num_trans</span><span class="p">)</span>
-
+        <span class="n">w_0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">efficiency</span> <span class="o">=</span> <span class="mf">0.9</span>
-        <span class="n">conversion</span> <span class="o">=</span> <span class="mf">1e7</span>
+        <span class="n">conversion</span> <span class="o">=</span> <span class="mf">1e6</span>
 
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 

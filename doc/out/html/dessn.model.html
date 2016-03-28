@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="dessn 0.0.1 documentation" href="index.html"/>
-        <link rel="next" title="dessn.chain package" href="dessn.chain.html"/>
-        <link rel="prev" title="dessn.examples.discrete package" href="dessn.examples.discrete.html"/> 
+        <link rel="up" title="dessn package" href="dessn.html"/>
+        <link rel="next" title="dessn.simulation package" href="dessn.simulation.html"/>
+        <link rel="prev" title="dessn.examples.simple.modelbased package" href="dessn.examples.simple.modelbased.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -81,28 +82,7 @@
           
             
             
-                <ul>
-<li class="toctree-l1"><a class="reference internal" href="dessn.examples.simple.html">dessn.examples.simple package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
-</ul>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">dessn.model package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dessn.model.edge">dessn.model.edge module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dessn.model.model">dessn.model.model module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-dessn.model.parameter">dessn.model.parameter module</a></li>
-</ul>
-</li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="dessn.chain.html">dessn.chain package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="dessn.toy.html">dessn.toy package</a></li>
-</ul>
-<ul class="current">
+                <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="dessn.html">dessn package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="dessn.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="dessn.chain.html">dessn.chain package</a></li>
@@ -150,6 +130,8 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="dessn.html">dessn package</a> &raquo;</li>
       
     <li>dessn.model package</li>
       <li class="wy-breadcrumbs-aside">
@@ -501,7 +483,8 @@ latent and underlying parameters.</p>
 <dd><p>Starting all walkers from the same position is not a good thing to do, so the
 suggested starting positions given by the <a class="reference internal" href="#dessn.model.parameter.Parameter.get_suggestion" title="dessn.model.parameter.Parameter.get_suggestion"><code class="xref py py-func docutils literal"><span class="pre">get_suggestion()</span></code></a> need to be randomised
 slightly so that the walkers start in different positions. This is done by taking the suggested
-parameter and adding gaussian noise to it, where the scale/width/standard deviation of the spread
+parameter and adding uniform noise (<strong>not</strong> gaussian any more) to it,
+where the upper or lower maximum deviation of the suggested parameter
 is given by this function. Overestimating this value to try and ensure a proper spread of
 walker positions can lead to complications and increased convergence, so don&#8217;t always think
 bigger is better!</p>
@@ -859,10 +842,10 @@ particular step in your chain.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="dessn.chain.html" class="btn btn-neutral float-right" title="dessn.chain package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dessn.simulation.html" class="btn btn-neutral float-right" title="dessn.simulation package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="dessn.examples.discrete.html" class="btn btn-neutral" title="dessn.examples.discrete package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="dessn.examples.simple.modelbased.html" class="btn btn-neutral" title="dessn.examples.simple.modelbased package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

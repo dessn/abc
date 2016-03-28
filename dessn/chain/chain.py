@@ -581,6 +581,8 @@ class ChainConsumer(object):
         ax.set_xlim(0, x[-1])
         ax.set_ylabel(parameter)
         ax.scatter(x, data, c="#0345A1", s=2, marker=".", edgecolors="none", alpha=0.5)
+        max_ticks = self.parameters_general["max_ticks"]
+        ax.yaxis.set_major_locator(MaxNLocator(max_ticks, prune="lower"))
         if convolve is not None:
             filt = np.ones(convolve) / convolve
             filtered = np.convolve(data, filt, mode="same")

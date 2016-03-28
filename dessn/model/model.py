@@ -304,11 +304,11 @@ class Model(object):
         for node in node_sorted:
             reqs = node.get_suggestion_requirements()
             if len(reqs) == 0:
-                sigmas.append(node.get_suggestion({}))
+                sigmas.append(node.get_suggestion_sigma({}))
             else:
                 for row in data:
                     node_data = dict((key, row[key]) for key in reqs)
-                    sigmas.append(node.get_suggestion(node_data))
+                    sigmas.append(node.get_suggestion_sigma(node_data))
         return sigmas
 
     def _get_starting_position(self, num_walkers):
@@ -316,6 +316,7 @@ class Model(object):
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
         sigmas = self._get_suggestion_sigma()
+        print("sigmas: ", sigmas)
         self.logger.debug("Initial position is:  %s" % p0)
         if self.num_temps is None and len(p0) < 20: # TODO: confirm. Removing this for high dimensions, as it seems to be ineffective
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
@@ -324,10 +325,14 @@ class Model(object):
             optimised = p0
 
         if self.num_temps is not None:
-            std = np.random.normal(size=(self.num_temps, num_walkers, num_dim)) * np.array(sigmas).reshape((1, 1, -1))
+            std = np.random.uniform(low=-1, high=1, size=(self.num_temps, num_walkers, num_dim)) * np.array(sigmas).reshape((1, 1, -1))
         else:
-            std = np.random.normal(size=(num_walkers, num_dim)) * np.array(sigmas).reshape((1, -1))
+            std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * np.array(sigmas).reshape((1, -1))
+            print("std: ", std)
+        print("optimised: ", optimised)
         start = optimised + std
+        for row in start:
+            print("START: ", row)
         return start
 
     def _get_log_prior(self, theta_dict):

@@ -81,21 +81,6 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.simple.html">dessn.examples.simple package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.examples.discrete.html">dessn.examples.discrete package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.model.html">dessn.model package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.chain.html">dessn.chain package</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../dessn.toy.html">dessn.toy package</a></li>
-</ul>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../dessn.html">dessn package</a></li>
 </ul>
 
@@ -162,7 +147,7 @@
         <span class="k">return</span> <span class="mf">0.30</span></div>
 
 <div class="viewcode-block" id="OmegaM.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.OmegaM.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.02</span></div></div>
+        <span class="k">return</span> <span class="mf">0.05</span></div></div>
 
 
 <div class="viewcode-block" id="W"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.W">[docs]</a><span class="k">class</span> <span class="nc">W</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -178,7 +163,7 @@
         <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span></div>
 
 <div class="viewcode-block" id="W.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.W.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.05</span></div></div>
+        <span class="k">return</span> <span class="mf">0.03</span></div></div>
 
 
 <div class="viewcode-block" id="Hubble"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.Hubble">[docs]</a><span class="k">class</span> <span class="nc">Hubble</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -194,7 +179,7 @@
         <span class="k">return</span> <span class="mi">72</span></div>
 
 <div class="viewcode-block" id="Hubble.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.Hubble.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">2</span></div></div>
+        <span class="k">return</span> <span class="mi">5</span></div></div>
 
 
 <div class="viewcode-block" id="SupernovaIaDist1"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist1">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIaDist1</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -206,7 +191,7 @@
         <span class="k">return</span> <span class="mi">10</span></div>
 
 <div class="viewcode-block" id="SupernovaIaDist1.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist1.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.01</span></div></div>
+        <span class="k">return</span> <span class="mf">0.02</span></div></div>
 
 
 <div class="viewcode-block" id="SupernovaIaDist2"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist2">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIaDist2</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -220,10 +205,10 @@
         <span class="k">return</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="SupernovaIaDist2.get_suggestion"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist2.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.1</span> <span class="c1"># Deliberately order of magnitude wrong to test recovery</span></div>
+        <span class="k">return</span> <span class="mf">0.03</span>  <span class="c1"># Deliberately wrong to test recovery</span></div>
 
 <div class="viewcode-block" id="SupernovaIaDist2.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIaDist2.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.01</span></div></div>
+        <span class="k">return</span> <span class="mf">0.02</span></div></div>
 
 
 <div class="viewcode-block" id="SupernovaIIDist1"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist1">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIIDist1</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -231,10 +216,10 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">SupernovaIIDist1</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;snII_luminosity&quot;</span><span class="p">,</span> <span class="s2">r&quot;$L_{\rm SnII}$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;SNII&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SupernovaIIDist1.get_suggestion"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist1.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">9.5</span></div>
+        <span class="k">return</span> <span class="mf">9.8</span></div>
 
 <div class="viewcode-block" id="SupernovaIIDist1.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist1.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.02</span></div></div>
+        <span class="k">return</span> <span class="mf">0.05</span></div></div>
 
 
 <div class="viewcode-block" id="SupernovaIIDist2"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist2">[docs]</a><span class="k">class</span> <span class="nc">SupernovaIIDist2</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -250,7 +235,7 @@
         <span class="k">return</span> <span class="mf">0.02</span></div>
 
 <div class="viewcode-block" id="SupernovaIIDist2.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaIIDist2.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.002</span></div></div>
+        <span class="k">return</span> <span class="mf">0.01</span></div></div>
 
 
 <div class="viewcode-block" id="SupernovaRate"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaRate">[docs]</a><span class="k">class</span> <span class="nc">SupernovaRate</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
@@ -267,7 +252,7 @@
         <span class="k">return</span> <span class="mf">0.6</span></div>
 
 <div class="viewcode-block" id="SupernovaRate.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.SupernovaRate.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mf">0.1</span></div></div>
+        <span class="k">return</span> <span class="mf">0.2</span></div></div>
 </pre></div>
 
            </div>
