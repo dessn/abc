@@ -224,9 +224,9 @@ class Model(object):
 
     def _get_edge_likelihood(self, theta_dict, edges):
         probability = 0.0
-        edgeIndex = 0
-        while edgeIndex < len(edges):
-            edge = edges[edgeIndex]
+        edge_index = 0
+        while edge_index < len(edges):
+            edge = edges[edge_index]
             dependencies = edge.given + edge.probability_of
             discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], ParameterDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
@@ -246,12 +246,14 @@ class Model(object):
                     else:
                         probability = np.logaddexp(result, probability)
             else:
-                edgeIndex += 1
+                edge_index += 1
                 if isinstance(edge, EdgeTransformation):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
                     result = self._get_log_likelihood(theta_dict, edge)
                     probability += result
+            if not np.isfinite(probability):
+                break
         return probability
 
     def _get_log_posterior(self, theta):
@@ -263,6 +265,8 @@ class Model(object):
                 t.update(observation)
                 result = self._get_edge_likelihood(t, self._ordered_edges[:])
                 probability += result
+                if not np.isfinite(probability):
+                    return probability
         # if np.random.random() < 0.001:
         #     print("P: ", probability, " THETA ", theta)
         return probability
