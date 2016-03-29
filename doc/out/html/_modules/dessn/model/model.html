@@ -353,9 +353,9 @@
 
     <span class="k">def</span> <span class="nf">_get_edge_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_dict</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
         <span class="n">probability</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">edgeIndex</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">while</span> <span class="n">edgeIndex</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
-            <span class="n">edge</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">edgeIndex</span><span class="p">]</span>
+        <span class="n">edge_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">edge_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">edge_index</span><span class="p">]</span>
             <span class="n">dependencies</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">given</span> <span class="o">+</span> <span class="n">edge</span><span class="o">.</span><span class="n">probability_of</span>
             <span class="n">discretes</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameter</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">dependencies</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node_dict</span><span class="p">[</span><span class="n">parameter</span><span class="p">],</span> <span class="n">ParameterDiscrete</span><span class="p">)]</span>
             <span class="n">unfilled</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">discretes</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">theta_dict</span><span class="p">]</span>
@@ -375,12 +375,14 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">probability</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">edgeIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">edge_index</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">EdgeTransformation</span><span class="p">):</span>
                     <span class="n">theta_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_transformation</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_log_likelihood</span><span class="p">(</span><span class="n">theta_dict</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
                     <span class="n">probability</span> <span class="o">+=</span> <span class="n">result</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">probability</span><span class="p">):</span>
+                <span class="k">break</span>
         <span class="k">return</span> <span class="n">probability</span>
 
     <span class="k">def</span> <span class="nf">_get_log_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
@@ -392,6 +394,8 @@
                 <span class="n">t</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_edge_likelihood</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ordered_edges</span><span class="p">[:])</span>
                 <span class="n">probability</span> <span class="o">+=</span> <span class="n">result</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">probability</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">probability</span>
         <span class="c1"># if np.random.random() &lt; 0.001:</span>
         <span class="c1">#     print(&quot;P: &quot;, probability, &quot; THETA &quot;, theta)</span>
         <span class="k">return</span> <span class="n">probability</span>
