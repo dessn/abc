@@ -26,7 +26,7 @@ class Luminosity(ParameterLatent):
         return typeIa * 10 + (1 - typeIa) * 9.8
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.1
 
 
 class Type(ParameterDiscrete):

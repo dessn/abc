@@ -148,7 +148,7 @@ class ToType(Edge):
 
         o_type = data["otype"]
         input_type = data["type"]
-        prob = 0.98 * (o_type == input_type) + 0.01
+        prob = 0.8 * (o_type == input_type) + 0.1
 
         return np.log(prob)
 

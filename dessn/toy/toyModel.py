@@ -84,9 +84,9 @@ if __name__ == "__main__":
     if not only_data:
         np.random.seed(0)
         pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-        fig = toy_model.get_pgm(pgm_file)
+        # fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=5000, num_burn=0, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=9000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()

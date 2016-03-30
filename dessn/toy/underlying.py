@@ -62,7 +62,7 @@ class SupernovaIaDist1(ParameterUnderlying):
         return 10
 
     def get_suggestion_sigma(self, data):
-        return 0.02
+        return 0.05
 
 
 class SupernovaIaDist2(ParameterUnderlying):

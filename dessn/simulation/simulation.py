@@ -33,8 +33,8 @@ class Simulation(object):
         type_Ias = 1.0 * (np.random.random(num_trans) < r)
         type_Iash = ["Ia" if t == 1 else "II" for t in type_Ias]
 
-        # misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
-        misidentification = 1.0 * (np.random.random(num_trans) < 0.0)
+        misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
+        # misidentification = 1.0 * (np.random.random(num_trans) < 0.0)
         type_o = type_Ias * (1 - misidentification) + (1 - type_Ias) * misidentification
         type_oh = ["Ia" if a == 1 else "II" for a in type_o]
 
