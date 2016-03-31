@@ -80,16 +80,28 @@ Then
 &= \int dL\, \frac{ p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) }{P(S_c, S_T, | T=T_o, L,  z=z_o, X) }
 \frac{p(L, S_c, S_T | T=T_o, z=z_o, X)}{P(S_c, S_T| T=T_o,  z=z_o, X)}
 \frac{p(T_o, S_c, S_T | z=z_o, X)}{P(S_c, S_T| z=z_o, X)} \\
-&= \frac{\int dL\, p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o, S_c, S_T | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}\\
-&= \frac{\int dL\, p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}.
+&= \frac{\int dL\, p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o, S_c, S_T | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}.%\\
+%&= \frac{\int dL\, p(L|T_o, z=z_o, X) P(T_o|z=z_o, X) p(c_o | T=T_o, L, z=z_o, X)}{P(S_c, S_T| z=z_o, X)}.
 \end{align}
+
+The photometric and spectroscopic sample selections can be treated as efficiencies $\epsilon_c$, $\epsilon_T$ as
+\begin{align}
+p(c_o, S_c, S_T | T=T_o, L, z=z_o, X) & = \int ds\, p(c_o, s, S_c, S_T | T=T_o, L, z=z_o, X) \\
+ & =p(c_o, S_c | T=T_o, L, z=z_o, X)  \int ds\,  p(s, S_T | T=T_o, L, z=z_o, X) \\
+ & = \epsilon_c(c_o) p(c_o| T=T_o, L, z=z_o, X)  \int ds\, \epsilon_T(s)  p(s | T=T_o, L, z=z_o, X) \\
+ & \approx \epsilon_c(c_o)   \epsilon_T(s_\star) p(c_o| T=T_o, L, z=z_o, X).
+\end{align}
+where the supernova signal in the spectrum $s$ is not extracted and we make the approximation $ p(s | T=T_o, L, z=z_o, X)  = \delta(s-s_\star)$
+and $s_\star(t_T; T=T_o, L, z=z_o, X)$ is the expected signal.
+
 
 The  normalization term sums/integrates over all possible observed types/counts 
 \begin{align}
 P(S_c, S_T| z=z_o, X) & =\sum_i \int dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X) \\
 % & =\sum_i \int_{-\infty}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X) \\
 %& = \sum_i \int_{c_T}^{\infty} dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z, X)\\
-& = \sum_i  P(T_i|z=z_o, X)\int dL\, p(L|T_i, z=z_o, X)  \left[\int dc_o\,  p(c_o,S_c, S_T | T=T_i, L, z=z_o, X)\right].
+& = \sum_i  P(T_i|z=z_o, X)\int dL\, p(L|T_i, z=z_o, X)  \left[\int dc_o\,  p(c_o,S_c, S_T | T=T_i, L, z=z_o, X)\right] \\
+& \approx  \sum_i   P(T_i|z=z_o, X)\int dL\, p(L|T_i, z=z_o, X)  \left[  \epsilon_T(s_\star)   \int dc_o\, \epsilon_c(c_o)  p(c_o| T=T_o, L, z=z_o, X)  \right] .
 \end{align}
 
 \subsection{Case Not Typed}
