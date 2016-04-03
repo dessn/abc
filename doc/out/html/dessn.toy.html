@@ -169,7 +169,7 @@
 an observed flux and flux error from counts. From that, we can calculate the likelihood of an actual flux, given
 our observed flux and observed flux error, assuming a normal distribution:</p>
 <div class="math">
-\[f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}\]\[\sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}\]\[P ({\rm count}_o | f) = \frac{1}{\sqrt{2\pi} \sigma_f} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)\]</div>
+\[c_\star = 10^{Z/2.5} f\]\[P(c_o | c_\star) \sim \mathcal{N}(c_\star, \sqrt{c_\star})\]</div>
 </dd></dl>
 
 </dd></dl>
@@ -554,6 +554,27 @@ to get the discrete type. The method of changing from continuous to discrete wil
 <dl class="method">
 <dt id="dessn.toy.underlying.W.get_suggestion_sigma">
 <code class="descname">get_suggestion_sigma</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/underlying.html#W.get_suggestion_sigma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.underlying.W.get_suggestion_sigma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dessn.toy.underlying.ZCalibration">
+<em class="property">class </em><code class="descclassname">dessn.toy.underlying.</code><code class="descname">ZCalibration</code><a class="reference internal" href="_modules/dessn/toy/underlying.html#ZCalibration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.underlying.ZCalibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dessn.model.html#dessn.model.parameter.ParameterUnderlying" title="dessn.model.parameter.ParameterUnderlying"><code class="xref py py-class docutils literal"><span class="pre">dessn.model.parameter.ParameterUnderlying</span></code></a></p>
+<dl class="method">
+<dt id="dessn.toy.underlying.ZCalibration.get_log_prior">
+<code class="descname">get_log_prior</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/underlying.html#ZCalibration.get_log_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.underlying.ZCalibration.get_log_prior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.toy.underlying.ZCalibration.get_suggestion">
+<code class="descname">get_suggestion</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/underlying.html#ZCalibration.get_suggestion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.underlying.ZCalibration.get_suggestion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dessn.toy.underlying.ZCalibration.get_suggestion_sigma">
+<code class="descname">get_suggestion_sigma</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dessn/toy/underlying.html#ZCalibration.get_suggestion_sigma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dessn.toy.underlying.ZCalibration.get_suggestion_sigma" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

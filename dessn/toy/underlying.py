@@ -2,6 +2,23 @@ from dessn.model.parameter import ParameterUnderlying
 import numpy as np
 
 
+class ZCalibration(ParameterUnderlying):
+    def __init__(self):
+        super(ZCalibration, self).__init__("Zcal", "$Z$", group="Calibration")
+
+    def get_log_prior(self, data):
+        z = data["Zcal"]
+        if z < 0 or z > 10:
+            return -np.inf
+        return 1
+
+    def get_suggestion(self, data):
+        return 6
+
+    def get_suggestion_sigma(self, data):
+        return 1
+
+
 class OmegaM(ParameterUnderlying):
     def __init__(self):
         super(OmegaM, self).__init__("omega_m", r"$\Omega_m$", group="Cosmology")

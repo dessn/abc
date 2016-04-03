@@ -320,7 +320,6 @@ class Model(object):
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
         sigmas = self._get_suggestion_sigma()
-        print("sigmas: ", sigmas)
         self.logger.debug("Initial position is:  %s" % p0)
         if self.num_temps is None and len(p0) < 20: # TODO: confirm. Removing this for high dimensions, as it seems to be ineffective
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
@@ -332,11 +331,7 @@ class Model(object):
             std = np.random.uniform(low=-1, high=1, size=(self.num_temps, num_walkers, num_dim)) * np.array(sigmas).reshape((1, 1, -1))
         else:
             std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * np.array(sigmas).reshape((1, -1))
-            print("std: ", std)
-        print("optimised: ", optimised)
         start = optimised + std
-        for row in start:
-            print("START: ", row)
         return start
 
     def _get_log_prior(self, theta_dict):

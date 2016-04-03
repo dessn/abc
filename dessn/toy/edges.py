@@ -6,7 +6,7 @@ from dessn.model.edge import Edge, EdgeTransformation
 class ToCount(Edge):
 
     def __init__(self):
-        super(ToCount, self).__init__("ocount", "flux")
+        super(ToCount, self).__init__("ocount", ["flux", "Zcal"])
         self.sqrt2pi = np.sqrt(2 * np.pi)
 
     def get_log_likelihood(self, data):
@@ -15,20 +15,14 @@ class ToCount(Edge):
         our observed flux and observed flux error, assuming a normal distribution:
 
         .. math::
-            f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}
+            c_\star = 10^{Z/2.5} f
 
-            \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}
-
-            P ({\rm count}_o | f) = \frac{1}{\sqrt{2\pi} \sigma_f} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)
-
+            P(c_o | c_\star) \sim \mathcal{N}(c_\star, \sqrt{c_\star})
         """
-        efficiency = 0.9
-        conversion = 1e6
-        flux = data["flux"]
-        f = data["ocount"] / efficiency / conversion
-        fe = np.sqrt(data["ocount"]) / efficiency / conversion
-
-        return -(flux - f) * (flux - f) / (2 * fe * fe) - np.log(self.sqrt2pi * fe)
+        cstar = np.power(10, data["Zcal"] / 2.5) * data["flux"]
+        cerr = np.sqrt(cstar)
+        co = data["ocount"]
+        return -(co - cstar) * (co - cstar) / (2 * cerr * cerr) - np.log(self.sqrt2pi * cerr)
 
 
 class ToFlux(EdgeTransformation):

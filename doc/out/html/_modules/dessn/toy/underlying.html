@@ -131,6 +131,23 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
+<div class="viewcode-block" id="ZCalibration"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.ZCalibration">[docs]</a><span class="k">class</span> <span class="nc">ZCalibration</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ZCalibration</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;Zcal&quot;</span><span class="p">,</span> <span class="s2">&quot;$Z$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Calibration&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ZCalibration.get_log_prior"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.ZCalibration.get_log_prior">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Zcal&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="ZCalibration.get_suggestion"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.ZCalibration.get_suggestion">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">6</span></div>
+
+<div class="viewcode-block" id="ZCalibration.get_suggestion_sigma"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.ZCalibration.get_suggestion_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">get_suggestion_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span></div></div>
+
+
 <div class="viewcode-block" id="OmegaM"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.underlying.OmegaM">[docs]</a><span class="k">class</span> <span class="nc">OmegaM</span><span class="p">(</span><span class="n">ParameterUnderlying</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">OmegaM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;omega_m&quot;</span><span class="p">,</span> <span class="s2">r&quot;$\Omega_m$&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;Cosmology&quot;</span><span class="p">)</span>

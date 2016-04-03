@@ -135,7 +135,7 @@
 <div class="viewcode-block" id="ToCount"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount">[docs]</a><span class="k">class</span> <span class="nc">ToCount</span><span class="p">(</span><span class="n">Edge</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ToCount</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ocount&quot;</span><span class="p">,</span> <span class="s2">&quot;flux&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ToCount</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s2">&quot;ocount&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">,</span> <span class="s2">&quot;Zcal&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ToCount.get_log_likelihood"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToCount.get_log_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">get_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
@@ -144,20 +144,14 @@
 <span class="sd">        our observed flux and observed flux error, assuming a normal distribution:</span>
 
 <span class="sd">        .. math::</span>
-<span class="sd">            f_{\rm observed} = \frac{{\rm count}}{{\rm conversion} \times {\rm efficiency}}</span>
+<span class="sd">            c_\star = 10^{Z/2.5} f</span>
 
-<span class="sd">            \sigma_f = \frac{\sqrt{{\rm count}}}{{\rm conversion} \times {\rm efficiency}}</span>
-
-<span class="sd">            P ({\rm count}_o | f) = \frac{1}{\sqrt{2\pi} \sigma_f} \exp\left( - \frac{(f_{\rm observed}-f)^2}{2 \sigma_f^2} \right)</span>
-
+<span class="sd">            P(c_o | c_\star) \sim \mathcal{N}(c_\star, \sqrt{c_\star})</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">efficiency</span> <span class="o">=</span> <span class="mf">0.9</span>
-        <span class="n">conversion</span> <span class="o">=</span> <span class="mf">1e6</span>
-        <span class="n">flux</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span>
-        <span class="n">fe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="n">efficiency</span> <span class="o">/</span> <span class="n">conversion</span>
-
-        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">flux</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">flux</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">fe</span> <span class="o">*</span> <span class="n">fe</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">*</span> <span class="n">fe</span><span class="p">)</span></div></div>
+        <span class="n">cstar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Zcal&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span>
+        <span class="n">cerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cstar</span><span class="p">)</span>
+        <span class="n">co</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ocount&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">co</span> <span class="o">-</span> <span class="n">cstar</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">co</span> <span class="o">-</span> <span class="n">cstar</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">cerr</span> <span class="o">*</span> <span class="n">cerr</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sqrt2pi</span> <span class="o">*</span> <span class="n">cerr</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ToFlux"><a class="viewcode-back" href="../../../dessn.toy.html#dessn.toy.edges.ToFlux">[docs]</a><span class="k">class</span> <span class="nc">ToFlux</span><span class="p">(</span><span class="n">EdgeTransformation</span><span class="p">):</span>
