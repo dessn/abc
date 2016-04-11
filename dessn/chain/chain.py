@@ -207,10 +207,10 @@ class ChainConsumer(object):
             One entry per chain, parameter bounds stored in dictionary with parameter as key
         """
         results = []
-        for chain, parameters in zip(self.chains, self.parameters):
+        for ind, (chain, parameters) in enumerate(zip(self.chains, self.parameters)):
             res = {}
             for i, p in enumerate(parameters):
-                summary = self._get_parameter_summary(chain[:, i], p)
+                summary = self._get_parameter_summary(chain[:, i], p, ind)
                 res[p] = summary
             results.append(res)
         return results
@@ -329,9 +329,12 @@ class ChainConsumer(object):
         r = 1
         if np.abs(resolution) > 2:
             factor = -resolution - 1
-        if resolution == -2:
+        if resolution == -1:
             fmt = "%0.2f"
             r = 2
+        elif resolution == -2:
+            fmt = "%0.3f"
+            r = 3
         upper_error *= 10 ** factor
         lower_error *= 10 ** factor
         maximum *= 10 ** factor
@@ -742,17 +745,17 @@ class ChainConsumer(object):
     def _get_bins(self):
         proposal = [max(20, np.floor(1.2 * np.power(chain.shape[0] / chain.shape[1], 0.3))) for chain in self.chains]
         return proposal
-        
+
     def _clamp(self, val, minimum=0, maximum=255):
         if val < minimum:
             return minimum
         if val > maximum:
             return maximum
         return val
-    
+
     def _scale_colours(self, colour, num):
         # http://thadeusb.com/weblog/2010/10/10/python_scale_hex_color
-        scales = np.logspace(np.log(0.7), np.log(1.4), num)
+        scales = np.logspace(np.log(0.8), np.log(1.4), num)
         colours = [self._scale_colour(colour, scale) for scale in scales]
         return colours
 
@@ -775,22 +778,25 @@ class ChainConsumer(object):
         sigma = sigma.ravel()
         i_sort = np.argsort(sigma)[::-1]
         i_unsort = np.argsort(i_sort)
-    
+
         sigma_cumsum = 1.0* sigma[i_sort].cumsum()
         sigma_cumsum /= sigma_cumsum[-1]
-    
+
         return sigma_cumsum[i_unsort].reshape(shape)
 
-    def _get_parameter_summary(self, data, parameter, bins=50, desired_area=0.6827):
+    def _get_parameter_summary(self, data, parameter, chain_index, desired_area=0.6827):
+        if not self._configured_general:
+            self.configure_general()
+        bins = self.parameters_general['bins'][chain_index]
         hist, edges = np.histogram(data, bins=bins, normed=True)
         edge_centers = 0.5 * (edges[1:] + edges[:-1])
-        
+
         xs = np.linspace(edge_centers[0], edge_centers[-1], 10000)
         ys = interp1d(edge_centers, hist, kind="linear")(xs)
-        
+
         cs = ys.cumsum()
         cs /= cs.max()
-        
+
         startIndex = ys.argmax()
         maxVal = ys[startIndex]
         minVal = 0
@@ -801,7 +807,7 @@ class ChainConsumer(object):
         count = 0
         while x1 is None:
             mid = (maxVal + minVal) / 2.0
-            count += 1                    
+            count += 1
             try:
                 if count > 50:
                     raise Exception("Failed to converge")
