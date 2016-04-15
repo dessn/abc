@@ -1,64 +1,89 @@
 import logging
 import numpy as np
 from astropy.cosmology import FlatwCDM
+import sncosmo
+from astropy.table import Table
 
 
 class Simulation(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def get_simulation(self, omega_m=0.3, Zcal=6, H0=70, snIa_luminosity=10, snIa_sigma=0.01, snII_luminosity=9.8,
-                       snII_sigma=0.02, sn_rate=0.7, num_trans=50):
-        self.logger.info('Getting data for %d transients' % num_trans)
-        w_0 = -1
-
+    def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1, snII_luminosity=-18.5,
+                       snII_sigma=0.3, sn_rate=0.7, num_days=100, area=1, zmax=0.8, mean_num_obs=20):
         np.random.seed(1)
 
+        # Get cosmology
+        w_0 = -1
         cosmology = FlatwCDM(Om0=omega_m, w0=w_0, H0=H0)
 
-        # Get redshifts with some errors in them
-        # z_err_rate = 0.02
-        z_err_rate = 0.0
-        z = np.exp(np.random.uniform(-3, 3.0, num_trans))
-        z2 = np.exp(np.random.uniform(-3, 3.0, num_trans))
-        z_err = 1e-5 * np.ones(num_trans)
-        z_err_realised = z_err * np.random.normal(0, 1, num_trans)
-        catastrophic_failures = 1.0 * (np.random.random(num_trans) < z_err_rate)
-        z_o = (z * (1 - catastrophic_failures) + z2 * catastrophic_failures) + z_err_realised
+        # Get redshift distribution of supernova
+        tmin = 56700
+        tmax = tmin + num_days
+        model = sncosmo.Model(source='salt2')
+        redshifts = list(sncosmo.zdist(0., zmax, time=num_days, area=area))
+        types = ["Ia" if np.random.random() < sn_rate else "II" for z in redshifts]
+        lums = [snIa_luminosity if t == "Ia" else snII_luminosity for t in types]
+        sigs = [snIa_sigma if t == "Ia" else snII_sigma for t in types]
 
-        # From the actual redshift, grab the luminosity distance
-        luminosity_distance = cosmology.luminosity_distance(z).value
-        # Get the types from the underlying type rate
-        type_Ias = 1.0 * (np.random.random(num_trans) < sn_rate)
-        type_Iash = ["Ia" if t == 1 else "II" for t in type_Ias]
+        self.logger.info('Getting data for %d days of transients, with %d supernova' % (num_days, len(redshifts)))
 
-        misidentification = 1.0 * (np.random.random(num_trans) < 0.1)
-        # misidentification = 1.0 * (np.random.random(num_trans) < 0.0)
-        type_o = type_Ias * (1 - misidentification) + (1 - type_Ias) * misidentification
-        type_oh = ["Ia" if a == 1 else "II" for a in type_o]
+        num_obs = np.ceil(np.random.normal(loc=mean_num_obs, scale=2.0, size=len(redshifts)))
 
-        # Get luminosities from type
-        luminosity_Ia = snIa_luminosity + np.random.normal(0, snIa_sigma, num_trans)
-        luminosity_II = snII_luminosity + np.random.normal(0, snII_sigma, num_trans)
-        actual_lum = type_Ias * luminosity_Ia + (1 - type_Ias) * luminosity_II
+        observations = [self.get_supernova(z, n, tmin, tmax, cosmology, x0_mean=l, x0_sigma=s) for z, n, l, s in zip(redshifts, num_obs, lums, sigs)]
 
-        # Get flux from luminosity distance and luminosity
-        # Remember luminosity is log luminosity
-        log_flux = actual_lum - np.log(4 * np.pi * luminosity_distance * luminosity_distance)
-        flux = np.exp(log_flux)
-
-        # Get photon counts from flux
-        count = flux * np.power(10, Zcal / 2.5)
-        count_sigma = np.sqrt(count)
-        count_o = count + np.random.normal(0, count_sigma, num_trans)
-
-        observations = {
-            "z_o": z_o.tolist(),
-            "type_o": type_oh,
-            "count_o": count_o.tolist()
+        theta = {
+            "$w$": w_0,
+            r"$\Omega_m$": omega_m,
+            r"$H_0$": H0,
         }
-        # theta = [omega_m, w_0, h_0, snIa_mean, snIa_sigma, snII_mean, snII_sigma, r] + actual_lum.tolist()
-        theta = [omega_m, Zcal, H0, snIa_luminosity, snIa_sigma, snII_luminosity, snII_sigma, sn_rate] + actual_lum.tolist()
-        return observations, theta
+        for i, obs in enumerate(observations):
+            for k, v in obs.meta.items():
+                key = "$%s_{%d}$" % (k, i)
+                theta[key] = v
+        print(theta)
+        data = {"z_o": redshifts, "type_o": types, "lcs_o": observations}
+        return data, theta
+
+    def get_supernova(self, z, num_obs, tmin, tmax, cosmology, x0_mean=-19.3, x0_sigma=0.1):
+        t0 = np.random.uniform(tmin, tmax)
+        ts = np.linspace(t0 - 30, t0 + 60, num_obs)
+
+        times = np.array([[t, t + 0.1, t + 0.2] for t in ts]).flatten()
+        bands = [b for t in ts for b in ['desg', 'desr', 'desi']]
+        gains = np.ones(times.shape)
+        skynoise = 50 * np.ones(times.shape)
+        zp = 30 * np.ones(times.shape)
+        zpsys = ['ab'] * times.size
+
+        obs = Table({'time': times,
+                     'band': bands,
+                     'gain': gains,
+                     'skynoise': skynoise,
+                     'zp': zp,
+                     'zpsys': zpsys})
+
+        model = sncosmo.Model(source='salt2')
+
+        mabs = np.random.normal(x0_mean, x0_sigma)
+        model.set(z=z)
+        model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
+        x0 = model.get('x0')
+        p = {'z': z,
+             't0': t0,
+             'x0': x0,
+             'x1': np.random.normal(0., 1.),
+             'c': np.random.normal(0., 0.1)
+             }
+
+        lcs = sncosmo.realize_lcs(obs, model, [p])
+        return lcs[0]
 
 
+if __name__ == "__main__":
+    sim = Simulation()
+
+    observations, theta = sim.get_simulation(num_days=5)
+
+    print(theta)
+    print(observations)

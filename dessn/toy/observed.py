@@ -1,9 +1,9 @@
 from dessn.model.parameter import ParameterObserved
 
 
-class ObservedCounts(ParameterObserved):
-    def __init__(self, counts):
-        super(ObservedCounts, self).__init__("ocount", "$c_o$", counts, group="Obs. Counts")
+class ObservedLightCurves(ParameterObserved):
+    def __init__(self, lcs):
+        super(ObservedLightCurves, self).__init__("olc", "$LC$", lcs, group="Obs. Light Curves")
 
 
 class ObservedRedshift(ParameterObserved):

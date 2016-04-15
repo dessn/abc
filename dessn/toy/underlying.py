@@ -1,22 +1,22 @@
 from dessn.model.parameter import ParameterUnderlying
 import numpy as np
 
-
-class ZCalibration(ParameterUnderlying):
-    def __init__(self):
-        super(ZCalibration, self).__init__("Zcal", "$Z$", group="Calibration")
-
-    def get_log_prior(self, data):
-        z = data["Zcal"]
-        if z < 0 or z > 10:
-            return -np.inf
-        return 1
-
-    def get_suggestion(self, data):
-        return 6
-
-    def get_suggestion_sigma(self, data):
-        return 1
+#
+# class ZCalibration(ParameterUnderlying):
+#     def __init__(self):
+#         super(ZCalibration, self).__init__("Zcal", "$Z$", group="Calibration")
+#
+#     def get_log_prior(self, data):
+#         z = data["Zcal"]
+#         if z < 0 or z > 10:
+#             return -np.inf
+#         return 1
+#
+#     def get_suggestion(self, data):
+#         return 6
+#
+#     def get_suggestion_sigma(self, data):
+#         return 1
 
 
 class OmegaM(ParameterUnderlying):
@@ -38,20 +38,20 @@ class OmegaM(ParameterUnderlying):
         return 0.05
 
 
-class W(ParameterUnderlying):
-    def __init__(self):
-        super(W, self).__init__("w", "$w$", group="Cosmology")
-        self.sigma = 0.08 * 10
-        self.prefactor = np.log(np.sqrt(2 * np.pi) * self.sigma)
-
-    def get_log_prior(self, data):
-        return -(data["w"] - 1.019) * (data["w"]* - 1.019) / (2 * self.sigma * self.sigma) - self.prefactor
-
-    def get_suggestion(self, data):
-        return -1.0
-
-    def get_suggestion_sigma(self, data):
-        return 0.03
+# class W(ParameterUnderlying):
+#     def __init__(self):
+#         super(W, self).__init__("w", "$w$", group="Cosmology")
+#         self.sigma = 0.08 * 10
+#         self.prefactor = np.log(np.sqrt(2 * np.pi) * self.sigma)
+#
+#     def get_log_prior(self, data):
+#         return -(data["w"] - 1.019) * (data["w"]* - 1.019) / (2 * self.sigma * self.sigma) - self.prefactor
+#
+#     def get_suggestion(self, data):
+#         return -1.0
+#
+#     def get_suggestion_sigma(self, data):
+#         return 0.03
 
 
 class Hubble(ParameterUnderlying):
@@ -76,10 +76,10 @@ class SupernovaIaDist1(ParameterUnderlying):
         super(SupernovaIaDist1, self).__init__("snIa_luminosity", r"$L_{\rm SnIa}$", group="SNIa")
 
     def get_suggestion(self, data):
-        return 10
+        return -19
 
     def get_suggestion_sigma(self, data):
-        return 0.05
+        return 0.1
 
 
 class SupernovaIaDist2(ParameterUnderlying):
@@ -93,7 +93,7 @@ class SupernovaIaDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.03  # Deliberately wrong to test recovery
+        return 0.1  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
         return 0.02
@@ -104,10 +104,10 @@ class SupernovaIIDist1(ParameterUnderlying):
         super(SupernovaIIDist1, self).__init__("snII_luminosity", r"$L_{\rm SnII}$", group="SNII")
 
     def get_suggestion(self, data):
-        return 9.8
+        return -18
 
     def get_suggestion_sigma(self, data):
-        return 0.05
+        return 0.2
 
 
 class SupernovaIIDist2(ParameterUnderlying):
@@ -120,10 +120,10 @@ class SupernovaIIDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.02
+        return 0.2
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.1
 
 
 class SupernovaRate(ParameterUnderlying):
@@ -140,4 +140,4 @@ class SupernovaRate(ParameterUnderlying):
         return 0.6
 
     def get_suggestion_sigma(self, data):
-        return 0.2
+        return 0.3

@@ -8,7 +8,7 @@ from emcee.utils import MPIPool
 import sys
 from scipy.optimize import fmin_bfgs
 import types
-import copy_reg
+import copyreg
 import itertools
 import scipy.optimize
 
@@ -539,4 +539,4 @@ def _pickle_method(m):
     else:
         return getattr, (m.im_self, m.im_func.func_name)
 
-copy_reg.pickle(types.MethodType, _pickle_method)
+copyreg.pickle(types.MethodType, _pickle_method)

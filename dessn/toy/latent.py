@@ -1,5 +1,5 @@
 from dessn.model.parameter import ParameterLatent, ParameterTransformation, ParameterDiscrete
-
+import numpy as np
 
 class Redshift(ParameterTransformation):
     def __init__(self, n):
@@ -12,7 +12,7 @@ class Redshift(ParameterTransformation):
 
 class Luminosity(ParameterLatent):
     def __init__(self, n):
-        super(Luminosity, self).__init__("luminosity", "$L$", group="Luminosity")
+        super(Luminosity, self).__init__("x0", "$x_0$", group="Supernova Properties")
         self.n = n
 
     def get_num_latent(self):
@@ -23,10 +23,64 @@ class Luminosity(ParameterLatent):
 
     def get_suggestion(self, data):
         typeIa = data["otype"] == "Ia"
-        return typeIa * 10 + (1 - typeIa) * 9.8
+        return typeIa * -19.3 + (1 - typeIa) * -18
 
     def get_suggestion_sigma(self, data):
-        return 0.1
+        return 0.2
+
+
+class Stretch(ParameterLatent):
+    def __init__(self, n):
+        super().__init__("x1", "$x_1$", group="Supernova Properties")
+        self.n = n
+
+    def get_num_latent(self):
+        return self.n
+
+    def get_suggestion_requirements(self):
+        return []
+
+    def get_suggestion(self, data):
+        return 0
+
+    def get_suggestion_sigma(self, data):
+        return 1.0
+
+
+class PeakTime(ParameterLatent):
+    def __init__(self, n):
+        super().__init__("t0", "$t_0$", group="Supernova Properties")
+        self.n = n
+
+    def get_num_latent(self):
+        return self.n
+
+    def get_suggestion_requirements(self):
+        return ["olc"]
+
+    def get_suggestion(self, data):
+        return np.mean(data["olc"]["time"])
+
+    def get_suggestion_sigma(self, data):
+        return 30
+
+
+class Colour(ParameterLatent):
+    def __init__(self, n):
+        super().__init__("c", "$c$", group="Supernova Properties")
+        self.n = n
+
+    def get_num_latent(self):
+        return self.n
+
+    def get_suggestion_requirements(self):
+        return []
+
+    def get_suggestion(self, data):
+        return 0
+
+    def get_suggestion_sigma(self, data):
+        return 0.3
 
 
 class Type(ParameterDiscrete):
