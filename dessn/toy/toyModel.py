@@ -7,7 +7,6 @@ from dessn.simulation.simulation import Simulation
 import logging
 import sys
 import os
-import numpy as np
 
 
 class ToyModel(Model):
@@ -72,20 +71,20 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
     walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
 
-    vals = {"num_days": 10, "omega_m": 0.28, "H0": 72, "snIa_luminosity": -19.3, "snIa_sigma": 0.1,
+    vals = {"num_days": 30, "omega_m": 0.28, "H0": 72, "snIa_luminosity": -19.3, "snIa_sigma": 0.1,
             "snII_luminosity": -18, "snII_sigma": 0.2, "sn_rate": 0.5}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
     toy_model = ToyModel(observations)
-
+    '''
     if not only_data:
         np.random.seed(102)
         pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-        fig = toy_model.get_pgm(pgm_file)
+        fig = toy_model.get_pgm(pgm_file)'''
 
-    '''
+
     toy_model.fit_model(num_steps=5000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
-
+    '''
     if not only_data:
         chain_consumer = toy_model.get_consumer()
         chain_consumer.configure_general(max_ticks=4, bins=0.7)

@@ -2,27 +2,6 @@ import numpy as np
 from astropy.cosmology import FlatwCDM
 from dessn.model.edge import Edge, EdgeTransformation
 import sncosmo
-#
-# class ToCount(Edge):
-#
-#     def __init__(self):
-#         super(ToCount, self).__init__("ocount", ["flux", "Zcal"])
-#         self.sqrt2pi = np.sqrt(2 * np.pi)
-#
-#     def get_log_likelihood(self, data):
-#         r""" Given CCD efficiency, convert from count to flux :math:`f`. We go from counts, assume Poisson error, to get
-#         an observed flux and flux error from counts. From that, we can calculate the likelihood of an actual flux, given
-#         our observed flux and observed flux error, assuming a normal distribution:
-#
-#         .. math::
-#             c_\star = 10^{Z/2.5} f
-#
-#             P(c_o | c_\star) \sim \mathcal{N}(c_\star, \sqrt{c_\star})
-#         """
-#         cstar = np.power(10, data["Zcal"] / 2.5) * data["flux"]
-#         cerr = np.sqrt(cstar)
-#         co = data["ocount"]
-#         return -(co - cstar) * (co - cstar) / (2 * cerr * cerr) - np.log(self.sqrt2pi * cerr)
 
 
 class ToLightCurve(Edge):
@@ -36,9 +15,14 @@ class ToLightCurve(Edge):
         H0 = data["H0"]
         om = data["omega_m"]
         cosmology = FlatwCDM(H0, om)
-        self.model.set_source_peakabsmag(data["x0"], 'bessellb', 'ab', cosmo=cosmology)
         self.model.parameters = [data["redshift"], data["t0"], data["x0"], data["x1"], data["c"]]
+        self.model.set_source_peakabsmag(data["x0"], 'bessellb', 'ab', cosmo=cosmology)
         chi2 = sncosmo.chisq(data["olc"], self.model)
+        print(chi2, [data["redshift"], data["t0"], data["x0"], data["x1"], data["c"]])
+        print(self.model.bandflux(data["olc"]['band'], data["olc"]['time'], zp=data["olc"]['zp'], zpsys=data["olc"]['zpsys']))
+        if (not np.isfinite(chi2)):
+            print(self.model.param_names)
+            raise Exception("sigh")
         return -0.5 * chi2
 
 
@@ -105,7 +89,7 @@ class ToLuminosity(Edge):
 
         # TODO: Where should we consistency check parameters? Should we need to?
         sn_type = data["type"]
-        luminosity = data["luminosity"]
+        luminosity = data["x0"]
         if sn_type == "Ia":
             snIa_mean = data["snIa_luminosity"]
             snIa_std = data["snIa_sigma"]

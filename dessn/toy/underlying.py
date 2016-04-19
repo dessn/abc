@@ -79,7 +79,7 @@ class SupernovaIaDist1(ParameterUnderlying):
         return -19
 
     def get_suggestion_sigma(self, data):
-        return 0.1
+        return 0.01
 
 
 class SupernovaIaDist2(ParameterUnderlying):
@@ -93,7 +93,7 @@ class SupernovaIaDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.1  # Deliberately wrong to test recovery
+        return 0.03  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
         return 0.02
@@ -104,10 +104,10 @@ class SupernovaIIDist1(ParameterUnderlying):
         super(SupernovaIIDist1, self).__init__("snII_luminosity", r"$L_{\rm SnII}$", group="SNII")
 
     def get_suggestion(self, data):
-        return -18
+        return -18.5
 
     def get_suggestion_sigma(self, data):
-        return 0.2
+        return 0.01
 
 
 class SupernovaIIDist2(ParameterUnderlying):
@@ -120,10 +120,10 @@ class SupernovaIIDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.2
+        return 0.02
 
     def get_suggestion_sigma(self, data):
-        return 0.1
+        return 0.01
 
 
 class SupernovaRate(ParameterUnderlying):

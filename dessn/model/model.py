@@ -190,6 +190,7 @@ class Model(object):
             array = arrs[m]
             for a, d in zip(array, data):
                 d[m] = a
+        print("RESULT: ", result)
         return result, data
 
     def get_log_prior(self, theta):
@@ -289,12 +290,14 @@ class Model(object):
         data = self.data
         for node in node_sorted:
             reqs = node.get_suggestion_requirements()
-            if len(reqs) == 0:
-                theta.append(node.get_suggestion({}))
+            if not isinstance(node, ParameterLatent):
+                node_data = dict((key, row[key]) for key in reqs)
+                theta.append(node.get_suggestion(node_data))
             else:
                 for row in data:
                     node_data = dict((key, row[key]) for key in reqs)
                     theta.append(node.get_suggestion(node_data))
+        print("T1 ", self._theta_names, theta)
         return theta
 
     def _get_suggestion_sigma(self):
@@ -307,7 +310,7 @@ class Model(object):
         data = self.data
         for node in node_sorted:
             reqs = node.get_suggestion_requirements()
-            if len(reqs) == 0:
+            if not isinstance(node, ParameterLatent):
                 sigmas.append(node.get_suggestion_sigma({}))
             else:
                 for row in data:

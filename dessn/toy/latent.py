@@ -1,6 +1,7 @@
 from dessn.model.parameter import ParameterLatent, ParameterTransformation, ParameterDiscrete
 import numpy as np
 
+
 class Redshift(ParameterTransformation):
     def __init__(self, n):
         super(Redshift, self).__init__("redshift", "$z$", group="Redshift")

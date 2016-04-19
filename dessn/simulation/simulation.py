@@ -47,7 +47,7 @@ class Simulation(object):
 
     def get_supernova(self, z, num_obs, tmin, tmax, cosmology, x0_mean=-19.3, x0_sigma=0.1):
         t0 = np.random.uniform(tmin, tmax)
-        ts = np.linspace(t0 - 30, t0 + 60, num_obs)
+        ts = np.linspace(t0 - 60, t0 + 60, num_obs)
 
         times = np.array([[t, t + 0.1, t + 0.2] for t in ts]).flatten()
         bands = [b for t in ts for b in ['desg', 'desr', 'desi']]
@@ -72,8 +72,8 @@ class Simulation(object):
         p = {'z': z,
              't0': t0,
              'x0': x0,
-             'x1': np.random.normal(0., 1.),
-             'c': np.random.normal(0., 0.1)
+             'x1': np.random.normal(0., 0.001*1.),
+             'c': np.random.normal(0., 0.001*0.1)
              }
 
         lcs = sncosmo.realize_lcs(obs, model, [p])
@@ -83,7 +83,4 @@ class Simulation(object):
 if __name__ == "__main__":
     sim = Simulation()
 
-    observations, theta = sim.get_simulation(num_days=5)
 
-    print(theta)
-    print(observations)
