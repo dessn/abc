@@ -77,6 +77,8 @@ class Simulation(object):
              }
 
         lcs = sncosmo.realize_lcs(obs, model, [p])
+        #model.set(**p)
+        #print(p, sncosmo.chisq(lcs[0], model))
         return lcs[0]
 
 

@@ -82,12 +82,11 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
         fig = toy_model.get_pgm(pgm_file)'''
 
+    toy_model.fit_model(num_steps=5000, num_burn=500, temp_dir=temp_dir, save_interval=60)
 
-    toy_model.fit_model(num_steps=5000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
-    '''
     if not only_data:
         chain_consumer = toy_model.get_consumer()
         chain_consumer.configure_general(max_ticks=4, bins=0.7)
-        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta[:8])
-        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta[:8])'''
+        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta)
+        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta)
 

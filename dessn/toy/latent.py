@@ -13,7 +13,7 @@ class Redshift(ParameterTransformation):
 
 class Luminosity(ParameterLatent):
     def __init__(self, n):
-        super(Luminosity, self).__init__("x0", "$x_0$", group="Supernova Properties")
+        super(Luminosity, self).__init__("luminosity", "$L$", group="Supernova Properties")
         self.n = n
 
     def get_num_latent(self):
@@ -24,7 +24,7 @@ class Luminosity(ParameterLatent):
 
     def get_suggestion(self, data):
         typeIa = data["otype"] == "Ia"
-        return typeIa * -19.3 + (1 - typeIa) * -18
+        return typeIa * -19.3 + (1 - typeIa) * -18.5
 
     def get_suggestion_sigma(self, data):
         return 0.2

@@ -190,7 +190,7 @@ class Model(object):
             array = arrs[m]
             for a, d in zip(array, data):
                 d[m] = a
-        print("RESULT: ", result)
+        # print("RESULT: ", result)
         return result, data
 
     def get_log_prior(self, theta):

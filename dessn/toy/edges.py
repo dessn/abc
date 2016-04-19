@@ -6,7 +6,7 @@ import sncosmo
 
 class ToLightCurve(Edge):
     def __init__(self):
-        super(ToLightCurve, self).__init__("olc", ["redshift", "x0", "x1", "t0", "c", "omega_m", "H0"])
+        super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
         self.model = sncosmo.Model(source="salt2")
 
     def get_log_likelihood(self, data):
@@ -15,11 +15,15 @@ class ToLightCurve(Edge):
         H0 = data["H0"]
         om = data["omega_m"]
         cosmology = FlatwCDM(H0, om)
-        self.model.parameters = [data["redshift"], data["t0"], data["x0"], data["x1"], data["c"]]
-        self.model.set_source_peakabsmag(data["x0"], 'bessellb', 'ab', cosmo=cosmology)
+        # print("LLL ", data["luminosity"], data["redshift"])
+        self.model.set(z=data["redshift"])
+        self.model.set_source_peakabsmag(data["luminosity"], 'bessellb', 'ab', cosmo=cosmology)
+        x0 = self.model.get("x0")
+        self.model.parameters = [data["redshift"], data["t0"], x0, data["x1"], data["c"]]
+
         chi2 = sncosmo.chisq(data["olc"], self.model)
-        print(chi2, [data["redshift"], data["t0"], data["x0"], data["x1"], data["c"]])
-        print(self.model.bandflux(data["olc"]['band'], data["olc"]['time'], zp=data["olc"]['zp'], zpsys=data["olc"]['zpsys']))
+        # print(chi2, [data["redshift"], data["t0"], x0, data["x1"], data["c"]])
+        # print("FLUX", self.model.bandflux(data["olc"]['band'], data["olc"]['time'], zp=data["olc"]['zp'], zpsys=data["olc"]['zpsys']))
         if (not np.isfinite(chi2)):
             print(self.model.param_names)
             raise Exception("sigh")
@@ -67,7 +71,7 @@ class ToRedshift(EdgeTransformation):
 
 class ToLuminosity(Edge):
     def __init__(self):
-        super(ToLuminosity, self).__init__("x0", ["type", "snIa_luminosity", "snIa_sigma", "snII_luminosity", "snII_sigma"])
+        super(ToLuminosity, self).__init__("luminosity", ["type", "snIa_luminosity", "snIa_sigma", "snII_luminosity", "snII_sigma"])
         self.sqrt2pi = np.sqrt(2 * np.pi)
 
     def get_log_likelihood(self, data):
@@ -89,7 +93,7 @@ class ToLuminosity(Edge):
 
         # TODO: Where should we consistency check parameters? Should we need to?
         sn_type = data["type"]
-        luminosity = data["x0"]
+        luminosity = data["luminosity"]
         if sn_type == "Ia":
             snIa_mean = data["snIa_luminosity"]
             snIa_std = data["snIa_sigma"]

@@ -767,9 +767,9 @@ class ChainConsumer(object):
             if scalefactor < 0 or len(hex) != 6:
                 return hex
             r, g, b = int(hex[:2], 16), int(hex[2:4], 16), int(hex[4:], 16)
-        r = self._clamp(r * scalefactor)
-        g = self._clamp(g * scalefactor)
-        b = self._clamp(b * scalefactor)
+        r = self._clamp(int(r * scalefactor))
+        g = self._clamp(int(g * scalefactor))
+        b = self._clamp(int(b * scalefactor))
         return "#%02x%02x%02x" % (r, g, b)
 
     def _convert_to_stdev(self, sigma):
