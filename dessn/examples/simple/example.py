@@ -122,7 +122,7 @@ class Example(object):
 
         Parameters
         ----------
-        theta : array of model parameters
+        theta : array of framework parameters
 
         Returns
         -------
@@ -139,7 +139,7 @@ class Example(object):
 
         Parameters
         ----------
-        theta : array of model parameters
+        theta : array of framework parameters
         data : array of length `n`
             An array of observed luminosities
         error : array of length `n`

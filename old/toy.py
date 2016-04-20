@@ -285,7 +285,7 @@ def main():
 			if ia_only:
 				app+='ia_only.'
 
-			with open('../results/temp'+dire+'/model'+app+str(ns)+'.pkl', 'wb') as f:
+			with open('../results/temp'+dire+'/framework'+app+str(ns)+'.pkl', 'wb') as f:
 				pickle.dump([fit.extract(), logposterior], f)
 
 
@@ -301,7 +301,7 @@ def main():
 	# 	app+='.ia_only.'
 	# if ADU0 == 0.:
 	# 	app+='.noMalm.'
-	# with open('../results/temp/model'+app+str(ns)+'.pkl', 'wb') as f:
+	# with open('../results/temp/framework'+app+str(ns)+'.pkl', 'wb') as f:
 	# 	pickle.dump([fit.extract(), logposterior], f)
 
 	# ns=0.2
@@ -314,7 +314,7 @@ def main():
 	# 	app+='.ia_only.'
 	# if ADU0 == 0.:
 	# 	app+='.noMalm.'
-	# with open('../results/temp/model'+app+str(ns)+'.pkl', 'wb') as f:
+	# with open('../results/temp/framework'+app+str(ns)+'.pkl', 'wb') as f:
 	# 	pickle.dump([fit.extract(), logposterior], f)
 
 

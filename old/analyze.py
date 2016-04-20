@@ -23,7 +23,7 @@ def individual(N_s, ia_only = False, ADU0=None,N_sn=None,dir='temp'):
 		app+='ia_only.'
 	if ADU0 == 0.:
 			app+='noMalm.'
-	[extract,logposterior] = pickle.load(file('../results/'+dir+'/model'+app+str(N_s)+'.pkl','rb'))
+	[extract,logposterior] = pickle.load(file('../results/'+dir+'/framework'+app+str(N_s)+'.pkl','rb'))
 #	print numpy.abs((extract['w'] < -1).sum()*1. / len(extract['w'])-0.5)*2
 	n_samples = len(extract[extract.keys()[0]])
 
@@ -178,7 +178,7 @@ def group(nspec):
 	deltas = numpy.zeros((len(nspec),len(levels)/2))
 	ind=0
 	for n in nspec:
-		[extract, logposterior] = pickle.load(file('../results/temp/model'+str(n)+'.pkl','rb'))
+		[extract, logposterior] = pickle.load(file('../results/temp/framework'+str(n)+'.pkl','rb'))
 		wsort = numpy.sort(extract['w'])
 		ans[ind,:] = wsort[numpy.round(levels*len(wsort)).astype(int)]
 		for i in xrange(len(levels)/2):

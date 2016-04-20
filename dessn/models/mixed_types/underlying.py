@@ -1,4 +1,4 @@
-from dessn.model.parameter import ParameterUnderlying
+from dessn.framework.parameter import ParameterUnderlying
 import numpy as np
 
 #
@@ -76,10 +76,10 @@ class SupernovaIaDist1(ParameterUnderlying):
         super(SupernovaIaDist1, self).__init__("snIa_luminosity", r"$L_{\rm SnIa}$", group="SNIa")
 
     def get_suggestion(self, data):
-        return -19
+        return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.1
 
 
 class SupernovaIaDist2(ParameterUnderlying):
@@ -93,10 +93,10 @@ class SupernovaIaDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.03  # Deliberately wrong to test recovery
+        return 0.1  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
-        return 0.02
+        return 0.05
 
 
 class SupernovaIIDist1(ParameterUnderlying):
@@ -107,7 +107,7 @@ class SupernovaIIDist1(ParameterUnderlying):
         return -18.5
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.20
 
 
 class SupernovaIIDist2(ParameterUnderlying):
@@ -120,10 +120,10 @@ class SupernovaIIDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.02
+        return 0.2
 
     def get_suggestion_sigma(self, data):
-        return 0.01
+        return 0.1
 
 
 class SupernovaRate(ParameterUnderlying):

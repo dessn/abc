@@ -3,9 +3,9 @@ import os
 import sys
 
 import numpy as np
-from dessn.model.edge import Edge
-from dessn.model.model import Model
-from dessn.model.parameter import ParameterObserved, ParameterUnderlying, ParameterDiscrete
+from dessn.framework.edge import Edge
+from dessn.framework.model import Model
+from dessn.framework.parameter import ParameterObserved, ParameterUnderlying, ParameterDiscrete
 
 
 def get_data(n=200):
@@ -106,9 +106,9 @@ class ToRate(Edge):
 
 
 class DiscreteModel(Model):
-    r"""A small example model illustrating how to use discrete parameters.
+    r"""A small example framework illustrating how to use discrete parameters.
 
-    As normal, the model is set up by declaring parameters (which can be thought of like nodes on a PGM),
+    As normal, the framework is set up by declaring parameters (which can be thought of like nodes on a PGM),
     and declaring the edges between parameters (the conditional probabilities).
 
     This is the primary class in this package, and you can see that other classes
@@ -117,7 +117,7 @@ class DiscreteModel(Model):
     I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes,
     and encourage viewing the code directly to understand exactly what is happening.
 
-    Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:
+    Running this file in python first generates a PGM of the framework, and then runs ``emcee`` and creates a corner plot:
 
     .. figure::     ../plots/discretePGM.png
         :align:     center

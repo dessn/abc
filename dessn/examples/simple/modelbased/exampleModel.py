@@ -5,9 +5,9 @@ import sys
 import numpy as np
 
 from dessn.examples.simple.example import Example
-from dessn.model.edge import Edge, EdgeTransformation
-from dessn.model.model import Model
-from dessn.model.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation
+from dessn.framework.edge import Edge, EdgeTransformation
+from dessn.framework.model import Model
+from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation
 
 
 class ObservedFlux(ParameterObserved):
@@ -46,7 +46,7 @@ class LatentLuminosity(ParameterLatent):
 class UnderlyingSupernovaDistribution1(ParameterUnderlying):
 
     def get_log_prior(self, data):
-        """ We model the prior enforcing realistic values"""
+        """ We framework the prior enforcing realistic values"""
         mean = data["SN_theta_1"]
         if mean < 0 or mean > 200:
             return -np.inf
@@ -68,7 +68,7 @@ class UnderlyingSupernovaDistribution1(ParameterUnderlying):
 class UnderlyingSupernovaDistribution2(ParameterUnderlying):
 
     def get_log_prior(self, data):
-        """ We model the prior enforcing realistic values"""
+        """ We framework the prior enforcing realistic values"""
         sigma = data["SN_theta_2"]
         if sigma < 0 or sigma > 100:
             return -np.inf
@@ -127,7 +127,7 @@ class LuminosityToSupernovaDistribution(Edge):
 class ExampleModel(Model):
     r"""An implementation of :class:`.ExampleLatent` using classes instead of procedural code.
 
-    The model is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the model
+    The framework is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the framework
     to verify its correctness.
 
     This is the primary class in this package, and you can see that other classes inherit from either
@@ -136,7 +136,7 @@ class ExampleModel(Model):
     I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes, and encourage viewing the
     code directly to understand exactly what is happening.
 
-    Running this file in python first generates a PGM of the model, and then runs ``emcee`` and creates a corner plot:
+    Running this file in python first generates a PGM of the framework, and then runs ``emcee`` and creates a corner plot:
 
     .. figure::     ../plots/exampleModel.png
         :align:     center
@@ -147,7 +147,7 @@ class ExampleModel(Model):
     .. figure::     ../plots/exampleModelWalk.png
         :align:     center
 
-    We could also run the example model using the PT sampler by specifying a number of temperature to the ``fit_model``
+    We could also run the example framework using the PT sampler by specifying a number of temperature to the ``fit_model``
     method. You would get similar results.
     """
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    logging.info("Creating model")
+    logging.info("Creating framework")
     exampleModel = ExampleModel()
     temp_dir = os.path.abspath(dir_name + "/../../../../temp/exampleModel")
 

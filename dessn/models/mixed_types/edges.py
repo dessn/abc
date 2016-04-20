@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.cosmology import FlatwCDM
-from dessn.model.edge import Edge, EdgeTransformation
+from dessn.framework.edge import Edge, EdgeTransformation
 import sncosmo
 
 
@@ -23,7 +23,7 @@ class ToLightCurve(Edge):
 
         chi2 = sncosmo.chisq(data["olc"], self.model)
         # print(chi2, [data["redshift"], data["t0"], x0, data["x1"], data["c"]])
-        # print("FLUX", self.model.bandflux(data["olc"]['band'], data["olc"]['time'], zp=data["olc"]['zp'], zpsys=data["olc"]['zpsys']))
+        # print("FLUX", self.framework.bandflux(data["olc"]['band'], data["olc"]['time'], zp=data["olc"]['zp'], zpsys=data["olc"]['zpsys']))
         if (not np.isfinite(chi2)):
             print(self.model.param_names)
             raise Exception("sigh")
@@ -143,7 +143,7 @@ class ToRate(Edge):
     def get_log_likelihood(self, data):
         r""" The likelihood of having the supernova types :math:`T` given supernova rate :math:`r`.
 
-        We model the supernova rate as a binomial process, with rate :math:`r`. That is, given :math:`x` type
+        We framework the supernova rate as a binomial process, with rate :math:`r`. That is, given :math:`x` type
         Ia supernova and :math:`y` type II supernova, our pdf is given by
 
         .. math::

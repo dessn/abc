@@ -1,18 +1,20 @@
-from dessn.model.model import Model
-from dessn.toy.edges import ToLightCurve, ToLuminosity, ToRate, ToRedshift, ToType
-from dessn.toy.latent import Luminosity, Redshift, Type, Colour, PeakTime, Stretch
-from dessn.toy.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
-from dessn.toy.observed import ObservedRedshift, ObservedType, ObservedLightCurves
-from dessn.simulation.simulation import Simulation
 import logging
-import sys
 import os
+import sys
+
+from dessn.models.mixed_types.edges import ToLightCurve, ToLuminosity, ToRate, ToRedshift, ToType
+from dessn.models.mixed_types.latent import Luminosity, Redshift, Type, Colour, PeakTime, Stretch
+from dessn.models.mixed_types.observed import ObservedRedshift, ObservedType, ObservedLightCurves
+from dessn.models.mixed_types.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
+
+from dessn.framework.model import Model
+from dessn.models.mixed_types.simulation import Simulation
 
 
 class ToyModel(Model):
-    """ A modified toy model. The likelihood surfaces and PGM model are given below.
+    """ A modified mixed_types framework. The likelihood surfaces and PGM framework are given below.
 
-    Probabilities and model details are recorded in the model parameter and edge classes.
+    Probabilities and framework details are recorded in the framework parameter and edge classes.
 
 
     .. figure::     ../plots/toyModelPGM.png
@@ -82,7 +84,7 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
         fig = toy_model.get_pgm(pgm_file)'''
 
-    toy_model.fit_model(num_steps=5000, num_burn=500, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=3029, num_burn=500, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()

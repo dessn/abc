@@ -254,7 +254,7 @@ class Luminosity(object):
 	"""docstring for Luminosity"""
 
 	__input__=[TypeSubtype, HostGalaxy, Source]
-	__par_names__=['Luminosity model']
+	__par_names__=['Luminosity framework']
 
 	def __init__(self, modeltype, host):
 		super(Luminosity, self).__init__()
@@ -269,7 +269,7 @@ class Flux(object):
 	"""docstring for Flux"""
 
 	__input__=[Luminosity,HostGalaxy,Distance]
-	__par_names__ = ['Flux model']
+	__par_names__ = ['Flux framework']
 
 	def __init__(self, luminosity, host, distance):
 		super(Flux, self).__init__()

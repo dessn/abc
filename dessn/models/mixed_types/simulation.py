@@ -36,6 +36,11 @@ class Simulation(object):
             "$w$": w_0,
             r"$\Omega_m$": omega_m,
             r"$H_0$": H0,
+            r"$L_{\rm SnIa}$": snIa_luminosity,
+            r"$L_{\rm SnII}$": snII_luminosity,
+            r"$\sigma_{\rm SnIa}$": snIa_sigma,
+            r"$\sigma_{\rm SnII}$": snII_sigma,
+            "$r$": sn_rate
         }
         for i, obs in enumerate(observations):
             for k, v in obs.meta.items():
@@ -77,8 +82,6 @@ class Simulation(object):
              }
 
         lcs = sncosmo.realize_lcs(obs, model, [p])
-        #model.set(**p)
-        #print(p, sncosmo.chisq(lcs[0], model))
         return lcs[0]
 
 

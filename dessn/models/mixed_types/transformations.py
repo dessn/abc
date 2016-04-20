@@ -1,4 +1,4 @@
-from dessn.model.parameter import ParameterTransformation
+from dessn.framework.parameter import ParameterTransformation
 
 #
 # class Flux(ParameterTransformation):

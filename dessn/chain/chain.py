@@ -228,8 +228,8 @@ class ChainConsumer(object):
         parameters : list[str], optional
             A list of what parameters to include in the table. By default, includes all parameters
         transpose : bool, optional
-            Defaults to False, which gives each column as a parameter, each chain (model) as a row. You can swap it so
-            that you have a parameter each row and a model each column by setting this to True
+            Defaults to False, which gives each column as a parameter, each chain (framework) as a row. You can swap it so
+            that you have a parameter each row and a framework each column by setting this to True
         caption : str, optional
             If you want to generate a caption for the table through Python, use this. Defaults to an empty string
         label : str, optional
@@ -237,7 +237,7 @@ class ChainConsumer(object):
         hlines : bool, optional
             Inserts ``\\hline`` before and after the header, and at the end of table.
         blank_fill : str, optional
-            If a model does not have a particular parameter, will fill that cell of the table with this string.
+            If a framework does not have a particular parameter, will fill that cell of the table with this string.
 
         Returns
         -------

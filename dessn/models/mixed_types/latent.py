@@ -1,4 +1,4 @@
-from dessn.model.parameter import ParameterLatent, ParameterTransformation, ParameterDiscrete
+from dessn.framework.parameter import ParameterLatent, ParameterTransformation, ParameterDiscrete
 import numpy as np
 
 
@@ -45,7 +45,7 @@ class Stretch(ParameterLatent):
         return 0
 
     def get_suggestion_sigma(self, data):
-        return 1.0
+        return 2.0
 
 
 class PeakTime(ParameterLatent):

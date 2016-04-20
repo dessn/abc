@@ -68,7 +68,7 @@ class NewtonianPosition(object):
         p = np.random.random(size=(len(self.nodes), dim)) - 0.5
         v = np.zeros(p.shape)
 
-        for i in range(95):
+        for i in range(70):
             self.iterate(p, v, i)
             if plot and i % 10 == 0:
                 print(i)
