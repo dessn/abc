@@ -3,13 +3,13 @@ import os
 import sys
 import numpy as np
 
-from dessn.models.pure_snia.edges import ToLightCurve, ToLuminosity, ToRedshift
-from dessn.models.pure_snia.latent import Luminosity, Redshift, Colour, PeakTime, Stretch
-from dessn.models.pure_snia.observed import ObservedRedshift, ObservedLightCurves
-from dessn.models.pure_snia.underlying import OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2
+from dessn.models.a_pure_snia.edges import ToLightCurve, ToLuminosity, ToRedshift
+from dessn.models.a_pure_snia.latent import Luminosity, Redshift, Colour, PeakTime, Stretch
+from dessn.models.a_pure_snia.observed import ObservedRedshift, ObservedLightCurves
+from dessn.models.a_pure_snia.underlying import OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2
 
 from dessn.framework.model import Model
-from dessn.models.pure_snia.simulation import Simulation
+from dessn.models.a_pure_snia.simulation import Simulation
 
 
 class PureModel(Model):

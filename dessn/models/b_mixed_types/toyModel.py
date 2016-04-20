@@ -2,13 +2,14 @@ import logging
 import os
 import sys
 
-from dessn.models.mixed_types.edges import ToLightCurve, ToLuminosity, ToRate, ToRedshift, ToType
-from dessn.models.mixed_types.latent import Luminosity, Redshift, Type, Colour, PeakTime, Stretch
-from dessn.models.mixed_types.observed import ObservedRedshift, ObservedType, ObservedLightCurves
-from dessn.models.mixed_types.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
+from dessn.models.b_mixed_types.edges import ToLightCurve, ToLuminosity, ToRate, ToRedshift, ToType
+from dessn.models.b_mixed_types.latent import Luminosity, Redshift, Type, Colour, PeakTime, Stretch
+from dessn.models.b_mixed_types.observed import ObservedRedshift, ObservedType, ObservedLightCurves
+from dessn.models.b_mixed_types.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, \
+    SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
 
 from dessn.framework.model import Model
-from dessn.models.mixed_types.simulation import Simulation
+from dessn.models.b_mixed_types.simulation import Simulation
 
 
 class ToyModel(Model):
