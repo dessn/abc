@@ -66,7 +66,7 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/pure_snia.png")
     walk_file = os.path.abspath(dir_name + "/output/pure_snia_walk.png")
 
-    vals = {"num_days": 100, "omega_m": 0.25, "H0": 75, "snIa_luminosity": -19.3, "snIa_sigma": 0.1}
+    vals = {"num_days": 30, "omega_m": 0.25, "H0": 75, "snIa_luminosity": -19.3, "snIa_sigma": 0.1}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
     model = PureModel(observations)
