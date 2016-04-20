@@ -12,24 +12,18 @@ class Simulation(object):
     def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1, num_days=100, area=1, zmax=0.8, mean_num_obs=30):
         np.random.seed(1)
 
-        # Get cosmology
-        w_0 = -1
-        cosmology = FlatwCDM(Om0=omega_m, w0=w_0, H0=H0)
+        cosmology = FlatwCDM(Om0=omega_m, w0=-1, H0=H0)
 
         # Get redshift distribution of supernova
         tmin = 56700
         tmax = tmin + num_days
-        model = sncosmo.Model(source='salt2')
         redshifts = list(sncosmo.zdist(0., zmax, time=num_days, area=area))
 
         self.logger.info('Getting data for %d days of transients, with %d supernova' % (num_days, len(redshifts)))
-
         num_obs = np.ceil(np.random.normal(loc=mean_num_obs, scale=2.0, size=len(redshifts)))
-
         observations = [self.get_supernova(z, n, tmin, tmax, cosmology, x0_mean=snIa_luminosity, x0_sigma=snIa_sigma) for z, n, in zip(redshifts, num_obs)]
 
         theta = {
-            "$w$": w_0,
             r"$\Omega_m$": omega_m,
             r"$H_0$": H0,
             r"$L_{\rm SnIa}$": snIa_luminosity,

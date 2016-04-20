@@ -20,7 +20,6 @@ class Simulation(object):
         # Get redshift distribution of supernova
         tmin = 56700
         tmax = tmin + num_days
-        model = sncosmo.Model(source='salt2')
         redshifts = list(sncosmo.zdist(0., zmax, time=num_days, area=area))
         types = ["Ia" if np.random.random() < sn_rate else "II" for z in redshifts]
         lums = [snIa_luminosity if t == "Ia" else snII_luminosity for t in types]
@@ -77,8 +76,8 @@ class Simulation(object):
         p = {'z': z,
              't0': t0,
              'x0': x0,
-             'x1': np.random.normal(0., 0.001*1.),
-             'c': np.random.normal(0., 0.001*0.1)
+             'x1': np.random.normal(0., 1.),
+             'c': np.random.normal(0., 0.1)
              }
 
         lcs = sncosmo.realize_lcs(obs, model, [p])
