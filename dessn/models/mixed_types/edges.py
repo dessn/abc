@@ -8,65 +8,34 @@ class ToLightCurve(Edge):
     def __init__(self):
         super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
         self.model = sncosmo.Model(source="salt2")
+        self.current_h0 = None
+        self.current_omega_m = None
+        self.cosmology = None
 
     def get_log_likelihood(self, data):
         r""" Uses SNCosmo to move from supernova parameters to a light curve.
         """
         H0 = data["H0"]
         om = data["omega_m"]
-        cosmology = FlatwCDM(H0, om)
-        # print("LLL ", data["luminosity"], data["redshift"])
+        if self.cosmology is None or (self.current_h0 != H0 or self.current_omega_m != om):
+            self.cosmology = FlatwCDM(H0, om)
+            self.current_h0 = H0
+            self.current_omega_m = om
         self.model.set(z=data["redshift"])
-        self.model.set_source_peakabsmag(data["luminosity"], 'bessellb', 'ab', cosmo=cosmology)
+        self.model.set_source_peakabsmag(data["luminosity"], 'bessellb', 'ab', cosmo=self.cosmology)
         x0 = self.model.get("x0")
         self.model.parameters = [data["redshift"], data["t0"], x0, data["x1"], data["c"]]
 
         chi2 = sncosmo.chisq(data["olc"], self.model)
-        # print(chi2, [data["redshift"], data["t0"], x0, data["x1"], data["c"]])
-        # print("FLUX", self.framework.bandflux(data["olc"]['band'], data["olc"]['time'], zp=data["olc"]['zp'], zpsys=data["olc"]['zpsys']))
-        if (not np.isfinite(chi2)):
-            print(self.model.param_names)
-            raise Exception("sigh")
         return -0.5 * chi2
 
 
-# class ToLuminosityDistance(EdgeTransformation):
-#     def __init__(self):
-#         super(ToLuminosityDistance, self).__init__("lumdist", ["omega_m", "H0", "redshift"]) # "w", "H0",
-#
-#     def get_transformation(self, data):
-#         if data["omega_m"] < 0:
-#             return {"lumdist": -np.inf}
-#         cosmology = FlatwCDM(H0=data["H0"], Om0=data["omega_m"], w0=-1)
-#         return {"lumdist": cosmology.luminosity_distance(data['redshift']).value}
-#
-
-# class ToRedshift(Edge):
 class ToRedshift(EdgeTransformation):
     def get_transformation(self, data):
         return {"redshift": data["oredshift"]}
 
     def __init__(self):
         super(ToRedshift, self).__init__("redshift", ["oredshift"])
-
-        '''
-        super(ToRedshift, self).__init__(["oredshift", "oredshift_error"], "redshift")
-    def get_log_likelihood(self, data):
-        r""" Assume the redshift distribution follows a uniform distribution (for misidentification)
-        with a tight Gaussian peak around the observed redshift.
-
-        Assumes the misidentifiation range is between :math:`z=0` and :math:`z=2`.
-        Also assumes the success rate is 99% for observed spectra
-
-        .. math::
-            P(z_o|z) = \frac{0.01}{2} + \frac{0.99}{\sqrt{2\pi} z_{o,{\rm err}}} \exp\left(  -\frac{(z-z_o)^2}{2z^2_{o,{\rm err}}}  \right)
-
-        """
-        uniform = np.log(0.01 / 2)
-        gauss = -(data["oredshift"] - data["redshift"]) * (data["oredshift"] - data["redshift"]) / (2 * data["oredshift_error"] * data["oredshift_error"])
-        gauss -= np.log(np.sqrt(2 * np.pi) * data["oredshift_error"])
-        result = np.logaddexp(gauss, uniform)
-        return np.sum(result)'''
 
 
 class ToLuminosity(Edge):
@@ -90,8 +59,6 @@ class ToLuminosity(Edge):
             P(L|\mu_{\rm SnII}, \sigma_{\rm SnII}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnII}} \exp\left( - \frac{(L - \mu_{\rm SnII})^2}{2\sigma_{\rm SnII}} \right)
 
         """
-
-        # TODO: Where should we consistency check parameters? Should we need to?
         sn_type = data["type"]
         luminosity = data["luminosity"]
         if sn_type == "Ia":
@@ -109,7 +76,6 @@ class ToLuminosity(Edge):
             return -np.inf
 
 
-# class ToType(Edge):
 class ToType(Edge):
     def __init__(self):
         super(ToType, self).__init__("otype", "type")

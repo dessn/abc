@@ -6,15 +6,23 @@ import sncosmo
 
 class ToLightCurve(Edge):
     def __init__(self):
-        super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
+        super(ToLightCurve, self).__init__("ofit", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
         self.model = sncosmo.Model(source="salt2")
+        self.current_h0 = None
+        self.current_omega_m = None
+        self.cosmology = None
 
     def get_log_likelihood(self, data):
         r""" Uses SNCosmo to move from supernova parameters to a light curve.
         """
-        cosmology = FlatwCDM(data["H0"], data["omega_m"])
+        H0 = data["H0"]
+        om = data["omega_m"]
+        if self.cosmology is None or (self.current_h0 != H0 or self.current_omega_m != om):
+            self.cosmology = FlatwCDM(H0, om)
+            self.current_h0 = H0
+            self.current_omega_m = om
         self.model.set(z=data["redshift"])
-        self.model.set_source_peakabsmag(data["luminosity"], 'bessellb', 'ab', cosmo=cosmology)
+        self.model.set_source_peakabsmag(data["luminosity"], 'bessellb', 'ab', cosmo=self.cosmology)
         x0 = self.model.get("x0")
         self.model.parameters = [data["redshift"], data["t0"], x0, data["x1"], data["c"]]
 
