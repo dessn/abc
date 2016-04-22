@@ -75,48 +75,7 @@ if __name__ == "__main__":
     if not only_data:
         np.random.seed(102)
         pgm_file = os.path.abspath(dir_name + "/output/pure_snia.png")
-        # fig = model.get_pgm(pgm_file)
-
-    # print(model._theta_names, model._theta_labels)
-    # t = model._get_suggestion()
-    # t[model._theta_names.index("H0")] = 85
-    # # print("OOO: ", observations["z_o"][0], observations["lcs_o"][0])
-    # for om in np.linspace(0.1, 0.8, 15):
-    #     t[model._theta_names.index("omega_m")] = om
-    #     # print(om, model.get_log_posterior(t))
-    #     print(om, model.get_log_likelihood(t))
-
-    #
-    # z = observations["z_o"][0]
-    # import sncosmo
-    # sncosmo_model = sncosmo.Model(source="salt2")
-    # sncosmo_model.set(z=z)
-    # print(observations["lcs_o"][0].meta)
-    # res, fitted_model = sncosmo.fit_lc(observations["lcs_o"][0], sncosmo_model,
-    #                                    ['t0', 'x0', 'x1', 'c'])
-    # sncosmo.plot_lc(observations["lcs_o"][0], model=fitted_model, errors=res.errors, fname=dir_name+"/output/death.png")
-
-    # edge = ToLightCurve()
-    # print(theta)
-    # oms = np.linspace(0.1, 0.7, 39)
-    # vals = []
-    # for om in oms:
-    #     l = -np.inf
-    #
-    #     for lc, z in zip(observations["lcs_o"], observations["z_o"]):
-    #         data = lc.meta.copy()
-    #         data["redshift"] = z
-    #         data["H0"] = 85
-    #         data["luminosity"] = -19.3
-    #         data["olc"] = lc
-    #         data["omega_m"] = om
-    #         l = np.logaddexp(l, edge.get_log_likelihood(data))
-    #     vals.append(l)
-    # vals = np.array(vals)
-    # vals -= vals.max()
-    # for om,v in zip(oms, vals):
-    #     print(om, v)
-
+        fig = model.get_pgm(pgm_file)
 
     model.fit_model(num_steps=10000, num_burn=0, temp_dir=temp_dir, save_interval=60)
 
