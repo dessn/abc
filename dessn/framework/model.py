@@ -194,18 +194,29 @@ class Model(object):
         return result, data
 
     def get_log_prior(self, theta):
-        theta_dict = self._get_theta_dict(theta)
+        theta_dict, data = self._get_theta_dict(theta)
         return self._get_log_prior(theta_dict)
 
     def get_log_likelihood(self, theta):
-        theta_dict = self._get_theta_dict(theta)
+        theta_dict, data = self._get_theta_dict(theta)
+        return self._get_log_likelihood(theta_dict, data)
+
+    def _get_log_likelihood(self, theta_dict, data):
         probability = 0
-        for edge in self._ordered_edges:
-            if isinstance(edge, EdgeTransformation):
-                theta_dict.update(self._get_transformation(theta_dict, edge))
-            else:
-                result = self._get_log_likelihood(theta_dict, edge)
-                probability += result
+        for observation in data:
+            t = theta_dict.copy()
+            t.update(observation)
+            result = self._get_edge_likelihood(t, self._ordered_edges[:])
+            probability += result
+            if not np.isfinite(probability):
+                break
+        return probability
+
+    def get_log_posterior(self, theta):
+        theta_dict, data = self._get_theta_dict(theta)
+        probability = self._get_log_prior(theta_dict)
+        if np.isfinite(probability):
+            probability += self._get_log_likelihood(theta_dict, data)
         return probability
 
     def _expand_discrete(self, dictionary):
@@ -251,33 +262,18 @@ class Model(object):
                 if isinstance(edge, EdgeTransformation):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
-                    result = self._get_log_likelihood(theta_dict, edge)
+                    result = self._get_log_likelihood_edge(theta_dict, edge)
                     probability += result
             if not np.isfinite(probability):
                 break
         return probability
 
-    def _get_log_posterior(self, theta):
-        theta_dict, data = self._get_theta_dict(theta)
-        probability = self._get_log_prior(theta_dict)
-        if np.isfinite(probability):
-            for observation in data:
-                t = theta_dict.copy()
-                t.update(observation)
-                result = self._get_edge_likelihood(t, self._ordered_edges[:])
-                probability += result
-                if not np.isfinite(probability):
-                    return probability
-        # if np.random.random() < 0.001:
-        #     print("P: ", probability, " THETA ", theta)
-        return probability
-
     def _get_log_posterior_grad(self, theta):
-        grad = scipy.optimize.approx_fprime(theta, self._get_log_posterior, self.epsilon)
+        grad = scipy.optimize.approx_fprime(theta, self.get_log_posterior, self.epsilon)
         return grad
 
     def _get_negative_log_posterior(self, theta):
-        val = self._get_log_posterior(theta)
+        val = self.get_log_posterior(theta)
         return -val
 
     def _get_suggestion(self):
@@ -352,11 +348,13 @@ class Model(object):
         result = edge.get_transformation(dict((key, theta_dict[key]) for key in edge.given))
         return result
 
-    def _get_log_likelihood(self, theta_dict, edge):
+    def _get_log_likelihood_edge(self, theta_dict, edge):
         result = edge.get_log_likelihood(dict((key, theta_dict[key]) for key in edge.given + edge.probability_of))
         if np.isnan(result):
             self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
             raise ValueError("NaN")
+        # else:
+        #     print("RRR: ", edge.__class__, result)
         return result
 
     def get_pgm(self, filename=None):
@@ -501,7 +499,7 @@ class Model(object):
         num_walkers = max(num_walkers, 20)
         if num_temps is None:
             self.logger.info("Using Ensemble Sampler")
-            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self._get_log_posterior, pool=pool, live_dangerously=True)
+            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self.get_log_posterior, pool=pool, live_dangerously=True)
         else:
             self.logger.info("Using PTSampler")
             sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)

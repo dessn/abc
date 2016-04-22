@@ -9,19 +9,24 @@ class Simulation(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1, num_days=100, area=1, zmax=0.8, mean_num_obs=30):
+    def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1,
+                       num_transient=10, zmin=0.1, zmax=0.8, mean_num_obs=30):
         np.random.seed(1)
 
         cosmology = FlatwCDM(Om0=omega_m, w0=-1, H0=H0)
 
         # Get redshift distribution of supernova
         tmin = 56700
-        tmax = tmin + num_days
-        redshifts = list(sncosmo.zdist(0., zmax, time=num_days, area=area))
+        tmax = tmin + 500
+        # redshifts = list(sncosmo.zdist(0., zmax, time=num_days, area=area))
+        redshifts = np.random.uniform(zmin, zmax, size=(num_transient,)).tolist()
 
-        self.logger.info('Getting data for %d days of transients, with %d supernova' % (num_days, len(redshifts)))
+        self.logger.info('Getting data for %d supernova' % len(redshifts))
         num_obs = np.ceil(np.random.normal(loc=mean_num_obs, scale=2.0, size=len(redshifts)))
-        observations = [self.get_supernova(z, n, tmin, tmax, cosmology, x0_mean=snIa_luminosity, x0_sigma=snIa_sigma) for z, n, in zip(redshifts, num_obs)]
+
+        observations = [self.get_supernova(z, n, tmin, tmax, cosmology,
+                                           x0_mean=snIa_luminosity, x0_sigma=snIa_sigma)
+                        for z, n, in zip(redshifts, num_obs)]
 
         theta = {
             r"$\Omega_m$": omega_m,
@@ -39,7 +44,7 @@ class Simulation(object):
 
     def get_supernova(self, z, num_obs, tmin, tmax, cosmology, x0_mean=-19.3, x0_sigma=0.1):
         t0 = np.random.uniform(tmin, tmax)
-        ts = np.linspace(t0 - 40, t0 + 60, num_obs)
+        ts = np.linspace(t0 - 60, t0 + 60, num_obs)
 
         times = np.array([[t, t + 0.1, t + 0.2] for t in ts]).flatten()
         bands = [b for t in ts for b in ['desg', 'desr', 'desi']]

@@ -5,14 +5,12 @@ import numpy as np
 class OmegaM(ParameterUnderlying):
     def __init__(self):
         super(OmegaM, self).__init__("omega_m", r"$\Omega_m$", group="Cosmology")
-        self.sigma = 0.0062 * 10
-        self.prefactor = np.log(np.sqrt(2 * np.pi) * self.sigma) # Planck 2016
 
     def get_log_prior(self, data):
         om = data["omega_m"]
         if om < 0.05 or om > 0.7:
             return -np.inf
-        return -(om - 0.3089) * (om - 0.3089) / (2 * self.sigma * self.sigma) - self.prefactor
+        return 1
 
     def get_suggestion(self, data):
         return 0.30
@@ -24,11 +22,12 @@ class OmegaM(ParameterUnderlying):
 class Hubble(ParameterUnderlying):
     def __init__(self):
         super(Hubble, self).__init__("H0", "$H_0$", group="Cosmology")
-        self.sigma = 0.46 * 10
-        self.prefactor = np.log(np.sqrt(2 * np.pi) * self.sigma)
 
     def get_log_prior(self, data):
-        return -(data["H0"] - 67.74) * (data["H0"] - 67.74) / (2 * self.sigma * self.sigma) - self.prefactor
+        h0 = data["H0"]
+        if h0 < 50 or h0 > 100:
+            return -np.inf
+        return 1
 
     def get_suggestion(self, data):
         return 72
@@ -46,7 +45,7 @@ class SupernovaIaDist1(ParameterUnderlying):
         return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 0.1
+        return 0.001
 
 
 class SupernovaIaDist2(ParameterUnderlying):
@@ -60,8 +59,8 @@ class SupernovaIaDist2(ParameterUnderlying):
         return 1
 
     def get_suggestion(self, data):
-        return 0.1  # Deliberately wrong to test recovery
+        return 0.001  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
-        return 0.05
+        return 0.0005
 

@@ -6,7 +6,7 @@ import sncosmo
 
 class ToLightCurve(Edge):
     def __init__(self):
-        super(ToLightCurve, self).__init__("ofit", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
+        super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
         self.model = sncosmo.Model(source="salt2")
         self.current_h0 = None
         self.current_omega_m = None
@@ -18,7 +18,7 @@ class ToLightCurve(Edge):
         H0 = data["H0"]
         om = data["omega_m"]
         if self.cosmology is None or (self.current_h0 != H0 or self.current_omega_m != om):
-            self.cosmology = FlatwCDM(H0, om)
+            self.cosmology = FlatwCDM(H0=H0, Om0=om, w0=-1)
             self.current_h0 = H0
             self.current_omega_m = om
         self.model.set(z=data["redshift"])

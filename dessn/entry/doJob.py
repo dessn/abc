@@ -5,7 +5,7 @@ args = sys.argv
 
 assert len(args) >= 2, "You need to supply the filename to run"
 filename = args[1]
-cores = 60
+cores = 1
 if len(args) > 2:
     cores = int(args[2])
 if len(args) > 3:

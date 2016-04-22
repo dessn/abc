@@ -23,7 +23,7 @@ class Luminosity(ParameterLatent):
         return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 0.2
+        return 0.001
 
     def get_suggestion_requirements(self):
         return []
