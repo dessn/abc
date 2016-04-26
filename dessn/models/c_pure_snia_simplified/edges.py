@@ -37,7 +37,7 @@ class ToDistanceModulus(EdgeTransformation):
         H0 = data["H0"]
         if not (om == self.om and H0 == self.H0):
             self.cosmology = FlatwCDM(H0=H0, Om0=om)
-        return {"mu_cos": self.cosmology.distmod(data["redshift"])}
+        return {"mu_cos": self.cosmology.distmod(data["redshift"]).value}
 
 
 class ToObservedDistanceModulus(EdgeTransformation):
@@ -54,5 +54,7 @@ class ToMus(Edge):
         super().__init__("mu", ["mu_cos", "scatter"])
 
     def get_log_likelihood(self, data):
-        return -0.5 * (data["mu"] - data["mu_cos"])*(data["mu"] - data["mu_cos"]) \
-               / (data["scatter"] * data["scatter"])
+        diff = data["mu"] - data["mu_cos"]
+        s2 = data["scatter"]*data["scatter"]
+        chi2 = diff * diff / s2
+        return -0.5 * chi2

@@ -52,7 +52,7 @@ class IntrinsicScatter(ParameterUnderlying):
         super(IntrinsicScatter, self).__init__("scatter", r"$\sigma_{\rm int}$", group="SNIa")
 
     def get_log_prior(self, data):
-        if data["snIa_sigma"] < 0:
+        if data["scatter"] < 0:
             return -np.inf
         return 1
 
