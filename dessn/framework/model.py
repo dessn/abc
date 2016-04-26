@@ -423,8 +423,11 @@ class Model(object):
             obs = node in self._observed_nodes
             fixed = node in self._transformation_nodes
             node_name = value
-            node_label = node_name.replace(" ", "\n") + "\n" + ", ".join(reverse_dict[value]["labels"])
-
+            if node.group is not None:
+                node_label = node.group.replace(" ", "\n") + "\n"
+            else:
+                node_label = ""
+            node_label += ", ".join(reverse_dict[value]["labels"])
             pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3, observed=obs, fixed=fixed))
 
         for edge in self.edges:
