@@ -11,10 +11,11 @@ class ToParameters(Edge):
     def get_log_likelihood(self, data):
         m = np.array([data["mb"], data["x1"], data["c"]])
         o = np.array([data["mb_o"], data["x1_o"], data["c_o"]])
-        diff = m - o
+        diff = o - m
         icov = data["inv_cov"]
-        chi2 = np.dot(diff.T, np.dot(icov, diff))
-        return -0.5 * chi2
+        logl = -0.5 * np.dot(diff.T, np.dot(icov, diff))
+        # print("PARAMS: ", m, o, -2 * logl)
+        return logl
 
 
 class ToRedshift(EdgeTransformation):
@@ -45,16 +46,20 @@ class ToObservedDistanceModulus(EdgeTransformation):
         super().__init__("mu", ["mb", "x1", "c", "alpha", "beta", "mag"])
 
     def get_transformation(self, data):
-        return {"mu": data["mb"] + data["alpha"] * data["x1"] +
-                      data["beta"] * data["c"] - data["mag"]}
+        mus = data["mb"] + data["alpha"] * data["x1"] + data["beta"] * data["c"] - data["mag"]
+        # print("MUS ", data["mb"], data["alpha"], data["x1"], data["beta"], data["c"], data["mag"], mus)
+        return {"mu": mus}
 
 
 class ToMus(Edge):
     def __init__(self):
         super().__init__("mu", ["mu_cos", "scatter"])
+        self.sqrt2pi = np.log(np.sqrt(2 * np.pi))
 
     def get_log_likelihood(self, data):
         diff = data["mu"] - data["mu_cos"]
         s2 = data["scatter"]*data["scatter"]
         chi2 = diff * diff / s2
-        return -0.5 * chi2
+        logl = -0.5 * chi2 - self.sqrt2pi - np.log(data["scatter"])
+        # print("DD ", data["mu"], data["mu_cos"], data["scatter"], logl)
+        return logl

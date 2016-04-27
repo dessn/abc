@@ -40,6 +40,12 @@ class Magnitude(ParameterUnderlying):
     def __init__(self):
         super(Magnitude, self).__init__("mag", r"$M_B$", group="SNIa")
 
+    def get_log_prior(self, data):
+        m = data["mag"]
+        if m < -22 or m > -17:
+            return -np.inf
+        return 1
+
     def get_suggestion(self, data):
         return -19.3
 
@@ -52,7 +58,7 @@ class IntrinsicScatter(ParameterUnderlying):
         super(IntrinsicScatter, self).__init__("scatter", r"$\sigma_{\rm int}$", group="SNIa")
 
     def get_log_prior(self, data):
-        if data["scatter"] < 0:
+        if data["scatter"] < 0 or data["scatter"] > 1:
             return -np.inf
         return 1
 
@@ -73,6 +79,11 @@ class AlphaStretch(ParameterUnderlying):
     def get_suggestion(self, data):
         return 0.1
 
+    def get_log_prior(self, data):
+        if data["alpha"] < 2 or data["alpha"] > 2:
+            return -np.inf
+        return 1
+
 
 class BetaColour(ParameterUnderlying):
     def __init__(self):
@@ -83,3 +94,8 @@ class BetaColour(ParameterUnderlying):
 
     def get_suggestion(self, data):
         return 3
+
+    def get_log_prior(self, data):
+        if data["beta"] < -5 or data["beta"] > 5:
+            return -np.inf
+        return 1

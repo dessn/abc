@@ -27,13 +27,13 @@ class ApparentMagnitude(ParameterLatent):
         return self.n
 
     def get_suggestion(self, data):
-        return -19.3
+        return data["mb_o"]
 
     def get_suggestion_sigma(self, data):
-        return 0.001
+        return 2 / data["inv_cov"][0, 0]
 
     def get_suggestion_requirements(self):
-        return []
+        return ["mb_o", "inv_cov"]
 
 
 class Stretch(ParameterLatent):
@@ -45,13 +45,13 @@ class Stretch(ParameterLatent):
         return self.n
 
     def get_suggestion_requirements(self):
-        return []
+        return ["inv_cov", "x1_o"]
 
     def get_suggestion(self, data):
-        return 0
+        return data["x1_o"]
 
     def get_suggestion_sigma(self, data):
-        return 2.0
+        return 2 / data["inv_cov"][1, 1]
 
 
 class Colour(ParameterLatent):
@@ -63,11 +63,11 @@ class Colour(ParameterLatent):
         return self.n
 
     def get_suggestion_requirements(self):
-        return []
+        return ["inv_cov", "c_o"]
 
     def get_suggestion(self, data):
-        return 0
+        return data["c_o"]
 
     def get_suggestion_sigma(self, data):
-        return 0.3
+        return 2.0 / data["inv_cov"][2, 2]
 
