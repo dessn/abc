@@ -232,14 +232,16 @@ class Model(object):
         return dep_edge
 
     def _get_edge_likelihood(self, theta_dict, edges):
-        probability = 0.0
+        print("GETTING EDGE LIKELIHOOD")
         edge_index = 0
+        probability = None
         while edge_index < len(edges):
             edge = edges[edge_index]
             dependencies = edge.given + edge.probability_of
             discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], ParameterDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
             if len(unfilled) > 0:
+                print("UNFILLED")
                 first_name = unfilled[0]
                 first_node = self._node_dict[first_name]
                 unfilled_dependencies = first_node.get_discrete_requirements()
@@ -251,48 +253,67 @@ class Model(object):
                 t = theta_dict.copy()
                 # print("EDGE ", first_name, edge, dependent_edges)
                 if type(discrete) == tuple:
+                    n = 0
                     for key in t:
                         value = t[key]
                         # print(key, value)
                         if type(value) == list:
+                            n = len(value)
                             t[key] = value * len(discrete)
                         elif type(value) == np.ndarray:
+                            n = len(value)
                             t[key] = np.tile(value, len(discrete))
+                    assert n > 0, "No observational data found to effect!"
                     t[first_name] = np.repeat(discrete, self.n)
                     combine = np.tile(np.arange(self.n), len(discrete))
                     result = self._get_edge_likelihood(t, dependent_edges)
                     indexes = np.unique(combine)
                     for i in indexes:
-                        probability += logsumexp(result[combine == i])
+                        result[np.argmax(combine == i)] = logsumexp(result[combine == i])
+                    if probability is None:
+                        probability = result[:n]
+                        print("111", len(probability))
+                    else:
+                        probability += result[:n]
+                        print("222", len(probability))
 
                 elif type(discrete) == list:
                     combine = np.zeros(len(discrete))
+                    n = len(discrete)
                     d2 = discrete[:]
                     c = 1
                     for i, element in enumerate(discrete):
-                        if type(element) in [list or tuple]:
+                        if type(element) in [list, tuple]:
                             combine[i] = c
                             d2[i] = element[0]
                             end_elements = element[1:]
-                            d2 = np.concatenate(d2, end_elements)
-                            combine = np.concatenate(d2, c * np.ones(len(end_elements)))
+                            d2 = d2 + end_elements
+                            combine = np.concatenate((combine, c * np.ones(len(end_elements))))
                             for key in t:
                                 value = t[key]
-                                arr = value[i] * end_elements
                                 if type(value) == list:
-                                    value += value[i] * end_elements
+                                    arr = [value[i]] * len(end_elements)
+                                    value += arr
                                 elif type(value) == np.ndarray:
+                                    arr = [value[i]] * len(end_elements)
                                     value = np.concatenate((value, arr))
+                                t[key] = value
                             c += 1
                     t[first_name] = d2
                     result = self._get_edge_likelihood(t, dependent_edges)
                     indexes = np.unique(combine)
+
                     for i in indexes:
                         if i == 0:
-                            probability += np.sum(result[combine == i])
-                        else:
-                            probability += logsumexp(result[combine == i])
-                    # If list, assume like discrete redshifts. Only duplicate the required rows.
+                            continue
+                        result[np.argmax(combine == i)] = logsumexp(result[combine == i])
+                    if probability is None:
+                        probability = result[:n]
+                        print("333", len(probability))
+
+                    else:
+                        probability += result[:n]
+                        print("444", len(probability))
                 else:
                     raise ValueError("Discrete result is not a tuple or a list! %s" % discrete)
             else:
@@ -301,7 +322,13 @@ class Model(object):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
                     result = self._get_log_likelihood_edge(theta_dict, edge)
-                    probability += result
+                    if probability is None:
+                        probability = result
+                        print("555", len(probability), len(result), len(theta_dict["c_o"]), edge)
+                    else:
+                        print("665 ", edge)
+                        print("666 ", len(probability), len(result), edge)
+                        probability += result
             if not np.all(np.isfinite(probability)):
                 break
         return probability

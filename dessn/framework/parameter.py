@@ -1,5 +1,5 @@
 import abc
-
+import numpy as np
 
 class Parameter(object):
     """ A parameter represented on a node on a PGM framework. Multiple parameters can be assigned to the same node on a
@@ -103,8 +103,8 @@ class ParameterObserved(Parameter):
         The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
     """
     def __init__(self, name, label, data, group=None):
-        assert type(data) == list, \
-            "Data must be a list. If you are passing in a :class:`np.ndarray`, call ``.tolist()``"
+        assert type(data) in [list, np.ndarray], \
+            "Data must be a list format"
         self.data = data
         super(ParameterObserved, self).__init__(name, label, group=group)
 
