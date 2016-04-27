@@ -11,6 +11,7 @@ import types
 import copyreg
 import itertools
 import scipy.optimize
+from scipy.misc import logsumexp
 
 
 class Model(object):
@@ -56,6 +57,7 @@ class Model(object):
         self._labels = []
         self.master = True
         self._node_groups = {}
+        self.n = None
         self.epsilon = np.sqrt(np.finfo(float).eps)
 
     def add_node(self, node):
@@ -119,11 +121,13 @@ class Model(object):
                 assert len(self._out[name]) == 0, "Underlying parameter %s should not have an outgoing edge" % name
 
     def _create_data_structures(self):
-        names = [node.name for node in self._observed_nodes]
-        datas = [node.data for node in self._observed_nodes]
-        for d in zip(*datas):
-            self.data.append(dict((name, datapoint)for name, datapoint in zip(names, d)))
-        # print(self.data)
+        self.data = {node.name: node.data for node in self._observed_nodes}
+        for key in self.data:
+            if self.n is None:
+                self.n = len(self.data[key])
+            else:
+                assert self.n == len(self.data[key]), \
+                    "Data sizes must agree. Have %d vs %d" % (self.n, len(self.data[key]))
 
         for node in self._underlying_nodes:
             self._theta_names.append(node.name)
@@ -131,7 +135,6 @@ class Model(object):
         self._num_actual = len(self._theta_names)
         for node in self._latent_nodes:
             self._theta_names += [node.name] * node.get_num_latent()
-
         num_edges = len(self.edges)
         observed_names = [node.name for node in self.nodes if not isinstance(node, ParameterTransformation)]
         self._ordered_edges = []
@@ -176,7 +179,7 @@ class Model(object):
     def _get_theta_dict(self, theta):
         result = {}
         arrs = {}
-        data = self.data[:]
+        data = self.data.copy()
         make_array = []
         for theta, theta_name in zip(theta, self._theta_names):
             if self._theta_names.count(theta_name) == 1:
@@ -202,14 +205,8 @@ class Model(object):
         return self._get_log_likelihood(theta_dict, data)
 
     def _get_log_likelihood(self, theta_dict, data):
-        probability = 0
-        for observation in data:
-            t = theta_dict.copy()
-            t.update(observation)
-            result = self._get_edge_likelihood(t, self._ordered_edges[:])
-            probability += result
-            if not np.isfinite(probability):
-                break
+        theta_dict.update(data)
+        probability = self._get_edge_likelihood(theta_dict, self._ordered_edges[:])
         return probability
 
     def get_log_posterior(self, theta):
@@ -246,17 +243,58 @@ class Model(object):
                 first_name = unfilled[0]
                 first_node = self._node_dict[first_name]
                 unfilled_dependencies = first_node.get_discrete_requirements()
-                to_pass = dict((k, theta_dict[k]) for k in unfilled_dependencies)
+                to_pass = {k: theta_dict[k] for k in unfilled_dependencies}
+
                 discrete = first_node.get_discrete(to_pass)
                 dependent_edges = self._get_dependencies(edges, first_name)
                 edges = [e for e in edges if e not in dependent_edges]
-                for d in discrete:
-                    theta_dict.update({first_name: d})
-                    result = self._get_edge_likelihood(theta_dict, dependent_edges)
-                    if probability == 0.0:
-                        probability = result
-                    else:
-                        probability = np.logaddexp(result, probability)
+                t = theta_dict.copy()
+                # print("EDGE ", first_name, edge, dependent_edges)
+                if type(discrete) == tuple:
+                    for key in t:
+                        value = t[key]
+                        # print(key, value)
+                        if type(value) == list:
+                            t[key] = value * len(discrete)
+                        elif type(value) == np.ndarray:
+                            t[key] = np.tile(value, len(discrete))
+                    t[first_name] = np.repeat(discrete, self.n)
+                    combine = np.tile(np.arange(self.n), len(discrete))
+                    result = self._get_edge_likelihood(t, dependent_edges)
+                    indexes = np.unique(combine)
+                    for i in indexes:
+                        probability += logsumexp(result[combine == i])
+
+                elif type(discrete) == list:
+                    combine = np.zeros(len(discrete))
+                    d2 = discrete[:]
+                    c = 1
+                    for i, element in enumerate(discrete):
+                        if type(element) in [list or tuple]:
+                            combine[i] = c
+                            d2[i] = element[0]
+                            end_elements = element[1:]
+                            d2 = np.concatenate(d2, end_elements)
+                            combine = np.concatenate(d2, c * np.ones(len(end_elements)))
+                            for key in t:
+                                value = t[key]
+                                arr = value[i] * end_elements
+                                if type(value) == list:
+                                    value += value[i] * end_elements
+                                elif type(value) == np.ndarray:
+                                    value = np.concatenate((value, arr))
+                            c += 1
+                    t[first_name] = d2
+                    result = self._get_edge_likelihood(t, dependent_edges)
+                    indexes = np.unique(combine)
+                    for i in indexes:
+                        if i == 0:
+                            probability += np.sum(result[combine == i])
+                        else:
+                            probability += logsumexp(result[combine == i])
+                    # If list, assume like discrete redshifts. Only duplicate the required rows.
+                else:
+                    raise ValueError("Discrete result is not a tuple or a list! %s" % discrete)
             else:
                 edge_index += 1
                 if isinstance(edge, EdgeTransformation):
@@ -264,7 +302,7 @@ class Model(object):
                 else:
                     result = self._get_log_likelihood_edge(theta_dict, edge)
                     probability += result
-            if not np.isfinite(probability):
+            if not np.all(np.isfinite(probability)):
                 break
         return probability
 
@@ -293,7 +331,6 @@ class Model(object):
                 for row in data:
                     node_data = dict((key, row[key]) for key in reqs)
                     theta.append(node.get_suggestion(node_data))
-        print("T1 ", self._theta_names, theta)
         return theta
 
     def _get_suggestion_sigma(self):
@@ -350,7 +387,7 @@ class Model(object):
 
     def _get_log_likelihood_edge(self, theta_dict, edge):
         result = edge.get_log_likelihood(dict((key, theta_dict[key]) for key in edge.given + edge.probability_of))
-        if np.isnan(result):
+        if np.any(np.isnan(result)):
             self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
             raise ValueError("NaN")
         # else:

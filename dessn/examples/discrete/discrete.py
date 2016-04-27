@@ -37,7 +37,7 @@ class Colour(ParameterDiscrete):
         super(Colour, self).__init__("c", "$c$", group="Colour")
 
     def get_discrete(self, data):
-        return ["red", "blue"]
+        return "red", "blue"
 
     def get_discrete_requirements(self):
         return []
@@ -72,7 +72,8 @@ class ToColour(Edge):
         c = data["c"]
         c_o = data["c_o"]
         m = 0.9
-        return np.log(m if c == c_o else 1 - m)
+        prob = m * (c == c_o) + (1 - m) * (c != c_o)
+        return np.log(prob)
 
 
 class ToColour2(Edge):
@@ -83,10 +84,7 @@ class ToColour2(Edge):
     def get_log_likelihood(self, data):
         c = data["c"]
         s_o = data["s_o"]
-        if c == "red":
-            mid = 2
-        else:
-            mid = 1
+        mid = 1 + 1.0 * (c == "red")
         sigma = 0.3
         ps = -(s_o - mid) * (s_o - mid) / (2 * sigma * sigma) - np.log(self.sqrt2pi * sigma)
         return ps
@@ -99,10 +97,8 @@ class ToRate(Edge):
     def get_log_likelihood(self, data):
         c = data["c"]
         r = data["r"]
-        if c == "red":
-            return np.log(r)
-        else:
-            return np.log(1 - r)
+        probs = r * (c == "red") + (1 - r) * (c != "red")
+        return np.log(probs)
 
 
 class DiscreteModel(Model):
@@ -149,14 +145,14 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     temp_dir = os.path.abspath(dir_name + "/../../../temp/discrete")
+    plot_file = os.path.abspath(dir_name + "/../../../plots/discrete.png")
 
     if not only_data:
-        plot_file = os.path.abspath(dir_name + "/../../../plots/discrete.png")
         pgm_file = os.path.abspath(dir_name + "/../../../plots/discretePGM.png")
         model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    model.fit_model(num_steps=3000, num_burn=100, temp_dir=temp_dir, save_interval=20)
+    model.fit_model(num_steps=5000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = model.get_consumer()
