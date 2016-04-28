@@ -8,7 +8,7 @@ python:
     - "3.5"
 
 install:
-    - pip install setuptools pytest pytest-cov coveralls
+    - pip install setuptools pytest pytest-cov coveralls emcee
 
 script:
     - python setup.py test -a "--cov dessn -v"
