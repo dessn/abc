@@ -1,6 +1,7 @@
 import abc
 import numpy as np
 
+
 class Parameter(object):
     """ A parameter represented on a node on a PGM framework. Multiple parameters can be assigned to the same node on a
     PGM by giving them the same group.
