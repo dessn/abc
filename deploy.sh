@@ -10,7 +10,7 @@ if [ -n "$GITHUB_API_KEY" ]; then
     make html
     cd "$TRAVIS_BUILD_DIR"
     git config --global user.email "travis"
-    git config --global user.email "travis"
+    git config --global user.name "travis"
     git init
     git checkout -b gh-pages
     git add index.html
