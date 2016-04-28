@@ -27,7 +27,7 @@ install:
     - conda create --yes -n test python=$PYTHON_VERSION numpy scipy pytest setuptools h5py pip
     - source activate test
     - pip install pytest-cov coveralls emcee
-    - pip install sphinx
+    - pip install sphinx numpydoc
 
 script:
     - python setup.py test -a "--cov dessn -v"
