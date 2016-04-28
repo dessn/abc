@@ -4,6 +4,10 @@ sudo: false
 
 language: c
 
+env:
+    global:
+        - GH_REF: github.com/dessn/sn-doc.git
+
 matrix:
     include:
         - os: linux
