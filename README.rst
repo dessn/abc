@@ -20,9 +20,9 @@ Build documentation
 
 2. Execute ``make rst``
 
-4. Execute ``make latexpdf`` (if you also want to pdf output)
+3. Execute ``make latexpdf`` (if you also want to pdf output)
 
-3. Execute ``make html``
+4. Execute ``make html``
 
-5. Documentation should now be found in the `_build` directory underneath ``doc``.
+5. Documentation should now be found in the ``_build`` directory underneath ``doc``.
    The top level ``index.html`` file will redirect to the appropriate place, just open it up.
