@@ -79,7 +79,7 @@ def LogLuminosityMarginalizedOverType_logp(value, mus=None, taus=None, p=None):
                 pdf(Type_i | Type prob)
 
 
-    This class should be generalized to handle multiple types each with its own model
+    This class should be generalized to handle multiple types each with its own framework
 
     Count does not depend explicitly on Type, so the summation over type is done here
 
@@ -425,7 +425,7 @@ def lnprob(theta, co, zo, cinvcovo, pzo, spectypeo):
     pdf(Om0, w0)
 
     We need the flexibility to switch in and out different cosmological models.  The function
-    that describes luminosity distance is specific to the model: the parameters and function
+    that describes luminosity distance is specific to the framework: the parameters and function
     should be packaged together.
 
     Parameters
@@ -487,7 +487,7 @@ def lnprob(theta, co, zo, cinvcovo, pzo, spectypeo):
 
     pdf(rate_II_r)
 
-    Along with the rate parameters is a rate model.
+    Along with the rate parameters is a rate framework.
 
     There should be equivalent nodes for all other transient types being modeled.
 
@@ -578,7 +578,7 @@ def lnprob(theta, co, zo, cinvcovo, pzo, spectypeo):
         """
         Type Node.
 
-        Not explicitly considered in our model.
+        Not explicitly considered in our framework.
         """
 
         """
@@ -655,7 +655,7 @@ def lnprob(theta, co, zo, cinvcovo, pzo, spectypeo):
         """
         Redshift Node.
 
-        Not considered explicitly in our model.
+        Not considered explicitly in our framework.
 
         """
 

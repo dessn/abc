@@ -5,7 +5,7 @@ class Edge(object):
     """ An edge connection one or more parameters to one or more different parameters.
 
     An edge is a connection between parameters (*not* Nodes), and signifies a joint probability distribution.
-    That is, if in our mathematical definition of our model, we find the term :math:`P(a,b|c,d,e)`, this
+    That is, if in our mathematical definition of our framework, we find the term :math:`P(a,b|c,d,e)`, this
     would be represented by a single edge. Similarly, :math:`P(a|b)P(b|c,d)` would be two edges.
 
     Parameters
@@ -43,7 +43,7 @@ class Edge(object):
         Returns
         -------
         float
-            the log likelihood given the supplied data and the model parametrisation.
+            the log likelihood given the supplied data and the framework parametrisation.
         """
         return
 

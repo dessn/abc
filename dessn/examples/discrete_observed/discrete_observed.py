@@ -8,16 +8,26 @@ from dessn.framework.model import Model
 from dessn.framework.parameter import ParameterObserved, ParameterUnderlying, ParameterDiscrete
 
 
-def get_data(n=200):
+def get_data(n=400):
     np.random.seed(0)
-    rate = 0.7
+    rate = 0.6
     colour = np.random.random(n) <= rate
     size = 1 + 1.0 * colour + np.random.normal(scale=0.3, size=n)
+    p = 0.3
 
-    misidentification = np.random.random(n) > 0.9
-    final = (colour ^ misidentification)
-    colours = ['red' if a else 'blue' for a in final]
-    return size.tolist(), colours
+    misidentification = np.random.random(n) > 0.8
+    colours = []
+    for c, m in zip(colour, misidentification):
+        actual = "red" if c else "blue"
+        incorrect = "blue" if c else "red"
+        if m:
+            if np.random.random() > p:
+                colours.append({actual: 1 - p, incorrect: p})
+            else:
+                colours.append({incorrect: 1 - p, actual: p})
+        else:
+            colours.append("red" if c else "blue")
+    return size, colours
 
 
 class ObservedColour(ParameterObserved):
@@ -37,10 +47,10 @@ class Colour(ParameterDiscrete):
         super(Colour, self).__init__("c", "$c$", group="Colour")
 
     def get_discrete(self, data):
-        return "red", "blue"
+        return [list(c.keys()) if type(c) == dict else c for c in data["c_o"]]
 
     def get_discrete_requirements(self):
-        return []
+        return ["c_o"]
 
 
 class UnderlyingRate(ParameterUnderlying):
@@ -64,16 +74,19 @@ class UnderlyingRate(ParameterUnderlying):
 
 
 class ToColour(Edge):
-
     def __init__(self):
         super(ToColour, self).__init__("c_o", "c")
 
     def get_log_likelihood(self, data):
-        c = data["c"]
-        c_o = data["c_o"]
-        m = 0.9
-        prob = m * (c == c_o) + (1 - m) * (c != c_o)
-        return np.log(prob)
+        cs = data["c"]
+        c_os = data["c_o"]
+        probs = []
+        for c, c_o in zip(cs, c_os):
+            if c == c_o:
+                probs.append(1)
+            elif type(c_o) == dict:
+                probs.append(c_o[c])
+        return np.log(np.array(probs))
 
 
 class ToColour2(Edge):
@@ -96,16 +109,17 @@ class ToRate(Edge):
 
     def get_log_likelihood(self, data):
         c = data["c"]
+        mask = np.array(c) == "red"
         r = data["r"]
-        probs = r * (c == "red") + (1 - r) * (c != "red")
+        probs = r * mask + (1 - r) * ~mask
         return np.log(probs)
 
 
-class DiscreteModel(Model):
+class DiscreteModel2(Model):
     r"""A small example framework illustrating how to use discrete parameters.
 
-    As normal, the framework is set up by declaring parameters (which can be thought of like nodes on a PGM),
-    and declaring the edges between parameters (the conditional probabilities).
+    As normal, the framework is set up by declaring parameters (which can be thought of like
+    nodes on a PGM), and declaring the edges between parameters (the conditional probabilities).
 
     This is the primary class in this package, and you can see that other classes
     inherit from either :class:`.Parameter` or from :class:`.Edge`.
@@ -113,18 +127,19 @@ class DiscreteModel(Model):
     I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes,
     and encourage viewing the code directly to understand exactly what is happening.
 
-    Running this file in python first generates a PGM of the framework, and then runs ``emcee`` and creates a corner plot:
+    Running this file in python first generates a PGM of the framework, and then runs ``emcee``
+    and creates a corner plot:
 
-    .. figure::     ../plots/discretePGM.png
+    .. figure::     ../plots/discretePGM2.png
         :align:     center
 
-    .. figure::     ../plots/discrete.png
+    .. figure::     ../plots/discrete2.png
         :align:     center
 
     """
 
     def __init__(self):
-        super(DiscreteModel, self).__init__("Discrete")
+        super(DiscreteModel2, self).__init__("Discrete")
 
         self.add_node(ObservedColour())
         self.add_node(ObservedSize())
@@ -137,24 +152,24 @@ class DiscreteModel(Model):
         self.finalise()
 
 if __name__ == "__main__":
-    model = DiscreteModel()
+    model = DiscreteModel2()
     only_data = len(sys.argv) > 1
     if only_data:
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    temp_dir = os.path.abspath(dir_name + "/../../../temp/discrete")
-    plot_file = os.path.abspath(dir_name + "/../../../plots/discrete.png")
+    temp_dir = os.path.abspath(dir_name + "/../../../temp/discrete2")
+    plot_file = os.path.abspath(dir_name + "/../../../plots/discrete2.png")
 
     if not only_data:
-        pgm_file = os.path.abspath(dir_name + "/../../../plots/discretePGM.png")
-        model.get_pgm(pgm_file)
+        pgm_file = os.path.abspath(dir_name + "/../../../plots/discretePGM2.png")
+        # model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    model.fit_model(num_steps=5000, num_burn=1000, temp_dir=temp_dir, save_interval=20)
+    model.fit_model(num_steps=3000, num_burn=300, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = model.get_consumer()
         print(chain_consumer.get_summary())
-        chain_consumer.plot(filename=plot_file, display=False, truth=[0.7])
+        chain_consumer.plot(filename=plot_file, display=False, truth=[0.6])

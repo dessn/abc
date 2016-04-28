@@ -23,7 +23,7 @@ def individual(N_s, ia_only = False, ADU0=None,N_sn=None,dir='temp'):
 		app+='.ia_only.'
 	if ADU0 == 0.:
 			app+='noMalm.'
-	[extract,logposterior] = pickle.load(file('../results/'+dir+'/model'+app+str(N_s)+'.pkl','rb'))
+	[extract,logposterior] = pickle.load(file('../results/'+dir+'/framework'+app+str(N_s)+'.pkl','rb'))
 #	print numpy.abs((extract['w'] < -1).sum()*1. / len(extract['w'])-0.5)*2
 	n_samples = len(extract[extract.keys()[0]])
 
@@ -71,7 +71,7 @@ def individual(N_s, ia_only = False, ADU0=None,N_sn=None,dir='temp'):
 	#fractions = [0.0]
 
 	for frac in fractions:
-		[extract_,logposterior_] = pickle.load(file('../results/'+dir+'/model'+app+str(frac)+'.pkl','rb'))
+		[extract_,logposterior_] = pickle.load(file('../results/'+dir+'/framework'+app+str(frac)+'.pkl','rb'))
 
 		samples2=numpy.zeros((n_samples,8))
 		samples2[:,0] = extract_['Omega_M']-extract['Omega_M']
@@ -210,7 +210,7 @@ def group(nspec):
 	deltas = numpy.zeros((len(nspec),len(levels)/2))
 	ind=0
 	for n in nspec:
-		[extract, logposterior] = pickle.load(file('../results/'+dir+'/model'+str(n)+'.pkl','rb'))
+		[extract, logposterior] = pickle.load(file('../results/'+dir+'/framework'+str(n)+'.pkl','rb'))
 		wsort = numpy.sort(extract['w'])
 		ans[ind,:] = wsort[numpy.round(levels*len(wsort)).astype(int)]
 		for i in xrange(len(levels)/2):

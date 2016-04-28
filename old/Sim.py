@@ -17,19 +17,19 @@ The framework is meant to describe models for use in the
 
 1) Simulation of data (in conjunction with a description of the experiment).
 
-2) Fitting a model (in conjunction with data from an experiment).
+2) Fitting a framework (in conjunction with data from an experiment).
 
 Therefore the framework needs to make available the likeihood both as a pdf
-for data simulation and as a function for model fitting. Maybe the framework
+for data simulation and as a function for framework fitting. Maybe the framework
 will encompass the simulation and fitting. For the moment we have not settled
 on what code will be used:  emcee is an example of code that for a set of
 parameters returns a scalar likelihood. real likelihood(array parameters);
 there is no candidate code at the moment that realizes data, we may have to
 write our own.
 
-The model is assembled through a probabilistic graphical model (PGM).  A PGM
+The framework is assembled through a probabilistic graphical framework (PGM).  A PGM
 is composed of nodes and nodes are connected by edges.  Each node has its set
-of model parameters (names and values).  There are two kinds of parameters:
+of framework parameters (names and values).  There are two kinds of parameters:
 
 The probabilistic are described by a pdf
 
@@ -41,13 +41,13 @@ A=f(B),
 
 where there is an edge that connects node B to A.
 
-The likelihood for a model is described as follows.  Lets call B the set of
+The likelihood for a framework is described as follows.  Lets call B the set of
 nodes that have no inputs, A the nodes without outputs (i.e. the A are data),
 and C are all other nodes.  The pdfs of interest are pdf(AC|B) and
 pdf(A|B)=Sum_C pdf(AC|B).  The former is used in fitting, the latter in
 simulation.
 
-For practical purposes it is useful to describe the model only in terms of
+For practical purposes it is useful to describe the framework only in terms of
 nodes with continuous parameters, that is to say with no discrete parameters.
 If the PGM does have nodes with discrete parameters, a "supernode" that
 margninalizes over the discrete parameters.
@@ -266,7 +266,7 @@ class Luminosity(object):
 	"""docstring for Luminosity"""
 
 	__input__=[ModelType, HostGalaxy, Source]
-	__par_names__=['model']
+	__par_names__=['framework']
 
 	def __init__(self, modeltype, host):
 		super(Luminosity, self).__init__()
@@ -281,7 +281,7 @@ class Flux(object):
 	"""docstring for Flux"""
 
 	__input__=[Luminosity,HostGalaxy,Distance]
-	__par_names__ = ['model']
+	__par_names__ = ['framework']
 
 	def __init__(self, luminosity, host, distance):
 		super(Flux, self).__init__()

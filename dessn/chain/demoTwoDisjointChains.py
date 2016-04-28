@@ -9,7 +9,7 @@ class DemoTwoDisjointChains:
     Running this file in python creates two random data sets, representing two separate chains, *for two separate models*.
 
     It is sometimes the case that we wish to compare models which have partially overlapping parameters. For example,
-    we might fit a model which depends has cosmology dependend on :math:`\Omega_m` and :math:`\Omega_\Lambda`, where we
+    we might fit a framework which depends has cosmology dependend on :math:`\Omega_m` and :math:`\Omega_\Lambda`, where we
     assume :math:`w = 1`. Alternatively, we might assume flatness, and therefore fix :math:`\Omega_\Lambda` but instead
     vary the equation of state :math:`w`. The good news is, you can visualise them both at once!
 

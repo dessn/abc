@@ -1,9 +1,9 @@
 astropy
 corner
-progressbar
 numpy
 matplotlib
 numpydoc
 scipy
 emcee
 daft
+sncosmo

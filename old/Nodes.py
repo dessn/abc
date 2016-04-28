@@ -138,7 +138,7 @@ class LogLuminosityMarginalizedOverType(Continuous):
                 pdf(Type_i | Type prob)
 
 
-    This class should be generalized to handle multiple types each with its own model
+    This class should be generalized to handle multiple types each with its own framework
 
     Parameters
     -----------
@@ -402,8 +402,8 @@ def runModel():
     observation = simulateData()
     nTrans = len(observation['spectype'])
 
-    # Create the pymc3 model and fill it with the distributions and parameters
-    # of the model
+    # Create the pymc3 framework and fill it with the distributions and parameters
+    # of the framework
     basic_model = Model()
 
     with basic_model:
@@ -416,7 +416,7 @@ def runModel():
         pdf(Om0, w0)
 
         We need the flexibility to switch in and out different cosmological models.  The function
-        that describes luminosity distance is specific to the model: the parameters and function
+        that describes luminosity distance is specific to the framework: the parameters and function
         should be packaged together.
 
         Parameters
@@ -470,7 +470,7 @@ def runModel():
 
         pdf(rate_II_r)
 
-        Along with the rate parameters is a rate model.
+        Along with the rate parameters is a rate framework.
 
         There should be equivalent nodes for all other transient types being modeled.
 
@@ -547,7 +547,7 @@ def runModel():
             """
             Type Node.
 
-            Not explicitly considered in our model.
+            Not explicitly considered in our framework.
             """
 
             """
@@ -619,7 +619,7 @@ def runModel():
             """
             Redshift Node.
 
-            Not considered explicitly in our model.
+            Not considered explicitly in our framework.
 
             """
 

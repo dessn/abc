@@ -228,8 +228,8 @@ class ChainConsumer(object):
         parameters : list[str], optional
             A list of what parameters to include in the table. By default, includes all parameters
         transpose : bool, optional
-            Defaults to False, which gives each column as a parameter, each chain (model) as a row. You can swap it so
-            that you have a parameter each row and a model each column by setting this to True
+            Defaults to False, which gives each column as a parameter, each chain (framework) as a row. You can swap it so
+            that you have a parameter each row and a framework each column by setting this to True
         caption : str, optional
             If you want to generate a caption for the table through Python, use this. Defaults to an empty string
         label : str, optional
@@ -237,7 +237,7 @@ class ChainConsumer(object):
         hlines : bool, optional
             Inserts ``\\hline`` before and after the header, and at the end of table.
         blank_fill : str, optional
-            If a model does not have a particular parameter, will fill that cell of the table with this string.
+            If a framework does not have a particular parameter, will fill that cell of the table with this string.
 
         Returns
         -------
@@ -767,9 +767,9 @@ class ChainConsumer(object):
             if scalefactor < 0 or len(hex) != 6:
                 return hex
             r, g, b = int(hex[:2], 16), int(hex[2:4], 16), int(hex[4:], 16)
-        r = self._clamp(r * scalefactor)
-        g = self._clamp(g * scalefactor)
-        b = self._clamp(b * scalefactor)
+        r = self._clamp(int(r * scalefactor))
+        g = self._clamp(int(g * scalefactor))
+        b = self._clamp(int(b * scalefactor))
         return "#%02x%02x%02x" % (r, g, b)
 
     def _convert_to_stdev(self, sigma):

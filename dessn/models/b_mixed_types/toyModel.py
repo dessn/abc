@@ -1,21 +1,21 @@
-from dessn.model.model import Model
-from dessn.toy.edges import ToCount, ToFlux, ToLuminosity, ToLuminosityDistance, ToRate, ToRedshift, ToType
-from dessn.toy.latent import Luminosity, Redshift, Type
-from dessn.toy.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2, \
-    ZCalibration
-from dessn.toy.transformations import Flux, LuminosityDistance
-from dessn.toy.observed import ObservedCounts, ObservedRedshift, ObservedType
-from dessn.simulation.simulation import Simulation
 import logging
-import sys
 import os
-import numpy as np
+import sys
+
+from dessn.models.b_mixed_types.edges import ToLightCurve, ToLuminosity, ToRate, ToRedshift, ToType
+from dessn.models.b_mixed_types.latent import Luminosity, Redshift, Type, Colour, PeakTime, Stretch
+from dessn.models.b_mixed_types.observed import ObservedRedshift, ObservedType, ObservedLightCurves
+from dessn.models.b_mixed_types.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, \
+    SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
+
+from dessn.framework.model import Model
+from dessn.models.b_mixed_types.simulation import Simulation
 
 
 class ToyModel(Model):
-    """ A modified toy model. The likelihood surfaces and PGM model are given below.
+    """ A modified mixed_types framework. The likelihood surfaces and PGM framework are given below.
 
-    Probabilities and model details are recorded in the model parameter and edge classes.
+    Probabilities and framework details are recorded in the framework parameter and edge classes.
 
 
     .. figure::     ../plots/toyModelPGM.png
@@ -32,19 +32,15 @@ class ToyModel(Model):
         super(ToyModel, self).__init__("ToyModel")
 
         z_o = observations["z_o"]
-        count_o = observations["count_o"]
+        lcs_o = observations["lcs_o"]
         type_o = observations["type_o"]
         n = len(z_o)
 
         self.add_node(ObservedType(type_o))
         self.add_node(ObservedRedshift(z_o))
-        self.add_node(ObservedCounts(count_o))
-
-        self.add_node(Flux())
-        self.add_node(LuminosityDistance())
+        self.add_node(ObservedLightCurves(lcs_o))
 
         self.add_node(OmegaM())
-        self.add_node(ZCalibration())
         self.add_node(Hubble())
         self.add_node(SupernovaIaDist1())
         self.add_node(SupernovaIaDist2())
@@ -53,12 +49,13 @@ class ToyModel(Model):
         self.add_node(SupernovaRate())
 
         self.add_node(Luminosity(n=n))
+        self.add_node(Stretch(n=n))
+        self.add_node(PeakTime(n=n))
+        self.add_node(Colour(n=n))
         self.add_node(Redshift(n=n))
         self.add_node(Type(n=n))
 
-        self.add_edge(ToCount())
-        self.add_edge(ToFlux())
-        self.add_edge(ToLuminosityDistance())
+        self.add_edge(ToLightCurve())
         self.add_edge(ToLuminosity())
         self.add_edge(ToRedshift())
         self.add_edge(ToRate())
@@ -77,22 +74,22 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
     walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
 
-    vals = {"omega_m": 0.28, "Zcal": 6.5, "H0": 72, "snIa_luminosity": 10, "snIa_sigma": 0.01,
-            "snII_luminosity": 9.8, "snII_sigma": 0.02, "sn_rate": 0.5}
+    vals = {"num_days": 30, "omega_m": 0.28, "H0": 72, "snIa_luminosity": -19.3, "snIa_sigma": 0.1,
+            "snII_luminosity": -18, "snII_sigma": 0.2, "sn_rate": 0.5}
     simulation = Simulation()
-    observations, theta = simulation.get_simulation(num_trans=30, **vals)
+    observations, theta = simulation.get_simulation(**vals)
     toy_model = ToyModel(observations)
-
+    '''
     if not only_data:
         np.random.seed(102)
         pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-        fig = toy_model.get_pgm(pgm_file)
+        fig = toy_model.get_pgm(pgm_file)'''
 
-    toy_model.fit_model(num_steps=5586, num_burn=2000, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit_model(num_steps=3029, num_burn=500, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()
         chain_consumer.configure_general(max_ticks=4, bins=0.7)
-        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta[:8])
-        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta[:8])
+        chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta)
+        chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta)
 
