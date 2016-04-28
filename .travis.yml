@@ -24,10 +24,9 @@ install:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
     - conda info -a
-
-    - conda create --yes -n test python=$PYTHON_VERSION numpy scipy pytest setuptools h5py pip emcee
+    - conda create --yes -n test python=$PYTHON_VERSION numpy scipy pytest setuptools h5py pip
     - source activate test
-    - pip install pytest-cov coveralls
+    - pip install pytest-cov coveralls emcee
 
 script:
     - python setup.py test -a "--cov dessn -v"
