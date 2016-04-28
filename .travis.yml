@@ -50,3 +50,4 @@ after_success:
     # This works because the API key can replace your password.
     #git push -f -q https://<me>:$GITHUB_API_KEY@github.com/dessn/abc gh-pages &2>/dev/null
   fi
+  echo "DOOM"
