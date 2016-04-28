@@ -9,8 +9,8 @@ matrix:
         - os: linux
           env: PYTHON_VERSION=3.5
 
-        - os: osx
-          env: PYTHON_VERSION=3.5
+#        - os: osx
+#          env: PYTHON_VERSION=3.5
 
 install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -26,8 +26,7 @@ install:
     - conda info -a
     - conda create --yes -n test python=$PYTHON_VERSION numpy scipy pytest setuptools h5py pip
     - source activate test
-    - pip install pytest-cov coveralls emcee matplotlib
-    - pip install sphinx numpydoc sphinx_rtd_theme
+    - pip install -r requirements.txt
 
 script:
     - python setup.py test -a "--cov dessn -v"

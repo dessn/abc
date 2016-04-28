@@ -2,8 +2,13 @@ astropy
 corner
 numpy
 matplotlib
+sphinx
 numpydoc
+sphinx_rtd_theme
 scipy
 emcee
 daft
 sncosmo
+pytest
+pytest-cov
+coveralls
