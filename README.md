@@ -16,6 +16,6 @@ a PDF file, which Travis does not do), you will need to follow the below steps.
 1. Navigate to doc directory
 2. Execute `make rst`
 3. Execute `make latexpdf` (if you want PDF output)
-4. Execute make html` (if you want HTML output)
+4. Execute `make html` (if you want HTML output)
 5. Documentation should now be found in the `_build` directory underneath doc`.
    The top level `index.html` file will redirect to the appropriate place, just open it up.
