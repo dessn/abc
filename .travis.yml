@@ -26,7 +26,7 @@ install:
     - conda info -a
     - conda create --yes -n test python=$PYTHON_VERSION numpy scipy pytest setuptools h5py pip
     - source activate test
-    - pip install pytest-cov coveralls emcee
+    - pip install pytest-cov coveralls emcee matplotlib
     - pip install sphinx numpydoc sphinx_rtd_theme
 
 script:
