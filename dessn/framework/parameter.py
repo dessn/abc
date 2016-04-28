@@ -97,7 +97,7 @@ class ParameterObserved(Parameter):
         The parameter name, used as the key to access this parameter in the data object
     label : str
         The parameter label, for use in plotting and PGM creation.
-    data : list[object]
+    data : list[object] or `numpy.ndarray`
         The data list to supply to the edges.
     group : str, optional
         The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.

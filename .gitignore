@@ -1,5 +1,11 @@
 **/build
+**/*.egg-info/**
+**/.cache/**
+**/temp/**
 .idea/*
+**/doc/out/doctrees/**
+**/doc/out/latex/**
+*.npy
 *.aux
 *.bbl
 *log
