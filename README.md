@@ -1,6 +1,6 @@
 #Bayesian Supernova Cosmology framework
 
-###For the DES Supernova Working Group
+####For the DES Supernova Working Group
 
 [![Build Status](https://travis-ci.org/dessn/abc.svg?style=flat&branch=master)](https://travis-ci.org/dessn/abc)
 [![Coverage Status](https://coveralls.io/repos/github/dessn/abc/badge.svg?branch=master)](https://coveralls.io/github/dessn/abc?branch=master)
@@ -8,6 +8,7 @@
 
 ## Build documentation
 
+[**Documentation available online here.**](https://dessn.github.io/abc)
 
 1. Navigate to doc directory
 2. Execute `make rst`
