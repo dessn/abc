@@ -4,9 +4,9 @@ Bayesian Supernova Cosmology framework
 For the DES Supernova Working Group
 
 
-.. image:: https://travis-ci.org/dessn/abc.svg?style=flat
+.. image:: https://travis-ci.org/dessn/abc.svg?style=flat&branch=gh-pages
     :target: https://travis-ci.org/dessn/abc
-.. image:: https://coveralls.io/repos/github/dessn/abc/badge.svg?style=flat
+.. image:: https://coveralls.io/repos/github/dessn/abc/badge.svg?style=flat&branch=gh-pages
     :target: https://coveralls.io/github/dessn/abc
 .. image:: http://img.shields.io/badge/license-MIT-blue.svg?style=flat
         :target: https://github.com/dessn/abc/blob/master/LICENSE

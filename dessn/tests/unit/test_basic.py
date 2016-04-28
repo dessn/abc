@@ -70,3 +70,6 @@ class TestClass(object):
         theta = [0.9]
         assert np.isclose(self.model.get_log_likelihood(theta),
                           np.sum(np.log([0.9, 0.9, 0.9, 0.1])))
+
+    def test_num_parameters(self):
+        assert len(self.model._theta_names) == 1
