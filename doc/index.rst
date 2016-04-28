@@ -5,7 +5,6 @@ DESSN Cosmology Analysis
 
 This document should detail the code structure, examples, and all other goodies.
 
-You can find :download:`PDF documentation here <out/latex/dessn.pdf>`.
 
 Examples
 --------
