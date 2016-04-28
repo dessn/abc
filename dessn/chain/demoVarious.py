@@ -1,5 +1,5 @@
 import numpy as np
-from .chain import ChainConsumer
+from dessn.chain.chain import ChainConsumer
 
 
 class DemoVarious(object):

@@ -1,6 +1,7 @@
-from ..framework.parameter import Parameter, ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation, ParameterDiscrete
-from ..framework.edge import EdgeTransformation
-from ..utility.hdemcee import EmceeWrapper
+from dessn.framework.parameter import Parameter, ParameterObserved, ParameterLatent, \
+    ParameterUnderlying, ParameterTransformation, ParameterDiscrete
+from dessn.framework.edge import EdgeTransformation
+from dessn.utility.hdemcee import EmceeWrapper
 import numpy as np
 import logging
 import emcee
