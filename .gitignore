@@ -3,8 +3,7 @@
 **/.cache/**
 **/temp/**
 .idea/*
-**/doc/out/doctrees/**
-**/doc/out/latex/**
+**/doc/out/**
 *.npy
 *.aux
 *.bbl
@@ -19,3 +18,4 @@
 *.cls
 *.sty
 *.q
+.coverage

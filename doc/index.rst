@@ -24,7 +24,7 @@ Core
 ----
 
 To learn how the underlying models function, and specific details on the sorts of parameters and edges allowed,
-please see the documentation located at :py:mod:`dessn.model`.
+please see the documentation located at :py:mod:`dessn.framework`.
 
 
 Utilities
@@ -37,7 +37,7 @@ see :py:mod:`dessn.chain`.
 Implementations
 ---------------
 
-Finally, for the toy model implementation, see :py:mod:`dessn.toy`
+Finally, for the toy model implementations, see :py:mod:`dessn.models`
 
 
 General

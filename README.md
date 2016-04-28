@@ -19,3 +19,7 @@ a PDF file, which Travis does not do), you will need to follow the below steps.
 4. Execute `make html` (if you want HTML output)
 5. Documentation should now be found in the `_build` directory underneath doc`.
    The top level `index.html` file will redirect to the appropriate place, just open it up.
+
+# Manually running test cases
+
+Please test your build before pushing it. To test your build, simply run `python setup.py test`.
