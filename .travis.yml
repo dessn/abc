@@ -33,5 +33,5 @@ script:
 
 after_success:
     - coveralls
-    - chmod u+x desploy.sh
-    - ./desploy.sh
+    - chmod u+x deploy.sh
+    - ./deploy.sh

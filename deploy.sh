@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 if [ -n "$GITHUB_API_KEY" ]; then
+    echo "Github key found. Building documentation."
     cd "$TRAVIS_BUILD_DIR"/doc
     echo `pwd`
     echo `ls`
