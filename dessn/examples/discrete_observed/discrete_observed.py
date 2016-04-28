@@ -8,17 +8,23 @@ from dessn.framework.model import Model
 from dessn.framework.parameter import ParameterObserved, ParameterUnderlying, ParameterDiscrete
 
 
-def get_data(n=200):
+def get_data(n=400):
     np.random.seed(0)
     rate = 0.6
     colour = np.random.random(n) <= rate
     size = 1 + 1.0 * colour + np.random.normal(scale=0.3, size=n)
+    p = 0.3
 
-    misidentification = np.random.random(n) > 0.9
+    misidentification = np.random.random(n) > 0.8
     colours = []
     for c, m in zip(colour, misidentification):
+        actual = "red" if c else "blue"
+        incorrect = "blue" if c else "red"
         if m:
-            colours.append({"red": 0.5, "blue": 0.5})
+            if np.random.random() > p:
+                colours.append({actual: 1 - p, incorrect: p})
+            else:
+                colours.append({incorrect: 1 - p, actual: p})
         else:
             colours.append("red" if c else "blue")
     return size, colours
@@ -124,10 +130,10 @@ class DiscreteModel2(Model):
     Running this file in python first generates a PGM of the framework, and then runs ``emcee``
     and creates a corner plot:
 
-    .. figure::     ../plots/discretePGM.png
+    .. figure::     ../plots/discretePGM2.png
         :align:     center
 
-    .. figure::     ../plots/discrete.png
+    .. figure::     ../plots/discrete2.png
         :align:     center
 
     """
@@ -161,7 +167,7 @@ if __name__ == "__main__":
         # model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    model.fit_model(num_steps=1000, num_burn=300, temp_dir=temp_dir, save_interval=20)
+    model.fit_model(num_steps=3000, num_burn=300, temp_dir=temp_dir, save_interval=20)
 
     if not only_data:
         chain_consumer = model.get_consumer()

@@ -1,11 +1,12 @@
 r""" An example used to prototype the inclusion of discrete observables into the mix.
 
 The scenario being modelled is similar to the coloured balled example. Except now
-we model the observed colour not as a single value, but as a discrete value with given
-probabilities if the "colour" is close between the boundary of red and blue.
+we introduce a measurement deficiency. 20% of the time when we measure the colour of
+the balls, we fumble. On a fumble, we have a 30% chance of writing down the
+wrong colour.
 
-We *should* be modelling all observed colours as discrete, but only model some
-provides a more rigorous test of the discrete framework.
-
+We represent this by giving colour as a discrete parameter, where 80% of the time
+there is only one colour option, but 10% of the time we give both colours as options,
+quantifying the probability that we switched the colours or not.
 
 """

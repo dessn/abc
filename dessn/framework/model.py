@@ -207,7 +207,7 @@ class Model(object):
     def _get_log_likelihood(self, theta_dict, data):
         theta_dict.update(data)
         probability = self._get_edge_likelihood(theta_dict, self._ordered_edges[:])
-        return probability
+        return probability.sum()
 
     def get_log_posterior(self, theta):
         theta_dict, data = self._get_theta_dict(theta)
@@ -232,7 +232,7 @@ class Model(object):
         return dep_edge
 
     def _get_edge_likelihood(self, theta_dict, edges):
-        print("GETTING EDGE LIKELIHOOD")
+        # print("GETTING EDGE LIKELIHOOD")
         edge_index = 0
         probability = None
         while edge_index < len(edges):
@@ -241,7 +241,7 @@ class Model(object):
             discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], ParameterDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
             if len(unfilled) > 0:
-                print("UNFILLED")
+                # print("UNFILLED")
                 first_name = unfilled[0]
                 first_node = self._node_dict[first_name]
                 unfilled_dependencies = first_node.get_discrete_requirements()
@@ -253,10 +253,10 @@ class Model(object):
                 t = theta_dict.copy()
                 # print("EDGE ", first_name, edge, dependent_edges)
                 if type(discrete) == tuple:
+                    # print("HAVE TUPLE FOR ", edge)
                     n = 0
                     for key in t:
                         value = t[key]
-                        # print(key, value)
                         if type(value) == list:
                             n = len(value)
                             t[key] = value * len(discrete)
@@ -272,12 +272,13 @@ class Model(object):
                         result[np.argmax(combine == i)] = logsumexp(result[combine == i])
                     if probability is None:
                         probability = result[:n]
-                        print("111", len(probability))
+                        # print("111", len(probability))
                     else:
                         probability += result[:n]
-                        print("222", len(probability))
+                        # print("222", len(probability))
 
                 elif type(discrete) == list:
+                    # print("HAVE LIST FOR ", edge)
                     combine = np.zeros(len(discrete))
                     n = len(discrete)
                     d2 = discrete[:]
@@ -293,11 +294,10 @@ class Model(object):
                                 value = t[key]
                                 if type(value) == list:
                                     arr = [value[i]] * len(end_elements)
-                                    value += arr
+                                    t[key] = value + arr
                                 elif type(value) == np.ndarray:
                                     arr = [value[i]] * len(end_elements)
-                                    value = np.concatenate((value, arr))
-                                t[key] = value
+                                    t[key] = np.concatenate((value, arr))
                             c += 1
                     t[first_name] = d2
                     result = self._get_edge_likelihood(t, dependent_edges)
@@ -309,11 +309,11 @@ class Model(object):
                         result[np.argmax(combine == i)] = logsumexp(result[combine == i])
                     if probability is None:
                         probability = result[:n]
-                        print("333", len(probability))
+                        # print("333", len(probability))
 
                     else:
                         probability += result[:n]
-                        print("444", len(probability))
+                        # print("444", len(probability))
                 else:
                     raise ValueError("Discrete result is not a tuple or a list! %s" % discrete)
             else:
@@ -324,10 +324,10 @@ class Model(object):
                     result = self._get_log_likelihood_edge(theta_dict, edge)
                     if probability is None:
                         probability = result
-                        print("555", len(probability), len(result), len(theta_dict["c_o"]), edge)
+                        # print("555", len(probability), len(result), len(theta_dict["c_o"]), edge)
                     else:
-                        print("665 ", edge)
-                        print("666 ", len(probability), len(result), edge)
+                        # print("665 ", edge)
+                        # print("666 ", len(probability), len(result), edge)
                         probability += result
             if not np.all(np.isfinite(probability)):
                 break
@@ -417,8 +417,6 @@ class Model(object):
         if np.any(np.isnan(result)):
             self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
             raise ValueError("NaN")
-        # else:
-        #     print("RRR: ", edge.__class__, result)
         return result
 
     def get_pgm(self, filename=None):
