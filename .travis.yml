@@ -7,14 +7,6 @@ language: python
 python:
     - "3.5"
 
-matrix:
-    include:
-        - os: linux
-          env: PYTHON_VERSION=3.5
-
-        - os: osx
-          env: PYTHON_VERSION=3.5
-
 install:
     - pip install numpy scipy setuptools pytest pytest-cov coveralls
 
