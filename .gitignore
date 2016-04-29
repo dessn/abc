@@ -3,7 +3,8 @@
 **/.cache/**
 **/temp/**
 .idea/*
-**/doc/out/**
+**/doc/out/doctrees/**
+**/doc/out/latex/**
 *.npy
 *.aux
 *.bbl
