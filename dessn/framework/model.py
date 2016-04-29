@@ -110,16 +110,16 @@ class Model(object):
         for node in self.nodes:
             name = node.name
             if isinstance(node, ParameterObserved):
-                pass
-                # assert len(self._in[name]) == 0, "Observed parameter %s should not have incoming edges" % name
-                # assert len(self._out[name]) > 0, "Observed parameter %s is not utilised in the PGM" % name
+                assert len(self._in[name]) + len(self._out[name]) > 0, \
+                    "Unconnected node %s" % name
             elif isinstance(node, ParameterLatent) or isinstance(node, ParameterTransformation):
-                pass
-                # assert len(self._in[name]) > 0, "Internal parameter %s has no incoming edges" % name
-                # assert len(self._out[name]) > 0, "Internal parameter %s does not have any outgoing edges" % name
+                assert len(self._in[name]) + len(self._out[name]) > 0, \
+                    "Unconnected node %s" % name
             elif isinstance(node, ParameterUnderlying):
-                assert len(self._in[name]) > 0, "Underlying parameter %s has no incoming edges" % name
-                assert len(self._out[name]) == 0, "Underlying parameter %s should not have an outgoing edge" % name
+                assert len(self._in[name]) > 0, \
+                    "Underlying parameter %s has no incoming edges" % name
+                assert len(self._out[name]) == 0, \
+                    "Underlying parameter %s should not have an outgoing edge" % name
 
     def _create_data_structures(self):
         self.data = {node.name: node.data for node in self._observed_nodes}
@@ -421,7 +421,7 @@ class Model(object):
             raise ValueError("NaN")
         return result
 
-    def get_pgm(self, filename=None):
+    def get_pgm(self, filename=None):  # pragma: no cover
         """ Renders (and returns) a PGM of the current framework.
 
         Parameters

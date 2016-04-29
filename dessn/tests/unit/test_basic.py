@@ -42,6 +42,14 @@ class CoinModel(Model):
         self.finalise()
 
 
+def test_model_add_node():
+    model = Model("test")
+    node = ObservedCoinTosses()
+    model.add_node(node)
+    assert len(model.nodes) == 1
+    assert model.nodes[0] == node
+
+
 class TestClass(object):
     model = CoinModel()
 
