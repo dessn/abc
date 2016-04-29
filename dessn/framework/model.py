@@ -191,10 +191,11 @@ class Model(object):
                     make_array.append(theta_name)
                 arrs[theta_name].append(theta)
         for m in make_array:
-            array = arrs[m]
-            for a, d in zip(array, data):
-                d[m] = a
-        # print("RESULT: ", result)
+            nparray = np.array(arrs[m])
+            if np.issubdtype(nparray.dtype, np.number):
+                data[m] = nparray
+            else:
+                data[m] = arrs[m]
         return result, data
 
     def get_log_prior(self, theta):
