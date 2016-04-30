@@ -234,17 +234,14 @@ class Model(object):
         return dep_edge
 
     def _get_edge_likelihood(self, theta_dict, edges):
-        # print("GETTING EDGE LIKELIHOOD")
         edge_index = 0
         probability = None
-        print(edges)
         while edge_index < len(edges):
             edge = edges[edge_index]
             dependencies = edge.given + edge.probability_of
             discretes = [parameter for parameter in dependencies if isinstance(self._node_dict[parameter], ParameterDiscrete)]
             unfilled = [d for d in discretes if d not in theta_dict]
             if len(unfilled) > 0:
-                # print("UNFILLED")
                 first_name = unfilled[0]
                 first_node = self._node_dict[first_name]
                 unfilled_dependencies = first_node.get_discrete_requirements()
@@ -254,7 +251,6 @@ class Model(object):
                 dependent_edges = self._get_dependencies(edges, first_name)
                 edges = [e for e in edges if e not in dependent_edges]
                 t = theta_dict.copy()
-                # print("EDGE ", first_name, edge, dependent_edges)
                 if type(discrete) == tuple:
                     # print("HAVE TUPLE FOR ", edge)
                     n = 0
@@ -281,7 +277,6 @@ class Model(object):
                         # print("222", len(probability))
 
                 elif type(discrete) == list:
-                    # print("HAVE LIST FOR ", edge)
                     combine = np.zeros(len(discrete))
                     n = len(discrete)
                     d2 = discrete[:]
@@ -312,11 +307,8 @@ class Model(object):
                         result[np.argmax(combine == i)] = logsumexp(result[combine == i])
                     if probability is None:
                         probability = result[:n]
-                        # print("333", len(probability))
-
                     else:
                         probability += result[:n]
-                        # print("444", len(probability))
                 else:
                     raise ValueError("Discrete result is not a tuple or a list! %s" % discrete)
             else:

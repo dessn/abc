@@ -73,7 +73,6 @@ class TestTransformed(object):
         assert len(self.model._theta_names) == 1
 
     def test_latent_prior(self):
-        print(self.model.data)
         assert self.model.get_log_prior(self.theta) == 1.0
 
     def test_latent_posterior(self):
