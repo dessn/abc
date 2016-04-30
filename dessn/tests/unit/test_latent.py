@@ -24,7 +24,7 @@ class LatentValue(ParameterLatent):
         return data["obs"]
 
     def get_suggestion_sigma(self, data):
-        return 2 * np.std(data["obs"])
+        return 2 * np.std(data["obs"]) * np.ones(data["obs"].shape)
 
 
 class Underlying(ParameterUnderlying):
@@ -98,3 +98,16 @@ class TestLatent(object):
         posterior += 1
         model_posterior = self.model.get_log_posterior(self.theta)
         assert np.isclose(model_posterior, posterior)
+
+    def test_suggestion(self):
+        suggestion = self.model._get_suggestion()
+        obs = self.model.raw_error_data
+        expected = [np.mean(obs)] + self.model.raw_error_data.tolist()
+        assert suggestion == expected
+
+    def test_suggestion_sigma(self):
+        obs = self.model.raw_error_data
+        sigma = self.model._get_suggestion_sigma()
+        sqrt = np.sqrt(len(obs)) * np.std(obs)
+        expected = [sqrt] + [2 * np.std(obs)] * len(obs)
+        assert sigma == expected

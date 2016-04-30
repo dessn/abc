@@ -346,13 +346,15 @@ class Model(object):
         data = self.data
         for node in node_sorted:
             reqs = node.get_suggestion_requirements()
-            if not isinstance(node, ParameterLatent):
-                node_data = dict((key, row[key]) for key in reqs)
-                theta.append(node.get_suggestion(node_data))
+            node_data = {key: data[key] for key in reqs}
+            suggestion = node.get_suggestion(node_data)
+            if type(suggestion) == np.ndarray:
+                theta += suggestion.tolist()
+            elif type(suggestion) == list:
+                theta += suggestion
             else:
-                for row in data:
-                    node_data = dict((key, row[key]) for key in reqs)
-                    theta.append(node.get_suggestion(node_data))
+                theta.append(suggestion)
+            print("THETA IS ", node, theta)
         return theta
 
     def _get_suggestion_sigma(self):
@@ -365,12 +367,14 @@ class Model(object):
         data = self.data
         for node in node_sorted:
             reqs = node.get_suggestion_requirements()
-            if not isinstance(node, ParameterLatent):
-                sigmas.append(node.get_suggestion_sigma({}))
+            node_data = {key: data[key] for key in reqs}
+            suggestion = node.get_suggestion_sigma(node_data)
+            if type(suggestion) == np.ndarray:
+                sigmas += suggestion.tolist()
+            elif type(suggestion) == list:
+                sigmas += suggestion
             else:
-                for row in data:
-                    node_data = dict((key, row[key]) for key in reqs)
-                    sigmas.append(node.get_suggestion_sigma(node_data))
+                sigmas.append(suggestion)
         return sigmas
 
     def _get_starting_position(self, num_walkers):
