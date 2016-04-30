@@ -237,6 +237,7 @@ class Model(object):
         # print("GETTING EDGE LIKELIHOOD")
         edge_index = 0
         probability = None
+        print(edges)
         while edge_index < len(edges):
             edge = edges[edge_index]
             dependencies = edge.given + edge.probability_of
@@ -331,7 +332,7 @@ class Model(object):
                         # print("665 ", edge)
                         # print("666 ", len(probability), len(result), edge)
                         probability += result
-            if not np.all(np.isfinite(probability)):
+            if probability is not None and not np.all(np.isfinite(probability)):
                 break
         return probability
 

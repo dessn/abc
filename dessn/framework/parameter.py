@@ -30,11 +30,18 @@ class Parameter(object):
         self.label = label
         self.group = group
 
+
+class ParameterEmcee(Parameter):
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, name, label, group=None):
+        super().__init__(name, label, group=group)
+
     @abc.abstractmethod
     def get_suggestion_requirements(self):
         """ Returns suggestion parameter requirements.
         """
-        return
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def get_suggestion(self, data):
@@ -56,7 +63,7 @@ class Parameter(object):
             float
                 a suggested parameter
         """
-        return
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def get_suggestion_sigma(self, data):
@@ -80,7 +87,7 @@ class Parameter(object):
                 a suggested parameter sigma, used to randomise the suggest parameter
 
         """
-        return
+        raise NotImplementedError()
 
 
 class ParameterObserved(Parameter):
@@ -103,6 +110,8 @@ class ParameterObserved(Parameter):
     group : str, optional
         The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
     """
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, name, label, data, group=None):
         assert type(data) in [list, np.ndarray], \
             "Data must be a list format"
@@ -114,17 +123,8 @@ class ParameterObserved(Parameter):
         """
         return {self.name: self.data}
 
-    def get_suggestion(self, data):
-        return
 
-    def get_suggestion_requirements(self):
-        return []
-
-    def get_suggestion_sigma(self, data):
-        return
-
-
-class ParameterUnderlying(Parameter):
+class ParameterUnderlying(ParameterEmcee):
     r""" A parameter representing an underlying parameter in your framework.
 
     On the PGM, these nodes would be at the very top, and would represent the variables
@@ -150,6 +150,7 @@ class ParameterUnderlying(Parameter):
     def __init__(self, name, label, group=None):
         super(ParameterUnderlying, self).__init__(name, label, group=group)
 
+    @abc.abstractclassmethod
     def get_log_prior(self, data):
         """ Returns the log prior for the parameter.
 
@@ -166,7 +167,7 @@ class ParameterUnderlying(Parameter):
         float
             the log prior probability given the current value of the parameters
         """
-        return 1
+        raise NotImplementedError()
 
     def get_suggestion_requirements(self):
         return []
@@ -191,20 +192,13 @@ class ParameterTransformation(Parameter):
     group : str, optional
         The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
     """
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, name, label, group=None):
         super(ParameterTransformation, self).__init__(name, label, group=group)
 
-    def get_suggestion_requirements(self):
-        return []
 
-    def get_suggestion(self, data):
-        return
-
-    def get_suggestion_sigma(self, data):
-        return
-
-
-class ParameterLatent(Parameter):
+class ParameterLatent(ParameterEmcee):
     """ A parameter representing a latent, or hidden, variable in our framework.
 
     Given infinitely powerful computers, these nodes would not be necessary, for they represent
@@ -244,7 +238,7 @@ class ParameterLatent(Parameter):
         int
             the number of latent parameters required by this node
         """
-        pass
+        raise NotImplementedError()
 
 
 class ParameterDiscrete(Parameter):
@@ -295,7 +289,7 @@ class ParameterDiscrete(Parameter):
             list
                 A list of types which are iterated over.
         """
-        pass
+        raise NotImplementedError()
 
     def get_discrete_requirements(self):
         """ Gets the data and parameters required for generating the discrete values for this parameters
@@ -306,12 +300,3 @@ class ParameterDiscrete(Parameter):
                 Defaults to an empty list.
         """
         return []
-
-    def get_suggestion_requirements(self):
-        return []
-
-    def get_suggestion(self, data):
-        return
-
-    def get_suggestion_sigma(self, data):
-        return

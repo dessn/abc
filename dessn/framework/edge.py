@@ -45,7 +45,7 @@ class Edge(object):
         float
             the log likelihood given the supplied data and the framework parametrisation.
         """
-        return
+        raise NotImplementedError()
 
 
 class EdgeTransformation(Edge):
@@ -76,7 +76,7 @@ class EdgeTransformation(Edge):
         dict
             a dictionary containing a value for each parameter given in ``transform_to``
         """
-        pass
+        raise NotImplementedError()
 
     def get_log_likelihood(self, data):
-        return 0
+        raise NotImplementedError()
