@@ -354,7 +354,6 @@ class Model(object):
                 theta += suggestion
             else:
                 theta.append(suggestion)
-            print("THETA IS ", node, theta)
         return theta
 
     def _get_suggestion_sigma(self):

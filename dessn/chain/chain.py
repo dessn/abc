@@ -355,7 +355,8 @@ class ChainConsumer(object):
             text = "$%s$" % text
         return text
 
-    def plot(self, figsize="GROW", parameters=None, extents=None, filename=None, display=False, truth=None, legend=True):
+    def plot(self, figsize="GROW", parameters=None, extents=None, filename=None,
+             display=False, truth=None, legend=True):  # pragma: no cover
         """ Plot the chain
 
         Parameters
@@ -475,7 +476,8 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
-    def plot_walks(self, parameters=None, truth=None, extents=None, display=False, filename=None, chain=None, convolve=None, figsize=None):
+    def plot_walks(self, parameters=None, truth=None, extents=None, display=False,
+                   filename=None, chain=None, convolve=None, figsize=None): # pragma: no cover
         """ Plots the chain walk; the parameter values as a function of step index.
 
         This plot is more for a sanity or consistency check than for use with final results. Plotting this before plotting
@@ -525,10 +527,12 @@ class ChainConsumer(object):
         if parameters is None:
             parameters = self.all_parameters
 
-        assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
+        assert truth is None or isinstance(truth, dict) or \
+               (isinstance(truth, list) and len(truth) == len(parameters)), \
             "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
 
-        assert extents is None or isinstance(extents, dict) or (isinstance(extents, list) and len(extents) == len(parameters)), \
+        assert extents is None or isinstance(extents, dict) or \
+               (isinstance(extents, list) and len(extents) == len(parameters)), \
             "Have a list of %d parameters and %d extent values" % (len(parameters), len(extents))
 
         if truth is not None and isinstance(truth, list):
@@ -548,10 +552,13 @@ class ChainConsumer(object):
             if len(self.chains) == 1:
                 chain = 0
             else:
-                raise ValueError("You can only plot walks for one chain at a time. If you have multiple chains, please pass an index or a chain name via the chain parameter")
+                raise ValueError("You can only plot walks for one chain at a time. "
+                                 "If you have multiple chains, please pass an "
+                                 "index or a chain name via the chain parameter")
 
         if isinstance(chain, str):
-            assert chain in self.names, "A chain with name %s is not found in available names: %s" % (chain, self.names)
+            assert chain in self.names, \
+                "A chain with name %s is not found in available names: %s" % (chain, self.names)
             chain = self.names.index(chain)
 
         chain_data = self.chains[chain]
@@ -566,9 +573,11 @@ class ChainConsumer(object):
 
         for p, axes_row in zip(parameters, axes):
             ax = axes_row[0]
-            assert p in chain_parameters, "Chain does not have parameter %s, it has %s" % (p, chain_parameters)
+            assert p in chain_parameters, \
+                "Chain does not have parameter %s, it has %s" % (p, chain_parameters)
             chain_row = chain_data[:, chain_parameters.index(p)]
-            self._plot_walk(ax, p, chain_row, truth=truth.get(p), extents=extents.get(p), convolve=convolve)
+            self._plot_walk(ax, p, chain_row, truth=truth.get(p),
+                            extents=extents.get(p), convolve=convolve)
 
         if filename is not None:
             fig.savefig(filename, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
@@ -579,7 +588,8 @@ class ChainConsumer(object):
     def _plot_walk(self, ax, parameter, data, truth=None, extents=None, convolve=None):
         if extents is not None:
             ax.set_ylim(extents)
-        assert convolve is None or isinstance(convolve, int), "Convolve must be an integer pixel window width"
+        assert convolve is None or isinstance(convolve, int), \
+            "Convolve must be an integer pixel window width"
         x = np.arange(data.size)
         ax.set_xlim(0, x[-1])
         ax.set_ylabel(parameter)
@@ -676,7 +686,7 @@ class ChainConsumer(object):
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
         fig.subplots_adjust(left=0.1, right=0.95, top=0.95, bottom=0.1, wspace=0.05, hspace=0.05)
-        
+
         extents = {}
         for p in all_parameters:
             min_val = None
@@ -827,5 +837,5 @@ class ChainConsumer(object):
                 return [None, xs[startIndex], None]
 
         return [x1, xs[startIndex], x2]
-        
+
 
