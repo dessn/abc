@@ -105,7 +105,7 @@ class Model(object):
         self._finalised = False
 
     def _validate_model(self):
-        assert len(self._underlying_nodes) > 0, "No underlying framework to constrain"
+        assert len(self._underlying_nodes) > 0, "No underlying parameters to constrain"
         assert len(self._observed_nodes) > 0, "No observed nodes found"
         for node in self.nodes:
             name = node.name

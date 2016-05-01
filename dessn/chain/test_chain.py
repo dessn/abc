@@ -3,17 +3,17 @@ import numpy as np
 
 
 class TestChain(object):
-    np.random.seed(2)
-    n = 10000000
+    np.random.seed(1)
+    n = 1000000
     data = np.random.normal(loc=5.0, scale=1.5, size=n)
     data2 = np.random.normal(loc=3, scale=1.0, size=n)
     data_combined = np.vstack((data, data2)).T
 
     def test_summary1(self):
-        tolerance = 1e-2
+        tolerance = 5e-2
         consumer = chain.ChainConsumer()
         consumer.add_chain(self.data)
-        consumer.configure_general(bins=1.2)
+        consumer.configure_general(bins=1.6)
         summary = consumer.get_summary()
         actual = np.array(list(summary[0].values())[0])
         expected = np.array([3.5, 5.0, 6.5])
@@ -21,11 +21,11 @@ class TestChain(object):
         assert np.all(diff < tolerance)
 
     def test_summary2(self):
-        tolerance = 2e-2
+        tolerance = 5e-2
         consumer = chain.ChainConsumer()
         consumer.add_chain(self.data_combined, parameters=["a", "b"], name="chain1")
         consumer.add_chain(self.data_combined, parameters=["c", "d"], name="chain2")
-        consumer.configure_general(bins=1.6)
+        consumer.configure_general(bins=1.9)
         summary = consumer.get_summary()
         k1 = list(summary[0].keys())
         k2 = list(summary[1].keys())
