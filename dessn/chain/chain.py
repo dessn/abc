@@ -53,6 +53,8 @@ class ChainConsumer(object):
                 chain = np.loadtxt(chain)
             else:
                 chain = np.load(chain)
+        if len(chain.shape) == 1:
+            chain = chain[None].T
         self.chains.append(chain)
         self.names.append(name)
         if self.default_parameters is None and parameters is not None:
@@ -77,7 +79,7 @@ class ChainConsumer(object):
         return self
 
     def configure_general(self, bins=None, flip=True, rainbow=None, colours=None,
-                          serif=True, plot_hists=True, max_ticks=5):
+                          serif=True, plot_hists=True, max_ticks=5):  # pragma: no cover
         r""" Configure the general plotting parameters common across the bar
         and contour plots. If you do not call this explicitly, the :func:`plot`
         method will invoke this method automatically.
@@ -131,7 +133,8 @@ class ChainConsumer(object):
 
         return self
 
-    def configure_contour(self, sigmas=None, cloud=None, contourf=None, contourf_alpha=1.0):
+    def configure_contour(self, sigmas=None, cloud=None, contourf=None,
+                          contourf_alpha=1.0):  # pragma: no cover
         """ Configure the default variables for the contour plots. If you do not call this
         explicitly, the :func:`plot` method will invoke this method automatically.
 
@@ -175,7 +178,7 @@ class ChainConsumer(object):
 
         return self
 
-    def configure_bar(self, summary=None):
+    def configure_bar(self, summary=None):  # pragma: no cover
         """ Configure the bar plots showing the marginalised distributions. If you do not
         call this explicitly, the :func:`plot` method will invoke this method automatically.
 
@@ -190,7 +193,7 @@ class ChainConsumer(object):
         self._configured_bar = True
         return self
 
-    def configure_truth(self, **kwargs):
+    def configure_truth(self, **kwargs):  # pragma: no cover
         """ Configure the arguments passed to the ``axvline`` and ``axhline``
         methods when plotting truth values.
 
@@ -229,7 +232,7 @@ class ChainConsumer(object):
         return results
 
     def get_latex_table(self, parameters=None, transpose=False, caption=None,
-                        label=None, hlines=True, blank_fill="--"):
+                        label=None, hlines=True, blank_fill="--"):  # pragma: no cover
         """ Generates a LaTeX table from parameter summaries.
 
         For an example output, see the image below:
@@ -627,7 +630,8 @@ class ChainConsumer(object):
             plt.show()
         return fig
 
-    def _plot_walk(self, ax, parameter, data, truth=None, extents=None, convolve=None):
+    def _plot_walk(self, ax, parameter, data, truth=None, extents=None,
+                   convolve=None):  # pragma: no cover
         if extents is not None:
             ax.set_ylim(extents)
         assert convolve is None or isinstance(convolve, int), \
@@ -681,7 +685,7 @@ class ChainConsumer(object):
                     ax.axvline(truth_value, **self.parameters_truth)
         return hist.max()
 
-    def _plot_contour(self, ax, x, y, px, py, colour, bins=25, truth=None):
+    def _plot_contour(self, ax, x, y, px, py, colour, bins=25, truth=None):  # pragma: no cover
 
         levels = 1.0 - np.exp(-0.5 * self.parameters_contour["sigmas"] ** 2)
 
@@ -711,7 +715,7 @@ class ChainConsumer(object):
             if truth_value is not None:
                 ax.axvline(truth_value, **self.parameters_truth)
 
-    def _get_colours(self, colours, rainbow=False):
+    def _get_colours(self, colours, rainbow=False):  # pragma: no cover
         num_chains = len(self.chains)
         if rainbow or num_chains > len(colours):
             colours = cm.rainbow(np.linspace(0, 1, num_chains))
@@ -719,7 +723,8 @@ class ChainConsumer(object):
             colours = colours[:num_chains]
         return colours
 
-    def _get_figure(self, all_parameters, flip, figsize=(5, 5), external_extents=None):
+    def _get_figure(self, all_parameters, flip, figsize=(5, 5),
+                    external_extents=None):  # pragma: no cover
         n = len(all_parameters)
         max_ticks = self.parameters_general["max_ticks"]
         plot_hists = self.parameters_general["plot_hists"]
@@ -807,20 +812,20 @@ class ChainConsumer(object):
                     for chain in self.chains]
         return proposal
 
-    def _clamp(self, val, minimum=0, maximum=255):
+    def _clamp(self, val, minimum=0, maximum=255):  # pragma: no cover
         if val < minimum:
             return minimum
         if val > maximum:
             return maximum
         return val
 
-    def _scale_colours(self, colour, num):
+    def _scale_colours(self, colour, num):  # pragma: no cover
         # http://thadeusb.com/weblog/2010/10/10/python_scale_hex_color
         scales = np.logspace(np.log(0.8), np.log(1.4), num)
         colours = [self._scale_colour(colour, scale) for scale in scales]
         return colours
 
-    def _scale_colour(self, colour, scalefactor):
+    def _scale_colour(self, colour, scalefactor):  # pragma: no cover
         if isinstance(colour, np.ndarray):
             r, g, b = colour[:3]*255.0
         else:
@@ -833,7 +838,7 @@ class ChainConsumer(object):
         b = self._clamp(int(b * scalefactor))
         return "#%02x%02x%02x" % (r, g, b)
 
-    def _convert_to_stdev(self, sigma):
+    def _convert_to_stdev(self, sigma):  # pragma: no cover
         # From astroML
         shape = sigma.shape
         sigma = sigma.ravel()

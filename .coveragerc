@@ -11,6 +11,7 @@ omit =
     dessn/entry/*
     dessn/examples/*
     dessn/chain/demo*.py
+    **/test*.py
     *__init__*
 
 exclude_lines =
