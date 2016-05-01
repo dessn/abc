@@ -522,7 +522,7 @@ class Model(object):
         if not self._finalised:
             self.finalise()
         pool = None
-        try:
+        try:  # pragma: no cover
             pool = MPIPool()
             if not pool.is_master():
                 self.logger.info("Slave waiting")
@@ -535,7 +535,7 @@ class Model(object):
         except ImportError:
             self.logger.info("mpi4py is not installed or not configured properly. "
                              "Ignore if running through python, not mpirun")
-        except ValueError as e:
+        except ValueError as e:  # pragma: no cover
             self.logger.info("Unable to start MPI pool, expected normal python execution")
             self.logger.info(str(e))
 
@@ -556,7 +556,7 @@ class Model(object):
                                              temp_dir=temp_dir,
                                              save_interval=save_interval)
         self.logger.debug("Fit finished")
-        if pool is not None:
+        if pool is not None:  # pragma: no cover
             pool.close()
             self.logger.debug("Pool closed")
         self.flat_chain = flat_chain

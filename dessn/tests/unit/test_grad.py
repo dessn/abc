@@ -49,7 +49,6 @@ def test_fit():
     m.add_node(Underlying())
     m.add_node(Observed())
     m.add_edge(TheEdge())
-    m.finalise()
     np.random.seed(0)
     m.fit_model(num_steps=8010, num_burn=10)
     consumer = m.get_consumer()
