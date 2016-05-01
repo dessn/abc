@@ -41,4 +41,4 @@ def test_gradient():
     x = 2.0
     expected = [-x]
     grad = m._get_log_posterior_grad([x])
-    assert grad == expected
+    assert np.allclose(grad, expected)
