@@ -12,7 +12,8 @@ class ChainConsumer(object):
     """
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.all_colours = ["#1E88E5", "#D32F2F", "#4CAF50", "#673AB7", "#FFC107", "#795548", "#64B5F6", "#8BC34A", "#757575", "#CDDC39"]
+        self.all_colours = ["#1E88E5", "#D32F2F", "#4CAF50", "#673AB7", "#FFC107",
+                            "#795548", "#64B5F6", "#8BC34A", "#757575", "#CDDC39"]
         self.chains = []
         self.names = []
         self.parameters = []
@@ -33,8 +34,9 @@ class ChainConsumer(object):
         Parameters
         ----------
         chain : str|ndarray
-            The chain to load. Normally a ``numpy.ndarray``, but can also accept a string. If a string is found, it
-            interprets the string as a filename and attempts to load it in.
+            The chain to load. Normally a ``numpy.ndarray``, but can also accept a string.
+            If a string is found, it interprets the string as a filename
+            and attempts to load it in.
         parameters : list[str], optional
             A list of parameter names, one for each column (dimension) in the chain.
         name : str, optional
@@ -58,7 +60,9 @@ class ChainConsumer(object):
 
         if parameters is None:
             if self.default_parameters is not None:
-                assert chain.shape[1] == len(self.default_parameters), "Chain has %d dimensions, but default parameters have %d dimesions" % (chain.shape[1], len(self.default_parameters))
+                assert chain.shape[1] == len(self.default_parameters), \
+                    "Chain has %d dimensions, but default parameters have %d dimensions" \
+                    % (chain.shape[1], len(self.default_parameters))
                 parameters = self.default_parameters
                 self.logger.debug("Adding chain using default parameters")
             else:
@@ -72,24 +76,27 @@ class ChainConsumer(object):
         self.parameters.append(parameters)
         return self
 
-    def configure_general(self, bins=None, flip=True, rainbow=None, colours=None, serif=True, plot_hists=True, max_ticks=5):
-        r""" Configure the general plotting parameters common across the bar and contour plots. If you do not call this explicitly,
-        the :func:`plot` method will invoke this method automatically.
+    def configure_general(self, bins=None, flip=True, rainbow=None, colours=None,
+                          serif=True, plot_hists=True, max_ticks=5):
+        r""" Configure the general plotting parameters common across the bar
+        and contour plots. If you do not call this explicitly, the :func:`plot`
+        method will invoke this method automatically.
 
         Parameters
         ----------
         bins : int|float, optional
-            The number of bins to use. By default uses :math:`\frac{\sqrt{n}}{10}`, where :math:`n` are the number of data points.
-            Giving an integer will set the number of bins to the given value. Giving a float will scale the number of bins, such that
-            giving ``bins=1.5`` will result in using :math:`\frac{1.5\sqrt{n}}{10}` bins.
+            The number of bins to use. By default uses :math:`\frac{\sqrt{n}}{10}`, where
+            :math:`n` are the number of data points. Giving an integer will set the number
+            of bins to the given value. Giving a float will scale the number of bins, such
+            that giving ``bins=1.5`` will result in using :math:`\frac{1.5\sqrt{n}}{10}` bins.
         flip : bool, optional
-            Set to false if, when plotting only two parameters, you do not want it to rotate the histogram
-            so that it is horizontal.
+            Set to false if, when plotting only two parameters, you do not want it to
+            rotate the histogram so that it is horizontal.
         rainbow : bool, optional
             Set to True to force use of rainbow colours
         colours : list[str(hex)], optional
-            Provide a list of colours to use for each chain. If you provide more chains than colours,
-            you *will* get the rainbow colour spectrum.
+            Provide a list of colours to use for each chain. If you provide more chains
+            than colours, you *will* get the rainbow colour spectrum.
         serif : bool, optional
             Whether to display ticks and labels with serif font.
         plot_hists : bool, optional
@@ -98,7 +105,8 @@ class ChainConsumer(object):
             The maximum number of ticks to use on the plots
 
         """
-        assert rainbow is None or colours is None, "You cannot both ask for rainbow colours and then give explicit colours"
+        assert rainbow is None or colours is None, \
+            "You cannot both ask for rainbow colours and then give explicit colours"
 
         if bins is None:
             bins = self._get_bins()
@@ -124,17 +132,18 @@ class ChainConsumer(object):
         return self
 
     def configure_contour(self, sigmas=None, cloud=None, contourf=None, contourf_alpha=1.0):
-        """ Configure the default variables for the contour plots. If you do not call this explicitly,
-        the :func:`plot` method will invoke this method automatically.
+        """ Configure the default variables for the contour plots. If you do not call this
+        explicitly, the :func:`plot` method will invoke this method automatically.
 
-        Please ensure that you call this method after adding all the relevant datae to the chain consumer,
-        as the consume changes configuration values depending on the presupplied data.
+        Please ensure that you call this method after adding all the relevant data to the
+        chain consumer, as the consume changes configuration values depending on
+        the presupplied data.
 
         Parameters
         ----------
         sigmas : np.array, optional
-            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3]. Number of contours shown
-            decreases with the number of chains to show.
+            The :math:`\sigma` contour levels to plot. Defaults to [0.5, 1, 2, 3].
+            Number of contours shown decreases with the number of chains to show.
         cloud : bool, optional
             If set, overrides the default behaviour and plots the cloud or not
         contourf : bool, optional
@@ -167,8 +176,8 @@ class ChainConsumer(object):
         return self
 
     def configure_bar(self, summary=None):
-        """ Configure the bar plots showing the marginalised distributions. If you do not call this explicitly,
-        the :func:`plot` method will invoke this method automatically.
+        """ Configure the bar plots showing the marginalised distributions. If you do not
+        call this explicitly, the :func:`plot` method will invoke this method automatically.
 
         summary : bool, optional
             If overridden, sets whether parameter summaries should be set as axis titles.
@@ -182,10 +191,14 @@ class ChainConsumer(object):
         return self
 
     def configure_truth(self, **kwargs):
-        """ Configure the arguments passed to the ``axvline`` and ``axhline`` methods when plotting truth values.
-        If you do not call this explicitly, the :func:`plot` method will invoke this method automatically.
+        """ Configure the arguments passed to the ``axvline`` and ``axhline``
+        methods when plotting truth values.
 
-        Recommended to set the parameters ``linestyle``, ``color`` and/or ``alpha`` if you want some basic control.
+        If you do not call this explicitly, the :func:`plot` method will
+        invoke this method automatically.
+
+        Recommended to set the parameters ``linestyle``, ``color`` and/or ``alpha``
+        if you want some basic control.
 
         Default is to use an opaque black dashed line.
         """
@@ -215,7 +228,8 @@ class ChainConsumer(object):
             results.append(res)
         return results
 
-    def get_latex_table(self, parameters=None, transpose=False, caption=None, label=None, hlines=True, blank_fill="--"):
+    def get_latex_table(self, parameters=None, transpose=False, caption=None,
+                        label=None, hlines=True, blank_fill="--"):
         """ Generates a LaTeX table from parameter summaries.
 
         For an example output, see the image below:
@@ -228,16 +242,20 @@ class ChainConsumer(object):
         parameters : list[str], optional
             A list of what parameters to include in the table. By default, includes all parameters
         transpose : bool, optional
-            Defaults to False, which gives each column as a parameter, each chain (framework) as a row. You can swap it so
-            that you have a parameter each row and a framework each column by setting this to True
+            Defaults to False, which gives each column as a parameter, each chain (framework)
+            as a row. You can swap it so that you have a parameter each row and a framework
+            each column by setting this to True
         caption : str, optional
-            If you want to generate a caption for the table through Python, use this. Defaults to an empty string
+            If you want to generate a caption for the table through Python, use this.
+            Defaults to an empty string
         label : str, optional
-            If you want to generate a label for the table through Python, use this. Defaults to an empty string
+            If you want to generate a label for the table through Python, use this.
+            Defaults to an empty string
         hlines : bool, optional
             Inserts ``\\hline`` before and after the header, and at the end of table.
         blank_fill : str, optional
-            If a framework does not have a particular parameter, will fill that cell of the table with this string.
+            If a framework does not have a particular parameter, will fill that cell of
+            the table with this string.
 
         Returns
         -------
@@ -247,9 +265,12 @@ class ChainConsumer(object):
         if parameters is None:
             parameters = self.all_parameters
         for i, name in enumerate(self.names):
-            assert name is not None, "Generating a LaTeX table requires all chains to have names. Ensure you have `name=` in your `add_chain` call"
+            assert name is not None, \
+                "Generating a LaTeX table requires all chains to have names." \
+                " Ensure you have `name=` in your `add_chain` call"
         for p in parameters:
-            assert isinstance(p, str), "Generating a LaTeX table requires all parameters have labels"
+            assert isinstance(p, str), \
+                "Generating a LaTeX table requires all parameters have labels"
         num_parameters = len(parameters)
         num_chains = len(self.chains)
         fit_values = self.get_summary()
@@ -323,7 +344,8 @@ class ChainConsumer(object):
             return ""
         upper_error = upper - maximum
         lower_error = maximum - lower
-        resolution = min(np.floor(np.log10(np.abs(upper_error))), np.floor(np.log10(np.abs(lower_error))))
+        resolution = min(np.floor(np.log10(np.abs(upper_error))),
+                         np.floor(np.log10(np.abs(lower_error))))
         factor = 0
         fmt = "%0.1f"
         r = 1
@@ -348,7 +370,8 @@ class ChainConsumer(object):
         if upper_error_text == lower_error_text:
             text = r"%s\pm %s" % (fmt, "%s") % (maximum, lower_error_text)
         else:
-            text = r"%s^{+%s}_{-%s}" % (fmt, "%s", "%s") % (maximum, upper_error_text, lower_error_text)
+            text = r"%s^{+%s}_{-%s}" % (fmt, "%s", "%s") % \
+                   (maximum, upper_error_text, lower_error_text)
         if factor != 0:
             text = r"\left( %s \right) \times 10^{%d}" % (text, -factor)
         if wrap:
@@ -362,21 +385,24 @@ class ChainConsumer(object):
         Parameters
         ----------
         figsize : str|tuple(float), optional
-            The figure size to generate. Accepts a regular two tuple of size in inches, or one of several key words.
-            The default value of ``COLUMN`` creates a figure of appropriate size of insertion into an A4 LaTeX document
-            in two-column mode. ``PAGE`` creates a full page width figure. ``GROW`` creates an image that
-            scales with parameters (1.5 inches per parameter). String arguments are not case sensitive.
-        parameters : list[str], optional
+            The figure size to generate. Accepts a regular two tuple of size in inches,
+            or one of several key words. The default value of ``COLUMN`` creates a figure
+            of appropriate size of insertion into an A4 LaTeX document in two-column mode.
+             ``PAGE`` creates a full page width figure. ``GROW`` creates an image that
+             scales with parameters (1.5 inches per parameter). String arguments are not
+              case sensitive. parameters : list[str], optional
             If set, only creates a plot for those specific parameters
         extents : list[tuple[float]] or dict[str], optional
-            Extents are given as two-tuples. You can pass in a list the same size as parameters (or default
-            parameters if you don't specify parameters), or as a dictionary.
+            Extents are given as two-tuples. You can pass in a list the same size as
+            parameters (or default parameters if you don't specify parameters),
+            or as a dictionary.
         filename : str, optional
             If set, saves the figure to this location
         display : bool, optional
             If True, shows the figure using ``plt.show()``.
         truth : list[float] or dict[str], optional
-            A list of truth values corresponding to parameters, or a dictionary of truth values indexed by key
+            A list of truth values corresponding to parameters, or a dictionary of
+            truth values indexed by key
         legend : bool, optional
             If true, creates a legend in your plot using the chain names.
 
@@ -409,10 +435,12 @@ class ChainConsumer(object):
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
 
-        assert truth is None or isinstance(truth, dict) or (isinstance(truth, list) and len(truth) == len(parameters)), \
+        assert truth is None or isinstance(truth, dict) or \
+               (isinstance(truth, list) and len(truth) == len(parameters)), \
             "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
 
-        assert extents is None or isinstance(extents, dict) or (isinstance(extents, list) and len(extents) == len(parameters)), \
+        assert extents is None or isinstance(extents, dict) or \
+               (isinstance(extents, list) and len(extents) == len(parameters)), \
             "Have a list of %d parameters and %d extent values" % (len(parameters), len(extents))
 
         if truth is not None and isinstance(truth, list):
@@ -424,12 +452,14 @@ class ChainConsumer(object):
         plot_hists = self.parameters_general["plot_hists"]
         flip = (len(parameters) == 2 and plot_hists and self.parameters_general["flip"])
 
-        fig, axes, params1, params2, extents = self._get_figure(parameters, figsize=figsize, flip=flip, external_extents=extents)
+        fig, axes, params1, params2, extents = self._get_figure(parameters, figsize=figsize,
+                                                                flip=flip, external_extents=extents)
 
         num_bins = self.parameters_general["bins"]
         self.logger.info("Plotting surfaces with %s bins" % num_bins)
         fit_values = self.get_summary()
-        colours = self._get_colours(self.parameters_general["colours"], rainbow=self.parameters_general["rainbow"])
+        colours = self._get_colours(self.parameters_general["colours"],
+                                    rainbow=self.parameters_general["rainbow"])
         summary = self.parameters_bar["summary"]
         if summary is None:
             summary = len(parameters) < 5 and len(self.chains) == 1
@@ -445,11 +475,14 @@ class ChainConsumer(object):
                 do_flip = (flip and i == len(params1) - 1)
                 if plot_hists and i == j:
                     max_val = None
-                    for chain, parameters, colour, bins, fit in zip(self.chains, self.parameters, colours, num_bins, fit_values):
+                    for chain, parameters, colour, bins, fit in \
+                            zip(self.chains, self.parameters, colours, num_bins, fit_values):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
-                        m = self._plot_bars(ax, p1, chain[:, index], colour, bins=bins, fit_values=fit[p1], flip=do_flip, summary=summary, truth=truth, extents=extents[p1])
+                        m = self._plot_bars(ax, p1, chain[:, index], colour, bins=bins,
+                                            fit_values=fit[p1], flip=do_flip, summary=summary,
+                                            truth=truth, extents=extents[p1])
                         if max_val is None or m > max_val:
                             max_val = m
                     if do_flip:
@@ -458,16 +491,19 @@ class ChainConsumer(object):
                         ax.set_ylim(0, 1.1 * max_val)
 
                 else:
-                    for chain, parameters, bins, colour, fit in zip(self.chains, self.parameters, num_bins, colours, fit_values):
+                    for chain, parameters, bins, colour, fit in zip(self.chains, self.parameters,
+                                                                    num_bins, colours, fit_values):
                         if p1 not in parameters or p2 not in parameters:
                             continue
                         i1 = parameters.index(p1)
                         i2 = parameters.index(p2)
-                        self._plot_contour(ax, chain[:, i2], chain[:, i1], p1, p2, colour, bins=bins, truth=truth)
+                        self._plot_contour(ax, chain[:, i2], chain[:, i1], p1, p2, colour,
+                                           bins=bins, truth=truth)
 
         if self.names is not None and legend:
             ax = axes[0, -1]
-            artists = [plt.Line2D((0, 1), (0, 0), color=c) for n, c in zip(self.names, colours) if n is not None]
+            artists = [plt.Line2D((0, 1), (0, 0), color=c)
+                       for n, c in zip(self.names, colours) if n is not None]
             ax.legend(artists, self.names, loc="center", frameon=False)
 
         if filename is not None:
@@ -480,12 +516,14 @@ class ChainConsumer(object):
                    filename=None, chain=None, convolve=None, figsize=None): # pragma: no cover
         """ Plots the chain walk; the parameter values as a function of step index.
 
-        This plot is more for a sanity or consistency check than for use with final results. Plotting this before plotting
-        with :func:`plot` allows you to quickly see if the chains are well behaved, or if certain parameters are suspect
+        This plot is more for a sanity or consistency check than for use with final results.
+        Plotting this before plotting with :func:`plot` allows you to quickly see if the
+        chains are well behaved, or if certain parameters are suspect
         or require a greater burn in period.
 
-        The desired outcome is to see an unchanging distribution along the x-axis of the plot. If there are obvious tails
-        or features in the parameters, you probably want to investigate.
+        The desired outcome is to see an unchanging distribution along the x-axis of the plot.
+        If there are obvious tails or features in the parameters, you probably want
+        to investigate.
 
         See :class:`.dessn.chain.demoWalk.DemoWalk` for example usage.
 
@@ -494,18 +532,22 @@ class ChainConsumer(object):
         parameters : list[str], optional
             Specifiy a subset of parameters to plot. If not set, all parameters are plotted.
         truth : list[float]|dict[str], optional
-            A list of truth values corresponding to parameters, or a dictionary of truth values keyed by the parameter.
+            A list of truth values corresponding to parameters, or a dictionary of
+            truth values keyed by the parameter.
         extents : list[tuple]|dict[str], optional
-            A list of two-tuples for plot extents per parameter, or a dictionary of extents keyed by the parameter.
+            A list of two-tuples for plot extents per parameter, or a dictionary of
+            extents keyed by the parameter.
         display : bool, optional
             If set, shows the plot using ``plt.show()``
         filename : str, optional
             If set, saves the figure to the filename
         chain : int|str, optional
-            Used to specify which chain to show if more than one chain is loaded in. Can be an integer, specifying the
+            Used to specify which chain to show if more than one chain is loaded in.
+            Can be an integer, specifying the
             chain index, or a str, specifying the chain name.
         convolve : int, optional
-            If set, overplots a smoothed version of the steps using ``convolve`` as the width of the smoothing filter.
+            If set, overplots a smoothed version of the steps using ``convolve`` as
+            the width of the smoothing filter.
         figsize : tuple, optional
             If set, sets the created figure size.
 
@@ -603,7 +645,8 @@ class ChainConsumer(object):
         if truth is not None:
             ax.axhline(truth, **self.parameters_truth)
 
-    def _plot_bars(self, ax, parameter, chain_row, colour, bins=25, flip=False, summary=False, fit_values=None, truth=None, extents=None):
+    def _plot_bars(self, ax, parameter, chain_row, colour, bins=25, flip=False, summary=False,
+                   fit_values=None, truth=None, extents=None):  # pragma: no cover
         bins = np.linspace(extents[0], extents[1], bins + 1)
         hist, edges = np.histogram(chain_row, bins=bins, normed=True)
         edge_center = 0.5 * (edges[:-1] + edges[1:])
@@ -611,7 +654,8 @@ class ChainConsumer(object):
             orientation = "horizontal"
         else:
             orientation = "vertical"
-        ax.hist(edge_center, weights=hist, bins=edges, histtype="step", color=colour, orientation=orientation)
+        ax.hist(edge_center, weights=hist, bins=edges, histtype="step",
+                color=colour, orientation=orientation)
         interpolator = interp1d(edge_center, hist, kind="nearest")
         if len(self.chains) == 1 and fit_values is not None:
             lower = fit_values[0]
@@ -620,11 +664,14 @@ class ChainConsumer(object):
                 x = np.linspace(lower, upper, 1000)
                 if lower > edge_center.min() and upper < edge_center.max():
                     if flip:
-                        ax.fill_betweenx(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
+                        ax.fill_betweenx(x, np.zeros(x.shape), interpolator(x),
+                                         color=colour, alpha=0.2)
                     else:
-                        ax.fill_between(x, np.zeros(x.shape), interpolator(x), color=colour, alpha=0.2)
+                        ax.fill_between(x, np.zeros(x.shape), interpolator(x),
+                                        color=colour, alpha=0.2)
                 if summary and isinstance(parameter, str):
-                    ax.set_title(r"$%s = %s$" % (parameter.strip("$"), self.get_parameter_text(*fit_values)), fontsize=14)
+                    ax.set_title(r"$%s = %s$" % (parameter.strip("$"),
+                                                 self.get_parameter_text(*fit_values)), fontsize=14)
         if truth is not None:
             truth_value = truth.get(parameter)
             if truth_value is not None:
@@ -639,7 +686,8 @@ class ChainConsumer(object):
         levels = 1.0 - np.exp(-0.5 * self.parameters_contour["sigmas"] ** 2)
 
         colours = self._scale_colours(colour, len(levels))
-        colours2 = [self._scale_colour(colours[0], 0.7)] + [self._scale_colour(c, 0.8) for c in colours[:-1]]
+        colours2 = [self._scale_colour(colours[0], 0.7)] + \
+                   [self._scale_colour(c, 0.8) for c in colours[:-1]]
 
         hist, x_bins, y_bins = np.histogram2d(x, y, bins=bins)
         x_centers = 0.5 * (x_bins[:-1] + x_bins[1:])
@@ -648,9 +696,11 @@ class ChainConsumer(object):
         vals = self._convert_to_stdev(hist.T)
         if self.parameters_contour["cloud"]:
             skip = max(1, x.size / 80000)
-            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.4, c=colours[1], marker=".", edgecolors="none")
+            ax.scatter(x[::skip], y[::skip], s=10, alpha=0.4, c=colours[1],
+                       marker=".", edgecolors="none")
         if self.parameters_contour["contourf"]:
-            ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours, alpha=self.parameters_contour["contourf_alpha"])
+            ax.contourf(x_centers, y_centers, vals, levels=levels, colors=colours,
+                        alpha=self.parameters_contour["contourf_alpha"])
         ax.contour(x_centers, y_centers, vals, levels=levels, colors=colours2)
 
         if truth is not None:
@@ -753,7 +803,8 @@ class ChainConsumer(object):
         return fig, axes, params1, params2, extents
 
     def _get_bins(self):
-        proposal = [max(20, np.floor(1.2 * np.power(chain.shape[0] / chain.shape[1], 0.3))) for chain in self.chains]
+        proposal = [max(20, np.floor(1.2 * np.power(chain.shape[0] / chain.shape[1], 0.3)))
+                    for chain in self.chains]
         return proposal
 
     def _clamp(self, val, minimum=0, maximum=255):
