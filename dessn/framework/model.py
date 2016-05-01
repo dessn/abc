@@ -541,7 +541,8 @@ class Model(object):
         num_dim = len(self._theta_names)
 
         self.num_temps = num_temps
-        self.logger.debug("Fitting framework with %d dimensions using %d temperature levels" % (num_dim, 0 if self.num_temps is None else self.num_temps))
+        self.logger.debug("Fitting framework with %d dimensions using %d temperature levels"
+                          % (num_dim, 0 if self.num_temps is None else self.num_temps))
         if num_walkers is None:
             if num_temps is None:
                 num_walkers = num_dim * 2
@@ -550,18 +551,25 @@ class Model(object):
         num_walkers = max(num_walkers, 20)
         if num_temps is None:
             self.logger.info("Using Ensemble Sampler")
-            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self.get_log_posterior, pool=pool, live_dangerously=True)
+            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self.get_log_posterior,
+                                            pool=pool, live_dangerously=True)
         else:
             self.logger.info("Using PTSampler")
-            sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim, self.get_log_likelihood, self.get_log_prior, pool=pool)
+            sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim,
+                                      self.get_log_likelihood, self.get_log_prior, pool=pool)
         emcee_wrapper = EmceeWrapper(sampler)
-        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim, start=self._get_starting_position, save_dim=self._num_actual, temp_dir=temp_dir, save_interval=save_interval)
+        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim,
+                                             start=self._get_starting_position,
+                                             save_dim=self._num_actual, temp_dir=temp_dir,
+                                             save_interval=save_interval)
         self.logger.debug("Fit finished")
         if pool is not None:
             pool.close()
             self.logger.debug("Pool closed")
         self.flat_chain = flat_chain
-        return flat_chain, self._theta_names[:self._num_actual], self._theta_labels[:self._num_actual]
+        return flat_chain, \
+               self._theta_names[:self._num_actual], \
+               self._theta_labels[:self._num_actual]
 
     def get_consumer(self):
         from dessn.chain.chain import ChainConsumer
@@ -569,18 +577,18 @@ class Model(object):
         chain_plotter.add_chain(self.flat_chain, parameters=self._theta_labels[:self._num_actual])
         return chain_plotter
 
-    def __getstate__(self):
+    def __getstate__(self):  # pragma: no cover
         d = dict(self.__dict__)
         del d['logger']
         return d
 
-    def __setstate__(self, d):
+    def __setstate__(self, d):  # pragma: no cover
         self.__dict__.update(d)
         if self.master:
             self.logger = logging.getLogger(__name__)
 
 
-def _pickle_method(m):
+def _pickle_method(m):  # pragma: no cover
     if m.im_self is None:
         return getattr, (m.im_class, m.im_func.func_name)
     else:

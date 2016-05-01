@@ -14,7 +14,7 @@ class Underlying(ParameterUnderlying):
         super().__init__("mean", "mean")
 
     def get_suggestion_sigma(self, data):
-        return 0.0
+        return 2.0
 
     def get_suggestion(self, data):
         return 0.0
@@ -42,3 +42,19 @@ def test_gradient():
     expected = [-x]
     grad = m._get_log_posterior_grad([x])
     assert np.allclose(grad, expected)
+
+
+def test_fit():
+    m = Model("Model")
+    m.add_node(Underlying())
+    m.add_node(Observed())
+    m.add_edge(TheEdge())
+    m.finalise()
+    np.random.seed(1)
+    m.fit_model(num_steps=5010, num_burn=10)
+    consumer = m.get_consumer()
+    summary = np.array(consumer.get_summary()[0]["mean"])
+    expected = np.array([-1.0, 0.0, 1.0])
+    threshold = 0.1
+    diff = np.abs(expected - summary)
+    assert np.all(diff < threshold)
