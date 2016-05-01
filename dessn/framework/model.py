@@ -370,16 +370,15 @@ class Model(object):
         p0 = self._get_suggestion()
         sigmas = self._get_suggestion_sigma()
         self.logger.debug("Initial position is:  %s" % p0)
-        if self.num_temps is None and len(p0) < 20: # TODO: confirm. Removing this for high dimensions, as it seems to be ineffective
-            optimised = fmin_bfgs(self._get_negative_log_posterior, p0)
+        if len(p0) < 20:
+            # TODO: confirm. Removing this for high dimensions, as it seems to be ineffective
+            optimised = fmin_bfgs(self._get_negative_log_posterior, p0, disp=0)
             self.logger.debug("Optimised position is: %s" % optimised)
         else:
             optimised = p0
 
-        if self.num_temps is not None:
-            std = np.random.uniform(low=-1, high=1, size=(self.num_temps, num_walkers, num_dim)) * np.array(sigmas).reshape((1, 1, -1))
-        else:
-            std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * np.array(sigmas).reshape((1, -1))
+        std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * \
+              np.array(sigmas).reshape((1, -1))
         start = optimised + std
         return start
 
@@ -476,7 +475,8 @@ class Model(object):
             else:
                 node_label = ""
             node_label += ", ".join(reverse_dict[value]["labels"])
-            pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3, observed=obs, fixed=fixed))
+            pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3,
+                                   observed=obs, fixed=fixed))
 
         for edge in self.edges:
             for g in edge.given:
@@ -489,7 +489,8 @@ class Model(object):
 
         return pgm
 
-    def fit_model(self, num_temps=None, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None, save_interval=300, p0=None):
+    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None,
+                  save_interval=300):
         """ Uses ``emcee`` to fit the supplied framework.
 
         This method sets an emcee run using the ``EnsembleSampler`` and manual chain management to allow for
@@ -500,8 +501,6 @@ class Model(object):
 
         Parameters
         ----------
-        num_temps : int, optional
-            The number of temperature to run. If none, does not use PTSampler
         num_walkers : int, optional
             The number of walkers to run. If not supplied, it defaults to eight times the framework dimensionality
         num_steps : int, optional
@@ -531,36 +530,30 @@ class Model(object):
                 pool.wait()
                 sys.exit(0)
             else:
-                self.logger.info("MPIPool successful initialised and master found. Running with %d cores." % pool.size)
+                self.logger.info("MPIPool successful initialised and master found. "
+                                 "Running with %d cores." % pool.size)
         except ImportError:
-            self.logger.info("mpi4py is not installed or not configured properly. Ignore if running through python, not mpirun")
+            self.logger.info("mpi4py is not installed or not configured properly. "
+                             "Ignore if running through python, not mpirun")
         except ValueError as e:
             self.logger.info("Unable to start MPI pool, expected normal python execution")
             self.logger.info(str(e))
 
         num_dim = len(self._theta_names)
 
-        self.num_temps = num_temps
-        self.logger.debug("Fitting framework with %d dimensions using %d temperature levels"
-                          % (num_dim, 0 if self.num_temps is None else self.num_temps))
+        self.logger.debug("Fitting framework with %d dimensions"
+                          % num_dim)
         if num_walkers is None:
-            if num_temps is None:
-                num_walkers = num_dim * 2
-            else:
-                num_walkers = num_dim * 4
+            num_walkers = num_dim * 2
         num_walkers = max(num_walkers, 20)
-        if num_temps is None:
-            self.logger.info("Using Ensemble Sampler")
-            sampler = emcee.EnsembleSampler(num_walkers, num_dim, self.get_log_posterior,
-                                            pool=pool, live_dangerously=True)
-        else:
-            self.logger.info("Using PTSampler")
-            sampler = emcee.PTSampler(self.num_temps, num_walkers, num_dim,
-                                      self.get_log_likelihood, self.get_log_prior, pool=pool)
+        self.logger.info("Using Ensemble Sampler")
+        sampler = emcee.EnsembleSampler(num_walkers, num_dim, self.get_log_posterior,
+                                        pool=pool, live_dangerously=True)
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim,
                                              start=self._get_starting_position,
-                                             save_dim=self._num_actual, temp_dir=temp_dir,
+                                             save_dim=self._num_actual,
+                                             temp_dir=temp_dir,
                                              save_interval=save_interval)
         self.logger.debug("Fit finished")
         if pool is not None:

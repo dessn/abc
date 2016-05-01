@@ -50,9 +50,10 @@ def test_fit():
     m.add_node(Observed())
     m.add_edge(TheEdge())
     m.finalise()
-    np.random.seed(1)
-    m.fit_model(num_steps=5010, num_burn=10)
+    np.random.seed(0)
+    m.fit_model(num_steps=8010, num_burn=10)
     consumer = m.get_consumer()
+    consumer.configure_general(bins=1.4)
     summary = np.array(consumer.get_summary()[0]["mean"])
     expected = np.array([-1.0, 0.0, 1.0])
     threshold = 0.1

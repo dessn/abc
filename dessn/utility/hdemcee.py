@@ -58,10 +58,7 @@ class EmceeWrapper(object):
                               % (temp_dir, save_interval))
 
         for result in self.sampler.sample(pos, iterations=num, storechain=False):
-            if isinstance(self.sampler, PTSampler):
-                self.chain[:, step, :] = result[0][0, :, :save_dim]
-            else:
-                self.chain[:, step, :] = result[0][:, :save_dim]
+            self.chain[:, step, :] = result[0][:, :save_dim]
             step += 1
             if step == 1 or temp_dir is not None and save_interval is not None:
                 t2 = time()
