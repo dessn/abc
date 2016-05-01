@@ -218,11 +218,6 @@ class Model(object):
             probability += self._get_log_likelihood(theta_dict, data)
         return probability
 
-    def _expand_discrete(self, dictionary):
-        keys = dictionary.keys()
-        product = list(itertools.product(*[dictionary[k] for k in keys]))
-        return keys, product
-
     def _get_dependencies(self, edges, dependency_name):
         dep_edge = []
         for edge in edges:
@@ -252,7 +247,6 @@ class Model(object):
                 edges = [e for e in edges if e not in dependent_edges]
                 t = theta_dict.copy()
                 if type(discrete) == tuple:
-                    # print("HAVE TUPLE FOR ", edge)
                     n = 0
                     for key in t:
                         value = t[key]
@@ -271,11 +265,8 @@ class Model(object):
                         result[np.argmax(combine == i)] = logsumexp(result[combine == i])
                     if probability is None:
                         probability = result[:n]
-                        # print("111", len(probability))
                     else:
                         probability += result[:n]
-                        # print("222", len(probability))
-
                 elif type(discrete) == list:
                     combine = np.zeros(len(discrete))
                     n = len(discrete)
@@ -319,10 +310,7 @@ class Model(object):
                     result = self._get_log_likelihood_edge(theta_dict, edge)
                     if probability is None:
                         probability = result
-                        # print("555", len(probability), len(result), len(theta_dict["c_o"]), edge)
                     else:
-                        # print("665 ", edge)
-                        # print("666 ", len(probability), len(result), edge)
                         probability += result
             if probability is not None and not np.all(np.isfinite(probability)):
                 break
