@@ -98,6 +98,7 @@ class TestLatent(object):
         posterior += 1
         model_posterior = self.model.get_log_posterior(self.theta)
         assert np.isclose(model_posterior, posterior)
+        assert np.isclose(self.model._get_negative_log_posterior(self.theta), -posterior)
 
     def test_suggestion(self):
         suggestion = self.model._get_suggestion()

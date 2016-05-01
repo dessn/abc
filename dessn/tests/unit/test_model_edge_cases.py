@@ -11,7 +11,7 @@ def test_fail_without_underlying():
     m.add_node(n1)
     with pytest.raises(AssertionError) as e:
         m.finalise()
-    assert "underlying" in str(e.value)
+    assert "underlying" in str(e.value).lower()
 
 
 def test_fail_without_observed():
@@ -19,7 +19,18 @@ def test_fail_without_observed():
     m.add_node(ParameterUnderlying("a", "a"))
     with pytest.raises(AssertionError) as e:
         m.finalise()
-    assert "observed" in str(e.value)
+    assert "observed" in str(e.value).lower()
+
+
+def test_fail_without_edges():
+    m = Model("name")
+    m.add_node(ParameterObserved("a", "a", np.random.random(20)))
+    m.add_node(ParameterUnderlying("b", "b"))
+    with pytest.raises(AssertionError) as e:
+        m.finalise()
+    assert "unconnected" in str(e.value).lower()
+
+
 
 
 # def test_fail_without_edges():
