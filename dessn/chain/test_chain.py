@@ -1,5 +1,8 @@
 from . import chain
 import numpy as np
+import tempfile
+import os
+import pytest
 
 
 class TestChain(object):
@@ -102,3 +105,37 @@ class TestChain(object):
         consumer = chain.ChainConsumer()
         text = consumer.get_parameter_text(*p1)
         assert text == r"0.0\pm 1.0"
+
+    def test_file_loading1(self):
+        data = self.data
+        directory = tempfile._get_default_tempdir()
+        filename = next(tempfile._get_candidate_names())
+        filename = directory + os.sep + filename + ".txt"
+        np.savetxt(filename, data)
+        consumer = chain.ChainConsumer()
+        consumer.add_chain(filename)
+        summary = consumer.get_summary()
+        actual = np.array(list(summary[0].values())[0])
+        assert np.abs(actual[1] - 5.0) < 0.5
+
+    def test_file_loading2(self):
+        data = self.data
+        directory = tempfile._get_default_tempdir()
+        filename = next(tempfile._get_candidate_names())
+        filename = directory + os.sep + filename + ".npy"
+        np.save(filename, data)
+        consumer = chain.ChainConsumer()
+        consumer.add_chain(filename)
+        summary = consumer.get_summary()
+        actual = np.array(list(summary[0].values())[0])
+        assert np.abs(actual[1] - 5.0) < 0.5
+
+    # def test_convergence_failure(self):
+    #     data = np.concatenate((np.random.normal(loc=0.0, size=10000),
+    #                           np.random.normal(loc=4.0, size=10000)))
+    #     consumer = chain.ChainConsumer()
+    #     consumer.add_chain(data)
+    #     summary = consumer.get_summary()
+    #     actual = np.array(list(summary[0].values())[0])
+    #     consumer.plot(filename="death")
+    #     assert actual[0] is None and actual[2] is None
