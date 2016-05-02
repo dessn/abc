@@ -135,7 +135,6 @@ class ChainConsumer(object):
         self.parameters_general["rainbow"] = rainbow
         self.parameters_general["plot_hists"] = plot_hists
         self.parameters_general["kde"] = kde
-        print("DDD1 ", self.parameters_general["kde"])
         if colours is None:
             self.parameters_general["colours"] = self.all_colours
         else:
@@ -880,7 +879,6 @@ class ChainConsumer(object):
         hist, edges = np.histogram(data, bins=bins, normed=True)
         edge_centers = 0.5 * (edges[1:] + edges[:-1])
         xs = np.linspace(edge_centers[0], edge_centers[-1], 10000)
-        print("DOOM ", self.parameters_general["kde"])
         if self.parameters_general["kde"]:
             kde_xs = np.linspace(edge_centers[0], edge_centers[-1], max(100, int(bins)))
             ys = interp1d(kde_xs, gaussian_kde(data)(kde_xs), kind="cubic")(xs)

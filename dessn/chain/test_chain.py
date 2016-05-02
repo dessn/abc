@@ -147,6 +147,5 @@ class TestChain(object):
         consumer.add_chain(data)
         summary = consumer.get_summary()
         actual = np.array(list(summary[0].values())[0])
-        consumer.plot(filename="death")
         print(actual)
         assert actual[0] is None and actual[2] is None
