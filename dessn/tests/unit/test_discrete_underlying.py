@@ -2,6 +2,7 @@ from ...framework.model import Model
 from ...framework.parameter import ParameterUnderlying, ParameterObserved, ParameterDiscrete
 from ...framework.edge import Edge
 import numpy as np
+import pytest
 
 
 class ObservedValue(ParameterObserved):
@@ -15,6 +16,14 @@ class TypeMean(ParameterDiscrete):
 
     def get_discrete(self, data):
         return 0, 3
+
+
+class TypeMeanFailure(ParameterDiscrete):
+    def __init__(self):
+        super().__init__("discrete", "$l$")
+
+    def get_discrete(self, data):
+        return "oops"
 
 
 class Rate(ParameterUnderlying):
@@ -72,6 +81,23 @@ class DiscreteModel(Model):
         self.finalise()
 
 
+class DiscreteModelFailure(Model):
+    def __init__(self):
+        super().__init__("DiscreteModel")
+        rate = 0.7
+        r1 = np.random.normal(loc=0, scale=1, size=100)
+        r2 = np.random.normal(loc=3, scale=1, size=100)
+        m = np.random.random(size=100) > rate
+        data = r1 * m + (1 - m) * r2
+        self.raw_data = data
+        self.add_node(ObservedValue(data))
+        self.add_node(TypeMeanFailure())
+        self.add_node(Rate())
+        self.add_edge(ToTypeMean())
+        self.add_edge(ToUnderlying())
+        self.finalise()
+
+
 class TestDiscrete(object):
     model = DiscreteModel()
     theta = [0.7]
@@ -100,3 +126,10 @@ class TestDiscrete(object):
     def test_suggestion_sigma(self):
         sigma = self.model._get_suggestion_sigma()
         assert sigma == [0.4]
+
+
+def test_discrete_failure():
+    model_failure = DiscreteModelFailure()
+    with pytest.raises(ValueError) as e:
+        model_failure.get_log_posterior([0.7])
+    assert "not a tuple or a list" in str(e.value).lower()
