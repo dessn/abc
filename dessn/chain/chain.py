@@ -353,7 +353,7 @@ class ChainConsumer(object):
         fmt = "%0.1f"
         r = 1
         if np.abs(resolution) > 2:
-            factor = -resolution - 1
+            factor = -resolution
         if resolution == -1:
             fmt = "%0.2f"
             r = 2

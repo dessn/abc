@@ -49,8 +49,38 @@ class TestChain(object):
         text = consumer.get_parameter_text(*vals)
         assert text == r"5.0\pm 1.5"
 
+    def test_output_text_asymmetric(self):
+        p1 = [1.0, 2.0, 3.5]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"2.0^{+1.5}_{-1.0}"
 
+    def test_output_format1(self):
+        p1 = [1.0e-1, 2.0e-1, 3.5e-1]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"0.20^{+0.15}_{-0.10}"
 
+    def test_output_format2(self):
+        p1 = [1.0e-2, 2.0e-2, 3.5e-2]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"(0.020^{+0.015}_{-0.010}"
 
+    def test_output_format2(self):
+        p1 = [1.0e-3, 2.0e-3, 3.5e-3]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"\left( 2.0^{+1.5}_{-1.0} \right) \times 10^{-3}"
 
+    def test_output_format3(self):
+        p1 = [1.0e3, 2.0e3, 3.5e3]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"\left( 2.0^{+1.5}_{-1.0} \right) \times 10^{3}"
 
+    def test_output_format3(self):
+        p1 = [1.1e6, 2.2e6, 3.3e6]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"\left( 2.2\pm 1.1 \right) \times 10^{6}"
