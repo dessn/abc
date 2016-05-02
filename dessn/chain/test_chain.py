@@ -24,7 +24,7 @@ class TestChain(object):
         tolerance = 5e-2
         consumer = chain.ChainConsumer()
         consumer.add_chain(self.data_combined, parameters=["a", "b"], name="chain1")
-        consumer.add_chain(self.data_combined, parameters=["c", "d"], name="chain2")
+        consumer.add_chain(self.data_combined, name="chain2")
         consumer.configure_general(bins=1.9)
         summary = consumer.get_summary()
         k1 = list(summary[0].keys())
@@ -33,8 +33,8 @@ class TestChain(object):
         assert "a" in k1
         assert "b" in k1
         assert len(k2) == 2
-        assert "c" in k2
-        assert "d" in k2
+        assert "a" in k2
+        assert "b" in k2
         expected1 = np.array([3.5, 5.0, 6.5])
         expected2 = np.array([2.0, 3.0, 4.0])
         diff1 = np.abs(expected1 - np.array(list(summary[0]["a"])))
@@ -65,7 +65,7 @@ class TestChain(object):
         p1 = [1.0e-2, 2.0e-2, 3.5e-2]
         consumer = chain.ChainConsumer()
         text = consumer.get_parameter_text(*p1)
-        assert text == r"(0.020^{+0.015}_{-0.010}"
+        assert text == r"0.020^{+0.015}_{-0.010}"
 
     def test_output_format3(self):
         p1 = [1.0e-3, 2.0e-3, 3.5e-3]
