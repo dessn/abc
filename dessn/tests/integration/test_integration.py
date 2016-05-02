@@ -32,13 +32,18 @@ class TheEdge(Edge):
         return -0.5 * (o - m)**2 - np.log(np.sqrt(2 * np.pi) * 1.0)
 
 
-def test_gradient():
+def test_fit():
     m = Model("Model")
     m.add_node(Underlying())
     m.add_node(Observed())
     m.add_edge(TheEdge())
-    m.finalise()
-    x = 2.0
-    expected = [-x]
-    grad = m._get_log_posterior_grad([x])
-    assert np.allclose(grad, expected)
+    np.random.seed(0)
+    m.fit_model(num_steps=910, num_burn=10)
+    consumer = m.get_consumer()
+    consumer.configure_general(bins=1.2)
+    summary = np.array(consumer.get_summary()[0]["mean"])
+    summary[1] = np.mean(m.flat_chain)
+    expected = np.array([-1.0, 0.0, 1.0])
+    threshold = 0.1
+    diff = np.abs(expected - summary)
+    assert np.all(diff < threshold)

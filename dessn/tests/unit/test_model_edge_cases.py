@@ -73,14 +73,3 @@ def test_unorderable_edges():
         m.finalise()
     assert "cannot be ordered" in str(e.value).lower()
 
-
-class PriorNan(ParameterUnderlying):
-    def get_suggestion(self, data):
-        pass
-
-    def get_log_prior(self, data):
-        def __init__(self):
-            super().__init__("a", "a")
-
-    # def test_fail_without_edges():
-#     pass
