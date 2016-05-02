@@ -67,20 +67,38 @@ class TestChain(object):
         text = consumer.get_parameter_text(*p1)
         assert text == r"(0.020^{+0.015}_{-0.010}"
 
-    def test_output_format2(self):
+    def test_output_format3(self):
         p1 = [1.0e-3, 2.0e-3, 3.5e-3]
         consumer = chain.ChainConsumer()
         text = consumer.get_parameter_text(*p1)
         assert text == r"\left( 2.0^{+1.5}_{-1.0} \right) \times 10^{-3}"
 
-    def test_output_format3(self):
+    def test_output_format4(self):
         p1 = [1.0e3, 2.0e3, 3.5e3]
         consumer = chain.ChainConsumer()
         text = consumer.get_parameter_text(*p1)
         assert text == r"\left( 2.0^{+1.5}_{-1.0} \right) \times 10^{3}"
 
-    def test_output_format3(self):
+    def test_output_format5(self):
         p1 = [1.1e6, 2.2e6, 3.3e6]
         consumer = chain.ChainConsumer()
         text = consumer.get_parameter_text(*p1)
         assert text == r"\left( 2.2\pm 1.1 \right) \times 10^{6}"
+
+    def test_output_format6(self):
+        p1 = [1.0e-2, 2.0e-2, 3.5e-2]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1, wrap=True)
+        assert text == r"$0.020^{+0.015}_{-0.010}$"
+
+    def test_output_format7(self):
+        p1 = [None, 2.0e-2, 3.5e-2]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == ""
+
+    def test_output_format8(self):
+        p1 = [-1, -0.0, 1]
+        consumer = chain.ChainConsumer()
+        text = consumer.get_parameter_text(*p1)
+        assert text == r"0.0\pm 1.0"
