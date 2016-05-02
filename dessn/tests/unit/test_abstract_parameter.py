@@ -1,5 +1,5 @@
-from ...framework.parameter import ParameterLatent, ParameterTransformation, \
-    ParameterObserved, ParameterUnderlying, ParameterDiscrete, Parameter
+from ...framework.parameter import ParameterObserved, ParameterUnderlying, \
+    ParameterDiscrete, Parameter
 import pytest
 import numpy as np
 
@@ -41,5 +41,5 @@ def test_parameter_discrete():
             super().__init__("name", "label")
     p = P()
     with pytest.raises(NotImplementedError):
-        p.get_discrete(None)
+        p.get_discrete({})
     assert p.get_discrete_requirements() == []

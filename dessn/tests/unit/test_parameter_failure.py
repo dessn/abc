@@ -1,8 +1,9 @@
 from ...framework.model import Model
-from ...framework.parameter import ParameterUnderlying, ParameterObserved, ParameterLatent
+from ...framework.parameter import ParameterUnderlying, ParameterObserved
 from ...framework.edge import Edge
 import numpy as np
 import pytest
+
 
 class PriorNan(ParameterUnderlying):
     def __init__(self):

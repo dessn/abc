@@ -1,5 +1,5 @@
 from ...framework.model import Model
-from ...framework.parameter import ParameterUnderlying, ParameterObserved, ParameterLatent, \
+from ...framework.parameter import ParameterUnderlying, ParameterObserved, \
     ParameterTransformation
 from ...framework.edge import Edge
 import numpy as np
@@ -72,4 +72,3 @@ def test_unorderable_edges():
     with pytest.raises(AssertionError) as e:
         m.finalise()
     assert "cannot be ordered" in str(e.value).lower()
-

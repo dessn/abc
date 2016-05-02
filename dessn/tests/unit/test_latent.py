@@ -61,7 +61,7 @@ class ToUnderlying(Edge):
 
     def get_log_likelihood(self, data):
         diff = data["latent"] - data["under"]
-        return -(diff * diff) / (2.0) - self.prefactor
+        return -(diff * diff) / 2.0 - self.prefactor
 
 
 class LatentModel(Model):
@@ -122,10 +122,3 @@ class TestLatent(object):
         assert np.all(start1 < np.array(suggestion) + np.array(sigma))
         start2 = self.model._get_starting_position(10)
         assert start2.shape == (10, len(suggestion))
-
-
-
-
-
-
-
