@@ -157,9 +157,8 @@ class Model(object):
                         for val in edge.probability_of:
                             observed_names.append(val)
             count += 1
-            if count > max_count:
-                raise ValueError("Model edges cannot be ordered. Please double check your edges")
-        # print(self._ordered_edges)
+            assert count < max_count, \
+                "Model edges cannot be ordered. Please double check your edges"
 
     def finalise(self):
         """ Finalises the framework.
