@@ -4,6 +4,7 @@ import logging
 from scipy.interpolate import interp1d
 from matplotlib.ticker import MaxNLocator
 import matplotlib.cm as cm
+from scipy.stats.kde import gaussian_kde
 
 
 class ChainConsumer(object):
@@ -27,6 +28,7 @@ class ChainConsumer(object):
         self.parameters_bar = {}
         self.parameters_truth = {}
         self.parameters_general = {}
+
 
     def add_chain(self, chain, parameters=None, name=None):
         """ Add a chain to the consumer.
@@ -79,7 +81,7 @@ class ChainConsumer(object):
         return self
 
     def configure_general(self, bins=None, flip=True, rainbow=None, colours=None,
-                          serif=True, plot_hists=True, max_ticks=5):  # pragma: no cover
+                          serif=True, plot_hists=True, max_ticks=5, kde=False):  # pragma: no cover
         r""" Configure the general plotting parameters common across the bar
         and contour plots. If you do not call this explicitly, the :func:`plot`
         method will invoke this method automatically.
@@ -91,6 +93,8 @@ class ChainConsumer(object):
             :math:`n` are the number of data points. Giving an integer will set the number
             of bins to the given value. Giving a float will scale the number of bins, such
             that giving ``bins=1.5`` will result in using :math:`\frac{1.5\sqrt{n}}{10}` bins.
+            Note this parameter is most useful if `kde=False` is also passed, so you
+            can actually see the bins and not a KDE.
         flip : bool, optional
             Set to false if, when plotting only two parameters, you do not want it to
             rotate the histogram so that it is horizontal.
@@ -105,6 +109,12 @@ class ChainConsumer(object):
             Whether to plot marginalised distributions or not
         max_ticks : int, optional
             The maximum number of ticks to use on the plots
+        kde : bool [optional]
+            Whether to use a Gaussian KDE to smooth marginalised posteriors. If false, uses
+            bins and linear interpolation, so ensure you have plenty of samples if your
+            distribution is highly non-gaussian. Due to the slowness of performing a
+            KDE on all data, it is often useful to disable this before producing final
+            plots.
 
         """
         assert rainbow is None or colours is None, \
@@ -124,13 +134,14 @@ class ChainConsumer(object):
         self.parameters_general["serif"] = serif
         self.parameters_general["rainbow"] = rainbow
         self.parameters_general["plot_hists"] = plot_hists
+        self.parameters_general["kde"] = kde
+        print("DDD1 ", self.parameters_general["kde"])
         if colours is None:
             self.parameters_general["colours"] = self.all_colours
         else:
             self.parameters_general["colours"] = colours
 
         self._configured_general = True
-
         return self
 
     def configure_contour(self, sigmas=None, cloud=None, contourf=None,
@@ -467,7 +478,8 @@ class ChainConsumer(object):
         if summary is None:
             summary = len(parameters) < 5 and len(self.chains) == 1
         if len(self.chains) == 1:
-            self.logger.debug("Plotting surfaces for chain of dimenson %s" % (self.chains[0].shape,))
+            self.logger.debug("Plotting surfaces for chain of dimenson %s" %
+                              (self.chains[0].shape,))
         else:
             self.logger.debug("Plotting surfaces for %d chains" % len(self.chains))
         for i, p1 in enumerate(params1):
@@ -654,13 +666,24 @@ class ChainConsumer(object):
         bins = np.linspace(extents[0], extents[1], bins + 1)
         hist, edges = np.histogram(chain_row, bins=bins, normed=True)
         edge_center = 0.5 * (edges[:-1] + edges[1:])
-        if flip:
-            orientation = "horizontal"
+        kde = self.parameters_general["kde"]
+        if kde:
+            pdf = gaussian_kde(chain_row)
+            xs = np.linspace(extents[0], extents[1], 100)
+            if flip:
+                ax.plot(pdf(xs), xs, color=colour)
+            else:
+                ax.plot(xs, pdf(xs), color=colour)
+            interpolator = pdf
         else:
-            orientation = "vertical"
-        ax.hist(edge_center, weights=hist, bins=edges, histtype="step",
-                color=colour, orientation=orientation)
-        interpolator = interp1d(edge_center, hist, kind="nearest")
+            if flip:
+                orientation = "horizontal"
+            else:
+                orientation = "vertical"
+            ax.hist(edge_center, weights=hist, bins=edges, histtype="step",
+                    color=colour, orientation=orientation)
+            interpolator = interp1d(edge_center, hist, kind="nearest")
+
         if len(self.chains) == 1 and fit_values is not None:
             lower = fit_values[0]
             upper = fit_values[2]
@@ -856,9 +879,13 @@ class ChainConsumer(object):
         bins = self.parameters_general['bins'][chain_index]
         hist, edges = np.histogram(data, bins=bins, normed=True)
         edge_centers = 0.5 * (edges[1:] + edges[:-1])
-
         xs = np.linspace(edge_centers[0], edge_centers[-1], 10000)
-        ys = interp1d(edge_centers, hist, kind="linear")(xs)
+        print("DOOM ", self.parameters_general["kde"])
+        if self.parameters_general["kde"]:
+            kde_xs = np.linspace(edge_centers[0], edge_centers[-1], max(100, int(bins)))
+            ys = interp1d(kde_xs, gaussian_kde(data)(kde_xs), kind="cubic")(xs)
+        else:
+            ys = interp1d(edge_centers, hist, kind="linear")(xs)
 
         cs = ys.cumsum()
         cs /= cs.max()
@@ -877,7 +904,7 @@ class ChainConsumer(object):
             try:
                 if count > 50:
                     raise Exception("Failed to converge")
-                i1 = np.where(ys[:startIndex] > mid)[0][0]
+                i1 = startIndex - np.where(ys[:startIndex][::-1] < mid)[0][0]
                 i2 = startIndex + np.where(ys[startIndex:] < mid)[0][0]
                 area = cs[i2] - cs[i1]
                 deviation = np.abs(area - desired_area)

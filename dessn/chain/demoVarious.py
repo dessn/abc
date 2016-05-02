@@ -75,9 +75,10 @@ class DemoVarious(object):
         c.plot(parameters=self.parameters[:2], filename="demoVarious3_Flip.png", figsize=(6, 6))
 
     def various4_summaries(self):
-        r""" If there is only one chain to analyse, and you only chose to plot a small number of parameters,
-        the parameter summary will be shown above the relevent axis. You can set this to always show or always not show
-        by using the ``force_summary`` flag. Also, here we demonstrate more :math:`\sigma` levels!
+        r""" If there is only one chain to analyse, and you only chose to plot a small number
+        of parameters, the parameter summary will be shown above the relevent axis. You
+        can set this to always show or always not show by using the ``force_summary`` flag.
+        Also, here we demonstrate more :math:`\sigma` levels!
 
         .. figure::     ../dessn/chain/demoVarious4_ForceSummary.png
             :align:     center
@@ -87,14 +88,17 @@ class DemoVarious(object):
         c.plot(filename="demoVarious4_ForceSummary.png")
 
     def various5_custom_colours(self):
-        r""" You can supply custom colours to the plotting. Be warned, if you have more chains than colours, you *will* get a
-        rainbow instead!
+        r""" You can supply custom colours to the plotting. Be warned, if you have more chains
+        than colours, you *will* get a rainbow instead!
 
-        Note that, due to colour scaling, you **must** supply custom colours as full six digit hex colours, such as ``#A87B20``.
+        Note that, due to colour scaling, you **must** supply custom colours as full six
+        digit hex colours, such as ``#A87B20``.
 
-        As colours get scaled, it is a good idea to pick something neither too light, dark, or saturated.
+        As colours get scaled, it is a good idea to pick something neither too light, dark,
+        or saturated.
 
-        In this example, I also force contour filling and set contour filling opactiy to 0.5, so we can see overlap.
+        In this example, I also force contour filling and set contour filling opactiy to
+        0.5, so we can see overlap.
 
         .. figure::     ../dessn/chain/demoVarious5_CustomColours.png
             :align:     center
@@ -105,12 +109,15 @@ class DemoVarious(object):
         c.plot(filename="demoVarious5_CustomColours.png")
 
     def various6_truth_values(self):
-        r""" The reward for scrolling down so far, the first customised argument that will be frequently used; truth values.
+        r""" The reward for scrolling down so far, the first customised argument that will be
+        frequently used; truth values.
 
-        Truth values can be given as a list the same length of the input parameters, or as a dictionary, keyed by the parameters.
+        Truth values can be given as a list the same length of the input parameters, or as a
+        dictionary, keyed by the parameters.
 
-        In the code there are two examples. The first, where a list is passed in, and the second, where an incomplete dictionary
-        of truth values is passed in. In the second case, customised values for truth line plotting are used.
+        In the code there are two examples. The first, where a list is passed in, and the second,
+        where an incomplete dictionary of truth values is passed in. In the second case,
+        customised values for truth line plotting are used.
         The figures are respectively
 
         .. figure::     ../dessn/chain/demoVarious6_TruthValues.png
@@ -122,9 +129,12 @@ class DemoVarious(object):
         c = ChainConsumer().add_chain(self.data, parameters=self.parameters)
         c.plot(filename="demoVarious6_TruthValues.png", truth=[0.0, 5.0, 0.0, 0.0])
 
-        # You can also set truth using a dictionary, like below. If you do it this way, you do not need to
+        # You can also set truth using a dictionary, like below.
+        # If you do it this way, you do not need to
         # set truth values for all parameters
-        c.configure_truth(color='w', ls=":", alpha=0.5).plot(filename="demoVarious6_TruthValues2.png", truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
+        c.configure_truth(color='w', ls=":", alpha=0.5)\
+            .plot(filename="demoVarious6_TruthValues2.png",
+                  truth={"$x$": 0.0, "$y$": 5.0, r"$\beta$": 0.0})
 
     def various7_rainbow(self):
         r""" An example on using the rainbow with sans-serif fonts and too many bins!
@@ -144,33 +154,53 @@ class DemoVarious(object):
         r""" An example on using customised extents. Similarly to the example for truth values in
         :func:`various7_truth_values`, you can pass a list in, or a dictionary.
 
-        Also modifying the number of bins using a float value to scale, rather than set, the number of bins.
+        Also modifying the number of bins using a float value to scale, rather than set, the number
+        of bins.
 
         .. figure::     ../dessn/chain/demoVarious8_Extents.png
             :align:     center
         """
         c = ChainConsumer()
         c.add_chain(self.data)
-        c.configure_general(bins=1.5)
+        c.configure_general(bins=1.5, kde=False)
         c.plot(filename="demoVarious8_Extents.png", extents=[(-5, 5), (0, 15), (-3, 3), (-6, 6)])
 
+    def various9_KDE(self):
+        r""" If your distribution is Gaussian-like, you may want to utilise
+        a Gaussian KDE on your marginalised distributions. To turn on KDEs, pass
+         in `kde = True` to the `configure_general` method.
+
+         KDEs are recommended to get the most accurate point of maximum
+         probability in your marginalised posterior, however due to their
+         computationally intensive nature they are by default disabled.
+
+        .. figure::     ../dessn/chain/demoVarious9_kde.png
+            :align:     center
+
+        """
+        c = ChainConsumer()
+        c.add_chain(self.data)
+        c.configure_general(kde=True)
+        c.plot(filename="demoVarious9_kde.png")
 
 if __name__ == "__main__":
 
     demo = DemoVarious()
 
-    # demo.various1_no_histogram()
-    #
-    # demo.various2_select_parameters()
+    demo.various1_no_histogram()
+
+    demo.various2_select_parameters()
 
     demo.various3_flip_histogram()
 
-    # demo.various4_summaries()
-    #
-    # demo.various5_custom_colours()
-    #
-    # demo.various6_truth_values()
-    #
-    # demo.various7_rainbow()
-    #
-    # demo.various8_extents()
+    demo.various4_summaries()
+
+    demo.various5_custom_colours()
+
+    demo.various6_truth_values()
+
+    demo.various7_rainbow()
+
+    demo.various8_extents()
+
+    demo.various9_KDE()

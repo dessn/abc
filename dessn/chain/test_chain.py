@@ -2,7 +2,6 @@ from . import chain
 import numpy as np
 import tempfile
 import os
-import pytest
 
 
 class TestChain(object):
@@ -12,11 +11,11 @@ class TestChain(object):
     data2 = np.random.normal(loc=3, scale=1.0, size=n)
     data_combined = np.vstack((data, data2)).T
 
-    def test_summary1(self):
+    def test_summary(self):
         tolerance = 5e-2
         consumer = chain.ChainConsumer()
-        consumer.add_chain(self.data)
-        consumer.configure_general(bins=1.6)
+        consumer.add_chain(self.data[::2])
+        consumer.configure_general(kde=True)
         summary = consumer.get_summary()
         actual = np.array(list(summary[0].values())[0])
         expected = np.array([3.5, 5.0, 6.5])
@@ -44,6 +43,17 @@ class TestChain(object):
         diff2 = np.abs(expected2 - np.array(list(summary[0]["b"])))
         assert np.all(diff1 < tolerance)
         assert np.all(diff2 < tolerance)
+
+    def test_summary1(self):
+        tolerance = 5e-2
+        consumer = chain.ChainConsumer()
+        consumer.add_chain(self.data)
+        consumer.configure_general(bins=1.6)
+        summary = consumer.get_summary()
+        actual = np.array(list(summary[0].values())[0])
+        expected = np.array([3.5, 5.0, 6.5])
+        diff = np.abs(expected - actual)
+        assert np.all(diff < tolerance)
 
     def test_output_text(self):
         consumer = chain.ChainConsumer()
@@ -107,7 +117,7 @@ class TestChain(object):
         assert text == r"0.0\pm 1.0"
 
     def test_file_loading1(self):
-        data = self.data
+        data = self.data[:1000]
         directory = tempfile._get_default_tempdir()
         filename = next(tempfile._get_candidate_names())
         filename = directory + os.sep + filename + ".txt"
@@ -119,7 +129,7 @@ class TestChain(object):
         assert np.abs(actual[1] - 5.0) < 0.5
 
     def test_file_loading2(self):
-        data = self.data
+        data = self.data[:1000]
         directory = tempfile._get_default_tempdir()
         filename = next(tempfile._get_candidate_names())
         filename = directory + os.sep + filename + ".npy"
@@ -130,12 +140,13 @@ class TestChain(object):
         actual = np.array(list(summary[0].values())[0])
         assert np.abs(actual[1] - 5.0) < 0.5
 
-    # def test_convergence_failure(self):
-    #     data = np.concatenate((np.random.normal(loc=0.0, size=10000),
-    #                           np.random.normal(loc=4.0, size=10000)))
-    #     consumer = chain.ChainConsumer()
-    #     consumer.add_chain(data)
-    #     summary = consumer.get_summary()
-    #     actual = np.array(list(summary[0].values())[0])
-    #     consumer.plot(filename="death")
-    #     assert actual[0] is None and actual[2] is None
+    def test_convergence_failure(self):
+        data = np.concatenate((np.random.normal(loc=0.0, size=10000),
+                              np.random.normal(loc=4.0, size=10000)))
+        consumer = chain.ChainConsumer()
+        consumer.add_chain(data)
+        summary = consumer.get_summary()
+        actual = np.array(list(summary[0].values())[0])
+        consumer.plot(filename="death")
+        print(actual)
+        assert actual[0] is None and actual[2] is None
