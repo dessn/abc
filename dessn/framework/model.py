@@ -143,8 +143,8 @@ class Model(object):
         max_count = 100
         while len(self._ordered_edges) < num_edges:
             for edge in self.edges:
-                if edge in self._ordered_edges:
-                    continue
+                # if edge in self._ordered_edges:
+                #     continue
                 if isinstance(edge, EdgeTransformation):
                     requirements = edge.given
                 else:
@@ -190,11 +190,7 @@ class Model(object):
                     make_array.append(theta_name)
                 arrs[theta_name].append(theta)
         for m in make_array:
-            nparray = np.array(arrs[m])
-            if np.issubdtype(nparray.dtype, np.number):
-                data[m] = nparray
-            else:
-                data[m] = arrs[m]
+            data[m] = np.array(arrs[m])
         return result, data
 
     def get_log_prior(self, theta):
@@ -311,8 +307,6 @@ class Model(object):
                         probability = result
                     else:
                         probability += result
-            if probability is not None and not np.all(np.isfinite(probability)):
-                break
         return probability
 
     def _get_log_posterior_grad(self, theta):
