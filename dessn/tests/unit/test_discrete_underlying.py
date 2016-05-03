@@ -81,6 +81,23 @@ class DiscreteModel(Model):
         self.finalise()
 
 
+class DiscreteModelList(Model):
+    def __init__(self):
+        super().__init__("DiscreteModel")
+        rate = 0.7
+        r1 = np.random.normal(loc=0, scale=1, size=100)
+        r2 = np.random.normal(loc=3, scale=1, size=100)
+        m = np.random.random(size=100) > rate
+        data = r1 * m + (1 - m) * r2
+        self.raw_data = data
+        self.add_node(ObservedValue(data.tolist()))
+        self.add_node(TypeMean())
+        self.add_node(Rate())
+        self.add_edge(ToTypeMean())
+        self.add_edge(ToUnderlying())
+        self.finalise()
+
+
 class DiscreteModelFailure(Model):
     def __init__(self):
         super().__init__("DiscreteModel")
@@ -133,3 +150,16 @@ def test_discrete_failure():
     with pytest.raises(ValueError) as e:
         model_failure.get_log_posterior([0.7])
     assert "not a tuple or a list" in str(e.value).lower()
+
+
+def test_discrete_list():
+    model_list = DiscreteModelList()
+    posterior = 1
+    rate = 0.7
+    for d in model_list.raw_data:
+        prob1 = 1 / (np.sqrt(2 * np.pi)) * np.exp(-0.5 * (d - 0) ** 2) * (1 - rate)
+        prob2 = 1 / (np.sqrt(2 * np.pi)) * np.exp(-0.5 * (d - 3) ** 2) * rate
+        prob = prob1 + prob2
+        posterior += np.log(prob)
+    model_posterior = model_list.get_log_posterior([rate])
+    assert np.isclose(model_posterior, posterior)
