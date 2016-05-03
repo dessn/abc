@@ -79,4 +79,4 @@ class EdgeTransformation(Edge):
         raise NotImplementedError()
 
     def get_log_likelihood(self, data):
-        raise NotImplementedError()
+        raise PermissionError("You should not be calling this")

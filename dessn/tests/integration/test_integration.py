@@ -1,5 +1,5 @@
 from ...framework.model import Model
-from ...framework.parameter import ParameterUnderlying, ParameterObserved, ParameterLatent
+from ...framework.parameter import ParameterUnderlying, ParameterObserved
 from ...framework.edge import Edge
 import numpy as np
 
@@ -38,9 +38,9 @@ def test_fit():
     m.add_node(Observed())
     m.add_edge(TheEdge())
     np.random.seed(0)
-    m.fit_model(num_steps=5010, num_burn=10)
+    m.fit_model(num_steps=1510, num_burn=10)
     consumer = m.get_consumer()
-    consumer.configure_general(bins=1.2)
+    consumer.configure_general(kde=True)
     summary = np.array(consumer.get_summary()[0]["mean"])
     summary[1] = np.mean(m.flat_chain)
     expected = np.array([-1.0, 0.0, 1.0])

@@ -147,8 +147,8 @@ class Model(object):
         max_count = 100
         while len(self._ordered_edges) < num_edges:
             for edge in self.edges:
-                # if edge in self._ordered_edges:
-                #     continue
+                if edge in self._ordered_edges:
+                    continue
                 if isinstance(edge, EdgeTransformation):
                     requirements = edge.given
                 else:
@@ -225,7 +225,10 @@ class Model(object):
                     dep_edge += self._get_dependencies(edges, name)
             elif dependency_name in edge.given + edge.probability_of:
                 dep_edge.append(edge)
-        return dep_edge
+        # Make list unique and order according to ordered_edges
+        dep_edge = list(set(dep_edge))
+        ordered = [a for a in self._ordered_edges if a in dep_edge]
+        return ordered
 
     def _get_edge_likelihood(self, theta_dict, edges):
         edge_index = 0

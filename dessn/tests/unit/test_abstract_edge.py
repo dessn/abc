@@ -32,3 +32,10 @@ def test_edge_transformation_not_implemented():
         e.get_transformation(None)
 
 
+def test_edge_transformation_likelihood_failure():
+    class E3(EdgeTransformation):
+        def __init__(self):
+            super().__init__("a", "b")
+    e = E3()
+    with pytest.raises(PermissionError):
+        e.get_log_likelihood({})
