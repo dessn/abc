@@ -10,7 +10,7 @@ class Simulation(object):
         self.logger = logging.getLogger(__name__)
 
     def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1,
-                       num_transient=10, zmin=0.1, zmax=0.8, mean_num_obs=30, alpha=0.1, beta=3):
+                       num_transient=10, zmin=0.1, zmax=0.8, mean_num_obs=30, alpha=0.1, beta=3.0):
         np.random.seed(1)
 
         cosmology = FlatwCDM(Om0=omega_m, w0=-1, H0=H0)
@@ -43,10 +43,12 @@ class Simulation(object):
             theta["$x_{1 %d}$" % i] = x1
             theta["$c{ %d}$" % i] = c
         print(theta)
-        data = {"z_o": redshifts, "mbs": mbs, "x1s": x1s, "cs": cs, "icovs": ics}
+        data = {"z_o": np.array(redshifts), "mbs": np.array(mbs),
+                "x1s": np.array(x1s), "cs": np.array(cs), "icovs": ics}
         return data, theta
 
-    def get_supernova(self, z, num_obs, tmin, tmax, cosmology, alpha, beta, x0_mean=-19.3, x0_sigma=0.1):
+    def get_supernova(self, z, num_obs, tmin, tmax, cosmology, alpha, beta,
+                      x0_mean=-19.3, x0_sigma=0.1):
         t0 = np.random.uniform(tmin, tmax)
         ts = np.linspace(t0 - 60, t0 + 60, num_obs)
 
@@ -70,7 +72,7 @@ class Simulation(object):
         model.set(z=z)
         x1 = np.random.normal(0., 1.)
         c = np.random.normal(0., 0.1)
-        mabs = mabs + alpha * x1 + beta * c
+        mabs = mabs - alpha * x1 - beta * c
         model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
 
         x0 = model.get('x0')
@@ -99,8 +101,10 @@ class Simulation(object):
         sigma_mbc = -5 * res.covariance[x0_ind, c_ind] / (2 * x0 * np.log(10))
 
         covariance = np.array([[sigma_mb2, sigma_mbx1, sigma_mbc],
-                              [sigma_mbx1, res.covariance[x1_ind, x1_ind], res.covariance[x1_ind, c_ind]],
-                              [sigma_mbc, res.covariance[x1_ind, c_ind], res.covariance[c_ind, c_ind]]])
+                              [sigma_mbx1, res.covariance[x1_ind, x1_ind],
+                               res.covariance[x1_ind, c_ind]],
+                              [sigma_mbc, res.covariance[x1_ind, c_ind],
+                               res.covariance[c_ind, c_ind]]])
         icov = np.linalg.inv(covariance)
         return [mb, x1, c, icov]
 

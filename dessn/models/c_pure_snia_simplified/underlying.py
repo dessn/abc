@@ -50,23 +50,25 @@ class Magnitude(ParameterUnderlying):
         return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 10
+        return 2
 
 
 class IntrinsicScatter(ParameterUnderlying):
     def __init__(self):
         super(IntrinsicScatter, self).__init__("scatter", r"$\sigma_{\rm int}$", group="SNIa")
+        self.prefactor = np.log(np.sqrt(2 * np.pi))
 
     def get_log_prior(self, data):
-        if data["scatter"] < 0 or data["scatter"] > 1:
+        if data["scatter"] < -10 or data["scatter"] > 0:
             return -np.inf
-        return 1
+        val = np.log10(data["scatter"])
+        return -0.5 * (val + 3) * (val + 3) - self.prefactor
 
     def get_suggestion(self, data):
         return 0.1  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
-        return 0.08
+        return 0.09
 
 
 class AlphaStretch(ParameterUnderlying):
@@ -80,7 +82,7 @@ class AlphaStretch(ParameterUnderlying):
         return 0.1
 
     def get_log_prior(self, data):
-        if data["alpha"] < 2 or data["alpha"] > 2:
+        if data["alpha"] < -2 or data["alpha"] > 2:
             return -np.inf
         return 1
 

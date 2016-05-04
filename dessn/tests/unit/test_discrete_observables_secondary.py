@@ -100,6 +100,14 @@ class ToLatent1(Edge):
         return np.log(0.1 * np.ones(data["obs"].shape))
 
 
+class ToLatent12(Edge):
+    def __init__(self):
+        super().__init__("obs", "latent1")
+
+    def get_log_likelihood(self, data):
+        return np.log(0.1 * np.ones(data["obs"].shape)).tolist()
+
+
 class ToTransformation1(EdgeTransformation):
     def __init__(self):
         super().__init__("t1", "latent1")
@@ -122,6 +130,14 @@ class ToDiscrete(Edge):
 
     def get_log_likelihood(self, data):
         return np.log(0.1 * np.ones(data["latent1"].shape))
+
+
+class ToDiscrete2(Edge):
+    def __init__(self):
+        super().__init__(["latent1", "t1"], ["discrete", "latent1", "t2"])
+
+    def get_log_likelihood(self, data):
+        return np.log(0.1 * np.ones(data["latent1"].shape)).tolist()
 
 
 class ToUnderlying(Edge):
@@ -176,6 +192,28 @@ class DiscreteModelSecondary2(Model):
         self.finalise()
 
 
+class DiscreteModelSecondary3(Model):
+    def __init__(self):
+        super().__init__("DiscreteModel")
+        data = np.array([0.0, 0.5])
+        self.raw_data = data
+        self.add_node(ObservedValue(data))
+        self.add_node(Transformed1())
+        self.add_node(LatentValue1(data.size))
+        self.add_node(DiscreteValue2())
+        self.add_node(LatentValue2(data.size))
+        self.add_node(Transformed2())
+        self.add_node(Underlying())
+
+        self.add_edge(ToLatent12())
+        self.add_edge(ToTransformation1())
+        self.add_edge(ToUnderlying())
+        self.add_edge(ToDiscrete2())
+        self.add_edge(ToTransformation2())
+
+        self.finalise()
+
+
 class TestDiscreteSecondary(object):
     model = DiscreteModelSecondary()
     theta = [0.6, 0.5, 0.5, 0.5, 0.5]
@@ -195,6 +233,23 @@ class TestDiscreteSecondary(object):
 
 class TestDiscreteSecondary2(object):
     model = DiscreteModelSecondary2()
+    theta = [0.6, 0.5, 0.5, 0.5, 0.5]
+
+    def test_latent_num_parameters(self):
+        assert len(self.model._theta_names) == 5
+
+    def test_latent_prior(self):
+        assert self.model.get_log_prior(self.theta) == 1.0
+
+    def test_latent_posterior(self):
+        posterior = np.log((0.1 * (0.1 * 0.1 + 0.1 * 0.1))**2)
+        posterior += 1
+        model_posterior = self.model.get_log_posterior(self.theta)
+        assert np.isclose(model_posterior, posterior)
+
+
+class TestDiscreteSecondary3(object):
+    model = DiscreteModelSecondary3()
     theta = [0.6, 0.5, 0.5, 0.5, 0.5]
 
     def test_latent_num_parameters(self):

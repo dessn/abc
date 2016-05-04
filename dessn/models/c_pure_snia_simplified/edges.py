@@ -1,7 +1,6 @@
 import numpy as np
 from astropy.cosmology import FlatwCDM
 from dessn.framework.edge import Edge, EdgeTransformation
-import sncosmo
 
 
 class ToParameters(Edge):
@@ -9,13 +8,16 @@ class ToParameters(Edge):
         super(ToParameters, self).__init__(["mb", "x1", "c"], ["mb_o", "x1_o", "c_o", "inv_cov"])
 
     def get_log_likelihood(self, data):
-        m = np.array([data["mb"], data["x1"], data["c"]])
-        o = np.array([data["mb_o"], data["x1_o"], data["c_o"]])
-        diff = o - m
-        icov = data["inv_cov"]
-        logl = -0.5 * np.dot(diff.T, np.dot(icov, diff))
-        # print("PARAMS: ", m, o, -2 * logl)
-        return logl
+        ls = []
+        for mb, x1, c, mb_o, x1_o, c_o, icov in zip(data["mb"], data["x1"], data["c"],
+                                                    data["mb_o"], data["x1_o"], data["c_o"],
+                                                    data["inv_cov"]):
+            o = np.array([mb, x1, c])
+            m = np.array([mb_o, x1_o, c_o])
+            diff = o - m
+            logl = -0.5 * np.dot(diff, np.dot(icov, diff))
+            ls.append(logl)
+        return np.array(ls)
 
 
 class ToRedshift(EdgeTransformation):
@@ -58,8 +60,7 @@ class ToMus(Edge):
 
     def get_log_likelihood(self, data):
         diff = data["mu"] - data["mu_cos"]
-        s2 = data["scatter"]*data["scatter"]
+        s2 = 2 * data["scatter"]*data["scatter"]
         chi2 = diff * diff / s2
-        logl = -0.5 * chi2 - self.sqrt2pi - np.log(data["scatter"])
-        # print("DD ", data["mu"], data["mu_cos"], data["scatter"], logl)
+        logl = -chi2 - self.sqrt2pi - np.log(data["scatter"])
         return logl

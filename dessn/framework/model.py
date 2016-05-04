@@ -266,10 +266,6 @@ class Model(object):
                     indexes = np.unique(combine)
                     for i in indexes:
                         result[np.argmax(combine == i)] = logsumexp(result[combine == i])
-                    if probability is None:
-                        probability = result[:n]
-                    else:
-                        probability += result[:n]
                 elif type(discrete) == list:
                     combine = np.zeros(len(discrete))
                     n = len(discrete)
@@ -299,18 +295,24 @@ class Model(object):
                         if i == 0:
                             continue
                         result[np.argmax(combine == i)] = logsumexp(result[combine == i])
-                    if probability is None:
-                        probability = result[:n]
-                    else:
-                        probability += result[:n]
                 else:
                     raise ValueError("Discrete result is not a tuple or a list! %s" % discrete)
+                # if type(result) != np.ndarray:
+                #     result = np.array(result)
+                assert len(result.shape) == 1
+                if probability is None:
+                    probability = result[:n]
+                else:
+                    probability += result[:n]
             else:
                 edge_index += 1
                 if isinstance(edge, EdgeTransformation):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
                     result = self._get_log_likelihood_edge(theta_dict, edge)
+                    if type(result) != np.ndarray:
+                        result = np.array(result)
+                    assert len(result.shape) == 1
                     if probability is None:
                         probability = result
                     else:
