@@ -21,3 +21,5 @@
 *.q
 .coverage
 htmlcov/**
+*.pyc
+**/__pycache__/*

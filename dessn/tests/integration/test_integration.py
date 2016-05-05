@@ -38,7 +38,7 @@ def test_fit():
     m.add_node(Observed())
     m.add_edge(TheEdge())
     np.random.seed(0)
-    m.fit_model(num_steps=1600, num_burn=200)
+    m.fit_model(num_steps=4600, num_burn=600)
     consumer = m.get_consumer()
     consumer.configure_general(kde=True)
     summary = np.array(consumer.get_summary()[0]["mean"])
