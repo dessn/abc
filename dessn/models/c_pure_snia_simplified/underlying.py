@@ -50,7 +50,7 @@ class Magnitude(ParameterUnderlying):
         return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 2
+        return 1.5
 
 
 class IntrinsicScatter(ParameterUnderlying):
