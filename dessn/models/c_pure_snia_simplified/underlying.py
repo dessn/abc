@@ -10,6 +10,7 @@ class OmegaM(ParameterUnderlying):
         om = data["omega_m"]
         if om < 0.05 or om > 0.7:
             return -np.inf
+        # return -(om-0.4)*(om-0.4)/(2*0.001*0.001)
         return 1
 
     def get_suggestion(self, data):
@@ -27,6 +28,7 @@ class Hubble(ParameterUnderlying):
         h0 = data["H0"]
         if h0 < 50 or h0 > 100:
             return -np.inf
+        # return -(((h0-80)/(2*0.1))**2)
         return 1
 
     def get_suggestion(self, data):
@@ -56,13 +58,13 @@ class Magnitude(ParameterUnderlying):
 class IntrinsicScatter(ParameterUnderlying):
     def __init__(self):
         super(IntrinsicScatter, self).__init__("scatter", r"$\sigma_{\rm int}$", group="SNIa")
-        self.prefactor = np.log(np.sqrt(2 * np.pi))
+        self.prefactor = np.log(np.sqrt(2 * np.pi) * 0.01)
 
     def get_log_prior(self, data):
-        if data["scatter"] < -10 or data["scatter"] > 0:
+        if data["scatter"] < 0 or data["scatter"] > 1:
             return -np.inf
         val = np.log10(data["scatter"])
-        return -0.5 * (val + 3) * (val + 3) - self.prefactor
+        return -(val + 2) * (val + 2) / (0.01 * 0.01 * 2) - self.prefactor
 
     def get_suggestion(self, data):
         return 0.1  # Deliberately wrong to test recovery
@@ -98,6 +100,6 @@ class BetaColour(ParameterUnderlying):
         return 3
 
     def get_log_prior(self, data):
-        if data["beta"] < -5 or data["beta"] > 5:
+        if data["beta"] < -10 or data["beta"] > 10:
             return -np.inf
         return 1

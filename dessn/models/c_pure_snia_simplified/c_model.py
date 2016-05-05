@@ -66,7 +66,7 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surface.png")
     walk_file = os.path.abspath(dir_name + "/output/walk.png")
 
-    vals = {"num_transient": 40, "omega_m": 0.4, "H0": 80, "snIa_luminosity": -19.3,
+    vals = {"num_transient": 30, "omega_m": 0.4, "H0": 80, "snIa_luminosity": -19.3,
             "snIa_sigma": 0.01}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pure_snia.png")
         # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=200, num_burn=100, temp_dir=temp_dir, save_interval=60)
+    model.fit_model(num_steps=10000, num_burn=2000, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = model.get_consumer()

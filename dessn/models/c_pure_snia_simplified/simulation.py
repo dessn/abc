@@ -71,7 +71,7 @@ class Simulation(object):
         mabs = np.random.normal(x0_mean, x0_sigma)
         model.set(z=z)
         x1 = np.random.normal(0., 1.)
-        c = np.random.normal(0., 0.1)
+        c = np.random.normal(0., 0.2)
         mabs = mabs - alpha * x1 - beta * c
         model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
 
@@ -93,9 +93,9 @@ class Simulation(object):
         x1_ind = res.vparam_names.index('x1')
         c_ind = res.vparam_names.index('c')
 
-        x0 = res.parameters[x0_ind]
-        x1 = res.parameters[x1_ind]
-        c = res.parameters[c_ind]
+        x0 = res.parameters[res.param_names.index('x0')]
+        x1 = res.parameters[res.param_names.index('x1')]
+        c = res.parameters[res.param_names.index('c')]
         sigma_mb2 = -5 * res.covariance[x0_ind, x0_ind] / (2 * x0 * np.log(10))
         sigma_mbx1 = -5 * res.covariance[x0_ind, x1_ind] / (2 * x0 * np.log(10))
         sigma_mbc = -5 * res.covariance[x0_ind, c_ind] / (2 * x0 * np.log(10))

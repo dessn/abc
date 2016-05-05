@@ -15,7 +15,8 @@ class ToParameters(Edge):
             o = np.array([mb, x1, c])
             m = np.array([mb_o, x1_o, c_o])
             diff = o - m
-            logl = -0.5 * np.dot(diff, np.dot(icov, diff))
+            logl = -0.5 * np.dot(diff, np.dot(icov, diff)) \
+                   - np.log(np.sqrt(2 * np.pi * np.abs(np.linalg.det(icov))))
             ls.append(logl)
         return np.array(ls)
 
@@ -60,7 +61,7 @@ class ToMus(Edge):
 
     def get_log_likelihood(self, data):
         diff = data["mu"] - data["mu_cos"]
-        s2 = 2 * data["scatter"]*data["scatter"]
+        s2 = 2 * data["scatter"] * data["scatter"]
         chi2 = diff * diff / s2
         logl = -chi2 - self.sqrt2pi - np.log(data["scatter"])
         return logl
