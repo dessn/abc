@@ -10,7 +10,7 @@ class Simulation(object):
         self.logger = logging.getLogger(__name__)
 
     def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1,
-                       num_transient=10, zmin=0.1, zmax=0.8, mean_num_obs=30, alpha=0.1, beta=3.0):
+                       num_transient=10, zmin=0.1, zmax=0.7, mean_num_obs=40, alpha=0.3, beta=4.0):
         np.random.seed(1)
 
         cosmology = FlatwCDM(Om0=omega_m, w0=-1, H0=H0)
@@ -29,7 +29,8 @@ class Simulation(object):
         mbs = [o[0] for o in observations]
         x1s = [o[1] for o in observations]
         cs = [o[2] for o in observations]
-        ics = [o[3] for o in observations]
+        covs = [o[3] for o in observations]
+        ics = [o[4] for o in observations]
         theta = {
             r"$\Omega_m$": omega_m,
             r"$H_0$": H0,
@@ -42,9 +43,8 @@ class Simulation(object):
             theta["$m_{B %d}$" % i] = mb
             theta["$x_{1 %d}$" % i] = x1
             theta["$c{ %d}$" % i] = c
-        print(theta)
         data = {"z_o": np.array(redshifts), "mbs": np.array(mbs),
-                "x1s": np.array(x1s), "cs": np.array(cs), "icovs": ics}
+                "x1s": np.array(x1s), "cs": np.array(cs), "covs": covs, "icovs": ics}
         return data, theta
 
     def get_supernova(self, z, num_obs, tmin, tmax, cosmology, alpha, beta,
@@ -55,7 +55,7 @@ class Simulation(object):
         times = np.array([[t, t + 0.1, t + 0.2] for t in ts]).flatten()
         bands = [b for t in ts for b in ['desg', 'desr', 'desi']]
         gains = np.ones(times.shape)
-        skynoise = 50 * np.ones(times.shape)
+        skynoise = 20 * np.ones(times.shape)
         zp = 30 * np.ones(times.shape)
         zpsys = ['ab'] * times.size
 
@@ -72,7 +72,7 @@ class Simulation(object):
         model.set(z=z)
         x1 = np.random.normal(0., 1.)
         c = np.random.normal(0., 0.2)
-        mabs = mabs - alpha * x1 - beta * c
+        mabs = mabs - alpha * x1 + beta * c
         model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
 
         x0 = model.get('x0')
@@ -96,17 +96,16 @@ class Simulation(object):
         x0 = res.parameters[res.param_names.index('x0')]
         x1 = res.parameters[res.param_names.index('x1')]
         c = res.parameters[res.param_names.index('c')]
-        sigma_mb2 = -5 * res.covariance[x0_ind, x0_ind] / (2 * x0 * np.log(10))
+        sigma_mb2 = 5 * np.sqrt(res.covariance[x0_ind, x0_ind]) / (2 * x0 * np.log(10))
         sigma_mbx1 = -5 * res.covariance[x0_ind, x1_ind] / (2 * x0 * np.log(10))
         sigma_mbc = -5 * res.covariance[x0_ind, c_ind] / (2 * x0 * np.log(10))
-
         covariance = np.array([[sigma_mb2, sigma_mbx1, sigma_mbc],
                               [sigma_mbx1, res.covariance[x1_ind, x1_ind],
                                res.covariance[x1_ind, c_ind]],
                               [sigma_mbc, res.covariance[x1_ind, c_ind],
                                res.covariance[c_ind, c_ind]]])
         icov = np.linalg.inv(covariance)
-        return [mb, x1, c, icov]
+        return [mb, x1, c, covariance, icov]
 
 
 if __name__ == "__main__":

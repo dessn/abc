@@ -16,9 +16,14 @@ class ObservedC(ParameterObserved):
         super(ObservedC, self).__init__("c_o", r"$\hat{c}$", cs, group="Lightcurve Fit")
 
 
-class ObservedCovariance(ParameterObserved):
+class ObservedInvCovariance(ParameterObserved):
     def __init__(self, inv_covs):
-        super(ObservedCovariance, self).__init__("inv_cov", r"$\hat{C}^{-1}$", inv_covs, group="Lightcurve Fit")
+        super(ObservedInvCovariance, self).__init__("inv_cov", r"$\hat{C}^{-1}$", inv_covs, group="Lightcurve Fit")
+
+
+class ObservedCovariance(ParameterObserved):
+    def __init__(self, covs):
+        super(ObservedCovariance, self).__init__("cov", r"$\hat{C}$", covs, group="Lightcurve Fit")
 
 
 class ObservedRedshift(ParameterObserved):

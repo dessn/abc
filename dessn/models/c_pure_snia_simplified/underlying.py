@@ -17,7 +17,7 @@ class OmegaM(ParameterUnderlying):
         return 0.30
 
     def get_suggestion_sigma(self, data):
-        return 0.05
+        return 0.1
 
 
 class Hubble(ParameterUnderlying):
@@ -28,14 +28,13 @@ class Hubble(ParameterUnderlying):
         h0 = data["H0"]
         if h0 < 50 or h0 > 100:
             return -np.inf
-        # return -(((h0-80)/(2*0.1))**2)
         return 1
 
     def get_suggestion(self, data):
         return 72
 
     def get_suggestion_sigma(self, data):
-        return 5
+        return 8
 
 
 class Magnitude(ParameterUnderlying):
@@ -58,19 +57,17 @@ class Magnitude(ParameterUnderlying):
 class IntrinsicScatter(ParameterUnderlying):
     def __init__(self):
         super(IntrinsicScatter, self).__init__("scatter", r"$\sigma_{\rm int}$", group="SNIa")
-        self.prefactor = np.log(np.sqrt(2 * np.pi) * 0.01)
 
     def get_log_prior(self, data):
-        if data["scatter"] < 0 or data["scatter"] > 1:
+        if data["scatter"] < 0 or data["scatter"] > 0.016:
             return -np.inf
-        val = np.log10(data["scatter"])
-        return -(val + 2) * (val + 2) / (0.01 * 0.01 * 2) - self.prefactor
+        return 1
 
     def get_suggestion(self, data):
-        return 0.1  # Deliberately wrong to test recovery
+        return 0.01
 
     def get_suggestion_sigma(self, data):
-        return 0.09
+        return 0.005
 
 
 class AlphaStretch(ParameterUnderlying):
@@ -78,13 +75,14 @@ class AlphaStretch(ParameterUnderlying):
         super().__init__("alpha", r"$\alpha$", group="Corrections")
 
     def get_suggestion_sigma(self, data):
-        return 0.5
+        return 0.3
 
     def get_suggestion(self, data):
-        return 0.1
+        return 0.3
 
     def get_log_prior(self, data):
-        if data["alpha"] < -2 or data["alpha"] > 2:
+        alpha = data["alpha"]
+        if alpha < 0 or alpha > 2:
             return -np.inf
         return 1
 
@@ -94,12 +92,13 @@ class BetaColour(ParameterUnderlying):
         super().__init__("beta", r"$\beta$", group="Corrections")
 
     def get_suggestion_sigma(self, data):
-        return 2
+        return 3
 
     def get_suggestion(self, data):
         return 3
 
     def get_log_prior(self, data):
-        if data["beta"] < -10 or data["beta"] > 10:
+        beta = data["beta"]
+        if beta < -1 or beta > 10:
             return -np.inf
-        return 1
+        return -0.1 * (beta - 3) * (beta - 3)

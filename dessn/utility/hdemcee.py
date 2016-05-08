@@ -39,10 +39,10 @@ class EmceeWrapper(object):
 
         step = 0
         self.chain = np.zeros((num_walkers, num_steps, save_dim))
-        if past_chain is not None and past_chain.shape[1] <= num_steps:
-            step = past_chain.shape[1]
+        if past_chain is not None:
+            step = min(past_chain.shape[1], num_steps)
             num = num_steps - step
-            self.chain[:, :step, :] = past_chain
+            self.chain[:, :step, :] = past_chain[:, :step, :]
             self.logger.debug("A further %d steps are required" % num)
         else:
             num = num_steps

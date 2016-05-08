@@ -5,18 +5,19 @@ from dessn.framework.edge import Edge, EdgeTransformation
 
 class ToParameters(Edge):
     def __init__(self):
-        super(ToParameters, self).__init__(["mb", "x1", "c"], ["mb_o", "x1_o", "c_o", "inv_cov"])
+        super(ToParameters, self).__init__(["mb", "x1", "c"], ["mb_o", "x1_o", "c_o",
+                                                               "inv_cov", "cov"])
 
     def get_log_likelihood(self, data):
         ls = []
-        for mb, x1, c, mb_o, x1_o, c_o, icov in zip(data["mb"], data["x1"], data["c"],
+        for mb, x1, c, mb_o, x1_o, c_o, cov, icov in zip(data["mb"], data["x1"], data["c"],
                                                     data["mb_o"], data["x1_o"], data["c_o"],
-                                                    data["inv_cov"]):
+                                                    data["cov"], data["inv_cov"]):
             o = np.array([mb, x1, c])
             m = np.array([mb_o, x1_o, c_o])
             diff = o - m
             logl = -0.5 * np.dot(diff, np.dot(icov, diff)) \
-                   - np.log(np.sqrt(2 * np.pi * np.abs(np.linalg.det(icov))))
+                   - np.log(np.sqrt(2 * np.pi * np.abs(np.linalg.det(cov))))
             ls.append(logl)
         return np.array(ls)
 
@@ -49,19 +50,24 @@ class ToObservedDistanceModulus(EdgeTransformation):
         super().__init__("mu", ["mb", "x1", "c", "alpha", "beta", "mag"])
 
     def get_transformation(self, data):
-        mus = data["mb"] + data["alpha"] * data["x1"] + data["beta"] * data["c"] - data["mag"]
-        # print("MUS ", data["mb"], data["alpha"], data["x1"], data["beta"], data["c"], data["mag"], mus)
+        mus = data["mb"] + data["alpha"] * data["x1"] - data["beta"] * data["c"] - data["mag"]
         return {"mu": mus}
 
 
 class ToMus(Edge):
     def __init__(self):
-        super().__init__("mu", ["mu_cos", "scatter"])
+        super().__init__("mu", ["mu_cos", "scatter", "alpha", "beta", "cov"])
         self.sqrt2pi = np.log(np.sqrt(2 * np.pi))
 
     def get_log_likelihood(self, data):
         diff = data["mu"] - data["mu_cos"]
-        s2 = 2 * data["scatter"] * data["scatter"]
-        chi2 = diff * diff / s2
-        logl = -chi2 - self.sqrt2pi - np.log(data["scatter"])
+        s2 = data["scatter"] * data["scatter"]
+        d2s = diff * diff
+        sigmas = np.zeros(d2s.shape)
+        psiT = np.array([[1, data["alpha"], -data["beta"]]])
+        psi = psiT.T
+        covs = data["cov"]
+        for i, cov in enumerate(covs):
+            sigmas[i] = 2 * (s2 + np.abs(np.dot(psiT, np.dot(cov, psi))))
+        logl = -d2s / sigmas - self.sqrt2pi - np.log(sigmas)
         return logl

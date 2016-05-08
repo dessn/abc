@@ -31,12 +31,12 @@ class ApparentMagnitude(ParameterLatent):
 
     def get_suggestion_sigma(self, data):
         sigmas = []
-        for ic in data["inv_cov"]:
-            sigmas.append(2 / ic[0, 0])
+        for ic in data["cov"]:
+            sigmas.append(2 * np.sqrt(ic[0, 0]))
         return np.array(sigmas)
 
     def get_suggestion_requirements(self):
-        return ["mb_o", "inv_cov"]
+        return ["mb_o", "cov"]
 
 
 class Stretch(ParameterLatent):
@@ -48,15 +48,15 @@ class Stretch(ParameterLatent):
         return self.n
 
     def get_suggestion_requirements(self):
-        return ["inv_cov", "x1_o"]
+        return ["cov", "x1_o"]
 
     def get_suggestion(self, data):
         return data["x1_o"]
 
     def get_suggestion_sigma(self, data):
         sigmas = []
-        for ic in data["inv_cov"]:
-            sigmas.append(2 / ic[1, 1])
+        for ic in data["cov"]:
+            sigmas.append(2 * np.sqrt(ic[1, 1]))
         return np.array(sigmas)
 
 
@@ -69,13 +69,13 @@ class Colour(ParameterLatent):
         return self.n
 
     def get_suggestion_requirements(self):
-        return ["inv_cov", "c_o"]
+        return ["cov", "c_o"]
 
     def get_suggestion(self, data):
         return data["c_o"]
 
     def get_suggestion_sigma(self, data):
         sigmas = []
-        for ic in data["inv_cov"]:
-            sigmas.append(2 / ic[2, 2])
+        for ic in data["cov"]:
+            sigmas.append(2 * np.sqrt(ic[2, 2]))
         return np.array(sigmas)
