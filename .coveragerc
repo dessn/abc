@@ -1,0 +1,21 @@
+[report]
+omit =
+    doc/*
+    tex/*
+    old/*
+    plots/*
+    temp/*
+    dessn/tests/*
+    dessn/models/*
+    dessn/utility/*
+    dessn/entry/*
+    dessn/examples/*
+    dessn/chain/demo*.py
+    **/test*.py
+    *__init__*
+
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    raise ImportError
+    def __len__
