@@ -109,7 +109,8 @@ P(S_c, S_T| z=z_o, X) & =\sum_i \int dc_o \mathcal{L}(T_i,z_o,c_o | S_c, S_T, z,
 
 For Case Not Typed the likelihood is
 \begin{align}
-\mathcal{L}(z_o,c_o | S_c, S_T, z, X) & =  \int dL \sum_i p(z_o,c_o | T_i, L, S_c, S_T, z, X) p(L |  T_i,  S_c, S_T, z, X) P(T_i|S_c, S_T, z, X).
+\mathcal{L}(z_o,c_o | S_c, S_T, z, X) & =  \int ds \,\mathcal{L}(z_o,c_o, s | S_c, S_T, z, X) \\
+& =  \int ds \, \int dL \, \sum_i p(z_o,c_o, s | T_i, L, S_c, S_T, z, X) p(L |  T_i,  S_c, S_T, z, X) P(T_i|S_c, S_T, z, X).
 \end{align}
 
 For the redshift measurement, we take a set of potential host galaxies, where galaxy $j$
@@ -119,7 +120,10 @@ p(z_o|S_c, S_T, z, X) = \sum_j   p_j\delta(z_j-z).
 \end{equation}
 Then
 \begin{align}
-\mathcal{L}(z_o,c_o | S_c, S_T, z, X) & =  \sum_j p_j \int dL \,\sum_{i} p(c_o | T_i, L, S_c, S_T, z=z_j, X) p(L |  T_i,  S_c, S_T,  z=z_j, X) P(T_i|S_c, S_T, z=z_j, X) \\
+\mathcal{L}(z_o,c_o | S_c, S_T, z, X) & =  \sum_j p_j \int ds \, \int dL \,\sum_{i} p(c_o | T_i, L, S_c, S_T, z=z_j, X) p(s | T_i, L, S_c, S_T, z=z_j, X) \\
+& \times p(L |  T_i,  S_c, S_T,  z=z_j, X) P(T_i|S_c, S_T, z=z_j, X) \\
+& \propto  \sum_j p_j \int ds \, \int dL \,\sum_{i} p(c_o, S_c, S_T | T_i, L, z=z_j, X) p(s, S_c, S_T | T_i, L, S_c, S_T, z=z_j, X) \\
+& \times p(L,, S_c, S_T |  T_i,  S_c, S_T,  z=z_j, X) P(T_i|S_c, S_T, z=z_j, X) \\
 &=  \frac{\sum_j p_j \int dL \, p(c_o, S_c, S_T | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c, S_T| z=z_j, X)}\\
 &=  \frac{\sum_j p_j \int dL \, p(c_o | L, z=z_j, X) \sum_{i}  p(L|T_i, z=z_j, X) P(T_i|z=z_j, X)   }{P(S_c, S_T| z=z_j, X)},
 \end{align}
