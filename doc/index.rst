@@ -37,7 +37,8 @@ see :py:mod:`dessn.chain`.
 Implementations
 ---------------
 
-Finally, for the toy model implementations, see :py:mod:`dessn.models`
+Finally, for the toy model implementations, see :py:mod:`dessn.models`. Specially, for the
+working toy model implementation, see :py:mod:`dessn.models.c_pure_snia_simplified`.
 
 
 General

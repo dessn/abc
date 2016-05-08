@@ -78,11 +78,11 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pure_snia.png")
         # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=4000, num_burn=500, temp_dir=temp_dir, save_interval=60)
+    model.fit_model(num_steps=4368, num_burn=800, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = model.get_consumer()
-        chain_consumer.configure_general(max_ticks=4)
+        chain_consumer.configure_general(max_ticks=4, bins=0.7)
         chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta)
         chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta)
 

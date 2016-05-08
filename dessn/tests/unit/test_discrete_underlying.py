@@ -64,7 +64,7 @@ class ToUnderlying(Edge):
         return result
 
 
-class DiscreteModel(Model):
+class DiscreteModelTest(Model):
     def __init__(self):
         super().__init__("DiscreteModel")
         rate = 0.7
@@ -116,7 +116,7 @@ class DiscreteModelFailure(Model):
 
 
 class TestDiscrete(object):
-    model = DiscreteModel()
+    model = DiscreteModelTest()
     theta = [0.7]
 
     def test_latent_num_parameters(self):

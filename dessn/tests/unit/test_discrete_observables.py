@@ -57,7 +57,7 @@ class ToUnderlying(Edge):
         return result
 
 
-class DiscreteModel(Model):
+class DiscreteModelTest2(Model):
     def __init__(self):
         super().__init__("DiscreteModel")
         data = [{"heads": 0.8, "tails": 0.2}, {"heads": 0.2, "tails": 0.8}]
@@ -71,7 +71,7 @@ class DiscreteModel(Model):
 
 
 class TestDiscrete(object):
-    model = DiscreteModel()
+    model = DiscreteModelTest2()
     theta = [0.6]
 
     def test_latent_num_parameters(self):

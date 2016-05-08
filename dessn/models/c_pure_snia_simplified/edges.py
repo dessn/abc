@@ -4,6 +4,19 @@ from dessn.framework.edge import Edge, EdgeTransformation
 
 
 class ToParameters(Edge):
+    r""" The likelihood of true supernova properties given the observed properties.
+
+    Given observed properties :math:`\hat{m}_B, \hat{x}_1, \hat{c}, \hat{C}`, and
+    true properties :math:`m_B, x_1, c`, we define :math:`\psi = \left( m_B - \hat{m}_B,
+    x_1 - \hat{x}_1, c - \hat{c} \right)`.
+
+    From this, we define the probability
+
+    .. math::
+        P(\hat{m}_B, \hat{x}_1, \hat{c}, \hat{C}|m_B,x_1,c) =
+        \frac{\exp\left[ -\frac{1}{2} \psi \hat{C}^{-1} \psi^T  \right]}
+        {\left| \sqrt{2 \pi \hat{C}} \right| }
+    """
     def __init__(self):
         super(ToParameters, self).__init__(["mb", "x1", "c"], ["mb_o", "x1_o", "c_o",
                                                                "inv_cov", "cov"])
@@ -23,6 +36,12 @@ class ToParameters(Edge):
 
 
 class ToRedshift(EdgeTransformation):
+    r""" Transformation to give true redshift.
+
+    In this simplified model, we assume that the observed redshifts
+    have negligible errors and no catastrophic failures, and thus
+    the true redshifts are in fact given by the observed redshifts.
+    """
     def __init__(self):
         super(ToRedshift, self).__init__("redshift", ["oredshift"])
 
@@ -31,6 +50,12 @@ class ToRedshift(EdgeTransformation):
 
 
 class ToDistanceModulus(EdgeTransformation):
+    r""" Transformation to give cosmological distance modulus.
+
+    Given :math:`\Omega_m` and :math:`H_0`, we utilise `astropy.cosmology`
+    to generate an underlying cosmology. The cosmological distance
+    modulus is then calculated from this cosmology and the given redshifts.
+    """
     def __init__(self):
         super().__init__("mu_cos", ["omega_m", "H0", "redshift"])
         self.cosmology = None
@@ -46,6 +71,16 @@ class ToDistanceModulus(EdgeTransformation):
 
 
 class ToObservedDistanceModulus(EdgeTransformation):
+    r""" Transformation to observed distance modulus.
+
+    Given a corrected supernova absolute magnitude of :math:`M = M_B - \alpha x_1 + \beta c`,
+    and an observed magnitude of :math:`m_B`, the observed distance modulus is given by:
+
+    .. math::
+        \mu_{\rm obs} = m_B - M
+
+        \mu_{\rm obs} = m_B - \alpha x_1 + \beta c - M_B
+    """
     def __init__(self):
         super().__init__("mu", ["mb", "x1", "c", "alpha", "beta", "mag"])
 
@@ -55,6 +90,25 @@ class ToObservedDistanceModulus(EdgeTransformation):
 
 
 class ToMus(Edge):
+    r""" Likelihood of cosmological distance modulus and observed distance modulus.
+
+    Given a cosmological distance modulus :math:`\mu_{\mathcal{C}}` and an observed
+    distance modulus :math:`\mu_{\rm obs}`, we define the probability as
+
+    .. math::
+        P(\mu_{\rm obs} | \mu_{\mathcal{C}}) = \frac{1}{\sqrt{2\pi}\sigma}
+        \exp\left[ -\frac{(\mu_{\rm obs} - \mu_{\mathcal{C}})^2}{2\sigma^2}  \right]
+
+    Our variance here, :math:`\sigma` is given by a combination of the variance
+    contributions from the intrinsic scatter of our supernova population :math:`\sigma_{\rm int}`
+    and the error in observed distance modulus, which is denoted :math:`\sigma_{\rm obs}` and
+    defined via:
+
+    .. math::
+        \sigma_{\rm obs}^2 = (1, \alpha, -\beta) \hat{C}^{-1} (1, \alpha, -\beta)^{-1}
+
+    Thus giving the total variance as :math:`\sigma^2 = \sigma_{rm int}^2 + \sigma_{\rm obs}^2`.
+    """
     def __init__(self):
         super().__init__("mu", ["mu_cos", "scatter", "alpha", "beta", "cov"])
         self.sqrt2pi = np.log(np.sqrt(2 * np.pi))

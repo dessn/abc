@@ -60,7 +60,7 @@ class ToUnderlying(Edge):
         return result
 
 
-class DiscreteModel(Model):
+class DiscreteModelTest3(Model):
     def __init__(self):
         super().__init__("DiscreteModel")
         data = np.array([0.8, 0.2])
@@ -74,7 +74,7 @@ class DiscreteModel(Model):
 
 
 class TestDiscreteNumpy(object):
-    model = DiscreteModel()
+    model = DiscreteModelTest3()
     theta = [0.6]
 
     def test_latent_num_parameters(self):

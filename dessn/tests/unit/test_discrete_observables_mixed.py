@@ -63,7 +63,7 @@ class ToUnderlying(Edge):
         return result
 
 
-class DiscreteModel(Model):
+class DiscreteModelTest4(Model):
     def __init__(self):
         super().__init__("DiscreteModel")
         data = [{"heads": 0.8, "tails": 0.2}, "heads"]
@@ -77,7 +77,7 @@ class DiscreteModel(Model):
 
 
 class TestDiscreteMixed(object):
-    model = DiscreteModel()
+    model = DiscreteModelTest4()
     theta = [0.6]
 
     def test_latent_num_parameters(self):
