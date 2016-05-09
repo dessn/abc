@@ -18,8 +18,8 @@ class ToParameters(Edge):
         {\left| \sqrt{2 \pi \hat{C}} \right| }
     """
     def __init__(self):
-        super(ToParameters, self).__init__(["mb", "x1", "c"], ["mb_o", "x1_o", "c_o",
-                                                               "inv_cov", "cov"])
+        super(ToParameters, self).__init__(["mb_o", "x1_o", "c_o", "inv_cov", "cov"],
+                                           ["mb", "x1", "c"])
 
     def get_log_likelihood(self, data):
         ls = []

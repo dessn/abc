@@ -12,7 +12,7 @@ modulus can then be combined with the cosmological distance modulus,
 which is given as a function of the observed supernova redshift and
 cosmological parameters. Graphically, the model is represented as follows.
 
-.. figure::     ../dessn/models/c_pure_snia_simplified/output/pure_snia.png
+.. figure::     ../dessn/models/c_pure_snia_simplified/output/pgm.png
     :align:     center
 
 

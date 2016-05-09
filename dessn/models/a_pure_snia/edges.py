@@ -6,7 +6,8 @@ import sncosmo
 
 class ToLightCurve(Edge):
     def __init__(self):
-        super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1", "t0", "c", "omega_m", "H0"])
+        super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1",
+                                                   "t0", "c", "omega_m", "H0"])
         self.model = sncosmo.Model(source="salt2")
         self.current_h0 = None
         self.current_omega_m = None
@@ -46,24 +47,29 @@ class ToLuminosity(Edge):
     def get_log_likelihood(self, data):
         r""" Assume type is "Ia" for a Type SnIa, or "II" for SnII.
 
-        If we have a type SnIa supernova, we use the type SnIa distribution, which is modelled as a gaussian.
+        If we have a type SnIa supernova, we use the type SnIa distribution, which is
+        modelled as a gaussian.
 
         We should also note clearly that luminosity here is actually peak absolute magnitude
 
         .. math::
-            P(L|\mu_{\rm SnIa}, \sigma_{\rm SnIa}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnIa}} \exp\left( - \frac{(L - \mu_{\rm SnIa})^2}{2\sigma_{\rm SnIa}} \right)
+            P(L|\mu_{\rm SnIa}, \sigma_{\rm SnIa}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnIa}}
+            \exp\left( - \frac{(L - \mu_{\rm SnIa})^2}{2\sigma_{\rm SnIa}} \right)
 
-        If we have a type SnII supernova, we use the type SnII distribution, which is also modelled as a gaussian.
+        If we have a type SnII supernova, we use the type SnII distribution, which is also
+        modelled as a gaussian.
 
         .. math::
-            P(L|\mu_{\rm SnII}, \sigma_{\rm SnII}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnII}} \exp\left( - \frac{(L - \mu_{\rm SnII})^2}{2\sigma_{\rm SnII}} \right)
+            P(L|\mu_{\rm SnII}, \sigma_{\rm SnII}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnII}}
+            \exp\left( - \frac{(L - \mu_{\rm SnII})^2}{2\sigma_{\rm SnII}} \right)
 
         """
 
         luminosity = data["luminosity"]
         snIa_mean = data["snIa_luminosity"]
         snIa_std = data["snIa_sigma"]
-        snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) / (2 * snIa_std * snIa_std)) - np.log(self.sqrt2pi * snIa_std)
+        snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) /
+                     (2 * snIa_std * snIa_std)) - np.log(self.sqrt2pi * snIa_std)
         return snIa_prob
 
 
