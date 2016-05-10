@@ -4,10 +4,9 @@ import sys
 import numpy as np
 
 from dessn.models.a_pure_snia.edges import ToLightCurve, ToRedshift, \
-    ToAbsoluteMagnitude, ToApparentMagnitude, ToDistanceModuli, ToCosmologicalDistanceModulus, \
-    ToObservedDistanceModulus
+    ToAbsoluteMagnitude, ToDeltaM
 from dessn.models.a_pure_snia.latent import Redshift, Colour, PeakTime, Stretch, \
-    NovaAbsMag, NovaApparentMag, Scale, CosmologicalDistanceModulus, ObservedDistanceModulus
+    DeltaMag, AbsMag
 from dessn.models.a_pure_snia.observed import ObservedRedshift, ObservedLightCurves
 from dessn.models.a_pure_snia.underlying import OmegaM, Hubble, AbsoluteMagnitude, Scatter, \
     AlphaStretch, BetaColour
@@ -32,23 +31,17 @@ class PureModel(Model):
         self.add_node(Scatter())
         self.add_node(AlphaStretch())
         self.add_node(BetaColour())
-        self.add_node(Scale(n, o["x0"], o["x0s"]))
         self.add_node(Stretch(n, o["x1"], o["x1s"]))
         self.add_node(PeakTime(n, o["t0"], o["t0s"]))
         self.add_node(Colour(n, o["c"], o["cs"]))
         self.add_node(Redshift(n))
-        self.add_node(NovaApparentMag())
-        self.add_node(NovaAbsMag())
-        self.add_node(ObservedDistanceModulus())
-        self.add_node(CosmologicalDistanceModulus())
+        self.add_node(DeltaMag(n))
+        self.add_node(AbsMag())
 
         self.add_edge(ToLightCurve())
         self.add_edge(ToRedshift())
         self.add_edge(ToAbsoluteMagnitude())
-        self.add_edge(ToApparentMagnitude())
-        self.add_edge(ToObservedDistanceModulus())
-        self.add_edge(ToCosmologicalDistanceModulus())
-        self.add_edge(ToDistanceModuli())
+        self.add_edge(ToDeltaM())
 
         self.finalise()
 
@@ -63,18 +56,18 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surface.png")
     walk_file = os.path.abspath(dir_name + "/output/walk.png")
 
-    vals = {"num_transient": 10, "omega_m": 0.5, "H0": 85, "snIa_luminosity": -19.3,
+    vals = {"num_transient": 15, "omega_m": 0.5, "H0": 85, "snIa_luminosity": -19.3,
             "snIa_sigma": 0.01}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
     model = PureModel(observations)
 
     if not only_data:
-        np.random.seed(3)
+        np.random.seed(103)
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=500, num_burn=0, temp_dir=temp_dir, save_interval=60)
+    model.fit_model(num_steps=5000, num_burn=0, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = model.get_consumer()

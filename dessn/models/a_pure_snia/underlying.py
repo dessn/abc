@@ -16,7 +16,7 @@ class OmegaM(ParameterUnderlying):
         return 0.30
 
     def get_suggestion_sigma(self, data):
-        return 0.05
+        return 0.2
 
 
 class Hubble(ParameterUnderlying):

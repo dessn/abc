@@ -1,4 +1,5 @@
 from dessn.framework.parameter import ParameterLatent, ParameterTransformation
+import numpy as np
 
 
 class Redshift(ParameterTransformation):
@@ -10,34 +11,52 @@ class Redshift(ParameterTransformation):
         return self.n
 
 
-class NovaAbsMag(ParameterTransformation):
+class AbsMag(ParameterTransformation):
     def __init__(self):
-        super(NovaAbsMag, self).__init__("abs_mag", "$M_B$", group="Nova. Properties")
+        super(AbsMag, self).__init__("abs_mag", "$M_B$", group="Nova. Properties")
+
+#
+# class NovaApparentMag(ParameterTransformation):
+#     def __init__(self):
+#         super(NovaApparentMag, self).__init__("app_mag", "$m_B$", group="Nova. Properties")
 
 
-class NovaApparentMag(ParameterTransformation):
-    def __init__(self):
-        super(NovaApparentMag, self).__init__("app_mag", "$m_B$", group="Nova. Properties")
+# class Scale(ParameterLatent):
+#     def __init__(self, n, x0s, x0s_sigma):
+#         super().__init__("x0", "$x_0$", group="Salt2")
+#         self.n = n
+#         self.x0s = x0s
+#         self.x0s_sigma = x0s_sigma
+#
+#     def get_num_latent(self):
+#         return self.n
+#
+#     def get_suggestion_requirements(self):
+#         return []
+#
+#     def get_suggestion(self, data):
+#         return self.x0s
+#
+#     def get_suggestion_sigma(self, data):
+#         return 3.0 * self.x0s_sigma
 
 
-class Scale(ParameterLatent):
-    def __init__(self, n, x0s, x0s_sigma):
-        super().__init__("x0", "$x_0$", group="Salt2")
+class DeltaMag(ParameterLatent):
+    def __init__(self, n):
+        super().__init__("delta_m", r"$\Delta M$")
         self.n = n
-        self.x0s = x0s
-        self.x0s_sigma = x0s_sigma
 
     def get_num_latent(self):
         return self.n
 
-    def get_suggestion_requirements(self):
-        return []
-
     def get_suggestion(self, data):
-        return self.x0s
+        return np.zeros(self.n)
 
     def get_suggestion_sigma(self, data):
-        return 3.0 * self.x0s_sigma
+        return 0.1 * np.ones(self.n)
+
+    def get_suggestion_requirements(self):
+        return []
 
 
 class Stretch(ParameterLatent):
@@ -100,11 +119,11 @@ class Colour(ParameterLatent):
         return 3.0 * self.cs_sigma
 
 
-class ObservedDistanceModulus(ParameterTransformation):
-    def __init__(self):
-        super().__init__("mu_obs", r"$\mu_{\rm obs}$", group="Obs. Dist. Mod")
-
-
-class CosmologicalDistanceModulus(ParameterTransformation):
-    def __init__(self):
-        super().__init__("mu_cos", r"$\mu_{\mathcal{C}}$", group="Cos. Dist. Mod")
+# class ObservedDistanceModulus(ParameterTransformation):
+#     def __init__(self):
+#         super().__init__("mu_obs", r"$\mu_{\rm obs}$", group="Obs. Dist. Mod")
+#
+#
+# class CosmologicalDistanceModulus(ParameterTransformation):
+#     def __init__(self):
+#         super().__init__("mu_cos", r"$\mu_{\mathcal{C}}$", group="Cos. Dist. Mod")
