@@ -6,29 +6,71 @@ import sncosmo
 
 class ToLightCurve(Edge):
     def __init__(self):
-        super(ToLightCurve, self).__init__("olc", ["redshift", "luminosity", "x1",
-                                                   "t0", "c", "omega_m", "H0"])
+        super(ToLightCurve, self).__init__("olc", ["redshift", "x0", "x1", "t0", "c"])
         self.model = sncosmo.Model(source="salt2")
-        self.current_h0 = None
-        self.current_omega_m = None
-        self.cosmology = None
 
     def get_log_likelihood(self, data):
         r""" Uses SNCosmo to move from supernova parameters to a light curve.
         """
-        H0 = data["H0"]
-        om = data["omega_m"]
-        if self.cosmology is None or (self.current_h0 != H0 or self.current_omega_m != om):
-            self.cosmology = FlatwCDM(H0=H0, Om0=om, w0=-1)
-            self.current_h0 = H0
-            self.current_omega_m = om
-        self.model.set(z=data["redshift"])
-        self.model.set_source_peakabsmag(data["luminosity"], 'bessellb', 'ab', cosmo=self.cosmology)
-        x0 = self.model.get("x0")
-        self.model.parameters = [data["redshift"], data["t0"], x0, data["x1"], data["c"]]
+        arr = []
+        for z, t0, x0, x1, c, lc in zip(data["redshift"], data["t0"],
+                                    data["x0"], data["x1"], data["c"], data["olc"]):
+            self.model.set(z=z)
+            self.model.parameters = [z, t0, x0, x1, c]
+            chi2 = sncosmo.chisq(lc, self.model)
+            arr.append(-0.5 * chi2)
 
-        chi2 = sncosmo.chisq(data["olc"], self.model)
-        return -0.5 * chi2
+        return np.array(arr)
+
+
+class ToApparentMagnitude(EdgeTransformation):
+    def __init__(self):
+        super(ToApparentMagnitude, self).__init__("app_mag", ["x0", "x1", "c"])
+        self.model = sncosmo.Model(source="salt2")
+
+    def get_transformation(self, data):
+        arr = []
+        for x0, x1, c in zip(data["x0"], data["x1"], data["c"]):
+            self.model.set(x0=x0, x1=x1, c=c)
+            app = self.model.source.peakmag("bessellb", "ab")
+            arr.append(app)
+        return {"app_mag": np.array(arr)}
+
+
+class ToAbsoluteMagnitude(EdgeTransformation):
+    def __init__(self):
+        super(ToAbsoluteMagnitude, self).__init__("abs_mag",
+                                                  ["magnitude", "alpha", "beta", "x1", "c"])
+
+    def get_transformation(self, data):
+        val = data["magnitude"] - data["alpha"] * data["x1"] + data["beta"] * data["c"]
+        return {"abs_mag": val}
+
+
+class ToObservedDistanceModulus(EdgeTransformation):
+    def __init__(self):
+        super().__init__("mu_obs", ["abs_mag", "app_mag"])
+
+    def get_transformation(self, data):
+        return {"mu_obs": data["app_mag"] - data["abs_mag"]}
+
+
+class ToCosmologicalDistanceModulus(EdgeTransformation):
+    def __init__(self):
+        super().__init__("mu_cos", ["omega_m", "hubble", "redshift"])
+
+    def get_transformation(self, data):
+        cosmology = FlatwCDM(H0=data["hubble"], Om0=data["omega_m"])
+        return {"mu_cos": cosmology.distmod(data["redshift"]).value}
+
+
+class ToDistanceModuli(Edge):
+    def __init__(self):
+        super().__init__("mu_obs", ["mu_cos", "scatter"])
+
+    def get_log_likelihood(self, data):
+        diff = data["mu_obs"] - data["mu_cos"]
+        return -0.5 * diff * diff / (data["scatter"] * data["scatter"])
 
 
 class ToRedshift(EdgeTransformation):
@@ -37,39 +79,4 @@ class ToRedshift(EdgeTransformation):
 
     def get_transformation(self, data):
         return {"redshift": data["oredshift"]}
-
-
-class ToLuminosity(Edge):
-    def __init__(self):
-        super(ToLuminosity, self).__init__("luminosity", ["snIa_luminosity", "snIa_sigma"])
-        self.sqrt2pi = np.sqrt(2 * np.pi)
-
-    def get_log_likelihood(self, data):
-        r""" Assume type is "Ia" for a Type SnIa, or "II" for SnII.
-
-        If we have a type SnIa supernova, we use the type SnIa distribution, which is
-        modelled as a gaussian.
-
-        We should also note clearly that luminosity here is actually peak absolute magnitude
-
-        .. math::
-            P(L|\mu_{\rm SnIa}, \sigma_{\rm SnIa}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnIa}}
-            \exp\left( - \frac{(L - \mu_{\rm SnIa})^2}{2\sigma_{\rm SnIa}} \right)
-
-        If we have a type SnII supernova, we use the type SnII distribution, which is also
-        modelled as a gaussian.
-
-        .. math::
-            P(L|\mu_{\rm SnII}, \sigma_{\rm SnII}) = \frac{1}{\sqrt{2\pi}\sigma_{\rm SnII}}
-            \exp\left( - \frac{(L - \mu_{\rm SnII})^2}{2\sigma_{\rm SnII}} \right)
-
-        """
-
-        luminosity = data["luminosity"]
-        snIa_mean = data["snIa_luminosity"]
-        snIa_std = data["snIa_sigma"]
-        snIa_prob = (-(luminosity - snIa_mean) * (luminosity - snIa_mean) /
-                     (2 * snIa_std * snIa_std)) - np.log(self.sqrt2pi * snIa_std)
-        return snIa_prob
-
 

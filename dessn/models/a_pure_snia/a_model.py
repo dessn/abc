@@ -3,55 +3,52 @@ import os
 import sys
 import numpy as np
 
-from dessn.models.a_pure_snia.edges import ToLightCurve, ToLuminosity, ToRedshift
-from dessn.models.a_pure_snia.latent import Luminosity, Redshift, Colour, PeakTime, Stretch
+from dessn.models.a_pure_snia.edges import ToLightCurve, ToRedshift, \
+    ToAbsoluteMagnitude, ToApparentMagnitude, ToDistanceModuli, ToCosmologicalDistanceModulus, \
+    ToObservedDistanceModulus
+from dessn.models.a_pure_snia.latent import Redshift, Colour, PeakTime, Stretch, \
+    NovaAbsMag, NovaApparentMag, Scale, CosmologicalDistanceModulus, ObservedDistanceModulus
 from dessn.models.a_pure_snia.observed import ObservedRedshift, ObservedLightCurves
-from dessn.models.a_pure_snia.underlying import OmegaM, Hubble, SupernovaIaDist1, SupernovaIaDist2
+from dessn.models.a_pure_snia.underlying import OmegaM, Hubble, AbsoluteMagnitude, Scatter, \
+    AlphaStretch, BetaColour
 
 from dessn.framework.model import Model
 from dessn.models.a_pure_snia.simulation import Simulation
 
 
 class PureModel(Model):
-    """ A modified mixed_types framework. The likelihood surfaces and PGM framework are given below.
-
-    Probabilities and framework details are recorded in the framework parameter and edge classes.
-
-
-    .. figure::     ../plots/toyModelPGM.png
-        :align:     center
-
-    .. figure::     ../plots/toyModelChain.png
-        :align:     center
-
-    .. figure::     ../plots/toyModelWalks.png
-        :align:     center
-
-    """
-    def __init__(self, observations):
+    def __init__(self, o):
         super(PureModel, self).__init__("ToyModel")
 
-        z_o = observations["z_o"]
-        lcs_o = observations["lcs_o"]
+        z_o = o["z"]
         n = len(z_o)
 
         self.add_node(ObservedRedshift(z_o))
-        self.add_node(ObservedLightCurves(lcs_o))
+        self.add_node(ObservedLightCurves(o["lcs"]))
 
         self.add_node(OmegaM())
         self.add_node(Hubble())
-        self.add_node(SupernovaIaDist1())
-        self.add_node(SupernovaIaDist2())
-
-        self.add_node(Luminosity(n=n))
-        self.add_node(Stretch(n=n))
-        self.add_node(PeakTime(n=n))
-        self.add_node(Colour(n=n))
-        self.add_node(Redshift(n=n))
+        self.add_node(AbsoluteMagnitude())
+        self.add_node(Scatter())
+        self.add_node(AlphaStretch())
+        self.add_node(BetaColour())
+        self.add_node(Scale(n, o["x0"], o["x0s"]))
+        self.add_node(Stretch(n, o["x1"], o["x1s"]))
+        self.add_node(PeakTime(n, o["t0"], o["t0s"]))
+        self.add_node(Colour(n, o["c"], o["cs"]))
+        self.add_node(Redshift(n))
+        self.add_node(NovaApparentMag())
+        self.add_node(NovaAbsMag())
+        self.add_node(ObservedDistanceModulus())
+        self.add_node(CosmologicalDistanceModulus())
 
         self.add_edge(ToLightCurve())
-        self.add_edge(ToLuminosity())
         self.add_edge(ToRedshift())
+        self.add_edge(ToAbsoluteMagnitude())
+        self.add_edge(ToApparentMagnitude())
+        self.add_edge(ToObservedDistanceModulus())
+        self.add_edge(ToCosmologicalDistanceModulus())
+        self.add_edge(ToDistanceModuli())
 
         self.finalise()
 
@@ -66,18 +63,18 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surface.png")
     walk_file = os.path.abspath(dir_name + "/output/walk.png")
 
-    vals = {"num_transient": 20, "omega_m": 0.5, "H0": 85, "snIa_luminosity": -19.3,
-            "snIa_sigma": 0.001}
+    vals = {"num_transient": 10, "omega_m": 0.5, "H0": 85, "snIa_luminosity": -19.3,
+            "snIa_sigma": 0.01}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
     model = PureModel(observations)
 
     if not only_data:
-        np.random.seed(102)
+        np.random.seed(3)
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-        fig = model.get_pgm(pgm_file)
+        # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=10000, num_burn=0, temp_dir=temp_dir, save_interval=60)
+    model.fit_model(num_steps=500, num_burn=0, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = model.get_consumer()
