@@ -4,9 +4,9 @@ import sys
 import numpy as np
 
 from dessn.models.a_pure_snia.edges import ToLightCurve, ToRedshift, \
-    ToAbsoluteMagnitude, ToDeltaM
+    ToAbsoluteMagnitude, ToDeltaM, ToDistanceModulus
 from dessn.models.a_pure_snia.latent import Redshift, Colour, PeakTime, Stretch, \
-    DeltaMag, AbsMag
+    DeltaMag, AbsMag, DistanceModulus
 from dessn.models.a_pure_snia.observed import ObservedRedshift, ObservedLightCurves
 from dessn.models.a_pure_snia.underlying import OmegaM, Hubble, AbsoluteMagnitude, Scatter, \
     AlphaStretch, BetaColour
@@ -37,11 +37,13 @@ class PureModel(Model):
         self.add_node(Redshift(n))
         self.add_node(DeltaMag(n))
         self.add_node(AbsMag())
+        self.add_node(DistanceModulus())
 
         self.add_edge(ToLightCurve())
         self.add_edge(ToRedshift())
         self.add_edge(ToAbsoluteMagnitude())
         self.add_edge(ToDeltaM())
+        self.add_edge(ToDistanceModulus())
 
         self.finalise()
 
@@ -63,11 +65,11 @@ if __name__ == "__main__":
     model = PureModel(observations)
 
     if not only_data:
-        np.random.seed(103)
+        np.random.seed(1)
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-        # fig = model.get_pgm(pgm_file)
+        fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=5000, num_burn=0, temp_dir=temp_dir, save_interval=60)
+    model.fit_model(num_steps=2500, num_burn=200, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = model.get_consumer()

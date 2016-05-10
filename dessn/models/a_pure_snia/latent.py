@@ -1,4 +1,5 @@
 from dessn.framework.parameter import ParameterLatent, ParameterTransformation
+from dessn.models.a_pure_snia.underlying import Scatter
 import numpy as np
 
 
@@ -45,6 +46,7 @@ class DeltaMag(ParameterLatent):
     def __init__(self, n):
         super().__init__("delta_m", r"$\Delta M$")
         self.n = n
+        self.scatter = Scatter().get_suggestion_sigma({})
 
     def get_num_latent(self):
         return self.n
@@ -53,7 +55,7 @@ class DeltaMag(ParameterLatent):
         return np.zeros(self.n)
 
     def get_suggestion_sigma(self, data):
-        return 0.1 * np.ones(self.n)
+        return self.scatter * np.ones(self.n)
 
     def get_suggestion_requirements(self):
         return []
@@ -119,11 +121,6 @@ class Colour(ParameterLatent):
         return 3.0 * self.cs_sigma
 
 
-# class ObservedDistanceModulus(ParameterTransformation):
-#     def __init__(self):
-#         super().__init__("mu_obs", r"$\mu_{\rm obs}$", group="Obs. Dist. Mod")
-#
-#
-# class CosmologicalDistanceModulus(ParameterTransformation):
-#     def __init__(self):
-#         super().__init__("mu_cos", r"$\mu_{\mathcal{C}}$", group="Cos. Dist. Mod")
+class DistanceModulus(ParameterTransformation):
+    def __init__(self):
+        super().__init__("mu", r"$\mu$", group="Dist. Mod")

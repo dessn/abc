@@ -67,7 +67,7 @@ class Scatter(ParameterUnderlying):
         return 0.01  # Deliberately wrong to test recovery
 
     def get_suggestion_sigma(self, data):
-        return 0.09
+        return 0.009
 
 
 class AlphaStretch(ParameterUnderlying):
