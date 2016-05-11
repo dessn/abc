@@ -30,23 +30,53 @@
 \label{likelihood:sec}
 
 The ambition is to construct a model to determine the likelihood of DES-like
-supernova data.  We start with a toy model and plan to evolve its complexity to
-have the fidelity necessary for the DES analysis.
+supernova data. 
 The conceptual structure of the model is shown in Figure~\ref{pgm:fig}. 
 \begin{figure}[htbp] %  figure placement: here, top, bottom, or page
    \centering
-   \includegraphics[width=6.5in]{../results//nodes_pgm.pdf} 
+   \includegraphics[width=6.5in]{../results//hdpgm.pdf} 
    \caption{Probabilistic Graphical Model for the SN~Ia analysis.  
    \label{pgm:fig}}
 \end{figure}
 
-In the toy model there are three types of data that
+The model has three types of observables $O$ that
 may be observed for each supernova:
 \begin{itemize}
 \item $c_o$: Counts at peak brightness, one or more independent measurements.
 \item $z_o$: Redshift.
 \item $T_o$: Transient type.
 \end{itemize}
+
+There are top-level  sets of parameters $M$ that correspond to photometric calibration, cosmology,
+host-galaxy properties, and transient properties.
+There are two sets of intermediary parameters $M_I$ that correspond to luminosity $L$ and type $T$.
+
+The likelihood is expressed as
+\begin{align*}
+\mathcal{L}(O| M, M_I) & = \frac{\epsilon(O, M, M_I) p(O|M, M_I)}{\int dO\, \epsilon(O, M, M_I) p(O|M, M_I)},
+\end{align*}
+where $p(O|M, M_I)$ is the pdf of all possible observables, and $\epsilon(O, M, M_I)$
+is the probability those observables will be included in the experimental analysis.
+
+The dependencies of the parameters are charted through the PGM to give for transients with a type measurement
+\begin{align*}
+p(O| M, M_I) & = P(T_o | T) p(z | M) p(c_o | L, M)
+\end{align*}
+and for transients without a type measurement
+\begin{align*}
+p(O| M, M_I) & = p(z | M) p(c_o | L, M),
+\end{align*}
+where the observable measurements are taken to be independent.
+
+The efficiency $\epsilon$ depends on the properties of the experiment and the sample selection criteria:
+the transient is discovered, satisfies sample selection, is selected for spectroscopic typing, the typing
+is successful, and that the type is SN~Ia:
+\begin{align*}
+\epsilon(O, M, M_I) & = p(SNIa, typed, sample, discovered |O, M, L, T)\\
+& = p(SNIa|  typed, T_o)p(typed | sample, c_o)p(sample| discovered, c_o)p(discovered |c_o),
+\end{align*}
+where transient discovery, sample selection, and typing is based on observed photometry and
+identification as a SN~Ia is based on observed type.
 
 There are selection criteria $S_c$ and $S_T$ for the inclusion of an object in the
 sample and for a successul typing.
