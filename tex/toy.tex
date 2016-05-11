@@ -116,7 +116,7 @@ The mean luminosity and intrinsic magnitude dispersion for SNe~Ia are
 \ln{L}_{SNIa} & \sim \mathcal{N}(\ln{1}, 0.02) \\
 \sigma_{SNIa} & \sim \ln{\mathcal{N}}(\ln{0.1},0.1).
 \end{align}
-and for the moment we don't worry about priors on the distribution of $\alpha$ and $\beta$.
+and for the moment we don't worry about priors on $\alpha$ and $\beta$ or the distributions of $x_1$ and $c$.
 
 For the cosmology analysis only the relative SN~Ia rate between different transients are important.
 We take the rates relative to the SN~Ia rate
@@ -138,7 +138,70 @@ r_{SNII} \sim \mathcal{U}(0.25, 4).
 
 \end{itemize}
 
-\subsection{$p(M)$: Priors on the Top-Level Parameters}
+\subsection{$p(M_I|M)$: Probabilities of the Intermediary Parameters.}
+\begin{itemize}
+\item We only have to worry about the type probabilities in the photometric-typing analysis.
+The probability an object is SN~Ia is
+\begin{align}
+p_{SNIa} &= \frac{r_{SNIa}}{r_{SNIa}+r_{SNII}} \nonumber \\
+p_{SNII}&=1-p_{SNIa}.
+\label{prob:eqn}
+\end{align}
+
+
+The type of the object $\tau$ is drawn from the Bernoulli distribution 
+\begin{equation}
+\tau | p_{SNIa} \sim \mathcal{B}(1-p_{SNIa}),
+\end{equation}
+with the convention that $T=0$ corresponds to SN~Ia.
+
+For each SN~Ia the SALT2 parameters are drawn
+\begin{equation}
+x_1, c | \text{distribution hyperparameters }  \sim TBD.
+\end{equation}
+
+
+\item
+The peak luminosity is drawn from
+\begin{equation}
+\ln{L} | \tau, \ln{L}_{\tau},\sigma_{\tau} \sim \mathcal{N}\left( \ln{L}_{\tau},\frac{\ln{10}}{2.5}\sigma_{\tau}\right).
+\end{equation}
+
+
+\end{itemize}
+
+\subsection{$p(O| M, M_I)$: Probability of All Possible Observables}
+\begin{itemize}
+\item The spectroscopic typing is assumed to be perfect
+\begin{equation}
+T | \tau ~ \delta (T-\tau).
+\end{equation}
+
+\item The spectroscopic redshift is also assumed to be perfect
+\begin{equation}
+z | z_{host} ~ \delta (z-z_{host}).
+\end{equation}
+\item  The luminosity distance comes from the physics-theory function
+\begin{equation}
+d_L = d_L(z; \Omega_M, w0),
+\end{equation}
+the flux is something like
+\begin{equation}
+f = 10^{-\frac{\alpha x_1 + \beta c}{2.5}}\frac{L}{4\pi d_L^2} SALT2(t-t_0; x_1, c),
+\end{equation}
+and expected counts is
+\begin{equation}
+c_\star = 10^{Z/2.5}f.
+\end{equation}
+The distribution of counts for all transients is 
+\begin{equation}
+c | c_\star, \sigma_c \sim \mathcal{N}(c_\star, \sigma_c),
+\end{equation}
+where $\sigma_c$ is the measurement noise.
+
+\end{itemize}
+
+\subsection{$\epsilon(O, M, M_I)$: Sample Inclusion Efficiency}
 
 There are selection criteria $S_c$ and $S_T$ for the inclusion of an object in the
 sample and for a successul typing.
@@ -281,34 +344,10 @@ A description of the nodes follow.  Numbers are illustrative.
 
 
 \subsection{SNIa~Probability}
-Probability an object is SN~Ia
-\begin{align}
-p_{SNIa} &= \frac{r_{SNIa}}{r_{SNIa}+r_{SNII}} \nonumber \\
-p_{SNII}&=1-p_{SNIa}.
-\label{prob:eqn}
-\end{align}
-\subsection{Type}
-The type of the object $T$ is drawn from the Bernoulli distribution 
-\begin{equation}
-T | p_{SNIa} \sim \mathcal{B}(1-p_{SNIa}),
-\end{equation}
-with the convention that $T=0$ corresponds to SN~Ia.
-
-The type probability appears explicitly in the calculation of the likelihoods.
-\begin{align}
-P(T_{SNIa} | z=z_j, X) &= p_{SNIa}\\
-P(T_{SNII} | z=z_j, X) &= p_{SNII}
-\end{align}
 \subsection{Observed Type}
 The observed type is assumed to be perfect.
 \begin{equation}
 T_o = T.
-\end{equation}
-
-\subsection{Luminosity}
-For our model
-\begin{equation}
-\ln{L} | T, \ln{L}_{T},\sigma_{T} \sim \mathcal{N}\left( \ln{L}_{T},\frac{\ln{10}}{2.5}\sigma_{T}\right).
 \end{equation}
 
 The corresponding pdf appears in the likelihood.
@@ -336,23 +375,6 @@ redshift $z_i$ has probability $p_i$ of being
 the host.  
 
 \subsection{Counts}
-The luminosity distance comes from the physics-theory function
-\begin{equation}
-d_L = d_L(z; \Omega_M, w0),
-\end{equation}
-the flux is
-\begin{equation}
-f = \frac{L}{4\pi d_L^2},
-\end{equation}
-and expected counts is
-\begin{equation}
-c_\star = 10^{Z/2.5}f.
-\end{equation}
-The distribution of counts for all transients is 
-\begin{equation}
-c_o | c_\star, \sigma_c \sim \mathcal{N}(c_\star, \sigma_c),
-\end{equation}
-where $\sigma_c$ is the measurement noise.
 
 \subsection{Implementation Notes}
 Anticipating the use of available statistical packages, the likelihoods have been constructed
