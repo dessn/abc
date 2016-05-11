@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import numpy as np
 
 from dessn.models.b_mixed_types.edges import ToLightCurve, ToLuminosity, ToRate, ToRedshift, ToType
 from dessn.models.b_mixed_types.latent import Luminosity, Redshift, Type, Colour, PeakTime, Stretch
@@ -70,20 +71,20 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    temp_dir = os.path.abspath(dir_name + "/../../temp/toyModel")
-    plot_file = os.path.abspath(dir_name + "/../../plots/toyModelChain.png")
-    walk_file = os.path.abspath(dir_name + "/../../plots/toyModelWalks.png")
+    temp_dir = os.path.abspath(dir_name + "/output/data")
+    plot_file = os.path.abspath(dir_name + "/output/surface.png")
+    walk_file = os.path.abspath(dir_name + "/output/walk.png")
 
     vals = {"num_days": 30, "omega_m": 0.28, "H0": 72, "snIa_luminosity": -19.3, "snIa_sigma": 0.1,
             "snII_luminosity": -18, "snII_sigma": 0.2, "sn_rate": 0.5}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
     toy_model = ToyModel(observations)
-    '''
+
     if not only_data:
         np.random.seed(102)
-        pgm_file = os.path.abspath(dir_name + "/../../plots/toyModelPGM.png")
-        fig = toy_model.get_pgm(pgm_file)'''
+        pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+        fig = toy_model.get_pgm(pgm_file)
 
     toy_model.fit_model(num_steps=3029, num_burn=500, temp_dir=temp_dir, save_interval=60)
 

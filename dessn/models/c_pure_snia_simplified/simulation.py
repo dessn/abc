@@ -9,8 +9,9 @@ class Simulation(object):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3, snIa_sigma=0.1,
-                       num_transient=10, zmin=0.1, zmax=0.7, mean_num_obs=40, alpha=0.3, beta=4.0):
+    def get_simulation(self, omega_m=0.3, H0=70, snIa_luminosity=-19.3,
+                       snIa_sigma=0.1, num_transient=10, zmin=0.1, zmax=0.7,
+                       mean_num_obs=40, alpha=0.3, beta=4.0):
         np.random.seed(1)
 
         cosmology = FlatwCDM(Om0=omega_m, w0=-1, H0=H0)

@@ -67,7 +67,7 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surface.png")
     walk_file = os.path.abspath(dir_name + "/output/walk.png")
 
-    vals = {"num_transient": 40, "omega_m": 0.31, "H0": 65, "snIa_luminosity": -19.3,
+    vals = {"num_transient": 100, "omega_m": 0.31, "H0": 65, "snIa_luminosity": -19.3,
             "snIa_sigma": 0.01, "alpha": 0.3, "beta": 2.0}
     simulation = Simulation()
     observations, theta = simulation.get_simulation(**vals)
@@ -75,14 +75,14 @@ if __name__ == "__main__":
 
     if not only_data:
         np.random.seed(102)
-        pgm_file = os.path.abspath(dir_name + "/output/pure_snia.png")
+        pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=4368, num_burn=800, temp_dir=temp_dir, save_interval=60)
+    model.fit_model(num_steps=6000, num_burn=1000, temp_dir=temp_dir, save_interval=60)
 
     if not only_data:
         chain_consumer = model.get_consumer()
-        chain_consumer.configure_general(max_ticks=4, bins=0.7)
+        chain_consumer.configure_general(max_ticks=4, bins=0.4)
         chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta)
         chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta)
 
