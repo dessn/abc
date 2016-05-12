@@ -55,10 +55,12 @@ There are two sets of intermediary parameters $M_I$ that correspond to luminosit
 
 The likelihood for observations $O_o$ is expressed as
 \begin{align*}
-\mathcal{L}(O_o, sample| M, M_I) & = \frac{\epsilon(O_o, M, M_I) p(O_o|M, M_I)}{\int  \epsilon(O, M, M_I) p(O|M, M_I)dO},
+\mathcal{L}_S(O_o | M, M_I) & = \frac{\epsilon(O_o, M, M_I) p(O_o|M, M_I)}{\int  \epsilon(O, M, M_I) p(O|M, M_I)dO},
 \end{align*}
 where $p(O|M, M_I)$ is the pdf of all possible observables, and $\epsilon(O, M, M_I) $
-is the probability those observables will be included in the experimental analysis.
+is the probability those observables will be included in the experimental analysis.  The $S$ subscript represents a
+distribution over the analysis sample whereas the $p$'s with no subscript are for the underlying population.
+
 
 The dependencies of the parameters are charted through the PGM to give for transients with a type measurement
 \begin{align*}
@@ -82,8 +84,8 @@ where transient discovery, sample selection, and spectroscopic follow-up are bas
 
 The posterior is given by Bayes theorem
 \begin{align*}
-p(M, M_i | O_o) & \propto \mathcal{L}(O_o| M, M_I) p(M_I|M) p(M)\\
- & \propto \mathcal{L}(O_o| M, M_I) p(L| \tau, M) p(\tau|M) p(M).
+p(M, M_i | O_o) & \propto \mathcal{L}_S(O_o| M, M_I) p(M_I|M) p(M)\\
+ & \propto \mathcal{L}_S(O_o| M, M_I) p(L| \tau, M) p(\tau|M) p(M).
 \end{align*}
 
 \section{Probabilities}
