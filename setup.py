@@ -7,7 +7,7 @@ if "test" in sys.argv:
 else:
     version = "0.0.1"
 
-
+# Using framework from emcee. Credit to Daniel Foreman-Mackey
 class PyTest(test):
     user_options = [("pytest-args=", "a", "Arguments to pass to py.test")]
 
