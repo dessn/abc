@@ -14,7 +14,7 @@ pgm = PGM([9.5, 8.5], origin=[0., 0.2], observed_style='inner')
 #pgm.add_node(Node('theta_T',r"\center{$\alpha_{Ia}$, $\alpha_{!Ia}$ \newline $\beta_{Ia}$, $\beta_{!Ia}$}", 4,6,scale=1.4,aspect=1.8))
 pgm.add_node(Node('theta_T', r"\center{SNe~Ia, Non-Ia Populations \newline Rates}", 3, 8, scale=1.8, aspect=3))
 pgm.add_node(Node('Global Transmission', r"\centering{Global \newline Throughput}", 8, 8, scale=1.6, aspect=1.2))
-pgm.add_node(Node('Transmission', r"Throughput", 8, 4, scale=1.6, aspect=1.2))
+pgm.add_node(Node('Transmission', r"Throughput", 8, 4, scale=1.6, aspect=1.2,fixed=True))
 #pgm.add_node(Node('theta_T2',r"{Non-Ia}", 4,8,scale=1.6,aspect=1.2))
 pgm.add_node(Node('mu', r"{\center Cosmology}", 7, 8, scale=1.6, aspect=1.2))
 
