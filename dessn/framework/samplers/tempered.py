@@ -37,9 +37,7 @@ class ParallelTemperedSampler(GenericSampler):
         """
 
         self.logger = logging.getLogger(__name__)
-        if not self.can_use():
-            self.logger.warn("Cannot load the emcee package.")
-            import emcee
+        import emcee
         self.chain = None
         self.pool = None
         self.master = True
@@ -49,14 +47,6 @@ class ParallelTemperedSampler(GenericSampler):
         self.temp_dir = temp_dir
         self.save_interval = save_interval
         self.num_walkers = num_walkers
-
-    def can_use(self):  # pragma: no cover
-        try:
-            import emcee
-            return True
-        except ImportError as e:
-            self.logger.warn(str(e))
-            return False
 
     def fit(self, model):
         """ Runs the sampler over the model and returns the flat chain of results

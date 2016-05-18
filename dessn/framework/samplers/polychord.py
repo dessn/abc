@@ -23,23 +23,13 @@ class PolyChord(GenericSampler):  # pragma: no cover
         """
 
         self.logger = logging.getLogger(__name__)
-        if not self.can_use():
-            self.logger.warn("Cannot load the PyPolyChord package")
-            import PyPolyChord
+        import PyPolyChord
         self.chain = None
         self.pool = None
         self.master = True
         self.temp_dir = os.path.abspath(temp_dir)
         self.boost = boost
         self.num_repeats = num_repeats
-
-    def can_use(self):  # pragma: no cover
-        try:
-            import PyPolyChord
-            return True
-        except ImportError as e:
-            self.logger.warn(str(e))
-            return False
 
     def fit(self, model):
         """ Runs the sampler over the model and returns the flat chain of results
