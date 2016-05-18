@@ -1,11 +1,11 @@
 import logging
 import os
 import sys
-
 import numpy as np
 from dessn.framework.edge import Edge
 from dessn.framework.model import Model
 from dessn.framework.parameter import ParameterObserved, ParameterUnderlying, ParameterDiscrete
+from dessn.framework.samplers.ensemble import EnsembleSampler
 
 
 def get_data(n=400):
@@ -130,10 +130,10 @@ class DiscreteModel2(Model):
     Running this file in python first generates a PGM of the framework, and then runs ``emcee``
     and creates a corner plot:
 
-    .. figure::     ../plots/discretePGM2.png
+    .. figure::     ../dessn/examples/discrete_observed/output/pgm.png
         :align:     center
 
-    .. figure::     ../plots/discrete2.png
+    .. figure::     ../dessn/examples/discrete_observed/output/surfaces.png
         :align:     center
 
     """
@@ -159,17 +159,17 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    temp_dir = os.path.abspath(dir_name + "/../../../temp/discrete2")
-    plot_file = os.path.abspath(dir_name + "/../../../plots/discrete2.png")
+    temp_dir = os.path.abspath(dir_name + "/output/data")
+    plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
 
     if not only_data:
-        pgm_file = os.path.abspath(dir_name + "/../../../plots/discretePGM2.png")
-        # model.get_pgm(pgm_file)
+        pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+        model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    model.fit_model(num_steps=3000, num_burn=300, temp_dir=temp_dir, save_interval=20)
+    sampler = EnsembleSampler(num_steps=3000, num_burn=500, temp_dir=temp_dir, save_interval=20)
+    chain_consumer = model.fit(sampler)
 
     if not only_data:
-        chain_consumer = model.get_consumer()
         print(chain_consumer.get_summary())
-        chain_consumer.plot(filename=plot_file, display=False, truth=[0.6])
+        chain_consumer.plot(filename=plot_file, truth=[0.6])

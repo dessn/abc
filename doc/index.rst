@@ -12,13 +12,13 @@ Examples
 Learning from examples is my preferred method.
 
 For the primary motivation example, explaining how the models work and tie together, and why
-certain design choices have been chosen - primarily marginalisation over numerical integration,
-see the :py:mod:`dessn.examples.simple` package.
+certain design choices have been chosen, see the :py:mod:`dessn.examples.simple` package.
 
 
 
-For a different example, which shows how to use discrete parameters, see the
-:py:mod:`dessn.examples.discrete` package.
+There are two example models which use discrete parameters (as they can be used in two
+different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
+:py:mod:`dessn.examples.discrete_observed`.
 
 
 Core
