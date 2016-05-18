@@ -10,6 +10,8 @@ from dessn.models.a_pure_snia.latent import Redshift, Colour, PeakTime, Stretch,
 from dessn.models.a_pure_snia.observed import ObservedRedshift, ObservedLightCurves
 from dessn.models.a_pure_snia.underlying import OmegaM, Hubble, AbsoluteMagnitude, Scatter, \
     AlphaStretch, BetaColour
+from dessn.framework.samplers.ensemble import EnsembleSampler
+from dessn.framework.samplers.polychord import PolyChord
 
 from dessn.framework.model import Model
 from dessn.models.a_pure_snia.simulation import Simulation
@@ -55,6 +57,7 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     temp_dir = os.path.abspath(dir_name + "/output/data")
+    pdir = os.path.abspath(dir_name + "/output")
     plot_file = os.path.abspath(dir_name + "/output/surface.png")
     walk_file = os.path.abspath(dir_name + "/output/walk.png")
 
@@ -67,9 +70,11 @@ if __name__ == "__main__":
     if not only_data:
         np.random.seed(1)
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-        fig = model.get_pgm(pgm_file)
+        # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=2500, num_burn=200, temp_dir=temp_dir, save_interval=60)
+    sampler = EnsembleSampler(num_steps=2500, num_burn=200, temp_dir=temp_dir, save_interval=60)
+    poly_sampler = PolyChord(pdir)
+    model.fit(poly_sampler)
 
     if not only_data:
         chain_consumer = model.get_consumer()
