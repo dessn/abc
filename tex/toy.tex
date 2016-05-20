@@ -53,23 +53,34 @@ There are top-level  sets of parameters $M$ that correspond to photometric calib
 host-galaxy properties, and transient properties.
 There are two sets of intermediary parameters $M_I$ that correspond to luminosity $L$ and type $\tau$.
 
-The likelihood is related to the pdf of observables given the model for the population of transients that satisfy sample
-selection criteria that is different from the population of all transients: we thus label the likelihood with
-an $S$ subscript to emphasize that its population is distinct from the underlying population.
-The likelihood for observations $O_o$ is expressed as
+The model describes transients and their observables.  We are particularly interested in the pdf of those observables
+given the model.  The pdf is dependent on the sample and we consider two such samples: an underlying sample
+that represents the distribution of all possible transients and observables accommodated by the model; and
+an analysis sample that represents the distribution of transients and observables that end up being analyzed.
+The analysis sample differs from the underlying sample in that the transients of the former 
+must be discovered, pass photometric selection criteria, and for the SN~Ia sample be selected for spectroscopic
+observation, have a successful type from the spectrum, and be typed as SN~Ia.
+The pdf of the underlying sample is denoted as $p(O|M,M_I)$ whereas the pdf of the analysis sample, the likelihood,
+is denoted $\mathcal{L}_S(O | M, M_I)$. 
+The two are related by
 \begin{align}
-\mathcal{L}_S(O_o | M, M_I) & = \frac{\epsilon(O_o, M, M_I) p(O_o|M, M_I)}{\int  \epsilon(O, M, M_I) p(O|M, M_I)dO},
+% \mathcal{L}_S(O_o | M, M_I) & = \frac{\epsilon(O_o, M, M_I) p(O_o|M, M_I)}{\int  \epsilon(O, M, M_I) p(O|M, M_I)dO},
+\mathcal{L}(O_o | M, M_I) & = \frac{p_S(O_o|M, M_I)}{\int  p_S(O|M, M_I)dO},
 \label{likelihood:eqn}
 \end{align}
-where $p(O|M, M_I)$ is the pdf of the underlying sample, and $\epsilon(O, M, M_I) $
-is the probability those observables will be included in the analysis sample.
-As the observable uncertainties across different transients
-are expected to be independent the likelihood can be split into contributions
+where
+\begin{align}
+p_S(O|M, M_I) &= p(O, disc=True, anal=True, sobs=True, type=True, T=SNIa |M, M_I).
+\end{align}
+
+As the sample-inclusion probabilities and the uncertainties in $O_o$ are expected to be uncorrelated between different transients
+ the likelihood can be split into contributions
 from each,
 \begin{align*}
-\mathcal{L}_S(O_o | M, M_I) & = \frac{\prod_{\alpha \in transients} \epsilon(O_o^\alpha, M, M_I) p(O_o^\alpha|M, M_I)}{\int \prod_{\alpha \in transients}  \epsilon(O^\alpha, M, M_I) p(O^\alpha|M, M_I)dO^\alpha}.
+\mathcal{L}(O_o | M, M_I) & = \frac{\prod_{\alpha \in transients} p_S(O_o^\alpha|M, M_I)}{\prod_{\alpha \in transients} \int  p_S(O^\alpha|M, M_I)dO^\alpha}.
 \end{align*}
 Note that we work with counts:  correlated calibration uncertainties would prevent this splitting for fluxes.
+
 
 We now consider the terms in the likelihood contributed by each transient and omit the $\alpha$ superscript. 
 The dependencies of the parameters are charted through the PGM to give for transients with a  spectroscopic type measurement
@@ -82,22 +93,26 @@ p(O| M, M_I) & = p(z | M) p(c | L, M),
 \end{align*}
 where the photometric and spectroscopic observations have independent measurement uncertainties.
 
-The efficiency $\epsilon(O, M, M_I) $ depends on the properties of the experiment and the sample selection criteria:
-the transient is discovered, satisfies sample selection, is selected for spectroscopic typing, has successful typing, and is SN~Ia:
-\begin{align*}
-\epsilon(O, M, M_I)  & = P(SNIa, typed, spec, sample, discovered |O, M, L, \tau)\\
-& = P(SNIa|  typed, \tau)P(typed | spec, s, M, M_I)P(spec | discovered, c) P(sample, discovered| c).
-\end{align*}
-Transient discovery and sample selection are purely based on observed photometry $c$.
-The decision for spectroscopic follow-up is also based on observed photometry,  though perhaps external redshift estimates
-of the possible host galaxy may come into play.  The success of the typing measurement should primarily depend
-on the signal $s$, but may also depend on the type and host properties. 
+The probability density for an object to enter the analysis sample can be broken out
+\begin{align}
+p_S(O|M, M_I) &= p(O, disc=True, anal=True, sobs=True, type=True, T=SNIa |M, M_I)\\
+&= P(T, T=SNIa| s, c, disc=True, anal=True, sobs=True, type=True, M, M_I)\\
+& \times  p(s, type=True | c, disc=True, anal=True, sobs=True, M, M_I)\\
+& \times  p(c, disc=True, anal=True, sobs=True| M, M_I)\\
+&= P(T, T=SNIa| M, M_I)  p(s, type=True | M, M_I) \\
+& \times  p(c, disc=True, anal=True, sobs=True| M, M_I).
+\end{align}
+
+%Transient discovery and sample selection are purely based on observed photometry $c$.
+%The decision for spectroscopic follow-up is also based on observed photometry,  though perhaps external redshift estimates
+%of the possible host galaxy may come into play.  The success of the typing measurement should primarily depend
+%on the signal $s$, but may also depend on the type and host properties. 
 
 A frequentist analysis can proceed with this likelihood.
 Alternatively, the Bayesian posterior is specified by parameter priors as follows:
 \begin{align*}
-p(M, M_i | O_o) & \propto \mathcal{L}_S(O_o| M, M_I) p(M_I|M) p(M)\\
- & \propto \mathcal{L}_S(O_o| M, M_I) p(L| \tau, M) p(\tau|M) p(M).
+p(M, M_i | O_o) & \propto \mathcal{L}(O_o| M, M_I) p(M_I|M) p(M)\\
+ & \propto \mathcal{L}(O_o| M, M_I) p(L| \tau, M) p(\tau|M) p(M).
 \end{align*}
 Once all the $p$'s and $P$'s are specified we are ready to analyze!
 
@@ -171,8 +186,8 @@ z\sim \mathcal{U}(0,\infty).
 \item Type probabilities are relevant in the photometric analysis.
 The probability an object is SN~Ia is
 \begin{align}
-p_{SNIa} &= \frac{r_{SNIa}}{r_{SNIa}+r_{SNII}} \nonumber \\
-p_{SNII}&=1-p_{SNIa}.
+P_{SNIa} &= \frac{r_{SNIa}}{r_{SNIa}+r_{SNII}} \nonumber \\
+P_{SNII}&=1-P_{SNIa}.
 \label{prob:eqn}
 \end{align}
 
@@ -198,6 +213,7 @@ c_{SNIa} & \sim \text{SkewNormal}(c^\star_{SNIa},R^{c}_{SNIa} )
 \item The spectroscopic typing is assumed to be perfect
 \begin{equation}
 T | \tau \sim \delta (T-\tau).
+\label{typepdf:eqn}
 \end{equation}
 
 \item The spectroscopic redshift of a spectroscopically typed transient assumed to be perfect
@@ -235,28 +251,48 @@ where $C_c$ and $C_s$ are the measurement covariances for the photometric and sp
 
 \end{itemize}
 
-\subsection{$\epsilon(O, M, M_I)$: Sample Inclusion Efficiency}
-The probability that a transient becomes a part of the analysis sample is given by $\epsilon(O, M, M_I)$ and is dependent
-on the properties of the experiment and choices made by the experimenter.
+\subsection{$p_S(O|M, M_I)$: Sample Selection Probability}
+We have listed the probabilities for the underlying distribution.  We now describe the probabilities for making it into the analysis sample.
+There are three terms.
+
 \begin{itemize}
-\item The probability the transient is discovered and included in the sample is given by
-$P(sample, discovered |c)$.  To first order, the discovery probability within a single image depends on the transient signal-to-noise $\epsilon(STON)$.  For
-an image with noise $N$ the efficiency for discovery is $\epsilon(c/N)$, and the probability of discovery in at least one image
-\begin{equation}
-\epsilon_D(c) = 1-\prod_{\beta \in images} \left(1-\epsilon(c_\beta/N_\beta)\right).
- \end{equation}
- 
-As an illustrative example we write out the probability of a sample selection requiring two photometric points above
-a signal-to-noise threshold $STON_T$:
-\begin{align*}
-\epsilon_S(c) = &1 - \prod_{\beta \in images} (1-\mathcal{H}(c_\beta/N_\beta; STON_T))\mathcal{N}(c_\star-c_\beta, C_c)\\
-&  - \sum_{\alpha \in images}\mathcal{H}(c_\alpha/N_\alpha; STON_T) \mathcal{N}(c_\star-c_\alpha, C_c)\prod_{\beta \in \{images-\alpha\}} (1-\mathcal{H}(c_\beta/N_\beta; STON_T))\mathcal{N}(c_\star-c_\beta, C_c),
- \end{align*}
- where $\mathcal{H}$ is the Heaviside step function (other sample selection cases are similar but with different combinatorics).
-Then 
-$P(sample, discovered |c) = \epsilon_D(c) \epsilon_S(c)$.
+\item $P(T, T=SNIa| M, M_I)$: the probability a type measurement $T$ yields an SN~Ia type.  It depends
+on rate parameters as passed through in Eqn.~\ref{typepdf:eqn}.
+\item $p(s, type=True | M, M_I)$: the probability of a spectral measurement $s$ that yields a successful typing.
+\item $p(c, disc=True, anal=True, sobs=True| M, M_I)$
+\end{itemize}
+%\subsection{$\epsilon(O, M, M_I)$: Sample Inclusion Efficiency}
+%The probability that a transient becomes a part of the analysis sample is given by  \begin{equation}
+%P(typed, spec, sample, discovered | s, c, M, M_I) = \epsilon_T(s, M, M_I) \epsilon_O(c) \epsilon_S(c) \epsilon_D(c)
+%\end{equation}
+%and is dependent
+%on the properties of the experiment and choices made by the experimenter.
+%The probability of typing depends on the spectroscopic data whereas the probability of spectroscopic observation,
+%sample selection, and discovery depend on photometry.
+%
+%\begin{itemize}
+%\item The probability the transient is discovered 
+%in a single image depends on the transient signal-to-noise $\epsilon(STON)$.  For
+%an image with noise $N$ the efficiency for discovery is $\epsilon(c/N)$, and the probability of discovery in at least one image
+%\begin{equation}
+%\epsilon_D(c) = 1-\prod_{\beta \in images} \left(1-\epsilon(c_\beta/N_\beta)\right).
+% \end{equation}
+%\item
+%As an illustrative example we write out the probability of a sample selection requiring two photometric points above
+%a signal-to-noise threshold $STON_T$:
+%\begin{align*}
+%\epsilon_S(c) = &1 - \prod_{\beta \in images} (1-\mathcal{H}(c_\beta/N_\beta; STON_T))\mathcal{N}(c_\star-c_\beta, C_c)\\
+%&  - \sum_{\alpha \in images}\mathcal{H}(c_\alpha/N_\alpha; STON_T) \mathcal{N}(c_\star-c_\alpha, C_c)\prod_{\beta \in \{images-\alpha\}} (1-\mathcal{H}(c_\beta/N_\beta; STON_T))\mathcal{N}(c_\star-c_\beta, C_c),
+% \end{align*}
+% where $\mathcal{H}$ is the Heaviside step function (other sample selection cases are similar but with different combinatorics).
+%\item The probability of obtaining a spectroscopic observation of a transient is given as $\epsilon_O(c)$.  Each follow-up telescope
+%has its own criteria: OzDES is magnitude limited, VLT prefers transients on faint hosts, others may try to get a random sample uniform in
+%redshift.  Mat Smith and Chris D'Andrea should be able to provide this term.
+%\item The probability that the spectroscopic observation yields a type is $\epsilon_T( s, M, M_I)$.  This is a function we have to
+%figure out!
+%\end{itemize}
 
-
+\subsection{$\int  p_S(O|M, M_I)dO$: Normalizing the Likelihood}
 We could write
 \begin{align*}
 P(sample, discovered |c) & =P(sample| discovered, c)P(discovered |c)\\
@@ -265,43 +301,36 @@ P(sample, discovered |c) & =P(sample| discovered, c)P(discovered |c)\\
 if the sample selection criteria are selected such that $P(discovered | sample, c)=1$.
 This would have significant
 computational benefits in the evaluation of the denominator of Eqn.~\ref{likelihood:eqn}.
-\item The probability of obtaining a spectroscopic observation of a transient is given as $P(spec | discovered, c)$.  Each follow-up telescope
-has its own criteria: OzDES is magnitude limited, VLT prefers transients on faint hosts, others may try to get a random sample uniform in
-redshift.  Mat Smith and Chris D'Andrea should be able to provide this term.
-\item The probability that the spectroscopic observation yields a type is $P(typed | spec, s, M, M_I)$.  This is a function we have to
-figure out!
-\item This term appears for the typed SN~Ia sample, where it is trivial $P(SNIa|  typed, \tau)=1$.
-\end{itemize}
 
-%\section{Implementation Notes}
-%Anticipating the use of available statistical packages, the likelihoods have been constructed
-%from standard distribution functions.  The truncated distributions from sample selection
-%are accounted by the normalization 
-%terms $P(S_c, S_T| z=z_o, X)$, $P(S_c| z=z_o, X)$.  Although they do not appear
-%in the PGM, they are treated as nodes who contribute 
-%$-\ln{P(S_c, S_T| z=z_o, X)}$ to the log-likelihood, where the negative sign reflects that this is a normalization
-%factor.
-%
-%
-%The following integral appears in the normalization
-%\begin{equation}
-%\int dL\, p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right].
-%\end{equation}
-%We actually work with $\ln{L_X}$ and $\sigma_X$.  Setting
-%\begin{equation}
-%n=\frac{\ln{L}-\ln{L_X}}{\sigma_X}
-%\end{equation}
-%the integral becomes
-% \begin{equation}
-%\sigma_X \int dn\, p(n\sigma_X + \ln{L_X} |T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o\,  p(c_o | T=T_i, L_Xe^{n\sigma_X}, z=z_o, X)\right].
-%\end{equation}
-%The two probability distributions are normal so that this reduces to
-% \begin{equation}
-%\frac{1}{2\sqrt{2\pi}} \int dn\, e^{-0.5n^2} \left(1-erf\left(\frac{(c_T - c_\star)}{\sqrt{2}\sigma_c}\right)\right),
-%\end{equation}
-%where
-%\begin{equation}
-%c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
-%\end{equation}
+\section{Implementation Notes}
+Anticipating the use of available statistical packages, the likelihoods have been constructed
+from standard distribution functions.  The truncated distributions from sample selection
+are accounted by the normalization 
+terms $P(S_c, S_T| z=z_o, X)$, $P(S_c| z=z_o, X)$.  Although they do not appear
+in the PGM, they are treated as nodes who contribute 
+$-\ln{P(S_c, S_T| z=z_o, X)}$ to the log-likelihood, where the negative sign reflects that this is a normalization
+factor.
+
+
+The following integral appears in the normalization
+\begin{equation}
+\int dL\, p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right].
+\end{equation}
+We actually work with $\ln{L_X}$ and $\sigma_X$.  Setting
+\begin{equation}
+n=\frac{\ln{L}-\ln{L_X}}{\sigma_X}
+\end{equation}
+the integral becomes
+ \begin{equation}
+\sigma_X \int dn\, p(n\sigma_X + \ln{L_X} |T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o\,  p(c_o | T=T_i, L_Xe^{n\sigma_X}, z=z_o, X)\right].
+\end{equation}
+The two probability distributions are normal so that this reduces to
+ \begin{equation}
+\frac{1}{2\sqrt{2\pi}} \int dn\, e^{-0.5n^2} \left(1-erf\left(\frac{(c_T - c_\star)}{\sqrt{2}\sigma_c}\right)\right),
+\end{equation}
+where
+\begin{equation}
+c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
+\end{equation}
 
 \end{document}
