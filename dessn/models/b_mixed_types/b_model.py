@@ -8,7 +8,8 @@ from dessn.models.b_mixed_types.latent import Luminosity, Redshift, Type, Colour
 from dessn.models.b_mixed_types.observed import ObservedRedshift, ObservedType, ObservedLightCurves
 from dessn.models.b_mixed_types.underlying import SupernovaRate, OmegaM, Hubble, SupernovaIaDist1, \
     SupernovaIaDist2, SupernovaIIDist1, SupernovaIIDist2
-
+from dessn.framework.samplers.ensemble import EnsembleSampler
+from dessn.framework.samplers.polychord import PolyChord
 from dessn.framework.model import Model
 from dessn.models.b_mixed_types.simulation import Simulation
 
@@ -86,7 +87,8 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         fig = toy_model.get_pgm(pgm_file)
 
-    toy_model.fit_model(num_steps=3029, num_burn=500, temp_dir=temp_dir, save_interval=60)
+    sampler = EnsembleSampler(num_steps=2500, num_burn=500, temp_dir=temp_dir, save_interval=60)
+    toy_model.fit(sampler)
 
     if not only_data:
         chain_consumer = toy_model.get_consumer()

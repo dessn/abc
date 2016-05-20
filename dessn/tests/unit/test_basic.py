@@ -81,3 +81,13 @@ class TestClass(object):
 
     def test_num_parameters(self):
         assert len(self.model._theta_names) == 1
+
+    def test_hypercube(self):
+        theta = [0.0]
+        scaled = self.model.get_hypercube_convert(theta)
+        c = CoinFlipRate()
+        assert len(scaled) == 1
+        assert scaled[0] == c.get_suggestion({}) - c.get_suggestion_sigma({})
+        assert self.model.get_hypercube_convert([1.0])[0] == c.get_suggestion({}) + \
+                                                          c.get_suggestion_sigma({})
+        assert self.model.get_hypercube_convert([0.5])[0] == c.get_suggestion({})

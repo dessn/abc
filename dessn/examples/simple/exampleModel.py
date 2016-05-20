@@ -4,23 +4,35 @@ import sys
 
 import numpy as np
 
-from dessn.examples.simple.example import Example
 from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.model import Model
-from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, ParameterTransformation
+from dessn.framework.parameter import ParameterObserved, ParameterLatent, \
+    ParameterUnderlying, ParameterTransformation
+from dessn.framework.samplers.ensemble import EnsembleSampler
+from scipy import stats
+
+
+def get_data(n=50, theta_1=100.0, theta_2=20.0, scale=1.0, seed=1):
+    np.random.seed(seed)
+
+    data = stats.norm.rvs(size=n, loc=theta_1, scale=theta_2) * scale
+    error = 0.2 * np.sqrt(data)
+    data += stats.norm.rvs(size=n) * error
+
+    return data, error
 
 
 class ObservedFlux(ParameterObserved):
     def __init__(self, n=100):
         self.n = n
-        flux, error = Example.get_data(n=n, scale=0.5)
+        flux, error = get_data(n=n, scale=0.5)
         super(ObservedFlux, self).__init__("flux", "$f$", flux, group="Flux")
 
 
 class ObservedFluxError(ParameterObserved):
     def __init__(self, n=100):
         self.n = n
-        flux, error = Example.get_data(n=n, scale=0.5)
+        flux, error = get_data(n=n, scale=0.5)
         super(ObservedFluxError, self).__init__("flux_error", r"$\sigma_f$", error, group="Flux")
 
 
@@ -125,30 +137,31 @@ class LuminosityToSupernovaDistribution(Edge):
 
 
 class ExampleModel(Model):
-    r"""An implementation of :class:`.ExampleLatent` using classes instead of procedural code.
+    r"""An implementation example of a trivialised supernova model.
 
-    The framework is set up by declaring nodes, the edges between nodes, and then calling ``finalise`` on the framework
-    to verify its correctness.
+    The framework is set up by declaring nodes, the edges between nodes, and then calling
+    ``finalise`` on the framework to verify its correctness.
 
-    This is the primary class in this package, and you can see that other classes inherit from either
-    :class:`.Parameter` or from :class:`.Edge`.
+    This is the primary class in this package, and you can see that other classes
+    inherit from either :class:`.Parameter` or from :class:`.Edge`.
 
-    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes, and encourage viewing the
-    code directly to understand exactly what is happening.
+    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those
+    classes, and encourage viewing the code directly to understand exactly what is happening.
 
-    Running this file in python first generates a PGM of the framework, and then runs ``emcee`` and creates a corner plot:
+    Running this file in python first generates a PGM of the framework, and then runs
+    ``emcee`` and creates a corner plot:
 
-    .. figure::     ../plots/exampleModel.png
+    .. figure::     ../dessn/examples/simple/output/pgm.png
         :align:     center
 
-    .. figure::     ../plots/examplePGM.png
+    .. figure::     ../dessn/examples/simple/output/surfaces.png
         :align:     center
 
-    .. figure::     ../plots/exampleModelWalk.png
+    .. figure::     ../dessn/examples/simple/output/walks.png
         :align:     center
 
-    We could also run the example framework using the PT sampler by specifying a number of temperature to the ``fit_model``
-    method. You would get similar results.
+    We could also run the example framework using the PT sampler by specifying a
+    number of temperature to the ``fit`` method. You would get similar results.
     """
 
     def __init__(self):
@@ -185,20 +198,20 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     logging.info("Creating framework")
     exampleModel = ExampleModel()
-    temp_dir = os.path.abspath(dir_name + "/../../../../temp/exampleModel")
+    temp_dir = os.path.abspath(dir_name + "/output/data")
 
     if not only_data:
-        plot_file = os.path.abspath(dir_name + "/../../../../plots/exampleModel.png")
-        plot_file2 = os.path.abspath(dir_name + "/../../../../plots/exampleModelWalk.png")
-        pgm_file = os.path.abspath(dir_name + "/../../../../plots/examplePGM.png")
-        # exampleModel.get_pgm(pgm_file)
+        plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
+        plot_file2 = os.path.abspath(dir_name + "/output/walk.png")
+        pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+        exampleModel.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    exampleModel.fit_model(num_steps=15000, num_burn=5000, temp_dir=temp_dir, save_interval=20)
+    sampler = EnsembleSampler(num_steps=15000, num_burn=5000, temp_dir=temp_dir, save_interval=20)
+    chain_consumer = exampleModel.fit(sampler)
 
     if not only_data:
-        chain_consumer = exampleModel.get_consumer()
         chain_consumer.configure_general(bins=0.8)
         print(chain_consumer.get_summary())
         chain_consumer.plot_walks(filename=plot_file2)
-        chain_consumer.plot(filename=plot_file, display=False, figsize="PAGE", truth=[100, 20])
+        chain_consumer.plot(filename=plot_file, figsize=(6, 6), truth=[100, 20])

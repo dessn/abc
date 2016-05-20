@@ -10,7 +10,6 @@ import sys
 from scipy.optimize import fmin_bfgs
 import types
 import copyreg
-import itertools
 import scipy.optimize
 from scipy.misc import logsumexp
 
@@ -59,6 +58,8 @@ class Model(object):
         self.master = True
         self._node_groups = {}
         self.n = None
+        self.hypercube_factor = None
+        self.hypercube_min = None
         self.epsilon = np.sqrt(np.finfo(float).eps)
 
     def add_node(self, node):
@@ -132,7 +133,6 @@ class Model(object):
             else:
                 assert self.n == len(self.data[key]), \
                     "Data sizes must agree. Have %d vs %d" % (self.n, len(self.data[key]))
-
         for node in self._underlying_nodes:
             self._theta_names.append(node.name)
             self._theta_labels.append(node.label)
@@ -162,6 +162,11 @@ class Model(object):
             count += 1
             assert count < max_count, \
                 "Model edges cannot be ordered. Please double check your edges"
+
+        sigmas = np.array(self._get_suggestion_sigma())
+        means = np.array(self._get_suggestion())
+        self.hypercube_factor = 2 * sigmas
+        self.hypercube_min = means - sigmas
 
     def finalise(self):
         """ Finalises the framework.
@@ -216,6 +221,12 @@ class Model(object):
         if np.isfinite(probability):
             probability += self._get_log_likelihood(theta_dict, data)
         return probability
+
+    def get_log_posterior_polychord(self, theta):
+        return self.get_log_posterior(theta), []
+
+    def get_hypercube_convert(self, theta):
+        return (theta * self.hypercube_factor + self.hypercube_min).tolist()
 
     def _get_dependencies(self, edges, dependency_name):
         dep_edge = []
@@ -494,84 +505,13 @@ class Model(object):
 
         return pgm
 
-    def fit_model(self, num_walkers=None, num_steps=5000, num_burn=3000, temp_dir=None,
-                  save_interval=300):
-        """ Uses ``emcee`` to fit the supplied framework.
-
-        This method sets an emcee run using the ``EnsembleSampler`` and manual
-        chain management to allow for very high dimension models. MPI running
-        is detected automatically for less hassle, and chain progress is serialised
-        to disk automatically for convenience.
-
-        This method works... but is still a work in progress
-
-        Parameters
-        ----------
-        num_walkers : int, optional
-            The number of walkers to run. If not supplied, it defaults to eight times the
-            framework dimensionality
-        num_steps : int, optional
-            The number of steps to run
-        num_burn : int, optional
-            The number of steps to discard for burn in
-        temp_dir : str
-            If set, specifies a directory in which to save temporary results, like the emcee chain
-        save_interval : float
-            The amount of seconds between saving the chain to file. Setting to ``None``
-            disables serialisation.
-
-        Returns
-        -------
-        ndarray
-            The final flattened chain of dimensions `
-            `(num_dimensions, num_walkers * (num_steps - num_burn))``
-        fig
-            The corner plot figure returned from ``corner.corner(...)``
-        """
+    def fit(self, sampler):
+        """ Fits the model using the provided sampler and returns a :class:`.ChainConsumer`
+         """
         if not self._finalised:
             self.finalise()
-        pool = None
-        try:  # pragma: no cover
-            pool = MPIPool()
-            if not pool.is_master():
-                self.logger.info("Slave waiting")
-                self.master = False
-                pool.wait()
-                sys.exit(0)
-            else:
-                self.logger.info("MPIPool successful initialised and master found. "
-                                 "Running with %d cores." % pool.size)
-        except ImportError:
-            self.logger.info("mpi4py is not installed or not configured properly. "
-                             "Ignore if running through python, not mpirun")
-        except ValueError as e:  # pragma: no cover
-            self.logger.info("Unable to start MPI pool, expected normal python execution")
-            self.logger.info(str(e))
-
-        num_dim = len(self._theta_names)
-
-        self.logger.debug("Fitting framework with %d dimensions"
-                          % num_dim)
-        if num_walkers is None:
-            num_walkers = num_dim * 2
-        num_walkers = max(num_walkers, 20)
-        self.logger.info("Using Ensemble Sampler")
-        sampler = emcee.EnsembleSampler(num_walkers, num_dim, self.get_log_posterior,
-                                        pool=pool, live_dangerously=True)
-        emcee_wrapper = EmceeWrapper(sampler)
-        flat_chain = emcee_wrapper.run_chain(num_steps, num_burn, num_walkers, num_dim,
-                                             start=self._get_starting_position,
-                                             save_dim=self._num_actual,
-                                             temp_dir=temp_dir,
-                                             save_interval=save_interval)
-        self.logger.debug("Fit finished")
-        if pool is not None:  # pragma: no cover
-            pool.close()
-            self.logger.debug("Pool closed")
-        self.flat_chain = flat_chain
-        return flat_chain, \
-               self._theta_names[:self._num_actual], \
-               self._theta_labels[:self._num_actual]
+        self.flat_chain = sampler.fit(self)
+        return self.get_consumer()
 
     def get_consumer(self):
         from dessn.chain.chain import ChainConsumer

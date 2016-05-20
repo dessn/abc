@@ -31,6 +31,7 @@ install:
     - conda create --yes -n test python=$PYTHON_VERSION numpy scipy pytest setuptools pip cython
     - source activate test
     - pip install -r requirements.txt
+    - ulimit -s unlimited
 
 script:
     - python setup.py test -a "--cov dessn -v"

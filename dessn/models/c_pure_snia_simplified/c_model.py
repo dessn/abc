@@ -11,7 +11,8 @@ from dessn.models.c_pure_snia_simplified.observed import ObservedRedshift, Obser
     ObservedCovariance, ObservedMB, ObservedX1, ObservedInvCovariance
 from dessn.models.c_pure_snia_simplified.underlying import OmegaM, Hubble, \
     IntrinsicScatter, Magnitude, AlphaStretch, BetaColour
-
+from dessn.framework.samplers.ensemble import EnsembleSampler
+from dessn.framework.samplers.polychord import PolyChord
 from dessn.framework.model import Model
 from dessn.models.c_pure_snia_simplified.simulation import Simulation
 
@@ -78,7 +79,8 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         # fig = model.get_pgm(pgm_file)
 
-    model.fit_model(num_steps=6000, num_burn=1000, temp_dir=temp_dir, save_interval=60)
+    sampler = EnsembleSampler(num_steps=6000, num_burn=1000, temp_dir=temp_dir, save_interval=60)
+    model.fit(sampler)
 
     if not only_data:
         chain_consumer = model.get_consumer()
