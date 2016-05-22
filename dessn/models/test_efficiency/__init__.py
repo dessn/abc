@@ -12,8 +12,8 @@ as :math:`d`.
 Given our observed data point value, we give it some observational error (corresponding
 to a Poisson process), such that the error on :math:`d` is given by :math:`e \equiv \sqrt{d}`.
 
-Now, we bias our sample, by discarding all points which have a signal to noise (:math:`d/s`)
-less than some threshold :math:`\alpha`.
+Now, we bias our sample, by discarding all points which have a signal to noise
+(:math:`d/\sqrt{d}=\sqrt{d}`) less than some threshold :math:`\alpha`.
 
 We model the likelihood as
 
@@ -24,18 +24,18 @@ where :math:`R` is used to denote a potential realisation of the data, given the
 model :math:`\theta` (which includes the latent points, and underlying distribution mean
 and sigma).
 
-So, given a data point :\math:`d` with observational error :math:`\sigma`, and latent
+So, given a data point :\math:`R` with observational error :math:`\sqrt{R}`, and latent
 parameter :math:`p`, we have that
 
 .. math::
     \int dR \epsilon(R|\theta) P(R|\theta) = \int_{\alpha \sigma}^{\infty}
-    \frac{1}{\sqrt{2\pi}\sigma} \exp\left[ -\frac{(s-p)^2}{2\sigma^2} \right]
+    \frac{1}{\sqrt{2\pi R}} \exp\left[ -\frac{(R-p)^2}{2 R^2} \right]
 
 Evaluating this gives the answer
 
 .. math::
     \int dR \epsilon(R|\theta) P(R|\theta) = \frac{1}{2} {\rm erfc}
-    \left[ \frac{\alpha \sigma - p}{\sqrt{2} \sigma} \right]
+    \left[ \frac{\alpha \sqrt{R} - p}{\sqrt{2 R} } \right]
 
 
 We can not implement this correction, and then implement it, and hopefully see that the
