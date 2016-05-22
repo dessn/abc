@@ -41,7 +41,8 @@ The conceptual structure of the model is shown in Figure~\ref{pgm:fig}.
 
 There are top-level  sets of parameters $M$ that correspond to photometric calibration, cosmology,
 host-galaxy properties, and transient properties.
-There are two sets of intermediary parameters $M_I$ that correspond to luminosity $L$ and type $\tau$.
+There are two sets of intermediary parameters  $M_I=\{L, \tau\}$. that correspond to luminosity and type respectively.
+
 
 The model has the following types of observables $O$ that
 may be observed for each transient:
@@ -56,59 +57,62 @@ The actual measurements of the observables are labeled  with a subscript ``o''.
 
 We are interested in what the model predicts for the pdf of those observables
 for the population of transients that enter the analysis.  
-The probabilities for this ``analysis'' population are notated with the
-subscript $S$, for example the likelihood is expressed as $\mathcal{L}_S(O| M, M_I)$.
-
 The likelihood can be expressed in terms of probabilities of the observables
 for all possible transients and observables accommodated by the model.
-The probabilities for this ``underlying'' population are notated with no subscript,
-so that the pdf of observables for this population is $p(O|M, M_I$).
 The analysis population differs from the underlying population in that the transients of the former 
 must, for the typed SN~Ia analysis, be discovered, pass photometric selection criteria, be selected for spectroscopic
 observation, have a successful type from the spectrum, and be typed as SN~Ia.
-
-The likelihood is proportional to the pdf of the underlying sample that
-enter the analysis sample, as expressed by
-\begin{align}
+The likelihood of the observations $O_o$ is
+\begin{align*}
 % \mathcal{L}_S(O_o | M, M_I) & = \frac{\epsilon(O_o, M, M_I) p(O_o|M, M_I)}{\int  \epsilon(O, M, M_I) p(O|M, M_I)dO},
-\mathcal{L}_S(O | M, M_I) & \propto p(O, \text{in analysis}|M, M_I)\\
-&  \propto \prod_{\alpha \in transients} p(O^\alpha, \text{in analysis}|M, M_I),
-\end{align}
-where the second line holds because the observations and stochastic decisions
+\mathcal{L}_S(O_o | M, M_I) & = p(O_o |\text{in analysis}, M, M_I)\\
+& = \frac{ p(O_o, \text{in analysis}|M, M_I)}{p(\text{in analysis}|M, M_I)}\\
+&  = \frac{\prod_{\alpha \in transients} p(O_o^\alpha, \text{in analysis}|M, M_I)}{p(\text{in analysis}|M, M_I)},
+\end{align*}
+where the last line holds because the observations and stochastic decisions
 for sample selection are expected to be independent from transient to transient.
+
 
 For a single supernova labeled by $\alpha$,   the probability of the analysis population is related
 to the underlying population by
-\begin{align*}
-p_S(O^\alpha|M, M_I) &\equiv p(O^\alpha, \text{in analysis}|M, M_I)\\
-& = P(disc=True, anal=True, sobs=True, type=True, T^\alpha=SNIa|O^\alpha, M, M_I)p(O^\alpha|M, M_I)\\
-& = P(disc=True, anal=True, sobs=True, type=True|T^\alpha=SNIa, O^\alpha, M, M_I)\\
-& \times P(T^\alpha=SNIa| O^\alpha, M, M_I)p(O^\alpha|M, M_I)\\
+\begin{align}
+p_S(O^\alpha|M, M_I) &\equiv p(O^\alpha, \text{in analysis}|M, M_I) \nonumber \\
+& = P(disc=True, anal=True, sobs=True, type=True, T^\alpha=SNIa|O^\alpha, M, M_I)p(O^\alpha|M, M_I) \nonumber \\
+& = P(disc=True, anal=True, sobs=True, type=True|T^\alpha=SNIa, O^\alpha, M, M_I) \nonumber \\
+& \times P(T^\alpha=SNIa| O^\alpha, M, M_I)p(O^\alpha|M, M_I) \nonumber \\
 &= P(disc=True|T^\alpha=SNIa,c^\alpha, M, M_I)
-P(anal=True|T^\alpha=SNIa,c^\alpha, M, M_I) \\
+P(anal=True|T^\alpha=SNIa,c^\alpha, M, M_I)  \nonumber \\
 &  \times P(sobs=True|T^\alpha=SNIa,c^\alpha, M, M_I)
- P(type=True|T^\alpha=SNIa, s^\alpha, M, M_I)\\
+ P(type=True|T^\alpha=SNIa, s^\alpha, M, M_I) \nonumber \\
 &  \times
 P(T^\alpha=SNIa| M, M_I)p(c^\alpha|M, M_I)p(s^\alpha|M, M_I)p(z^\alpha|M, M_I).
-\end{align*}
-where we anticipate that the stochastic processes that enter each sample-selection step
-are independent of each other, and that the measurement uncertainties are independent.
-We find that $p_S$ is the pdf of the underlying
+\label{p_S:eqn}
+\end{align}
+where we anticipate that the stochastic processes that operate on each sample-selection decision
+are independent of each other, and that the measurement uncertainties of type, counts,
+spectrum, and redshift are independent.
+$p_S$ is equal to the pdf of the underlying
 distribution $p(O^\alpha|M, M_I)$ multiplied by the efficiency of a realized target to
 enter the analysis sample.
 
-The likelihood can be expressed as
+The likelihood is then  re-expressed as
 \begin{align}
-\mathcal{L}_S(O_o | M, M_I) & = \frac{\prod_{\alpha \in transients}p_S(O_o^\alpha|M, M_I)}{\int  \prod_{\alpha \in transients} p_S(O^\alpha |M, M_I)dO}.
+\mathcal{L}_S(O_o | M, M_I) & = \frac{\prod_{\alpha \in transients}p_S(O_o^\alpha|M, M_I)}{\int  \prod_{\alpha \in transients} p_S(O^\alpha |M, M_I)dO},
 \label{likelihood:eqn}
 \end{align}
+where  the denominator $p(\text{in analysis}|M, M_I)$ is set
+by the condition that the integral over the likelihood over all possible
+observations must equal to one.
 A frequentist analysis can proceed with this likelihood.
 Alternatively, the Bayesian posterior is specified by parameter priors as 
-\begin{align*}
-p(M, M_i | O_o) & \propto \mathcal{L}_S(O_o| M, M_I) p(M_I|M) p(M)\\
+\begin{align}
+p(M, M_i | O_o) & \propto \mathcal{L}_S(O_o| M, M_I) p(M_I|M) p(M) \nonumber \\
  & \propto \mathcal{L}_S(O_o| M, L, \tau) p(L| \tau, M) p(\tau|M) p(M).
-\end{align*}
-Once all the $p$'s and $P$'s are specified we are ready to analyze!
+\label{posterior:eqn}
+\end{align}
+Once all the $p$'s and $P$'s introduced in
+Eqns.~\ref{p_S:eqn}, \ref{likelihood:eqn}, and \ref{posterior:eqn}
+are specified we are ready to analyze!
 
 
 %We now consider the terms in the likelihood contributed by each transient and omit the $\alpha$ superscript. 
@@ -197,10 +201,10 @@ z\sim \mathcal{U}(0,\infty).
 
 \subsection{$p(M_I|M)$: Probabilities of the Intermediary Parameters.}
 \begin{itemize}
-\item Type probabilities are relevant in the photometric analysis.
+\item $p(\tau| M, M_I) $: Type probabilities are relevant in the photometric analysis.
 The probability an object is SN~Ia is
 \begin{align}
-P_{SNIa} &= \frac{r_{SNIa}}{r_{SNIa}+r_{SNII}} \nonumber \\
+P_{SNIa} &= \frac{r_{SNIa}}{r_{SNIa}+r_{SNII}}  \\
 P_{SNII}&=1-P_{SNIa}.
 \label{prob:eqn}
 \end{align}
@@ -211,25 +215,27 @@ The type of the object $\tau$ is drawn from the Bernoulli distribution
 \end{equation}
 with the convention that $T=0$ corresponds to SN~Ia.
 
-There are parameters that specify the sub-type.
+\item $P(L| \tau, M, M_I) $: 
+For the SALT2 model several parameters
+must be specified to define the subtype,
+including the parameter $x_{0, SNIa}$ that corresponds to $L$.
 \begin{align}
 t_0 & \sim \mathcal{U}\\
 x_{0, SNIa} & \sim \mathcal{N}(0,R^{x_0}_{SNX})\\
 x_{1,SNIa} & \sim \mathcal{N}(x_{1,SNIa}^\star,R^{x_1}_{SNIa})\\
 c_{SNIa} & \sim \text{SkewNormal}(c^\star_{SNIa},R^{c}_{SNIa} )
 \end{align}
-
 \end{itemize}
 
 \subsection{$p(O| M, M_I)$: Probability of All Possible Observables}
 \begin{itemize}
-\item The spectroscopic typing is assumed to be perfect
+\item $P(T=SNIa| M, M_I) $: The spectroscopic typing is assumed to be perfect
 \begin{equation}
 T | \tau \sim \delta (T-\tau).
 \label{typepdf:eqn}
 \end{equation}
 
-\item The spectroscopic redshift of a spectroscopically typed transient assumed to be perfect
+\item $P(z| M, M_I) $: The spectroscopic redshift of a spectroscopically typed transient assumed to be perfect
 \begin{equation}
 z | z_{host} ~ \delta (z-z_{host}).
 \end{equation}
@@ -243,7 +249,8 @@ where galaxy $i$ at
 redshift $z_i$ has probability $p_i$ of being
 the host.  
 
-\item  The luminosity distance comes from the physics-theory function
+\item  $P(c| M, M_I)$, $P(s| M, M_I)$:
+The luminosity distance comes from the physics-theory function
 \begin{equation}
 d_L = d_L(z; \Omega_M, w0),
 \end{equation}
@@ -256,10 +263,10 @@ and expected counts is
 c_\star = 10^{Z/2.5}f.
 \end{equation}
 The distributions of counts are 
-\begin{align*}
+\begin{align}
 c | c_\star &\sim \mathcal{N}(c_\star, C_c)\\
 s | c_\star &\sim \mathcal{N}(c_\star, \sigma_s),
-\end{align*}
+\end{align}
 where $C_c$ and $C_s$ are the measurement covariances for the photometric and spectroscopic observations respectively.
 
 \end{itemize}
@@ -269,8 +276,6 @@ We have listed the terms that contribute to the probability that a target enters
 the analysis sample.
 
 \begin{itemize}
-\item $P(T=SNIa| M, M_I) = \delta_{\tau, SNIa}$: The transient is
-measured to be SN~Ia if it is SN~Ia.
 \item $ P(type=True|T=SNIa, s, M, M_I)$: 
 The probability of successful spectroscopic typing needs to be determined.
 A simple possibility is that  it only depends on the signal-to-noise of the spectroscopic observation
@@ -284,29 +289,30 @@ The probability for discovery of a transient in a single image depends on the
 signal-to-noise $\epsilon_D(ston)$.  The probability of discovery given all
 the images is
 \begin{equation}
-P(disc=True | T=SNIa,c,  M, M_I)
+P(disc=True | T=SNIa,c,  M, M_Ii)
 =  1-\prod_{\beta \in images} \left(1-\epsilon_D(c_\beta/N_\beta)\right).
 \end{equation}
 
 \item $P(anal=True|T=SNIa,c, M, M_I)$:
 As an illustrative example we write out the probability of a analysis-sample selection requiring two photometric points above
 a signal-to-noise threshold $STON_T$: other sample selection cases are similar but with different combinatorics
-\begin{align*}
-P(anal=True  | T=SNIa, c,  M, M_I)= &1 - \prod_{\beta \in images} (1-\mathcal{H}(c_\beta/N_\beta; STON_T))\\
+\begin{align}
+P(anal=True  | T=SNIa, c,  M, M_I)= &1 - \prod_{\beta \in images} (1-\mathcal{H}(c_\beta/N_\beta; STON_T)) \nonumber \\
 &  - \sum_{\alpha \in images}\mathcal{H}(c_\alpha/N_\alpha; STON_T) \prod_{\beta \in \{images-\alpha\}} (1-\mathcal{H}(c_\beta/N_\beta; STON_T)),
- \end{align*}
+ \end{align}
  where $\mathcal{H}$ is the Heaviside step function.
 
 \item $P(sobs=True|T=SNIa,c, M, M_I)$:
 The probability a transient has a spectroscopic observation.
 Mat Smith and Chris D'Andrea should be able to provide this term.
 Until we get this, lets make the simplifying ansatz that
-\begin{align*}
+\begin{align}
 P(sobs=True | T=SNIa, c, M, M_I)= & const.
- \end{align*}
+ \end{align}
 
 \end{itemize}
 
+\subsection{$p(\text{in analysis}|M, M_I)$: The Normalization}
 
 \section{Implementation Notes}
 Anticipating the use of available statistical packages, the likelihoods have been constructed
