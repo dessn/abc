@@ -442,8 +442,9 @@ class Model(object):
         rc("font", family="serif", size=8)
         rc("text", usetex=True)
 
-        x_size = 9
-        y_size = 8
+        scale = np.power(len(self.nodes), 0.7)
+        x_size = 1.7 * scale
+        y_size = 1.7 * scale
         border = 1
         node_name_dict = {}
         reverse_dict = {}
@@ -517,7 +518,8 @@ class Model(object):
         from dessn.chain.chain import ChainConsumer
         chain_plotter = ChainConsumer()
         chain_plotter.add_chain(self.flat_chain,
-                                parameters=self._theta_labels[:self._num_actual])
+                                parameters=self._theta_labels[:self._num_actual],
+                                name=self.model_name)
         return chain_plotter
 
     def __getstate__(self):  # pragma: no cover

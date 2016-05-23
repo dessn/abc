@@ -188,18 +188,22 @@ class ChainConsumer(object):
 
         return self
 
-    def configure_bar(self, summary=None):  # pragma: no cover
+    def configure_bar(self, summary=None, shade=None):  # pragma: no cover
         """ Configure the bar plots showing the marginalised distributions. If you do not
         call this explicitly, the :func:`plot` method will invoke this method automatically.
 
         summary : bool, optional
             If overridden, sets whether parameter summaries should be set as axis titles.
             Will not work if you have multiple chains
+        shade : bool, optional
+            If set to true, shades in confidence regions in under histogram. By default
+            this happens if you have a single chain, but is disabled if you are comparing
+            multiple chains.
         """
         if summary is not None:
             summary = summary and len(self.chains) == 1
         self.parameters_bar["summary"] = summary
-
+        self.parameters_bar["shade"] = shade if shade is not None else len(self.chains) == 1
         self._configured_bar = True
         return self
 
@@ -518,7 +522,8 @@ class ChainConsumer(object):
             ax = axes[0, -1]
             artists = [plt.Line2D((0, 1), (0, 0), color=c)
                        for n, c in zip(self.names, colours) if n is not None]
-            ax.legend(artists, self.names, loc="center", frameon=False)
+            location = "center" if len(parameters) > 1 else 1
+            ax.legend(artists, self.names, loc=location, frameon=False)
 
         if filename is not None:
             fig.savefig(filename, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
@@ -683,7 +688,7 @@ class ChainConsumer(object):
                     color=colour, orientation=orientation)
             interpolator = interp1d(edge_center, hist, kind="nearest")
 
-        if len(self.chains) == 1 and fit_values is not None:
+        if self.parameters_bar["shade"] and fit_values is not None:
             lower = fit_values[0]
             upper = fit_values[2]
             if lower is not None and upper is not None:
