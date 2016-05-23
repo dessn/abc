@@ -97,7 +97,7 @@ enter the analysis sample.
 
 The likelihood is then  re-expressed as
 \begin{align}
-\mathcal{L}_S(O_o | M, M_I) & = \frac{\prod_{\alpha \in transients}p_S(O_o^\alpha|M, M_I)}{\int  \prod_{\alpha \in transients} p_S(O^\alpha |M, M_I)dO},
+\mathcal{L}_S(O_o | M, M_I) & = \frac{\prod_{\alpha \in transients}p_S(O_o^\alpha|M, M_I)}{\prod_{\alpha \in transients} \int  p_S(O^\alpha |M, M_I)dO^\alpha},
 \label{likelihood:eqn}
 \end{align}
 where  the denominator $p(\text{in analysis}|M, M_I)$ is set
@@ -299,6 +299,7 @@ a signal-to-noise threshold $STON_T$: other sample selection cases are similar b
 \begin{align}
 P(anal=True  | T=SNIa, c,  M, M_I)= &1 - \prod_{\beta \in images} (1-\mathcal{H}(c_\beta/N_\beta; STON_T)) \nonumber \\
 &  - \sum_{\alpha \in images}\mathcal{H}(c_\alpha/N_\alpha; STON_T) \prod_{\beta \in \{images-\alpha\}} (1-\mathcal{H}(c_\beta/N_\beta; STON_T)),
+\label{anal:eqn}
  \end{align}
  where $\mathcal{H}$ is the Heaviside step function.
 
@@ -307,42 +308,72 @@ The probability a transient has a spectroscopic observation.
 Mat Smith and Chris D'Andrea should be able to provide this term.
 Until we get this, lets make the simplifying ansatz that
 \begin{align}
-P(sobs=True | T=SNIa, c, M, M_I)= & const.
+P(sobs=True | T=SNIa, c, M, M_I)= & 1.
+\label{sobs:eqn}
  \end{align}
 
 \end{itemize}
 
 \subsection{$p(\text{in analysis}|M, M_I)$: The Normalization}
-
-\section{Implementation Notes}
-Anticipating the use of available statistical packages, the likelihoods have been constructed
-from standard distribution functions.  The truncated distributions from sample selection
-are accounted by the normalization 
-terms $P(S_c, S_T| z=z_o, X)$, $P(S_c| z=z_o, X)$.  Although they do not appear
-in the PGM, they are treated as nodes who contribute 
-$-\ln{P(S_c, S_T| z=z_o, X)}$ to the log-likelihood, where the negative sign reflects that this is a normalization
-factor.
-
-
-The following integral appears in the normalization
+The contribution to the normalization from transient $\alpha$ can be rewritten as
+\begin{align}
+\int p_S(O^\alpha|M, M_I)dO^\alpha &= I_c I_s P(T^\alpha=SNIa| M, M_I),
+\end{align}
+where the independence of the photometric and spectroscopic observations allow us to separate the contributions of each
+\begin{multline}
+I_c = \int  P(disc=True|T^\alpha=SNIa,c^\alpha, M, M_I,z_{host}=z^\alpha) P(anal=True|T^\alpha=SNIa,c^\alpha, M, M_I,z_{host}=z^\alpha) \\ P(sobs=True|T^\alpha=SNIa,c^\alpha, M, M_I,z_{host}=z^\alpha)
+p(c^\alpha|M, M_I,z_{host}=z^\alpha) dc\\
+\end{multline}
+and
 \begin{equation}
-\int dL\, p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right].
-\end{equation}
-We actually work with $\ln{L_X}$ and $\sigma_X$.  Setting
-\begin{equation}
-n=\frac{\ln{L}-\ln{L_X}}{\sigma_X}
-\end{equation}
-the integral becomes
- \begin{equation}
-\sigma_X \int dn\, p(n\sigma_X + \ln{L_X} |T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o\,  p(c_o | T=T_i, L_Xe^{n\sigma_X}, z=z_o, X)\right].
-\end{equation}
-The two probability distributions are normal so that this reduces to
- \begin{equation}
-\frac{1}{2\sqrt{2\pi}} \int dn\, e^{-0.5n^2} \left(1-erf\left(\frac{(c_T - c_\star)}{\sqrt{2}\sigma_c}\right)\right),
-\end{equation}
-where
-\begin{equation}
-c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
+I_s = \int P(type=True|T^\alpha=SNIa, s^\alpha, M, M_I,z_{host}=z^\alpha)
+ p(s^\alpha|M, M_I,z_{host}=z^\alpha)ds.
 \end{equation}
 
+Note that in the pure SN~Ia sample analysis, $P(T^\alpha=SNIa| M, M_I)$ divides out in the calculation of the likelihood,  so that the cosmological results
+are independent of rates.  This would not be the case for the photometric-sample analysis.
+
+The integrals $I_c$ and $I_s$ can be simple to evaluate in certain circumstances.  Suppose the photometric selection requirements
+are set so that $P(disc=True | T=SNIa,c,  M, M_I) \sim 1$ and the photometric uncertainties are independent (approximatively true when
+each point's noise is dominated by its image noise).  Then for the case of the sample selection (spectroscopic observation)
+criteria in Eqn.~\ref{anal:eqn} (\ref{sobs:eqn}), 
+\begin{align}
+I_c & = \int  P(anal=True|T^\alpha=SNIa,c^\alpha, M, M_I,z_{host}=z^\alpha) p(c^\alpha|M, M_I,z_{host}=z^\alpha) dc\\
+& = 1 - \prod_{\beta \in images} \text{CDF}\left(N_\beta STON_T; \mathcal{N}(c_\star,\sigma_\beta)\right)   \nonumber \\
+& - \sum_{\alpha \in images}  \text{CCDF}\left(N_\alpha STON_T;\mathcal{N}(c_\star,\sigma_\alpha)\right)   \prod_{\beta \in \{images-\alpha\}} \text{CDF}\left(N_\beta STON_T;\mathcal{N}(c_\star,\sigma_\beta)\right),
+\end{align}
+where CDF and CCDF are the cumulative and the complimentary cumulative distribution functions respectively of the normal distribution
+that are readily accessible in programming language libraries either on their own or as error fuctions.
+%
+%\section{Implementation Notes}
+%Anticipating the use of available statistical packages, the likelihoods have been constructed
+%from standard distribution functions.  The truncated distributions from sample selection
+%are accounted by the normalization 
+%terms $P(S_c, S_T| z=z_o, X)$, $P(S_c| z=z_o, X)$.  Although they do not appear
+%in the PGM, they are treated as nodes who contribute 
+%$-\ln{P(S_c, S_T| z=z_o, X)}$ to the log-likelihood, where the negative sign reflects that this is a normalization
+%factor.
+%
+%
+%The following integral appears in the normalization
+%\begin{equation}
+%\int dL\, p(L|T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o  p(c_o | T=T_i, L, z=z_o, X)\right].
+%\end{equation}
+%We actually work with $\ln{L_X}$ and $\sigma_X$.  Setting
+%\begin{equation}
+%n=\frac{\ln{L}-\ln{L_X}}{\sigma_X}
+%\end{equation}
+%the integral becomes
+% \begin{equation}
+%\sigma_X \int dn\, p(n\sigma_X + \ln{L_X} |T_i, z=z_o, X)  \left[\int_{c_T}^{\infty} dc_o\,  p(c_o | T=T_i, L_Xe^{n\sigma_X}, z=z_o, X)\right].
+%\end{equation}
+%The two probability distributions are normal so that this reduces to
+% \begin{equation}
+%\frac{1}{2\sqrt{2\pi}} \int dn\, e^{-0.5n^2} \left(1-erf\left(\frac{(c_T - c_\star)}{\sqrt{2}\sigma_c}\right)\right),
+%\end{equation}
+%where
+%\begin{equation}
+%c_\star = \frac{e^{\ln{L_X}+n\sigma_X}}{4\pi d_L^2}10^{Z/2.5}.
+%\end{equation}
+%
 \end{document}
