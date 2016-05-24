@@ -99,7 +99,9 @@ class ToLatentCorrected(Edge):
         ltz = (bound < 0) * 2.0 - 1.0
         integral = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2) * sigma)) + 0.5
         log_integral = np.log(integral)
-        return prob_happening - log_integral
+        result = prob_happening - log_integral
+        result[result == np.inf] = -np.inf
+        return result
 
 
 class ToUnderlying(Edge):
@@ -174,16 +176,15 @@ if __name__ == "__main__":
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     fig = model_cor.get_pgm(pgm_file)
 
-    sampler = EnsembleSampler(num_steps=4250, num_burn=500, temp_dir=t % "no", save_interval=60)
+    sampler = EnsembleSampler(num_steps=15000, num_burn=3000, temp_dir=t % "no", save_interval=300)
     chain_un = model_un.fit(sampler)
 
-    sampler.temp_dir = t % "cor"
+    sampler = EnsembleSampler(num_steps=5000, num_burn=0, temp_dir=t % "cor", save_interval=300)
     chain_consumer_cor = model_cor.fit(sampler)
 
     chain_consumer_cor.add_chain(chain_un.chains[0], name=chain_un.names[0])
-
     chain_consumer_cor.configure_bar(shade=True)
-    chain_consumer_cor.configure_general(bins=0.7)
+    chain_consumer_cor.configure_general(bins=0.4)
     # chain_consumer_cor.plot_walks(filename=walk_file % "no", chain=1, truth=[mean, std])
     chain_consumer_cor.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
-    # chain_consumer_cor.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std])
+    chain_consumer_cor.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std])

@@ -213,6 +213,10 @@ class Model(object):
     def _get_log_likelihood(self, theta_dict, data):
         theta_dict.update(data)
         probability = self._get_edge_likelihood(theta_dict, self._ordered_edges[:])
+        if np.any(probability == np.inf):
+            raise ValueError("Your likelihood has positive infinities in it. "
+                             "This is an issue. Probabilities, theta and data as follows. "
+                             "%s %s %s" % (probability, theta_dict, data))
         return probability.sum()
 
     def get_log_posterior(self, theta):

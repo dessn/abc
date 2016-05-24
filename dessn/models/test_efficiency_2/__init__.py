@@ -118,7 +118,8 @@ The model PGM:
     :align:     center
     :width: 70%
 
-The models, corrected and uncorrected:
+The models, corrected and uncorrected. There appears to still be an issue that
+we have not managed to resolve to get the result unbiased.
 
 .. figure::     ../dessn/models/test_efficiency_2/output/surfaces.png
     :align:     center
