@@ -1,8 +1,8 @@
 from dessn.framework.model import Model
 from dessn.framework.edge import Edge
-from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
+from dessn.framework.parameter import ParameterObserved, ParameterUnderlying
 from dessn.framework.samplers.ensemble import EnsembleSampler
-
+from dessn.chain.chain import ChainConsumer
 import numpy as np
 import os
 import logging
@@ -14,30 +14,7 @@ class ObservedPoints(ParameterObserved):
         super().__init__("data", "$d$", data)
 
 
-class ObservedError(ParameterObserved):
-    def __init__(self, data):
-        super().__init__("data_error", "$e$", data)
-
-
-class ActualPoint(ParameterLatent):
-    def __init__(self, n):
-        super().__init__("point", "$p$")
-        self.n = n
-
-    def get_num_latent(self):
-        return self.n
-
-    def get_suggestion_requirements(self):
-        return ["data", "data_error"]
-
-    def get_suggestion(self, data):
-        return data["data"]
-
-    def get_suggestion_sigma(self, data):
-        return data["data_error"]
-
-
-class ActualMean(ParameterUnderlying):
+class ActualValue(ParameterUnderlying):
     def __init__(self):
         super().__init__("mean", r"$\mu$")
 
@@ -48,54 +25,43 @@ class ActualMean(ParameterUnderlying):
         return ["data"]
 
     def get_suggestion(self, data):
-        return np.mean(data["data"]) * 0.5 + 0.5 * 100
+        return np.mean(data["data"])
 
     def get_suggestion_sigma(self, data):
         return np.std(data["data"]) * 2
 
 
-class ActualSigma(ParameterUnderlying):
+class ActualError(ParameterUnderlying):
     def __init__(self):
         super().__init__("sigma", r"$\sigma$")
-
-    def get_suggestion(self, data):
-        return np.std(data["data"])
-
-    def get_suggestion_sigma(self, data):
-        return 0.5 * np.std(data["data"])
-
-    def get_suggestion_requirements(self):
-        return ["data"]
 
     def get_log_prior(self, data):
         if data["sigma"] < 0:
             return -np.inf
         return 1
 
+    def get_suggestion_requirements(self):
+        return ["data"]
 
-class ToLatentUncorrected(Edge):
-    def __init__(self):
-        super().__init__(["data", "data_error"], "point")
-        self.factor = np.log(np.sqrt(2 * np.pi))
+    def get_suggestion(self, data):
+        return np.std(data["data"])
 
-    def get_log_likelihood(self, data):
-        diff = data["data"] - data["point"]
-        sigma = data["data_error"]
-        return -0.5 * diff * diff / (sigma * sigma) - self.factor - np.log(sigma)
+    def get_suggestion_sigma(self, data):
+        return 10
 
 
-class ToLatentCorrected(Edge):
+class ToUnderlyingCorrected(Edge):
     def __init__(self, threshold):
-        super().__init__(["data", "data_error"], ["point"])
+        super().__init__(["data"], ["mean", "sigma"])
         self.factor = np.log(np.sqrt(2 * np.pi))
         self.threshold = threshold
 
     def get_log_likelihood(self, data):
-        diff = data["data"] - data["point"]
-        sigma = data["data_error"]
+        diff = data["data"] - data["mean"]
+        sigma = data["sigma"]
         prob_happening = -0.5 * diff * diff / (sigma * sigma) - self.factor - np.log(sigma)
 
-        bound = self.threshold * sigma - data["point"]
+        bound = self.threshold - data["mean"]
         ltz = (bound < 0) * 2.0 - 1.0
         integral = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2) * sigma)) + 0.5
         log_integral = np.log(integral)
@@ -106,60 +72,49 @@ class ToLatentCorrected(Edge):
 
 class ToUnderlying(Edge):
     def __init__(self):
-        super().__init__("point", ["mean", "sigma"])
+        super().__init__(["data"], ["mean", "sigma"])
         self.factor = np.log(np.sqrt(2 * np.pi))
 
     def get_log_likelihood(self, data):
-        diff = data["point"] - data["mean"]
+        diff = data["data"] - data["mean"]
         sigma = data["sigma"]
         return -0.5 * diff * diff / (sigma * sigma) - self.factor - np.log(sigma)
 
 
 class EfficiencyModelUncorrected(Model):
-    def __init__(self, realised, realised_errors, seed=0):
+    def __init__(self, realised, seed=0):
         super().__init__("Uncorrected")
         np.random.seed(seed)
-        self.add_node(ObservedError(realised_errors))
         self.add_node(ObservedPoints(realised))
-        self.add_node(ActualPoint(realised.size))
-        self.add_node(ActualMean())
-        self.add_node(ActualSigma())
-        self.add_edge(ToLatentUncorrected())
+        self.add_node(ActualValue())
+        self.add_node(ActualError())
         self.add_edge(ToUnderlying())
         self.finalise()
 
 
 class EfficiencyModelCorrected(Model):
-    def __init__(self, realised, realised_errors, threshold, seed=0):
+    def __init__(self, realised, threshold, seed=0):
         super().__init__("Corrected")
         np.random.seed(seed)
-        self.add_node(ObservedError(realised_errors))
         self.add_node(ObservedPoints(realised))
-        self.add_node(ActualPoint(realised.size))
-        self.add_node(ActualMean())
-        self.add_node(ActualSigma())
-        self.add_edge(ToLatentCorrected(threshold))
-        self.add_edge(ToUnderlying())
+        self.add_node(ActualValue())
+        self.add_node(ActualError())
+        self.add_edge(ToUnderlyingCorrected(threshold))
         self.finalise()
 
 
-def get_data():
-    np.random.seed(1)
+def get_data(seed=5):
+    np.random.seed(seed)
     mean = 100.0
-    std = 30.0
-    alpha = 3.5
-    n = 300
+    cut = 80
+    n = 1000
+    sigma = 20
+    observed = mean + np.random.normal(size=n) * sigma
+    mask = observed > cut
+    observed = observed[mask]
+    print(mask.sum(), n, observed.mean())
+    return mean, sigma, observed, cut
 
-    actual = np.random.normal(loc=mean, scale=std, size=n)
-
-    errors = np.ones(actual.shape) * mean / 5
-    observed = actual + np.random.normal(size=n) * errors
-
-    ston = observed / errors
-    mask = ston > alpha
-    print(mask.sum(), n, observed[mask].mean())
-
-    return mean, std, observed[mask], errors[mask], alpha
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -168,23 +123,28 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    mean, std, observed, errors, alpha = get_data()
+    c = ChainConsumer()
+    n = 3
+    colours = ["#D32F2F", "#1E88E5"] * n
+    for i in range(n):
+        mean, sigma, observed, cut = get_data(seed=i)
 
-    model_un = EfficiencyModelUncorrected(observed, errors)
-    model_cor = EfficiencyModelCorrected(observed, errors, alpha)
+        model_un = EfficiencyModelUncorrected(observed)
+        model_cor = EfficiencyModelCorrected(observed, cut)
 
-    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    fig = model_cor.get_pgm(pgm_file)
+        pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+        fig = model_cor.get_pgm(pgm_file)
 
-    sampler = EnsembleSampler(num_steps=15000, num_burn=3000, temp_dir=t % "no", save_interval=300)
-    chain_un = model_un.fit(sampler)
+        sampler = EnsembleSampler(num_steps=5000, num_burn=1000, temp_dir=t % "no%d" % i)
+        chain = model_un.fit(sampler)
+        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
-    sampler = EnsembleSampler(num_steps=5000, num_burn=0, temp_dir=t % "cor", save_interval=300)
-    chain_consumer_cor = model_cor.fit(sampler)
+        sampler.temp_dir = t % "cor%d" % i
+        chain = model_cor.fit(sampler)
+        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
-    chain_consumer_cor.add_chain(chain_un.chains[0], name=chain_un.names[0])
-    chain_consumer_cor.configure_bar(shade=True)
-    chain_consumer_cor.configure_general(bins=0.4)
-    # chain_consumer_cor.plot_walks(filename=walk_file % "no", chain=1, truth=[mean, std])
-    chain_consumer_cor.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
-    chain_consumer_cor.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std])
+    c.configure_bar(shade=True)
+    c.configure_general(colours=colours)
+    # c.plot_walks(truth=[mean, sigma], filename=walk_file % "no", chain=0)
+    # c.plot_walks(truth=[mean, sigma], filename=walk_file % "cor", chain=1)
+    c.plot(filename=plot_file, figsize=(5, 5), truth=[mean, sigma], legend=False)

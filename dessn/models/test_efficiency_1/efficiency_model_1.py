@@ -1,8 +1,8 @@
 from dessn.framework.model import Model
 from dessn.framework.edge import Edge
-from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
+from dessn.framework.parameter import ParameterObserved, ParameterUnderlying
 from dessn.framework.samplers.ensemble import EnsembleSampler
-
+from dessn.chain.chain import ChainConsumer
 import numpy as np
 import os
 import logging
@@ -88,8 +88,8 @@ class EfficiencyModelCorrected(Model):
         self.finalise()
 
 
-def get_data():
-    np.random.seed(3)
+def get_data(seed=5):
+    np.random.seed(seed)
     mean = 100.0
     alpha = 4
     n = 1000
@@ -102,6 +102,7 @@ def get_data():
     print(mask.sum(), n, observed.mean())
     return mean, observed, errors, alpha
 
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
@@ -109,21 +110,26 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    mean, observed, errors, alpha = get_data()
+    c = ChainConsumer()
+    n = 3
+    colours = ["#D32F2F", "#1E88E5"] * n
+    for i in range(n):
+        mean, observed, errors, alpha = get_data(seed=i)
 
-    model_un = EfficiencyModelUncorrected(observed, errors)
-    model_cor = EfficiencyModelCorrected(observed, errors, alpha)
+        model_un = EfficiencyModelUncorrected(observed, errors)
+        model_cor = EfficiencyModelCorrected(observed, errors, alpha)
 
-    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    fig = model_cor.get_pgm(pgm_file)
+        pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+        fig = model_cor.get_pgm(pgm_file)
 
-    sampler = EnsembleSampler(num_steps=10000, num_burn=1000, temp_dir=t % "no", save_interval=60)
-    chain_un = model_un.fit(sampler)
+        sampler = EnsembleSampler(num_steps=10000, num_burn=1000, temp_dir=t % "no%d" % i)
+        chain = model_un.fit(sampler)
+        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
-    sampler.temp_dir = t % "cor"
-    chain_consumer_cor = model_cor.fit(sampler)
+        sampler.temp_dir = t % "cor%d" % i
+        chain = model_cor.fit(sampler)
+        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
-    chain_consumer_cor.add_chain(chain_un.chains[0], name=chain_un.names[0])
-
-    chain_consumer_cor.configure_bar(shade=True)
-    chain_consumer_cor.plot(filename=plot_file, figsize=(6, 4), truth=[mean])
+    c.configure_bar(shade=True)
+    c.configure_general(colours=colours)
+    c.plot(filename=plot_file, figsize=(6, 4), truth=[mean], legend=False)
