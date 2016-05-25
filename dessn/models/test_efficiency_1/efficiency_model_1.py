@@ -89,7 +89,7 @@ class EfficiencyModelCorrected(Model):
 
 
 def get_data(seed=5):
-    np.random.seed(seed)
+    np.random.seed(seed=seed)
     mean = 100.0
     alpha = 4
     n = 1000

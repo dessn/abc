@@ -104,7 +104,7 @@ class EfficiencyModelCorrected(Model):
 
 
 def get_data(seed=5):
-    np.random.seed(seed)
+    np.random.seed(seed=seed)
     mean = 100.0
     cut = 80
     n = 1000
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         fig = model_cor.get_pgm(pgm_file)
 
-        sampler = EnsembleSampler(num_steps=5000, num_burn=1000, temp_dir=t % "no%d" % i)
+        sampler = EnsembleSampler(num_steps=10000, num_burn=1000, temp_dir=t % "no%d" % i)
         chain = model_un.fit(sampler)
         c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
@@ -145,6 +145,7 @@ if __name__ == "__main__":
 
     c.configure_bar(shade=True)
     c.configure_general(colours=colours)
+    c.configure_contour(contourf=True, contourf_alpha=0.3)
     # c.plot_walks(truth=[mean, sigma], filename=walk_file % "no", chain=0)
     # c.plot_walks(truth=[mean, sigma], filename=walk_file % "cor", chain=1)
     c.plot(filename=plot_file, figsize=(5, 5), truth=[mean, sigma], legend=False)

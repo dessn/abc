@@ -145,7 +145,7 @@ class EfficiencyModelCorrected(Model):
 
 
 def get_data(seed=5):
-    np.random.seed(seed)
+    np.random.seed(seed=seed)
     mean = 100.0
     std = 20.0
     alpha = 3.5
@@ -153,7 +153,7 @@ def get_data(seed=5):
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
-    errors = np.ones(actual.shape) * mean / 5
+    errors = np.ones(actual.shape) * 20
     observed = actual + np.random.normal(size=n) * errors
 
     ston = observed / errors
@@ -192,7 +192,8 @@ if __name__ == "__main__":
 
     c.configure_bar(shade=True)
     c.configure_general(bins=0.7, colours=colours)
-    c.configure_contour(sigmas=[0,0.01,1])
+    c.configure_contour(sigmas=[0, 0.01, 1], contourf=True, contourf_alpha=0.3)
+
     # c.plot_walks(filename=walk_file % "no", chain=1, truth=[mean, std])
     # c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
     c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std])
