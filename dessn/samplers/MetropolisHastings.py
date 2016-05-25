@@ -34,8 +34,9 @@ class MetropolisHastings(Sampler):
     accept_ratio : float, optional
         The desired acceptance ratio
     """
-    def __init__(self, log_posterior, start, uid="mh", num_burn=10000, num_steps=10000, sigma_adjust=50,
-                 covariance_adjust=1000, temp_dir=None, save_dims=None, save_interval=300,
+    def __init__(self, log_posterior, start, uid="mh", num_burn=10000, num_steps=10000,
+                 sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
+                 save_dims=None, save_interval=300,
                  accept_ratio=0.4):
         super().__init__(temp_dir)
         self.logger = logging.getLogger(__name__)
@@ -61,88 +62,88 @@ class MetropolisHastings(Sampler):
             self.covariance_file = None
             self.sigma_file = None
         else:
-            self.position_file = temp_dir + os.sep + "position_%s.npy" % uid
-            self.burn_file = temp_dir + os.sep + "burn_%s.npy" % uid
-            self.chain_file = temp_dir + os.sep + "chain_%s.npy" % uid
-            self.covariance_file = temp_dir + os.sep + "covariance_%s.npy" % uid
-            self.sigma_file = temp_dir + os.sep + "sigma_%s.npy" % uid
-
-    def get_chain(self):
-        pass
+            self.position_file = temp_dir + os.sep + "%s_position.npy" % uid
+            self.burn_file = temp_dir + os.sep + "%s_burn.npy" % uid
+            self.chain_file = temp_dir + os.sep + "%s_chain.npy" % uid
+            self.covariance_file = temp_dir + os.sep + "%s_covariance.npy" % uid
+            self.sigma_file = temp_dir + os.sep + "%s_sigma.npy" % uid
 
     def fit(self):
         """ Runs the fit """
         position, burnin, chain, covariance, sigma = self._load()
         position = self._ensure_position(position)
         sigma = self._ensure_sigma(sigma, position)
-
         if chain is not None:
-            chain = self._do_chain(position, sigma, covariance, chain=chain)
+            res = self._do_chain(position, sigma, covariance, chain=chain)
         else:
-            position, covariance = self._do_burnin(position, burnin, sigma, covariance)
-            chain = self._do_chain(position, covariance)
+            position, covariance, sigma = self._do_burnin(position, burnin, sigma, covariance)
+            res = self._do_chain(position, sigma, covariance)
 
-        return chain
+        return res
 
     def _do_chain(self, position, sigma, covariance, chain=None):
         dims = self.save_dims if self.save_dims is not None else position.size - self.space
         size = dims + self.space
         if chain is None:
-            chain = np.zeros((size, self.num_steps))
-            chain[:, 0] = position[:size]
-
-        current_step = np.where(chain[self.IND_S, :] == 0)[0][0]
+            current_step = 1
+            chain = np.zeros((self.num_steps, size))
+            chain[0, :] = position[:size]
+        elif chain.shape[0] < self.num_steps:
+            current_step = chain.shape[0]
+            chain = np.vstack((chain, np.zeros((self.num_steps - chain.shape[0], size))))
+        else:
+            current_step = self.num_steps
 
         last_save_time = time()
-
+        self.logger.debug("Starting chain")
         while current_step < self.num_steps:
             position, weight = self._get_next_step(position, sigma, covariance)
-            chain[self.IND_W, current_step - 1] += 1
-            chain[:, current_step] = position[:size]
+            chain[current_step - 1, self.IND_W] += 1
+            chain[current_step, :] = position[:size]
             current_step += 1
             if current_step == self.num_steps or \
                     (self._do_save and time() - last_save_time > self.save_interval):
-                self._save(position, None, chain[:, :current_step], None)
+                self._save(position, None, chain[:current_step, :], None, None)
 
-        return chain
+        return chain[:, self.space:], chain[:, self.IND_W]
 
     def _do_burnin(self, position, burnin, sigma, covariance):
-
         if burnin is None:
             # Initialise burning to all zeros. 2 from posterior and step size
-            burnin = np.zeros((position.size, self.num_burn))
-            burnin[:, 0] = position
-        elif burnin.shape[1] < self.num_burn:
+            burnin = np.zeros((self.num_burn, position.size))
+            current_step = 1
+            burnin[0, :] = position
+        elif burnin.shape[0] < self.num_burn:
+            current_step = burnin.shape[0]
             # If we only saved part of the burnin to save size, add the rest in as zeros
-            burnin = np.vstack((burnin, np.zeros((position.size, self.num_burn - burnin.shape[1]))))
-
+            burnin = np.vstack((burnin, np.zeros((self.num_burn - burnin.shape[0], position.size))))
+        else:
+            current_step = self.num_burn
         if covariance is None:
             covariance = np.identity(position.size - self.space)
 
-        current_step = np.where(burnin[self.IND_S, :] == 0)[0][0]
-
         last_save_time = time()
-
+        self.logger.debug("Starting burn in")
         while current_step < self.num_burn:
             # If sigma adjust, adjust
             if current_step % self.sigma_adjust == 0 and current_step > 0:
-                burnin[self.IND_S, current_step] = self._adjust_sigma_ratio(burnin, current_step)
+                burnin[current_step, self.IND_S] = self._adjust_sigma_ratio(burnin, current_step)
             # If covariance adjust, adjust
             if current_step % self.covariance_adjust == 0 and current_step > 0:
                 sigma, covariance = self._adjust_covariance(burnin, current_step)
 
             # Get next step
-            burnin[:, current_step] = self._get_next_step(burnin[:, current_step - 1],
+            burnin[current_step, :], weight = self._get_next_step(burnin[current_step - 1, :],
                                                           sigma, covariance, burnin=True)
-
+            burnin[current_step - 1, self.IND_W] = weight
             current_step += 1
-
             if current_step == self.num_burn or \
                     (self._do_save and time() - last_save_time > self.save_interval):
-                self._save(burnin[:, -1], burnin[:, :current_step], None, covariance, sigma)
+                self._save(burnin[current_step - 1, :], burnin[:current_step, :],
+                           None, covariance, sigma)
                 last_save_time = time()
 
-        return burnin[:, -1], covariance
+        return burnin[-1, :], covariance, sigma
 
     def _ensure_position(self, position):
         """ Ensures that the position object, which can be none from loading, is a
@@ -155,34 +156,34 @@ class MetropolisHastings(Sampler):
                 position = self.start
             if type(position) == list:
                 position = np.array(position)
-            position = np.concatenate(([-np.inf, 1, 1], position))
+            position = np.concatenate(([self.log_posterior(position), 1, 1], position))
             # Starting log posterior is infinitely unlikely, sigma size of 1 to begin with
         return position
 
     def _ensure_sigma(self, sigma, position):
         if sigma is None:
             return np.ones(position.size - self.space)
+        return sigma
 
     def _adjust_sigma_ratio(self, burnin, index):
-        subsection = burnin[:, index - self.sigma_adjust:index]
-        print("PP11 ", subsection.shape, burnin.shape, index)
-        actual_ratio = 1 / np.average(subsection[self.IND_W, :])
+        subsection = burnin[index - self.sigma_adjust:index, :]
+        actual_ratio = 1 / np.average(subsection[:, self.IND_W])
 
-        sigma_ratio = burnin[self.IND_S, index - 1]
+        sigma_ratio = burnin[index - 1, self.IND_S]
         if actual_ratio < self.accept_ratio:
             sigma_ratio *= 0.9  # TODO: Improve for high dimensionality
         else:
             sigma_ratio /= 0.9
         self.logger.debug("Adjusting sigma: Want %0.2f, got %0.2f. "
                           "Updating ratio to %0.3f" % (self.accept_ratio, actual_ratio, sigma_ratio))
-        burnin[self.IND_S, index - 1] = sigma_ratio
+        burnin[index - 1, self.IND_S] = sigma_ratio
 
     def _adjust_covariance(self, burnin, index):
-        subset = burnin[:, int(np.floor(index/2)):index]
-        covariance = np.cov(subset[self.space:, :], fweights=subset[self.IND_W, :])
+        subset = burnin[int(np.floor(index/2)):index, :]
+        covariance = np.cov(subset[:, self.space:].T, fweights=subset[:, self.IND_W])
         evals, evecs = np.linalg.eig(covariance)
         sigma = np.sqrt(np.abs(evals)) * 2.3 / np.sqrt(evals.size)
-        burnin[self.IND_S, index - 1] = 0.5
+        self.logger.debug("Adjusting covariance and reseting sigma ratio")
         return sigma, evecs
 
     def _propose_point(self, position, sigma, covariance):
@@ -197,9 +198,11 @@ class MetropolisHastings(Sampler):
         while True:
             pot = self._propose_point(position, sigma, covariance)
             posterior = self.log_posterior(pot)
-            if posterior > past_pot or posterior - past_pot < np.random.uniform():
+
+            # print(posterior, past_pot, posterior > past_pot, np.exp(posterior - past_pot))
+            if posterior > past_pot or np.exp(posterior - past_pot) > np.random.uniform():
                 result = np.concatenate(([posterior, position[self.IND_S], 1], pot))
-                return result
+                return result, attempts
             else:
                 attempts += 1
                 if attempts > 100 and burnin:
@@ -208,7 +211,7 @@ class MetropolisHastings(Sampler):
     def _load(self):
         position = None
         if os.path.exists(self.position_file):
-            position = np.load(position)
+            position = np.load(self.position_file)
         burnin = None
         if os.path.exists(self.burn_file):
             burnin = np.load(self.burn_file)
@@ -221,10 +224,10 @@ class MetropolisHastings(Sampler):
         sigma = None
         if os.path.exists(self.sigma_file):
             sigma = np.load(self.sigma_file)
-
         return position, burnin, chain, covariance, sigma
 
     def _save(self, position, burnin, chain, covariance, sigma):
+        self.logger.debug("Serialising results to file")
         if position is not None:
             np.save(self.position_file, position)
         if burnin is not None:

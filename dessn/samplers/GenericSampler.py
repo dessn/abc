@@ -15,8 +15,5 @@ class Sampler(object):
             if not os.path.exists(self.temp_dir):
                 os.makedirs(self.temp_dir)
 
-    def get_chain(self):
-        raise NotImplementedError()
-
     def fit(self):
         raise NotImplementedError()

@@ -4,7 +4,7 @@ import logging
 from scipy.interpolate import interp1d
 from matplotlib.ticker import MaxNLocator
 import matplotlib.cm as cm
-from scipy.stats.kde import gaussian_kde
+import statsmodels.api as sm
 
 
 class ChainConsumer(object):
@@ -16,6 +16,7 @@ class ChainConsumer(object):
         self.all_colours = ["#1E88E5", "#D32F2F", "#4CAF50", "#673AB7", "#FFC107",
                             "#795548", "#64B5F6", "#8BC34A", "#757575", "#CDDC39"]
         self.chains = []
+        self.weights = []
         self.names = []
         self.parameters = []
         self.all_parameters = []
@@ -30,7 +31,7 @@ class ChainConsumer(object):
         self.parameters_general = {}
 
 
-    def add_chain(self, chain, parameters=None, name=None):
+    def add_chain(self, chain, parameters=None, name=None, weights=None):
         """ Add a chain to the consumer.
 
         Parameters
@@ -43,6 +44,8 @@ class ChainConsumer(object):
             A list of parameter names, one for each column (dimension) in the chain.
         name : str, optional
             The name of the chain. Used when plotting multiple chains at once.
+        weights : ndarray, optional
+            If given, uses this array to weight the samples in chain
 
         Returns
         -------
@@ -59,6 +62,10 @@ class ChainConsumer(object):
             chain = chain[None].T
         self.chains.append(chain)
         self.names.append(name)
+        if weights is None:
+            self.weights.append(np.ones(chain.shape[0]))
+        else:
+            self.weights.append(weights)
         if self.default_parameters is None and parameters is not None:
             self.default_parameters = parameters
 
@@ -237,10 +244,11 @@ class ChainConsumer(object):
             One entry per chain, parameter bounds stored in dictionary with parameter as key
         """
         results = []
-        for ind, (chain, parameters) in enumerate(zip(self.chains, self.parameters)):
+        for ind, (chain, parameters, weights) in enumerate(zip(self.chains,
+                                                               self.parameters, self.weights)):
             res = {}
             for i, p in enumerate(parameters):
-                summary = self._get_parameter_summary(chain[:, i], p, ind)
+                summary = self._get_parameter_summary(chain[:, i], weights, p, ind)
                 res[p] = summary
             results.append(res)
         return results
@@ -493,12 +501,13 @@ class ChainConsumer(object):
                 do_flip = (flip and i == len(params1) - 1)
                 if plot_hists and i == j:
                     max_val = None
-                    for chain, parameters, colour, bins, fit in \
-                            zip(self.chains, self.parameters, colours, num_bins, fit_values):
+                    for chain, weights, parameters, colour, bins, fit in \
+                            zip(self.chains, self.weights, self.parameters, colours,
+                                num_bins, fit_values):
                         if p1 not in parameters:
                             continue
                         index = parameters.index(p1)
-                        m = self._plot_bars(ax, p1, chain[:, index], colour, bins=bins,
+                        m = self._plot_bars(ax, p1, chain[:, index], weights, colour, bins=bins,
                                             fit_values=fit[p1], flip=do_flip, summary=summary,
                                             truth=truth, extents=extents[p1])
                         if max_val is None or m > max_val:
@@ -509,13 +518,14 @@ class ChainConsumer(object):
                         ax.set_ylim(0, 1.1 * max_val)
 
                 else:
-                    for chain, parameters, bins, colour, fit in zip(self.chains, self.parameters,
-                                                                    num_bins, colours, fit_values):
+                    for chain, parameters, bins, colour, fit, weights in \
+                            zip(self.chains, self.parameters, num_bins,
+                                colours, fit_values, self.weights):
                         if p1 not in parameters or p2 not in parameters:
                             continue
                         i1 = parameters.index(p1)
                         i2 = parameters.index(p2)
-                        self._plot_contour(ax, chain[:, i2], chain[:, i1], p1, p2, colour,
+                        self._plot_contour(ax, chain[:, i2], chain[:, i1], weights, p1, p2, colour,
                                            bins=bins, truth=truth)
 
         if self.names is not None and legend:
@@ -665,19 +675,20 @@ class ChainConsumer(object):
         if truth is not None:
             ax.axhline(truth, **self.parameters_truth)
 
-    def _plot_bars(self, ax, parameter, chain_row, colour, bins=25, flip=False, summary=False,
+    def _plot_bars(self, ax, parameter, chain_row, weights, colour, bins=25, flip=False, summary=False,
                    fit_values=None, truth=None, extents=None):  # pragma: no cover
         bins = np.linspace(extents[0], extents[1], bins + 1)
-        hist, edges = np.histogram(chain_row, bins=bins, normed=True)
+        hist, edges = np.histogram(chain_row, bins=bins, normed=True, weights=weights)
         edge_center = 0.5 * (edges[:-1] + edges[1:])
         kde = self.parameters_general["kde"]
         if kde:
-            pdf = gaussian_kde(chain_row)
+            pdf = sm.nonparametric.KDEUnivariate(chain_row)
+            pdf.fit(weights=weights)
             xs = np.linspace(extents[0], extents[1], 100)
             if flip:
-                ax.plot(pdf(xs), xs, color=colour)
+                ax.plot(pdf.evaluate(xs), xs, color=colour)
             else:
-                ax.plot(xs, pdf(xs), color=colour)
+                ax.plot(xs, pdf.evaluate(xs), color=colour)
             interpolator = pdf
         else:
             if flip:
@@ -712,7 +723,7 @@ class ChainConsumer(object):
                     ax.axvline(truth_value, **self.parameters_truth)
         return hist.max()
 
-    def _plot_contour(self, ax, x, y, px, py, colour, bins=25, truth=None):  # pragma: no cover
+    def _plot_contour(self, ax, x, y, w, px, py, colour, bins=25, truth=None):  # pragma: no cover
 
         levels = 1.0 - np.exp(-0.5 * self.parameters_contour["sigmas"] ** 2)
 
@@ -720,7 +731,7 @@ class ChainConsumer(object):
         colours2 = [self._scale_colour(colours[0], 0.7)] + \
                    [self._scale_colour(c, 0.8) for c in colours[:-1]]
 
-        hist, x_bins, y_bins = np.histogram2d(x, y, bins=bins)
+        hist, x_bins, y_bins = np.histogram2d(x, y, bins=bins, weights=w)
         x_centers = 0.5 * (x_bins[:-1] + x_bins[1:])
         y_centers = 0.5 * (y_bins[:-1] + y_bins[1:])
         hist[hist == 0] = 1E-16
@@ -877,16 +888,18 @@ class ChainConsumer(object):
 
         return sigma_cumsum[i_unsort].reshape(shape)
 
-    def _get_parameter_summary(self, data, parameter, chain_index, desired_area=0.6827):
+    def _get_parameter_summary(self, data, weights, parameter, chain_index, desired_area=0.6827):
         if not self._configured_general:
             self.configure_general()
         bins = self.parameters_general['bins'][chain_index]
-        hist, edges = np.histogram(data, bins=bins, normed=True)
+        hist, edges = np.histogram(data, bins=bins, normed=True, weights=weights)
         edge_centers = 0.5 * (edges[1:] + edges[:-1])
         xs = np.linspace(edge_centers[0], edge_centers[-1], 10000)
         if self.parameters_general["kde"]:
             kde_xs = np.linspace(edge_centers[0], edge_centers[-1], max(100, int(bins)))
-            ys = interp1d(kde_xs, gaussian_kde(data)(kde_xs), kind="cubic")(xs)
+            pdf = sm.nonparametric.KDEUnivariate(data)
+            pdf.fit()
+            ys = interp1d(kde_xs, pdf.evaluate(kde_xs), kind="cubic")(xs)
         else:
             ys = interp1d(edge_centers, hist, kind="linear")(xs)
 

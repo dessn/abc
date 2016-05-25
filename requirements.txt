@@ -12,3 +12,4 @@ sncosmo
 pytest
 pytest-cov
 coveralls
+statsmodels
