@@ -106,7 +106,7 @@ def get_data(seed=5):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    t = os.path.abspath(dir_name + "/output/data_%s")
+    t = os.path.abspath(dir_name + "/output/run_%d")
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
@@ -122,13 +122,9 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         fig = model_cor.get_pgm(pgm_file)
 
-        sampler = EnsembleSampler(num_steps=10000, num_burn=1000, temp_dir=t % "no%d" % i)
-        chain = model_un.fit(sampler)
-        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
-
-        sampler.temp_dir = t % "cor%d" % i
-        chain = model_cor.fit(sampler)
-        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
+        sampler = EnsembleSampler(num_steps=5000, num_burn=1000, temp_dir=t % i)
+        model_un.fit(sampler, chain_consumer=c)
+        model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(colours=colours)

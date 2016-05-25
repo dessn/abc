@@ -2,6 +2,7 @@ from dessn.framework.samplers.scaffold import GenericSampler
 from dessn.utility.ptemcee import PTWrapper
 import logging
 import sys
+import os
 
 
 class ParallelTemperedSampler(GenericSampler):
@@ -45,18 +46,51 @@ class ParallelTemperedSampler(GenericSampler):
         self.num_steps = num_steps
         self.num_burn = num_burn
         self.temp_dir = temp_dir
+        if temp_dir is not None and not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
         self.save_interval = save_interval
         self.num_walkers = num_walkers
 
-    def fit(self, model):
+    def fit(self, kwargs):
         """ Runs the sampler over the model and returns the flat chain of results
 
+        Parameters
+        ----------
+        kwargs : dict
+            Containing the following information at a minimum:
+
+            - log_likelihood : function
+                A function which takes a list of parameters and returns
+                the log likelihood
+            - log_prior : function
+                A function which takes al ist of parameters and returns
+                the log prior
+            - start : function|list|ndarray
+                Either a starting position, or a function that can be called
+                to generate a starting position
+            - save_dims : int, optional
+                Only return values for the first ``save_dims`` parameters.
+                Useful to remove numerous marginalisation parameters if running
+                low on memory or hard drive space.
+            - uid : str, optional
+                A unique identifier used to differentiate different fits
+                if two fits both serialise their chains and use the
+                same temporary directory
         Returns
         -------
-        ndarray
-            The final flattened chain of dimensions
-            ``(num_dimensions, num_walkers * (num_steps - num_burn))``
+        dict
+            A dictionary with key "chains" containing the final
+            flattened chain of dimensions
+             ``(num_dimensions, num_walkers * (num_steps - num_burn))``
         """
+        log_likelihood = kwargs.get("log_likelihood")
+        log_prior = kwargs.get("log_prior")
+        start = kwargs.get("start")
+        save_dims = kwargs.get("save_dims")
+        uid = kwargs.get("uid")
+        assert log_likelihood is not None
+        assert log_prior is not None
+        assert start is not None
         from emcee.utils import MPIPool
         import emcee
         try:  # pragma: no cover
@@ -76,7 +110,10 @@ class ParallelTemperedSampler(GenericSampler):
             self.logger.info("Unable to start MPI pool, expected normal python execution")
             self.logger.info(str(e))
 
-        num_dim = len(model._theta_names)
+        if callable(start):
+            num_dim = start().size
+        else:
+            num_dim = start.size
         if self.num_walkers is None:
             self.num_walkers = num_dim * 4
             self.num_walkers = max(self.num_walkers, 50)
@@ -85,19 +122,19 @@ class ParallelTemperedSampler(GenericSampler):
 
         self.logger.info("Using PTSampler")
         sampler = emcee.PTSampler(self.num_temps, self.num_walkers, num_dim,
-                                        model.get_log_likelihood, model.get_log_prior,
-                                        pool=self.pool)
+                                  log_likelihood, log_prior, pool=self.pool)
 
         emcee_wrapper = PTWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(self.num_temps, self.num_steps, self.num_burn,
                                              self.num_walkers, num_dim,
-                                             start=model.get_starting_position,
-                                             save_dim=model._num_actual,
+                                             start=start,
+                                             save_dim=save_dims,
                                              temp_dir=self.temp_dir,
+                                             uid=uid,
                                              save_interval=self.save_interval)
         self.logger.debug("Fit finished")
         if self.pool is not None:  # pragma: no cover
             self.pool.close()
             self.logger.debug("Pool closed")
 
-        return flat_chain
+        return {"chain": flat_chain}

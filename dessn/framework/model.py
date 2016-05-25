@@ -52,7 +52,6 @@ class Model(object):
         self._num_actual = None
         self.data = []
         self._finalised = False
-        self.flat_chain = None
         self.num_temps = None
         self._labels = []
         self.master = True
@@ -513,21 +512,47 @@ class Model(object):
 
         return pgm
 
-    def fit(self, sampler):
-        """ Fits the model using the provided sampler and returns a :class:`.ChainConsumer`
-         """
+    def fit(self, sampler, chain_consumer=None):
+        """
+
+        Parameters
+        ----------
+        sampler : Sampler
+            The sampler to use
+        chain_consumer : ChainConsumer
+            The chain consumer to add results to. If not given,
+            creates a new chain consumer
+
+        Returns
+        -------
+        ChainConsumer
+            The chain consumer with the results added
+
+        """
         if not self._finalised:
             self.finalise()
-        self.flat_chain = sampler.fit(self)
-        return self.get_consumer()
+        kwargs = {"log_posterior": self.get_log_posterior,
+                  "log_prior": self.get_log_prior,
+                  "log_likelihood": self.get_log_likelihood,
+                  "start": self.get_starting_position,
+                  "save_dims": self._num_actual,
+                  "hypercube": self.get_hypercube_convert,
+                  "log_posterior_polychord": self.get_log_posterior_polychord,
+                  "num_dim": len(self._theta_names),
+                  "uid": self.model_name
+                  }
+        results = sampler.fit(kwargs)
+        return self.get_consumer(results, chain_consumer=chain_consumer)
 
-    def get_consumer(self):
-        from dessn.chain.chain import ChainConsumer
-        chain_plotter = ChainConsumer()
-        chain_plotter.add_chain(self.flat_chain,
-                                parameters=self._theta_labels[:self._num_actual],
-                                name=self.model_name)
-        return chain_plotter
+    def get_consumer(self, results, chain_consumer=None):
+        if chain_consumer is None:
+            from dessn.chain.chain import ChainConsumer
+            chain_consumer = ChainConsumer()
+        chain_consumer.add_chain(results["chain"],
+                                 weights=results.get("weights"),
+                                 parameters=self._theta_labels[:self._num_actual],
+                                 name=self.model_name)
+        return chain_consumer
 
     def __getstate__(self):  # pragma: no cover
         d = dict(self.__dict__)

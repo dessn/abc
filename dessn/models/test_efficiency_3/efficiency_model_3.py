@@ -1,7 +1,7 @@
 from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
-from dessn.framework.samplers.ensemble import EnsembleSampler
+from dessn.framework.samplers.metropolisHastings import MetropolisHastings
 from dessn.chain.chain import ChainConsumer
 
 import numpy as np
@@ -170,30 +170,25 @@ if __name__ == "__main__":
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
     c = ChainConsumer()
-    n = 5
+    n = 3
     colours = ["#D32F2F", "#1E88E5"] * n
     for i in range(n):
         mean, std, observed, errors, alpha = get_data(seed=i)
 
         model_un = EfficiencyModelUncorrected(observed, errors)
+        model_cor = EfficiencyModelCorrected(observed, errors, alpha)
 
         if i == 0:
             pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
             fig = model_un.get_pgm(pgm_file)
 
-        sampler = EnsembleSampler(num_steps=5000, num_burn=500, temp_dir=t % "no%d" % i)
-        chain = model_un.fit(sampler)
-        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
-
-        model_cor = EfficiencyModelCorrected(observed, errors, alpha)
-        sampler = EnsembleSampler(num_steps=5000, num_burn=500, temp_dir=t % "cor%d"%i)
-        chain = model_cor.fit(sampler)
-        c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
+        sampler = MetropolisHastings(num_steps=150000, temp_dir=t % i)
+        model_un.fit(sampler, chain_consumer=c)
+        model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=0.7, colours=colours)
-    c.configure_contour(sigmas=[0, 0.01, 1], contourf=True, contourf_alpha=0.3)
-
+    c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
     # c.plot_walks(filename=walk_file % "no", chain=1, truth=[mean, std])
     # c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
-    c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std])
+    c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)

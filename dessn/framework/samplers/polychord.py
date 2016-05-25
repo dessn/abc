@@ -31,18 +31,37 @@ class PolyChord(GenericSampler):  # pragma: no cover
         self.boost = boost
         self.num_repeats = num_repeats
 
-    def fit(self, model):
+    def fit(self, kwargs):
         """ Runs the sampler over the model and returns the flat chain of results
 
+        Parameters
+        ----------
+        kwargs : dict
+            Containing the following information at a minimum:
+
+            - log_posterior_polychord : function
+                A function which takes a list of parameters and returns
+                the log posterior and derived parameters (a tuple)
+            - hypercube : function
+                A function that takes a list of parameters in the range 0 to 1
+                and scales them to the correct ranges for the model
+            - num_dim : int
+                The number of dimensions in the model
         Returns
         -------
-        ndarray
-            The final flattened chain of dimensions
-            ``(num_dimensions, num_walkers * (num_steps - num_burn))``
+        dict
+            A dictionary with key "chains" containing the final
+            flattened chain of dimensions
+             ``(num_dimensions, num_walkers * (num_steps - num_burn))``
         """
+        log_posterior_polychord = kwargs.get("log_posterior_polychord")
+        hypercube = kwargs.get("hypercube")
+        num_dim = kwargs.get("num_dim")
+        assert log_posterior_polychord is not None
+        assert hypercube is not None
+        assert num_dim is not None
         import PyPolyChord
 
-        num_dim = len(model._theta_names)
         if self.num_repeats is None:
             self.num_repeats = 2 * num_dim
         self.logger.debug("Fitting framework with %d dimensions" % num_dim)
@@ -54,13 +73,13 @@ class PolyChord(GenericSampler):  # pragma: no cover
         if not os.path.exists(chain_dir):
             os.mkdir(chain_dir)
         print("Do it")
-        PyPolyChord.run_nested_sampling(model.get_log_posterior_polychord, num_dim, 0,
+        PyPolyChord.run_nested_sampling(log_posterior_polychord, num_dim, 0,
                                         base_dir=self.temp_dir,
-                                        prior=model.get_hypercube_convert,
+                                        prior=hypercube,
                                         file_root="chain",
                                         num_repeats=self.num_repeats,
                                         boost_posterior=self.boost)
 
         chain = np.loadtxt(self.temp_dir + os.sep + "chain_equal_weights.txt")
         self.logger.debug("Fit finished")
-        return chain[:, 2:]
+        return {"chain": chain[:, 2:]}

@@ -1,6 +1,7 @@
 from time import time
 import logging
 import numpy as np
+import os
 
 
 class PTWrapper(object):
@@ -10,7 +11,7 @@ class PTWrapper(object):
         self.chain = None
 
     def run_chain(self, num_temps, num_steps, num_burn, num_walkers, num_dim, start=None,
-                  save_interval=300, save_dim=None, temp_dir=None):
+                  save_interval=300, save_dim=None, temp_dir=None, uid="pt"):
         assert num_steps > num_burn, "num_steps has to be larger than num_burn"
         if save_dim is not None:
             assert save_dim <= num_dim, "You cannot save more dimensions than you actually have"
@@ -21,8 +22,8 @@ class PTWrapper(object):
         pos = None
         if temp_dir is not None:
             self.logger.debug("Looking in temp dir %s" % temp_dir)
-            chain_file = temp_dir + ".chain.npy"
-            position_file = temp_dir + ".pos.npy"
+            chain_file = temp_dir + os.sep + uid + "_pt.chain.npy"
+            position_file = temp_dir + os.sep + uid + "_pt.pos.npy"
             try:
                 pos = np.load(position_file)
                 past_chain = np.load(chain_file)
