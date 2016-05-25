@@ -382,7 +382,7 @@ class Model(object):
                 sigmas.append(suggestion)
         return sigmas
 
-    def _get_starting_position(self, num_walkers):
+    def get_starting_position(self, num_walkers=1, squeeze=True):
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
@@ -398,7 +398,10 @@ class Model(object):
         std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * \
               np.array(sigmas).reshape((1, -1))
         start = optimised + std
-        return start
+        if squeeze:
+            return start.squeeze()
+        else:
+            return start
 
     def _get_log_prior(self, theta_dict):
         result = []

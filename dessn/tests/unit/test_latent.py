@@ -117,9 +117,9 @@ class TestLatent(object):
     def test_starting_position(self):
         suggestion = self.model._get_suggestion()
         sigma = self.model._get_suggestion_sigma()
-        start1 = self.model._get_starting_position(1)
+        start1 = self.model.get_starting_position(1)
         assert start1.shape == (1, len(suggestion))
         assert np.all(start1 > np.array(suggestion) - np.array(sigma))
         assert np.all(start1 < np.array(suggestion) + np.array(sigma))
-        start2 = self.model._get_starting_position(10)
+        start2 = self.model.get_starting_position(10)
         assert start2.shape == (10, len(suggestion))

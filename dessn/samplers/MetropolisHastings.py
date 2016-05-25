@@ -4,6 +4,7 @@ import numpy as np
 from time import time
 import logging
 
+
 class MetropolisHastings(Sampler):
     """ Self tuning Metropolis Hastings Sampler
 
@@ -30,7 +31,7 @@ class MetropolisHastings(Sampler):
     save_dims : int, optional
         If given, the final chain will contain only the first ``save_dim`` parameters.
         Useful for discarding many nuisance parameters that would bloat the size of the chain.
-    desiredAcceptRatio : float, optional
+    accept_ratio : float, optional
         The desired acceptance ratio
     """
     def __init__(self, log_posterior, start, uid="mh", num_burn=10000, num_steps=10000, sigma_adjust=50,
@@ -76,10 +77,12 @@ class MetropolisHastings(Sampler):
         sigma = self._ensure_sigma(sigma, position)
 
         if chain is not None:
-            self._do_chain(position, sigma, covariance, chain=chain)
+            chain = self._do_chain(position, sigma, covariance, chain=chain)
         else:
             position, covariance = self._do_burnin(position, burnin, sigma, covariance)
-            self._do_chain(position, covariance)
+            chain = self._do_chain(position, covariance)
+
+        return chain
 
     def _do_chain(self, position, sigma, covariance, chain=None):
         dims = self.save_dims if self.save_dims is not None else position.size - self.space
@@ -101,19 +104,20 @@ class MetropolisHastings(Sampler):
                     (self._do_save and time() - last_save_time > self.save_interval):
                 self._save(position, None, chain[:, :current_step], None)
 
+        return chain
 
     def _do_burnin(self, position, burnin, sigma, covariance):
 
         if burnin is None:
             # Initialise burning to all zeros. 2 from posterior and step size
-            burnin = np.zeros((2 + position.size, self.num_burn))
+            burnin = np.zeros((position.size, self.num_burn))
+            burnin[:, 0] = position
         elif burnin.shape[1] < self.num_burn:
             # If we only saved part of the burnin to save size, add the rest in as zeros
-            burnin = np.vstack((burnin,
-                                np.zeros((2 + position.size, self.num_burn - burnin.shape[1]))))
+            burnin = np.vstack((burnin, np.zeros((position.size, self.num_burn - burnin.shape[1]))))
 
         if covariance is None:
-            covariance = np.identity(position.size)
+            covariance = np.identity(position.size - self.space)
 
         current_step = np.where(burnin[self.IND_S, :] == 0)[0][0]
 
@@ -121,14 +125,15 @@ class MetropolisHastings(Sampler):
 
         while current_step < self.num_burn:
             # If sigma adjust, adjust
-            if current_step % self.sigma_adjust == 0:
+            if current_step % self.sigma_adjust == 0 and current_step > 0:
                 burnin[self.IND_S, current_step] = self._adjust_sigma_ratio(burnin, current_step)
             # If covariance adjust, adjust
-            if current_step % self.covariance_adjust == 0:
+            if current_step % self.covariance_adjust == 0 and current_step > 0:
                 sigma, covariance = self._adjust_covariance(burnin, current_step)
 
             # Get next step
-            burnin[:, current_step] = self._get_next_step(position, sigma, covariance)
+            burnin[:, current_step] = self._get_next_step(burnin[:, current_step - 1],
+                                                          sigma, covariance, burnin=True)
 
             current_step += 1
 
@@ -150,41 +155,55 @@ class MetropolisHastings(Sampler):
                 position = self.start
             if type(position) == list:
                 position = np.array(position)
-            position = np.concatenate(([-np.inf, 1], position))
+            position = np.concatenate(([-np.inf, 1, 1], position))
             # Starting log posterior is infinitely unlikely, sigma size of 1 to begin with
         return position
 
     def _ensure_sigma(self, sigma, position):
         if sigma is None:
-            return np.ones(self.position.size - self.space)
+            return np.ones(position.size - self.space)
 
     def _adjust_sigma_ratio(self, burnin, index):
-        subsection = burnin[index - self.sigma_adjust:index]
+        subsection = burnin[:, index - self.sigma_adjust:index]
+        print("PP11 ", subsection.shape, burnin.shape, index)
         actual_ratio = 1 / np.average(subsection[self.IND_W, :])
 
-        sigma_ratio = burnin[self.IND_S, -1]
+        sigma_ratio = burnin[self.IND_S, index - 1]
         if actual_ratio < self.accept_ratio:
             sigma_ratio *= 0.9  # TODO: Improve for high dimensionality
         else:
-            sigma_ratio *= 0.9
+            sigma_ratio /= 0.9
         self.logger.debug("Adjusting sigma: Want %0.2f, got %0.2f. "
                           "Updating ratio to %0.3f" % (self.accept_ratio, actual_ratio, sigma_ratio))
         burnin[self.IND_S, index - 1] = sigma_ratio
 
     def _adjust_covariance(self, burnin, index):
         subset = burnin[:, int(np.floor(index/2)):index]
-        covariance = np.cov(subset[self.space + 1:, :], fweights=subset[self.IND_W, :])
+        covariance = np.cov(subset[self.space:, :], fweights=subset[self.IND_W, :])
         evals, evecs = np.linalg.eig(covariance)
         sigma = np.sqrt(np.abs(evals)) * 2.3 / np.sqrt(evals.size)
         burnin[self.IND_S, index - 1] = 0.5
         return sigma, evecs
 
     def _propose_point(self, position, sigma, covariance):
-        rotated_params = np.dot(position[self.space + 1], covariance)
-        new = rotated_params + sigma * position
+        rotated_params = np.dot(position[self.space:], covariance)
+        new_params = rotated_params + \
+                     sigma * position[self.IND_S] * np.random.normal(size=sigma.size)
+        return np.dot(covariance, new_params)
 
-    def _get_next_step(self, position, sigma, covariance):
-        pass
+    def _get_next_step(self, position, sigma, covariance, burnin=False):
+        attempts = 1
+        past_pot = position[self.IND_P]
+        while True:
+            pot = self._propose_point(position, sigma, covariance)
+            posterior = self.log_posterior(pot)
+            if posterior > past_pot or posterior - past_pot < np.random.uniform():
+                result = np.concatenate(([posterior, position[self.IND_S], 1], pot))
+                return result
+            else:
+                attempts += 1
+                if attempts > 100 and burnin:
+                    posterior[self.IND_S] *= 0.9
 
     def _load(self):
         position = None
@@ -199,6 +218,7 @@ class MetropolisHastings(Sampler):
         covariance = None
         if os.path.exists(self.covariance_file):
             covariance = np.load(self.covariance_file)
+        sigma = None
         if os.path.exists(self.sigma_file):
             sigma = np.load(self.sigma_file)
 

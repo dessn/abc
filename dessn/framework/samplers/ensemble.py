@@ -87,7 +87,7 @@ class EnsembleSampler(GenericSampler):
         emcee_wrapper = EmceeWrapper(sampler)
         flat_chain = emcee_wrapper.run_chain(self.num_steps, self.num_burn,
                                              self.num_walkers, num_dim,
-                                             start=model._get_starting_position,
+                                             start=model.get_starting_position,
                                              save_dim=model._num_actual,
                                              temp_dir=self.temp_dir,
                                              save_interval=self.save_interval)
