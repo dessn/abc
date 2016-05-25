@@ -117,7 +117,7 @@ class TestLatentList(object):
         suggestion = self.model._get_suggestion()
         sigma = self.model._get_suggestion_sigma()
         start1 = self.model.get_starting_position(1)
-        assert start1.shape == (1, len(suggestion))
+        assert start1.shape == (len(suggestion),)
         assert np.all(start1 > np.array(suggestion) - np.array(sigma))
         assert np.all(start1 < np.array(suggestion) + np.array(sigma))
         start2 = self.model.get_starting_position(10)

@@ -178,24 +178,27 @@ if __name__ == "__main__":
 
     model_un = EfficiencyModelUncorrected(observed, errors)
 
-    sampler = EnsembleSampler(num_steps=5000, num_burn=500, temp_dir=t2 % "no")
+    sampler = EnsembleSampler(num_steps=9000, num_burn=400, temp_dir=t2 % "no")
     chain = model_un.fit(sampler)
     c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
-    sampler = MetropolisHastings(model_un.get_log_posterior, model_un.get_starting_position,uid="no",
-                                 temp_dir=t, save_dims=model_un._num_actual, num_steps=30000)
+    sampler = MetropolisHastings(model_un.get_log_posterior, model_un.get_starting_position,
+                                 uid="no", temp_dir=t, save_dims=model_un._num_actual,
+                                 num_steps=90000, num_burn=30000)
     chain, weights = sampler.fit()
     c.add_chain(chain, weights=weights, name="Uncorrected MH")
     #
     model_cor = EfficiencyModelCorrected(observed, errors, alpha)
 
-    sampler = EnsembleSampler(num_steps=5000, num_burn=500, temp_dir=t2 % "cor")
+    sampler = EnsembleSampler(num_steps=9000, num_burn=400, temp_dir=t2 % "cor")
     chain = model_cor.fit(sampler)
     c.add_chain(chain.chains[0], name=chain.names[0], parameters=chain.default_parameters)
 
 
     sampler = MetropolisHastings(model_cor.get_log_posterior, model_cor.get_starting_position,uid="cor",
-                                 temp_dir=t, save_dims=model_cor._num_actual, num_steps=30000)
+                                 temp_dir=t, save_dims=model_cor._num_actual,
+                                 num_steps=90000, num_burn=30000)
+
     chain, weights = sampler.fit()
     c.add_chain(chain, weights=weights, name="Corrected MH")
 

@@ -34,7 +34,7 @@ class PTWrapper(object):
             raise ValueError("You need to have either a starting function or existing chains")
 
         if pos is None:
-            pos = np.array([start(num_walkers) for i in range(num_temps)])
+            pos = np.array([start(num_walkers=num_walkers) for i in range(num_temps)])
         step = 0
         self.chain = np.zeros((num_temps, num_walkers, num_steps, save_dim))
         if past_chain is not None:

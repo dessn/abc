@@ -398,8 +398,8 @@ class Model(object):
         std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * \
               np.array(sigmas).reshape((1, -1))
         start = optimised + std
-        if squeeze:
-            return start.squeeze()
+        if squeeze and num_walkers == 1:
+            return start.squeeze(axis=0)
         else:
             return start
 

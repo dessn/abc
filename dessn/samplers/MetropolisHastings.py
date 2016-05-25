@@ -73,7 +73,7 @@ class MetropolisHastings(Sampler):
         position, burnin, chain, covariance, sigma = self._load()
         position = self._ensure_position(position)
         sigma = self._ensure_sigma(sigma, position)
-        if chain is not None:
+        if chain is not None and burnin.shape[0] == self.num_burn:
             res = self._do_chain(position, sigma, covariance, chain=chain)
         else:
             position, covariance, sigma = self._do_burnin(position, burnin, sigma, covariance)
