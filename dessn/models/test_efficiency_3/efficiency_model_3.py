@@ -1,14 +1,17 @@
 from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
+from dessn.framework.samplers.batch import BatchMetroploisHastings
 from dessn.framework.samplers.metropolisHastings import MetropolisHastings
 from dessn.chain.chain import ChainConsumer
+from dessn.utility.viewer import Viewer
 
 import numpy as np
 import os
 import logging
 from scipy.special import erf
 from scipy.integrate import simps
+
 
 class ObservedPoints(ParameterObserved):
     def __init__(self, data):
@@ -90,7 +93,7 @@ class BiasCorrection(Edge):
         super().__init__(["data_error", "point"], ["mean", "sigma"])
         self.factor = np.log(np.sqrt(2 * np.pi))
         self.threshold = threshold
-        self.arr = np.linspace(-3, 3, 100)
+        self.arr = np.linspace(-4, 4, 300)
         self.gauss = (1 / (np.sqrt(2 * np.pi))) * np.exp(-(self.arr * self.arr) / 2)
 
     def get_log_likelihood(self, data):
@@ -123,8 +126,8 @@ class ToUnderlying(Edge):
 
 
 class EfficiencyModelUncorrected(Model):
-    def __init__(self, realised, realised_errors, seed=0):
-        super().__init__("Uncorrected")
+    def __init__(self, realised, realised_errors, seed=0, name="Uncorrected"):
+        super().__init__(name)
         np.random.seed(seed)
         self.add_node(ObservedError(realised_errors))
         self.add_node(ObservedPoints(realised))
@@ -137,8 +140,8 @@ class EfficiencyModelUncorrected(Model):
 
 
 class EfficiencyModelCorrected(Model):
-    def __init__(self, realised, realised_errors, threshold, seed=0):
-        super().__init__("Corrected")
+    def __init__(self, realised, realised_errors, threshold, seed=0, name="Corrected"):
+        super().__init__(name)
         np.random.seed(seed)
         self.add_node(ObservedError(realised_errors))
         self.add_node(ObservedPoints(realised))
@@ -156,7 +159,7 @@ def get_data(seed=5):
     mean = 100.0
     std = 20.0
     alpha = 3.75
-    n = 600
+    n = 400
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
@@ -167,7 +170,7 @@ def get_data(seed=5):
     mask = ston > alpha
     print(mask.sum(), n, observed[mask].mean())
 
-    return mean, std, observed[mask], errors[mask], alpha, actual
+    return mean, std, observed[mask], errors[mask], alpha, actual, observed, errors
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -176,37 +179,37 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
+    # model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
+    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    # fig = model_un.get_pgm(pgm_file)
+
     c = ChainConsumer()
-    n = 7
-    colours = ["#D32F2F", "#1E88E5"] * n
+    v = Viewer([[80, 120], [10, 40]], parameters=[r"$\mu$", r"$\sigma$"], truth=[100, 20])
+
+    n = 1
+    colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
-        mean, std, observed, errors, alpha, actual = get_data(seed=i)
+        mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=i)
         theta = [mean, std] + actual.tolist()
-        model_un = EfficiencyModelUncorrected(observed, errors)
-        model_cor = EfficiencyModelCorrected(observed, errors, alpha)
 
-        if i == 0:
-            pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-            fig = model_un.get_pgm(pgm_file)
+        model_un = EfficiencyModelUncorrected(observed, errors, name="Uncorrected")
+        model_good = EfficiencyModelUncorrected(uo, oe, name="Good")
+        model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected")
 
-        sampler = MetropolisHastings(num_steps=50000, num_burn=20000, temp_dir=t % i,
-                                     covariance_adjust=4000)
+        kwargs = {"num_steps": 40000, "num_burn": 12000}
+        sampler = BatchMetroploisHastings(num_walkers=8, kwargs=kwargs, temp_dir=t % i)
+
+        model_good.fit(sampler, chain_consumer=c)
         model_un.fit(sampler, chain_consumer=c)
-        print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-1][-1, 0])
         model_cor.fit(sampler, chain_consumer=c)
+        print("Good ", model_un.get_log_posterior(theta), c.chains[-3][-1, 0])
+        print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-2][-1, 0])
         print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
 
     c.configure_bar(shade=True)
-    c.configure_general(bins=1.5, colours=colours)
+    c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    # c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
-    # c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
+    c.plot_walks(filename=walk_file % "good", chain=0, truth=[mean, std])
+    c.plot_walks(filename=walk_file % "un", chain=1, truth=[mean, std])
+    c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
     c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)
-
-    # import matplotlib.pyplot as plt
-    # plt.clf()
-    # for w in c.weights:
-    #     plt.hist(w, alpha=0.3)
-    #     # plt.plot(w, '.', alpha=0.2)
-    #     print(np.mean(w))
-    # plt.show()

@@ -22,10 +22,14 @@ class MetropolisHastings(GenericSampler):
         The location of a folder to save the results, such as the last position and chain
     accept_ratio : float, optional
         The desired acceptance ratio
+    callback : function, optional
+        If set, passes the log posterior, position and weight for each step in the burn
+        in and the chain to the function. Useful for plotting the walks whilst the
+        chain is running.
     """
     def __init__(self, num_burn=10000, num_steps=10000,
                  sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
-                 save_interval=60, accept_ratio=0.4):
+                 save_interval=300, accept_ratio=0.4, callback=None):
         self.temp_dir = temp_dir
         if temp_dir is not None and not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
@@ -33,6 +37,7 @@ class MetropolisHastings(GenericSampler):
         self.log_posterior = None
         self.start = None
         self.save_dims = None
+        self.callback = callback
 
         self.num_burn = num_burn
         self.num_steps = num_steps
@@ -50,7 +55,6 @@ class MetropolisHastings(GenericSampler):
         self.burn_file = None
         self.chain_file = None
         self.covariance_file = None
-        self.sigma_file = None
 
     def fit(self, kwargs):
         """
@@ -61,9 +65,9 @@ class MetropolisHastings(GenericSampler):
         kwargs : dict
             Containing the following information at a minimum:
 
-            - log_posterior : function
-                A function which takes a list of parameters and returns
-                the log posterior
+            - model : object
+                Model must implement a ``get_log_posterior`` method which
+                takes a list of parameters and returns the log posterior
             - start : function|list|ndarray
                 Either a starting position, or a function that can be called
                 to generate a starting position
@@ -81,33 +85,34 @@ class MetropolisHastings(GenericSampler):
         dict
             A dictionary containing the chain and the weights
         """
-        log_posterior = kwargs.get("log_posterior")
+        log_posterior = kwargs.get("model").get_log_posterior
         start = kwargs.get("start")
         save_dims = kwargs.get("save_dims")
         uid = kwargs.get("uid")
         assert log_posterior is not None
         assert start is not None
-
+        if uid is None:
+            uid = "mh"
         self._update_temp_files(uid)
         self.save_dims = save_dims
         self.log_posterior = log_posterior
         self.start = start
-        position, burnin, chain, covariance, sigma = self._load()
+        position, burnin, chain, covariance = self._load()
         if burnin is not None:
             self.logger.debug("Found burnin of size %d" % burnin.shape[0])
         if chain is not None:
             self.logger.debug("Found chain of size %d" % chain.shape[0])
         position = self._ensure_position(position)
-        sigma = self._ensure_sigma(sigma, position)
+
         if chain is not None and burnin.shape[0] == self.num_burn:
-            c, w = self._do_chain(position, sigma, covariance, chain=chain)
+            c, w = self._do_chain(position, covariance, chain=chain)
         else:
-            position, covariance, sigma = self._do_burnin(position, burnin, sigma, covariance)
-            c, w = self._do_chain(position, sigma, covariance)
+            position, covariance = self._do_burnin(position, burnin, covariance)
+            c, w = self._do_chain(position, covariance)
         self.logger.info("Returning results")
         return {"chain": c, "weights": w}
 
-    def _do_burnin(self, position, burnin, sigma, covariance):
+    def _do_burnin(self, position, burnin, covariance):
         if burnin is None:
             # Initialise burning to all zeros. 2 from posterior and step size
             burnin = np.zeros((self.num_burn, position.size))
@@ -131,22 +136,26 @@ class MetropolisHastings(GenericSampler):
                 burnin[current_step, self.IND_S] = self._adjust_sigma_ratio(burnin, current_step)
             # If covariance adjust, adjust
             if current_step % self.covariance_adjust == 0 and current_step > 0:
-                sigma, covariance = self._adjust_covariance(burnin, current_step)
+                covariance = self._adjust_covariance(burnin, current_step)
 
             # Get next step
             burnin[current_step, :], weight = self._get_next_step(burnin[current_step - 1, :],
-                                                          sigma, covariance, burnin=True)
+                                                          covariance, burnin=True)
             burnin[current_step - 1, self.IND_W] = weight
+            if self.callback is not None:
+                self.callback(burnin[current_step - 1, self.IND_P],
+                              burnin[current_step - 1, self.space:self.space + self.save_dims],
+                              weight=burnin[current_step - 1, self.IND_W])
             current_step += 1
             if current_step == self.num_burn or \
                     (self._do_save and (time() - last_save_time) > self.save_interval):
                 self._save(burnin[current_step - 1, :], burnin[:current_step, :],
-                           None, covariance, sigma)
+                           None, covariance)
                 last_save_time = time()
 
-        return burnin[-1, :], covariance, sigma
+        return burnin[-1, :], covariance
 
-    def _do_chain(self, position, sigma, covariance, chain=None):
+    def _do_chain(self, position, covariance, chain=None):
         dims = self.save_dims if self.save_dims is not None else position.size - self.space
         size = dims + self.space
         if chain is None:
@@ -162,13 +171,16 @@ class MetropolisHastings(GenericSampler):
         last_save_time = time()
         self.logger.info("Starting chain")
         while current_step < self.num_steps:
-            position, weight = self._get_next_step(position, sigma, covariance)
+            position, weight = self._get_next_step(position, covariance)
             chain[current_step, :] = position[:size]
             chain[current_step - 1, self.IND_W] = weight
+            if self.callback is not None:
+                self.callback(chain[current_step - 1, self.IND_P], chain[current_step - 1, self.space:],
+                              weight=chain[current_step - 1, self.IND_W])
             current_step += 1
             if current_step == self.num_steps or \
                     (self._do_save and (time() - last_save_time) > self.save_interval):
-                self._save(position, None, chain[:current_step, :], None, None)
+                self._save(position, None, chain[:current_step, :], None)
                 last_save_time = time()
         return chain[:, self.space:], chain[:, self.IND_W]
 
@@ -178,7 +190,6 @@ class MetropolisHastings(GenericSampler):
             self.burn_file = self.temp_dir + os.sep + "%s_mh_burn.npy" % uid
             self.chain_file = self.temp_dir + os.sep + "%s_mh_chain.npy" % uid
             self.covariance_file = self.temp_dir + os.sep + "%s_mh_covariance.npy" % uid
-            self.sigma_file = self.temp_dir + os.sep + "%s_mh_sigma.npy" % uid
 
     def _ensure_position(self, position):
         """ Ensures that the position object, which can be none from loading, is a
@@ -192,13 +203,8 @@ class MetropolisHastings(GenericSampler):
             if type(position) == list:
                 position = np.array(position)
             position = np.concatenate(([self.log_posterior(position), 1, 1], position))
-            # Starting log posterior is infinitely unlikely, sigma size of 1 to begin with
+            # Starting log posterior is infinitely unlikely, sigma ratio of 1 to begin with
         return position
-
-    def _ensure_sigma(self, sigma, position):
-        if sigma is None:
-            return np.ones(position.size - self.space)
-        return sigma
 
     def _adjust_sigma_ratio(self, burnin, index):
         subsection = burnin[index - self.sigma_adjust:index, :]
@@ -216,27 +222,22 @@ class MetropolisHastings(GenericSampler):
     def _adjust_covariance(self, burnin, index):
         subset = burnin[int(np.floor(index/2)):index, :]
         covariance = np.cov(subset[:, self.space:].T, fweights=subset[:, self.IND_W])
-        evals, evecs = np.linalg.eig(covariance)
-        sigma = np.sqrt(np.abs(evals)) * 2.3 / np.sqrt(evals.size)
+        res = np.linalg.cholesky(covariance)
         self.logger.debug("Adjusting covariance and resetting sigma ratio")
-        return sigma, np.linalg.cholesky(covariance)
+        return res
 
-    def _propose_point(self, position, sigma, covariance):
+    def _propose_point(self, position, covariance):
         p = position[self.space:]
         eta = np.random.normal(size=p.size)
         step = np.dot(covariance, eta) * position[self.IND_S]
         return p + step
-        # rotated_params = np.dot(position[self.space:], covariance)
-        # new_params = rotated_params + \
-        #              sigma * position[self.IND_S] * np.random.normal(size=sigma.size)
-        # return np.dot(covariance, new_params)
 
-    def _get_next_step(self, position, sigma, covariance, burnin=False):
+    def _get_next_step(self, position, covariance, burnin=False):
         attempts = 1
         counter = 1
         past_pot = position[self.IND_P]
         while True:
-            pot = self._propose_point(position, sigma, covariance)
+            pot = self._propose_point(position, covariance)
             posterior = self.log_posterior(pot)
             if posterior > past_pot or np.exp(posterior - past_pot) > np.random.uniform():
                 result = np.concatenate(([posterior, position[self.IND_S], 1], pot))
@@ -250,23 +251,20 @@ class MetropolisHastings(GenericSampler):
 
     def _load(self):
         position = None
-        if os.path.exists(self.position_file):
+        if self.position_file is not None and os.path.exists(self.position_file):
             position = np.load(self.position_file)
         burnin = None
-        if os.path.exists(self.burn_file):
+        if self.burn_file is not None and os.path.exists(self.burn_file):
             burnin = np.load(self.burn_file)
         chain = None
-        if os.path.exists(self.chain_file):
+        if self.chain_file is not None and os.path.exists(self.chain_file):
             chain = np.load(self.chain_file)
         covariance = None
-        if os.path.exists(self.covariance_file):
+        if self.covariance_file is not None and os.path.exists(self.covariance_file):
             covariance = np.load(self.covariance_file)
-        sigma = None
-        if os.path.exists(self.sigma_file):
-            sigma = np.load(self.sigma_file)
-        return position, burnin, chain, covariance, sigma
+        return position, burnin, chain, covariance
 
-    def _save(self, position, burnin, chain, covariance, sigma):
+    def _save(self, position, burnin, chain, covariance):
         if burnin is not None:
             self.logger.info("Serialising results to file. Burnin has %d steps" % burnin.shape[0])
         if chain is not None:
@@ -279,6 +277,5 @@ class MetropolisHastings(GenericSampler):
             np.save(self.chain_file, chain)
         if covariance is not None:
             np.save(self.covariance_file, covariance)
-        if sigma is not None:
-            np.save(self.sigma_file, sigma)
+
 

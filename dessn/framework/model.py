@@ -531,15 +531,17 @@ class Model(object):
         """
         if not self._finalised:
             self.finalise()
-        kwargs = {"log_posterior": self.get_log_posterior,
-                  "log_prior": self.get_log_prior,
-                  "log_likelihood": self.get_log_likelihood,
+        kwargs = {
+                  # "log_posterior": self.get_log_posterior,
+                  # "log_prior": self.get_log_prior,
+                  # "log_likelihood": self.get_log_likelihood,
                   "start": self.get_starting_position,
                   "save_dims": self._num_actual,
-                  "hypercube": self.get_hypercube_convert,
-                  "log_posterior_polychord": self.get_log_posterior_polychord,
+                  # "hypercube": self.get_hypercube_convert,
+                  # "log_posterior_polychord": self.get_log_posterior_polychord,
                   "num_dim": len(self._theta_names),
-                  "uid": self.model_name
+                  "uid": self.model_name,
+                  "model": self
                   }
         results = sampler.fit(kwargs)
         return self.get_consumer(results, chain_consumer=chain_consumer)
@@ -565,10 +567,10 @@ class Model(object):
             self.logger = logging.getLogger(__name__)
 
 
-def _pickle_method(m):  # pragma: no cover
-    if m.im_self is None:
-        return getattr, (m.im_class, m.im_func.func_name)
-    else:
-        return getattr, (m.im_self, m.im_func.func_name)
-
-copyreg.pickle(types.MethodType, _pickle_method)
+# def _pickle_method(m):  # pragma: no cover
+#     if m.im_self is None:
+#         return getattr, (m.im_class, m.im_func.func_name)
+#     else:
+#         return getattr, (m.im_self, m.im_func.func_name)
+#
+# copyreg.pickle(types.MethodType, _pickle_method)
