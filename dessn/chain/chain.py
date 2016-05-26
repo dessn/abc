@@ -30,7 +30,6 @@ class ChainConsumer(object):
         self.parameters_truth = {}
         self.parameters_general = {}
 
-
     def add_chain(self, chain, parameters=None, name=None, weights=None):
         """ Add a chain to the consumer.
 

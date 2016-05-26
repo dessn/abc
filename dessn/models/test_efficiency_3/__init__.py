@@ -107,7 +107,7 @@ In terms of implementation details, as :math:`\alpha` and :math:`\epsilon` are f
 at the start of the model, we can precompute
 
 We can not implement this correction, and then implement it, and hopefully see that the
-recovered underlying distribution becomes unbiased. This is not currently the case.
+recovered underlying distribution becomes unbiased.
 
 The model PGM:
 

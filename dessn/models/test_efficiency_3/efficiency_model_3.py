@@ -156,7 +156,7 @@ def get_data(seed=5):
     mean = 100.0
     std = 20.0
     alpha = 3.5
-    n = 500
+    n = 300
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
@@ -167,21 +167,21 @@ def get_data(seed=5):
     mask = ston > alpha
     print(mask.sum(), n, observed[mask].mean())
 
-    return mean, std, observed[mask], errors[mask], alpha
+    return mean, std, observed[mask], errors[mask], alpha, actual
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     dir_name = os.path.dirname(__file__)
     t = os.path.abspath(dir_name + "/output/data_%s")
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
     c = ChainConsumer()
-    n = 4
+    n = 3
     colours = ["#D32F2F", "#1E88E5"] * n
     for i in range(n):
-        mean, std, observed, errors, alpha = get_data(seed=i)
-
+        mean, std, observed, errors, alpha, actual = get_data(seed=i)
+        theta = [mean, std] + actual.tolist()
         model_un = EfficiencyModelUncorrected(observed, errors)
         model_cor = EfficiencyModelCorrected(observed, errors, alpha)
 
@@ -189,12 +189,16 @@ if __name__ == "__main__":
             pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
             fig = model_un.get_pgm(pgm_file)
 
-        sampler = MetropolisHastings(num_steps=10000, num_burn=20000, temp_dir=t % i)
+        sampler = MetropolisHastings(num_steps=200000, num_burn=10000, temp_dir=t % i)
         model_un.fit(sampler, chain_consumer=c)
+        print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-1][-1, 0])
         model_cor.fit(sampler, chain_consumer=c)
+        print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
 
     c.configure_bar(shade=True)
     c.configure_general(bins=2.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
+    c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
     c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
     c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)
+

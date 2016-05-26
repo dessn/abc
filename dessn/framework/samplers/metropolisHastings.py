@@ -25,7 +25,7 @@ class MetropolisHastings(GenericSampler):
     """
     def __init__(self, num_burn=10000, num_steps=10000,
                  sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
-                 save_interval=300, accept_ratio=0.4):
+                 save_interval=60, accept_ratio=0.4):
         self.temp_dir = temp_dir
         if temp_dir is not None and not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
@@ -104,7 +104,7 @@ class MetropolisHastings(GenericSampler):
         else:
             position, covariance, sigma = self._do_burnin(position, burnin, sigma, covariance)
             c, w = self._do_chain(position, sigma, covariance)
-        self.logger.debug("Returning results")
+        self.logger.info("Returning results")
         return {"chain": c, "weights": w}
 
     def _do_burnin(self, position, burnin, sigma, covariance):
@@ -123,7 +123,7 @@ class MetropolisHastings(GenericSampler):
             covariance = np.identity(position.size - self.space)
 
         last_save_time = time()
-        self.logger.debug("Starting burn in")
+        self.logger.info("Starting burn in")
         while current_step < self.num_burn:
             # If sigma adjust, adjust
             if current_step % self.sigma_adjust == 0 and current_step > 0:
@@ -138,7 +138,7 @@ class MetropolisHastings(GenericSampler):
             burnin[current_step - 1, self.IND_W] = weight
             current_step += 1
             if current_step == self.num_burn or \
-                    (self._do_save and time() - last_save_time > self.save_interval):
+                    (self._do_save and (time() - last_save_time) > self.save_interval):
                 self._save(burnin[current_step - 1, :], burnin[:current_step, :],
                            None, covariance, sigma)
                 last_save_time = time()
@@ -159,16 +159,16 @@ class MetropolisHastings(GenericSampler):
             current_step = self.num_steps
 
         last_save_time = time()
-        self.logger.debug("Starting chain")
+        self.logger.info("Starting chain")
         while current_step < self.num_steps:
             position, weight = self._get_next_step(position, sigma, covariance)
-            chain[current_step - 1, self.IND_W] += 1
             chain[current_step, :] = position[:size]
+            chain[current_step - 1, self.IND_W] = weight
             current_step += 1
             if current_step == self.num_steps or \
-                    (self._do_save and time() - last_save_time > self.save_interval):
+                    (self._do_save and (time() - last_save_time) > self.save_interval):
                 self._save(position, None, chain[:current_step, :], None, None)
-
+                last_save_time = time()
         return chain[:, self.space:], chain[:, self.IND_W]
 
     def _update_temp_files(self, uid):
@@ -232,8 +232,6 @@ class MetropolisHastings(GenericSampler):
         while True:
             pot = self._propose_point(position, sigma, covariance)
             posterior = self.log_posterior(pot)
-
-            # print(posterior, past_pot, posterior > past_pot, np.exp(posterior - past_pot))
             if posterior > past_pot or np.exp(posterior - past_pot) > np.random.uniform():
                 result = np.concatenate(([posterior, position[self.IND_S], 1], pot))
                 return result, attempts
@@ -261,7 +259,10 @@ class MetropolisHastings(GenericSampler):
         return position, burnin, chain, covariance, sigma
 
     def _save(self, position, burnin, chain, covariance, sigma):
-        self.logger.debug("Serialising results to file")
+        if burnin is not None:
+            self.logger.info("Serialising results to file. Burnin has %d steps" % burnin.shape[0])
+        if chain is not None:
+            self.logger.info("Serialising results to file. Chain has %d steps" % chain.shape[0])
         if position is not None:
             np.save(self.position_file, position)
         if burnin is not None:
