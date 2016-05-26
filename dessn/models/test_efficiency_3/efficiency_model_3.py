@@ -155,8 +155,8 @@ def get_data(seed=5):
     np.random.seed(seed=seed)
     mean = 100.0
     std = 20.0
-    alpha = 3.5
-    n = 300
+    alpha = 3.75
+    n = 600
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
     c = ChainConsumer()
-    n = 3
+    n = 7
     colours = ["#D32F2F", "#1E88E5"] * n
     for i in range(n):
         mean, std, observed, errors, alpha, actual = get_data(seed=i)
@@ -189,16 +189,24 @@ if __name__ == "__main__":
             pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
             fig = model_un.get_pgm(pgm_file)
 
-        sampler = MetropolisHastings(num_steps=200000, num_burn=10000, temp_dir=t % i)
+        sampler = MetropolisHastings(num_steps=50000, num_burn=20000, temp_dir=t % i,
+                                     covariance_adjust=4000)
         model_un.fit(sampler, chain_consumer=c)
         print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-1][-1, 0])
         model_cor.fit(sampler, chain_consumer=c)
         print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
 
     c.configure_bar(shade=True)
-    c.configure_general(bins=2.0, colours=colours)
+    c.configure_general(bins=1.5, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
-    c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
+    # c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
+    # c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
     c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)
 
+    # import matplotlib.pyplot as plt
+    # plt.clf()
+    # for w in c.weights:
+    #     plt.hist(w, alpha=0.3)
+    #     # plt.plot(w, '.', alpha=0.2)
+    #     print(np.mean(w))
+    # plt.show()

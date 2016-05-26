@@ -36,7 +36,7 @@ class MetropolisHastings(GenericSampler):
 
         self.num_burn = num_burn
         self.num_steps = num_steps
-        self.sigma_adjust = sigma_adjust
+        self.sigma_adjust = sigma_adjust # Also should be at least 5 x num_dim
         self.covariance_adjust = covariance_adjust
         self.save_interval = save_interval
         self.accept_ratio = accept_ratio
@@ -119,6 +119,7 @@ class MetropolisHastings(GenericSampler):
             burnin = np.vstack((burnin, np.zeros((self.num_burn - burnin.shape[0], position.size))))
         else:
             current_step = self.num_burn
+        num_dim = position.size - self.space
         if covariance is None:
             covariance = np.identity(position.size - self.space)
 
@@ -126,7 +127,7 @@ class MetropolisHastings(GenericSampler):
         self.logger.info("Starting burn in")
         while current_step < self.num_burn:
             # If sigma adjust, adjust
-            if current_step % self.sigma_adjust == 0 and current_step > 0:
+            if current_step % self.sigma_adjust == 0 and current_step > num_dim * 5:
                 burnin[current_step, self.IND_S] = self._adjust_sigma_ratio(burnin, current_step)
             # If covariance adjust, adjust
             if current_step % self.covariance_adjust == 0 and current_step > 0:
@@ -217,17 +218,22 @@ class MetropolisHastings(GenericSampler):
         covariance = np.cov(subset[:, self.space:].T, fweights=subset[:, self.IND_W])
         evals, evecs = np.linalg.eig(covariance)
         sigma = np.sqrt(np.abs(evals)) * 2.3 / np.sqrt(evals.size)
-        self.logger.debug("Adjusting covariance and reseting sigma ratio")
-        return sigma, evecs
+        self.logger.debug("Adjusting covariance and resetting sigma ratio")
+        return sigma, np.linalg.cholesky(covariance)
 
     def _propose_point(self, position, sigma, covariance):
-        rotated_params = np.dot(position[self.space:], covariance)
-        new_params = rotated_params + \
-                     sigma * position[self.IND_S] * np.random.normal(size=sigma.size)
-        return np.dot(covariance, new_params)
+        p = position[self.space:]
+        eta = np.random.normal(size=p.size)
+        step = np.dot(covariance, eta) * position[self.IND_S]
+        return p + step
+        # rotated_params = np.dot(position[self.space:], covariance)
+        # new_params = rotated_params + \
+        #              sigma * position[self.IND_S] * np.random.normal(size=sigma.size)
+        # return np.dot(covariance, new_params)
 
     def _get_next_step(self, position, sigma, covariance, burnin=False):
         attempts = 1
+        counter = 1
         past_pot = position[self.IND_P]
         while True:
             pot = self._propose_point(position, sigma, covariance)
@@ -237,8 +243,10 @@ class MetropolisHastings(GenericSampler):
                 return result, attempts
             else:
                 attempts += 1
-                if attempts > 100 and burnin:
+                counter += 1
+                if counter > 50 and burnin:
                     position[self.IND_S] *= 0.9
+                    counter = 0
 
     def _load(self):
         position = None
