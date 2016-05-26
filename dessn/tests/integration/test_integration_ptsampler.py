@@ -39,7 +39,7 @@ def test_fit():
     m.add_node(Observed())
     m.add_edge(TheEdge())
     np.random.seed(0)
-    sampler = ParallelTemperedSampler(num_steps=4600, num_burn=600)
+    sampler = ParallelTemperedSampler(num_steps=1000, num_burn=600)
     consumer = m.fit(sampler)
     consumer.configure_general(kde=True)
     summary = np.array(consumer.get_summary()[0]["mean"])

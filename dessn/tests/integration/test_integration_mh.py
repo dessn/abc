@@ -1,7 +1,11 @@
 from ...framework.model import Model
 from ...framework.parameter import ParameterUnderlying, ParameterObserved
 from ...framework.edge import Edge
-from ...framework.samplers.ensemble import EnsembleSampler
+from ...framework.samplers.metropolisHastings import MetropolisHastings
+# from dessn.framework.model import Model
+# from dessn.framework.parameter import ParameterUnderlying, ParameterObserved
+# from dessn.framework.edge import Edge
+# from dessn.framework.samplers.metropolisHastings import MetropolisHastings
 import numpy as np
 
 
@@ -39,9 +43,9 @@ def test_fit():
     m.add_node(Observed())
     m.add_edge(TheEdge())
     np.random.seed(0)
-    sampler = EnsembleSampler(num_steps=2000, num_burn=600)
+    sampler = MetropolisHastings(num_steps=20000, num_burn=1500)
     consumer = m.fit(sampler)
-    consumer.configure_general(kde=True)
+    consumer.configure_general(bins=1.2)
     summary = np.array(consumer.get_summary()[0]["mean"])
     summary[1] = np.mean(consumer.chains[0])
     expected = np.array([-1.0, 0.0, 1.0])

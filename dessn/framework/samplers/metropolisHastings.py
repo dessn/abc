@@ -65,9 +65,9 @@ class MetropolisHastings(GenericSampler):
         kwargs : dict
             Containing the following information at a minimum:
 
-            - model : object
-                Model must implement a ``get_log_posterior`` method which
-                takes a list of parameters and returns the log posterior
+            - log_posterior : function
+                A function that takes a list of parameters and returns the
+                log posterior
             - start : function|list|ndarray
                 Either a starting position, or a function that can be called
                 to generate a starting position
@@ -85,7 +85,7 @@ class MetropolisHastings(GenericSampler):
         dict
             A dictionary containing the chain and the weights
         """
-        log_posterior = kwargs.get("model").get_log_posterior
+        log_posterior = kwargs.get("log_posterior")
         start = kwargs.get("start")
         save_dims = kwargs.get("save_dims")
         uid = kwargs.get("uid")
@@ -220,6 +220,9 @@ class MetropolisHastings(GenericSampler):
         burnin[index - 1, self.IND_S] = sigma_ratio
 
     def _adjust_covariance(self, burnin, index):
+        params = burnin.shape[1] - self.space
+        if params == 1:
+            return np.ones((1,1))
         subset = burnin[int(np.floor(index/2)):index, :]
         covariance = np.cov(subset[:, self.space:].T, fweights=subset[:, self.IND_W])
         res = np.linalg.cholesky(covariance)
@@ -265,17 +268,15 @@ class MetropolisHastings(GenericSampler):
         return position, burnin, chain, covariance
 
     def _save(self, position, burnin, chain, covariance):
-        if burnin is not None:
-            self.logger.info("Serialising results to file. Burnin has %d steps" % burnin.shape[0])
-        if chain is not None:
-            self.logger.info("Serialising results to file. Chain has %d steps" % chain.shape[0])
-        if position is not None:
+        if position is not None and self.position_file is not None:
             np.save(self.position_file, position)
-        if burnin is not None:
+        if burnin is not None and self.burn_file is not None:
+            self.logger.info("Serialising results to file. Burnin has %d steps" % burnin.shape[0])
             np.save(self.burn_file, burnin)
-        if chain is not None:
+        if chain is not None and self.chain_file is not None:
+            self.logger.info("Serialising results to file. Chain has %d steps" % chain.shape[0])
             np.save(self.chain_file, chain)
-        if covariance is not None:
+        if covariance is not None and self.covariance_file is not None:
             np.save(self.covariance_file, covariance)
 
 

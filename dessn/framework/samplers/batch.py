@@ -37,11 +37,14 @@ class BatchMetroploisHastings(GenericSampler):
         if self.kwargs is None:
             self.kwargs = {}
 
-    def fit(self, kwargs):
+    def fit_all(self, kwargs):
         res = Parallel(n_jobs=self.num_cores)(delayed(fit_sampler)(
             self.sampler, self.kwargs, self.walker_temp_dirs[i], kwargs)
                                               for i in range(self.num_walkers))
-        self.final = res
+        return res
+
+    def fit(self, kwargs):
+        res = self.fit_all(kwargs)
         chain = np.vstack(tuple([r["chain"] for r in res]))
         result = {"chain": chain}
         if res[0].get("weights") is not None:

@@ -196,7 +196,7 @@ if __name__ == "__main__":
         model_good = EfficiencyModelUncorrected(uo, oe, name="Good")
         model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected")
 
-        kwargs = {"num_steps": 40000, "num_burn": 12000}
+        kwargs = {"num_steps": 100100, "num_burn": 40000}
         sampler = BatchMetroploisHastings(num_walkers=8, kwargs=kwargs, temp_dir=t % i)
 
         model_good.fit(sampler, chain_consumer=c)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    c.plot_walks(filename=walk_file % "good", chain=0, truth=[mean, std])
-    c.plot_walks(filename=walk_file % "un", chain=1, truth=[mean, std])
-    c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
+    # c.plot_walks(filename=walk_file % "good", chain=0, truth=[mean, std])
+    # c.plot_walks(filename=walk_file % "un", chain=1, truth=[mean, std])
+    # c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
     c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)
