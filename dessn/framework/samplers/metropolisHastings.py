@@ -208,8 +208,8 @@ class MetropolisHastings(GenericSampler):
             sigma_ratio *= 0.9  # TODO: Improve for high dimensionality
         else:
             sigma_ratio /= 0.9
-        # self.logger.debug("Adjusting sigma: Want %0.2f, got %0.2f. "
-        #                   "Updating ratio to %0.3f" % (self.accept_ratio, actual_ratio, sigma_ratio))
+        self.logger.debug("Adjusting sigma: Want %0.2f, got %0.2f. "
+                          "Updating ratio to %0.3f" % (self.accept_ratio, actual_ratio, sigma_ratio))
         burnin[index - 1, self.IND_S] = sigma_ratio
 
     def _adjust_covariance(self, burnin, index):
@@ -240,7 +240,7 @@ class MetropolisHastings(GenericSampler):
             else:
                 attempts += 1
                 if attempts > 100 and burnin:
-                    posterior[self.IND_S] *= 0.9
+                    position[self.IND_S] *= 0.9
 
     def _load(self):
         position = None

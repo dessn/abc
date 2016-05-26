@@ -8,7 +8,7 @@ import numpy as np
 import os
 import logging
 from scipy.special import erf
-
+from scipy.integrate import simps
 
 class ObservedPoints(ParameterObserved):
     def __init__(self, data):
@@ -74,7 +74,7 @@ class ActualSigma(ParameterUnderlying):
         return 1
 
 
-class ToLatentUncorrected(Edge):
+class ToLatent(Edge):
     def __init__(self):
         super().__init__(["data", "data_error"], "point")
         self.factor = np.log(np.sqrt(2 * np.pi))
@@ -85,24 +85,30 @@ class ToLatentUncorrected(Edge):
         return -0.5 * diff * diff / (sigma * sigma) - self.factor - np.log(sigma)
 
 
-class ToLatentCorrected(Edge):
+class BiasCorrection(Edge):
     def __init__(self, threshold):
-        super().__init__(["data", "data_error"], ["point"])
+        super().__init__(["data_error", "point"], ["mean", "sigma"])
         self.factor = np.log(np.sqrt(2 * np.pi))
         self.threshold = threshold
+        self.arr = np.linspace(-3, 3, 100)
+        self.gauss = (1 / (np.sqrt(2 * np.pi))) * np.exp(-(self.arr * self.arr) / 2)
 
     def get_log_likelihood(self, data):
-        diff = data["data"] - data["point"]
-        sigma = data["data_error"]
-        prob_happening = -0.5 * diff * diff / (sigma * sigma) - self.factor - np.log(sigma)
+        mu = data["mean"]
+        sigma = data["sigma"]
+        shape = data["point"].shape
+        error = data["data_error"][0]
 
-        bound = self.threshold * sigma - data["point"]
+        s = self.arr * sigma + mu
+        bound = self.threshold * error - s
         ltz = (bound < 0) * 2.0 - 1.0
-        integral = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2) * sigma)) + 0.5
-        log_integral = np.log(integral)
-        result = prob_happening - log_integral
-        result[result == np.inf] = -np.inf
-        return result
+        integral = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2) * error)) + 0.5
+
+        multiplied = integral * self.gauss
+        denom = simps(multiplied) / (self.arr[-1] - self.arr[0])
+        result = -np.log(denom)
+        if result == np.inf: result = -np.inf
+        return np.ones(shape) * result
 
 
 class ToUnderlying(Edge):
@@ -125,7 +131,7 @@ class EfficiencyModelUncorrected(Model):
         self.add_node(ActualPoint(realised.size))
         self.add_node(ActualMean())
         self.add_node(ActualSigma())
-        self.add_edge(ToLatentUncorrected())
+        self.add_edge(ToLatent())
         self.add_edge(ToUnderlying())
         self.finalise()
 
@@ -139,7 +145,8 @@ class EfficiencyModelCorrected(Model):
         self.add_node(ActualPoint(realised.size))
         self.add_node(ActualMean())
         self.add_node(ActualSigma())
-        self.add_edge(ToLatentCorrected(threshold))
+        self.add_edge(ToLatent())
+        self.add_edge(BiasCorrection(threshold))
         self.add_edge(ToUnderlying())
         self.finalise()
 
@@ -149,7 +156,7 @@ def get_data(seed=5):
     mean = 100.0
     std = 20.0
     alpha = 3.5
-    n = 100
+    n = 500
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
@@ -170,7 +177,7 @@ if __name__ == "__main__":
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
     c = ChainConsumer()
-    n = 3
+    n = 4
     colours = ["#D32F2F", "#1E88E5"] * n
     for i in range(n):
         mean, std, observed, errors, alpha = get_data(seed=i)
@@ -182,13 +189,12 @@ if __name__ == "__main__":
             pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
             fig = model_un.get_pgm(pgm_file)
 
-        sampler = MetropolisHastings(num_steps=150000, temp_dir=t % i)
+        sampler = MetropolisHastings(num_steps=10000, num_burn=20000, temp_dir=t % i)
         model_un.fit(sampler, chain_consumer=c)
         model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
-    c.configure_general(bins=0.7, colours=colours)
+    c.configure_general(bins=2.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    # c.plot_walks(filename=walk_file % "no", chain=1, truth=[mean, std])
-    # c.plot_walks(filename=walk_file % "cor", chain=0, truth=[mean, std])
+    c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
     c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)

@@ -40,11 +40,10 @@ def test_fit():
     m.add_edge(TheEdge())
     np.random.seed(0)
     sampler = EnsembleSampler(num_steps=4600, num_burn=600)
-    m.fit(sampler)
-    consumer = m.get_consumer()
+    consumer = m.fit(sampler)
     consumer.configure_general(kde=True)
     summary = np.array(consumer.get_summary()[0]["mean"])
-    summary[1] = np.mean(m.flat_chain)
+    summary[1] = np.mean(consumer.chains[0])
     expected = np.array([-1.0, 0.0, 1.0])
     threshold = 0.1
     diff = np.abs(expected - summary)
