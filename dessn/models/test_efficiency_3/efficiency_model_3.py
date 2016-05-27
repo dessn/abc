@@ -3,6 +3,7 @@ from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
 from dessn.framework.samplers.batch import BatchMetroploisHastings
 from dessn.framework.samplers.metropolisHastings import MetropolisHastings
+from dessn.framework.samplers.ensemble import EnsembleSampler
 from dessn.chain.chain import ChainConsumer
 from dessn.utility.viewer import Viewer
 
@@ -159,7 +160,7 @@ def get_data(seed=5):
     mean = 100.0
     std = 20.0
     alpha = 3.75
-    n = 400
+    n = 200
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
@@ -187,7 +188,7 @@ if __name__ == "__main__":
     v = Viewer([[80, 120], [10, 40]], parameters=[r"$\mu$", r"$\sigma$"], truth=[100, 20])
 
     n = 1
-    colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
+    colours = ["#4CAF50", "#2C6F30", "#D32F2F","#732F2F", "#1E88E5", "#1E5895"] * n
     for i in range(n):
         mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=i)
         theta = [mean, std] + actual.tolist()
@@ -196,12 +197,16 @@ if __name__ == "__main__":
         model_good = EfficiencyModelUncorrected(uo, oe, name="Good")
         model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected")
 
-        kwargs = {"num_steps": 100100, "num_burn": 40000}
-        sampler = BatchMetroploisHastings(num_walkers=8, kwargs=kwargs, temp_dir=t % i)
+        kwargs = {"num_steps": 200000, "num_burn": 40000}
+        sampler = BatchMetroploisHastings(num_walkers=8, kwargs=kwargs, temp_dir=t % i, num_cores=1)
+        sampler2 = EnsembleSampler(temp_dir=t % i)
 
         model_good.fit(sampler, chain_consumer=c)
+        model_good.fit(sampler2, chain_consumer=c)
         model_un.fit(sampler, chain_consumer=c)
+        model_un.fit(sampler2, chain_consumer=c)
         model_cor.fit(sampler, chain_consumer=c)
+        model_cor.fit(sampler2, chain_consumer=c)
         print("Good ", model_un.get_log_posterior(theta), c.chains[-3][-1, 0])
         print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-2][-1, 0])
         print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
