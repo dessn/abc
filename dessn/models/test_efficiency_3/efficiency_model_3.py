@@ -4,6 +4,7 @@ from dessn.framework.parameter import ParameterObserved, ParameterLatent, Parame
 from dessn.framework.samplers.batch import BatchMetroploisHastings
 from dessn.framework.samplers.metropolisHastings import MetropolisHastings
 from dessn.framework.samplers.ensemble import EnsembleSampler
+from dessn.framework.samplers.nestled import NestledSampler
 from dessn.chain.chain import ChainConsumer
 from dessn.utility.viewer import Viewer
 
@@ -26,7 +27,7 @@ class ObservedError(ParameterObserved):
 
 class ActualPoint(ParameterLatent):
     def __init__(self, n):
-        super().__init__("point", "$p$")
+        super().__init__("point", "$s$")
         self.n = n
 
     def get_num_latent(self):
@@ -75,7 +76,11 @@ class ActualSigma(ParameterUnderlying):
     def get_log_prior(self, data):
         if data["sigma"] < 0:
             return -np.inf
-        return 1
+        g = 20
+        s = data["sigma"]
+        return -2 * np.log(s)
+        # return np.log((2 / (np.pi * g)) * (g * g / (s * s + g * g)))
+        # return 1
 
 
 class ToLatent(Edge):
@@ -94,7 +99,7 @@ class BiasCorrection(Edge):
         super().__init__(["data_error", "point"], ["mean", "sigma"])
         self.factor = np.log(np.sqrt(2 * np.pi))
         self.threshold = threshold
-        self.arr = np.linspace(-4, 4, 300)
+        self.arr = np.linspace(-4, 4, 200)
         self.gauss = (1 / (np.sqrt(2 * np.pi))) * np.exp(-(self.arr * self.arr) / 2)
 
     def get_log_likelihood(self, data):
@@ -155,12 +160,11 @@ class EfficiencyModelCorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5):
+def get_data(seed=5, n=500):
     np.random.seed(seed=seed)
     mean = 100.0
     std = 20.0
-    alpha = 3.75
-    n = 200
+    alpha = 3.25
 
     actual = np.random.normal(loc=mean, scale=std, size=n)
 
@@ -171,10 +175,10 @@ def get_data(seed=5):
     mask = ston > alpha
     print(mask.sum(), n, observed[mask].mean())
 
-    return mean, std, observed[mask], errors[mask], alpha, actual, observed, errors
+    return mean, std, observed[mask], errors[mask], alpha, actual, observed, errors, actual[mask]
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
     t = os.path.abspath(dir_name + "/output/data_%s")
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
@@ -188,33 +192,65 @@ if __name__ == "__main__":
     v = Viewer([[80, 120], [10, 40]], parameters=[r"$\mu$", r"$\sigma$"], truth=[100, 20])
 
     n = 1
-    colours = ["#4CAF50", "#2C6F30", "#D32F2F","#732F2F", "#1E88E5", "#1E5895"] * n
+    w = 8
+    colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
+
+    import matplotlib.pyplot as plt
+    #
+    # mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=100*(1+1))
+    # plt.hist(observed, histtype="step")
+    #
+    # mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=100*(0+1))
+    # plt.hist(observed, histtype="step")
+
+    # plt.show()
+
+    # mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=100 * (1 + 1))
+    #
+    # x = np.linspace(90, 110, 20)
+    # y = np.linspace(10, 30, 20)
+    # E = BiasCorrection(2)
+    # xx, yy = np.meshgrid(x, y, sparse=True)
+    # z = []
+    # for x1 in x:
+    #     for y1 in y:
+    #         z.append(np.sum(E.get_log_likelihood({"mean":x1, "sigma":y1, "data": observed, "point": actual, "data_error":errors})))
+    # z = np.array(z)
+    # print(z.size)
+    # z = z.reshape((20,20))
+    # h = plt.contourf(x, y, z)
+    # cbar = plt.colorbar(h)
+    #
+    # plt.show()
+    # exit()
     for i in range(n):
-        mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=i)
-        theta = [mean, std] + actual.tolist()
+        i = 1
+        mean, std, observed, errors, alpha, actual, uo, oe, am = get_data(seed=i)
+        theta = [mean, std] + am.tolist()
+        print(theta)
+        kwargs = {"num_steps": 100000, "num_burn": 80000, "save_interval": 300}
+        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
+        # sampler = MetropolisHastings(**kwargs, temp_dir=t % i)
+        # sampler2 = EnsembleSampler(temp_dir=t % i)
+        # sampler3 = NestledSampler(temp_dir=t % i)
 
-        model_un = EfficiencyModelUncorrected(observed, errors, name="Uncorrected")
-        model_good = EfficiencyModelUncorrected(uo, oe, name="Good")
-        model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected")
-
-        kwargs = {"num_steps": 200000, "num_burn": 40000}
-        sampler = BatchMetroploisHastings(num_walkers=8, kwargs=kwargs, temp_dir=t % i, num_cores=1)
-        sampler2 = EnsembleSampler(temp_dir=t % i)
-
+        model_good = EfficiencyModelUncorrected(uo, oe, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)
-        model_good.fit(sampler2, chain_consumer=c)
-        model_un.fit(sampler, chain_consumer=c)
-        model_un.fit(sampler2, chain_consumer=c)
-        model_cor.fit(sampler, chain_consumer=c)
-        model_cor.fit(sampler2, chain_consumer=c)
-        print("Good ", model_un.get_log_posterior(theta), c.chains[-3][-1, 0])
-        print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-2][-1, 0])
-        print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
+        # print("Good ", model_good.get_log_posterior(theta), c.chains[-1][-1, 0])
+
+        # model_un = EfficiencyModelUncorrected(observed, errors, name="Uncorrected%d" % i)
+        # model_un.fit(sampler, chain_consumer=c)
+        # print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-1][-1, 0])
+        #
+        # model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected%d" % i)
+        # model_cor.fit(sampler, chain_consumer=c)
+        # print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    # c.plot_walks(filename=walk_file % "good", chain=0, truth=[mean, std])
-    # c.plot_walks(filename=walk_file % "un", chain=1, truth=[mean, std])
-    # c.plot_walks(filename=walk_file % "cor", chain=1, truth=[mean, std])
-    c.plot(filename=plot_file, figsize=(8, 8), truth=[mean, std], legend=False)
+    c.plot(filename=plot_file, truth=theta, figsize=(8, 8), legend=False)
+    for i in range(len(c.chains)):
+        c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=[mean, std])
+        c.divide_chain(i, w).configure_general(rainbow=True) \
+            .plot(figsize=(8, 8), filename=plot_file.replace(".png", "_%s.png" % c.names[i]), truth=theta)

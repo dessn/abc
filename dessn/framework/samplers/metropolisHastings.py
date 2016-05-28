@@ -20,6 +20,8 @@ class MetropolisHastings(GenericSampler):
         During the burn in, how many steps between adjustment to the parameter covariance.
     temp_dir : str, optional
         The location of a folder to save the results, such as the last position and chain
+    save_interval : int, optional
+        How many seconds should pass between saving data snapshots
     accept_ratio : float, optional
         The desired acceptance ratio
     callback : function, optional
@@ -105,12 +107,12 @@ class MetropolisHastings(GenericSampler):
         position = self._ensure_position(position)
 
         if chain is not None and burnin.shape[0] == self.num_burn:
-            c, w = self._do_chain(position, covariance, chain=chain)
+            c, w, p = self._do_chain(position, covariance, chain=chain)
         else:
             position, covariance = self._do_burnin(position, burnin, covariance)
-            c, w = self._do_chain(position, covariance)
+            c, w, p = self._do_chain(position, covariance)
         self.logger.info("Returning results")
-        return {"chain": c, "weights": w}
+        return {"chain": c, "weights": w, "posterior": p}
 
     def _do_burnin(self, position, burnin, covariance):
         if burnin is None:
@@ -132,10 +134,10 @@ class MetropolisHastings(GenericSampler):
         self.logger.info("Starting burn in")
         while current_step < self.num_burn:
             # If sigma adjust, adjust
-            if current_step % self.sigma_adjust == 0 and current_step > num_dim * 5:
+            if current_step % self.sigma_adjust == 0:
                 burnin[current_step, self.IND_S] = self._adjust_sigma_ratio(burnin, current_step)
             # If covariance adjust, adjust
-            if current_step % self.covariance_adjust == 0 and current_step > 0:
+            if current_step % self.covariance_adjust == 0 and current_step > 0 and current_step > num_dim * 5:
                 covariance = self._adjust_covariance(burnin, current_step)
 
             # Get next step
@@ -182,7 +184,7 @@ class MetropolisHastings(GenericSampler):
                     (self._do_save and (time() - last_save_time) > self.save_interval):
                 self._save(position, None, chain[:current_step, :], None)
                 last_save_time = time()
-        return chain[:, self.space:], chain[:, self.IND_W]
+        return chain[:, self.space:], chain[:, self.IND_W], chain[:, self.IND_P]
 
     def _update_temp_files(self, uid):
         if self.temp_dir is not None:
