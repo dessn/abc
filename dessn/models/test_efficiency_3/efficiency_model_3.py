@@ -40,7 +40,7 @@ class ActualPoint(ParameterLatent):
         return data["data"]
 
     def get_suggestion_sigma(self, data):
-        return data["data_error"]
+        return 3 * data["data_error"]
 
 
 class ActualMean(ParameterUnderlying):
@@ -68,7 +68,7 @@ class ActualSigma(ParameterUnderlying):
         return np.std(data["data"])
 
     def get_suggestion_sigma(self, data):
-        return 0.5 * np.std(data["data"])
+        return np.std(data["data"])
 
     def get_suggestion_requirements(self):
         return ["data"]
@@ -160,7 +160,7 @@ class EfficiencyModelCorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5, n=500):
+def get_data(seed=5, n=3000):
     np.random.seed(seed=seed)
     mean = 100.0
     std = 20.0
@@ -192,8 +192,8 @@ if __name__ == "__main__":
     v = Viewer([[80, 120], [10, 40]], parameters=[r"$\mu$", r"$\sigma$"], truth=[100, 20])
 
     n = 1
-    w = 8
-    colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
+    w = 4
+    colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n * 2
 
     import matplotlib.pyplot as plt
     #
@@ -224,11 +224,10 @@ if __name__ == "__main__":
     # plt.show()
     # exit()
     for i in range(n):
-        i = 1
         mean, std, observed, errors, alpha, actual, uo, oe, am = get_data(seed=i)
-        theta = [mean, std] + am.tolist()
-        print(theta)
-        kwargs = {"num_steps": 100000, "num_burn": 80000, "save_interval": 300}
+        theta_good = [mean, std] + actual.tolist()
+        theta_bias = [mean, std] + am.tolist()
+        kwargs = {"num_steps": 6000, "num_burn": 6000, "save_interval": 300}
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
         # sampler = MetropolisHastings(**kwargs, temp_dir=t % i)
         # sampler2 = EnsembleSampler(temp_dir=t % i)
@@ -236,21 +235,25 @@ if __name__ == "__main__":
 
         model_good = EfficiencyModelUncorrected(uo, oe, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)
-        # print("Good ", model_good.get_log_posterior(theta), c.chains[-1][-1, 0])
+        print("Good ", model_good.get_log_posterior(theta_good), c.posteriors[-1][-1])
 
-        # model_un = EfficiencyModelUncorrected(observed, errors, name="Uncorrected%d" % i)
-        # model_un.fit(sampler, chain_consumer=c)
-        # print("Uncorrected ", model_un.get_log_posterior(theta), c.chains[-1][-1, 0])
+        model_un = EfficiencyModelUncorrected(observed, errors, name="Uncorrected%d" % i)
+        model_un.fit(sampler, chain_consumer=c)
+        print("Uncorrected ", model_un.get_log_posterior(theta_bias), c.posteriors[-1][-1])
         #
-        # model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected%d" % i)
-        # model_cor.fit(sampler, chain_consumer=c)
-        # print("Corrected ", model_cor.get_log_posterior(theta), c.chains[-1][-1, 0])
+        model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected%d" % i)
+        model_cor.fit(sampler, chain_consumer=c)
+        print("Corrected ", model_cor.get_log_posterior(theta_bias), c.posteriors[-1][-1])
+
+        # model_good.fit(sampler3, chain_consumer=c, start=theta_good)
+        # model_un.fit(sampler3, chain_consumer=c, start=theta_bias)
+        # model_cor.fit(sampler3, chain_consumer=c, start=theta_bias)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    c.plot(filename=plot_file, truth=theta, figsize=(8, 8), legend=False)
+    c.plot(filename=plot_file, truth=theta_bias, figsize=(8, 8), legend=False)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=[mean, std])
         c.divide_chain(i, w).configure_general(rainbow=True) \
-            .plot(figsize=(8, 8), filename=plot_file.replace(".png", "_%s.png" % c.names[i]), truth=theta)
+            .plot(figsize=(8, 8), filename=plot_file.replace(".png", "_%s.png" % c.names[i]), truth=theta_bias)

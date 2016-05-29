@@ -31,7 +31,7 @@ class MetropolisHastings(GenericSampler):
     """
     def __init__(self, num_burn=10000, num_steps=10000,
                  sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
-                 save_interval=300, accept_ratio=0.4, callback=None):
+                 save_interval=300, accept_ratio=0.234, callback=None):
         self.temp_dir = temp_dir
         if temp_dir is not None and not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
@@ -106,7 +106,7 @@ class MetropolisHastings(GenericSampler):
             self.logger.debug("Found chain of size %d" % chain.shape[0])
         position = self._ensure_position(position)
 
-        if chain is not None and burnin.shape[0] == self.num_burn:
+        if chain is not None and burnin is not None and burnin.shape[0] == self.num_burn:
             c, w, p = self._do_chain(position, covariance, chain=chain)
         else:
             position, covariance = self._do_burnin(position, burnin, covariance)

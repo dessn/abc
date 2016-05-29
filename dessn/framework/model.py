@@ -516,7 +516,7 @@ class Model(object):
 
         return pgm
 
-    def fit(self, sampler, chain_consumer=None, include_latent=False):
+    def fit(self, sampler, chain_consumer=None, include_latent=False, start=None):
         """
 
         Parameters
@@ -529,6 +529,9 @@ class Model(object):
         include_latent : bool, optional
             If set, return the latent parameters as well. Useful for debugging,
             but not recommended when speed is needed. Or memory. Or hard drive space.
+        start : list, optional
+            If given, starts the fitter from the given location (if applicable).
+            Useful for debugging.
 
         Returns
         -------
@@ -542,7 +545,7 @@ class Model(object):
                   "log_posterior": self.get_log_posterior,
                   "log_prior": self.get_log_prior,
                   "log_likelihood": self.get_log_likelihood,
-                  "start": self.get_starting_position,
+                  "start": self.get_starting_position if start is None else start,
                   "save_dims": len(self._theta_names) if include_latent else self._num_actual,
                   "hypercube": self.get_hypercube_convert,
                   "log_posterior_polychord": self.get_log_posterior_polychord,
