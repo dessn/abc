@@ -2,12 +2,9 @@ from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
 from dessn.framework.samplers.batch import BatchMetroploisHastings
-from dessn.framework.samplers.metropolisHastings import MetropolisHastings
-from dessn.framework.samplers.ensemble import EnsembleSampler
-from dessn.framework.samplers.nestled import NestledSampler
 from dessn.chain.chain import ChainConsumer
 from dessn.utility.viewer import Viewer
-
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import logging
@@ -76,12 +73,8 @@ class ActualSigma(ParameterUnderlying):
     def get_log_prior(self, data):
         if data["sigma"] < 0:
             return -np.inf
-        g = 20
         s = data["sigma"]
         return -2 * np.log(s)
-        # return np.log((2 / (np.pi * g)) * (g * g / (s * s + g * g)))
-        # return 1
-
 
 class ToLatent(Edge):
     def __init__(self):
@@ -160,7 +153,7 @@ class EfficiencyModelCorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5, n=3000):
+def get_data(seed=5, n=500):
     np.random.seed(seed=seed)
     mean = 100.0
     std = 20.0
@@ -177,6 +170,26 @@ def get_data(seed=5, n=3000):
 
     return mean, std, observed[mask], errors[mask], alpha, actual, observed, errors, actual[mask]
 
+
+def plot_weights(dir_name):
+    mean, std, observed, errors, alpha, actual, uo, oe, am = get_data()
+    x = np.linspace(90, 110, 40)
+    y = np.linspace(10, 30, 40)
+    E = BiasCorrection(3.25)
+    z = [np.exp(E.get_log_likelihood({"mean": x1, "sigma": y1, "data": observed,
+                                      "point": actual, "data_error": errors})[0])
+         for x1 in x for y1 in y]
+    z = np.array(z)
+    z = z.reshape((40, 40))
+    fig, ax = plt.subplots(1, 1, figsize=(4, 3))
+    h = ax.contourf(x, y, z, 20, cmap='viridis')
+    cbar = fig.colorbar(h)
+    cbar.set_label(r"$P$")
+    ax.set_xlabel(r"$\mu$")
+    ax.set_ylabel(r"$\sigma$")
+    fig.savefig(os.path.abspath(dir_name + "/output/weights.png"), bbox_inches="tight", dpi=300)
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
@@ -184,54 +197,25 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    # model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
-    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    # fig = model_un.get_pgm(pgm_file)
+    model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
+    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    fig = model_un.get_pgm(pgm_file)
+    plot_weights(dir_name)
 
     c = ChainConsumer()
     v = Viewer([[80, 120], [10, 40]], parameters=[r"$\mu$", r"$\sigma$"], truth=[100, 20])
 
-    n = 1
-    w = 4
+    n = 2
+    w = 8
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n * 2
 
-    import matplotlib.pyplot as plt
-    #
-    # mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=100*(1+1))
-    # plt.hist(observed, histtype="step")
-    #
-    # mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=100*(0+1))
-    # plt.hist(observed, histtype="step")
-
-    # plt.show()
-
-    # mean, std, observed, errors, alpha, actual, uo, oe = get_data(seed=100 * (1 + 1))
-    #
-    # x = np.linspace(90, 110, 20)
-    # y = np.linspace(10, 30, 20)
-    # E = BiasCorrection(2)
-    # xx, yy = np.meshgrid(x, y, sparse=True)
-    # z = []
-    # for x1 in x:
-    #     for y1 in y:
-    #         z.append(np.sum(E.get_log_likelihood({"mean":x1, "sigma":y1, "data": observed, "point": actual, "data_error":errors})))
-    # z = np.array(z)
-    # print(z.size)
-    # z = z.reshape((20,20))
-    # h = plt.contourf(x, y, z)
-    # cbar = plt.colorbar(h)
-    #
-    # plt.show()
-    # exit()
     for i in range(n):
         mean, std, observed, errors, alpha, actual, uo, oe, am = get_data(seed=i)
         theta_good = [mean, std] + actual.tolist()
         theta_bias = [mean, std] + am.tolist()
-        kwargs = {"num_steps": 6000, "num_burn": 6000, "save_interval": 300}
+        kwargs = {"num_steps": 70000, "num_burn": 20000, "save_interval": 300,
+                  "plot_covariance": True, "unify_latent": True}
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
-        # sampler = MetropolisHastings(**kwargs, temp_dir=t % i)
-        # sampler2 = EnsembleSampler(temp_dir=t % i)
-        # sampler3 = NestledSampler(temp_dir=t % i)
 
         model_good = EfficiencyModelUncorrected(uo, oe, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)
@@ -240,14 +224,10 @@ if __name__ == "__main__":
         model_un = EfficiencyModelUncorrected(observed, errors, name="Uncorrected%d" % i)
         model_un.fit(sampler, chain_consumer=c)
         print("Uncorrected ", model_un.get_log_posterior(theta_bias), c.posteriors[-1][-1])
-        #
+
         model_cor = EfficiencyModelCorrected(observed, errors, alpha, name="Corrected%d" % i)
         model_cor.fit(sampler, chain_consumer=c)
         print("Corrected ", model_cor.get_log_posterior(theta_bias), c.posteriors[-1][-1])
-
-        # model_good.fit(sampler3, chain_consumer=c, start=theta_good)
-        # model_un.fit(sampler3, chain_consumer=c, start=theta_bias)
-        # model_cor.fit(sampler3, chain_consumer=c, start=theta_bias)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
@@ -256,4 +236,5 @@ if __name__ == "__main__":
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=[mean, std])
         c.divide_chain(i, w).configure_general(rainbow=True) \
-            .plot(figsize=(8, 8), filename=plot_file.replace(".png", "_%s.png" % c.names[i]), truth=theta_bias)
+            .plot(figsize=(8, 8), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
+                  truth=theta_bias)

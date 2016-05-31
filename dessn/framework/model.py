@@ -551,6 +551,7 @@ class Model(object):
                   "log_posterior_polychord": self.get_log_posterior_polychord,
                   "num_dim": len(self._theta_names),
                   "uid": self.model_name,
+                  "parameters": self._theta_names
                   }
         results = sampler.fit(kwargs)
         return self._get_consumer(results, chain_consumer=chain_consumer, include_latent=include_latent)
