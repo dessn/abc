@@ -17,7 +17,7 @@ class Viewer(object):
         self.points = None
         self.batch = batch
         self.batched = []
-        self.colours = cm.rainbow(np.linspace(0, 1, 30))
+        self.colours = cm.rainbow(np.linspace(0, 1, 20))
         self.index = 0
 
     def initialise(self, position):

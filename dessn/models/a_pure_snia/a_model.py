@@ -77,7 +77,7 @@ if __name__ == "__main__":
     model.fit(poly_sampler)
 
     if not only_data:
-        chain_consumer = model.get_consumer()
+        chain_consumer = model._get_consumer()
         chain_consumer.configure_general(max_ticks=4, bins=0.7)
         chain_consumer.plot_walks(display=False, filename=walk_file, figsize=(20, 10), truth=theta)
         chain_consumer.plot(display=False, filename=plot_file, figsize="grow", truth=theta)

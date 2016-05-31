@@ -20,16 +20,27 @@ class MetropolisHastings(GenericSampler):
         During the burn in, how many steps between adjustment to the parameter covariance.
     temp_dir : str, optional
         The location of a folder to save the results, such as the last position and chain
+    save_interval : int, optional
+        How many seconds should pass between saving data snapshots
     accept_ratio : float, optional
         The desired acceptance ratio
     callback : function, optional
         If set, passes the log posterior, position and weight for each step in the burn
         in and the chain to the function. Useful for plotting the walks whilst the
         chain is running.
+    plot_covariance : bool, optional
+        If set, plots the covariance matrix to a file in the temp directory.
+        As such, requires temp directory to be set.
+    unify_latent : bool, optional
+        If set, draws latent parameters from the same (diagonal) distribution.
+        Requires knowledge of parameter names to determine latent parameters.
+    num_start : int, optional
+        How many starting positions to trial.
     """
     def __init__(self, num_burn=10000, num_steps=10000,
                  sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
-                 save_interval=300, accept_ratio=0.4, callback=None):
+                 save_interval=300, accept_ratio=0.234, callback=None,
+                 plot_covariance=False, unify_latent=False, num_start=500):
         self.temp_dir = temp_dir
         if temp_dir is not None and not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
@@ -38,6 +49,9 @@ class MetropolisHastings(GenericSampler):
         self.start = None
         self.save_dims = None
         self.callback = callback
+        self.do_plot_covariance = plot_covariance
+        self.unify_latent = unify_latent
+        self.num_start = num_start
 
         self.num_burn = num_burn
         self.num_steps = num_steps
@@ -55,6 +69,7 @@ class MetropolisHastings(GenericSampler):
         self.burn_file = None
         self.chain_file = None
         self.covariance_file = None
+        self.covariance_plot = None
 
     def fit(self, kwargs):
         """
@@ -63,14 +78,13 @@ class MetropolisHastings(GenericSampler):
         Parameters
         ----------
         kwargs : dict
-            Containing the following information at a minimum:
+            Containing the following information:
 
             - log_posterior : function
                 A function that takes a list of parameters and returns the
                 log posterior
-            - start : function|list|ndarray
-                Either a starting position, or a function that can be called
-                to generate a starting position
+            - start : function
+                A function that can be called to generate a starting position
             - save_dims : int, optional
                 Only return values for the first ``save_dims`` parameters.
                 Useful to remove numerous marginalisation parameters if running
@@ -79,6 +93,11 @@ class MetropolisHastings(GenericSampler):
                 A unique identifier used to differentiate different fits
                 if two fits both serialise their chains and use the
                 same temporary directory
+            - parameters : list[str], optional
+                A list containing parameter names. Used to draw from the
+                same distribution if ``unify_latent`` is set true. Note that
+                latent parameters (parameters with the same name) must be located
+                contiguously.
 
         Returns
         -------
@@ -89,6 +108,7 @@ class MetropolisHastings(GenericSampler):
         start = kwargs.get("start")
         save_dims = kwargs.get("save_dims")
         uid = kwargs.get("uid")
+        parameters = kwargs.get("parameters")
         assert log_posterior is not None
         assert start is not None
         if uid is None:
@@ -104,56 +124,66 @@ class MetropolisHastings(GenericSampler):
             self.logger.debug("Found chain of size %d" % chain.shape[0])
         position = self._ensure_position(position)
 
-        if chain is not None and burnin.shape[0] == self.num_burn:
-            c, w = self._do_chain(position, covariance, chain=chain)
+        if self.unify_latent and parameters is not None:
+            p = np.array(parameters)
+            unique, indexes, counts = np.unique(p, return_index=True, return_counts=True)
+            pruned = [(i, i + c) for i, c in zip(indexes, counts) if c > 1]
         else:
-            position, covariance = self._do_burnin(position, burnin, covariance)
-            c, w = self._do_chain(position, covariance)
-        self.logger.info("Returning results")
-        return {"chain": c, "weights": w}
+            pruned = None
 
-    def _do_burnin(self, position, burnin, covariance):
+        if chain is None or burnin is None or burnin.shape[0] < self.num_burn:
+            position, covariance, burnin = self._do_burnin(position, burnin, covariance, unify=pruned)
+            chain = None
+
+        if self.do_plot_covariance:
+            self.plot_covariance(burnin, unify=pruned)
+
+        c, w, p = self._do_chain(position, covariance, chain=chain)
+        self.logger.info("Returning results")
+        return {"chain": c, "weights": w, "posterior": p}
+
+    def _do_burnin(self, position, burnin, covariance, unify=None):
         if burnin is None:
             # Initialise burning to all zeros. 2 from posterior and step size
             burnin = np.zeros((self.num_burn, position.size))
-            current_step = 1
+            step = 1
             burnin[0, :] = position
         elif burnin.shape[0] < self.num_burn:
-            current_step = burnin.shape[0]
+            step = burnin.shape[0]
             # If we only saved part of the burnin to save size, add the rest in as zeros
             burnin = np.vstack((burnin, np.zeros((self.num_burn - burnin.shape[0], position.size))))
         else:
-            current_step = self.num_burn
+            step = self.num_burn
         num_dim = position.size - self.space
         if covariance is None:
             covariance = np.identity(position.size - self.space)
 
         last_save_time = time()
         self.logger.info("Starting burn in")
-        while current_step < self.num_burn:
+        while step < self.num_burn:
             # If sigma adjust, adjust
-            if current_step % self.sigma_adjust == 0 and current_step > num_dim * 5:
-                burnin[current_step, self.IND_S] = self._adjust_sigma_ratio(burnin, current_step)
+            if step % self.sigma_adjust == 0 and step > 0:
+                burnin[step - 1, self.IND_S] = self._adjust_sigma_ratio(burnin, step)
             # If covariance adjust, adjust
-            if current_step % self.covariance_adjust == 0 and current_step > 0:
-                covariance = self._adjust_covariance(burnin, current_step)
+            if step % self.covariance_adjust == 0 and step > 0 and step > num_dim * 10:
+                covariance = self._adjust_covariance(burnin, step, unify=unify)
 
             # Get next step
-            burnin[current_step, :], weight = self._get_next_step(burnin[current_step - 1, :],
+            burnin[step, :], weight = self._get_next_step(burnin[step - 1, :],
                                                           covariance, burnin=True)
-            burnin[current_step - 1, self.IND_W] = weight
+            burnin[step - 1, self.IND_W] = weight
             if self.callback is not None:
-                self.callback(burnin[current_step - 1, self.IND_P],
-                              burnin[current_step - 1, self.space:self.space + self.save_dims],
-                              weight=burnin[current_step - 1, self.IND_W])
-            current_step += 1
-            if current_step == self.num_burn or \
+                self.callback(burnin[step - 1, self.IND_P],
+                              burnin[step - 1, self.space:self.space + self.save_dims],
+                              weight=burnin[step - 1, self.IND_W])
+            step += 1
+            if step == self.num_burn or \
                     (self._do_save and (time() - last_save_time) > self.save_interval):
-                self._save(burnin[current_step - 1, :], burnin[:current_step, :],
+                self._save(burnin[step - 1, :], burnin[:step, :],
                            None, covariance)
                 last_save_time = time()
 
-        return burnin[-1, :], covariance
+        return burnin[-1, :], covariance, burnin
 
     def _do_chain(self, position, covariance, chain=None):
         dims = self.save_dims if self.save_dims is not None else position.size - self.space
@@ -182,7 +212,7 @@ class MetropolisHastings(GenericSampler):
                     (self._do_save and (time() - last_save_time) > self.save_interval):
                 self._save(position, None, chain[:current_step, :], None)
                 last_save_time = time()
-        return chain[:, self.space:], chain[:, self.IND_W]
+        return chain[:, self.space:], chain[:, self.IND_W], chain[:, self.IND_P]
 
     def _update_temp_files(self, uid):
         if self.temp_dir is not None:
@@ -190,20 +220,23 @@ class MetropolisHastings(GenericSampler):
             self.burn_file = self.temp_dir + os.sep + "%s_mh_burn.npy" % uid
             self.chain_file = self.temp_dir + os.sep + "%s_mh_chain.npy" % uid
             self.covariance_file = self.temp_dir + os.sep + "%s_mh_covariance.npy" % uid
+            self.covariance_plot = self.temp_dir + os.sep + "%s_mh_covariance.png" % uid
 
     def _ensure_position(self, position):
         """ Ensures that the position object, which can be none from loading, is a
         valid [starting] position.
         """
         if position is None:
-            if callable(self.start):
+            log_p = -np.inf
+            final_pos = None
+            for i in range(self.num_start):
                 position = self.start()
-            else:
-                position = self.start
-            if type(position) == list:
-                position = np.array(position)
-            position = np.concatenate(([self.log_posterior(position), 1, 1], position))
-            # Starting log posterior is infinitely unlikely, sigma ratio of 1 to begin with
+                v = self.log_posterior(position)
+                self.logger.debug("Log posterior is %f at position %s", (v, position))
+                if v > log_p:
+                    log_p = v
+                    final_pos = position
+            position = np.concatenate(([v, 1, 1], final_pos))
         return position
 
     def _adjust_sigma_ratio(self, burnin, index):
@@ -217,14 +250,25 @@ class MetropolisHastings(GenericSampler):
             sigma_ratio /= 0.9
         self.logger.debug("Adjusting sigma: Want %0.2f, got %0.2f. "
                           "Updating ratio to %0.3f" % (self.accept_ratio, actual_ratio, sigma_ratio))
-        burnin[index - 1, self.IND_S] = sigma_ratio
+        return sigma_ratio
 
-    def _adjust_covariance(self, burnin, index):
+    def _adjust_covariance(self, burnin, index, unify=None, return_cov=False):
         params = burnin.shape[1] - self.space
         if params == 1:
-            return np.ones((1,1))
+            return np.ones((1, 1))
         subset = burnin[int(np.floor(index/2)):index, :]
         covariance = np.cov(subset[:, self.space:].T, fweights=subset[:, self.IND_W])
+        if unify is not None:
+            for i0, i1 in unify:
+                val = np.identity(i1 - i0) * np.mean(np.diag(covariance[i0:i1, i0:i1]))
+                covariance[i0:i1, :] = 0
+                covariance[:, i0:i1] = 0
+                covariance[i0:i1, i0:i1] = val
+        # import matplotlib.pyplot as plt
+        # plt.imshow(covariance, cmap="viridis")
+        # plt.show()
+        if return_cov:
+            return covariance
         res = np.linalg.cholesky(covariance)
         self.logger.debug("Adjusting covariance and resetting sigma ratio")
         return res
@@ -279,4 +323,24 @@ class MetropolisHastings(GenericSampler):
         if covariance is not None and self.covariance_file is not None:
             np.save(self.covariance_file, covariance)
 
+    def plot_covariance(self, burnin, unify=None):
+        if self.covariance_plot is None:
+            return
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        covariance = self._adjust_covariance(burnin, burnin.shape[0], unify=unify, return_cov=True)
+        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        h = ax[0].imshow(covariance, cmap='viridis')
+        div1 = make_axes_locatable(ax[0])
+        cax1 = div1.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(h, cax=cax1)
+
+        diag = np.diag(1 / np.sqrt(np.diag(covariance)))
+        cor = np.dot(np.dot(diag, covariance), diag)
+        h2 = ax[1].imshow(cor, cmap='viridis')
+        div2 = make_axes_locatable(ax[1])
+        cax2 = div2.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(h2, cax=cax2)
+        self.logger.info("Saving covariance plot")
+        fig.savefig(self.covariance_plot)
 

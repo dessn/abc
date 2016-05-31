@@ -7,12 +7,11 @@ import logging
 import emcee
 from emcee.utils import MPIPool
 import sys
-from scipy.optimize import fmin_bfgs
+from scipy.optimize import fmin_bfgs, fmin_powell
 import types
 import copyreg
 import scipy.optimize
 from scipy.misc import logsumexp
-
 
 class Model(object):
     """ A generalised framework for use in arbitrary situations.
@@ -138,6 +137,12 @@ class Model(object):
         self._num_actual = len(self._theta_names)
         for node in self._latent_nodes:
             self._theta_names += [node.name] * node.get_num_latent()
+            if node.label.endswith("$"):
+                self._theta_labels += [node.label[:-1] + "_{%d}$" % i for i in
+                                       range(node.get_num_latent())]
+            else:
+                self._theta_labels += [node.label + " %d" % i for i in
+                                       range(node.get_num_latent())]
         num_edges = len(self.edges)
         observed_names = [node.name for node in self.nodes
                           if not isinstance(node, ParameterTransformation)]
@@ -388,11 +393,10 @@ class Model(object):
         sigmas = self._get_suggestion_sigma()
         self.logger.debug("Initial position is:  %s" % p0)
         if len(p0) < 20:
-            # TODO: confirm. Removing this for high dimensions, as it seems to be ineffective
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0, disp=0)
-            self.logger.debug("Optimised position is: %s" % optimised)
         else:
             optimised = p0
+        self.logger.debug("Optimised position is: %s" % optimised)
 
         std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * \
               np.array(sigmas).reshape((1, -1))
@@ -512,7 +516,7 @@ class Model(object):
 
         return pgm
 
-    def fit(self, sampler, chain_consumer=None):
+    def fit(self, sampler, chain_consumer=None, include_latent=False, start=None):
         """
 
         Parameters
@@ -522,6 +526,12 @@ class Model(object):
         chain_consumer : ChainConsumer
             The chain consumer to add results to. If not given,
             creates a new chain consumer
+        include_latent : bool, optional
+            If set, return the latent parameters as well. Useful for debugging,
+            but not recommended when speed is needed. Or memory. Or hard drive space.
+        start : list, optional
+            If given, starts the fitter from the given location (if applicable).
+            Useful for debugging.
 
         Returns
         -------
@@ -535,23 +545,26 @@ class Model(object):
                   "log_posterior": self.get_log_posterior,
                   "log_prior": self.get_log_prior,
                   "log_likelihood": self.get_log_likelihood,
-                  "start": self.get_starting_position,
-                  "save_dims": self._num_actual,
+                  "start": self.get_starting_position if start is None else start,
+                  "save_dims": len(self._theta_names) if include_latent else self._num_actual,
                   "hypercube": self.get_hypercube_convert,
                   "log_posterior_polychord": self.get_log_posterior_polychord,
                   "num_dim": len(self._theta_names),
                   "uid": self.model_name,
+                  "parameters": self._theta_names
                   }
         results = sampler.fit(kwargs)
-        return self.get_consumer(results, chain_consumer=chain_consumer)
+        return self._get_consumer(results, chain_consumer=chain_consumer, include_latent=include_latent)
 
-    def get_consumer(self, results, chain_consumer=None):
+    def _get_consumer(self, results, chain_consumer=None, include_latent=False):
         if chain_consumer is None:
             from dessn.chain.chain import ChainConsumer
             chain_consumer = ChainConsumer()
+        n = len(self._theta_labels) if include_latent else self._num_actual
         chain_consumer.add_chain(results["chain"],
                                  weights=results.get("weights"),
-                                 parameters=self._theta_labels[:self._num_actual],
+                                 posterior=results.get("posterior"),
+                                 parameters=self._theta_labels[:n],
                                  name=self.model_name)
         return chain_consumer
 

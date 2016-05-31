@@ -104,7 +104,15 @@ of
     {\int ds \ \mathcal{N}(s - \mu, \sigma) \  f(s, \alpha, \epsilon) }
 
 In terms of implementation details, as :math:`\alpha` and :math:`\epsilon` are fixed
-at the start of the model, we can precompute
+at the start of the model, we can precompute the normalisation term. And as the normalisation
+term is dependent in our example on :math:`\mu` and :math:`\sigma`, we can easily
+plot this surface, which has been done below when translated into a probabalistic
+weighting.
+
+.. figure::     ../dessn/models/test_efficiency_3/output/weights.png
+    :align:     center
+    :width:     80%
+
 
 We can not implement this correction, and then implement it, and hopefully see that the
 recovered underlying distribution becomes unbiased.
@@ -114,7 +122,7 @@ The model PGM:
 
 .. figure::     ../dessn/models/test_efficiency_3/output/pgm.png
     :align:     center
-    :width:     70%
+    :width:     80%
 
 The models, corrected and uncorrected. There appears to still be an issue that
 we have not managed to resolve to get the result unbiased.

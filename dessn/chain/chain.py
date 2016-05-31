@@ -17,6 +17,7 @@ class ChainConsumer(object):
                             "#795548", "#64B5F6", "#8BC34A", "#757575", "#CDDC39"]
         self.chains = []
         self.weights = []
+        self.posteriors = []
         self.names = []
         self.parameters = []
         self.all_parameters = []
@@ -30,7 +31,7 @@ class ChainConsumer(object):
         self.parameters_truth = {}
         self.parameters_general = {}
 
-    def add_chain(self, chain, parameters=None, name=None, weights=None):
+    def add_chain(self, chain, parameters=None, name=None, weights=None, posterior=None):
         """ Add a chain to the consumer.
 
         Parameters
@@ -45,6 +46,8 @@ class ChainConsumer(object):
             The name of the chain. Used when plotting multiple chains at once.
         weights : ndarray, optional
             If given, uses this array to weight the samples in chain
+        posterior : ndarray, optional
+            If given, records the log posterior for each sample in the chain
 
         Returns
         -------
@@ -61,6 +64,7 @@ class ChainConsumer(object):
             chain = chain[None].T
         self.chains.append(chain)
         self.names.append(name)
+        self.posteriors.append(posterior)
         if weights is None:
             self.weights.append(np.ones(chain.shape[0]))
         else:
@@ -402,6 +406,22 @@ class ChainConsumer(object):
             text = "$%s$" % text
         return text
 
+    def divide_chain(self, i, num_walkers):
+        cs = np.split(self.chains[i], num_walkers)
+        ws = np.split(self.weights[i], num_walkers)
+        con = ChainConsumer()
+        con._configured_bar = self._configured_bar
+        con._configured_contour = self._configured_contour
+        con._configured_truth = self._configured_truth
+        con._configured_general = self._configured_general
+        con.parameters_contour = self.parameters_contour
+        con.parameters_bar = self.parameters_bar
+        con.parameters_truth = self.parameters_truth
+        con.parameters_general = self.parameters_general
+        for j, (c, w) in enumerate(zip(cs, ws)):
+            con.add_chain(c, weights=w, name="Chain %d" % j, parameters=self.parameters[i])
+        return con
+
     def plot(self, figsize="GROW", parameters=None, extents=None, filename=None,
              display=False, truth=None, legend=True):  # pragma: no cover
         """ Plot the chain
@@ -412,10 +432,12 @@ class ChainConsumer(object):
             The figure size to generate. Accepts a regular two tuple of size in inches,
             or one of several key words. The default value of ``COLUMN`` creates a figure
             of appropriate size of insertion into an A4 LaTeX document in two-column mode.
-             ``PAGE`` creates a full page width figure. ``GROW`` creates an image that
-             scales with parameters (1.5 inches per parameter). String arguments are not
-              case sensitive. parameters : list[str], optional
-            If set, only creates a plot for those specific parameters
+            ``PAGE`` creates a full page width figure. ``GROW`` creates an image that
+            scales with parameters (1.5 inches per parameter). String arguments are not
+            case sensitive.
+        parameters : list[str]|int, optional
+            If set, only creates a plot for those specific parameters (if list). If an
+            integer is given, only plots the fist so many parameters.
         extents : list[tuple[float]] or dict[str], optional
             Extents are given as two-tuples. You can pass in a list the same size as
             parameters (or default parameters if you don't specify parameters),
@@ -448,6 +470,10 @@ class ChainConsumer(object):
 
         if parameters is None:
             parameters = self.all_parameters
+        elif isinstance(parameters, int):
+            parameters = self.all_parameters[:parameters]
+        if truth is not None and isinstance(truth, list):
+            truth = truth[:len(parameters)]
 
         if isinstance(figsize, str):
             if figsize.upper() == "COLUMN":
@@ -541,7 +567,8 @@ class ChainConsumer(object):
         return fig
 
     def plot_walks(self, parameters=None, truth=None, extents=None, display=False,
-                   filename=None, chain=None, convolve=None, figsize=None): # pragma: no cover
+                   filename=None, chain=None, convolve=None, figsize=None,
+                   plot_weights=True, plot_posterior=True): # pragma: no cover
         """ Plots the chain walk; the parameter values as a function of step index.
 
         This plot is more for a sanity or consistency check than for use with final results.
@@ -557,8 +584,9 @@ class ChainConsumer(object):
 
         Parameters
         ----------
-        parameters : list[str], optional
+        parameters : list[str]|int, optional
             Specifiy a subset of parameters to plot. If not set, all parameters are plotted.
+            If an integer is given, only the first so many parameters are plotted.
         truth : list[float]|dict[str], optional
             A list of truth values corresponding to parameters, or a dictionary of
             truth values keyed by the parameter.
@@ -578,6 +606,10 @@ class ChainConsumer(object):
             the width of the smoothing filter.
         figsize : tuple, optional
             If set, sets the created figure size.
+        plot_weights : bool, optional
+            If true, plots the weight if they are available
+        plot_posterior : bool, optional
+            If true, plots the log posterior if they are available
 
         Returns
         -------
@@ -596,6 +628,25 @@ class ChainConsumer(object):
 
         if parameters is None:
             parameters = self.all_parameters
+        elif isinstance(parameters, int):
+            parameters = self.all_parameters[:parameters]
+        if truth is not None and isinstance(truth, list):
+            truth = truth[:len(parameters)]
+
+        n = len(parameters)
+        extra = 0
+        if plot_weights:
+            for w in self.weights:
+                plot_weights = plot_weights and np.any(w != 1.0)
+                if not plot_weights:
+                    break
+
+        plot_posterior = plot_posterior and len([p for p in self.posteriors if p is not None]) > 0
+
+        if plot_weights:
+            extra += 1
+        if plot_posterior:
+            extra += 1
 
         assert truth is None or isinstance(truth, dict) or \
                (isinstance(truth, list) and len(truth) == len(parameters)), \
@@ -616,7 +667,7 @@ class ChainConsumer(object):
             extents = {}
 
         if figsize is None:
-            figsize = (5, 0.5 + len(parameters))
+            figsize = (8, 0.75 + (n + extra))
 
         if chain is None:
             if len(self.chains) == 1:
@@ -635,19 +686,25 @@ class ChainConsumer(object):
         self.logger.debug("Plotting chain of size %s" % (chain_data.shape,))
         chain_parameters = self.parameters[chain]
 
-        fig, axes = plt.subplots(figsize=figsize, nrows=len(parameters), squeeze=False, sharex=True)
+        fig, axes = plt.subplots(figsize=figsize, nrows=n + extra, squeeze=False, sharex=True)
 
         if self.parameters_general["serif"]:
             plt.rc('text', usetex=True)
             plt.rc('font', family='serif')
-
-        for p, axes_row in zip(parameters, axes):
+        for i, axes_row in enumerate(axes):
             ax = axes_row[0]
-            assert p in chain_parameters, \
-                "Chain does not have parameter %s, it has %s" % (p, chain_parameters)
-            chain_row = chain_data[:, chain_parameters.index(p)]
-            self._plot_walk(ax, p, chain_row, truth=truth.get(p),
-                            extents=extents.get(p), convolve=convolve)
+            if i >= extra:
+                p = parameters[i - n]
+                assert p in chain_parameters, \
+                    "Chain does not have parameter %s, it has %s" % (p, chain_parameters)
+                chain_row = chain_data[:, chain_parameters.index(p)]
+                self._plot_walk(ax, p, chain_row, truth=truth.get(p),
+                                extents=extents.get(p), convolve=convolve)
+            else:
+                if i == 0 and plot_posterior:
+                    self._plot_walk(ax, "$\log(P)$", self.posteriors[chain] - self.posteriors[chain].max(), convolve=convolve)
+                else:
+                    self._plot_walk(ax, "$w$", self.weights[chain], convolve=convolve)
 
         if filename is not None:
             fig.savefig(filename, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
@@ -670,7 +727,7 @@ class ChainConsumer(object):
         if convolve is not None:
             filt = np.ones(convolve) / convolve
             filtered = np.convolve(data, filt, mode="same")
-            ax.plot(x, filtered, ls=':', color="#9C1919", alpha=0.8)
+            ax.plot(x[:-1], filtered[:-1], ls=':', color="#FF0000", alpha=1)
         if truth is not None:
             ax.axhline(truth, **self.parameters_truth)
 
