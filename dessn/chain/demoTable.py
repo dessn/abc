@@ -2,21 +2,6 @@ import numpy as np
 from dessn.chain.chain import ChainConsumer
 
 
-class DemoTable:
-    r""" The multiple chain demo for Chain Consumer. Dummy class used to get documentation caught by ``sphinx-apidoc``,
-    it servers no other purpose.
-
-    Running this file in python creates two random data sets, representing two separate chains, *for two separate models*.
-
-    This example shows the output of calling the :func:`~dessn.chain.chain.ChainConsumer.get_latex_table` method.
-
-    .. figure::     ../dessn/chain/demoTable.png
-        :align:     center
-
-    """
-    def __init__(self):
-        pass
-
 if __name__ == "__main__":
     ndim, nsamples = 4, 200000
     np.random.seed(0)
@@ -36,5 +21,6 @@ if __name__ == "__main__":
     c = ChainConsumer()
     c.add_chain(data, parameters=["$x$", "$y$", r"$\alpha$", r"$\beta$"], name="Model A")
     c.add_chain(data2, parameters=["$x$", "$y$", r"$\alpha$", r"$\gamma$"], name="Model B")
-    table = c.get_latex_table(caption="The maximum likelihood results for the tested models", label="tab:example")
+    table = c.get_latex_table(caption="The maximum likelihood results for the tested models",
+                              label="tab:example")
     print(table)

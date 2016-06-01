@@ -33,7 +33,11 @@ different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
 
 ------------
 
+Chain Consumer
+--------------
 
+Also written for this project is a robust tool that consumes chains and produces plots.
+This tool is detailed at :py:mod:`dessn.chain`.
 
 
 Core
@@ -46,8 +50,7 @@ and edges allowed, please see the documentation located at :py:mod:`dessn.framew
 Utilities
 ---------
 
-For examples and usage instructions on how to use the plotting library included in this project,
-see :py:mod:`dessn.chain`.
+Stuff
 
 
 Implementations
@@ -69,3 +72,4 @@ The general project structure is as follows:
    :maxdepth: 2
 
    examples
+   chain
