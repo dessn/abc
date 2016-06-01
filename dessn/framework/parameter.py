@@ -3,13 +3,14 @@ import numpy as np
 
 
 class Parameter(object):
-    """ A parameter represented on a node on a PGM framework. Multiple parameters can be assigned to the same node on a
-    PGM by giving them the same group.
+    """ A parameter represented on a node on a PGM framework. Multiple parameters can be
+    assigned to the same node on a PGM by giving them the same group.
 
-    The Parameter class can essentially be thought of as a wrapper around a parameter or variable in your framework.
+    The Parameter class can essentially be thought of as a wrapper around a parameter or
+    variable in your framework.
 
-    This class is an abstract class, and cannot be directly instantiated. Instead, instantiate one of the provided
-    subclasses, as detailed below.
+    This class is an abstract class, and cannot be directly instantiated. Instead, instantiate
+    one of the provided subclasses, as detailed below.
 
     Parameters
     ----------
@@ -18,7 +19,8 @@ class Parameter(object):
     label : str
         The parameter label, for use in plotting and PGM creation.
     group : str, optional
-        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+        The group in the PGM that this parameter belongs to.
+        Will replace ``name`` on the PGM if set.
 
     """
     __metaclass__ = abc.ABCMeta
@@ -49,9 +51,9 @@ class ParameterEmcee(Parameter):
 
         The better this suggestion is, the less burn in time is needed. As parameters can
         vary by orders of magnitude, and have allowed ranges (some parameters cannot be negative
-        for example), local optimisation methods do not always work when starting with some arbitrary
-        and random initial condition. As such, overriding this parameter is required for all
-        latent and underlying parameters.
+        for example), local optimisation methods do not always work when starting with some
+        arbitrary and random initial condition. As such, overriding this parameter is required
+        for all latent and underlying parameters.
 
         Parameters
         ----------
@@ -69,8 +71,8 @@ class ParameterEmcee(Parameter):
     def get_suggestion_sigma(self, data):
         """ Starting all walkers from the same position is not a good thing to do, so the
         suggested starting positions given by the :func:`get_suggestion` need to be randomised
-        slightly so that the walkers start in different positions. This is done by taking the suggested
-        parameter and adding uniform noise (**not** gaussian any more) to it,
+        slightly so that the walkers start in different positions. This is done by taking the
+        suggested parameter and adding uniform noise (**not** gaussian any more) to it,
         where the upper or lower maximum deviation of the suggested parameter
         is given by this function. Overestimating this value to try and ensure a proper spread of
         walker positions can lead to complications and increased convergence, so don't always think
@@ -93,10 +95,11 @@ class ParameterEmcee(Parameter):
 class ParameterObserved(Parameter):
     """ A parameter representing an observed variables
 
-    This parameter is used for all observables in the framework. In addition to a normal parameter, it also contains data,
-    which should be a list of ``n`` elements (for ``n`` data points), with each element allowed to be an
-    arbitrary data type. This data is what is given to the incoming and outgoing node edges
-    to calculate likelihoods. It is **very important** that, if your framework has multiple observed parameters, each
+    This parameter is used for all observables in the framework. In addition to a normal
+    parameter, it also contains data, which should be a list of ``n`` elements (for ``n``
+    data points), with each element allowed to be an arbitrary data type. This data is what
+    is given to the incoming and outgoing node edges to calculate likelihoods. It is
+    **very important** that, if your framework has multiple observed parameters, each
     observed parameter returns lists of the same length.
 
     Parameters
@@ -108,7 +111,8 @@ class ParameterObserved(Parameter):
     data : list[object] or `numpy.ndarray`
         The data list to supply to the edges.
     group : str, optional
-        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+        The group in the PGM that this parameter belongs to.
+        Will replace ``name`` on the PGM if set.
     """
     __metaclass__ = abc.ABCMeta
 
@@ -117,7 +121,8 @@ class ParameterObserved(Parameter):
         super(ParameterObserved, self).__init__(name, label, group=group)
 
     def get_data(self):
-        """ Returns a dictionary containing keys of the parameter names and values of the parameter data object
+        """ Returns a dictionary containing keys of the parameter names and
+        values of the parameter data object.
         """
         return {self.name: self.data}
 
@@ -141,7 +146,8 @@ class ParameterUnderlying(ParameterEmcee):
     label : str
         The parameter label, for use in plotting and PGM creation.
     group : str, optional
-        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+        The group in the PGM that this parameter belongs to.
+        Will replace ``name`` on the PGM if set.
     """
     __metaclass__ = abc.ABCMeta
 
@@ -155,10 +161,10 @@ class ParameterUnderlying(ParameterEmcee):
         Parameters
         ----------
         data : dic
-            A dictionary containing all data and the framework parameters being tested at a given step
-            in the MCMC chain. For this class, if the class was instantiated with a name of "omega_m",
-            the input dictionary would have the key "omega_m", and the value of "omega_m" at that
-            particular step in your chain.
+            A dictionary containing all data and the framework parameters being tested
+            at a given step in the MCMC chain. For this class, if the class was instantiated
+            with a name of "omega_m", the input dictionary would have the key "omega_m",
+            and the value of "omega_m" at that particular step in your chain.
 
         Returns
         -------
@@ -174,10 +180,11 @@ class ParameterUnderlying(ParameterEmcee):
 class ParameterTransformation(Parameter):
     """ A parameter representing a variable transformation.
 
-    This parameter essentially represents latent variables which are fully determined - their probability is given by
-    a delta function. Examples of this might be the luminosity distance, as it is known exactly when given cosmology
-    and redshift. Or it might represent a conversion between observed flux and actual flux, given we have a well
-    defined flux correction.
+    This parameter essentially represents latent variables which are fully determined -
+    their probability is given by a delta function. Examples of this might be the luminosity
+    distance, as it is known exactly when given cosmology and redshift. Or it might represent
+    a conversion between observed flux and actual flux, given we have a well defined
+    flux correction.
 
     On a PGM, this parameter would be represented by a point, not an ellipse.
 
@@ -188,7 +195,8 @@ class ParameterTransformation(Parameter):
     label : str
         The parameter label, for use in plotting and PGM creation.
     group : str, optional
-        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+        The group in the PGM that this parameter belongs to.
+        Will replace ``name`` on the PGM if set.
     """
     __metaclass__ = abc.ABCMeta
 
@@ -200,12 +208,14 @@ class ParameterLatent(ParameterEmcee):
     """ A parameter representing a latent, or hidden, variable in our framework.
 
     Given infinitely powerful computers, these nodes would not be necessary, for they represent
-    marginalisation over unknown / hidden / latent parameters in the framework, and we would simple integrate them
-    out when computing the likelihood probability. However, this is not the case, and it is more efficient to
-    simply incorporate latent parameters into our framework and essentially marginalise over them using Monte Carlo
-    integration. We thus trade explicit numerical integration in each step of our calculation for increased dimensionality.
+    marginalisation over unknown / hidden / latent parameters in the framework, and we would
+    simple integrate them out when computing the likelihood probability. However, this is not
+    the case, and it is more efficient to simply incorporate latent parameters into our framework
+    and essentially marginalise over them using Monte Carlo integration. We thus trade explicit
+    numerical integration in each step of our calculation for increased dimensionality.
 
-    For examples on why and how to use latent parameters, see the examples beginning in :class:`.Example`.
+    For examples on why and how to use latent parameters, see the examples
+    beginning in :class:`.Example`.
 
     Parameters
     ----------
@@ -214,7 +224,8 @@ class ParameterLatent(ParameterEmcee):
     label : str
         The parameter label, for use in plotting and PGM creation.
     group : str, optional
-        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+        The group in the PGM that this parameter belongs to.
+        Will replace ``name`` on the PGM if set.
     """
     __metaclass__ = abc.ABCMeta
 
@@ -225,11 +236,12 @@ class ParameterLatent(ParameterEmcee):
     def get_num_latent(self):
         """ The number of latent parameters to include in the framework.
 
-        Running MCMC requires knowing the dimensionality of our framework, which means knowing how many
-        latent parameters (realisations of an underlying hidden distribution) we require.
+        Running MCMC requires knowing the dimensionality of our framework, which means
+        knowing how many latent parameters (realisations of an underlying hidden
+        distribution) we require.
 
-        For example, if we observe a hundred supernova drawn from an underlying supernova distribution,
-        we would have to realise a hundred latent variables - one per data point.
+        For example, if we observe a hundred supernova drawn from an underlying supernova
+        distribution, we would have to realise a hundred latent variables - one per data point.
 
         Returns
         -------
@@ -242,19 +254,21 @@ class ParameterLatent(ParameterEmcee):
 class ParameterDiscrete(Parameter):
     """ A parameter representing a discrete variable in our framework.
 
-    Unlike latent variables which can be easy marginalised over, discrete variables simply create more issues than
-    they are worth. Algorithms like Hamiltonian Monte Carlo require continuous posterior surfaces, which - off the bat -
-    simply rule out discrete parameters. As such, discrete parameters in the framework are integrated out (really, they
-    are summed over). Examples of discrete parameters might be supernova types, which galaxy is the actual transient
-    host, or trivially whether a coin was flipped to be heads or tails.
+    Unlike latent variables which can be easy marginalised over, discrete variables
+    simply create more issues than they are worth. Algorithms like Hamiltonian Monte Carlo
+    require continuous posterior surfaces, which - off the bat - simply rule out discrete
+    parameters. As such, discrete parameters in the framework are integrated out (really, they
+    are summed over). Examples of discrete parameters might be supernova types, which galaxy is
+    the actual transient host, or trivially whether a coin was flipped to be heads or tails.
 
-    Discrete parameters must implement a :func:`.get_discrete` method, which needs to return the discrete options
-    for the particular step in the framework. Some discrete options may be global (for example, we would consider all
-    supernova type combinations with each supernova), however some can be dependent on the current observation
-    (some supernova might have only one possible host, others might have two or more). As the possible types
-    can be dependent on observation, the :func:`.get_discrete_requirements` method also exists and can be
-    overridden. It functions identically to the ``get_suggestion_requirements`` method in the :class:`ParameterLatent`
-    class.
+    Discrete parameters must implement a :func:`.get_discrete` method, which needs to return
+    the discrete options for the particular step in the framework. Some discrete options may
+    be global (for example, we would consider all supernova type combinations with each
+    supernova), however some can be dependent on the current observation (some supernova might
+    have only one possible host, others might have two or more). As the possible types can
+    be dependent on observation, the :func:`.get_discrete_requirements` method also exists
+    and can be overridden. It functions identically to the ``get_suggestion_requirements``
+    method in the :class:`ParameterLatent` class.
 
     For examples how to use latent parameters, see the example give by :class:`.DiscreteModel`.
 
@@ -265,7 +279,8 @@ class ParameterDiscrete(Parameter):
     label : str
         The parameter label, for use in plotting and PGM creation.
     group : str, optional
-        The group in the PGM that this parameter belongs to. Will replace ``name`` on the PGM if set.
+        The group in the PGM that this parameter belongs to.
+        Will replace ``name`` on the PGM if set.
     """
 
     __metaclass__ = abc.ABCMeta
@@ -280,7 +295,8 @@ class ParameterDiscrete(Parameter):
         Parameters
         ----------
         data : dictionary
-            Contains parameter values and observations for the particular step in the chain and observation
+            Contains parameter values and observations for the particular step in
+            the chain and observation
 
         Returns
         -------
@@ -290,7 +306,8 @@ class ParameterDiscrete(Parameter):
         raise NotImplementedError()
 
     def get_discrete_requirements(self):
-        """ Gets the data and parameters required for generating the discrete values for this parameters
+        """ Gets the data and parameters required for generating the discrete values
+        for this parameters.
 
         Returns
         -------

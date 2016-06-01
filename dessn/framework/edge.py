@@ -4,14 +4,16 @@ import abc
 class Edge(object):
     """ An edge connection one or more parameters to one or more different parameters.
 
-    An edge is a connection between parameters (*not* Nodes), and signifies a joint probability distribution.
-    That is, if in our mathematical definition of our framework, we find the term :math:`P(a,b|c,d,e)`, this
-    would be represented by a single edge. Similarly, :math:`P(a|b)P(b|c,d)` would be two edges.
+    An edge is a connection between parameters (*not* Nodes), and signifies a joint
+    probability distribution. That is, if in our mathematical definition of our framework,
+    we find the term :math:`P(a,b|c,d,e)`, this would be represented by a single edge.
+    Similarly, :math:`P(a|b)P(b|c,d)` would be two edges.
 
     Parameters
     ----------
     probability_of : str or list[str]
-        The dependent parameters. With the example :math:`P(a,b|c,d)`, this input would be ``['a','b']``.
+        The dependent parameters. With the example :math:`P(a,b|c,d)`, this
+        input would be ``['a','b']``.
     given : str or list[str]
         In the example :math:`P(a,b|c,d)`, this input would be ``['c','d']``.
     """
@@ -42,8 +44,9 @@ class Edge(object):
 
         Returns
         -------
-        float
-            the log likelihood given the supplied data and the framework parametrisation.
+        np.ndarray
+            an array of the log likelihood given the supplied data and the
+            framework parametrisation.
         """
         raise NotImplementedError()
 
@@ -51,17 +54,20 @@ class Edge(object):
 class EdgeTransformation(Edge):
     """ This specialised edge is used to connect to transformation nodes.
 
-    A transformation edge does not give a likelihood, but - as it is a known transformation - returns a dictionary
-    when `get_transformation` is invoked that is injected into the data dictionary given to regular edges.
+    A transformation edge does not give a likelihood, but - as it is a known transformation -
+    returns a dictionary when `get_transformation` is invoked that is injected into
+    the data dictionary given to regular edges.
 
     See :class:`.LuminosityToAdjusted` for a simple example.
 
     Parameters
     ----------
     probability_of : str or list[str]
-        The dependent parameters. With the example :math:`P(a,b|c,d)`, (assuming the functional form is a delta), this input would be ``['a','b']``.
+        The dependent parameters. With the example :math:`P(a,b|c,d)`, (assuming the functional
+        form is a delta), this input would be ``['a','b']``.
     given : str or list[str]
-        In the example :math:`P(a,b|c,d)`, (assuming the functional form is a delta), this input would be ``['c','d']``.
+        In the example :math:`P(a,b|c,d)`, (assuming the functional form is a delta),
+        this input would be ``['c','d']``.
     """
 
     def __init__(self, probability_of, given):
