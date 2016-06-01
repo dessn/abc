@@ -1,15 +1,9 @@
 from dessn.framework.parameter import Parameter, ParameterObserved, ParameterLatent, \
     ParameterUnderlying, ParameterTransformation, ParameterDiscrete
-from dessn.framework.edge import EdgeTransformation
-from dessn.utility.hdemcee import EmceeWrapper
+from dessn.framework.edge import EdgeTransformation, Edge
 import numpy as np
 import logging
-import emcee
-from emcee.utils import MPIPool
-import sys
-from scipy.optimize import fmin_bfgs, fmin_powell
-import types
-import copyreg
+from scipy.optimize import fmin_bfgs
 import scipy.optimize
 from scipy.misc import logsumexp
 
@@ -105,6 +99,21 @@ class Model(object):
                 self._in[g].append(p)
                 self._out[p].append(g)
         self._finalised = False
+
+    def add(self, entity):
+        """ Add a node or an edge to the model.
+
+        Parameters
+        ----------
+        entity : parameter or edge
+            The parameter or edge to add to the model
+        """
+        if isinstance(entity, Parameter):
+            self.add_node(entity)
+        elif isinstance(entity, Edge):
+            self.add_edge(entity)
+        else:
+            raise ValueError("Object passed in is not an edge or parameter: %s" % entity)
 
     def _validate_model(self):
         assert len(self._underlying_nodes) > 0, "No underlying parameters to constrain"
@@ -604,7 +613,8 @@ class Model(object):
         if self.master:
             self.logger = logging.getLogger(__name__)
 
-
+# import types
+# import copyreg
 # def _pickle_method(m):  # pragma: no cover
 #     if m.im_self is None:
 #         return getattr, (m.im_class, m.im_func.func_name)

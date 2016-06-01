@@ -36,9 +36,9 @@ class ConditionalProbability(Edge):
 class Example(Model):
     def __init__(self):
         super().__init__("Example model")
-        self.add_node(Observed())
-        self.add_node(Mean())
-        self.add_edge(ConditionalProbability())
+        self.add(Observed())
+        self.add(Mean())
+        self.add(ConditionalProbability())
 
 if __name__ == "__main__":
     directory = os.path.dirname(__file__) + os.sep + "output/"
