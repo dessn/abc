@@ -53,6 +53,8 @@ To learn how the underlying models function, and specific details on the sorts o
 and edges allowed, please see the documentation located at :ref:`core`.
 
 
+.. include:: proofs.rst
+
 Implementations
 ---------------
 
