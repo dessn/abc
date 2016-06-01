@@ -8,9 +8,10 @@ This document should detail the code structure, examples, and all other goodies.
 .. _examples:
 
 Examples
---------
+========
 
-Learning from examples is my preferred method.
+The examples in this section are designed give familiarity to the underlying
+framework; how to construct models using parameters and edges.
 
 For the primary motivation example, explaining how the models work and tie together, and why
 certain design choices have been chosen, see the :py:mod:`dessn.examples.simple` package.
@@ -33,7 +34,7 @@ different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
 
 
 Chain Consumer
---------------
+==============
 
 Also written for this project is a robust tool that consumes chains and produces plots.
 This tool is detailed at :ref:`chain`. An image to encourage you to visit that section:
@@ -46,22 +47,28 @@ This tool is detailed at :ref:`chain`. An image to encourage you to visit that s
 
 
 
-Core
-----
+Core Functionality
+==================
 
 To learn how the underlying models function, and specific details on the sorts of parameters
 and edges allowed, please see the documentation located at :ref:`core`.
 
 
+Model Proofs
+============
 
 .. include:: proofs.rst
+
+Implementations
+===============
 
 .. include:: implementations.rst
 
 
 
 General
--------
+=======
+
 The general project structure is as follows:
 
 .. toctree::

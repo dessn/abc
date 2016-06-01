@@ -1,6 +1,10 @@
 
 .. _proofs_sep:
 
+============
+Model Proofs
+============
+
 .. include:: proofs.rst
 
 

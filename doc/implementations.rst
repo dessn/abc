@@ -1,9 +1,7 @@
 
 .. _implementations:
 
-===============
-Implementations
-===============
+
 
 This section should contain various supernova cosmology
 model implementations.

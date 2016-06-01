@@ -1,9 +1,7 @@
 
 .. _proofs:
 
-============
-Model Proofs
-============
+
 
 Before utilising certain concepts in cosmology models, we aim to first
 show that they are effective. This section details the model proofs that
