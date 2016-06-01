@@ -109,7 +109,7 @@ term is dependent in our example on :math:`\mu` and :math:`\sigma`, we can easil
 plot this surface, which has been done below when translated into a probabalistic
 weighting.
 
-.. figure::     ../dessn/models/test_efficiency_3/output/weights.png
+.. figure::     ../dessn/proofs/efficiency_3/output/weights.png
     :align:     center
     :width:     80%
 
@@ -124,8 +124,8 @@ The model PGM:
     :align:     center
     :width:     80%
 
-The models, corrected and uncorrected. There appears to still be an issue that
-we have not managed to resolve to get the result unbiased.
+The models, corrected (blue), uncorrected (red) and if the data was not biased
+(green). We show two random realisations of the data.
 
 .. figure::     ../dessn/proofs/efficiency_3/output/surfaces.png
     :align:     center

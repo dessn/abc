@@ -262,7 +262,7 @@ class ChainConsumer(object):
 
         For an example output, see the image below:
 
-        .. figure::     ../dessn/chain/demoTable.png
+        .. figure::     ../dessn/chain/examples/demoTable.png
             :align:     center
 
         Parameters

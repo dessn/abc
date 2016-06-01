@@ -70,5 +70,5 @@ The general project structure is as follows:
     examples
     chain
     core
-    proofs
-    models
+    proofs_sep
+    implementations_sep

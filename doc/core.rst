@@ -108,8 +108,10 @@ Edges
 
 For examples on how to use all of these, please simply consult the given :ref:`examples`.
 
-Contents
---------
+
+API
+---
+
 .. toctree::
    :maxdepth: 2
 
