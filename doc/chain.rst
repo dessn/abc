@@ -11,13 +11,13 @@ wanted to plot. And so here we are!
 
 
 
-.. literalinclude:: ../dessn/chain/demo_introduction.py
+.. literalinclude:: ../dessn/chain/examples/demo_introduction.py
    :language: python
 
 
 The output figure is displayed below.
 
-.. figure::     ../dessn/chain/demoIntroduction.png
+.. figure::     ../dessn/chain/examples/demoIntroduction.png
    :align:     center
 
 For examples and API usage, please follow the links.
