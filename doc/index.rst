@@ -37,14 +37,7 @@ Chain Consumer
 ==============
 
 Also written for this project is a robust tool that consumes chains and produces plots.
-This tool is detailed at :ref:`chain`. An image to encourage you to visit that section:
-
-
-..  image:: ../dessn/chain/examples/demoVarious6_TruthValues.png
-    :width: 50%
-    :align: center
-    :target: chain.html
-
+This tool is detailed at :ref:`chain`.
 
 
 Core Functionality
