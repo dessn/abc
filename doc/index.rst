@@ -53,17 +53,11 @@ To learn how the underlying models function, and specific details on the sorts o
 and edges allowed, please see the documentation located at :ref:`core`.
 
 
+
 .. include:: proofs.rst
 
-Implementations
----------------
+.. include:: implementations.rst
 
-Finally, for the toy model implementations, see :py:mod:`dessn.models`.
-
-Specially, for the
-working toy model implementation going from 'observed' SALT2 parameters, see
-:py:mod:`dessn.models.c_pure_snia_simplified`. For an implementation using the observed
-light curves instead of SALT2 parameters, see :py:mod:`dessn.models.a_pure_snia`.
 
 
 General
