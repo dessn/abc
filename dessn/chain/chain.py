@@ -468,7 +468,7 @@ class ChainConsumer(object):
         if not self._configured_truth:
             self.configure_truth()
         if legend is None:
-            legend = len(self.chains) == 1
+            legend = len(self.chains) > 1
         if parameters is None:
             parameters = self.all_parameters
         elif isinstance(parameters, int):

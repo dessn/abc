@@ -25,3 +25,7 @@ table.borderless td {
     border-top: none !important;
     border-right: none !important;
 }
+
+.bounding img {
+    padding: 5px;
+}

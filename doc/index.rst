@@ -31,26 +31,26 @@ different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
     +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
 
 
-------------
 
 Chain Consumer
 --------------
 
 Also written for this project is a robust tool that consumes chains and produces plots.
-This tool is detailed at :py:mod:`dessn.chain`.
+This tool is detailed at :ref:`chain`. An image to encourage you to visit that section:
+
+
+..  image:: ../dessn/chain/examples/demoVarious6_TruthValues.png
+    :width: 50%
+    :align: center
+    :target: chain.html
+
 
 
 Core
 ----
 
 To learn how the underlying models function, and specific details on the sorts of parameters
-and edges allowed, please see the documentation located at :py:mod:`dessn.framework`.
-
-
-Utilities
----------
-
-Stuff
+and edges allowed, please see the documentation located at :ref:`core`.
 
 
 Implementations
@@ -69,7 +69,10 @@ General
 The general project structure is as follows:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   examples
-   chain
+    examples
+    chain
+    core
+    proofs
+    models

@@ -127,6 +127,9 @@ Because individual samples can be noisy, there is also the option to pass an int
 via parameter ``convolve``, which overplots a boxcar smoothed version of the steps,
 where ``convolve`` sets the smooth window size.
 
+Also, if you have weights for your samples, or known posteriors (which can
+both be given when adding a chain), these will be plotted too!
+
 The plot for this is saved to the png file below:
 
 .. literalinclude:: ../dessn/chain/examples/demoWalk.py
@@ -134,6 +137,12 @@ The plot for this is saved to the png file below:
 
 
 .. figure::     ../dessn/chain/examples/demoWalks.png
+    :align:     center
+
+For an example in which a MH run was fit over several hundred parameters, with
+weights and log posteriors recorded, this is the sort of output produces.
+
+.. figure::     ../dessn/chain/examples/exampleWalk.png
     :align:     center
 
 No histograms
