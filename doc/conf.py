@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 numpydoc_show_class_members = False
 # General information about the project.
-project = u'dessn'
+project = u'DES Supernova BHM'
 copyright = u'2016, dessn'
 author = u'dessn'
 

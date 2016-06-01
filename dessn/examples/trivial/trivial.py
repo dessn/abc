@@ -30,7 +30,7 @@ class ConditionalProbability(Edge):
         super().__init__("data", "mean")
 
     def get_log_likelihood(self, data):
-        return -(data["data"] - data["mean"])**2
+        return -0.5 * (data["data"] - data["mean"])**2
 
 
 class Example(Model):

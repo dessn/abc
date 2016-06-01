@@ -113,8 +113,6 @@ class ParameterObserved(Parameter):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, label, data, group=None):
-        assert type(data) in [list, np.ndarray], \
-            "Data must be a list format"
         self.data = data
         super(ParameterObserved, self).__init__(name, label, group=group)
 
