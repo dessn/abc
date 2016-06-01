@@ -137,33 +137,6 @@ class LuminosityToSupernovaDistribution(Edge):
 
 
 class ExampleModel(Model):
-    r"""An implementation example of a trivialised supernova model.
-
-    The framework is set up by declaring nodes, the edges between nodes, and then calling
-    ``finalise`` on the framework to verify its correctness.
-
-    This is the primary class in this package, and you can see that other classes
-    inherit from either :class:`.Parameter` or from :class:`.Edge`.
-
-    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those
-    classes, and encourage viewing the code directly to understand exactly what is happening.
-
-    Running this file in python first generates a PGM of the framework, and then runs
-    ``emcee`` and creates a corner plot:
-
-    .. figure::     ../dessn/examples/simple/output/pgm.png
-        :align:     center
-
-    .. figure::     ../dessn/examples/simple/output/surfaces.png
-        :align:     center
-
-    .. figure::     ../dessn/examples/simple/output/walks.png
-        :align:     center
-
-    We could also run the example framework using the PT sampler by specifying a
-    number of temperature to the ``fit`` method. You would get similar results.
-    """
-
     def __init__(self):
         super(ExampleModel, self).__init__("ExampleModel")
 
@@ -198,7 +171,7 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     logging.info("Creating framework")
     exampleModel = ExampleModel()
-    temp_dir = os.path.abspath(dir_name + "/output/data")
+    temp_dir = os.path.abspath(dir_name + "/output")
 
     if not only_data:
         plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
@@ -207,11 +180,12 @@ if __name__ == "__main__":
         exampleModel.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    sampler = EnsembleSampler(num_steps=15000, num_burn=5000, temp_dir=temp_dir, save_interval=20)
+    sampler = EnsembleSampler(num_walkers=64, num_steps=15000, num_burn=5000,
+                              temp_dir=temp_dir, save_interval=60)
     chain_consumer = exampleModel.fit(sampler)
 
     if not only_data:
         chain_consumer.configure_general(bins=0.8)
         print(chain_consumer.get_summary())
         chain_consumer.plot_walks(filename=plot_file2)
-        chain_consumer.plot(filename=plot_file, figsize=(6, 6), truth=[100, 20])
+        chain_consumer.plot(filename=plot_file, figsize=(6, 6), truth=[100, 20], legend=False)

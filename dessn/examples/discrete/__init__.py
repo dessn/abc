@@ -46,4 +46,26 @@ for :math:`n` data points is
 
 With three conditional probabilities, we will have three edges in our node, one discrete parameter :math:`c`,
 one underlying node :math:`r`, and two observed parameters :math:`s_o` and :math:`c_o`.
+
+----------
+
+
+As normal, the framework is set up by declaring parameters (which can be thought of like nodes
+on a PGM), and declaring the edges between parameters (the conditional probabilities).
+
+This is the primary class in this package, and you can see that other classes
+inherit from either :class:`.Parameter` or from :class:`.Edge`.
+
+I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes,
+and encourage viewing the code directly to understand exactly what is happening.
+
+Running this file in python first generates a PGM of the framework, and then runs ``emcee``
+and creates a corner plot:
+
+.. figure::     ../dessn/examples/discrete/output/pgm.png
+    :align:     center
+
+.. figure::     ../dessn/examples/discrete/output/surfaces.png
+    :align:     center
+
 """

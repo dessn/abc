@@ -423,7 +423,7 @@ class ChainConsumer(object):
         return con
 
     def plot(self, figsize="GROW", parameters=None, extents=None, filename=None,
-             display=False, truth=None, legend=True):  # pragma: no cover
+             display=False, truth=None, legend=None):  # pragma: no cover
         """ Plot the chain
 
         Parameters
@@ -467,7 +467,8 @@ class ChainConsumer(object):
             self.configure_contour()
         if not self._configured_truth:
             self.configure_truth()
-
+        if legend is None:
+            legend = len(self.chains) == 1
         if parameters is None:
             parameters = self.all_parameters
         elif isinstance(parameters, int):

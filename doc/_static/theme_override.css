@@ -1,0 +1,27 @@
+.wy-nav-top {
+    background-color: #DC3535 !important;
+}
+.wy-side-nav-search {
+    background-color: #DC3535 !important;
+}
+
+
+div[class^="highlight"] a {
+    background-color: #E6E6E6;
+}
+
+div[class^="highlight"] a:hover {
+    background-color: #ABECFC;
+}
+
+table.borderless {
+    border: none !important;
+}
+
+table.borderless td {
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border-right: none !important;
+}

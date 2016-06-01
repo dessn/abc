@@ -49,5 +49,27 @@ rewrite this as
             \log\left( \int_{-\infty}^\infty \exp\left(-\frac{(x_i-L_i)^2}{2\sigma_i^2} -
     \frac{(L_i-\theta_1)^2}{2\theta_2^2} \right) dL_i \right) -\log(2\pi\theta_2\sigma_i) \right]
 
+------------
+
+An implementation example of a trivialised supernova model.
+
+The framework is set up by declaring nodes, the edges between nodes, and then calling
+``finalise`` on the framework to verify its correctness.
+
+This is the primary class in this package, and you can see that other classes
+inherit from either :class:`.Parameter` or from :class:`.Edge`.
+
+I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those
+classes, and encourage viewing the code directly to understand exactly what is happening.
+
+Running this file in python first generates a PGM of the framework, and then runs
+``emcee`` and creates a corner plot:
+
+.. figure::     ../dessn/examples/simple/output/pgm.png
+    :align:     center
+
+.. figure::     ../dessn/examples/simple/output/surfaces.png
+    :align:     center
+
 
 """

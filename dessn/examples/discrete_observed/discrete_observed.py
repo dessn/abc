@@ -116,28 +116,6 @@ class ToRate(Edge):
 
 
 class DiscreteModel2(Model):
-    r"""A small example framework illustrating how to use discrete parameters.
-
-    As normal, the framework is set up by declaring parameters (which can be thought of like
-    nodes on a PGM), and declaring the edges between parameters (the conditional probabilities).
-
-    This is the primary class in this package, and you can see that other classes
-    inherit from either :class:`.Parameter` or from :class:`.Edge`.
-
-    I leave the documentation for :class:`.Parameter` and :class:`.Edge` to those classes,
-    and encourage viewing the code directly to understand exactly what is happening.
-
-    Running this file in python first generates a PGM of the framework, and then runs ``emcee``
-    and creates a corner plot:
-
-    .. figure::     ../dessn/examples/discrete_observed/output/pgm.png
-        :align:     center
-
-    .. figure::     ../dessn/examples/discrete_observed/output/surfaces.png
-        :align:     center
-
-    """
-
     def __init__(self):
         super(DiscreteModel2, self).__init__("Discrete")
 
@@ -159,7 +137,7 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.DEBUG)
     dir_name = os.path.dirname(__file__)
-    temp_dir = os.path.abspath(dir_name + "/output/data")
+    temp_dir = os.path.abspath(dir_name + "/output")
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
 
     if not only_data:
@@ -167,9 +145,10 @@ if __name__ == "__main__":
         model.get_pgm(pgm_file)
 
     logging.info("Starting fit")
-    sampler = EnsembleSampler(num_steps=3000, num_burn=500, temp_dir=temp_dir, save_interval=20)
+    sampler = EnsembleSampler(num_steps=3000, num_burn=500, temp_dir=temp_dir,
+                              save_interval=20, num_walkers=20)
     chain_consumer = model.fit(sampler)
 
     if not only_data:
         print(chain_consumer.get_summary())
-        chain_consumer.plot(filename=plot_file, truth=[0.6])
+        chain_consumer.plot(filename=plot_file, truth=[0.6], figsize=(4, 2.5), legend=False)

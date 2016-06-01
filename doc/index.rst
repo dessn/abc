@@ -5,6 +5,7 @@ DESSN Cosmology Analysis
 
 This document should detail the code structure, examples, and all other goodies.
 
+.. _examples:
 
 Examples
 --------
@@ -13,12 +14,26 @@ Learning from examples is my preferred method.
 
 For the primary motivation example, explaining how the models work and tie together, and why
 certain design choices have been chosen, see the :py:mod:`dessn.examples.simple` package.
-
-
-
 There are two example models which use discrete parameters (as they can be used in two
 different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
 :py:mod:`dessn.examples.discrete_observed`.
+
+.. table::
+    :class: borderless
+
+    +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
+    |..  image:: ../dessn/examples/simple/output/surfaces.png        |..  image:: ../dessn/examples/discrete/output/surfaces.png        |..  image:: ../dessn/examples/discrete_observed/output/surfaces.png    |
+    |    :width: 95%                                                 |    :width: 95%                                                   |    :width: 95%                                                        |
+    |    :align: center                                              |    :align: center                                                |    :align: center                                                     |
+    |    :target: example_simple.html                                |    :target: example_discrete.html                                |    :target: example_discrete_observed.html                            |
+    |                                                                |                                                                  |                                                                       |
+    |:ref:`example_simple`                                           |:ref:`example_discrete`                                           |:ref:`example_discrete_observed`                                       |
+    +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
+
+
+------------
+
+
 
 
 Core
@@ -51,6 +66,6 @@ General
 The general project structure is as follows:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
-   dessn
+   examples
