@@ -207,10 +207,12 @@ class Model(object):
         return result, data
 
     def get_log_prior(self, theta):
+        """ Given a list of input parameters, calculates the models log prior."""
         theta_dict, data = self._get_theta_dict(theta)
         return self._get_log_prior(theta_dict)
 
     def get_log_likelihood(self, theta):
+        """ Given a list of input parameters, calculates the models log likelihood."""
         theta_dict, data = self._get_theta_dict(theta)
         return self._get_log_likelihood(theta_dict, data)
 
@@ -224,6 +226,7 @@ class Model(object):
         return probability.sum()
 
     def get_log_posterior(self, theta):
+        """ Given a list of input parameters, calculates the models log posterior."""
         theta_dict, data = self._get_theta_dict(theta)
         probability = self._get_log_prior(theta_dict)
         if np.isfinite(probability):
@@ -231,9 +234,21 @@ class Model(object):
         return probability
 
     def get_log_posterior_polychord(self, theta):
+        """ In accordance to the PolyChord api, the probability function
+        must return both a likelihood and any determined parameters as a two tuple.
+
+        As such, this function returns the log posterior and an empty list as a tuple.
+        """
         return self.get_log_posterior(theta), []
 
     def get_hypercube_convert(self, theta):
+        """ Given a list of parameters in the range 0 to 1, and given the parameter
+        range on underlying and latent parameters, returns a list of parameters
+        in the correct range.
+
+        For example, if parameter ``x`` has suggestion 5 and suggestion sigma 3, the space
+        0 to 1 would be mapped to 2 to 8.
+        """
         return (theta * self.hypercube_factor + self.hypercube_min).tolist()
 
     def _get_dependencies(self, edges, dependency_name):
@@ -387,6 +402,17 @@ class Model(object):
         return sigmas
 
     def get_starting_position(self, num_walkers=1, squeeze=True):
+        """ Returns a potential starting position for a sampler.
+
+        Parameters
+        ----------
+        num_walkers : int, optional
+            If given, will generate multiple starting points for samplers that require it.
+        squeeze : bool, optional
+            If only one starting position is requested (as is default), squeeze
+            will use ``np.squeeze`` to condense the 2D array of shape ``(1, len(theta))``
+            to a 1D array of size ``len(theta)``.
+        """
         num_dim = len(self._theta_names)
         self.logger.debug("Generating starting guesses")
         p0 = self._get_suggestion()
