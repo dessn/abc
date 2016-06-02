@@ -35,7 +35,8 @@ class MetropolisHastings(GenericSampler):
         If set, draws latent parameters from the same (diagonal) distribution.
         Requires knowledge of parameter names to determine latent parameters.
     num_start : int, optional
-        How many starting positions to trial.
+        How many starting positions to trial, if the ``start`` value given
+        is a function.
     """
     def __init__(self, num_burn=10000, num_steps=10000,
                  sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
@@ -83,8 +84,9 @@ class MetropolisHastings(GenericSampler):
             - log_posterior : function
                 A function that takes a list of parameters and returns the
                 log posterior
-            - start : function
-                A function that can be called to generate a starting position
+            - start : function|list|np.ndarray
+                A function that can be called to generate a starting position, or an
+                initial starting position to use.
             - save_dims : int, optional
                 Only return values for the first ``save_dims`` parameters.
                 Useful to remove numerous marginalisation parameters if running
@@ -226,16 +228,21 @@ class MetropolisHastings(GenericSampler):
         """ Ensures that the position object, which can be none from loading, is a
         valid [starting] position.
         """
+
         if position is None:
-            log_p = -np.inf
-            final_pos = None
-            for i in range(self.num_start):
-                position = self.start()
-                v = self.log_posterior(position)
-                self.logger.debug("Log posterior is %f at position %s", (v, position))
-                if v > log_p:
-                    log_p = v
-                    final_pos = position
+            if not callable(self.start):
+                final_pos = self.start
+                v = self.log_posterior(final_pos)
+            else:
+                log_p = -np.inf
+                final_pos = None
+                for i in range(self.num_start):
+                    position = self.start()
+                    v = self.log_posterior(position)
+                    self.logger.debug("Log posterior is %f at position %s", (v, position))
+                    if v > log_p:
+                        log_p = v
+                        final_pos = position
             position = np.concatenate(([v, 1, 1], final_pos))
         return position
 
