@@ -10,28 +10,7 @@ This document should detail the code structure, examples, and all other goodies.
 Examples
 ========
 
-The examples in this section are designed give familiarity to the underlying
-framework; how to construct models using parameters and edges.
-
-For the primary motivation example, explaining how the models work and tie together, and why
-certain design choices have been chosen, see the :py:mod:`dessn.examples.simple` package.
-There are two example models which use discrete parameters (as they can be used in two
-different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
-:py:mod:`dessn.examples.discrete_observed`.
-
-.. table::
-    :class: borderless
-
-    +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
-    |..  image:: ../dessn/examples/simple/output/surfaces.png        |..  image:: ../dessn/examples/discrete/output/surfaces.png        |..  image:: ../dessn/examples/discrete_observed/output/surfaces.png    |
-    |    :width: 95%                                                 |    :width: 95%                                                   |    :width: 95%                                                        |
-    |    :align: center                                              |    :align: center                                                |    :align: center                                                     |
-    |    :target: example_simple.html                                |    :target: example_discrete.html                                |    :target: example_discrete_observed.html                            |
-    |                                                                |                                                                  |                                                                       |
-    |:ref:`example_simple`                                           |:ref:`example_discrete`                                           |:ref:`example_discrete_observed`                                       |
-    +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
-
-
+.. include:: examples.rst
 
 Chain Consumer
 ==============
@@ -67,7 +46,7 @@ The general project structure is as follows:
 .. toctree::
     :maxdepth: 2
 
-    examples
+    examples_sep
     chain
     core
     proofs_sep

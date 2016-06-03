@@ -10,8 +10,10 @@ Model Proofs
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    efficiency1
    efficiency2
    efficiency3
+   efficiency4

@@ -9,7 +9,8 @@ and given an error :math:`e`, we have draw our observed value from
     d \sim \mathcal{N}(\mu, e)
 
 For notational simplicity, I will be treating :math:`d` as a single value and not
-the actual vector that it is. For more rigorous vector treatment, see the next example.
+the actual vector that it is. However, as we have independent data, this is not
+an issue for us.
 
 Now, we bias our sample, by discarding all points which have a signal to noise
 (:math:`d/e`) less than some threshold :math:`\alpha`. Phrased differently,

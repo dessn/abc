@@ -11,6 +11,7 @@ Implementations
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
    a_pure_snia
    c_pure_snia_simplified

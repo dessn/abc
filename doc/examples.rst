@@ -1,13 +1,25 @@
 
 .. _examples:
 
-=====================
-Introductory Examples
-=====================
 
-.. toctree::
-   :maxdepth: 2
+The examples in this section are designed give familiarity to the underlying
+framework; how to construct models using parameters and edges.
 
-   example_simple
-   example_discrete
-   example_discrete_observed
+For the primary motivation example, explaining how the models work and tie together, and why
+certain design choices have been chosen, see the :py:mod:`dessn.examples.simple` package.
+There are two example models which use discrete parameters (as they can be used in two
+different ways), and these are detailed in :py:mod:`dessn.examples.discrete` and
+:py:mod:`dessn.examples.discrete_observed`.
+
+.. table::
+    :class: borderless
+
+    +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
+    |..  image:: ../dessn/examples/simple/output/surfaces.png        |..  image:: ../dessn/examples/discrete/output/surfaces.png        |..  image:: ../dessn/examples/discrete_observed/output/surfaces.png    |
+    |    :width: 95%                                                 |    :width: 95%                                                   |    :width: 95%                                                        |
+    |    :align: center                                              |    :align: center                                                |    :align: center                                                     |
+    |    :target: example_simple.html                                |    :target: example_discrete.html                                |    :target: example_discrete_observed.html                            |
+    |                                                                |                                                                  |                                                                       |
+    |:ref:`example_simple`                                           |:ref:`example_discrete`                                           |:ref:`example_discrete_observed`                                       |
+    +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
+

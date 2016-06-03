@@ -72,7 +72,7 @@ through links on each image.
    :target: chain_examples.htmll#custom-colours-and-forcing-shading
 
 .. image:: ../dessn/chain/examples/demoVarious6_TruthValues.png
-   :width: 32%W
+   :width: 32%
    :target: chain_examples.html#truth-values
 
 .. image:: ../dessn/chain/examples/demoVarious7_Rainbow.png

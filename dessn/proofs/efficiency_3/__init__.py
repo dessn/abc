@@ -4,13 +4,18 @@ results from a biased set of data.
 To this end, I implement a simple toy model, where we are observing points
 from an underlying distribution, which is is normal and parameterised by :math:`\mu` and
 :math:`\sigma`. To generate our data, we sample from this distribution, and denote
-:math:`\vec{s}` the realised point of our distribution.
+:math:`s` the realised point of our distribution.
 
 We then add in noise (our error), which takes the form of a normal distribution
 centered around the realised value :math:`s`, with standard deviation :math:`e`,
 where :math:`e` is some arbitrary number currently set to :math:`\mu/5`, where :math:`\mu` is
 the true value, not the current value in the model.  Denote the observed data
-points :math:`\vec{d}`.
+points :math:`d`. Formally
+
+.. math::
+    s \sim \mathcal{N}(\mu, \sigma)
+
+    d \sim \mathcal{N}(s,e)
 
 Now, we bias our sample, by discarding all points which have a signal to noise
 (:math:`d/e`) less than some threshold :math:`\alpha`.
@@ -18,96 +23,76 @@ Now, we bias our sample, by discarding all points which have a signal to noise
 To start from the beginning, we wish to calculate the posterior, and utilise Bayes theorem
 
 .. math::
-    P(\mu,\sigma|\vec{d},e) \propto P(\vec{d},e|\mu,\sigma) P(\mu,\sigma)
+    P(\mu,\sigma,e|d) \propto P(d|\mu,\sigma,e) P(\mu,\sigma,e)
 
-To simplify matters, we utilise flat priors and therefore neglect the :math:`P(\mu,\sigma)` term
+To simplify matters, we utilise flat priors and therefore neglect the :math:`P(\mu,\sigma,e)` term
 as a constant multiplier.
 
 .. math::
-    P(\mu,\sigma|\vec{d},e) \propto P(\vec{d},e|\mu,\sigma)
+    P(\mu,\sigma,e|d) \propto P(d|\mu,\sigma,e)
 
-Now here we again need to differentiate between the probability that certain data
-is generated from our model and the probability that the data is generated and
-*successfully* observed. We denote the probability that the data is
-generated (unobserved) with :math:`P_g(\vec{d},e|\mu,\sigma)`, and the
-probability that the data is both generated and observed to be :math:`P(\vec{d},e|\mu,\sigma)`.
-We denote the probability of the data, if generated, being observed using an
-efficiency :math:`\epsilon(\vec{d},e)` (where we assume this probability is independent
-of :math:`\mu` and :math:`\sigma`). Given we want our likelihood to be normalised over all
-possible observed realisations of our data to be unity, we have that
+As the detailed maths has been shown in examples 1 and 2, here I simply write the general
+expression for a biased likelihood:
 
 .. math::
-    \mathcal{L} = P(\vec{d},e|\mu,\sigma) = \frac{ \epsilon(\vec{d},e) P_g(\vec{d},e|\mu,\sigma)}
-    {\int dR\  \epsilon(\vec{R},e) P_g(\vec{R},e|\mu,\sigma)}
+    \mathcal{L} = \frac{\epsilon(d,\alpha, e) P(d|\mu,\sigma, e)}
+    {\int dR \ \epsilon(R,\alpha, e)  P(R|mu,\sigma, e)}
 
-where :math:`\vec{R}` represents all possible realisations of our data. Now,
-we introduce the latent parameter vector :math:`\vec{s}`, representing the
-realised points in the distribution parameterised by :math:`\mu` and :math:`\sigma`.
-This differs to :math:`\vec{d}`, as :math:`\vec{d}` contains our observational noise.
+To model the hidden layer containing :math:`s`, we introduce it in both the denominator and
+the numerator.
 
 .. math::
-    \mathcal{L} = \frac{\int d\vec{s} \ \epsilon(\vec{d},e) P_g(\vec{d},e,\vec{s}|\mu,\sigma)}
-    {\int dR \ \int d\vec{s}\  \epsilon(\vec{R},e) P_g(\vec{R},e,\vec{s}|\mu,\sigma)}
-
-    \mathcal{L} = \frac{\int d\vec{s} \ \epsilon(\vec{d},e) P_g(\vec{d},e|\vec{s}) P(\vec{s}|\mu,\sigma)}
-    {\int dR \ \int d\vec{s}\  \epsilon(\vec{R},e) P_g(\vec{R},e|\vec{s}) P(\vec{s}|\mu,\sigma)}
-
-    \mathcal{L} = \frac{\int d\vec{s} \ \epsilon(\vec{d},e) P_g(\vec{d},e|\vec{s}) P(\vec{s}|\mu,\sigma)}
-    {\int d\vec{s} \ P(\vec{s}|\mu,\sigma) \  \int d\vec{R}\ \epsilon(\vec{R},e) P_g(\vec{R},e|\vec{s}) }
-
-Before continuing further, let us realise that each data point in :math:`\vec{d}` and
-each realised point :math:`\vec{s}` are independent of one another, and so we can write out
-that
+    \mathcal{L} = \frac{\int ds \ \epsilon(d,\alpha, e) P(d, s|\mu,\sigma, e)}
+    {\int dR \int ds\ \epsilon(R,\alpha, e)  P(R, s|\mu,\sigma, e)}
 
 .. math::
-    \mathcal{L} = \prod_i \frac{\int d s_i \ \epsilon(d_i,e) P_g(d_i,e|s_i) P(s_i|\mu,\sigma)}
-    {\int ds_i \ P(s_i|\mu,\sigma) \  \int dR_i\ \epsilon(R_i,e) P_g(R_i,e|s_i) }
-
-On a different note, if we impose a :math:`d_i/e < \alpha` cut in our data, this gives us
-observational bounds from :math:`d_i = \alpha e \rightarrow \infty`.
-Considering the integral over potential realisations of observed data
+    \mathcal{L} = \frac{\int ds \ P(d|s,e) P(s|\mu,\sigma)}
+    {\int dR \int ds\ \epsilon(R,\alpha, e)  P(R|s, e) P(s|\mu,\sigma)}
 
 .. math::
-    \int dR_i\ \epsilon(R_i,e) P_g(R_i,e|s_i) = \int_{\alpha e}^\infty \frac{1}{\sqrt{2\pi}e}
-    \exp\left[ -\frac{(R_i - s_i)^2}{2e^2} \right]
+    \mathcal{L} = \frac{\int ds \ \mathcal{N}(d;s,e) \mathcal{N}(s;\mu,\sigma)}
+    {\int ds\ \mathcal{N}(s;\mu,\sigma) \int dR \ \mathcal{H}(R - \alpha e)  \mathcal{N}(R;s, e) }
 
-Evaluating this by transforming coordinate to :math:`x = R_i-s_i` such that we get
+Looking at the denominator:
 
 .. math::
-    \int dR_i \ \epsilon(R_i,e) P_g(R_i, e|s_i) = \int_{\alpha e - s_i}^{\infty}
+    \int dR \ \mathcal{H}(R - \alpha e)  \mathcal{N}(R;s, e)
+    = \int_{\alpha e}^\infty \frac{1}{\sqrt{2\pi}e}
+    \exp\left[ -\frac{(R - s)^2}{2e^2} \right] dR
+
+Evaluating this by transforming coordinate to :math:`x = R-s` such that we get
+
+.. math::
+    \int dR \ \mathcal{H}(R - \alpha e)  \mathcal{N}(R;s, e)
+    = \int_{\alpha e - s}^{\infty}
     \frac{1}{\sqrt{2\pi}e} \exp\left[ -\frac{x^2}{2 e^2} \right] dx
 
 gives the answer
 
 .. math::
-    \int dR_i \ \epsilon(R_i,e) P_g(R_i,e|s_i) = f(s_i, \alpha, \epsilon) = \begin{cases}
-    \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{\alpha e - s_i}{\sqrt{2} e} \right] &
-    \text{ if } \alpha e - s_i > 0 \\
-    \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{s_i - \alpha e}{\sqrt{2} e} \right] &
-    \text{ if } \alpha e - s_i < 0 \\
+    \int dR \ \mathcal{H}(R - \alpha e)  \mathcal{N}(R;s, e) = g(s, \alpha, e) = \begin{cases}
+    \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{\alpha e - s}{\sqrt{2} e} \right] &
+    \text{ if } \alpha e - s > 0 \\
+    \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{s - \alpha e}{\sqrt{2} e} \right] &
+    \text{ if } \alpha e - s < 0 \\
     \end{cases}
 
-Again looking at a different component, let us examine :math:`P(s_i|\mu,\sigma)`.
+Which gives a likelihood of
 
 .. math::
-    P(s_i|\mu,\sigma) = \frac{1}{\sqrt{2\pi}\sigma}
-    \exp\left[-\frac{(s_i-\mu)^2}{2\sigma^2}\right]
+    \mathcal{L} = \frac{\int ds \ \mathcal{N}(d;s,e) \mathcal{N}(s;\mu,\sigma)}
+    {\int ds\ \mathcal{N}(s;\mu,\sigma) g(s, \alpha, e)}
 
-Finally, we note that, if the data point is already in our sample, the
-efficiency must be one.
-
-Combined, this gives a likelihood (which is proportional to the posterior)
-of
-
-.. math::
-    \mathcal{L} = \prod_i \frac{\int d s_i \ \mathcal{N}(d_i - s_i, e) \mathcal{N}(s_i - \mu, \sigma)}
-    {\int ds \ \mathcal{N}(s - \mu, \sigma) \  f(s, \alpha, \epsilon) }
-
-In terms of implementation details, as :math:`\alpha` and :math:`\epsilon` are fixed
+In terms of implementation details, as :math:`\alpha` and :math:`e` are fixed
 at the start of the model, we can precompute the normalisation term. And as the normalisation
 term is dependent in our example on :math:`\mu` and :math:`\sigma`, we can easily
 plot this surface, which has been done below when translated into a probabalistic
-weighting.
+weighting. In English, the probability on the surface is the probability that
+we *would* observe data for the given model parametrisation. Notice how, having
+set :math:`\alpha=3.25` and :math:`e=20` in the generated data, we observe the
+symmetry axis at :math:`\alpha e = 65`. If :math:`\mu` is above this value, we are
+more likely to observe data the smaller :math:`\sigma`, and below the value
+we are more likely to observe given higher :math:`\sigma`.
 
 .. figure::     ../dessn/proofs/efficiency_3/output/weights.png
     :align:     center
