@@ -230,16 +230,16 @@ class MetropolisHastings(GenericSampler):
         """
 
         if position is None:
+            final_pos = None
             if not callable(self.start):
                 final_pos = self.start
                 v = self.log_posterior(final_pos)
             else:
                 log_p = -np.inf
-                final_pos = None
                 for i in range(self.num_start):
                     position = self.start()
                     v = self.log_posterior(position)
-                    self.logger.debug("Log posterior is %f at position %s", (v, position))
+                    self.logger.debug("Log posterior is %s at position %s" % (v, position))
                     if v > log_p:
                         log_p = v
                         final_pos = position
