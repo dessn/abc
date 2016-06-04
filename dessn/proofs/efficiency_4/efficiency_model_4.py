@@ -127,7 +127,7 @@ class ToUnderlying(Edge):
 class BiasCorrection(Edge):
     def __init__(self, threshold, temp_dir):
         super().__init__(["z_o"], ["mu", "sigma"])
-        self.filename = temp_dir + os.sep + "bias_correction.npy"
+        self.filename = temp_dir + os.sep + "bias_correction_%d.npy" % threshold
         self.threshold = threshold
         self.mus = None
         self.sigmas = None
@@ -249,8 +249,7 @@ def plot_weights(dir_name):
 
     fig = plt.figure(figsize=(6, 5))
     ax = fig.add_subplot(111, projection='3d')
-    # h = ax.scatter(m, s, r, c=np.log(z), cmap='viridis', lw=0, vmin=0, vmax=1.0)
-    h = ax.scatter(m, s, r, c=z, cmap='viridis', lw=0)
+    h = ax.scatter(m, s, r, c=z, cmap='viridis', lw=0, vmin=0, vmax=1.0)
     cbar = fig.colorbar(h)
     cbar.set_label(r"$P$")
     ax.set_xlabel(r"$\mu$")
@@ -270,7 +269,7 @@ if __name__ == "__main__":
     model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model_un.get_pgm(pgm_file)
-    # plot_weights(dir_name)
+    plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
@@ -302,8 +301,8 @@ if __name__ == "__main__":
         model_good.fit(sampler, chain_consumer=c)
         # print("Good ", model_good.get_log_posterior(theta_good), c.posteriors[-1][-1])
 
-        # model_un = EfficiencyModelUncorrected(fall[mask], zall[mask], name="Uncorrected%d" % i)
-        # model_un.fit(sampler, chain_consumer=c)
+        model_un = EfficiencyModelUncorrected(fall[mask], zall[mask], name="Uncorrected%d" % i)
+        model_un.fit(sampler, chain_consumer=c)
         # print("Uncorrected ", model_un.get_log_posterior(theta_bias), c.posteriors[-1][-1])
 
         model_cor = EfficiencyModelCorrected(fall[mask], zall[mask], threshold,
