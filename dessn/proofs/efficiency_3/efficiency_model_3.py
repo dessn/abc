@@ -76,6 +76,7 @@ class ActualSigma(ParameterUnderlying):
         s = data["sigma"]
         return -2 * np.log(s)
 
+
 class ToLatent(Edge):
     def __init__(self):
         super().__init__(["data", "data_error"], "point")
@@ -90,24 +91,23 @@ class ToLatent(Edge):
 class BiasCorrection(Edge):
     def __init__(self, threshold):
         super().__init__(["data_error", "point"], ["mean", "sigma"])
-        self.factor = np.log(np.sqrt(2 * np.pi))
         self.threshold = threshold
-        self.arr = np.linspace(-4, 4, 200)
-        self.gauss = (1 / (np.sqrt(2 * np.pi))) * np.exp(-(self.arr * self.arr) / 2)
+        self.arr = np.linspace(1, 300, 200)
 
     def get_log_likelihood(self, data):
         mu = data["mean"]
         sigma = data["sigma"]
         shape = data["point"].shape
         error = data["data_error"][0]
-
-        s = self.arr * sigma + mu
+        s = self.arr
         bound = self.threshold * error - s
         ltz = (bound < 0) * 2.0 - 1.0
         integral = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2) * error)) + 0.5
 
-        multiplied = integral * self.gauss
-        denom = simps(multiplied) / (self.arr[-1] - self.arr[0])
+        gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(s - mu) * (s - mu) / (2 * sigma * sigma))
+
+        multiplied = integral * gauss
+        denom = simps(multiplied, x=s)
         result = -np.log(denom)
         if result == np.inf: result = -np.inf
         return np.ones(shape) * result
@@ -173,16 +173,18 @@ def get_data(seed=5, n=500):
 
 def plot_weights(dir_name):
     mean, std, observed, errors, alpha, actual, uo, oe, am = get_data()
-    x = np.linspace(90, 110, 40)
-    y = np.linspace(10, 30, 40)
-    E = BiasCorrection(3.25)
-    z = [np.exp(E.get_log_likelihood({"mean": x1, "sigma": y1, "data": observed,
+    x = np.linspace(30, 120, 40)
+    y = np.linspace(5, 50, 40)
+    E = BiasCorrection(alpha)
+    z = [np.exp(-E.get_log_likelihood({"mean": x1, "sigma": y1, "data": observed,
                                       "point": actual, "data_error": errors})[0])
          for x1 in x for y1 in y]
     z = np.array(z)
-    z = z.reshape((40, 40))
+    z = z.reshape((40, 40)).T
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
     fig, ax = plt.subplots(1, 1, figsize=(4, 3))
-    h = ax.contourf(x, y, z, 20, cmap='viridis')
+    h = ax.contourf(x, y, z, 20, cmap='viridis', vmin=0, vmax=1.0)
     cbar = fig.colorbar(h)
     cbar.set_label(r"$P$")
     ax.set_xlabel(r"$\mu$")
@@ -191,7 +193,7 @@ def plot_weights(dir_name):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     dir_name = os.path.dirname(__file__)
     t = os.path.abspath(dir_name + "/output/data_%s")
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
@@ -214,7 +216,7 @@ if __name__ == "__main__":
         theta_good = [mean, std] + actual.tolist()
         theta_bias = [mean, std] + am.tolist()
         kwargs = {"num_steps": 70000, "num_burn": 20000, "save_interval": 300,
-                  "plot_covariance": True, "unify_latent": True}
+                  "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(uo, oe, name="Good%d" % i)
