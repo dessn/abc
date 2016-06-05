@@ -86,7 +86,7 @@ Which gives a final likelihood of
     {g(\alpha, \mu,\sigma)}
 We can not implement this correction, and then implement it, and hopefully see that the
 recovered underlying distribution becomes unbiased. I plot three realisations of the data
-to confirm that the effect is not by change.
+to confirm that the effect is not by chance.
 
 The model PGM:
 

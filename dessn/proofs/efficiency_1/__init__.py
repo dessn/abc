@@ -133,7 +133,7 @@ The model PGM:
     :width:     60%
     :align:     center
 
-I plot three realisations of the data to confirm that the effect is not by change,
+I plot three realisations of the data to confirm that the effect is not by chance,
 and show the parameters recovered when correcting for the bias (blue) and the
 parameters recovered when you do not correct for the bias (red).
 
