@@ -153,23 +153,26 @@ class BiasCorrection(Edge):
             gplus = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * fs))) + 0.5
             gminus = 1 - gplus
             term = np.power(gminus, self.N - 1) * (gminus + self.N * gplus)
-            zs = np.linspace(0.5, 1.5, 50)
+            z1 = 0.0
+            z2 = 1.5
+            zrange = 1 / (z2 - z1)
+            zs = np.linspace(z1, z2, 100)
             self.vs = np.zeros(ms.shape)
             for i, m in enumerate(self.mus):
                 for j, s in enumerate(self.sigmas):
+                    # m = 100
+                    # s = 40
                     zvals = np.zeros(zs.shape)
                     for k, z in enumerate(zs):
-                        m = 300
-                        s = 20
-                        z = 0.5
                         g = (fs * (1 + z) * (1 + z) - m)
                         gaussian = (1 / (np.sqrt(2 * np.pi) * s)) * np.exp(-g * g / (2 * s * s))
                         integral = simps(gaussian * term, x=fs)
                         zvals[k] = integral
-                        plt.plot(fs, gaussian)
-                        plt.plot(fs, term)
-                        exit()
-                    self.vs[i, j] = 1 - simps((1 + zs) * (1 + zs) * zvals, x=zs)
+                    self.vs[i, j] = 1 - zrange *simps((1 + zs) * (1 + zs) * zvals, x=zs)
+                    # print(1 - self.vs[i, j])
+                    # plt.plot(zs, zvals)
+                    # plt.show()
+                    # exit()
             np.save(self.filename, self.vs)
         return RegularGridInterpolator((self.mus, self.sigmas), self.vs,
                                        bounds_error=False, fill_value=0.0)
@@ -226,7 +229,7 @@ def get_data(seed=5, n=500):
     num_obs = 7
     mean = 200.0
     std = 40.0
-    z_start = 0.5
+    z_start = 0
     z_end = 1.5
     threshold = 75
 
