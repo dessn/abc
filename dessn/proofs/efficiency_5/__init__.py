@@ -92,7 +92,8 @@ This gives us a final likelihood which we can implement:
 We now can model this using generated data and test our model performance. The denominator term,
 as a function of :math:`\mu`, :math:`\sigma` can be thought of as a weighting, and
 is shown below. Notice the similarity to the weights shown in the
-previous example.
+previous example, however the fact we have changed from a linear decrease in flux due to
+redshift to the inverse square law lowers our efficiency across the board.
 
 
 .. figure::     ../dessn/proofs/efficiency_5/output/weights.png
