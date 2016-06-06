@@ -61,7 +61,7 @@ Which gives us
 
 
 .. math::
-    P(C_0|\mu,\sigma) &=
+    P(C_0|\mu,\sigma) =
     \int_{0.5}^{1.5} dz (1+z)^2 \int_{-\infty}^\infty df\  \mathcal{N}(f(1+z)^2;\mu,\sigma) \left(g_{-}(f,\alpha)\right)^N
 
 We now consider the more complicated term in the denominator, in which only one point makes
