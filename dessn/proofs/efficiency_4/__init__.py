@@ -53,7 +53,7 @@ Transforming from :math:`L` to :math:`f` via :math:`L = (1+z_R)f \rightarrow dL 
 
 .. math::
 
-    P(F>\alpha^2|\mu,\sigma) &= \int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df \mathcal{N}(f(1+z_R) ;\mu,\sigma) \int_{\alpha^2}^\infty df_R  \ \mathcal{N}\left(f_R; f, \sqrt{f}\right)
+    P(F>\alpha^2|\mu,\sigma) = \int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df \mathcal{N}(f(1+z_R) ;\mu,\sigma) \int_{\alpha^2}^\infty df_R  \ \mathcal{N}\left(f_R; f, \sqrt{f}\right)
 
 Focusing on the last term and following the previous example, we show that
 
@@ -80,7 +80,7 @@ Which evaluates to
 Substituting this back in gives us a calculable denominator:
 
 .. math::
-    P(F>\alpha^2|\mu,\sigma) &= \int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df\ \mathcal{N}(f(1+z_R) ;\mu,\sigma) g(f, \alpha)
+    P(F>\alpha^2|\mu,\sigma) = \int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df\ \mathcal{N}(f(1+z_R) ;\mu,\sigma) g(f, \alpha)
 
 Giving an update likelihood
 
