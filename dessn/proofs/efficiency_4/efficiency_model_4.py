@@ -140,11 +140,9 @@ class BiasCorrection(Edge):
     def get_data(self):
         self.mus = np.linspace(100, 300, 50)
         self.sigmas = np.linspace(5, 100, 40)
-        self.zs = np.linspace(0.4, 1.6, 70)
-        ms, ss, zs = np.meshgrid(self.mus, self.sigmas, self.zs, indexing="ij")
+        ms, ss = np.meshgrid(self.mus, self.sigmas, indexing="ij")
         self.ms = ms
         self.ss = ss
-        self.z = zs
         if os.path.exists(self.filename):
             self.vs = np.load(self.filename)
         else:
@@ -152,17 +150,19 @@ class BiasCorrection(Edge):
             bound = fs - self.threshold
             ltz = (bound > 0) * 2.0 - 1.0
             erf_term = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * fs))) + 0.5
+            zs = np.linspace(0.5, 1.5, 100)
             self.vs = np.zeros(ms.shape)
-            print(self.vs.shape, ms.shape, ss.shape, zs.shape)
             for i, m in enumerate(self.mus):
                 for j, s in enumerate(self.sigmas):
-                    for k, z in enumerate(self.zs):
+                    zvals = np.zeros(zs.shape)
+                    for k, z in enumerate(zs):
                         g = (fs * (1 + z) - m)
                         gaussian = (1 + z) * (1 / (np.sqrt(2 * np.pi) * s)) * np.exp(-g * g / (2 * s * s))
                         integral = simps(gaussian * erf_term, x=fs)
-                        self.vs[i, j, k] = integral
+                        zvals[k] = integral
+                    self.vs[i, j] = simps(zvals, x=zs)
             np.save(self.filename, self.vs)
-        return RegularGridInterpolator((self.mus, self.sigmas, self.zs), self.vs,
+        return RegularGridInterpolator((self.mus, self.sigmas), self.vs,
                                        bounds_error=False, fill_value=0.0)
 
     def get_log_likelihood(self, data):
@@ -170,11 +170,11 @@ class BiasCorrection(Edge):
         sigma = data["sigma"]
         redshift = data["z_o"]
 
-        points = [[mu, sigma, z] for z in redshift]
+        points = [[mu, sigma]]
         p = self.interp(points)
         ps = -np.log(p)
         ps[ps == np.inf] = -np.inf
-        return ps
+        return np.ones(redshift.shape) * ps
 
 
 class EfficiencyModelUncorrected(Model):
@@ -231,25 +231,21 @@ def get_data(seed=5, n=500):
 
 
 def plot_weights(dir_name):
-    from mpl_toolkits.mplot3d import Axes3D
     mean, std, threshold, lall, zall, fall, mask = get_data(seed=0)
 
-    E = BiasCorrection(threshold, dir_name + "/output")
-    n = 25
-    i = 1
-    m = E.ms[::i, ::i, ::n].flatten()
-    s = E.ss[::i, ::i, ::n].flatten()
-    r = E.z[::i, ::i, ::n].flatten()
-    z = E.vs[::i, ::i, ::n].flatten()
+    bias = BiasCorrection(threshold, dir_name + "/output")
+    m = bias.ms
+    s = bias.ss
+    v = bias.vs
+    print(m.shape, s.shape, v.shape, v.max())
 
     fig = plt.figure(figsize=(6, 5))
-    ax = fig.add_subplot(111, projection='3d')
-    h = ax.scatter(m, s, r, c=z, cmap='viridis', lw=0, vmin=0, vmax=1.0)
+    ax = fig.add_subplot(111)
+    h = ax.contourf(m, s, v, 20, cmap='viridis', vmin=0, vmax=1.0)
     cbar = fig.colorbar(h)
     cbar.set_label(r"$P$")
     ax.set_xlabel(r"$\mu$")
     ax.set_ylabel(r"$\sigma$")
-    ax.set_zlabel(r"$z$")
     fig.savefig(os.path.abspath(dir_name + "/output/weights.png"), bbox_inches="tight", dpi=300)
 
 
@@ -263,8 +259,8 @@ if __name__ == "__main__":
 
     model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    fig = model_un.get_pgm(pgm_file)
-    plot_weights(dir_name)
+    # fig = model_un.get_pgm(pgm_file)
+    # plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 2

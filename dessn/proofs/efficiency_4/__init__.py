@@ -38,58 +38,24 @@ Following previous examples, we assume flat priors, denote our latent (true) flu
 Now we enforce that the denominator is the normalisation constant over all possible
 experimental outcomes (using a subscript R to denote realised vales). Note that
 as the redshift is assumed to be perfectly determined, there is no integral
-over redshift, the observed value represnts all possible experimental outcomes.
+over redshift, the observed value represnts all possible experimental outcomes. Note that
+in our model, we enforce a uniform redshift range from 0.5 to 1.5, to explain the integral bounds
+that appear.
 
 .. math::
-    \mathcal{L} = \frac{P(F = f_o, z_o, F>\alpha^2 | \mu, \sigma)}
-    {\int df_R \ P(F>\alpha^2, F=f_R, z_o|\mu,\sigma)}
 
-Continuing with the algebra, we note that the luminosity is a function of flux
-and redshift.
+    P(F>\alpha^2|\mu,\sigma) &= \int df_R \int dz_R \int dz \int dL \ P(F>\alpha^2, f_R, z_R, z, L |\mu,\sigma) \\
+    &= \int df_R \int dz_R \int dz \int dL \ P(F>\alpha^2 | f_R) P(z_R | z) P(f_R | z, L) P(L |\mu,\sigma) P(z) \\
+    &= \int df_R \int dz_R \int dL \ \mathcal{H}(f_R - \alpha^2) \mathcal{N}\left(f_R; \frac{L}{1+z_R}, \sqrt{\frac{L}{1+z_R}}\right) \mathcal{N}(L ;\mu,\sigma) \\
+    &= \int_{-\infty}^{\infty} dL\ \mathcal{N}(L ;\mu,\sigma)\int_{0.5}^{1.5} dz_R  \int_{\alpha^2}^\infty df_R  \ \mathcal{N}\left(f_R; \frac{L}{1+z_R}, \sqrt{\frac{L}{1+z_R}}\right)  \\
 
-.. math::
-    \mathcal{L} = \frac{P(f_o, z_o, f_o>\alpha^2 | \mu, \sigma)}
-    {\int df_R \ P(f_R>\alpha^2, f_R, z_o|\mu,\sigma)}
-
-    \mathcal{L} = \frac{P(f_o>\alpha^2 |f_o, z_o, \mu, \sigma) P(f_o, z_o | \mu, \sigma)}
-    {\int df_R\ P(f>\alpha^2|f, z_o,\mu,\sigma) P(f, z_o | \mu, \sigma)}
-
-Noting if we observed :math:`f_o`, is must have passed out cuts and thus be :math:`f_o > \alpha^2`.
+Transforming from :math:`L` to :math:`f` via :math:`L = (1+z_R)f \rightarrow dL = df(1+z_R)`:
 
 .. math::
-    \mathcal{L} = \frac{P(f_o, z_o | \mu, \sigma)}
-    {\int df_R \ P(f_R>\alpha^2|f_R) P(f_R, z_o| \mu, \sigma)}
 
-Adding in the latent parameters to represent the actual flux:
+    P(F>\alpha^2|\mu,\sigma) &= \int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df \mathcal{N}(f(1+z_R) ;\mu,\sigma) \int_{\alpha^2}^\infty df_R  \ \mathcal{N}\left(f_R; f, \sqrt{f}\right)
 
-.. math::
-    \mathcal{L} = \frac{\int df \ P(f_o, z_o, f| \mu, \sigma)}
-    {\int df_R \ P(f_R>\alpha^2|f_R) \int df \ P(f_R, z_o, f| \mu, \sigma)}
-
-Writing in the bounds now for our integrals (instead of the two step process of writing
-the Heaviside step function and then using that to modify the integral limits), and remembering
-that the observed flux is drawn from a normal distribution centered on the actual flux:
-
-.. math::
-    \mathcal{L} = \frac{\int_0^\infty df \ P(f_o, z_o, f| \mu, \sigma)}
-    {\int_0^\infty df_R\ P(f_R>\alpha^2|f_R) \int_0^\infty df \ P(f_R, z_o, f| \mu, \sigma)}
-
-    \mathcal{L} = \frac{\int_0^\infty df \ P(f_o, |z_o, f, \mu, \sigma) P(z_o, f| \mu, \sigma)}
-    {\int_0^\infty df_R\ P(f_R>\alpha^2|f_R) \int_0^\infty df \ P(f_R|z_R, f, \mu, \sigma) P(z_o, f| \mu, \sigma)}
-
-    \mathcal{L} = \frac{\int_0^\infty df \ P(f_o, |f) P(z_o, f| \mu, \sigma)}
-    {\int_0^\infty df_ \ P(f_R>\alpha^2|f_R) \int_0^\infty df \ P(f_R|f) P(z_o, f| \mu, \sigma)}
-
-    \mathcal{L} = \frac{\int_0^\infty df \ \mathcal{N}(f_o; f, \sqrt{f}) P(L_o| \mu, \sigma)}
-    {\int_{\alpha^2}^\infty df_R \int_0^\infty df \ \mathcal{N}(f_R; f, \sqrt{f}) P(L| \mu, \sigma)}
-
-    \mathcal{L} = \frac{\int_0^\infty df \ \mathcal{N}(f_o; f, \sqrt{f}) \mathcal{N}(L; \mu, \sigma)}
-    {\int_{\alpha^2}^\infty df_R  \int_0^\infty df \ \mathcal{N}(f_R; f, \sqrt{f}) \mathcal{N}(L_R; \mu, \sigma)}
-
-    \mathcal{L} = \frac{\int_0^\infty df \ \mathcal{N}(f_o; f, \sqrt{f}) \mathcal{N}(L; \mu, \sigma)}
-    {\int_0^\infty df \ \mathcal{N}(L_R; \mu, \sigma) \int_{\alpha^2}^\infty df_R \ \mathcal{N}(f_R; f, \sqrt{f})}
-
-Following the previous example, we show that
+Focusing on the last term and following the previous example, we show that
 
 .. math::
     \int_{\alpha^2}^\infty df_R \ \mathcal{N}(f_R; f, \sqrt{f}) =
@@ -104,25 +70,26 @@ We translate variables such that :math:`x = f_R - f`, which implies :math:`dx = 
 Which evaluates to
 
 .. math::
-    \int_{\alpha^2}^\infty df_R \ \mathcal{N}(f_R; f, \sqrt{f}) = g(f) = \begin{cases}
+    \int_{\alpha^2}^\infty df_R \ \mathcal{N}(f_R; f, \sqrt{f}) = g(f, \alpha) = \begin{cases}
     \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{\alpha^2 - f}{\sqrt{2f}} \right] &
     \text{ if } \alpha^2 - f > 0 \\
     \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{f - \alpha^2}{\sqrt{2f}} \right] &
     \text{ if } \alpha^2 - f < 0 \\
     \end{cases}
 
-Placing this expression back into the likelihood gives us
+Substituting this back in gives us a calculable denominator:
 
 .. math::
-    \mathcal{L} = \frac{\int_0^\infty df \ \mathcal{N}(f_o; f, \sqrt{f}) \mathcal{N}(L; \mu, \sigma)}
-    {\int_0^\infty df \ \mathcal{N}(L; \mu, \sigma) g(f)}
+    P(F>\alpha^2|\mu,\sigma) &= \int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df\ \mathcal{N}(f(1+z_R) ;\mu,\sigma) g(f, \alpha)
 
-Finally, noting that :math:`L = f(1+z) \rightarrow \frac{dL}{df} = (1+z) \rightarrow dL = (1+z) df`,
-we can write the normal distributions in luminosity as a function of flux.
+Giving an update likelihood
 
 .. math::
-    \mathcal{L} = \frac{\int_0^\infty df \ \mathcal{N}(f_o; f, \sqrt{f}) (1+z_o)\mathcal{N}(f(1+z_o); \mu, \sigma)}
-    {\int_0^\infty df \  (1+z_o)\mathcal{N}(f(1+z_o); \mu, \sigma) g(f)}
+    \mathcal{L} &= \frac{P(F = f_o, z_o, F>\alpha^2 | \mu, \sigma)}{\int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df\ \mathcal{N}(f(1+z_R) ;\mu,\sigma) g(f, \alpha)} \\
+    \mathcal{L} &= \frac{(1+z_o) \int_{-\infty}^\infty df \ \mathcal{N}(f_o; f, \sqrt{f}) \mathcal{N}(f_o(1+z_o); \mu, \sigma)}{\int_{0.5}^{1.5} dz_R  \int_{-\infty}^{\infty} df\ \mathcal{N}(f(1+z_R) ;\mu,\sigma) g(f, \alpha)} \\
+
+where in the last line we introduced the latent flux parameter in the numerator,
+and converted form luminosity to flux, just as was done in the denominator.
 
 We now can model this using generated data and test our model performance. The denominator term,
 as a function of :math:`\mu`, :math:`\sigma` and :math:`z` can be thought of as a weighting, and
