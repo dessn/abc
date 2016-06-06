@@ -1,8 +1,8 @@
 
 .. _efficiency2:
 
-=======================
-Second Efficiency Proof
-=======================
+=============
+2D Efficiency
+=============
 
 .. automodule:: dessn.proofs.efficiency_2

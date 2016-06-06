@@ -1,8 +1,8 @@
 
 .. _efficiency4:
 
-=======================
-Fourth Efficiency Proof
-=======================
+===================
+Redshift Efficiency
+===================
 
 .. automodule:: dessn.proofs.efficiency_4

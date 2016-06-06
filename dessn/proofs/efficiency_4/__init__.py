@@ -92,8 +92,8 @@ where in the last line we introduced the latent flux parameter in the numerator,
 and converted form luminosity to flux, just as was done in the denominator.
 
 We now can model this using generated data and test our model performance. The denominator term,
-as a function of :math:`\mu`, :math:`\sigma` and :math:`z` can be thought of as a weighting, and
-is shown below. Notice the similarity in the redshift slices to the weights shown in the
+as a function of :math:`\mu`, :math:`\sigma` can be thought of as a weighting, and
+is shown below. Notice the similarity to the weights shown in the
 previous example.
 
 

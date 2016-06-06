@@ -1,8 +1,8 @@
 
 .. _efficiency3:
 
-======================
-Third Efficiency Proof
-======================
+=================
+Latent Parameters
+=================
 
 .. automodule:: dessn.proofs.efficiency_3
