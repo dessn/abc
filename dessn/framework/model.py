@@ -137,9 +137,8 @@ class Model(object):
         for key in self.data:
             if self.n is None:
                 self.n = len(self.data[key])
-            else:
-                assert self.n == len(self.data[key]), \
-                    "Data sizes must agree. Have %d vs %d" % (self.n, len(self.data[key]))
+            elif self.n != len(self.data[key]):
+                self.logger.warn("Warning, data sizes do not agree. Have %d vs %d" % (self.n, len(self.data[key])))
         for node in self._underlying_nodes:
             self._theta_names.append(node.name)
             self._theta_labels.append(node.label)
@@ -353,9 +352,12 @@ class Model(object):
                     theta_dict.update(self._get_transformation(theta_dict, edge))
                 else:
                     result = self._get_log_likelihood_edge(theta_dict, edge)
+                    # print(result.sum(), edge)
                     if type(result) != np.ndarray:
                         result = np.array(result)
-                    assert len(result.shape) == 1
+                    assert len(result.shape) == 1, \
+                        "Results should be a 1D array, found shape %s for edge %s" % \
+                        (result.shape, edge)
                     if probability is None:
                         probability = result
                     else:
@@ -464,13 +466,15 @@ class Model(object):
             raise ValueError("NaN")
         return result
 
-    def get_pgm(self, filename=None):  # pragma: no cover
+    def get_pgm(self, filename=None, seed=0):  # pragma: no cover
         """ Renders (and returns) a PGM of the current framework.
 
         Parameters
         ----------
         filename : str, optional
             if the filename is set, the PGM is saved to file in the top level ``plots`` directory.
+        seed : int, optional
+            sets the seed, if desired
 
         Returns
         -------
@@ -482,7 +486,7 @@ class Model(object):
         import daft
         if not self._finalised:
             self.finalise()
-
+        np.random.seed(seed)
         self.logger.info("Generating PGM")
         rc("font", family="serif", size=8)
         rc("text", usetex=True)

@@ -18,3 +18,4 @@ Model Proofs
    efficiency3
    efficiency4
    efficiency5
+   efficiency6
