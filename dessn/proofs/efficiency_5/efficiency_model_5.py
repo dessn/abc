@@ -36,10 +36,10 @@ class LatentFlux(ParameterLatent):
         return ["f_o"]
 
     def get_suggestion(self, data):
-        return data["f_o"]
+        return data["f_o"].mean(axis=1)
 
     def get_suggestion_sigma(self, data):
-        return 0.5 * data["f_o"]
+        return 0.5 * data["f_o"].mean(axis=1)
 
 
 class Luminosity(ParameterTransformation):
@@ -89,11 +89,14 @@ class ToLatentFlux(Edge):
         self.factor = np.log(np.sqrt(2 * np.pi))
 
     def get_log_likelihood(self, data):
-        diff = data["f_o"] - data["f"]
+        diff = data["f_o"] - data["f"][:, None]
         sigma = np.sqrt(data["f"])
-        res = -0.5 * diff * diff / (sigma * sigma) - self.factor - np.log(sigma)
+        sigma = sigma * sigma
+        sigma = sigma[:, None]
+        res = -0.5 * diff * diff / sigma - self.factor - np.log(sigma)
         res[np.isnan(res)] = -np.inf
-        return res.sum(axis=1)
+        res = res.sum(axis=1)
+        return res
 
 
 class ToLuminosityCorrection(Edge):
@@ -139,12 +142,12 @@ class BiasCorrection(Edge):
         self.interp = self.get_data()
 
     def get_data(self):
-        self.mus = np.linspace(100, 300, 20)
-        self.sigmas = np.linspace(5, 100, 20)
+        self.mus = np.linspace(100, 300, 50)
+        self.sigmas = np.linspace(5, 100, 50)
         ms, ss = np.meshgrid(self.mus, self.sigmas, indexing="ij")
         self.ms = ms
         self.ss = ss
-        if False and os.path.exists(self.filename):
+        if os.path.exists(self.filename):
             self.vs = np.load(self.filename)
         else:
             fs = np.linspace(1, 500, 500)
@@ -195,7 +198,7 @@ class EfficiencyModelUncorrected(Model):
         np.random.seed(seed)
         self.add(ObservedRedshift(observed_redshift))
         self.add(ObservedFlux(observed_flux))
-        self.add(LatentFlux(observed_flux.size))
+        self.add(LatentFlux(observed_redshift.size))
         self.add(ActualMean())
         self.add(ActualSigma())
         self.add(Luminosity())
@@ -212,7 +215,7 @@ class EfficiencyModelCorrected(Model):
         np.random.seed(seed)
         self.add(ObservedRedshift(observed_redshift))
         self.add(ObservedFlux(observed_flux))
-        self.add(LatentFlux(observed_flux.size))
+        self.add(LatentFlux(observed_redshift.size))
         self.add(ActualMean())
         self.add(ActualSigma())
         self.add(Luminosity())
@@ -224,8 +227,8 @@ class EfficiencyModelCorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5, n=500):
-    np.random.seed(seed=seed)
+def get_data(seed=5, n=1000):
+    np.random.seed(seed=seed+1)
     num_obs = 7
     mean = 200.0
     std = 40.0
@@ -235,9 +238,8 @@ def get_data(seed=5, n=500):
 
     z_o = np.random.uniform(z_start, z_end, size=n)
     lum = np.random.normal(loc=mean, scale=std, size=n)
-    flux = lum / (1 + z_o)
+    flux = lum / (1 + z_o)**2
     f_o = np.vstack((flux + np.random.normal(scale=np.sqrt(flux), size=n) for i in range(num_obs))).T
-    print(f_o.shape, f_o)
     obs_mask = f_o > threshold
     mask = obs_mask.sum(axis=1) > 2
     print(mask.sum(), n, lum.mean(), lum[mask].mean())
@@ -272,11 +274,10 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
+    model_un = EfficiencyModelUncorrected(np.random.random(size=(10, 7)), np.random.random(10))
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model_un.get_pgm(pgm_file)
-    plot_weights(dir_name)
-    exit()
+    # plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
@@ -287,7 +288,7 @@ if __name__ == "__main__":
         mean, std, threshold, lall, zall, fall, mask, num_obs = get_data(seed=i, n=500)
         theta = [mean, std]
 
-        kwargs = {"num_steps": 2000, "num_burn": 2000, "save_interval": 60,
+        kwargs = {"num_steps": 8000, "num_burn": 4000, "save_interval": 60,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
