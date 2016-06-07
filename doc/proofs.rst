@@ -21,7 +21,7 @@ were constructed to this effect.
     |                                                                |                                                                  |                                                                       |
     |:ref:`efficiency1`                                              |:ref:`efficiency2`                                                |:ref:`efficiency3`                                                     |
     +----------------------------------------------------------------+------------------------------------------------------------------+-----------------------------------------------------------------------+
-    |..  image:: ../dessn/proofs/efficiency_4/output/surfaces.png    |..  image:: ../dessn/proofs/efficiency_4/output/surfaces.png      |                                                                       |
+    |..  image:: ../dessn/proofs/efficiency_4/output/surfaces.png    |..  image:: ../dessn/proofs/efficiency_5/output/surfaces.png      |                                                                       |
     |    :width: 95%                                                 |    :width: 95%                                                   |                                                                       |
     |    :align: center                                              |    :align: center                                                |                                                                       |
     |    :target: efficiency4.html                                   |    :target: efficiency5.html                                     |                                                                       |
