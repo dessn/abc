@@ -107,7 +107,7 @@ The model PGM is constructed as follows:
     :width:     80%
     :align:     center
 
-I plot three realisations of the data uaing a threshold of :math:`\alpha^2 = 75`,
+I plot two realisations of the data uaing a threshold of :math:`\alpha^2 = 75`,
 to confirm that the effect is not by chance,
 and show the parameters recovered when correcting for the bias (blue) and the
 parameters recovered when you do not correct for the bias (red).
