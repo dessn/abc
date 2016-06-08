@@ -241,7 +241,7 @@ def get_data(seed=5, n=1000):
     flux = lum / (1 + z_o)**2
     f_o = np.vstack((flux + np.random.normal(scale=np.sqrt(flux), size=n) for i in range(num_obs))).T
     obs_mask = f_o > threshold
-    mask = obs_mask.sum(axis=1) > 2
+    mask = obs_mask.sum(axis=1) >= 2
     print(mask.sum(), n, lum.mean(), lum[mask].mean())
 
     return mean, std, threshold, lum, z_o, f_o, mask, num_obs
@@ -276,11 +276,11 @@ if __name__ == "__main__":
 
     model_un = EfficiencyModelUncorrected(np.random.random(size=(10, 7)), np.random.random(10))
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    fig = model_un.get_pgm(pgm_file)
-    plot_weights(dir_name)
+    # fig = model_un.get_pgm(pgm_file)
+    # plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
-    n = 3
+    n = 2
     w = 8
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
 
@@ -288,7 +288,7 @@ if __name__ == "__main__":
         mean, std, threshold, lall, zall, fall, mask, num_obs = get_data(seed=i, n=500)
         theta = [mean, std]
 
-        kwargs = {"num_steps": 8000, "num_burn": 4000, "save_interval": 60,
+        kwargs = {"num_steps": 12000, "num_burn": 4000, "save_interval": 60,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 

@@ -331,7 +331,7 @@ def get_data(seed=5, n=400):
     ac = np.dot(flux[:, None], factor[None, :])
     c_o = np.dstack((ac + np.random.normal(scale=np.sqrt(ac), size=ac.shape) for i in range(num_obs)))
     obs_mask = c_o > threshold
-    mask = obs_mask.sum(axis=2) > 2
+    mask = obs_mask.sum(axis=2) >= 2
     mask = mask.sum(axis=1) == 4
     print(mask.sum(), n, lum.mean(), lum[mask].mean())
 
@@ -380,13 +380,13 @@ if __name__ == "__main__":
         mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
         theta = [mean, std]
 
-        kwargs = {"num_steps": 70000, "num_burn": 20000, "save_interval": 60,
+        kwargs = {"num_steps": 20000, "num_burn": 20000, "save_interval": 60,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=3)
 
         model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
-        #
+
         model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
                                               zeros, name="Uncorrected%d" % i)
         model_un.fit(sampler, chain_consumer=c)

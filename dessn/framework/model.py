@@ -491,7 +491,7 @@ class Model(object):
         rc("font", family="serif", size=8)
         rc("text", usetex=True)
 
-        scale = max(np.power(len(self.nodes), 0.7), 2)
+        scale = max(np.power(len(self.nodes), 0.65), 2)
         x_size = 1.7 * scale
         y_size = 1.7 * scale
         border = 1
