@@ -6,11 +6,12 @@ omit =
     plots/*
     temp/*
     dessn/tests/*
-    dessn/models/*
+    dessn/chain/examples/*
     dessn/utility/*
     dessn/entry/*
     dessn/examples/*
-    dessn/chain/demo*.py
+    dessn/proofs/*
+    dessn/models/*
     **/test*.py
     *__init__*
 

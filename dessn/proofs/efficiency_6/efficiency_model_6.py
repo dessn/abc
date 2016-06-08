@@ -98,10 +98,10 @@ class Mean(ParameterUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return 150
+        return 155
 
     def get_suggestion_sigma(self, data):
-        return 50
+        return 10
 
 
 class Scatter(ParameterUnderlying):
@@ -115,7 +115,7 @@ class Scatter(ParameterUnderlying):
         return 30
 
     def get_suggestion_sigma(self, data):
-        return 10
+        return 5
 
     def get_log_prior(self, data):
         if data["sigma"] < 0:
@@ -380,15 +380,16 @@ if __name__ == "__main__":
         mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
         theta = [mean, std]
 
-        kwargs = {"num_steps": 20000, "num_burn": 8000, "save_interval": 60,
+        kwargs = {"num_steps": 70000, "num_burn": 20000, "save_interval": 60,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
-        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
+        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=3)
 
         model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
         #
-        # model_un = EfficiencyModelUncorrected(fall[mask], zall[mask], name="Uncorrected%d" % i)
-        # model_un.fit(sampler, chain_consumer=c)
+        model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
+                                              zeros, name="Uncorrected%d" % i)
+        model_un.fit(sampler, chain_consumer=c)
         #
         # model_cor = EfficiencyModelCorrected(fall[mask], zall[mask], threshold, num_obs,
         #                                      dir_name + "/output", name="Corrected%d" % i)
@@ -397,9 +398,9 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
-    # c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)
+    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)
     for i in range(len(c.chains)):
-        c.plot_walks(filename=walk_file % c.names[i], chain=i) #, truth=theta
+        c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \
         #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
         #           truth=theta)

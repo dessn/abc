@@ -22,5 +22,9 @@ be represented by a hat and vector quantities shall be represented by bold font.
     c_i &= 10^{\hat{Z}_i / 2.5} f \\
     \mathbf{\hat{c}_i} &\sim \mathcal{N}(c_i, \sqrt{c_i})
 
+The model PGM is constructed as follows:
 
+.. figure::     ../dessn/proofs/efficiency_6/output/pgm.png
+    :width:     80%
+    :align:     center
 """

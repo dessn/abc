@@ -32,7 +32,7 @@ def test_fail_without_edges():
     assert "unconnected" in str(e.value).lower()
 
 
-def test_fail_on_mismatched_data():
+def test_dont_fail_on_mismatched_data():
     m = Model("name")
     n1 = ParameterObserved("a", "a", np.random.random(20))
     n2 = ParameterObserved("b", "b", np.random.random(10))
@@ -44,9 +44,8 @@ def test_fail_on_mismatched_data():
     m.add_node(n3)
     m.add_edge(e1)
     m.add_edge(e2)
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(NotImplementedError) as e:
         m.finalise()
-    assert "data size" in str(e.value).lower()
 
 
 def test_fail_on_duplicate_names():

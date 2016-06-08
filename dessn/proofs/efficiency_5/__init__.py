@@ -36,10 +36,10 @@ as such:
 Addressing each term individually, denoting realised flux as :math:`R`...
 
 .. math::
-    P(C_0|\mu,\sigma) &= \int dz \int dL \int d\vec{R} \ P(C_0,z,L,\vec{R}|\mu,\sigma) P(z) \\
-    &= \int dz (1+z)^2 \int df \int d\vec{R} \ P(C_0|\vec{R}) P(\vec{R}|f) P(f(1+z)^2|\mu,\sigma) P(z) \\
-    &= \int dz \frac{1}{z_{\rm max} - z_{\rm min}} (1+z)^2 \int df\  \mathcal{N}(f(1+z)^2;\mu,\sigma) \prod_i \int dR_i  \mathcal{H}(\alpha^2 - R_i) \mathcal{N}(R_i;f,\sqrt{f}) \\
-    &= \int_{0}^{1.5} dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int_{-\infty}^\infty df\  \mathcal{N}(f(1+z)^2;\mu,\sigma) \prod_i \int_{-\infty}^{\alpha^2} dR_i  \mathcal{N}(R_i;f,\sqrt{f})
+    P(C_0|\mu,\sigma) &= \int dz \int dL \int d\vec{R} \ P(C_0,z,L,\vec{R}|\mu,\sigma) \\
+    &= \int dz (1+z)^2 \int df \int d\vec{R} \ P(C_0|\vec{R}) P(\vec{R}|f) P(f(1+z)^{-2}|\mu,\sigma) P(z) \\
+    &= \int dz \frac{1}{z_{\rm max} - z_{\rm min}} (1+z)^2 \int df\  \mathcal{N}(f(1+z)^{-2};\mu,\sigma) \prod_i \int dR_i  \mathcal{H}(\alpha^2 - R_i) \mathcal{N}(R_i;f,\sqrt{f}) \\
+    &= \int_{0}^{1.5} dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int_{-\infty}^\infty df\  \mathcal{N}(f(1+z)^{-2};\mu,\sigma) \prod_i \int_{-\infty}^{\alpha^2} dR_i  \mathcal{N}(R_i;f,\sqrt{f})
 
 As in the previous examples, we can evaluate the last integral and turn it
 into an error function. One simplification that we can employ in this model is that, as
@@ -73,20 +73,20 @@ threshold, and having a total number of observations of :math:`N`, we get:
 
 .. math::
     P(C_1|\mu,\sigma) &= \int dz \int dL \int d\vec{R} \ P(C_1,z,L,\vec{R}|\mu,\sigma) P(z)\\
-    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}} \int df \ P(f(1+z)^2|\mu,\sigma) \int d\vec{R} \ P(C_1|\vec{R}) P(\vec{R}|f) \\
-    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int df \ \mathcal{N}(f(1+z)^2;\mu,\sigma) \left[ \sum_i \int dR_i \mathcal{H}(R_i - \alpha^2) \right. \\
+    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}} \int df \ P(f(1+z)^{-2}|\mu,\sigma) \int d\vec{R} \ P(C_1|\vec{R}) P(\vec{R}|f) \\
+    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int df \ \mathcal{N}(f(1+z)^{-2};\mu,\sigma) \left[ \sum_i \int dR_i \mathcal{H}(R_i - \alpha^2) \right. \\
     &\quad\quad \left.\mathcal{N}(R_i;f,\sqrt{f}) \prod_{j\neq i} \int dR_j \mathcal{H}(\alpha^2 - R_j)\mathcal{N}(R_j;f,\sqrt{f}) \right] \\
-    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int df \ \mathcal{N}(f(1+z)^2;\mu,\sigma) \left[ \sum_i \left( g_{+}(f,\alpha) \prod_{j\neq i} g_{-}(f,\alpha) \right) \right] \\
-    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int df \ \mathcal{N}(f(1+z)^2;\mu,\sigma) N  g_{+}(f,\alpha) \left[g_{-}(f,\alpha)\right]^{N-1}\\
+    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int df \ \mathcal{N}(f(1+z)^{-2};\mu,\sigma) \left[ \sum_i \left( g_{+}(f,\alpha) \prod_{j\neq i} g_{-}(f,\alpha) \right) \right] \\
+    &= \int dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int df \ \mathcal{N}(f(1+z)^{-2};\mu,\sigma) N  g_{+}(f,\alpha) \left[g_{-}(f,\alpha)\right]^{N-1}\\
 
 
 This gives us a final likelihood which we can implement:
 
 .. math::
-    \mathcal{L} &= \frac{\int df\  \frac{(1+z_o)^2}{z_{\rm max} - z_{\rm min}}  \mathcal{N}(f(1+z_o)^2 ; \mu, \sigma)
+    \mathcal{L} &= \frac{\int df\  \frac{(1+z_o)^2}{z_{\rm max} - z_{\rm min}}  \mathcal{N}(f(1+z_o)^{-2} ; \mu, \sigma)
     \prod_i \mathcal{N}(f_i ; f, \sqrt{f})}{1 - P(C_0|\mu,\sigma) - P(C_1|\mu,\sigma)} \\
-    &= \frac{\int df\  \frac{(1+z_o)^2}{z_{\rm max} - z_{\rm min}}  \mathcal{N}(f(1+z_o)^2 ; \mu, \sigma) \prod_i \mathcal{N}(f_i ; f, \sqrt{f})}
-    {1 - \int_{0}^{1} dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int_{-\infty}^\infty df\  \mathcal{N}(f(1+z)^2;\mu,\sigma) \left(g_{-}(f,\alpha)\right)^{N-1} \left[ g_{-}(f,\alpha)  + N  g_{+}(f,\alpha)  \right]} \\
+    &= \frac{\int df\  \frac{(1+z_o)^2}{z_{\rm max} - z_{\rm min}}  \mathcal{N}(f(1+z_o)^{-2} ; \mu, \sigma) \prod_i \mathcal{N}(f_i ; f, \sqrt{f})}
+    {1 - \int_{0}^{1} dz \frac{(1+z)^2}{z_{\rm max} - z_{\rm min}}  \int_{-\infty}^\infty df\  \mathcal{N}(f(1+z)^{-2};\mu,\sigma) \left(g_{-}(f,\alpha)\right)^{N-1} \left[ g_{-}(f,\alpha)  + N  g_{+}(f,\alpha)  \right]} \\
 
 
 We now can model this using generated data and test our model performance. The denominator term,
