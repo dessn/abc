@@ -12,11 +12,7 @@ class ObservedValue(ParameterObserved):
 
 class LatentValue1(ParameterLatent):
     def __init__(self, n):
-        super().__init__("latent1", "latent1")
-        self.n = n
-
-    def get_num(self):
-        return self.n
+        super().__init__("latent1", "latent1", n)
 
     def get_suggestion(self, data):
         return data["obs"]
@@ -62,11 +58,7 @@ class Transformed2(ParameterTransformation):
 
 class LatentValue2(ParameterLatent):
     def __init__(self, n):
-        super().__init__("latent2", "latent2")
-        self.n = n
-
-    def get_num(self):
-        return self.n
+        super().__init__("latent2", "latent2", n)
 
     def get_suggestion(self, data):
         return data["obs"]

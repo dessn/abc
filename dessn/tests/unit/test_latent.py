@@ -11,11 +11,7 @@ class ObservedValue(ParameterObserved):
 
 class LatentValue(ParameterLatent):
     def __init__(self, n):
-        super().__init__("latent", "$l$")
-        self.n = n
-
-    def get_num(self):
-        return self.n
+        super().__init__("latent", "$l$", n)
 
     def get_suggestion_requirements(self):
         return ["obs"]
