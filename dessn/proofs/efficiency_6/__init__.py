@@ -114,6 +114,14 @@ The model PGM is constructed as follows:
     :align:     center
 
 
+The weights (efficiency, denominator, or mathematically :math:`P(S_2|\mu,\sigma,Z_i)`),
+sliced down a single value of :math:`Z_0` and :math:`Z_1`, appear as follows:
+
+.. figure::     ../dessn/proofs/efficiency_6/output/weights.png
+    :width:     80%
+    :align:     center
+
+
 Here are plotted the likelihood surfaces. Green represents all the data, including those
 that didn'nt make the cut, using a model without a bias correction. Red is the data
 after the cut (less data points), using a model without the bias correction. Blue is with the

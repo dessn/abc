@@ -169,15 +169,13 @@ class BiasCorrection(Edge):
         self.z1s = None
         self.vs = None
 
-        self.zs = np.linspace(0.5, 1.5, 20)
-        self.cs = np.linspace(10, 700, 300)
+        self.zs = np.linspace(0.5, 1.5, 50)
+        self.cs = np.linspace(10, 900, 300)
         bound = self.cs - self.threshold
         ltz = (bound > 0) * 2.0 - 1.0
         self.gplus = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * self.cs))) + 0.5
         self.gminus = 1 - self.gplus
-        # self.gplusN = np.power(self.gplus, number)
         self.gminusN = np.power(self.gminus, number)
-        # self.gplusNmo = np.power(self.gplus, number - 1)
         self.gminusNmo = np.power(self.gminus, number - 1)
 
         self.N = number
@@ -187,57 +185,46 @@ class BiasCorrection(Edge):
         fs = self.cs / np.power(10, Z / 2.5)
         zvals = np.zeros(self.zs.shape)
         for i, z in enumerate(self.zs):
-            diff = fs / (z * z) - mu
+            lum = fs * (z * z)
+            diff = lum - mu
             gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
-            integral = simps(gauss * self.gminusN, x=fs)
-            # print(fs, mu)
-            # plt.plot(fs, gauss)
-            # plt.plot(fs, self.gminusN)
-            # plt.show()
-            # exit()
-            zvals[i] = integral
-        return simps(z * z * zvals, x=self.zs)
+            zvals[i] = simps(gauss * self.gminusN, x=fs)
+        return simps(self.zs * self.zs * zvals, x=self.zs)
 
     def _get_s1(self, mu, sigma, Z):
         fs = self.cs / np.power(10, Z / 2.5)
         zvals = np.zeros(self.zs.shape)
         for i, z in enumerate(self.zs):
-            diff = fs / (z * z) - mu
+            diff = fs * (z * z) - mu
             gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
             integral = simps(gauss * self.N * self.gplus * self.gminusNmo, x=fs)
             zvals[i] = integral
-        return simps(z * z * zvals, x=self.zs)
+        return simps(self.zs * self.zs * zvals, x=self.zs)
 
     def get_data(self):
-        self.mus = np.linspace(250, 450, 20)
+        self.mus = np.linspace(150, 400, 20)
         self.sigmas = np.linspace(20, 100, 20)
         self.z0s = np.linspace(0.45, 0.55, 10)
         self.z1s = np.linspace(0.35, 0.45, 10)
 
-        if False and os.path.exists(self.filename):
+        if os.path.exists(self.filename):
             self.vs = np.load(self.filename)
         else:
-            ms, ss, z0s, z1s = np.meshgrid(self.mus, self.sigmas, self.z0s, self.z1s, indexing="ij")
-
-            self.vs = np.zeros(ms.shape)
+            self.vs = np.zeros((self.mus.size, self.sigmas.size, self.z0s.size, self.z1s.size))
             for i, m in enumerate(self.mus):
                 for j, s in enumerate(self.sigmas):
                     for k, z0 in enumerate(self.z0s):
                         for l, z1 in enumerate(self.z1s):
                             # Please kill me
-
                             s0_z0 = self._get_s0(m, s, z0)
-                            s0_z1 = self._get_s0(m, s, z1)
                             s1_z0 = self._get_s1(m, s, z0)
+                            s0_z1 = self._get_s0(m, s, z1)
                             s1_z1 = self._get_s1(m, s, z1)
 
-                            # print(s, m, z0, z1, s0_z0, s0_z1, s1_z0, s1_z1)
-                            self.vs[i, j, k, l] = 1 - (s0_z0 * s0_z0) - (s0_z0 * s0_z1) - \
-                                                  (s1_z0 * s0_z1) - (s1_z0 * s1_z1)
-                    # print(1 - self.vs[i, j])
-                    # plt.plot(zs, zvals)
-                    # plt.show()
-                    # exit()
+                            res = 1 - (s0_z0 * s0_z1) - (s0_z0 * s1_z1) - (s1_z0 * s0_z1) - \
+                                  (s1_z0 * s1_z1)
+                            self.vs[i, j, k, l] = res
+
             np.save(self.filename, self.vs)
         return RegularGridInterpolator((self.mus, self.sigmas, self.z0s, self.z1s), self.vs,
                                        bounds_error=False, fill_value=0.0)
@@ -245,9 +232,10 @@ class BiasCorrection(Edge):
     def get_log_likelihood(self, data):
         mu = data["mu"]
         sigma = data["sigma"]
+        zeros = data["zero"]
         redshift = data["z_o"]
 
-        points = [[mu, sigma]]
+        points = [[mu, sigma, zeros[0], zeros[1]]]
         p = self.interp(points)
         ps = -np.log(p)
         ps[ps == np.inf] = -np.inf
@@ -316,10 +304,9 @@ def plot_weights(dir_name):
     mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
 
     bias = BiasCorrection(threshold, num_obs, dir_name + "/output")
-    m, s, z0, z1 = np.meshgrid(bias.mus, bias.sigmas, bias.z0s, bias.z1s)
+    m, s, z0, z1 = np.meshgrid(bias.mus, bias.sigmas, bias.z0s, bias.z1s, indexing='ij')
     v = bias.vs
     print(m.shape, s.shape, v.shape, v.max())
-
     fig = plt.figure(figsize=(6, 5))
     ax = fig.add_subplot(111)
     h = ax.contourf(m[:,:,0,0], s[:,:,0,0], v[:,:,0,0], 20, cmap='viridis', vmin=0, vmax=1.0)
@@ -342,32 +329,32 @@ if __name__ == "__main__":
     model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model_un.get_pgm(pgm_file)
-    plot_weights(dir_name)
-    exit()
+    # plot_weights(dir_name)
 
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
-    w = 8
+    w = 4
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
         mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
         theta = [mean, std] + zeros.tolist()
 
-        kwargs = {"num_steps": 30000, "num_burn": 30000, "save_interval": 60,
+        kwargs = {"num_steps": 1000, "num_burn": 5000, "save_interval": 60,
                   "plot_covariance": True} # , "unify_latent": True # , "callback": v.callback
-        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
+        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=1)
 
-        model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
-        model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
-
-        model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
-                                              zeros, name="Uncorrected%d" % i)
-        model_un.fit(sampler, chain_consumer=c)
+        # model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
+        # model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
         #
-        # model_cor = EfficiencyModelCorrected(fall[mask], zall[mask], threshold, num_obs,
-        #                                      dir_name + "/output", name="Corrected%d" % i)
-        # model_cor.fit(sampler, chain_consumer=c)
+        # model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
+        #                                       zeros, name="Uncorrected%d" % i)
+        # model_un.fit(sampler, chain_consumer=c)
+        #
+        model_cor = EfficiencyModelCorrected(call[mask], zall[mask], calibration, zeros,
+                                             threshold, num_obs,
+                                             dir_name + "/output", name="Corrected%d" % i)
+        model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)

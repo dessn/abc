@@ -140,6 +140,8 @@ class Model(object):
 
     def _create_data_structures(self):
         self.data = {node.name: node.data for node in self._observed_nodes}
+        self._theta_labels = []
+        self._theta_names = []
         for key in self.data:
             if self.n is None:
                 self.n = len(self.data[key])
@@ -464,7 +466,6 @@ class Model(object):
         else:
             optimised = p0
         self.logger.debug("Optimised position is: %s" % optimised)
-
         std = np.random.uniform(low=-1, high=1, size=(num_walkers, num_dim)) * \
               np.array(sigmas).reshape((1, -1))
         start = optimised + std
