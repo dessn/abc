@@ -36,8 +36,9 @@ class Parameter(object):
 class ParameterEmcee(Parameter):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, label, group=None):
+    def __init__(self, name, label, group=None, num_param=1):
         super().__init__(name, label, group=group)
+        self.num_param = num_param
 
     @abc.abstractmethod
     def get_suggestion_requirements(self):
@@ -90,6 +91,9 @@ class ParameterEmcee(Parameter):
 
         """
         raise NotImplementedError()
+
+    def get_num(self):
+        return self.num_param
 
 
 class ParameterObserved(Parameter):
@@ -148,11 +152,13 @@ class ParameterUnderlying(ParameterEmcee):
     group : str, optional
         The group in the PGM that this parameter belongs to.
         Will replace ``name`` on the PGM if set.
+    num_param : int, optional
+        The number of parameters to create for this node.
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, label, group=None):
-        super(ParameterUnderlying, self).__init__(name, label, group=group)
+    def __init__(self, name, label, group=None, num_param=1):
+        super(ParameterUnderlying, self).__init__(name, label, group=group, num_param=num_param)
 
     @abc.abstractclassmethod
     def get_log_prior(self, data):
@@ -223,32 +229,16 @@ class ParameterLatent(ParameterEmcee):
         The parameter name, used as the key to access this parameter in the data object
     label : str
         The parameter label, for use in plotting and PGM creation.
+    num_param : int
+        The number of parameters to generate
     group : str, optional
         The group in the PGM that this parameter belongs to.
         Will replace ``name`` on the PGM if set.
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, name, label, group=None):
-        super(ParameterLatent, self).__init__(name, label, group=group)
-
-    @abc.abstractmethod
-    def get_num_latent(self):
-        """ The number of latent parameters to include in the framework.
-
-        Running MCMC requires knowing the dimensionality of our framework, which means
-        knowing how many latent parameters (realisations of an underlying hidden
-        distribution) we require.
-
-        For example, if we observe a hundred supernova drawn from an underlying supernova
-        distribution, we would have to realise a hundred latent variables - one per data point.
-
-        Returns
-        -------
-        int
-            the number of latent parameters required by this node
-        """
-        raise NotImplementedError()
+    def __init__(self, name, label, num_param, group=None):
+        super(ParameterLatent, self).__init__(name, label, group=group, num_param=num_param)
 
 
 class ParameterDiscrete(Parameter):

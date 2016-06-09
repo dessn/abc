@@ -79,8 +79,11 @@ class EdgeTransformation(Edge):
 
         Returns
         -------
-        dict
-            a dictionary containing a value for each parameter given in ``transform_to``
+        dict|(dict,logprob)
+            a dictionary containing a value for each parameter given in ``transform_to``. If
+             an adjustment in the probability is needed (possible when transforming latent
+             variables, this can be passed back as well).
+
         """
         raise NotImplementedError()
 

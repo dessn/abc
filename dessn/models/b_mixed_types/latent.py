@@ -16,7 +16,7 @@ class Luminosity(ParameterLatent):
         super(Luminosity, self).__init__("luminosity", "$L$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):
@@ -35,7 +35,7 @@ class Stretch(ParameterLatent):
         super().__init__("x1", "$x_1$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):
@@ -53,7 +53,7 @@ class PeakTime(ParameterLatent):
         super().__init__("t0", "$t_0$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):
@@ -71,7 +71,7 @@ class Colour(ParameterLatent):
         super().__init__("c", "$c$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):

@@ -14,7 +14,7 @@ class LatentValue(ParameterLatent):
         super().__init__("latent", "$l$")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):

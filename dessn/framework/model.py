@@ -29,6 +29,8 @@ class Model(object):
         self.logger = logging.getLogger(__name__)
         self.nodes = []
         self.edges = []
+        self._normal_edges = []
+        self._transformed_edges = []
         self._node_dict = {}
         self._node_indexes = {}
         self._observed_nodes = []
@@ -94,6 +96,10 @@ class Model(object):
         edge : :class:`.Edge`
         """
         self.edges.append(edge)
+        if isinstance(edge, EdgeTransformation):
+            self._transformed_edges.append(edge)
+        else:
+            self._normal_edges.append(edge)
         for p in edge.probability_of:
             for g in edge.given:
                 self._in[g].append(p)
@@ -138,19 +144,32 @@ class Model(object):
             if self.n is None:
                 self.n = len(self.data[key])
             elif self.n != len(self.data[key]):
-                self.logger.warn("Warning, data sizes do not agree. Have %d vs %d" % (self.n, len(self.data[key])))
+                self.logger.warn("Warning, data sizes do not agree. Have %d vs %d" %
+                                 (self.n, len(self.data[key])))
         for node in self._underlying_nodes:
-            self._theta_names.append(node.name)
-            self._theta_labels.append(node.label)
+            self._theta_names += [node.name] * node.get_num()
+            if node.get_num() > 1:
+
+                if node.label.endswith("$"):
+                    self._theta_labels += [node.label[:-1] + "_{%d}$" % i for i in
+                                           range(node.get_num())]
+                else:
+                    self._theta_labels += [node.label + " %d" % i for i in
+                                           range(node.get_num())]
+            else:
+                self._theta_labels.append(node.label)
         self._num_actual = len(self._theta_names)
         for node in self._latent_nodes:
-            self._theta_names += [node.name] * node.get_num_latent()
-            if node.label.endswith("$"):
-                self._theta_labels += [node.label[:-1] + "_{%d}$" % i for i in
-                                       range(node.get_num_latent())]
+            self._theta_names += [node.name] * node.get_num()
+            if node.get_num() > 1:
+                if node.label.endswith("$"):
+                    self._theta_labels += [node.label[:-1] + "_{%d}$" % i for i in
+                                           range(node.get_num())]
+                else:
+                    self._theta_labels += [node.label + " %d" % i for i in
+                                           range(node.get_num())]
             else:
-                self._theta_labels += [node.label + " %d" % i for i in
-                                       range(node.get_num_latent())]
+                self._theta_labels.append(node.label)
         num_edges = len(self.edges)
         observed_names = [node.name for node in self.nodes
                           if not isinstance(node, ParameterTransformation)]
@@ -202,16 +221,21 @@ class Model(object):
         arrs = {}
         data = self.data.copy()
         make_array = []
-        for theta, theta_name in zip(theta, self._theta_names):
+        indexing = []
+        for index, (theta, theta_name) in enumerate(zip(theta, self._theta_names)):
             if self._theta_names.count(theta_name) == 1:
                 result[theta_name] = theta
             else:
                 if theta_name not in arrs:
                     arrs[theta_name] = []
                     make_array.append(theta_name)
+                    indexing.append(index < self._num_actual)
                 arrs[theta_name].append(theta)
-        for m in make_array:
-            data[m] = np.array(arrs[m])
+        for i, m in zip(indexing, make_array):
+            if i:
+                result[m] = np.array(arrs[m])
+            else:
+                data[m] = np.array(arrs[m])
         return result, data
 
     def get_log_prior(self, theta):
@@ -349,10 +373,16 @@ class Model(object):
             else:
                 edge_index += 1
                 if isinstance(edge, EdgeTransformation):
-                    theta_dict.update(self._get_transformation(theta_dict, edge))
+                    returned = self._get_transformation(theta_dict, edge)
+                    if type(returned) == tuple:
+                        theta_dict.update(returned[0])
+                        result = returned[1]
+                    else:
+                        theta_dict.update(returned)
+                        result = None
                 else:
                     result = self._get_log_likelihood_edge(theta_dict, edge)
-                    # print(result.sum(), edge)
+                if result is not None:
                     if type(result) != np.ndarray:
                         result = np.array(result)
                     assert len(result.shape) == 1, \
@@ -541,13 +571,20 @@ class Model(object):
             else:
                 node_label = ""
             node_label += ", ".join(reverse_dict[value]["labels"])
+            params = {} if not fixed else {"facecolor": "#aaaaaa", "edgecolor": "#aaaaaa"}
             pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3,
-                                   observed=obs, fixed=fixed))
+                                   observed=obs, plot_params=params))
 
-        for edge in self.edges:
+        for edge in self._normal_edges:
             for g in edge.given:
                 for p in edge.probability_of:
                     pgm.add_edge(node_name_dict[g], node_name_dict[p])
+
+        for edge in self._transformed_edges:
+            for g in edge.given:
+                for p in edge.probability_of:
+                    pgm.add_edge(node_name_dict[g], node_name_dict[p], ls=":")
+
         pgm.render()
         if filename is not None:
             self.logger.debug("Saving figure to %s" % filename)

@@ -15,7 +15,7 @@ class LatentValue1(ParameterLatent):
         super().__init__("latent1", "latent1")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion(self, data):
@@ -65,7 +65,7 @@ class LatentValue2(ParameterLatent):
         super().__init__("latent2", "latent2")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion(self, data):

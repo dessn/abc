@@ -29,7 +29,7 @@ class AbsMag(ParameterTransformation):
 #         self.x0s = x0s
 #         self.x0s_sigma = x0s_sigma
 #
-#     def get_num_latent(self):
+#     def get_num(self):
 #         return self.n
 #
 #     def get_suggestion_requirements(self):
@@ -48,7 +48,7 @@ class DeltaMag(ParameterLatent):
         self.n = n
         self.scatter = Scatter().get_suggestion_sigma({})
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion(self, data):
@@ -68,7 +68,7 @@ class Stretch(ParameterLatent):
         self.x1s = x1s
         self.x1s_sigma = x1s_sigma
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):
@@ -88,7 +88,7 @@ class PeakTime(ParameterLatent):
         self.t0s = t0s
         self.t0s_sigma = t0s_sigma
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):
@@ -108,7 +108,7 @@ class Colour(ParameterLatent):
         self.cs = cs
         self.cs_sigma = cs_sigma
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):

@@ -29,7 +29,7 @@ class LatentFlux(ParameterLatent):
         super().__init__("f", "$f$")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):

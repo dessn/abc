@@ -23,7 +23,7 @@ class ApparentMagnitude(ParameterLatent):
         super(ApparentMagnitude, self).__init__("mb", "$m_B$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion(self, data):
@@ -44,7 +44,7 @@ class Stretch(ParameterLatent):
         super().__init__("x1", "$x_1$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):
@@ -65,7 +65,7 @@ class Colour(ParameterLatent):
         super().__init__("c", "$c$", group="Supernova Properties")
         self.n = n
 
-    def get_num_latent(self):
+    def get_num(self):
         return self.n
 
     def get_suggestion_requirements(self):

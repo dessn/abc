@@ -24,11 +24,7 @@ class ObservedError(ParameterObserved):
 
 class ActualPoint(ParameterLatent):
     def __init__(self, n):
-        super().__init__("point", "$s$")
-        self.n = n
-
-    def get_num_latent(self):
-        return self.n
+        super().__init__("point", "$s$", n)
 
     def get_suggestion_requirements(self):
         return ["data", "data_error"]
