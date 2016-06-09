@@ -159,56 +159,87 @@ class ToUnderlying(Edge):
 
 class BiasCorrection(Edge):
     def __init__(self, threshold, number, temp_dir):
-        super().__init__(["z_o"], ["mu", "sigma"])
+        super().__init__(["z_o"], ["mu", "sigma", "zero"])
         self.filename = temp_dir + os.sep + "bias_correction_%d.npy" % threshold
         self.threshold = threshold
+
         self.mus = None
         self.sigmas = None
-        self.zs = None
+        self.z0s = None
+        self.z1s = None
         self.vs = None
-        self.ms = None
-        self.ss = None
-        self.z = None
+
+        self.zs = np.linspace(0.5, 1.5, 20)
+        self.cs = np.linspace(10, 700, 300)
+        bound = self.cs - self.threshold
+        ltz = (bound > 0) * 2.0 - 1.0
+        self.gplus = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * self.cs))) + 0.5
+        self.gminus = 1 - self.gplus
+        # self.gplusN = np.power(self.gplus, number)
+        self.gminusN = np.power(self.gminus, number)
+        # self.gplusNmo = np.power(self.gplus, number - 1)
+        self.gminusNmo = np.power(self.gminus, number - 1)
+
         self.N = number
         self.interp = self.get_data()
 
+    def _get_s0(self, mu, sigma, Z):
+        fs = self.cs / np.power(10, Z / 2.5)
+        zvals = np.zeros(self.zs.shape)
+        for i, z in enumerate(self.zs):
+            diff = fs / (z * z) - mu
+            gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
+            integral = simps(gauss * self.gminusN, x=fs)
+            # print(fs, mu)
+            # plt.plot(fs, gauss)
+            # plt.plot(fs, self.gminusN)
+            # plt.show()
+            # exit()
+            zvals[i] = integral
+        return simps(z * z * zvals, x=self.zs)
+
+    def _get_s1(self, mu, sigma, Z):
+        fs = self.cs / np.power(10, Z / 2.5)
+        zvals = np.zeros(self.zs.shape)
+        for i, z in enumerate(self.zs):
+            diff = fs / (z * z) - mu
+            gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
+            integral = simps(gauss * self.N * self.gplus * self.gminusNmo, x=fs)
+            zvals[i] = integral
+        return simps(z * z * zvals, x=self.zs)
+
     def get_data(self):
-        self.mus = np.linspace(100, 300, 50)
-        self.sigmas = np.linspace(5, 100, 50)
-        ms, ss = np.meshgrid(self.mus, self.sigmas, indexing="ij")
-        self.ms = ms
-        self.ss = ss
-        if os.path.exists(self.filename):
+        self.mus = np.linspace(250, 450, 20)
+        self.sigmas = np.linspace(20, 100, 20)
+        self.z0s = np.linspace(0.45, 0.55, 10)
+        self.z1s = np.linspace(0.35, 0.45, 10)
+
+        if False and os.path.exists(self.filename):
             self.vs = np.load(self.filename)
         else:
-            fs = np.linspace(1, 500, 500)
-            bound = fs - self.threshold
-            ltz = (bound > 0) * 2.0 - 1.0
-            gplus = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * fs))) + 0.5
-            gminus = 1 - gplus
-            term = np.power(gminus, self.N - 1) * (gminus + self.N * gplus)
-            z1 = 0.0
-            z2 = 1.5
-            zrange = 1 / (z2 - z1)
-            zs = np.linspace(z1, z2, 100)
+            ms, ss, z0s, z1s = np.meshgrid(self.mus, self.sigmas, self.z0s, self.z1s, indexing="ij")
+
             self.vs = np.zeros(ms.shape)
             for i, m in enumerate(self.mus):
                 for j, s in enumerate(self.sigmas):
-                    # m = 100
-                    # s = 40
-                    zvals = np.zeros(zs.shape)
-                    for k, z in enumerate(zs):
-                        g = (fs * z * z - m)
-                        gaussian = (1 / (np.sqrt(2 * np.pi) * s)) * np.exp(-g * g / (2 * s * s))
-                        integral = simps(gaussian * term, x=fs)
-                        zvals[k] = integral
-                    self.vs[i, j] = 1 - zrange *simps(zs * zs * zvals, x=zs)
+                    for k, z0 in enumerate(self.z0s):
+                        for l, z1 in enumerate(self.z1s):
+                            # Please kill me
+
+                            s0_z0 = self._get_s0(m, s, z0)
+                            s0_z1 = self._get_s0(m, s, z1)
+                            s1_z0 = self._get_s1(m, s, z0)
+                            s1_z1 = self._get_s1(m, s, z1)
+
+                            # print(s, m, z0, z1, s0_z0, s0_z1, s1_z0, s1_z1)
+                            self.vs[i, j, k, l] = 1 - (s0_z0 * s0_z0) - (s0_z0 * s0_z1) - \
+                                                  (s1_z0 * s0_z1) - (s1_z0 * s1_z1)
                     # print(1 - self.vs[i, j])
                     # plt.plot(zs, zvals)
                     # plt.show()
                     # exit()
             np.save(self.filename, self.vs)
-        return RegularGridInterpolator((self.mus, self.sigmas), self.vs,
+        return RegularGridInterpolator((self.mus, self.sigmas, self.z0s, self.z1s), self.vs,
                                        bounds_error=False, fill_value=0.0)
 
     def get_log_likelihood(self, data):
@@ -245,26 +276,13 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-class EfficiencyModelCorrected(Model):
+class EfficiencyModelCorrected(EfficiencyModelUncorrected):
     def __init__(self, observed_flux, observed_redshift, observed_calibration,
                  observed_zero_points, threshold, number, temp_dir, seed=0, name="Corrected"):
-        super().__init__(name)
-        np.random.seed(seed)
-        self.add(ObservedRedshift(observed_redshift))
-        self.add(ObservedCounts(observed_flux))
+        super().__init__(observed_flux, observed_redshift, observed_calibration,
+                 observed_zero_points, seed=seed, name=name)
 
-        self.add(LatentFlux(observed_redshift.size, observed_zero_points))
-        self.add(Counts())
-        self.add(Mean())
-        self.add(Scatter())
-        self.add(Calibration(observed_zero_points, observed_calibration))
-        self.add(Luminosity())
-
-        self.add(ToCounts())
-        self.add(ToLuminosity())
-        self.add(ToUnderlying())
         self.add(BiasCorrection(threshold, number, temp_dir))
-        self.add(ToObservedCounts())
         self.finalise()
 
 
@@ -274,7 +292,7 @@ def get_data(seed=5, n=400):
     mean = 350.0
     std = 50.0
     zeros = np.array([0.8, 0.7]) - 0.3
-    calibration = 0.001 * np.identity(zeros.size)
+    calibration = 0.01 * np.identity(zeros.size)
 
     z_start = 0.5
     z_end = 1.5
@@ -288,7 +306,7 @@ def get_data(seed=5, n=400):
     c_o = np.dstack((ac + np.random.normal(scale=np.sqrt(ac), size=ac.shape) for i in range(num_obs)))
     obs_mask = c_o > threshold
     mask = obs_mask.sum(axis=2) >= 2
-    mask = mask.sum(axis=1) == len(zeros)
+    mask = mask.sum(axis=1) > 0
     print(mask.sum(), n, lum.mean(), lum[mask].mean(), np.std(lum), np.std(lum[mask]))
 
     return mean, std, zeros, calibration, threshold, lum, z_o, c_o, mask, num_obs
@@ -298,14 +316,13 @@ def plot_weights(dir_name):
     mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
 
     bias = BiasCorrection(threshold, num_obs, dir_name + "/output")
-    m = bias.ms
-    s = bias.ss
+    m, s, z0, z1 = np.meshgrid(bias.mus, bias.sigmas, bias.z0s, bias.z1s)
     v = bias.vs
     print(m.shape, s.shape, v.shape, v.max())
 
     fig = plt.figure(figsize=(6, 5))
     ax = fig.add_subplot(111)
-    h = ax.contourf(m, s, v, 20, cmap='viridis', vmin=0, vmax=1.0)
+    h = ax.contourf(m[:,:,0,0], s[:,:,0,0], v[:,:,0,0], 20, cmap='viridis', vmin=0, vmax=1.0)
     cbar = fig.colorbar(h)
     cbar.set_label(r"$P$")
     ax.set_xlabel(r"$\mu$")
@@ -325,11 +342,13 @@ if __name__ == "__main__":
     model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model_un.get_pgm(pgm_file)
-    # plot_weights(dir_name)
+    plot_weights(dir_name)
+    exit()
+
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
-    w = 4
+    w = 8
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
         mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
