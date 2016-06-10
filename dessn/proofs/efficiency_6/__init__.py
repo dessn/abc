@@ -15,14 +15,24 @@ all different bands (like Einstein notation), and so observed quantities will
 be represented by a hat and vector quantities shall be represented by bold font.
 
 .. math::
-    \mu &\sim \mathcal{U}(0, 1000) \\
-    \sigma &\sim \mathcal{U}(0, 100) \\
+    \mu &\sim \mathcal{U}(500, 1500) \\
+    \sigma &\sim \mathcal{U}(50, 150) \\
     Z_i &\sim \mathcal{N}(Z_o, C) \\
     L &\sim \mathcal{N}(\mu, \sigma) \\
     z &\sim \mathcal{U}(0.5, 1.5) \\
     f &= \frac{L}{z^2} \\
     c_i &= 10^{Z_i / 2.5} f \\
     \mathbf{\hat{c}_i} &\sim \mathcal{N}(c_i, \sqrt{c_i})
+
+We create a data set by drawing from these distributions and introducing our
+data selection cuts. For 400 events, this gives us the following data distribution
+in redshift and luminosity.
+
+.. figure::     ../dessn/proofs/efficiency_6/output/data.png
+    :width:     80%
+    :align:     center
+
+
 
 Denoting the selection effects - a signal to noise cut in all bands - this
 time as :math:`S_2` we have:

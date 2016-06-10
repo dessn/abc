@@ -41,7 +41,7 @@ class MetropolisHastings(GenericSampler):
     def __init__(self, num_burn=10000, num_steps=10000,
                  sigma_adjust=100, covariance_adjust=1000, temp_dir=None,
                  save_interval=300, accept_ratio=0.234, callback=None,
-                 plot_covariance=False, unify_latent=False, num_start=500):
+                 plot_covariance=False, unify_latent=False, num_start=1000):
         self.temp_dir = temp_dir
         if temp_dir is not None and not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
@@ -152,6 +152,7 @@ class MetropolisHastings(GenericSampler):
             burnin[0, :] = position
         elif burnin.shape[0] < self.num_burn:
             step = burnin.shape[0]
+            position = burnin[-1, :]
             # If we only saved part of the burnin to save size, add the rest in as zeros
             burnin = np.vstack((burnin, np.zeros((self.num_burn - burnin.shape[0], position.size))))
         else:

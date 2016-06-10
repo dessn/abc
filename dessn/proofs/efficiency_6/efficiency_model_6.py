@@ -66,10 +66,10 @@ class Mean(ParameterUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return 345
+        return 500
 
     def get_suggestion_sigma(self, data):
-        return 10
+        return 20
 
 
 class Scatter(ParameterUnderlying):
@@ -83,7 +83,7 @@ class Scatter(ParameterUnderlying):
         return 50
 
     def get_suggestion_sigma(self, data):
-        return 5
+        return 10
 
     def get_log_prior(self, data):
         if data["sigma"] < 0:
@@ -170,7 +170,7 @@ class BiasCorrection(Edge):
         self.vs = None
 
         self.zs = np.linspace(0.5, 1.5, 50)
-        self.cs = np.linspace(10, 900, 300)
+        self.cs = np.linspace(10, 3000, 1000)
         bound = self.cs - self.threshold
         ltz = (bound > 0) * 2.0 - 1.0
         self.gplus = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * self.cs))) + 0.5
@@ -198,20 +198,33 @@ class BiasCorrection(Edge):
             diff = fs * (z * z) - mu
             gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
             integral = simps(gauss * self.N * self.gplus * self.gminusNmo, x=fs)
+            # if mu == 500 and sigma == 50 and i in [0, self.zs.size - 1]:
+            #     # print(fs, lum, diff)
+            #     plt.plot(fs, 20 * gauss, lw=3)
+            #     print("Area is ", z * z * simps(gauss, x=fs), " at redshift %f " % z)
+            #     plt.plot(fs, self.N * self.gplus * self.gminusNmo)
+            #     plt.title("%f %f %f" % (mu, sigma, z))
+            #     plt.show()
             zvals[i] = integral
+        if mu == 500 and sigma == 50:
+            plt.plot(self.zs, zvals)
+            plt.plot(self.zs, self.zs * self.zs * zvals)
+            plt.show()
+            print("VAL IS ", simps(self.zs * self.zs * zvals, x=self.zs))
         return simps(self.zs * self.zs * zvals, x=self.zs)
 
     def get_data(self):
-        self.mus = np.linspace(150, 400, 20)
-        self.sigmas = np.linspace(20, 100, 20)
-        self.z0s = np.linspace(0.45, 0.55, 10)
-        self.z1s = np.linspace(0.35, 0.45, 10)
+        self.mus = np.linspace(300, 700, 5)
+        self.sigmas = np.linspace(10, 90, 5)
+        self.z0s = np.linspace(0, 0.01, 1)
+        self.z1s = np.linspace(0, 0.01, 1)
 
-        if os.path.exists(self.filename):
+        if False and os.path.exists(self.filename):
             self.vs = np.load(self.filename)
         else:
             self.vs = np.zeros((self.mus.size, self.sigmas.size, self.z0s.size, self.z1s.size))
             for i, m in enumerate(self.mus):
+                print("Starting mu: %d/%d" % (i+1, self.mus.size))
                 for j, s in enumerate(self.sigmas):
                     for k, z0 in enumerate(self.z0s):
                         for l, z1 in enumerate(self.z1s):
@@ -221,9 +234,9 @@ class BiasCorrection(Edge):
                             s0_z1 = self._get_s0(m, s, z1)
                             s1_z1 = self._get_s1(m, s, z1)
 
-                            res = 1 - (s0_z0 * s0_z1) - (s0_z0 * s1_z1) - (s1_z0 * s0_z1) - \
-                                  (s1_z0 * s1_z1)
+                            res = 1 - (s0_z0 * s0_z1)# - (s0_z0 * s1_z1) - (s1_z0 * s0_z1) - (s1_z0 * s1_z1)
                             self.vs[i, j, k, l] = res
+                            print(m, s, z0, z1, res, " :: ", s0_z0, s0_z1, s1_z0, s1_z1)
 
             np.save(self.filename, self.vs)
         return RegularGridInterpolator((self.mus, self.sigmas, self.z0s, self.z1s), self.vs,
@@ -274,12 +287,12 @@ class EfficiencyModelCorrected(EfficiencyModelUncorrected):
         self.finalise()
 
 
-def get_data(seed=5, n=400):
+def get_data(seed=5, n=4000):
     np.random.seed(seed=seed+5)
     num_obs = 2
-    mean = 350.0
+    mean = 500.0
     std = 50.0
-    zeros = np.array([0.8, 0.7]) - 0.3
+    zeros = np.array([0.0, 0.0])
     calibration = 0.01 * np.identity(zeros.size)
 
     z_start = 0.5
@@ -293,9 +306,9 @@ def get_data(seed=5, n=400):
     ac = np.dot(flux[:, None], factor[None, :])
     c_o = np.dstack((ac + np.random.normal(scale=np.sqrt(ac), size=ac.shape) for i in range(num_obs)))
     obs_mask = c_o > threshold
-    mask = obs_mask.sum(axis=2) >= 2
+    mask = obs_mask.sum(axis=2) >= 1
     mask = mask.sum(axis=1) > 0
-    print(mask.sum(), n, lum.mean(), lum[mask].mean(), np.std(lum), np.std(lum[mask]))
+    print(mask.sum(), n, mask.sum()/n, lum.mean(), lum[mask].mean(), np.std(lum), np.std(lum[mask]))
 
     return mean, std, zeros, calibration, threshold, lum, z_o, c_o, mask, num_obs
 
@@ -309,13 +322,29 @@ def plot_weights(dir_name):
     print(m.shape, s.shape, v.shape, v.max())
     fig = plt.figure(figsize=(6, 5))
     ax = fig.add_subplot(111)
-    h = ax.contourf(m[:,:,0,0], s[:,:,0,0], v[:,:,0,0], 20, cmap='viridis', vmin=0, vmax=1.0)
+    n1 = m.shape[2] // 2
+    n2 = m.shape[3] // 2
+    h = ax.contourf(m[:,:,n1,n2], s[:,:,n1,n2], v[:,:,n1,n2], 20, cmap='viridis')#, vmin=0, vmax=1.0)
     cbar = fig.colorbar(h)
     cbar.set_label(r"$P$")
     ax.set_xlabel(r"$\mu$")
     ax.set_ylabel(r"$\sigma$")
     fig.savefig(os.path.abspath(dir_name + "/output/weights.png"), bbox_inches="tight", dpi=300)
 
+
+def plot_data(dir_name):
+    mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
+
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.set_xlabel("$z$")
+    ax.set_ylabel("$L$")
+    ax.scatter(zall[mask], lall[mask], color="#1976D2", alpha=0.7, label="Discovered")
+    ax.scatter(zall[~mask], lall[~mask], color="#D32F2F", alpha=0.7, label="Undiscovered")
+    ax.axhline(mean, color="k", ls="--")
+    ax.legend(loc=3, fontsize=12)
+    fig.savefig(os.path.abspath(dir_name + "/output/data.png"), bbox_inces="tight", dpi=300)
 
 if __name__ == "__main__":
 
@@ -325,12 +354,13 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
+    # plot_data(dir_name)
     mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
-    model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
-    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    # model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
+    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model_un.get_pgm(pgm_file)
-    # plot_weights(dir_name)
-
+    plot_weights(dir_name)
+    exit()
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
@@ -340,21 +370,21 @@ if __name__ == "__main__":
         mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
         theta = [mean, std] + zeros.tolist()
 
-        kwargs = {"num_steps": 1000, "num_burn": 5000, "save_interval": 60,
-                  "plot_covariance": True} # , "unify_latent": True # , "callback": v.callback
-        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=1)
+        kwargs = {"num_steps": 10000, "num_burn": 30000, "save_interval": 60,
+                  "plot_covariance": True}  # , "unify_latent": True # , "callback": v.callback
+        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
-        # model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
-        # model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
-        #
-        # model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
-        #                                       zeros, name="Uncorrected%d" % i)
-        # model_un.fit(sampler, chain_consumer=c)
-        #
-        model_cor = EfficiencyModelCorrected(call[mask], zall[mask], calibration, zeros,
-                                             threshold, num_obs,
-                                             dir_name + "/output", name="Corrected%d" % i)
-        model_cor.fit(sampler, chain_consumer=c)
+        model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
+        model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
+
+        model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
+                                              zeros, name="Uncorrected%d" % i)
+        model_un.fit(sampler, chain_consumer=c)
+
+        # model_cor = EfficiencyModelCorrected(call[mask], zall[mask], calibration, zeros,
+        #                                      threshold, num_obs,
+        #                                      dir_name + "/output", name="Corrected%d" % i)
+        # model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
