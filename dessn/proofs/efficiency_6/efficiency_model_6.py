@@ -388,7 +388,7 @@ if __name__ == "__main__":
     plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
-    n = 1
+    n = 3
     w = 4
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
@@ -414,7 +414,7 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
-    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)
+    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False, parameters=2)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \
