@@ -246,8 +246,8 @@ class BiasCorrection(Edge):
         return simps(self.zs * self.zs * zvals, x=self.zs)
 
     def get_data(self):
-        self.mus = np.linspace(300, 700, 20)
-        self.sigmas = np.linspace(10, 90, 9)
+        self.mus = np.linspace(400, 600, 30)
+        self.sigmas = np.linspace(30, 70, 15)
         self.z0s = np.linspace(-0.01, 0.01, 7)
         self.z1s = np.linspace(-0.01, 0.01, 7)
 
@@ -314,7 +314,7 @@ class EfficiencyModelCorrected(EfficiencyModelUncorrected):
 
 
 def get_data(seed=5, n=400):
-    np.random.seed(seed=seed+5)
+    np.random.seed(seed=seed+4)
     num_obs = 2
     mean = 500.0
     std = 50.0
@@ -350,7 +350,7 @@ def plot_weights(dir_name):
     ax = fig.add_subplot(111)
     n1 = m.shape[2] // 2
     n2 = m.shape[3] // 2
-    h = ax.contourf(m[:,:,n1,n2], s[:,:,n1,n2], v[:,:,n1,n2], 20, cmap='viridis')#, vmin=0, vmax=1.0)
+    h = ax.contourf(m[:,:,n1,n2], s[:,:,n1,n2], v[:,:,n1,n2], 20, cmap='viridis')  #, vmin=0, vmax=1.0
     cbar = fig.colorbar(h)
     cbar.set_label(r"$P$")
     ax.set_xlabel(r"$\mu$")
@@ -395,7 +395,7 @@ if __name__ == "__main__":
         mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
         theta = [mean, std] + zeros.tolist()
 
-        kwargs = {"num_steps": 10000, "num_burn": 30000, "save_interval": 60,
+        kwargs = {"num_steps": 40000, "num_burn": 30000, "save_interval": 60,
                   "plot_covariance": True}  # , "unify_latent": True # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
@@ -413,7 +413,7 @@ if __name__ == "__main__":
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
-    c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
+    c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
     c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
