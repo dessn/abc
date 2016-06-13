@@ -161,7 +161,7 @@ We can also sub in the results for :math:`t_2,\ t_3,\ t_4`, as will get
 These functions are calculable, and from them we can determine the efficiency.
 
 .. math::
-    P(S_2 | \mu, \sigma, Z_i) &= 1 - \int dz\, z^2 \int df \, \mathcal{N}(fz^{-2}; \mu, \sigma) \left[ x_1 + x_2 + x_3 + x_4 \right]
+    P(S_2 | \mu, \sigma, Z_i) = 1 - \int dz\, z^2 \int df \, \mathcal{N}(fz^{-2}; \mu, \sigma) \left[ x_1 + x_2 + x_3 + x_4 \right]
 
 
 The model PGM is constructed as follows:
