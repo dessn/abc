@@ -41,7 +41,7 @@ time as :math:`S_2` we have:
     \mathcal{L} &= P(\mathbf{\hat{c}_i}, \hat{z}|S_2,\mu,\sigma, Z_i) \\
     &= \frac{P(\mathbf{\hat{c}_i}, \hat{z}, S_2|\mu,\sigma, Z_i)}{P(S_2|\mu,\sigma, Z_i)} \\
     &= \frac{\int dL P(\mathbf{\hat{c}_i}, \hat{z}, S_2, L|\mu,\sigma, Z_i)}{P(S_2|\mu,\sigma, Z_i)} \\
-    &= \frac{\int dL \ P(S_2 | \mathbf{\hat{c}_i}) P(\mathbf{\hat{c}_i}| L \hat{z})
+    &= \frac{\int dL \ P(S_2 | \mathbf{\hat{c}_i}) P(\mathbf{\hat{c}_i}| L \hat{z}, Z_i)
     P(\hat{z}) P(L|\mu,\sigma)}{P(S_2|\mu,\sigma, Z_i)}
 
 Here we also assume flat priors on redshift, and as our
@@ -64,57 +64,104 @@ Which gives us :math:`dL = \hat{z}^2 df`, leading to:
     \mathcal{N}\left(\frac{f}{\hat{z}^2} ; \mu, \sigma\right)}   {P(S_2|\mu,\sigma,Z_i)} \\
 
 We now need to go through the fun process of determining the model efficiency in the
-denominator. Unlike in the previous example, stipulating at least two points
-above a signal to noise of :math:`\alpha` in *any* bands can be trivially broken into
-a cut of :math:`1 - P(S_0|\mu,\sigma,Z_i) - P(S_1|\mu,\sigma,Z_i)` because of the
-combinatorics involved now. However, we can determine :math:`P(S_0|\mu,\sigma,Z_i` for
-each band and combine these to get the correct weights. We consider the case
-where we have :math:`N` observations in each band and looking at band 0 to
-begin with.
+denominator. Due to the presence of multiple bands, this is more complicated than
+the previous example. We consider the case where we have :math:`N` observations
+in each band, and we only have two bands, denoted with a subscript :math:`1` and :math:`2`
+respectively.
 
 .. math::
-    P(S_0|\mu,\sigma,Z_0) &= P(S_0|\mu,\sigma,Z_0)
+    P(S_2 | \mu, \sigma, Z_i) &= \int dL \int dz \int d\mathbf{c_i} \ P(S_2, \mathbf{c_i}, L, z | \mu, \sigma, Z_i) \\
+    &= \int dz \int dL \int d\mathbf{c_1} \int d\mathbf{c_2} \ P(S_2, \mathbf{c_1}, \mathbf{c_2}, L, z | \mu, \sigma, Z_1, Z_2) \\
+    &= \int dz \int dL \int d\mathbf{c_1} \int d\mathbf{c_2} \ P(S_2 | \mathbf{c_1}, \mathbf{c_2}) P( \mathbf{c_1}| L, z, Z_1) P( \mathbf{c_2}| L, z, Z_2) P(L| \mu, \sigma) P(z) \\
 
-To determine this value, we introduce integrals. Lots of integrals. Too many, some would say.
-
-.. math::
-    P(S_0|\mu,\sigma,Z_0) &= \int dL \int dc \int dz\  P(S_0, c, z, L | \mu, \sigma, Z_0) \\
-    &= \int dz\ z^2 P(z) \int df\ P(f z^{-2}|\mu,\sigma) \int dc\
-    P(S_0 | \mathbf{c}) P(\mathbf{c} | L, z, Z_0) \\
-    &= \int dz\ z^2 P(z) \int df\ P(f z^{-2}|\mu,\sigma) \prod_{N} \int_{-\infty}^{\alpha^2} dc\ \mathcal{N}\left(c ; 10^{Z_0/2.5}f, \sqrt{10^{Z_0/2.5}f} \right)
-
-In the last example we showed that
+Again enforcing the flat prior on redshift, and converting from luminosity to flux:
 
 .. math::
-    \int_{-\infty}^{\alpha^2} dc\ \mathcal{N}\left(c ; 10^{Z_0/2.5}f, \sqrt{10^{Z_0/2.5}f} \right)
-    &= \begin{cases}
-    \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{\alpha^2 - 10^{Z_0/2.5}f}{\sqrt{2f\cdot 10^{Z_0/2.5}}} \right] &
-    \text{ if } \alpha^2 - 10^{Z_0/2.5}f > 0 \\
-    \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{10^{Z_0/2.5}f - \alpha^2}{\sqrt{2f\cdot 10^{Z_0/2.5}}} \right] &
-    \text{ if } \alpha^2 - 10^{Z_0/2.5}f < 0 \\
+    P(S_2 | \mu, \sigma, Z_i) &= \int dz\, z^2 \int df P(fz^{-2}| \mu, \sigma) \int d\mathbf{c_1} \int d\mathbf{c_2} \ P(S_2 | \mathbf{c_1}, \mathbf{c_2}) P( \mathbf{c_1}| f, Z_1) P( \mathbf{c_2}| f, Z_2) \\
+
+Translating to english, :math:`P(S_2 | \mathbf{c_1}, \mathbf{c_2})` is the probability that
+either of the bands has at least 2 points above a specified signal to noise cut, such that
+the counts is greater than some number :math:`\alpha^2`. This can be inverted to turn
+the *or* condition into an *and*, which is simpler to calculate.
+
+.. math::
+    P(S_2 |  \mathbf{c_1}, \mathbf{c_2}) = 1 - P(\bar{S_2} |  \mathbf{c_1}, \mathbf{c_2})
+
+We can further note that the probability the data does not pass selection cuts is separable
+into the probability band 1 fails *and* band 2 fails.
+
+.. math::
+    P(S_2 | \mathbf{c_1}, \mathbf{c_2}) = 1 - P(\bar{S}_{2,1} |  \mathbf{c_1}) P(\bar{S}_{2,2} | \mathbf{c_2})
+
+We can separate this again: the probability band 1 fails selection is sum of probability that
+zero points meet the signal-to-noise criterion or only one points meets the criterion.
+
+.. math::
+    P(\bar{S}_{2,1} | \mathbf{c_1}) = P(S_{0,1} | \mathbf{c_1}) + P(S_{1,1}|\mathbf{c_1})
+
+Let's continue breaking this down. The probability that we have 0 points above a
+signal-to-noise cut, due to the independence of successive points, can be written as a product.
+
+.. math::
+    P(S_{0,1}|\mathbf{c_1}) = \prod_i P(c_{1,i} < \alpha^2)
+
+We can also see that the probability of only one point being above a signal-to-noise cut is the
+same as can be found in the previous example.
+
+.. math::
+    P(S_{1,1} | \mathbf{c_1}) = \sum_i P(c_{1,i} > \alpha^2) \prod_{j\neq i} P(c_{1,j} < \alpha^2)
+
+Putting these together:
+
+.. math::
+    P(S_2 | \mathbf{c_1}, \mathbf{c_2}) &= 1 - \left[\prod_i P(c_{1,i} < \alpha^2) + \sum_j P(c_{1,j} > \alpha^2) \prod_{k\neq j} P(c_{1,k} < \alpha^2) \right]\\
+    &\quad\quad \left[ \prod_l P(c_{2,l} < \alpha^2) + \sum_m P(c_{2,m} > \alpha^2) \prod_{n\neq m} P(c_{2,n} < \alpha^2)   \right] \\
+    &= 1 -  \left[ \prod_i P(c_{1,i} < \alpha^2) \right] \left[\prod_l P(c_{2,l} < \alpha^2)  \right]-\\
+    &\quad\quad \left[ \prod_i P(c_{1,i} < \alpha^2) \right] \left[ \sum_m P(c_{2,m} > \alpha^2) \prod_{n\neq m} P(c_{2,n} < \alpha^2)   \right] \\
+    &\quad\quad \left[ \sum_j P(c_{1,j} > \alpha^2) \prod_{k\neq j} P(c_{1,k} < \alpha^2) \right] \left[ \prod_l P(c_{2,l} < \alpha^2) \right]  \\
+    &\quad\quad \left[ \sum_j P(c_{1,j} > \alpha^2) \prod_{k\neq j} P(c_{1,k} < \alpha^2) \right] \left[ \sum_m P(c_{2,m} > \alpha^2) \prod_{n\neq m} P(c_{2,n} < \alpha^2)   \right]
+
+What an ugly term to write out! Lets denote these four terms with :math:`t`, such that the
+above equation can be written
+as :math:`P(S_2 | \mathbf{c_1}, \mathbf{c_2}) = 1 - (t_1 + t_2 + t_3 + t_4)`.
+
+To put this back inside our efficiency term, we have
+
+.. math::
+    P(S_2 | \mu, \sigma, Z_i) &= 1 - \int dz\, z^2 \int df P(fz^{-2}| \mu, \sigma) \int d\mathbf{c_0} \int d\mathbf{c_1} \ (t_1 + t_2 + t_3 + t_4) P( \mathbf{c_1}| f, Z_1) P( \mathbf{c_2}| f, Z_2) \\
+
+Now let's break this down by :math:`t`.
+
+.. math::
+    x_1 &\equiv \int d\mathbf{c_0} \int d\mathbf{c_1} t_1 P( \mathbf{c_1}| f, Z_1) P( \mathbf{c_2}| f, Z_2) \\
+    &=  \int d\mathbf{c_1} \int d\mathbf{c_2} \left[ \prod_i P(c_{1,i} < \alpha^2) \right] \left[\prod_l P(c_{2,l} < \alpha^2)  \right] P( \mathbf{c_1}| f, Z_1) P( \mathbf{c_2}| f, Z_2) \\
+    &=  \int d\mathbf{c_1} \left[ \prod_i P(c_{1,i} < \alpha^2) \right] P( \mathbf{c_1}| f, Z_1) \int d\mathbf{c_2}  \left[\prod_l P(c_{2,l} < \alpha^2)  \right]  P( \mathbf{c_2}| f, Z_2) \\
+    &= \left[ g_{-} (f, Z_1, \alpha)  g_{-} (f, Z_2, \alpha) \right]^N,
+
+where :math:`g_{-}` is defined by
+
+.. math::
+    g_{-}(f, Z, \alpha) &= \begin{cases}
+    \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{\alpha^2 - 10^{Z/2.5}f}{\sqrt{2f\cdot 10^{Z/2.5}}} \right] &
+    \text{ if } \alpha^2 - 10^{Z/2.5}f > 0 \\
+    \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{10^{Z/2.5}f - \alpha^2}{\sqrt{2f\cdot 10^{Z/2.5}}} \right] &
+    \text{ if } \alpha^2 - 10^{Z/2.5}f < 0 \\
     \end{cases} \\
-    &= g_{-}(f,Z_0,\alpha)
 
-Substituting this in, along with a flat distribution (of width 1) on redshift and
-the normal distribution on luminosity, we get
+For a full derivation of the above, consult previous examples.
 
-.. math::
-    P(S_0|\mu,\sigma,Z_0) = \int dz\ z^2 \int df\ \mathcal{N}(f z^{-2};\mu,\sigma)
-    \left[g_{-}(f,Z_0,\alpha)\right]^N
-
-From the previous example, we can also see that
+We can also sub in the results for :math:`t_2,\ t_3,\ t_4`, as will get
 
 .. math::
-    P(S_1|\mu,\sigma,Z_0) &= \int dz\ z^2  \int df \ \mathcal{N}(fz^{-2};\mu,\sigma)
-    N  g_{+}(f,\alpha, Z_0) \left[g_{-}(f,\alpha, Z_0)\right]^{N-1}\\
+    t_1 & \rightarrow x_1 \equiv \left[ g_{-} (f, Z_1, \alpha)  g_{-} (f, Z_2, \alpha) \right]^N \\
+    t_2 & \rightarrow x_2 \equiv N g_{+}(f, Z_2, \alpha) \left[g_{-}(f, Z_1, \alpha)\right]^N \left[ g_{-}(f, Z_2, \alpha) \right]^{N-1} \\
+    t_3 & \rightarrow x_3 \equiv N g_{+}(f, Z_1, \alpha) \left[g_{-}(f, Z_2, \alpha)\right]^N \left[ g_{-}(f, Z_1, \alpha) \right]^{N-1} \\
+    t_4 & \rightarrow x_4 \equiv N^2 g_{+}(f, Z_1, \alpha) g_{+}(f, Z_2, \alpha) \left[g_{-}(f, Z_1, \alpha) g_{-}(f, Z_2, \alpha) \right]^{N-1}
 
-In order to combine these into the actual model efficiency, we need to permutate them.
-For two bands, this is given by
+These functions are calculable, and from them we can determine the efficiency.
 
 .. math::
-    P(S_2|\mu,\sigma,Z_0) = 1 -
-    \sum_{i\in \lbrace0,1\rbrace} \sum_{j\in \lbrace 0, 1 \rbrace}
-    P(S_i|\mu,\sigma,Z_0) P(S_j|\mu,\sigma,Z_1)
+    P(S_2 | \mu, \sigma, Z_i) &= 1 - \int dz\, z^2 \int df \, \mathcal{N}(fz^{-2}; \mu, \sigma) \left[ x_1 + x_2 + x_3 + x_4 \right]
 
 
 The model PGM is constructed as follows:

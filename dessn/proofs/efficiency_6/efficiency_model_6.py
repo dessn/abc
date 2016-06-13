@@ -11,7 +11,7 @@ import os
 import logging
 from scipy.special import erf
 from scipy.integrate import simps
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import RegularGridInterpolator, interp1d
 
 
 class ObservedCounts(ParameterObserved):
@@ -170,56 +170,88 @@ class BiasCorrection(Edge):
         self.vs = None
 
         self.zs = np.linspace(0.5, 1.5, 50)
-        self.cs = np.linspace(10, 3000, 1000)
+        self.cs = np.linspace(1, 3000, 1000)
+        self.fs = np.linspace(10, 2500, 1000)
+
         bound = self.cs - self.threshold
         ltz = (bound > 0) * 2.0 - 1.0
         self.gplus = ltz * 0.5 * erf((np.abs(bound)) / (np.sqrt(2 * self.cs))) + 0.5
         self.gminus = 1 - self.gplus
         self.gminusN = np.power(self.gminus, number)
         self.gminusNmo = np.power(self.gminus, number - 1)
-
         self.N = number
+
+        self.x1 = self.gminusN
+        self.x2 = self.N * self.gplus * self.gminusNmo
+
         self.interp = self.get_data()
 
-    def _get_s0(self, mu, sigma, Z):
-        fs = self.cs / np.power(10, Z / 2.5)
-        zvals = np.zeros(self.zs.shape)
-        for i, z in enumerate(self.zs):
-            lum = fs * (z * z)
-            diff = lum - mu
-            gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
-            zvals[i] = simps(gauss * self.gminusN, x=fs)
-        return simps(self.zs * self.zs * zvals, x=self.zs)
+    # def _get_s0(self, mu, sigma, Z):
+    #     fs = self.cs / np.power(10, Z / 2.5)
+    #     zvals = np.zeros(self.zs.shape)
+    #     for i, z in enumerate(self.zs):
+    #         lum = fs * (z * z)
+    #         diff = lum - mu
+    #         gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
+    #         zvals[i] = simps(gauss * self.gminusN, x=fs)
+    #     return simps(self.zs * self.zs * zvals, x=self.zs)
+    #
+    # def _get_s1(self, mu, sigma, Z):
+    #     fs = self.cs / np.power(10, Z / 2.5)
+    #     zvals = np.zeros(self.zs.shape)
+    #     for i, z in enumerate(self.zs):
+    #         diff = fs * (z * z) - mu
+    #         gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
+    #         integral = simps(gauss * self.N * self.gplus * self.gminusNmo, x=fs)
+    #         # if mu == 500 and sigma == 50 and i in [0, self.zs.size - 1]:
+    #         #     # print(fs, lum, diff)
+    #         #     plt.plot(fs, 20 * gauss, lw=3)
+    #         #     print("Area is ", z * z * simps(gauss, x=fs), " at redshift %f " % z)
+    #         #     plt.plot(fs, self.N * self.gplus * self.gminusNmo)
+    #         #     plt.title("%f %f %f" % (mu, sigma, z))
+    #         #     plt.show()
+    #         zvals[i] = integral
+    #     if mu == 500 and sigma == 50:
+    #         plt.plot(self.zs, zvals)
+    #         plt.plot(self.zs, self.zs * self.zs * zvals)
+    #         plt.show()
+    #         print("VAL IS ", simps(self.zs * self.zs * zvals, x=self.zs))
+    #     return simps(self.zs * self.zs * zvals, x=self.zs)
 
-    def _get_s1(self, mu, sigma, Z):
-        fs = self.cs / np.power(10, Z / 2.5)
+    def _get_val(self, mu, sigma, z1, z2):
         zvals = np.zeros(self.zs.shape)
+        f1 = self.cs / np.power(10, z1 / 2.5)
+        f2 = self.cs / np.power(10, z2 / 2.5)
+
+        # print(f1, self.fs)
+        vals11 = interp1d(f1, self.x1)(self.fs)
+        vals12 = interp1d(f1, self.x2)(self.fs)
+        vals21 = interp1d(f2, self.x1)(self.fs)
+        vals22 = interp1d(f2, self.x2)(self.fs)
+
+        summed = vals11 * vals21 + vals11 * vals22 + vals12 * vals21 + vals12 * vals22
+
         for i, z in enumerate(self.zs):
-            diff = fs * (z * z) - mu
+            diff = self.fs * z * z - mu
             gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
-            integral = simps(gauss * self.N * self.gplus * self.gminusNmo, x=fs)
-            # if mu == 500 and sigma == 50 and i in [0, self.zs.size - 1]:
-            #     # print(fs, lum, diff)
-            #     plt.plot(fs, 20 * gauss, lw=3)
-            #     print("Area is ", z * z * simps(gauss, x=fs), " at redshift %f " % z)
-            #     plt.plot(fs, self.N * self.gplus * self.gminusNmo)
-            #     plt.title("%f %f %f" % (mu, sigma, z))
-            #     plt.show()
+            integral = simps(gauss * summed, x=self.fs)
             zvals[i] = integral
-        if mu == 500 and sigma == 50:
-            plt.plot(self.zs, zvals)
-            plt.plot(self.zs, self.zs * self.zs * zvals)
-            plt.show()
-            print("VAL IS ", simps(self.zs * self.zs * zvals, x=self.zs))
+        #     if mu == 500.0 and sigma == 50.0 and (i == 0 or i == self.zs.size - 1):
+        #         plt.plot(self.fs, summed)
+        #         plt.plot(self.fs, gauss * 100, lw=2)
+        #         plt.show()
+        # if mu == 500.0 and sigma == 50.0:
+        #     plt.plot(self.zs, zvals)
+        #     plt.show()
         return simps(self.zs * self.zs * zvals, x=self.zs)
 
     def get_data(self):
-        self.mus = np.linspace(300, 700, 5)
-        self.sigmas = np.linspace(10, 90, 5)
-        self.z0s = np.linspace(0, 0.01, 1)
-        self.z1s = np.linspace(0, 0.01, 1)
+        self.mus = np.linspace(300, 700, 20)
+        self.sigmas = np.linspace(10, 90, 9)
+        self.z0s = np.linspace(-0.01, 0.01, 7)
+        self.z1s = np.linspace(-0.01, 0.01, 7)
 
-        if False and os.path.exists(self.filename):
+        if os.path.exists(self.filename):
             self.vs = np.load(self.filename)
         else:
             self.vs = np.zeros((self.mus.size, self.sigmas.size, self.z0s.size, self.z1s.size))
@@ -229,14 +261,8 @@ class BiasCorrection(Edge):
                     for k, z0 in enumerate(self.z0s):
                         for l, z1 in enumerate(self.z1s):
                             # Please kill me
-                            s0_z0 = self._get_s0(m, s, z0)
-                            s1_z0 = self._get_s1(m, s, z0)
-                            s0_z1 = self._get_s0(m, s, z1)
-                            s1_z1 = self._get_s1(m, s, z1)
-
-                            res = 1 - (s0_z0 * s0_z1)# - (s0_z0 * s1_z1) - (s1_z0 * s0_z1) - (s1_z0 * s1_z1)
+                            res = 1 - self._get_val(m, s, z0, z1)
                             self.vs[i, j, k, l] = res
-                            print(m, s, z0, z1, res, " :: ", s0_z0, s0_z1, s1_z0, s1_z1)
 
             np.save(self.filename, self.vs)
         return RegularGridInterpolator((self.mus, self.sigmas, self.z0s, self.z1s), self.vs,
@@ -287,7 +313,7 @@ class EfficiencyModelCorrected(EfficiencyModelUncorrected):
         self.finalise()
 
 
-def get_data(seed=5, n=4000):
+def get_data(seed=5, n=400):
     np.random.seed(seed=seed+5)
     num_obs = 2
     mean = 500.0
@@ -360,7 +386,6 @@ if __name__ == "__main__":
     # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model_un.get_pgm(pgm_file)
     plot_weights(dir_name)
-    exit()
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
@@ -381,10 +406,10 @@ if __name__ == "__main__":
                                               zeros, name="Uncorrected%d" % i)
         model_un.fit(sampler, chain_consumer=c)
 
-        # model_cor = EfficiencyModelCorrected(call[mask], zall[mask], calibration, zeros,
-        #                                      threshold, num_obs,
-        #                                      dir_name + "/output", name="Corrected%d" % i)
-        # model_cor.fit(sampler, chain_consumer=c)
+        model_cor = EfficiencyModelCorrected(call[mask], zall[mask], calibration, zeros,
+                                             threshold, num_obs,
+                                             dir_name + "/output", name="Corrected%d" % i)
+        model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
