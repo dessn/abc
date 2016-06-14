@@ -105,7 +105,8 @@ class EfficiencyModelCorrected(Model):
 
 def get_weights(alpha, mu, sigma, n):
     sign = np.sign(alpha - mu)
-    prob = 0.5 + sign * 0.5 * erf((alpha - mu) / (np.sqrt(2) * sigma))
+    abs = np.abs(alpha - mu)
+    prob = 0.5 - sign * 0.5 * erf(abs / (np.sqrt(2) * sigma))
     prob = np.power(prob, n)
     return prob
 
