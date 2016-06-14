@@ -186,44 +186,10 @@ class BiasCorrection(Edge):
 
         self.interp = self.get_data()
 
-    # def _get_s0(self, mu, sigma, Z):
-    #     fs = self.cs / np.power(10, Z / 2.5)
-    #     zvals = np.zeros(self.zs.shape)
-    #     for i, z in enumerate(self.zs):
-    #         lum = fs * (z * z)
-    #         diff = lum - mu
-    #         gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
-    #         zvals[i] = simps(gauss * self.gminusN, x=fs)
-    #     return simps(self.zs * self.zs * zvals, x=self.zs)
-    #
-    # def _get_s1(self, mu, sigma, Z):
-    #     fs = self.cs / np.power(10, Z / 2.5)
-    #     zvals = np.zeros(self.zs.shape)
-    #     for i, z in enumerate(self.zs):
-    #         diff = fs * (z * z) - mu
-    #         gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
-    #         integral = simps(gauss * self.N * self.gplus * self.gminusNmo, x=fs)
-    #         # if mu == 500 and sigma == 50 and i in [0, self.zs.size - 1]:
-    #         #     # print(fs, lum, diff)
-    #         #     plt.plot(fs, 20 * gauss, lw=3)
-    #         #     print("Area is ", z * z * simps(gauss, x=fs), " at redshift %f " % z)
-    #         #     plt.plot(fs, self.N * self.gplus * self.gminusNmo)
-    #         #     plt.title("%f %f %f" % (mu, sigma, z))
-    #         #     plt.show()
-    #         zvals[i] = integral
-    #     if mu == 500 and sigma == 50:
-    #         plt.plot(self.zs, zvals)
-    #         plt.plot(self.zs, self.zs * self.zs * zvals)
-    #         plt.show()
-    #         print("VAL IS ", simps(self.zs * self.zs * zvals, x=self.zs))
-    #     return simps(self.zs * self.zs * zvals, x=self.zs)
-
     def _get_val(self, mu, sigma, z1, z2):
         zvals = np.zeros(self.zs.shape)
         f1 = self.cs / np.power(10, z1 / 2.5)
         f2 = self.cs / np.power(10, z2 / 2.5)
-
-        # print(f1, self.fs)
         vals11 = interp1d(f1, self.x1)(self.fs)
         vals12 = interp1d(f1, self.x2)(self.fs)
         vals21 = interp1d(f2, self.x1)(self.fs)
@@ -236,13 +202,6 @@ class BiasCorrection(Edge):
             gauss = (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-(diff * diff) / (2 * sigma * sigma))
             integral = simps(gauss * summed, x=self.fs)
             zvals[i] = integral
-        #     if mu == 500.0 and sigma == 50.0 and (i == 0 or i == self.zs.size - 1):
-        #         plt.plot(self.fs, summed)
-        #         plt.plot(self.fs, gauss * 100, lw=2)
-        #         plt.show()
-        # if mu == 500.0 and sigma == 50.0:
-        #     plt.plot(self.zs, zvals)
-        #     plt.show()
         return simps(self.zs * self.zs * zvals, x=self.zs)
 
     def get_data(self):
@@ -380,11 +339,11 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    # plot_data(dir_name)
+    plot_data(dir_name)
     mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
-    # model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
-    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    # fig = model_un.get_pgm(pgm_file)
+    model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
+    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    fig = model_un.get_pgm(pgm_file)
     plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
@@ -417,6 +376,6 @@ if __name__ == "__main__":
     c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False, parameters=2)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
-        # c.divide_chain(i, w).configure_general(rainbow=True) \
-        #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
-        #           truth=theta)
+        c.divide_chain(i, w).configure_general(rainbow=True) \
+            .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
+                  truth=theta)
