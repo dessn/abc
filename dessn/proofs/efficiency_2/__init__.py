@@ -74,9 +74,9 @@ gives the answer
 .. math::
     \int_\alpha^\infty dR \ \mathcal{N}(R;\mu,\sigma) = g(\alpha, \mu, \sigma) = \begin{cases}
     \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{\alpha - \mu}{\sqrt{2} \sigma} \right] &
-    \text{ if } \alpha e - \mu > 0 \\
+    \text{ if } \alpha - \mu > 0 \\
     \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{\mu - \alpha}{\sqrt{2} \sigma} \right] &
-    \text{ if } \alpha e - \mu < 0 \\
+    \text{ if } \alpha - \mu < 0 \\
     \end{cases}
 
 Which gives a final likelihood of
