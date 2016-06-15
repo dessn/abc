@@ -132,7 +132,7 @@ class ToObservedCounts(Edge):
         sigma = np.sqrt(data["c_i"])
         sigma = sigma * sigma
         sigma = sigma[:, :, None]
-        res = -0.5 * diff * diff / sigma - self.factor - np.log(sigma)
+        res = -0.5 * diff * diff / sigma - self.factor - np.log(np.sqrt(sigma))
         res[np.isnan(res)] = -np.inf
         res = res.sum(axis=1).sum(axis=1)
         return res

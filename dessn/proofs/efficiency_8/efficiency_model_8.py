@@ -16,80 +16,99 @@ from scipy.interpolate import RegularGridInterpolator, interp1d
 
 class ObservedCounts(ParameterObserved):
     def __init__(self, data):
-        super().__init__("c_o", r"$\mathbf{\hat{c}_i}$", data)
+        super().__init__("c_o", r"$\mathbf{\hat{c}_i}$", data, group="Obs. Counts")
 
 
 class ObservedRedshift(ParameterObserved):
     def __init__(self, data):
-        super().__init__("z_o", "$\hat{z}$", data)
+        super().__init__("z_o", "$\hat{z}$", data, group="Obs. Redshift")
 
 
 class ObservedTimes(ParameterObserved):
     def __init__(self, data):
-        super().__init__("t_o", r"$\mathbf{\hat{t}}$", data)
+        super().__init__("t_o", r"$\mathbf{\hat{t}}$", data, group="Obs. Time")
 
 
-class Luminosity(ParameterLatent):
-    def __init__(self, n, estimated_zeros, estimated_redshift):
-        super().__init__("L", "$L$", n)
+class PeakLuminosity(ParameterLatent):
+    def __init__(self, n, estimated_zeros, estimated_redshift, lum):
+        super().__init__("L", "$L_0$", n, group="Peak Luminosity")
         self.estz = estimated_zeros
         self.estr = estimated_redshift
+        self.lum = lum
 
     def get_suggestion_requirements(self):
         return ["c_o", "z_o"]
 
     def get_suggestion(self, data):
-        flux = data["c_o"] / np.power(10, self.estz / 2.5)
-        luminosity = flux / (data["z_o"] ** 2)
-        return np.max(luminosity)
+        # flux = data["c_o"] / np.power(10, self.estz / 2.5)
+        # max_flux = flux.max(axis=2).max(axis=1)
+        # luminosity = max_flux / (data["z_o"] ** 2)
+        # return luminosity
+        return self.lum
 
     def get_suggestion_sigma(self, data):
-        flux = data["c_o"] / np.power(10, self.estz / 2.5)
-        luminosity = flux / (data["z_o"] ** 2)
-        return 0.5 * (np.max(luminosity) - np.min(luminosity))
+        # flux = data["c_o"] / np.power(10, self.estz / 2.5)
+        # max_flux = flux.max(axis=2).max(axis=1)
+        # luminosity = max_flux / (data["z_o"] ** 2)
+        # return 0.5 * luminosity
+        return 0.001 * self.lum
 
 
 class PeakTime(ParameterLatent):
-    def __init__(self, n):
-        super().__init__("t", r"$t_0$", n)
+    def __init__(self, n, ts):
+        super().__init__("t", r"$t_0$", n, group="Peak Time")
+        self.ts = ts
 
     def get_suggestion_requirements(self):
         return ["c_o", "t_o"]
 
     def get_suggestion(self, data):
-        return data["t_o"][data["c_o"].argmax()]
+        # max_counts = data["c_o"].max(axis=2)
+        # index2 = max_counts.argmax(axis=1)
+        # index1 = np.arange(index2.size)
+        # ts = data["t_o"]
+        # tmax = ts[index1, index2]
+        # return tmax
+        return self.ts
 
     def get_suggestion_sigma(self, data):
-        return 10
+        # return 10 * np.ones(self.num_param)
+        return 0.01 * self.ts
 
 
 class Stretch(ParameterLatent):
-    def __init__(self, n):
-        super().__init__("s", "$s$", n)
+    def __init__(self, n, ss):
+        super().__init__("s", "$s$", n, group="Stretch")
+        self.ss = ss
 
     def get_suggestion_requirements(self):
         return []
 
     def get_suggestion(self, data):
-        return 10
+        return self.ss
 
     def get_suggestion_sigma(self, data):
-        return 7
+        return 0.01 * self.ss
+
+
+class Luminosity(ParameterTransformation):
+    def __init__(self):
+        super().__init__("lum", "$L$", group="Luminosity")
 
 
 class Flux(ParameterTransformation):
     def __init__(self):
-        super().__init__("f", "$f$")
+        super().__init__("f", "$f$", group="Flux")
 
 
 class Counts(ParameterTransformation):
     def __init__(self):
-        super().__init__("c_i", "$c_i$")
+        super().__init__("c_i", "$c_i$", group="Counts")
 
 
 class LuminosityMean(ParameterUnderlying):
     def __init__(self):
-        super().__init__("mu_L", r"$\mu_L$")
+        super().__init__("mu_L", r"$\mu_L$", group="Luminosity Dist.")
 
     def get_log_prior(self, data):
         return 1
@@ -101,12 +120,12 @@ class LuminosityMean(ParameterUnderlying):
         return 500
 
     def get_suggestion_sigma(self, data):
-        return 20
+        return 2
 
 
 class LuminositySigma(ParameterUnderlying):
     def __init__(self):
-        super().__init__("sigma_L", r"$\sigma_L$")
+        super().__init__("sigma_L", r"$\sigma_L$", group="Luminosity Dist.")
 
     def get_suggestion_requirements(self):
         return []
@@ -115,17 +134,17 @@ class LuminositySigma(ParameterUnderlying):
         return 50
 
     def get_suggestion_sigma(self, data):
-        return 10
+        return 2
 
     def get_log_prior(self, data):
-        if data["sigma"] < 0:
+        if data["sigma_L"] < 0:
             return -np.inf
         return 1
 
 
 class StretchMean(ParameterUnderlying):
     def __init__(self):
-        super().__init__("mu_s", r"$\mu_s$")
+        super().__init__("mu_s", r"$\mu_s$", group="Stretch Dist.")
 
     def get_log_prior(self, data):
         return 1
@@ -142,24 +161,26 @@ class StretchMean(ParameterUnderlying):
 
 class StretchSigma(ParameterUnderlying):
     def __init__(self):
-        super().__init__("sigma_s", r"$\sigma_s$")
+        super().__init__("sigma_s", r"$\sigma_s$", group="Stretch Dist.")
 
     def get_log_prior(self, data):
+        if data["sigma_s"] < 0:
+            return -np.inf
         return 1
 
     def get_suggestion_requirements(self):
         return []
 
     def get_suggestion(self, data):
-        return 5
+        return 4
 
     def get_suggestion_sigma(self, data):
-        return 3
+        return 1
 
 
 class Calibration(ParameterUnderlying):
     def __init__(self, z, cov):
-        super().__init__("zero", "${Z_i}$", num_param=z.size)
+        super().__init__("zero", "${Z_i}$", num_param=z.size, group="Calibration")
         self.z = z
         self.icov = np.linalg.inv(cov)
         self.diag = np.diag(cov)
@@ -184,20 +205,29 @@ class ToCounts(EdgeTransformation):
         flux = data["f"]
         z = data["zero"]
         factor = np.power(10, z / 2.5)
-        result = np.dot(flux[:, None], factor[None, :])
+        result = np.dot(flux[:, :, None], factor[None, :])
         return {"c_i": result}
 
 
 class ToFlux(EdgeTransformation):
     def __init__(self):
-        super().__init__("f", ["L", "t", "s", "t_o", "z_o"])
+        super().__init__("f", ["lum", "z_o"])
 
     def get_transformation(self, data):
-        l0 = data["L"]
-        s = data["s"]
-        diff = data["t"] - data["t_o"]
-        z = data["z_o"]
-        return l0 * np.exp(-(diff * diff) / (2 * s * s)) / (z * z)
+        lum = data["lum"]
+        z = data["z_o"][:, None]
+        return {"f": lum / (z * z)}
+
+
+class ToLuminosity(EdgeTransformation):
+    def __init__(self):
+        super().__init__("lum", ["L", "t", "t_o", "s"])
+
+    def get_transformation(self, data):
+        l0 = data["L"][:, None]
+        s = data["s"][:, None]
+        diff = data["t"][:, None] - data["t_o"]
+        return {"lum": l0 * np.exp(-(diff * diff) / (2 * s * s))}
 
 
 class ToObservedCounts(Edge):
@@ -206,11 +236,9 @@ class ToObservedCounts(Edge):
         self.factor = np.log(np.sqrt(2 * np.pi))
 
     def get_log_likelihood(self, data):
-        diff = data["c_o"] - data["c_i"][:, :, None]
+        diff = data["c_o"] - data["c_i"]
         sigma = np.sqrt(data["c_i"])
-        sigma = sigma * sigma
-        sigma = sigma[:, :, None]
-        res = -0.5 * diff * diff / sigma - self.factor - np.log(sigma)
+        res = -(diff * diff) / (2 * sigma * sigma) - self.factor - np.log(sigma)
         res[np.isnan(res)] = -np.inf
         res = res.sum(axis=1).sum(axis=1)
         return res
@@ -240,7 +268,7 @@ class ToStretchDistribution(Edge):
 
 class EfficiencyModelUncorrected(Model):
     def __init__(self, observed_counts, observed_redshift, observed_times, observed_calibration,
-                 observed_zero_points, seed=0, name="Uncorrected"):
+                 observed_zero_points, actual_lum, actual_stretch, actual_t0, seed=0, name="Uncorrected"):
         super().__init__(name)
         np.random.seed(seed)
         # Observed Parameters
@@ -249,13 +277,14 @@ class EfficiencyModelUncorrected(Model):
         self.add(ObservedTimes(observed_times))
 
         # Latent Parameters
-        self.add(Luminosity(observed_redshift.size, observed_zero_points, observed_redshift))
-        self.add(PeakTime(observed_redshift.size))
-        self.add(Stretch(observed_redshift.size))
+        self.add(PeakLuminosity(observed_redshift.size, observed_zero_points, observed_redshift, actual_lum))
+        self.add(PeakTime(observed_redshift.size, actual_t0))
+        self.add(Stretch(observed_redshift.size, actual_stretch))
 
         # Transformed Parameters
-        self.add(Counts())
+        self.add(Luminosity())
         self.add(Flux())
+        self.add(Counts())
 
         # Underlying parameters
         self.add(LuminosityMean())
@@ -265,6 +294,7 @@ class EfficiencyModelUncorrected(Model):
         self.add(Calibration(observed_zero_points, observed_calibration))
 
         # Transformed Edges
+        self.add(ToLuminosity())
         self.add(ToCounts())
         self.add(ToFlux())
 
@@ -276,7 +306,7 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5, n=400):
+def get_data(seed=5, n=150):
     np.random.seed(seed=seed)
 
     # Experimental Configuration
@@ -301,13 +331,14 @@ def get_data(seed=5, n=400):
     ls = []
     cs = []
     mask = []
+    ss = []
+    t0s = []
     for i in range(n):
         t0 = np.random.randint(low=1, high=300)
         t = np.arange(-t_sep * (num_obs // 2), t_sep * (num_obs // 2), t_sep)
         l0 = np.random.normal(loc=lmu, scale=lsigma)
         s = np.random.normal(loc=smu, scale=ssigma)
-        z = np.random.uniform(0.5, 1.5)
-
+        z = np.random.uniform(1.1, 1.5)
 
         lums = l0 * np.exp(-(t * t) / (2 * s * s))
         flux = lums / (z * z)
@@ -324,20 +355,23 @@ def get_data(seed=5, n=400):
         cs.append(c_o)
         mask.append(mask_all)
         ls.append(l0)
-
+        ss.append(s)
+        t0s.append(t0)
     zs = np.array(zs)
     ts = np.array(ts)
     cs = np.array(cs)
+    ss = np.array(ss)
     ls = np.array(ls)
+    t0s = np.array(t0s)
     mask = np.array(mask)
 
     print(mask.sum(), n, mask.sum()/n, ls.mean(), ls[mask].mean(), np.std(ls), np.std(ls[mask]))
 
-    return lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs
+    return lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs
 
 
 def plot_data(dir_name):
-    lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs = get_data()
+    lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data()
 
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
@@ -358,39 +392,41 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    plot_data(dir_name)
-    lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs = get_data()
-    model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
-    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    fig = model.get_pgm(pgm_file)
-
-    exit()
+    # plot_data(dir_name)
+    # lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs = get_data()
+    # model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
+    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    # fig = model.get_pgm(pgm_file, seed=3)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
-    n = 3
+    n = 1
     w = 4
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
-        mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
-        theta = [mean, std] + zeros.tolist()
+        lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data()
+        theta = [lmu, lsigma, smu, ssigma] + zeros.tolist()
+        theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
 
-        kwargs = {"num_steps": 40000, "num_burn": 30000, "save_interval": 60,
-                  "plot_covariance": True}  # , "unify_latent": True # , "callback": v.callback
+        kwargs = {"num_steps": 5000, "num_burn": 40000, "save_interval": 60,
+                  "plot_covariance": True, "unify_latent": True}  # ,   # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
-        model_good = EfficiencyModelUncorrected(call, zall, calibration, zeros, name="Good%d" % i)
-        model_good.fit(sampler, chain_consumer=c)  # , include_latent=True
+        model_good = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
+        print(model_good._theta_names)
+        print("CORRECT ", model_good.get_log_posterior(theta2))
+        theta3 = [a * 1.0 for a in theta2]
+        theta3[0] *= 1.01
+        print("BAD ", model_good.get_log_posterior(theta3))
+        model_good.fit(sampler, chain_consumer=c)
 
-        model_un = EfficiencyModelUncorrected(call[mask], zall[mask], calibration,
-                                              zeros, name="Uncorrected%d" % i)
-        model_un.fit(sampler, chain_consumer=c)
-
-        model_cor.fit(sampler, chain_consumer=c)
+        # model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], calibration,
+        #                                       zeros, name="Uncorrected%d" % i)
+        # model_un.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
-    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False, parameters=2)
+    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)  # , parameters=2
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \

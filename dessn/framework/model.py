@@ -497,7 +497,7 @@ class Model(object):
             raise ValueError("NaN")
         return result
 
-    def get_pgm(self, filename=None, seed=0):  # pragma: no cover
+    def get_pgm(self, filename=None, seed=0, num=1):  # pragma: no cover
         """ Renders (and returns) a PGM of the current framework.
 
         Parameters
@@ -506,6 +506,8 @@ class Model(object):
             if the filename is set, the PGM is saved to file in the top level ``plots`` directory.
         seed : int, optional
             sets the seed, if desired
+        num : int, optional
+            Number of PGMs to output with different seeds
 
         Returns
         -------
@@ -517,81 +519,88 @@ class Model(object):
         import daft
         if not self._finalised:
             self.finalise()
-        np.random.seed(seed)
-        self.logger.info("Generating PGM")
-        rc("font", family="serif", size=8)
-        rc("text", usetex=True)
+        pgms = []
+        for i in range(num):
+            np.random.seed(seed + i)
+            self.logger.info("Generating PGM")
+            rc("font", family="serif", size=8)
+            rc("text", usetex=True)
 
-        scale = max(np.power(len(self.nodes), 0.65), 2)
-        x_size = 1.7 * scale
-        y_size = 1.7 * scale
-        border = 1
-        node_name_dict = {}
-        reverse_dict = {}
-        n = []
-        e = []
-        t = []
-        b = []
+            scale = max(np.power(len(self.nodes), 0.65), 2)
+            x_size = 1.7 * scale
+            y_size = 1.7 * scale
+            border = 1
+            node_name_dict = {}
+            reverse_dict = {}
+            n = []
+            e = []
+            t = []
+            b = []
 
-        for node in self.nodes:
-            value = node.name if node.group is None else node.group
-            if value not in n:
-                n.append(value)
-            if node in self._observed_nodes:
-                b.append(value)
-            if node in self._underlying_nodes:
-                t.append(value)
-            node_name_dict[node.name] = value
-            if value not in reverse_dict:
-                reverse_dict[value] = {"names": [], "labels": []}
-            reverse_dict[value]["node"] = node
-            reverse_dict[value]["labels"].append(node.label)
+            for node in self.nodes:
+                value = node.name if node.group is None else node.group
+                if value not in n:
+                    n.append(value)
+                if node in self._observed_nodes:
+                    b.append(value)
+                if node in self._underlying_nodes:
+                    t.append(value)
+                node_name_dict[node.name] = value
+                if value not in reverse_dict:
+                    reverse_dict[value] = {"names": [], "labels": []}
+                reverse_dict[value]["node"] = node
+                reverse_dict[value]["labels"].append(node.label)
 
-        for edge in self.edges:
-            for g in edge.given:
-                for p in edge.probability_of:
-                    e.append([node_name_dict[g], node_name_dict[p]])
+            for edge in self.edges:
+                for g in edge.given:
+                    for p in edge.probability_of:
+                        e.append([node_name_dict[g], node_name_dict[p]])
 
-        self.logger.debug("Using Newtonian positioner to position %d nodes and %d edges" %
-                          (len(n), len(e)))
+            self.logger.debug("Using Newtonian positioner to position %d nodes and %d edges" %
+                              (len(n), len(e)))
 
-        positioner = NewtonianPosition(n, e, top=t, bottom=b)
-        x, y = positioner.fit()
-        x = (x_size - 2 * border) * x + border
-        y = (y_size - 2 * border) * y + border
+            positioner = NewtonianPosition(n, e, top=t, bottom=b)
+            x, y = positioner.fit()
+            x = (x_size - 2 * border) * x + border
+            y = (y_size - 2 * border) * y + border
 
-        self.logger.debug("Creating PGM from positioner results")
-        pgm = daft.PGM([x_size, y_size], origin=[0., 0.2], observed_style='inner')
-        for value, x, y in zip(n, x, y):
-            node = reverse_dict[value]["node"]
-            obs = node in self._observed_nodes
-            fixed = node in self._transformation_nodes
-            node_name = value
-            if node.group is not None:
-                node_label = node.group.replace(" ", "\n") + "\n"
-            else:
-                node_label = ""
-            node_label += ", ".join(reverse_dict[value]["labels"])
-            params = {} if not fixed else {"facecolor": "#aaaaaa", "edgecolor": "#aaaaaa"}
-            pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3,
-                                   observed=obs, plot_params=params))
+            self.logger.debug("Creating PGM from positioner results")
+            pgm = daft.PGM([x_size, y_size], origin=[0., 0.2], observed_style='inner')
+            for value, x, y in zip(n, x, y):
+                node = reverse_dict[value]["node"]
+                obs = node in self._observed_nodes
+                fixed = node in self._transformation_nodes
+                node_name = value
+                if node.group is not None:
+                    node_label = node.group.replace(" ", "\n") + "\n"
+                else:
+                    node_label = ""
+                node_label += ", ".join(reverse_dict[value]["labels"])
+                params = {} if not fixed else {"facecolor": "#aaaaaa", "edgecolor": "#aaaaaa"}
+                pgm.add_node(daft.Node(node_name, node_label, x, y, scale=1.6, aspect=1.3,
+                                       observed=obs, plot_params=params))
 
-        for edge in self._normal_edges:
-            for g in edge.given:
-                for p in edge.probability_of:
-                    pgm.add_edge(node_name_dict[g], node_name_dict[p])
+            for edge in self._normal_edges:
+                for g in edge.given:
+                    for p in edge.probability_of:
+                        pgm.add_edge(node_name_dict[g], node_name_dict[p])
 
-        for edge in self._transformed_edges:
-            for g in edge.given:
-                for p in edge.probability_of:
-                    pgm.add_edge(node_name_dict[g], node_name_dict[p], ls=":")
+            for edge in self._transformed_edges:
+                for g in edge.given:
+                    for p in edge.probability_of:
+                        pgm.add_edge(node_name_dict[g], node_name_dict[p], ls=":")
 
-        pgm.render()
-        if filename is not None:
-            self.logger.debug("Saving figure to %s" % filename)
-            pgm.figure.savefig(filename, transparent=True, dpi=300)
-
-        return pgm
+            pgm.render()
+            if filename is not None:
+                if num > 1:
+                    index = filename.rfind(".")
+                    f = filename[:index] + "%d" % (seed + i) + filename[index:]
+                else:
+                    f = filename
+                self.logger.debug("Saving figure to %s" % f)
+                pgm.figure.savefig(f, transparent=True, dpi=300, bbox_inches="tight")
+            pgms.append(pgm)
+        return pgms[0] if num == 1 else pgms
 
     def fit(self, sampler, chain_consumer=None, include_latent=False, start=None):
         """
