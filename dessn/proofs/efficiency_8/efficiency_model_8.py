@@ -190,13 +190,14 @@ class ToCounts(EdgeTransformation):
 
 class ToFlux(EdgeTransformation):
     def __init__(self):
-        super().__init__("f", ["L", "t", "s", "t_o"])
+        super().__init__("f", ["L", "t", "s", "t_o", "z_o"])
 
     def get_transformation(self, data):
         l0 = data["L"]
         s = data["s"]
         diff = data["t"] - data["t_o"]
-        return l0 * np.exp(-(diff * diff) / (2 * s * s))
+        z = data["z_o"]
+        return l0 * np.exp(-(diff * diff) / (2 * s * s)) / (z * z)
 
 
 class ToObservedCounts(Edge):
@@ -248,7 +249,7 @@ class EfficiencyModelUncorrected(Model):
         self.add(ObservedTimes(observed_times))
 
         # Latent Parameters
-        self.add(Luminosity(observed_redshift.size, observed_zero_points))
+        self.add(Luminosity(observed_redshift.size, observed_zero_points, observed_redshift))
         self.add(PeakTime(observed_redshift.size))
         self.add(Stretch(observed_redshift.size))
 
@@ -281,6 +282,7 @@ def get_data(seed=5, n=400):
     # Experimental Configuration
     num_obs = 20
     t_sep = 2
+    threshold = 300
 
     # Zero points
     zeros = np.array([0.0, 0.0])
@@ -296,9 +298,11 @@ def get_data(seed=5, n=400):
     # Data
     zs = []
     ts = []
+    ls = []
     cs = []
+    mask = []
     for i in range(n):
-        t0 = np.arange(np.random.randint(low=1, high=300))
+        t0 = np.random.randint(low=1, high=300)
         t = np.arange(-t_sep * (num_obs // 2), t_sep * (num_obs // 2), t_sep)
         l0 = np.random.normal(loc=lmu, scale=lsigma)
         s = np.random.normal(loc=smu, scale=ssigma)
@@ -306,60 +310,43 @@ def get_data(seed=5, n=400):
 
 
         lums = l0 * np.exp(-(t * t) / (2 * s * s))
-        flux = l / (z * z)
+        flux = lums / (z * z)
         counts = np.dot(flux[:, None], factor[None, :])
 
+        c_o = np.array([np.random.normal(scale=np.sqrt(a)) for a in counts.flatten()]).reshape(counts.shape)
+        c_o += counts
+        mask_point = c_o > threshold
+        mask_band = mask_point.sum(axis=1) >= 2
+        mask_all = mask_band.sum() > 0
 
+        zs.append(z)
+        ts.append(t + t0)
+        cs.append(c_o)
+        mask.append(mask_all)
+        ls.append(l0)
 
+    zs = np.array(zs)
+    ts = np.array(ts)
+    cs = np.array(cs)
+    ls = np.array(ls)
+    mask = np.array(mask)
 
-    z_start = 0.5
-    z_end = 1.5
-    threshold = 300
-    factor = np.power(10, zeros / 2.5)
-    z_o = np.random.uniform(z_start, z_end, size=n)
-    lum = np.random.normal(loc=mean, scale=std, size=n)
-    flux = lum / (z_o * z_o)
+    print(mask.sum(), n, mask.sum()/n, ls.mean(), ls[mask].mean(), np.std(ls), np.std(ls[mask]))
 
-    ac = np.dot(flux[:, None], factor[None, :])
-    c_o = np.dstack((ac + np.random.normal(scale=np.sqrt(ac), size=ac.shape) for i in range(num_obs)))
-    obs_mask = c_o > threshold
-    mask = obs_mask.sum(axis=2) >= 1
-    mask = mask.sum(axis=1) > 0
-    print(mask.sum(), n, mask.sum()/n, lum.mean(), lum[mask].mean(), np.std(lum), np.std(lum[mask]))
-
-    return mean, std, zeros, calibration, threshold, lum, z_o, c_o, mask, num_obs
-
-
-def plot_weights(dir_name):
-    mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
-
-    bias = BiasCorrection(threshold, num_obs, dir_name + "/output")
-    m, s, z0, z1 = np.meshgrid(bias.mus, bias.sigmas, bias.z0s, bias.z1s, indexing='ij')
-    v = bias.vs
-    print(m.shape, s.shape, v.shape, v.max())
-    fig = plt.figure(figsize=(6, 5))
-    ax = fig.add_subplot(111)
-    n1 = m.shape[2] // 2
-    n2 = m.shape[3] // 2
-    h = ax.contourf(m[:,:,n1,n2], s[:,:,n1,n2], v[:,:,n1,n2], 20, cmap='viridis')  #, vmin=0, vmax=1.0
-    cbar = fig.colorbar(h)
-    cbar.set_label(r"$P$")
-    ax.set_xlabel(r"$\mu$")
-    ax.set_ylabel(r"$\sigma$")
-    fig.savefig(os.path.abspath(dir_name + "/output/weights.png"), bbox_inches="tight", dpi=300)
+    return lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs
 
 
 def plot_data(dir_name):
-    mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
+    lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs = get_data()
 
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
     fig, ax = plt.subplots(figsize=(5, 4))
     ax.set_xlabel("$z$")
     ax.set_ylabel("$L$")
-    ax.scatter(zall[mask], lall[mask], color="#1976D2", alpha=0.7, label="Discovered")
-    ax.scatter(zall[~mask], lall[~mask], color="#D32F2F", alpha=0.7, label="Undiscovered")
-    ax.axhline(mean, color="k", ls="--")
+    ax.scatter(zs[mask], ls[mask], color="#1976D2", alpha=0.7, label="Discovered")
+    ax.scatter(zs[~mask], ls[~mask], color="#D32F2F", alpha=0.7, label="Undiscovered")
+    ax.axhline(lmu, color="k", ls="--")
     ax.legend(loc=3, fontsize=12)
     fig.savefig(os.path.abspath(dir_name + "/output/data.png"), bbox_inces="tight", dpi=300)
 
@@ -371,12 +358,13 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    # plot_data(dir_name)
-    mean, std, zeros, calibration, threshold, lall, zall, call, mask, num_obs = get_data()
-    # model_un = EfficiencyModelUncorrected(call, zall, calibration, zeros)
-    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    # fig = model_un.get_pgm(pgm_file)
-    plot_weights(dir_name)
+    plot_data(dir_name)
+    lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs = get_data()
+    model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
+    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    fig = model.get_pgm(pgm_file)
+
+    exit()
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 3
@@ -397,9 +385,6 @@ if __name__ == "__main__":
                                               zeros, name="Uncorrected%d" % i)
         model_un.fit(sampler, chain_consumer=c)
 
-        model_cor = EfficiencyModelCorrected(call[mask], zall[mask], calibration, zeros,
-                                             threshold, num_obs,
-                                             dir_name + "/output", name="Corrected%d" % i)
         model_cor.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
