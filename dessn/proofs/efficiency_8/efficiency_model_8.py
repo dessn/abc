@@ -31,7 +31,7 @@ class ObservedTimes(ParameterObserved):
 
 class PeakLuminosity(ParameterLatent):
     def __init__(self, n, estimated_zeros, estimated_redshift, lum):
-        super().__init__("L", "$L_0$", n, group="Peak Luminosity")
+        super().__init__("L", "$L0$", n, group="Peak Luminosity")
         self.estz = estimated_zeros
         self.estr = estimated_redshift
         self.lum = lum
@@ -120,7 +120,7 @@ class LuminosityMean(ParameterUnderlying):
         return 500
 
     def get_suggestion_sigma(self, data):
-        return 2
+        return 10
 
 
 class LuminositySigma(ParameterUnderlying):
@@ -153,7 +153,7 @@ class StretchMean(ParameterUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return 20
+        return 10
 
     def get_suggestion_sigma(self, data):
         return 3
@@ -172,7 +172,7 @@ class StretchSigma(ParameterUnderlying):
         return []
 
     def get_suggestion(self, data):
-        return 4
+        return 2
 
     def get_suggestion_sigma(self, data):
         return 1
@@ -221,13 +221,15 @@ class ToFlux(EdgeTransformation):
 
 class ToLuminosity(EdgeTransformation):
     def __init__(self):
-        super().__init__("lum", ["L", "t", "t_o", "s"])
+        # super().__init__("lum", ["L", "t", "t_o", "s"])
+        super().__init__("lum", ["L", "t_o", "s"])
 
     def get_transformation(self, data):
         l0 = data["L"][:, None]
         s = data["s"][:, None]
-        diff = data["t"][:, None] - data["t_o"]
-        return {"lum": l0 * np.exp(-(diff * diff) / (2 * s * s))}
+        diff = 100 - data["t_o"]
+        vals = np.exp(-(diff * diff) / (2 * s * s))
+        return {"lum": l0 * vals}
 
 
 class ToObservedCounts(Edge):
@@ -278,7 +280,7 @@ class EfficiencyModelUncorrected(Model):
 
         # Latent Parameters
         self.add(PeakLuminosity(observed_redshift.size, observed_zero_points, observed_redshift, actual_lum))
-        self.add(PeakTime(observed_redshift.size, actual_t0))
+        # self.add(PeakTime(observed_redshift.size, actual_t0))
         self.add(Stretch(observed_redshift.size, actual_stretch))
 
         # Transformed Parameters
@@ -306,24 +308,24 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5, n=150):
+def get_data(seed=5, n=10):
     np.random.seed(seed=seed)
 
     # Experimental Configuration
-    num_obs = 20
-    t_sep = 2
+    num_obs = 60
+    t_sep = 1
     threshold = 300
 
     # Zero points
     zeros = np.array([0.0, 0.0])
-    calibration = 0.01 * np.identity(zeros.size)
+    calibration = 0.001 * np.identity(zeros.size)
     factor = np.power(10, zeros / 2.5)
 
     # Distributions
     lmu = 500
     lsigma = 50
-    smu = 20
-    ssigma = 4
+    smu = 10
+    ssigma = 2
 
     # Data
     zs = []
@@ -334,7 +336,7 @@ def get_data(seed=5, n=150):
     ss = []
     t0s = []
     for i in range(n):
-        t0 = np.random.randint(low=1, high=300)
+        t0 = 100  # np.random.randint(low=1, high=300)
         t = np.arange(-t_sep * (num_obs // 2), t_sep * (num_obs // 2), t_sep)
         l0 = np.random.normal(loc=lmu, scale=lsigma)
         s = np.random.normal(loc=smu, scale=ssigma)
@@ -364,7 +366,6 @@ def get_data(seed=5, n=150):
     ls = np.array(ls)
     t0s = np.array(t0s)
     mask = np.array(mask)
-
     print(mask.sum(), n, mask.sum()/n, ls.mean(), ls[mask].mean(), np.std(ls), np.std(ls[mask]))
 
     return lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs
@@ -398,26 +399,26 @@ if __name__ == "__main__":
     # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model.get_pgm(pgm_file, seed=3)
     c = ChainConsumer()
-    v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 1
     w = 4
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
         lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data()
         theta = [lmu, lsigma, smu, ssigma] + zeros.tolist()
-        theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
+        # theta = [lmu, lsigma] + zeros.tolist()
+        theta2 = theta + ls.tolist() + ss.tolist()# + t0s.tolist()
 
-        kwargs = {"num_steps": 5000, "num_burn": 40000, "save_interval": 60,
-                  "plot_covariance": True, "unify_latent": True}  # ,   # , "callback": v.callback
+        kwargs = {"num_steps": 5000, "num_burn": 30000, "save_interval": 60,
+                  "plot_covariance": True}  #, "unify_latent": True   # , "callback": v.callback
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
         print(model_good._theta_names)
         print("CORRECT ", model_good.get_log_posterior(theta2))
         theta3 = [a * 1.0 for a in theta2]
-        theta3[0] *= 1.01
+        theta3[0] *= 1.1
         print("BAD ", model_good.get_log_posterior(theta3))
-        model_good.fit(sampler, chain_consumer=c)
+        model_good.fit(sampler, chain_consumer=c, include_latent=True)
 
         # model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], calibration,
         #                                       zeros, name="Uncorrected%d" % i)
@@ -426,9 +427,9 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
-    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)  # , parameters=2
+    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False, parameters=6)
     for i in range(len(c.chains)):
-        c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
+        c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta2)
         # c.divide_chain(i, w).configure_general(rainbow=True) \
         #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
         #           truth=theta)

@@ -337,18 +337,21 @@ class MetropolisHastings(GenericSampler):
         import matplotlib.pyplot as plt
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         covariance = self._adjust_covariance(burnin, burnin.shape[0], unify=unify, return_cov=True)
-        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-        h = ax[0].imshow(covariance, cmap='viridis')
+        fig, ax = plt.subplots(1, 2, figsize=(14, 7))
+        h = ax[0].imshow(covariance, cmap='viridis', interpolation='none')
         div1 = make_axes_locatable(ax[0])
         cax1 = div1.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(h, cax=cax1)
 
         diag = np.diag(1 / np.sqrt(np.diag(covariance)))
         cor = np.dot(np.dot(diag, covariance), diag)
-        h2 = ax[1].imshow(cor, cmap='viridis')
+        h2 = ax[1].imshow(cor, cmap='viridis', interpolation='none')
         div2 = make_axes_locatable(ax[1])
         cax2 = div2.append_axes("right", size="5%", pad=0.05)
         plt.colorbar(h2, cax=cax2)
+        fig.gca().set_frame_on(False)
+        ax[0].set_axis_off()
+        ax[1].set_axis_off()
         self.logger.info("Saving covariance plot")
-        fig.savefig(self.covariance_plot)
+        fig.savefig(self.covariance_plot, bbox_inches="tight", dpi=300)
 
