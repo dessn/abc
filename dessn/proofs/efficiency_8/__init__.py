@@ -58,12 +58,34 @@ cuts are applied, giving the following distribution:
     :width:     80%
     :align:     center
 
+
+Before continuing further, we should note that the model we have constructed
+is highly pathological. Not only will both our zero point values be highly correlated with
+each other, but all of our luminosity values will be highly correlated, and our peak
+luminosity will be anti-correlated with stretch. These pathological models are discussed
+in [1]_, demonstrating the very slow convergence time for traditional MCMC fitting
+algorithms like MH. However, as fast HMC methods are not currently available using
+Python (unless one forgoes external libraries and uses Theano), we have simply decreased
+our data size and increased burn in such that we are still able to utilise MH. Future models
+will probably be attempted in STAN.
+
+
+.. figure::     ../dessn/proofs/efficiency_8/output/covariance.png
+    :width:     100%
+    :align:     center
+
+    The covariance matrix from the burn in on the left, with the associated
+    correlation matrix on the right. The parameters, from top left to bottom right,
+    are :math:`\mu_L,\, \sigma_L, \, \mu_s,\, \sigma_s, \, Z_0,\, Z_1, \lbrace{L}\rbrace,\,
+    \lbrace t \rbrace,\, \lbrace s \rbrace`. The highly correlated nature of the the
+    variables means that a huge amount of time needs to be spent on the burn in phase.
+
 Now we also need to determine the appropriate weights.
 
 .. math::
     W &= P(S|\mu_L, \sigma_L, \mu_s, \sigma_s, Z)  \\
     &= \idotsint dL_0 \, dt \, ds \, dz\, d\mathbf{c_i} P(S, \mathbf{c_i}, L_0, t, s, z|\mu_L, \sigma_L, \mu_s, \sigma_s, Z) \\
-    &= \idotsint dL_0 \, dt \, ds \, dz\, d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z) P(L_0|\mu_L,\sigma_L) P(s|\mu_s,\sigma_s)
+    &= \idotsint dL_0 \, dt \, ds \, dz\, d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z) P(L_0|\mu_L,\sigma_L) P(s|\mu_s,\sigma_s) \\
     &= \int dL_0 \int dt \int ds \int dz\int d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z) P(L_0|\mu_L,\sigma_L) P(s|\mu_s,\sigma_s)
 
 Note in here that we insert :math:`\hat{t}` inside the equation without an integral. This is because
@@ -72,6 +94,7 @@ as an observable in the first section as it is given data in the same way the ex
 is given data. As the weights represent the efficiency over all possible data, given the same
 experiment is performed, we use the same :math:`t` values without an integral.
 
-
+.. [1] Betancourt, M.J. and Girolami, M. (2013), "Hamiltonian Monte Carlo for Hierarchical Models",
+    http://adsabs.harvard.edu/abs/2013arXiv1312.0906B
 
 """

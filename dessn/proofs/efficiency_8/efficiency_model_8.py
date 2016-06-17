@@ -56,7 +56,7 @@ class PeakLuminosity(ParameterLatent):
 
 class PeakTime(ParameterLatent):
     def __init__(self, n, ts):
-        super().__init__("t", r"$t_0$", n, group="Peak Time")
+        super().__init__("t", r"$t0$", n, group="Peak Time")
         self.ts = ts
 
     def get_suggestion_requirements(self):
@@ -221,13 +221,12 @@ class ToFlux(EdgeTransformation):
 
 class ToLuminosity(EdgeTransformation):
     def __init__(self):
-        # super().__init__("lum", ["L", "t", "t_o", "s"])
-        super().__init__("lum", ["L", "t_o", "s"])
+        super().__init__("lum", ["L", "t", "t_o", "s"])
 
     def get_transformation(self, data):
         l0 = data["L"][:, None]
         s = data["s"][:, None]
-        diff = 100 - data["t_o"]
+        diff = data["t"][:, None] - data["t_o"]
         vals = np.exp(-(diff * diff) / (2 * s * s))
         return {"lum": l0 * vals}
 
@@ -280,7 +279,7 @@ class EfficiencyModelUncorrected(Model):
 
         # Latent Parameters
         self.add(PeakLuminosity(observed_redshift.size, observed_zero_points, observed_redshift, actual_lum))
-        # self.add(PeakTime(observed_redshift.size, actual_t0))
+        self.add(PeakTime(observed_redshift.size, actual_t0))
         self.add(Stretch(observed_redshift.size, actual_stretch))
 
         # Transformed Parameters
@@ -308,7 +307,7 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-def get_data(seed=5, n=10):
+def get_data(seed=5, n=30):
     np.random.seed(seed=seed)
 
     # Experimental Configuration
@@ -336,7 +335,7 @@ def get_data(seed=5, n=10):
     ss = []
     t0s = []
     for i in range(n):
-        t0 = 100  # np.random.randint(low=1, high=300)
+        t0 = np.random.randint(low=1, high=300)
         t = np.arange(-t_sep * (num_obs // 2), t_sep * (num_obs // 2), t_sep)
         l0 = np.random.normal(loc=lmu, scale=lsigma)
         s = np.random.normal(loc=smu, scale=ssigma)
@@ -406,30 +405,25 @@ if __name__ == "__main__":
         lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data()
         theta = [lmu, lsigma, smu, ssigma] + zeros.tolist()
         # theta = [lmu, lsigma] + zeros.tolist()
-        theta2 = theta + ls.tolist() + ss.tolist()# + t0s.tolist()
+        theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
 
-        kwargs = {"num_steps": 5000, "num_burn": 30000, "save_interval": 60,
-                  "plot_covariance": True}  #, "unify_latent": True   # , "callback": v.callback
+        kwargs = {"num_steps": 10000, "num_burn": 200000, "save_interval": 60,
+                  "plot_covariance": True}
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
-        print(model_good._theta_names)
-        print("CORRECT ", model_good.get_log_posterior(theta2))
-        theta3 = [a * 1.0 for a in theta2]
-        theta3[0] *= 1.1
-        print("BAD ", model_good.get_log_posterior(theta3))
-        model_good.fit(sampler, chain_consumer=c, include_latent=True)
+        model_good.fit(sampler, chain_consumer=c)
 
-        # model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], calibration,
-        #                                       zeros, name="Uncorrected%d" % i)
-        # model_un.fit(sampler, chain_consumer=c)
+        model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], calibration,
+                                              zeros, ls[mask], ss[mask], t0s[mask], name="Uncorrected%d" % i)
+        model_un.fit(sampler, chain_consumer=c)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
     c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False, parameters=6)
     for i in range(len(c.chains)):
-        c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta2)
+        c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \
         #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
         #           truth=theta)
