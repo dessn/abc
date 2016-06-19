@@ -307,6 +307,31 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
+def get_weights(mul, sigmal, mus, sigmas, z0, z1, threshold, n=1e4):
+    n = int(n)
+    ls = np.random.normal(loc=mul, scale=sigmal, size=n)
+    ss = np.random.normal(loc=mus, scale=sigmas, size=n)
+    zs = np.random.uniform(1.1, high=1.5, size=n)
+
+    ts = np.arange(-30, 30, 1)
+    interior = -(ts * ts)[:, None] / (2 * ss * ss)[None, :]
+    fluxes = (ls / (zs * zs))[None, :] * np.exp(interior)
+
+    masks = []
+    for z in [z0, z1]:
+        factor = np.power(10, z / 2.5)
+        counts = fluxes * factor
+        zm = counts <= 0
+        counts[zm] = 0.1
+        realised_counts = np.random.normal(loc=counts, scale=np.sqrt(counts), size=counts.shape)
+        mask = realised_counts > threshold
+        masks.append(mask.sum(axis=0) > 1)
+    masks = np.array(masks)
+    final_mask = masks.sum(axis=0) > 0
+    mean = final_mask.mean()
+    return mean
+
+
 def get_data(seed=5, n=30):
     np.random.seed(seed=seed)
 
@@ -393,7 +418,7 @@ if __name__ == "__main__":
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
     # plot_data(dir_name)
-    # lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, zs, ts, cs, mask, num_obs = get_data()
+    # lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data(n=1000)
     # model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
     # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     # fig = model.get_pgm(pgm_file, seed=3)
@@ -407,7 +432,7 @@ if __name__ == "__main__":
         # theta = [lmu, lsigma] + zeros.tolist()
         theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
 
-        kwargs = {"num_steps": 10000, "num_burn": 200000, "save_interval": 60,
+        kwargs = {"num_steps": 2000, "num_burn": 310000, "save_interval": 60,
                   "plot_covariance": True}
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
@@ -417,6 +442,21 @@ if __name__ == "__main__":
         model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], calibration,
                                               zeros, ls[mask], ss[mask], t0s[mask], name="Uncorrected%d" % i)
         model_un.fit(sampler, chain_consumer=c)
+
+        biased_chain = c.chains[-1]
+        # model_cor.fit(sampler, chain_consumer=c)
+
+        filename = dir_name + "/output/weights.txt"
+        if not os.path.exists(filename):
+            weights = []
+            for i, row in enumerate(biased_chain):
+                weights.append(get_weights(row[0], row[1], row[2], row[3], row[4], row[5], threshold))
+                print(100.0 * i / biased_chain.shape[0])
+            weights = np.array(weights)
+            np.savetxt(filename, weights)
+        else:
+            weights = np.power(np.loadtxt(filename), mask.sum())
+        c.add_chain(biased_chain, name="Importance Sampled", weights=1/weights)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)

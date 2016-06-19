@@ -634,21 +634,6 @@ class ChainConsumer(object):
         if truth is not None and isinstance(truth, list):
             truth = truth[:len(parameters)]
 
-        n = len(parameters)
-        extra = 0
-        if plot_weights:
-            for w in self.weights:
-                plot_weights = plot_weights and np.any(w != 1.0)
-                if not plot_weights:
-                    break
-
-        plot_posterior = plot_posterior and len([p for p in self.posteriors if p is not None]) > 0
-
-        if plot_weights:
-            extra += 1
-        if plot_posterior:
-            extra += 1
-
         assert truth is None or isinstance(truth, dict) or \
                (isinstance(truth, list) and len(truth) == len(parameters)), \
             "Have a list of %d parameters and %d truth values" % (len(parameters), len(truth))
@@ -667,9 +652,6 @@ class ChainConsumer(object):
         if extents is None:
             extents = {}
 
-        if figsize is None:
-            figsize = (8, 0.75 + (n + extra))
-
         if chain is None:
             if len(self.chains) == 1:
                 chain = 0
@@ -682,6 +664,22 @@ class ChainConsumer(object):
             assert chain in self.names, \
                 "A chain with name %s is not found in available names: %s" % (chain, self.names)
             chain = self.names.index(chain)
+
+        n = len(parameters)
+        extra = 0
+        if plot_weights:
+            plot_weights = plot_weights and np.any(self.weights[chain] != 1.0)
+
+        plot_posterior = plot_posterior and self.posteriors[chain] is not None
+
+        if plot_weights:
+            extra += 1
+        if plot_posterior:
+            extra += 1
+
+        if figsize is None:
+            figsize = (8, 0.75 + (n + extra))
+
 
         chain_data = self.chains[chain]
         self.logger.debug("Plotting chain of size %s" % (chain_data.shape,))

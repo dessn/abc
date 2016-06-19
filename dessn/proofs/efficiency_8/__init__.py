@@ -86,7 +86,8 @@ Now we also need to determine the appropriate weights.
     W &= P(S|\mu_L, \sigma_L, \mu_s, \sigma_s, Z)  \\
     &= \idotsint dL_0 \, dt \, ds \, dz\, d\mathbf{c_i} P(S, \mathbf{c_i}, L_0, t, s, z|\mu_L, \sigma_L, \mu_s, \sigma_s, Z) \\
     &= \idotsint dL_0 \, dt \, ds \, dz\, d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z) P(L_0|\mu_L,\sigma_L) P(s|\mu_s,\sigma_s) \\
-    &= \int dL_0 \int dt \int ds \int dz\int d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z) P(L_0|\mu_L,\sigma_L) P(s|\mu_s,\sigma_s)
+    &= \int dL_0 \int dt \int ds \int dz\int d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z) P(L_0|\mu_L,\sigma_L) P(s|\mu_s,\sigma_s) \\
+    &= \int dL_0 P(L_0|\mu_L,\sigma_L)  \int dt \int ds P(s|\mu_s,\sigma_s) \int dz \int d\mathbf{c_i} P(S|\mathbf{c_i}) P(\mathbf{c_i}|L_0, t, \hat{t}, z, Z)
 
 Note in here that we insert :math:`\hat{t}` inside the equation without an integral. This is because
 the time of the observation is part of the experiment, not an observable, however we treat it
