@@ -95,6 +95,19 @@ as an observable in the first section as it is given data in the same way the ex
 is given data. As the weights represent the efficiency over all possible data, given the same
 experiment is performed, we use the same :math:`t` values without an integral.
 
+We calculate the weight terms using monte carlo integration, as the parameter space is
+now too high to allow us to use gridded interpolation. In addition, due the degeneracies
+in the posterior surface and the associated difficulties that come from fitting such a
+surface, this example is run with a smaller number of steps and smaller data set,
+which makes the output surfaces rougher. We can see in the surfaces below, that roughness
+notwithstanding, the weights correction does remove the introduced bias in luminosity.
+
+
+.. figure::     ../dessn/proofs/efficiency_8/output/surfaces.png
+    :align:     center
+    :width:     100%
+
+
 .. [1] Betancourt, M.J. and Girolami, M. (2013), "Hamiltonian Monte Carlo for Hierarchical Models",
     http://adsabs.harvard.edu/abs/2013arXiv1312.0906B
 

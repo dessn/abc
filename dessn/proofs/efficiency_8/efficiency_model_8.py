@@ -417,11 +417,11 @@ if __name__ == "__main__":
     plot_file = os.path.abspath(dir_name + "/output/surfaces.png")
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
-    # plot_data(dir_name)
-    # lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data(n=1000)
-    # model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
-    # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    # fig = model.get_pgm(pgm_file, seed=3)
+    plot_data(dir_name)
+    lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data(n=1000)
+    model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
+    pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
+    fig = model.get_pgm(pgm_file, seed=3)
     c = ChainConsumer()
     n = 1
     w = 4
@@ -429,7 +429,6 @@ if __name__ == "__main__":
     for i in range(n):
         lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data()
         theta = [lmu, lsigma, smu, ssigma] + zeros.tolist()
-        # theta = [lmu, lsigma] + zeros.tolist()
         theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
 
         kwargs = {"num_steps": 3000, "num_burn": 320000, "save_interval": 60,
@@ -462,7 +461,7 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
-    c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False, parameters=6)
+    c.plot(filename=plot_file, truth=theta, figsize=(7, 7), legend=False, parameters=6)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \

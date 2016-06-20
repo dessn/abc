@@ -482,7 +482,7 @@ class ChainConsumer(object):
             elif figsize.upper() == "PAGE":
                 figsize = (10, 10)
             elif figsize.upper() == "GROW":
-                figsize = (2 * len(parameters), 2 * len(parameters))
+                figsize = (1.5 * len(parameters), 1.5 * len(parameters))
             else:
                 raise ValueError("Unknown figure size %s" % figsize)
 
