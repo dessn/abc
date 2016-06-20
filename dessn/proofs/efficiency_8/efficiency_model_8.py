@@ -307,7 +307,7 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-def get_weights(mul, sigmal, mus, sigmas, z0, z1, threshold, n=1e4):
+def get_weights(mul, sigmal, mus, sigmas, z0, z1, threshold, n=2e4):
     n = int(n)
     ls = np.random.normal(loc=mul, scale=sigmal, size=n)
     ss = np.random.normal(loc=mus, scale=sigmas, size=n)
@@ -432,7 +432,7 @@ if __name__ == "__main__":
         # theta = [lmu, lsigma] + zeros.tolist()
         theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
 
-        kwargs = {"num_steps": 2000, "num_burn": 310000, "save_interval": 60,
+        kwargs = {"num_steps": 3000, "num_burn": 320000, "save_interval": 60,
                   "plot_covariance": True}
         sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
@@ -455,8 +455,9 @@ if __name__ == "__main__":
             weights = np.array(weights)
             np.savetxt(filename, weights)
         else:
-            weights = np.power(np.loadtxt(filename), mask.sum())
-        c.add_chain(biased_chain, name="Importance Sampled", weights=1/weights)
+            weights = np.loadtxt(filename)
+        weights = (1 / np.power(weights, mask.sum()))
+        c.add_chain(biased_chain, name="Importance Sampled", weights=weights)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
