@@ -5,6 +5,7 @@ from astropy.table import Table
 from dessn.chain.chain import ChainConsumer
 from dessn.framework.samplers.ensemble import EnsembleSampler
 import os
+from scipy.stats import kstest
 
 
 if __name__ == "__main__":
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     times = np.array([[t, t + 0.1, t + 0.2] for t in ts]).flatten()
     bands = [b for t in ts for b in ['desg', 'desr', 'desi']]
     gains = np.ones(times.shape)
-    skynoise = 20 * np.ones(times.shape)
+    skynoise = 80 * np.ones(times.shape)
     zp = 30 * np.ones(times.shape)
     zpsys = ['ab'] * times.size
 
@@ -53,3 +54,10 @@ if __name__ == "__main__":
     c.plot(filename=surface, figsize=(7, 7))
     fig = sncosmo.plot_lc(lcs[0], model=fitted_model, errors=res.errors)
     fig.savefig(temp_dir + os.sep + "lc_simple.png", bbox_inches="tight", dpi=300)
+
+    chain = c.chains[0]
+    diff = chain - res.parameters[1:]
+    chisq = (np.dot(diff, np.linalg.inv(res.covariance)) * diff).sum(axis=1)
+    stat, pval = kstest(chisq, 'chi2', args=[4])
+    print(pval)
+
