@@ -31,6 +31,12 @@ Model Proofs
 
 .. include:: proofs.rst
 
+
+Investigations
+==============
+
+.. include:: investigations.rst
+
 Implementations
 ===============
 
@@ -50,4 +56,5 @@ The general project structure is as follows:
     chain
     core
     proofs_sep
+    investigations_sep
     implementations_sep

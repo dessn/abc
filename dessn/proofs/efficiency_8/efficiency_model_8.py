@@ -419,7 +419,7 @@ if __name__ == "__main__":
 
     plot_data(dir_name)
     lmu, lsigma, smu, ssigma, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs = get_data(n=1000)
-    model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros)
+    model = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros, ls, ss, t0s, )
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
     fig = model.get_pgm(pgm_file, seed=3)
     c = ChainConsumer()
