@@ -88,6 +88,11 @@ class ChainConsumer(object):
             if p not in self.all_parameters:
                 self.all_parameters.append(p)
         self.parameters.append(parameters)
+
+        self._configured_bar = False
+        self._configured_contour = False
+        self._configured_general = False
+        self._configured_truth = False
         return self
 
     def configure_general(self, bins=None, flip=True, rainbow=None, colours=None,

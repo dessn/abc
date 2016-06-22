@@ -1,4 +1,4 @@
-"""
+r"""
 In most supernova cosmology analyses, the analysis is performed not using the observed
 light curves, but using SALT2 summary statistics. Whilst this choice does provide
 strong computational benefits, the underpinning assumption of validity for using
@@ -8,6 +8,9 @@ In order to provide a more rigorous justification for utilising this assumption,
 I investigate how well the summary statistics reflect the full posterior
 surface of the SALT2 fits under a variety of conditions and supernova
 parametrisation.
+
+Introduction
+------------
 
 To begin with, we pick the optimal case for a supernova: a high signal-to-noise
 signal observed regularly throughout the entire supernova lifespan for
@@ -39,5 +42,54 @@ the supernova parameters and observation scenario (time pre-peak, and post-peak,
 of observations) and determine the difference between the full posterior surface and
 summary statistics via a given metric, and determine in what regions of parameter space
 might the gaussianity assumption not adequately hold.
+
+Our primary parameter of interest is not any of the fit parameters, but is instead
+the distance modulus :math:`\mu`, as it is biases in the distance modulus which will
+bias our cosmology. Using fiducial values for :math:`\alpha` and :math:`\beta` from [1]_,
+we have the distance modulus as
+
+.. math::
+    \mu = m_B^* - M + \alpha x_1 - \beta c,
+
+where :math:`m_B^*` is calculated using ``sncosmo``. Using this relationship, and moving
+the nuisance parameter :math:`M` to the other side, we can convert our multi-dimensional
+posterior surface into a single dimension, and then check for any biases in the mean and
+variance of the :math:`\mu+M` distribution. Doing this for the simple example above gives
+us the distributions shown below, which have :math:`\Delta (\mu+M) = 0.002`
+and :math:`\Delta (\sigma_{\mu+M}) = -0.0007`, which is a negligible change for cosmology.
+
+
+.. figure::     ../dessn/investigations/gaussianity/output/mu_simple.png
+    :align:     center
+    :width:     50%
+
+    The posterior surfaces from the previous figure transformed into distance modulus.
+
+
+
+
+Generalisation
+--------------
+
+By finding the difference in mean and standard deviation of the :math:`\mu+M` distributions
+from assuming a Gaussian approximation and examining the full posterior surface, we can
+investigate the effect of various observational conditions. Parameters which may be of
+interest are the peak signal to noise of the light curves, the number of observations,
+and when observations for a supernova begin (ie how early do we catch the supernova
+before peak) - in addition to stretch, colour and redshift.
+
+To simplify the problem, we assume consistent observations every three days.
+
+
+
+
+
+
+
+
+
+.. [1] Betoule, M., Kessler, R., Guy, J. et al. (2014), "Improved cosmological constraints from
+    a joint analysis of the SDSS-II and SNLS supernova samples",
+    http://adsabs.harvard.edu/abs/2014A%26A...568A..22B
 
 """

@@ -10,13 +10,15 @@ class Stretch(ParameterUnderlying):
         super().__init__("x1", "$x_1$")
 
     def get_log_prior(self, data):
+        if data["x1"] < -8 or data["x1"] > 8:
+            return -np.inf
         return 1
 
     def get_suggestion(self, data):
         return 0
 
     def get_suggestion_sigma(self, data):
-        return 1
+        return 4
 
 
 class Colour(ParameterUnderlying):
@@ -27,6 +29,8 @@ class Colour(ParameterUnderlying):
         return 0.2
 
     def get_log_prior(self, data):
+        if data["c"] < -1 or data["c"] > 1:
+            return -np.inf
         return 1
 
     def get_suggestion(self, data):
@@ -38,9 +42,11 @@ class Mag(ParameterUnderlying):
         super().__init__('x0', "$x_0$")
 
     def get_suggestion_sigma(self, data):
-        return 1e-6
+        return 5e-6
 
     def get_log_prior(self, data):
+        if data["x0"] < 0:
+            return -np.inf
         return 1
 
     def get_suggestion(self, data):
@@ -48,17 +54,18 @@ class Mag(ParameterUnderlying):
 
 
 class Time(ParameterUnderlying):
-    def __init__(self):
+    def __init__(self, t0):
         super().__init__('t0', "$t_0$")
+        self.t0 = t0
 
     def get_suggestion_sigma(self, data):
-        return 10 * np.ones(len(data["lc"]))
+        return 1
 
     def get_suggestion_requirements(self):
         return ['lc']
 
     def get_suggestion(self, data):
-        return [lc["time"][lc["flux"].argmax()] for lc in data["lc"]]
+        return self.t0
 
     def get_log_prior(self, data):
         return 1
@@ -87,7 +94,7 @@ class LightCurves(ParameterObserved):
 class LikelihoodPerfect(Edge):
     def __init__(self, z):
         super().__init__(["lc"], ["x0", "x1", "c", "t0"])
-        self.model = sncosmo.Model(source='salt2')
+        self.model = sncosmo.Model(source='salt2-extended')
         self.model.set(z=z[0])
 
     def get_log_likelihood(self, data):
@@ -99,7 +106,7 @@ class LikelihoodPerfect(Edge):
 class LikelihoodImperfect(Edge):
     def __init__(self):
         super().__init__(["lc"], ["x0", "x1", "c", "t0", "z"])
-        self.model = sncosmo.Model(source='salt2')
+        self.model = sncosmo.Model(source='salt2-extended')
 
     def get_log_likelihood(self, data):
         self.model.set(x0=data["x0"], x1=data["x1"], t0=data["t0"], c=data["c"], z=data["z"][0])
@@ -108,11 +115,11 @@ class LikelihoodImperfect(Edge):
 
 
 class PerfectRedshift(Model):
-    def __init__(self, lightcurves, redshift):
-        super().__init__("Perfect Redshift")
+    def __init__(self, lightcurves, redshift, t0, name="Perfect Redshift"):
+        super().__init__(name)
         self.add(Stretch())
         self.add(Colour())
-        self.add(Time())
+        self.add(Time(t0))
         self.add(Mag())
         self.add(LightCurves(lightcurves))
         self.add(LikelihoodPerfect(redshift))
@@ -120,11 +127,11 @@ class PerfectRedshift(Model):
 
 
 class ImperfectRedshift(Model):
-    def __init__(self, lightcurves, redshift):
-        super().__init__("Perfect Redshift")
+    def __init__(self, lightcurves, redshift, t0, name="Imperfect Redshift"):
+        super().__init__(name)
         self.add(Stretch())
         self.add(Colour())
-        self.add(Time())
+        self.add(Time(t0))
         self.add(Mag())
         self.add(Redshift(redshift))
         self.add(LightCurves(lightcurves))

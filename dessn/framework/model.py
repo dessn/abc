@@ -461,7 +461,7 @@ class Model(object):
         p0 = self._get_suggestion()
         sigmas = self._get_suggestion_sigma()
         self.logger.debug("Initial position is:  %s" % p0)
-        if len(p0) < 20:
+        if len(p0) < 2:
             optimised = fmin_bfgs(self._get_negative_log_posterior, p0, disp=0)
         else:
             optimised = p0

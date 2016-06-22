@@ -1,17 +1,17 @@
 from dessn.investigations.gaussianity.model import PerfectRedshift
+from dessn.investigations.gaussianity.apparent_mags import generate_and_return
 import sncosmo
 import numpy as np
 from astropy.table import Table
 from dessn.chain.chain import ChainConsumer
 from dessn.framework.samplers.ensemble import EnsembleSampler
 import os
-from scipy.stats import kstest
 
 
 if __name__ == "__main__":
     np.random.seed(0)
     x1 = np.random.normal()
-    c = np.random.normal(scale=0.1)
+    colour = np.random.normal(scale=0.1)
     x0 = np.random.normal(loc=1e-5, scale=1e-6)
     t0 = np.random.uniform(low=1000, high=2000)
     z = np.random.uniform(low=0.1, high=0.7)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
                  'zpsys': zpsys})
 
     model = sncosmo.Model(source='salt2')
-    p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
+    p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': colour}
     model.set(z=z)
     lcs = sncosmo.realize_lcs(obs, model, [p])
     res, fitted_model = sncosmo.fit_lc(lcs[0], model, ['t0', 'x0', 'x1', 'c'])
@@ -42,12 +42,13 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     temp_dir = dir_name + os.sep + "output"
     surface = temp_dir + os.sep + "surfaces_simple.png"
+    mu_simple = temp_dir + os.sep + "mu_simple.png"
     c = ChainConsumer()
     my_model = PerfectRedshift(lcs, [z])
     sampler = EnsembleSampler(temp_dir=temp_dir, num_steps=10000)
     my_model.fit(sampler, chain_consumer=c)
     c.add_chain(np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e6)),
-                name="Gaussian", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
+                     name="Gaussian", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
 
     c.configure_contour(contourf=True, contourf_alpha=0.2, sigmas=[0.0, 0.5, 1.0, 2.0, 3.0])
     c.configure_bar(shade=True)
@@ -55,9 +56,26 @@ if __name__ == "__main__":
     fig = sncosmo.plot_lc(lcs[0], model=fitted_model, errors=res.errors)
     fig.savefig(temp_dir + os.sep + "lc_simple.png", bbox_inches="tight", dpi=300)
 
-    chain = c.chains[0]
-    diff = chain - res.parameters[1:]
-    chisq = (np.dot(diff, np.linalg.inv(res.covariance)) * diff).sum(axis=1)
-    stat, pval = kstest(chisq, 'chi2', args=[4])
-    print(pval)
+    alpha = 0.14
+    beta = 3.15
+
+    c2 = ChainConsumer()
+    means = []
+    stds = []
+    for i in range(len(c.chains)):
+        chain = c.chains[i]
+        apparent_interp = generate_and_return()
+        x0s = chain[:, c.parameters[i].index("$x_0$")]
+        x1s = chain[:, c.parameters[i].index("$x_1$")]
+        cs = chain[:, c.parameters[i].index("$c$")]
+        a = apparent_interp(x1s, cs, grid=False) - (0.4 * np.log10(x0s / 1e-5))
+        a += alpha * x1s - beta * cs
+        means.append(a.mean())
+        stds.append(np.std(a))
+        c2.add_chain(a, parameters=[r"$\mu+M$"], name=c.names[i])
+    print(means, stds, np.diff(means), np.diff(stds))
+
+    actual = apparent_interp(x1, colour, grid=False) - (0.4 * np.log10(x0 / 1e-5))
+    actual += alpha * x1 - beta * colour
+    c2.plot(filename=mu_simple, figsize=(5, 3), truth=[actual], legend=False)
 

@@ -107,7 +107,7 @@ class EnsembleSampler(GenericSampler):
             num_dim = start.size
         if self.num_walkers is None:
             self.num_walkers = num_dim * 4
-            self.num_walkers = max(self.num_walkers, 50)
+            self.num_walkers = max(self.num_walkers, 20)
 
         self.logger.debug("Fitting framework with %d dimensions" % num_dim)
 
