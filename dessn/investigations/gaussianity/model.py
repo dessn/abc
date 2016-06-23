@@ -94,19 +94,21 @@ class LightCurves(ParameterObserved):
 class LikelihoodPerfect(Edge):
     def __init__(self, z):
         super().__init__(["lc"], ["x0", "x1", "c", "t0"])
-        self.model = sncosmo.Model(source='salt2-extended')
+        self.model = sncosmo.Model(source='salt2')
         self.model.set(z=z[0])
 
     def get_log_likelihood(self, data):
         self.model.set(x0=data["x0"], x1=data["x1"], t0=data["t0"], c=data["c"])
         chi2 = sncosmo.chisq(data["lc"][0], self.model)
+        if np.isnan(chi2):
+            return [-np.inf]
         return [-0.5 * chi2]
 
 
 class LikelihoodImperfect(Edge):
     def __init__(self):
         super().__init__(["lc"], ["x0", "x1", "c", "t0", "z"])
-        self.model = sncosmo.Model(source='salt2-extended')
+        self.model = sncosmo.Model(source='salt2')
 
     def get_log_likelihood(self, data):
         self.model.set(x0=data["x0"], x1=data["x1"], t0=data["t0"], c=data["c"], z=data["z"][0])
