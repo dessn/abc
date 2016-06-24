@@ -60,7 +60,7 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
     elif type == "mcmc":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=500, nwalkers=20,
-                                            nsamples=2000, guess_amplitude=False, guess_t0=False)
+                                            nsamples=1500, guess_amplitude=False, guess_t0=False)
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
     else:
         raise ValueError("method %s not recognised" % type)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 400
+    n = 800
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     titles = ["PSS - P", "FSS - P", "MSS - P", "P/PSS", "P/FSS", "P/MSS"]
     for ax, data, title in zip(axes, datas, titles):
         if True:
-            m = polyfit2d(z, s, data, order=3)
+            m = polyfit2d(z, s, data, order=2)
             zz = polyval2d(xx, yy, m)
         else:
             zz = griddata((z, s), data, (xx, yy), method="nearest")
