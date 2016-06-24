@@ -149,3 +149,21 @@ class TestChain(object):
         actual = np.array(list(summary[0].values())[0])
         print(actual)
         assert actual[0] is None and actual[2] is None
+
+    def test_divide_chains(self):
+        np.random.seed(0)
+        data = np.concatenate((np.random.normal(loc=0.0, size=100000),
+                               np.random.normal(loc=1.0, size=100000)))
+        consumer = chain.ChainConsumer()
+        consumer.add_chain(data)
+        num_walkers = 2
+
+        c = consumer.divide_chain(0, 2)
+        c.configure_general(kde=True)
+        means = [0, 1.0]
+        for i in range(num_walkers):
+            stats = list(c.get_summary()[i].values())[0]
+            assert np.abs(stats[1] - means[i]) < 1e-1
+            assert np.abs(c.chains[i][:, 0].mean() - means[i]) < 1e-2
+
+
