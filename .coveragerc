@@ -12,6 +12,7 @@ omit =
     dessn/examples/*
     dessn/proofs/*
     dessn/models/*
+    dessn/investigations/*
     **/test*.py
     *__init__*
 
