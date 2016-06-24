@@ -33,7 +33,7 @@ if __name__ == "__main__":
                  'zp': zp,
                  'zpsys': zpsys})
 
-    model = sncosmo.Model(source='salt2')
+    model = sncosmo.Model(source='salt2-extended')
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': colour}
     model.set(z=z)
     lcs = sncosmo.realize_lcs(obs, model, [p])
@@ -43,12 +43,23 @@ if __name__ == "__main__":
     temp_dir = dir_name + os.sep + "output"
     surface = temp_dir + os.sep + "surfaces_simple.png"
     mu_simple = temp_dir + os.sep + "mu_simple.png"
+    mcmc_chain = temp_dir + os.sep + "mcmc_simple.npy"
     c = ChainConsumer()
-    my_model = PerfectRedshift(lcs, [z], t0)
+    my_model = PerfectRedshift(lcs, [z], t0, name="My posterior")
     sampler = EnsembleSampler(temp_dir=temp_dir, num_steps=10000)
     my_model.fit(sampler, chain_consumer=c)
     c.add_chain(np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e6)),
-                     name="Gaussian", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
+                name="Summary Stats", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
+
+    if False:
+        if not os.path.exists(mcmc_chain):
+            res2, fitted_model2 = sncosmo.mcmc_lc(lcs[0], model, ['t0', 'x0', 'x1', 'c'], nwalkers=20,
+                                                  nburn=500, nsamples=4000)
+            mcchain = res2.samples
+            np.save(mcmc_chain, mcchain)
+        else:
+            mcchain = np.load(mcmc_chain)
+        c.add_chain(mcchain, name="sncosmo mcmc", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
 
     c.configure_contour(contourf=True, contourf_alpha=0.2, sigmas=[0.0, 0.5, 1.0, 2.0, 3.0])
     c.configure_bar(shade=True)
@@ -77,5 +88,5 @@ if __name__ == "__main__":
 
     actual = apparent_interp(x1, colour, grid=False) - (0.4 * np.log10(x0 / 1e-5))
     actual += alpha * x1 - beta * colour
-    c2.plot(filename=mu_simple, figsize=(5, 3), truth=[actual], legend=False)
+    c2.plot(filename=mu_simple, figsize=(7, 4), truth=[actual], legend=True)
 

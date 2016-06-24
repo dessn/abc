@@ -58,16 +58,18 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
         res, fitted_model = sncosmo.fit_lc(lc, model, ['t0', 'x0', 'x1', 'c'],
                                            guess_amplitude=False, guess_t0=False)
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
-
+        weights = None
     elif type == "mcmc":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=500, nwalkers=20,
                                             nsamples=2000, guess_amplitude=False, guess_t0=False)
         chain = res.samples
+        weights = None
     else:
         bounds = {"t0": [980, 1020], "x0": [0.5e-5, 1.5e-5], "x1": [-10, 10], "c": [-2, 2]}
         res, fitted_model = sncosmo.nest_lc(lc, model, ['t0', 'x0', 'x1', 'c'], bounds, npoints=1000,
                                             guess_amplitude=False, guess_t0=False)
         chain = res.samples
+        weights = res.weights
 
     # fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
     # fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
@@ -75,7 +77,7 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
     parameters = [map[a] for a in res.vparam_names]
 
     chain, parameters = add_mu_to_chain(interped, chain, parameters)
-    return chain, parameters, res.parameters[1:], res.covariance
+    return chain, parameters, weights, res.parameters[1:], res.covariance
 
 
 def get_posterior(z, t0, lc, seed, temp_dir, interped):
@@ -113,10 +115,10 @@ def add_mu_to_chain(interped, chain, parameters):
     return chain, parameters + [r"$\mu$"]
 
 
-def plot_results(chain, param, chainf, paramf, t0, x0, x1, c, temp_dir, seed, interped):
+def plot_results(chain, param, chainf, paramf, w, t0, x0, x1, c, temp_dir, seed, interped):
     cc = ChainConsumer()
     cc.add_chain(chain, parameters=param, name="Posterior")
-    cc.add_chain(chainf, parameters=paramf, name="Gaussian")
+    cc.add_chain(chainf, parameters=paramf, name="Gaussian", weights=w)
     truth = {"$t_0$": t0, "$x_0$": x0, "$x_1$": x1, "$c$": c, r"$\mu$": get_mu(interped, x0, x1, c)}
     cc.plot(filename=temp_dir + "/surfaces_%d.png" % seed, truth=truth)
 
@@ -151,10 +153,11 @@ def get_result(temp_dir, seed, method="iminuit"):
             return None
 
         try:
-            chainf, parametersf, means, cov = get_gaussian_fit(z, t0, x0, x1, c, lc, seed,
+            chainf, parametersf, weights, means, cov = get_gaussian_fit(z, t0, x0, x1, c, lc, seed,
                                                                temp_dir, interp, type=method)
             if method in ["iminuit"]:
                 chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp)
+                weights = None
             else:
                 chain = chainf
                 parameters = parametersf
@@ -169,7 +172,7 @@ def get_result(temp_dir, seed, method="iminuit"):
             np.save(save_file, np.array([]))
             return None
 
-        # plot_results(chain, parameters, chainf, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
+        plot_results(chain, parameters, chainf, parametersf, weights, t0, x0, x1, c, temp_dir, seed, interp)
 
         muf = chainf[:, -1]
         mu = chain[:, -1]
@@ -180,8 +183,8 @@ def get_result(temp_dir, seed, method="iminuit"):
         chain2, _ = add_mu_to_chain(interp, chain2, parameters[:-1])
         mu2 = chain2[:, -1]
 
-        diffmu = np.mean(muf) - np.mean(mu)
-        diffmu2 = np.mean(mu2) - np.mean(mu)
+        diffmu = np.average(muf) - np.average(mu, weights=weights)
+        diffmu2 = np.average(mu2) - np.average(mu, weights=weights)
         diffstd = np.std(muf) / np.std(mu)
         diffstd2 = np.std(mu2) / np.std(mu)
         res = np.array([z, t0, x0, x1, c, ston, diffmu, diffstd, diffmu2, diffstd2])

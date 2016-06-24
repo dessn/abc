@@ -55,13 +55,13 @@ where :math:`m_B^*` is calculated using ``sncosmo``. Using this relationship, an
 the nuisance parameter :math:`M` to the other side, we can convert our multi-dimensional
 posterior surface into a single dimension, and then check for any biases in the mean and
 variance of the :math:`\mu+M` distribution. Doing this for the simple example above gives
-us the distributions shown below, which have :math:`\Delta (\mu+M) = 0.02`
-and :math:`\Delta (\sigma_{\mu+M}) = 0.004`.
+us the distributions shown below, which have :math:`\Delta (\mu+M) = 0.003`
+and :math:`\Delta (\sigma_{\mu+M}) = 0.0007`, a negligible difference for use in cosmology.
 
 
 .. figure::     ../dessn/investigations/gaussianity/output/mu_simple.png
     :align:     center
-    :width:     50%
+    :width:     70%
 
     The posterior surfaces from the previous figure transformed into distance modulus.
 
