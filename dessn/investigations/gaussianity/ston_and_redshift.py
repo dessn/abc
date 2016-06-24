@@ -27,8 +27,7 @@ def realise_light_curve(seed):
     times = np.array([[t, t + 0.05, t + 0.1, t + 0.2] for t in ts]).flatten()
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
     gains = np.ones(times.shape)
-    # skynoise = np.random.uniform(low=50, high=400) * np.ones(times.shape)
-    skynoise = np.random.uniform(low=20, high=800) * np.ones(times.shape)
+    skynoise = np.random.uniform(low=50, high=300) * np.ones(times.shape)
     zp = 30 * np.ones(times.shape)
     zpsys = ['ab'] * times.size
 
@@ -39,7 +38,7 @@ def realise_light_curve(seed):
                  'zp': zp,
                  'zpsys': zpsys})
 
-    model = sncosmo.Model(source='salt2')
+    model = sncosmo.Model(source='salt2-extended')
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
     model.set(z=z)
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
@@ -48,13 +47,12 @@ def realise_light_curve(seed):
 
 
 def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminuit"):
-    model = sncosmo.Model(source='salt2')
+    model = sncosmo.Model(source='salt2-extended')
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
     model.set(**p)
 
-    correct_model = sncosmo.Model(source='salt2')
+    correct_model = sncosmo.Model(source='salt2-extended')
     correct_model.set(**p)
-    print(type)
     if type == "iminuit":
         res, fitted_model = sncosmo.fit_lc(lc, model, ['t0', 'x0', 'x1', 'c'],
                                            guess_amplitude=False, guess_t0=False)
@@ -81,7 +79,7 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
 
 def get_posterior(z, t0, lc, seed, temp_dir, interped):
     my_model = PerfectRedshift([lc], [z], t0, name="posterior%d" % seed)
-    sampler = EnsembleSampler(temp_dir=temp_dir, num_burn=1000, num_steps=2500)
+    sampler = EnsembleSampler(temp_dir=temp_dir, num_burn=500, num_steps=1500)
     c = my_model.fit(sampler)
     chain = c.chains[-1]
     parameters = c.parameters[-1]
@@ -147,25 +145,26 @@ def get_result(temp_dir, seed, method="iminuit"):
         interp = generate_and_return()
         z, t0, x0, x1, c, ston, lc = realise_light_curve(seed)
 
-        if ston < 5:
+        if ston < 5 or ston > 10:
             np.save(save_file, np.array([]))
             return None
 
         try:
             chainf, parametersf, means, cov = get_gaussian_fit(z, t0, x0, x1, c, lc, seed,
                                                                temp_dir, interp, type=method)
-        except Exception:
-            np.save(save_file, np.array([]))
-            return None
+            if method in ["iminuit"]:
+                chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp)
+            else:
+                chain = chainf
+                parameters = parametersf
+                chainf = np.random.multivariate_normal(means, cov, size=int(1e6))
+                chainf, _ = add_mu_to_chain(interp, chainf, parameters[:-1])
 
-        if not is_fit_good(t0, x0, x1, c, means, cov):
-            np.save(save_file, np.array([]))
-            return None
+            assert is_fit_good(t0, x0, x1, c, means, cov)
+            assert not is_unconstrained(chain, parameters)
 
-        chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp)
-
-        unconstrained = is_unconstrained(chain, parameters)
-        if unconstrained:
+        except Exception as e:
+            print(e)
             np.save(save_file, np.array([]))
             return None
 
@@ -204,15 +203,12 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    get_result(temp_dir, 161)
-
-    exit()
-    n = 600
+    n = 500
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
     s = res[:, 6]
-    res = res[s > 5, :]
+    res = res[(s > 5) & (s < 10), :]
 
     seeds = res[:, 0]
     z = res[:, 1]
@@ -231,27 +227,23 @@ if __name__ == "__main__":
         m = polyfit2d(z, s, diffmu, order=3)
         zz = polyval2d(xx, yy, m)
     else:
-        zz = griddata((z, s), adiffmu, (xx, yy), method="nearest")
+        zz = griddata((z, s), diffmu, (xx, yy), method="nearest")
     # Plot
     fig, ax = plt.subplots()
 
-    h = ax.contourf(xx, yy, zz, 30, cmap='viridis')
-    ax.scatter(z, s, c=diffmu, s=30, cmap='viridis')
+    vmin = diffmu.min()
+    vmax = diffmu.max()
+    print(vmin, vmax)
+    h = ax.contourf(xx, yy, zz, 30, cmap='viridis', vmin=vmin, vmax=vmax)
+    ax.scatter(z, s, c=diffmu, s=30, cmap='viridis', vmin=vmin, vmax=vmax)
     if True:
         for i, zp, sp in zip(seeds, z, s):
             ax.text(zp, sp, "%d" % i, alpha=0.3)
 
     ax.set_ylim(5, 10)
-    # ax.set_xlim(z.min(), z.max())
+    ax.set_xlim(z.min(), z.max())
     plt.colorbar(h)
     ax.set_xlabel("$z$")
     ax.set_ylabel("$S/N$")
+    fig.savefig(os.path.dirname(__file__) + "/output/bias.png", dpi=300, bbox_inches="tight", transparent=True)
     plt.show()
-
-    #
-    # h = ax.contourf(zz, ss, np.abs(interped), 30, cmap='viridis', vmin=0.0)
-
-    # ax.set_ylim(2, 10)
-    # ax.plot(z, s, 'k.', alpha=0.3)
-    # plt.colorbar(h)
-    # plt.show()

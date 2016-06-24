@@ -94,7 +94,7 @@ class LightCurves(ParameterObserved):
 class LikelihoodPerfect(Edge):
     def __init__(self, z):
         super().__init__(["lc"], ["x0", "x1", "c", "t0"])
-        self.model = sncosmo.Model(source='salt2')
+        self.model = sncosmo.Model(source='salt2-extended')
         self.model.set(z=z[0])
 
     def get_log_likelihood(self, data):
@@ -108,7 +108,7 @@ class LikelihoodPerfect(Edge):
 class LikelihoodImperfect(Edge):
     def __init__(self):
         super().__init__(["lc"], ["x0", "x1", "c", "t0", "z"])
-        self.model = sncosmo.Model(source='salt2')
+        self.model = sncosmo.Model(source='salt2-extended')
 
     def get_log_likelihood(self, data):
         self.model.set(x0=data["x0"], x1=data["x1"], t0=data["t0"], c=data["c"], z=data["z"][0])
@@ -119,6 +119,13 @@ class LikelihoodImperfect(Edge):
 class PerfectRedshift(Model):
     def __init__(self, lightcurves, redshift, t0, name="Perfect Redshift"):
         super().__init__(name)
+        model = sncosmo.Model(source='salt2-extended')
+        model.set(z=redshift[0])
+        for i, lc in enumerate(lightcurves):
+            lc = sncosmo.photdata.standardize_data(lc)
+            lc = sncosmo.photdata.normalize_data(lc)
+            lc = sncosmo.fitting.cut_bands(lc, model)
+            lightcurves[i] = lc
         self.add(Stretch())
         self.add(Colour())
         self.add(Time(t0))
@@ -131,6 +138,13 @@ class PerfectRedshift(Model):
 class ImperfectRedshift(Model):
     def __init__(self, lightcurves, redshift, t0, name="Imperfect Redshift"):
         super().__init__(name)
+        model = sncosmo.Model(source='salt2-extended')
+        model.set(z=redshift[0])
+        for i, lc in enumerate(lightcurves):
+            lc = sncosmo.photdata.standardize_data(lc)
+            lc = sncosmo.photdata.normalize_data(lc)
+            lc = sncosmo.fitting.cut_bands(lc, model)
+            lightcurves[i] = lc
         self.add(Stretch())
         self.add(Colour())
         self.add(Time(t0))

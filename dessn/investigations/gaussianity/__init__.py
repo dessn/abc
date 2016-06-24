@@ -55,8 +55,8 @@ where :math:`m_B^*` is calculated using ``sncosmo``. Using this relationship, an
 the nuisance parameter :math:`M` to the other side, we can convert our multi-dimensional
 posterior surface into a single dimension, and then check for any biases in the mean and
 variance of the :math:`\mu+M` distribution. Doing this for the simple example above gives
-us the distributions shown below, which have :math:`\Delta (\mu+M) = 0.002`
-and :math:`\Delta (\sigma_{\mu+M}) = -0.0007`, which is a negligible change for cosmology.
+us the distributions shown below, which have :math:`\Delta (\mu+M) = 0.02`
+and :math:`\Delta (\sigma_{\mu+M}) = 0.004`.
 
 
 .. figure::     ../dessn/investigations/gaussianity/output/mu_simple.png
@@ -78,10 +78,22 @@ interest are the peak signal to noise of the light curves, the number of observa
 and when observations for a supernova begin (ie how early do we catch the supernova
 before peak) - in addition to stretch, colour and redshift.
 
-To simplify the problem, we assume consistent observations every three days.
+To simplify the problem, we assume consistent observations every five days.
 
 
+First, we generate supernova with stretch and colour set to zero, with observations
+starting well before the peak and spanning the lifetime of the supernova. We allow
+the redshift and sky flux to vary (ie redshift and signal-to-noise changes). The shift in
+the mean value for :math:`\mu+M` is shown in the figure below.
 
+
+.. figure::     ../dessn/investigations/gaussianity/output/bias.png
+    :align:     center
+    :width:     100%
+
+    The bias in :math:`\Delta \langle \mu + M \rangle` as a function of redshift
+    and signal to noise. Each sample is shown as a point, with a third order polynomial
+    fit to the surface shown as a contour.
 
 
 

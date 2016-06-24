@@ -19,8 +19,8 @@ if __name__ == "__main__":
     num_obs = 30
     ts = np.linspace(t0 - 60, t0 + 60, num_obs)
 
-    times = np.array([[t, t + 0.1, t + 0.2] for t in ts]).flatten()
-    bands = [b for t in ts for b in ['desg', 'desr', 'desi']]
+    times = np.array([[t, t + 0.1, t + 0.2, t + 0.3] for t in ts]).flatten()
+    bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
     gains = np.ones(times.shape)
     skynoise = 80 * np.ones(times.shape)
     zp = 30 * np.ones(times.shape)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     surface = temp_dir + os.sep + "surfaces_simple.png"
     mu_simple = temp_dir + os.sep + "mu_simple.png"
     c = ChainConsumer()
-    my_model = PerfectRedshift(lcs, [z])
+    my_model = PerfectRedshift(lcs, [z], t0)
     sampler = EnsembleSampler(temp_dir=temp_dir, num_steps=10000)
     my_model.fit(sampler, chain_consumer=c)
     c.add_chain(np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e6)),
