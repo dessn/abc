@@ -203,7 +203,7 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 500
+    n = 2500
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
@@ -235,8 +235,8 @@ if __name__ == "__main__":
     vmax = diffmu.max()
     print(vmin, vmax)
     h = ax.contourf(xx, yy, zz, 30, cmap='viridis', vmin=vmin, vmax=vmax)
-    ax.scatter(z, s, c=diffmu, s=30, cmap='viridis', vmin=vmin, vmax=vmax)
-    if True:
+    ax.scatter(z, s, c=diffmu, s=20, cmap='viridis', vmin=vmin, vmax=vmax)
+    if False:
         for i, zp, sp in zip(seeds, z, s):
             ax.text(zp, sp, "%d" % i, alpha=0.3)
 
