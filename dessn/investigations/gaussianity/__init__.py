@@ -87,19 +87,20 @@ the redshift and sky flux to vary (ie redshift and signal-to-noise changes). The
 the mean value for :math:`\mu+M` is shown in the figure below.
 
 
-.. figure::     ../dessn/investigations/gaussianity/output/bias.png
+.. figure::     ../dessn/investigations/gaussianity/output/bias2.png
     :align:     center
     :width:     100%
 
     The bias in :math:`\mu+M` as a function of redshift
     and signal to noise. Each sample is shown as a point, with a third order polynomial
-    fit to the surface shown as a contour. The top row represents the difference
-    between the output of ``minuit`` summary statistics
-    when compared to posterior surface generated using ``emcee``, and the bottom row
-    shows the comparison between ``emcee`` summary statistics and the full ``emcee`` posterior.
-    The left hand column shows the change in :math:`\Delta(\mu + M)`, and the right
+    fit to the surface shown as a contour. The left hand column shows the change
+    in :math:`\Delta(\mu + M)`, and the right
     hand column shows the *percentage* change in standard deviation for the marginalised
-    distributions of :math:`\mu+M`.
+    distributions of :math:`\mu+M`. There are three rows, to reflect the three different
+    way summary statistics are obtained: **FSS:** From an ``iminuit`` fit using ``sncosmo``.
+    **MSS:** From an ``emcee`` fit using ``sncosmo``. **PSS:** From an ``emcee`` fit not
+    using the ``mcmc_lc`` method in ``sncosmo``.
+
 
 With reference to the above figure, we can see that the summary statistics provide
 accurate statistics when the mean and covariance are determined from the ``emcee`` distribution,

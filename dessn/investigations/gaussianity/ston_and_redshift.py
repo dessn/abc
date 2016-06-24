@@ -58,26 +58,20 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
         res, fitted_model = sncosmo.fit_lc(lc, model, ['t0', 'x0', 'x1', 'c'],
                                            guess_amplitude=False, guess_t0=False)
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
-        weights = None
     elif type == "mcmc":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=500, nwalkers=20,
                                             nsamples=2000, guess_amplitude=False, guess_t0=False)
-        chain = res.samples
-        weights = None
+        chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
     else:
-        bounds = {"t0": [980, 1020], "x0": [0.5e-5, 1.5e-5], "x1": [-10, 10], "c": [-2, 2]}
-        res, fitted_model = sncosmo.nest_lc(lc, model, ['t0', 'x0', 'x1', 'c'], bounds, npoints=1000,
-                                            guess_amplitude=False, guess_t0=False)
-        chain = res.samples
-        weights = res.weights
+        raise ValueError("method %s not recognised" % type)
 
-    # fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
-    # fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
+    fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
+    fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     map = {"x0": "$x_0$", "x1": "$x_1$", "c": "$c$", "t0": "$t_0$"}
     parameters = [map[a] for a in res.vparam_names]
 
     chain, parameters = add_mu_to_chain(interped, chain, parameters)
-    return chain, parameters, weights, res.parameters[1:], res.covariance
+    return chain, parameters, res.parameters[1:], res.covariance
 
 
 def get_posterior(z, t0, lc, seed, temp_dir, interped):
@@ -115,10 +109,11 @@ def add_mu_to_chain(interped, chain, parameters):
     return chain, parameters + [r"$\mu$"]
 
 
-def plot_results(chain, param, chainf, paramf, w, t0, x0, x1, c, temp_dir, seed, interped):
+def plot_results(chain, param, chainf, chainf2, paramf, t0, x0, x1, c, temp_dir, seed, interped):
     cc = ChainConsumer()
     cc.add_chain(chain, parameters=param, name="Posterior")
-    cc.add_chain(chainf, parameters=paramf, name="Gaussian", weights=w)
+    cc.add_chain(chainf, parameters=paramf, name="Minuit")
+    cc.add_chain(chainf2, parameters=paramf, name="Emcee")
     truth = {"$t_0$": t0, "$x_0$": x0, "$x_1$": x1, "$c$": c, r"$\mu$": get_mu(interped, x0, x1, c)}
     cc.plot(filename=temp_dir + "/surfaces_%d.png" % seed, truth=truth)
 
@@ -134,7 +129,7 @@ def is_unconstrained(chain, param):
     return False
 
 
-def get_result(temp_dir, seed, method="iminuit"):
+def get_result(temp_dir, seed):
     save_file = temp_dir + "/final%d.npy" % seed
 
     if os.path.exists(save_file):
@@ -142,8 +137,7 @@ def get_result(temp_dir, seed, method="iminuit"):
         if res.size == 0:
             return None
         else:
-            print(seed, res[-2], res[-1])
-            return np.concatenate(([seed], res))
+            return res
     else:
         interp = generate_and_return()
         z, t0, x0, x1, c, ston, lc = realise_light_curve(seed)
@@ -153,16 +147,17 @@ def get_result(temp_dir, seed, method="iminuit"):
             return None
 
         try:
-            chainf, parametersf, weights, means, cov = get_gaussian_fit(z, t0, x0, x1, c, lc, seed,
-                                                               temp_dir, interp, type=method)
-            if method in ["iminuit"]:
-                chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp)
-                weights = None
+            chainf, parametersf, means, cov = get_gaussian_fit(z, t0, x0, x1, c, lc, seed,
+                                                               temp_dir, interp, type="iminuit")
+
+            mcmc_file = temp_dir + "/mcmc%d.npy" % seed
+            if os.path.exists(mcmc_file):
+                chainf2 = np.load(mcmc_file)
             else:
-                chain = chainf
-                parameters = parametersf
-                chainf = np.random.multivariate_normal(means, cov, size=int(1e6))
-                chainf, _ = add_mu_to_chain(interp, chainf, parameters[:-1])
+                chainf2, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="mcmc")
+                np.save(mcmc_file, chainf2)
+
+            chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp)
 
             assert is_fit_good(t0, x0, x1, c, means, cov)
             assert not is_unconstrained(chain, parameters)
@@ -172,9 +167,10 @@ def get_result(temp_dir, seed, method="iminuit"):
             np.save(save_file, np.array([]))
             return None
 
-        plot_results(chain, parameters, chainf, parametersf, weights, t0, x0, x1, c, temp_dir, seed, interp)
+        plot_results(chain, parameters, chainf, chainf2, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
 
         muf = chainf[:, -1]
+        muf2 = chainf2[:, -1]
         mu = chain[:, -1]
 
         mean2 = np.mean(chain[:, :-1], axis=0)
@@ -183,13 +179,11 @@ def get_result(temp_dir, seed, method="iminuit"):
         chain2, _ = add_mu_to_chain(interp, chain2, parameters[:-1])
         mu2 = chain2[:, -1]
 
-        diffmu = np.average(muf) - np.average(mu, weights=weights)
-        diffmu2 = np.average(mu2) - np.average(mu, weights=weights)
-        diffstd = np.std(muf) / np.std(mu)
-        diffstd2 = np.std(mu2) / np.std(mu)
-        res = np.array([z, t0, x0, x1, c, ston, diffmu, diffstd, diffmu2, diffstd2])
+        mus = [np.mean(mu), np.mean(mu2), np.mean(muf), np.mean(muf2)]
+        stds = [np.std(mu), np.std(mu2), np.std(muf), np.std(muf2)]
+        res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds)
         np.save(save_file, res)
-        return np.concatenate(([seed], res))
+        return res
 
 
 def polyfit2d(x, y, z, order=3):
@@ -216,8 +210,8 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 2500
-    res = Parallel(n_jobs=1, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
+    n = 400
+    res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
     s = res[:, 6]
@@ -226,13 +220,18 @@ if __name__ == "__main__":
     seeds = res[:, 0]
     z = res[:, 1]
     s = res[:, 6]
-    diffmu2 = res[:, -2]
-    diffstd2 = res[:, -1]
-    diffmu = res[:, -4]
-    diffstd = res[:, -3]
 
-    diffstd = 100 * (diffstd - 1)
-    diffstd2 = 100 * (diffstd2 - 1)
+    diff_mu_ps = -res[:, 7] + res[:, 8]
+    diff_mu_fs = -res[:, 7] + res[:, 9]
+    diff_mu_ms = -res[:, 7] + res[:, 10]
+
+    diff_std_ps = res[:, 11] / res[:, 12]
+    diff_std_fs = res[:, 11] / res[:, 13]
+    diff_std_ms = res[:, 11] / res[:, 14]
+
+    diff_std_ps = 100 * (diff_std_ps - 1)
+    diff_std_fs = 100 * (diff_std_fs - 1)
+    diff_std_ms = 100 * (diff_std_ms - 1)
 
     import matplotlib.pyplot as plt
 
@@ -241,12 +240,14 @@ if __name__ == "__main__":
 
     xx, yy = np.meshgrid(zs, ston, indexing='ij')
 
-    fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
+    fig, axes = plt.subplots(ncols=2, nrows=3, figsize=(12, 14))
 
-    axes = axes.flatten()
-    for ax, data in zip(axes, [diffmu, diffstd, diffmu2, diffstd2]):
+    axes = axes.T.flatten()
+    datas = [diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_std_ps, diff_std_fs, diff_std_ms]
+    titles = ["PSS - P", "FSS - P", "MSS - P", "P/PSS", "P/FSS", "P/MSS"]
+    for ax, data, title in zip(axes, datas, titles):
         if True:
-            m = polyfit2d(z, s, data, order=4)
+            m = polyfit2d(z, s, data, order=3)
             zz = polyval2d(xx, yy, m)
         else:
             zz = griddata((z, s), data, (xx, yy), method="nearest")
@@ -269,6 +270,7 @@ if __name__ == "__main__":
                 ax.text(zp, sp, "%d" % i, alpha=0.3)
         ax.set_xlabel("$z$")
         ax.set_ylabel("$S/N$")
+        ax.set_title(title)
     plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias2.png", dpi=300, bbox_inches="tight", transparent=True)
     plt.show()
