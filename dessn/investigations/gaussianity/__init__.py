@@ -105,7 +105,9 @@ the mean value for :math:`\mu+M` is shown in the figure below.
 With reference to the above figure, we can see that the summary statistics provide
 accurate statistics when the mean and covariance are determined from the ``emcee`` distribution,
 implying low skewness of the posterior surface. However, the difference between the
-``minuit`` fits and ``emcee`` fits gives rise to a difference which is not negligible.
+``minuit`` fits and both ``emcee`` fits gives rise to a difference which is not negligible.
+
+
 
 
 

@@ -19,8 +19,16 @@ def realise_light_curve(seed):
     x0 = 1e-5
     x1 = 0
     c = 0
-    z = np.random.uniform(0.1, 0.9)
-
+    e = False and np.random.random() > 0.8
+    if e:
+        u = np.random.random() > 0.3
+        if u:
+            z = 0.1
+        else:
+            z = 0.9
+    else:
+        z = np.random.uniform(0.1, 0.9)
+    sn = np.random.uniform(low=50, high=300)
     num_obs = 20
     deltat = -35
     ts = np.arange(t0 + deltat, (t0 + deltat) + 5 * num_obs, 5)
@@ -28,7 +36,7 @@ def realise_light_curve(seed):
     times = np.array([[t, t + 0.05, t + 0.1, t + 0.2] for t in ts]).flatten()
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
     gains = np.ones(times.shape)
-    skynoise = np.random.uniform(low=50, high=300) * np.ones(times.shape)
+    skynoise = sn * np.ones(times.shape)
     zp = 30 * np.ones(times.shape)
     zpsys = ['ab'] * times.size
 
@@ -210,7 +218,7 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 800
+    n = 1000
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
