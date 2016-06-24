@@ -4,6 +4,7 @@ import itertools
 from joblib import Parallel, delayed
 import sncosmo
 from astropy.table import Table
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.interpolate import griddata
 
 from dessn.chain.chain import ChainConsumer
@@ -224,26 +225,45 @@ if __name__ == "__main__":
 
     xx, yy = np.meshgrid(zs, ston, indexing='ij')
     if True:
-        m = polyfit2d(z, s, diffmu, order=3)
+        m = polyfit2d(z, s, diffmu, order=4)
+        m2 = polyfit2d(z, s, diffstd, order=4)
         zz = polyval2d(xx, yy, m)
+        zz2 = polyval2d(xx, yy, m2)
     else:
         zz = griddata((z, s), diffmu, (xx, yy), method="nearest")
+        zz2 = griddata((z, s), diffstd, (xx, yy), method="nearest")
     # Plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(ncols=2, figsize=(12, 5))
 
-    vmin = diffmu.min()
-    vmax = diffmu.max()
+    vmin = -0.15  # zz.min()
+    vmax = 0.15  # zz.max()
     print(vmin, vmax)
-    h = ax.contourf(xx, yy, zz, 30, cmap='viridis', vmin=vmin, vmax=vmax)
-    ax.scatter(z, s, c=diffmu, s=20, cmap='viridis', vmin=vmin, vmax=vmax)
+    h = ax[0].contourf(xx, yy, zz, 30, cmap='bwr', vmin=vmin, vmax=vmax)
+    ax[0].scatter(z, s, c=diffmu, s=20, cmap='bwr', vmin=vmin, vmax=vmax)
     if False:
         for i, zp, sp in zip(seeds, z, s):
-            ax.text(zp, sp, "%d" % i, alpha=0.3)
+            ax[0].text(zp, sp, "%d" % i, alpha=0.3)
+            ax[1].text(zp, sp, "%d" % i, alpha=0.3)
 
-    ax.set_ylim(5, 10)
-    ax.set_xlim(z.min(), z.max())
-    plt.colorbar(h)
-    ax.set_xlabel("$z$")
-    ax.set_ylabel("$S/N$")
+    ax[0].set_ylim(5, 10)
+    ax[0].set_xlim(z.min(), z.max())
+    div1 = make_axes_locatable(ax[0])
+    cax1 = div1.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(h, cax=cax1)
+
+    vmin = -0.015  # zz2.min()
+    vmax = 0.015  # zz2.max()
+    h = ax[1].contourf(xx, yy, zz2, 30, cmap='bwr', vmin=vmin, vmax=vmax)
+    ax[1].scatter(z, s, c=diffstd, s=20, cmap='bwr', vmin=vmin, vmax=vmax)
+    ax[1].set_ylim(5, 10)
+    ax[1].set_xlim(z.min(), z.max())
+    div1 = make_axes_locatable(ax[1])
+    cax1 = div1.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(h, cax=cax1)
+
+    ax[0].set_xlabel("$z$")
+    ax[0].set_ylabel("$S/N$")
+    ax[1].set_xlabel("$z$")
+    ax[1].set_ylabel("$S/N$")
     fig.savefig(os.path.dirname(__file__) + "/output/bias.png", dpi=300, bbox_inches="tight", transparent=True)
     plt.show()
