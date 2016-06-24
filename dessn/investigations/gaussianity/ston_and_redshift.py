@@ -69,8 +69,8 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
                                             guess_amplitude=False, guess_t0=False)
         chain = res.samples
 
-    fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
-    fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
+    # fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
+    # fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     map = {"x0": "$x_0$", "x1": "$x_1$", "c": "$c$", "t0": "$t_0$"}
     parameters = [map[a] for a in res.vparam_names]
 
@@ -169,13 +169,22 @@ def get_result(temp_dir, seed, method="iminuit"):
             np.save(save_file, np.array([]))
             return None
 
-        plot_results(chain, parameters, chainf, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
+        # plot_results(chain, parameters, chainf, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
 
         muf = chainf[:, -1]
         mu = chain[:, -1]
+
+        mean2 = np.mean(chain[:, :-1], axis=0)
+        cov2 = np.cov(chain[:, :-1].T)
+        chain2 = np.random.multivariate_normal(mean2, cov2, size=int(1e6))
+        chain2, _ = add_mu_to_chain(interp, chain2, parameters[:-1])
+        mu2 = chain2[:, -1]
+
         diffmu = np.mean(muf) - np.mean(mu)
-        diffstd = np.std(muf) - np.std(mu)
-        res = np.array([z, t0, x0, x1, c, ston, diffmu, diffstd])
+        diffmu2 = np.mean(mu2) - np.mean(mu)
+        diffstd = np.std(muf) / np.std(mu)
+        diffstd2 = np.std(mu2) / np.std(mu)
+        res = np.array([z, t0, x0, x1, c, ston, diffmu, diffstd, diffmu2, diffstd2])
         np.save(save_file, res)
         return np.concatenate(([seed], res))
 
@@ -205,7 +214,7 @@ if __name__ == "__main__":
         os.makedirs(temp_dir)
 
     n = 2500
-    res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
+    res = Parallel(n_jobs=1, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
     s = res[:, 6]
@@ -214,9 +223,13 @@ if __name__ == "__main__":
     seeds = res[:, 0]
     z = res[:, 1]
     s = res[:, 6]
-    diffmu = res[:, -2]
-    adiffmu = np.abs(diffmu)
-    diffstd = res[:, -1]
+    diffmu2 = res[:, -2]
+    diffstd2 = res[:, -1]
+    diffmu = res[:, -4]
+    diffstd = res[:, -3]
+
+    diffstd = 100 * (diffstd - 1)
+    diffstd2 = 100 * (diffstd2 - 1)
 
     import matplotlib.pyplot as plt
 
@@ -224,46 +237,35 @@ if __name__ == "__main__":
     ston = np.linspace(s.min(), s.max(), 50)
 
     xx, yy = np.meshgrid(zs, ston, indexing='ij')
-    if True:
-        m = polyfit2d(z, s, diffmu, order=4)
-        m2 = polyfit2d(z, s, diffstd, order=4)
-        zz = polyval2d(xx, yy, m)
-        zz2 = polyval2d(xx, yy, m2)
-    else:
-        zz = griddata((z, s), diffmu, (xx, yy), method="nearest")
-        zz2 = griddata((z, s), diffstd, (xx, yy), method="nearest")
-    # Plot
-    fig, ax = plt.subplots(ncols=2, figsize=(12, 5))
 
-    vmin = -0.15  # zz.min()
-    vmax = 0.15  # zz.max()
-    print(vmin, vmax)
-    h = ax[0].contourf(xx, yy, zz, 30, cmap='bwr', vmin=vmin, vmax=vmax)
-    ax[0].scatter(z, s, c=diffmu, s=20, cmap='bwr', vmin=vmin, vmax=vmax)
-    if False:
-        for i, zp, sp in zip(seeds, z, s):
-            ax[0].text(zp, sp, "%d" % i, alpha=0.3)
-            ax[1].text(zp, sp, "%d" % i, alpha=0.3)
+    fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(12, 10))
 
-    ax[0].set_ylim(5, 10)
-    ax[0].set_xlim(z.min(), z.max())
-    div1 = make_axes_locatable(ax[0])
-    cax1 = div1.append_axes("right", size="5%", pad=0.05)
-    plt.colorbar(h, cax=cax1)
+    axes = axes.flatten()
+    for ax, data in zip(axes, [diffmu, diffstd, diffmu2, diffstd2]):
+        if True:
+            m = polyfit2d(z, s, data, order=4)
+            zz = polyval2d(xx, yy, m)
+        else:
+            zz = griddata((z, s), data, (xx, yy), method="nearest")
 
-    vmin = -0.015  # zz2.min()
-    vmax = 0.015  # zz2.max()
-    h = ax[1].contourf(xx, yy, zz2, 30, cmap='bwr', vmin=vmin, vmax=vmax)
-    ax[1].scatter(z, s, c=diffstd, s=20, cmap='bwr', vmin=vmin, vmax=vmax)
-    ax[1].set_ylim(5, 10)
-    ax[1].set_xlim(z.min(), z.max())
-    div1 = make_axes_locatable(ax[1])
-    cax1 = div1.append_axes("right", size="5%", pad=0.05)
-    plt.colorbar(h, cax=cax1)
-
-    ax[0].set_xlabel("$z$")
-    ax[0].set_ylabel("$S/N$")
-    ax[1].set_xlabel("$z$")
-    ax[1].set_ylabel("$S/N$")
+        if np.min(zz) > 0.0:
+            vmax = np.max(np.abs(zz - 1)) + 1
+            vmin = 1 - (vmax - 1)
+        else:
+            vmax = np.max(np.abs(zz))
+            vmin = -vmax
+        h = ax.contourf(xx, yy, zz, 30, cmap='bwr', vmin=vmin, vmax=vmax)
+        ax.scatter(z, s, c=data, s=20, cmap='bwr', vmin=vmin, vmax=vmax)
+        ax.set_ylim(5, 10)
+        ax.set_xlim(z.min(), z.max())
+        div1 = make_axes_locatable(ax)
+        cax1 = div1.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(h, cax=cax1)
+        if False:
+            for i, zp, sp in zip(seeds, z, s):
+                ax.text(zp, sp, "%d" % i, alpha=0.3)
+        ax.set_xlabel("$z$")
+        ax.set_ylabel("$S/N$")
+    plt.tight_layout()
     fig.savefig(os.path.dirname(__file__) + "/output/bias.png", dpi=300, bbox_inches="tight", transparent=True)
     plt.show()

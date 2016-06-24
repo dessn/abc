@@ -91,11 +91,20 @@ the mean value for :math:`\mu+M` is shown in the figure below.
     :align:     center
     :width:     100%
 
-    The bias in :math:`\Delta \langle \mu + M \rangle` as a function of redshift
+    The bias in :math:`\mu+M` as a function of redshift
     and signal to noise. Each sample is shown as a point, with a third order polynomial
-    fit to the surface shown as a contour.
+    fit to the surface shown as a contour. The top row represents the difference
+    between the output of ``minuit`` summary statistics
+    when compared to posterior surface generated using ``emcee``, and the bottom row
+    shows the comparison between ``emcee`` summary statistics and the full ``emcee`` posterior.
+    The left hand column shows the change in :math:`\Delta(\mu + M)`, and the right
+    hand column shows the *percentage* change in standard deviation for the marginalised
+    distributions of :math:`\mu+M`.
 
-
+With reference to the above figure, we can see that the summary statistics provide
+accurate statistics when the mean and covariance are determined from the ``emcee`` distribution,
+implying low skewness of the posterior surface. However, the difference between the
+``minuit`` fits and ``emcee`` fits gives rise to a difference which is not negligible.
 
 
 
