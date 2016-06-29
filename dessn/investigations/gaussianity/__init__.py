@@ -108,8 +108,67 @@ implying low skewness of the posterior surface. However, the difference between 
 ``minuit`` fits and both ``emcee`` fits gives rise to a difference which is not negligible.
 
 
+DES Specific Survey Conditions
+------------------------------
+
+Shallow Field
+~~~~~~~~~~~~~
+
+To investigate the DES specific impact of Salt 2 summary statistics gaussianity,
+we implement DES-like simulations. Specifically in this section, we emulate shallow
+field observations for DES in the *griz* bands for typical seeing conditions. We
+fit for a range of supernova over a redshift distribution from 0.1 to 0.9, and investigate
+the derived parameter :math:`\mu + M` with regards to the shift in mean, change in
+variance, and pull. We also add in ``nestle`` as a forth fitting methodology to help
+discriminate between ``minuit`` and ``emcee``.
+
+ .. figure::     ../dessn/investigations/gaussianity/output/bias_dessky.png
+    :align:     center
+    :width:     100%
+
+    The bias in :math:`\mu+M` as a function of redshift. Samples are binned and the mean and
+    dispersion of the samples is shown in the plot. The left hand column shows the change
+    in :math:`\Delta(\mu + M)`, the middle column shows the pull, and the right
+    hand column shows the *percentage* change in standard deviation for the marginalised
+    distributions of :math:`\mu+M`. Compared are a full posterior (derived from ``emcee``) against
+    summary statistics generated from the posterior, and from the three methods supplied by
+    ``sncosmo``, which respectively use ``iminuit``, ``emcee`` and ``nestle``.
+
+From these results, it can be seen that above a redshift range of approximately
+:math:`z=0.5`, using ``iminuit`` via the ``fit_lc`` method produces biased summary
+statistics. Below this redshift, and for all other fitting methodologies, expressing the
+posterior via gaussian approximation loses negligible information about the posterior surface
+and introduces no detectable bias.
 
 
+
+Deep Field
+~~~~~~~~~~
+
+We also investigate the presence of any bias when observing in the deep field. From the
+`Generalisation`_ section, we expect to discover less bias due to the increased
+signal-to-noise over the shallow fields. This is the case, as shown below, such that
+the bias in final output is lessened, however it is still present in redshifts
+above :math:`z=0.5`.
+
+
+ .. figure::     ../dessn/investigations/gaussianity/output/bias_dessky_deep.png
+    :align:     center
+    :width:     100%
+
+    The same plot as the previous, except this time looking in the deep field. Notice
+    the reduced bias in the ``iminuit`` fits (shown in green).
+
+
+Summary
+-------
+
+From investigating the biases imparted onto :math:`\mu +M` from the assumption of posterior
+gaussianity, we find the assumption of gaussianity to hold for ``emcee`` or ``nestle`` based
+fits across all redshifts, and the assumption to only hold for :math:`z<0.5` objects when
+using ``iminuit``. From this, we recommend utilising the ``emcee` or ``nestle`` fitting
+methods. When using either of those methods, we find no evidence of detectable bias
+in the output distance modulus for supernova events.
 
 
 .. [1] Betoule, M., Kessler, R., Guy, J. et al. (2014), "Improved cosmological constraints from

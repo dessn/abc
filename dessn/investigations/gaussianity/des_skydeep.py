@@ -25,9 +25,7 @@ def realise_light_curve(temp_dir, seed):
     ts = np.arange(t0 + deltat, (t0 + deltat) + 5 * num_obs, 5)
 
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
-    # zps = np.array([b for t in ts for b in [33.80, 34.54, 34.94, 35.52]])  # Deep field OLD
-    # zps = np.array([b for t in ts for b in [34.24, 34.85, 34.94, 35.42]])  # Deep field
-    zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])  # Shallow field
+    zps = np.array([b for t in ts for b in [34.24, 34.85, 34.94, 35.42]])  # Deep field
     mins = np.array([b for t in ts for b in [22.1, 21.1, 20.1, 18.7]])
     maxs = np.array([b for t in ts for b in [19.4, 19.7, 19.4, 18.2]])
     seeing = np.array([b for t in ts for b in [1.06, 1.00, 0.96, 0.93]])
@@ -248,11 +246,11 @@ def polyval2d(x, y, m):
 
 if __name__ == "__main__":
 
-    temp_dir = os.path.dirname(__file__) + "/output/dessky"
+    temp_dir = os.path.dirname(__file__) + "/output/dessky_deep"
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 230
+    n = 200
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
@@ -305,7 +303,7 @@ if __name__ == "__main__":
             std = np.sqrt(std / n - mean * mean)
             ec = 0.5 * (edges[:-1] + edges[1:])
             ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt='o', yerr=std, label=l)
-    axes[0].legend(loc=2)
+    # axes[0].legend(loc=2)
     plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky_deep.png", dpi=300, bbox_inches="tight", transparent=True)
     # plt.show()
