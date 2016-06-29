@@ -34,9 +34,11 @@ def realise_light_curve(temp_dir, seed):
 
     full = 0.5 + 0.5 * np.sin((times - newmoon) * 2 * np.pi / 29.5)
     perm = np.random.uniform(-0.1, 0.1, full.shape)
-    sigma_psf = np.random.uniform(4, 6, full.shape)
+    seeing = np.random.uniform(4, 6, full.shape)
+    sigma_psf = seeing / 2.36
 
-    sky_noise = np.array([np.sqrt(10.0**(((maxx - minn) * f + minn + p - zp) / -2.5)) * 4 * np.pi * s * 0.263**2
+    sky_noise = np.array([np.sqrt(10.0**(((maxx - minn) * f + minn + p - zp) / -2.5) * 0.263**2) *
+                          4 * np.pi * s
                  for f,p,s,minn,maxx,zp in zip(full, perm, sigma_psf, mins, maxs, zps)])
 
     zpsys = ['ab'] * times.size
@@ -63,6 +65,7 @@ def realise_light_curve(temp_dir, seed):
     fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     ston = (lc["flux"] / lc["fluxerr"]).max()
     print(z, t0, x0, x1, c, ston)
+    exit()
     return z, t0, x0, x1, c, ston, lc
 
 
@@ -297,5 +300,5 @@ if __name__ == "__main__":
         ax.set_ylabel("$S/N$")
         ax.set_title(title)
     plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias2.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky.png", dpi=300, bbox_inches="tight", transparent=True)
     plt.show()
