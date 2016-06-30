@@ -255,8 +255,8 @@ if __name__ == "__main__":
 
     model_un = EfficiencyModelUncorrected(np.random.random(10), np.random.random(10))
     pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    # fig = model_un.get_pgm(pgm_file)
-    # plot_weights(dir_name)
+    fig = model_un.get_pgm(pgm_file)
+    plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
     n = 2
