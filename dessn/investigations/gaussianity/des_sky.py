@@ -1,11 +1,12 @@
+import shutil
+
 import numpy as np
 import os
 import itertools
 from joblib import Parallel, delayed
 import sncosmo
 from astropy.table import Table
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from scipy.interpolate import griddata
+from scipy.stats import skew, skewtest
 
 from dessn.chain.chain import ChainConsumer
 from dessn.investigations.gaussianity.apparent_mags import generate_and_return
@@ -25,9 +26,7 @@ def realise_light_curve(temp_dir, seed):
     ts = np.arange(t0 + deltat, (t0 + deltat) + 5 * num_obs, 5)
 
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
-    # zps = np.array([b for t in ts for b in [33.80, 34.54, 34.94, 35.52]])  # Deep field OLD
-    # zps = np.array([b for t in ts for b in [34.24, 34.85, 34.94, 35.42]])  # Deep field
-    zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])  # Shallow field
+    zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])
     mins = np.array([b for t in ts for b in [22.1, 21.1, 20.1, 18.7]])
     maxs = np.array([b for t in ts for b in [19.4, 19.7, 19.4, 18.2]])
     seeing = np.array([b for t in ts for b in [1.06, 1.00, 0.96, 0.93]])
@@ -41,10 +40,6 @@ def realise_light_curve(temp_dir, seed):
     sky_noise = np.array([np.sqrt(10.0**(((maxx - minn) * f + minn + p - zp) / -2.5) * 0.263**2) *
                           np.sqrt(4 * np.pi) * s
                           for f, p, s, minn, maxx, zp in zip(full, perm, sigma_psf, mins, maxs, zps)])
-
-    # sky_noise = np.array([np.sqrt(10.0**(((maxx - minn) * f + minn + p - zp) / -2.5)) *
-    #                       np.pi * ((2.04 * se) / 2) ** 2
-    #                       for f,p,minn,maxx,zp,se in zip(full, perm, mins, maxs, zps, seeing)])
 
     zpsys = ['ab'] * times.size
     gains = np.ones(times.shape)
@@ -105,14 +100,19 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
     return chain, parameters, res.parameters[1:], res.covariance
 
 
-def get_posterior(z, t0, lc, seed, temp_dir, interped):
+def get_posterior(z, t0, lc, seed, temp_dir, interped, special):
     my_model = PerfectRedshift([lc], [z], t0, name="posterior%d" % seed)
-    sampler = EnsembleSampler(temp_dir=temp_dir, num_burn=500, num_steps=1500)
+    num_steps = 1500
+    if special:
+        num_steps *= 10
+    sampler = EnsembleSampler(temp_dir=temp_dir, num_burn=500, num_steps=num_steps)
     c = my_model.fit(sampler)
     chain = c.chains[-1]
     parameters = c.parameters[-1]
 
     chain, parameters = add_mu_to_chain(interped, chain, parameters)
+    for i in range(chain.shape[1]):
+        print(parameters[i], skew(chain[:, i]), skewtest(chain[:, i]))
     return chain, parameters
 
 
@@ -161,7 +161,7 @@ def is_unconstrained(chain, param):
     return False
 
 
-def get_result(temp_dir, seed):
+def get_result(temp_dir, seed, special=False):
     save_file = temp_dir + "/final%d.npy" % seed
 
     if os.path.exists(save_file):
@@ -195,7 +195,7 @@ def get_result(temp_dir, seed):
             else:
                 chainf3, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="nestle")
                 np.save(nestle_file, chainf3)
-            chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp)
+            chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp, special)
 
             assert is_fit_good(t0, x0, x1, c, means, cov)
             assert not is_unconstrained(chain, parameters)
@@ -256,7 +256,6 @@ if __name__ == "__main__":
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
-    print(res)
     s = res[:, 6]
     res = res[(s > 5), :]
 
@@ -280,6 +279,24 @@ if __name__ == "__main__":
     diff_std_fs2 = 100 * (diff_std_fs - 1)
     diff_std_ms2 = 100 * (diff_std_ms - 1)
     diff_std_ns2 = 100 * (diff_std_ns - 1)
+
+    # Create bias_surface.png and get skewness
+    im = diff_mu_fs.argmax()
+    index = int(res[im, 0])
+    print(index, diff_mu_fs[im])
+    os.remove(temp_dir + os.sep + "final%d.npy" % index)
+    get_result(temp_dir, index, special=True)
+    shutil.copyfile(temp_dir + os.sep + "surfaces_%d.png" % index,
+                    os.path.dirname(__file__) + "/output/bias_surface.png")
+
+    # Min bias
+    im = np.abs(diff_mu_fs).argmin()
+    index = int(res[im, 0])
+    print(index, diff_mu_fs[im])
+    os.remove(temp_dir + os.sep + "final%d.npy" % index)
+    get_result(temp_dir, index, special=True)
+
+    exit()
 
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(ncols=3, nrows=1, figsize=(11, 3.5))

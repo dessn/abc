@@ -58,6 +58,10 @@ variance of the :math:`\mu+M` distribution. Doing this for the simple example ab
 us the distributions shown below, which have :math:`\Delta (\mu+M) = 0.003`
 and :math:`\Delta (\sigma_{\mu+M}) = 0.0007`, a negligible difference for use in cosmology.
 
+To rephrase the above for more clarity, what we are doing is comparing the distribution
+of :math:`\mu +M` from a full posterior surface against the distribution obtained from
+using summary statistics (assuming gaussianity).
+
 
 .. figure::     ../dessn/investigations/gaussianity/output/mu_simple.png
     :align:     center
@@ -131,7 +135,7 @@ discriminate between ``minuit`` and ``emcee``.
     in :math:`\Delta(\mu + M)`, the middle column shows the pull, and the right
     hand column shows the *percentage* change in standard deviation for the marginalised
     distributions of :math:`\mu+M`. Compared are a full posterior (derived from ``emcee``) against
-    summary statistics generated from the posterior, and from the three methods supplied by
+    summary statistics generated from the same posterior, and from the three methods supplied by
     ``sncosmo``, which respectively use ``iminuit``, ``emcee`` and ``nestle``.
 
 From these results, it can be seen that above a redshift range of approximately
@@ -141,7 +145,27 @@ posterior via gaussian approximation loses negligible information about the post
 and introduces no detectable bias.
 
 We find identical results when generating non-canonical supernova (with :math:`x_1,\ c` not
-set to zero).
+set to zero). Furthermore, we take the realised light curve of maximal bias and present it here.
+
+
+ .. figure::     ../dessn/investigations/gaussianity/output/bias_surface.png
+    :align:     center
+    :width:     100%
+
+    The full surface for, including derived parameter :math:`\mu + M` for the generated light
+    curve of maximal bias. Compared are a full posterior (derived from ``emcee``) against
+    summary statistics generated from the same posterior, and from the three methods supplied by
+    ``sncosmo``, which respectively use ``iminuit``, ``emcee`` and ``nestle``. As a difference
+    between maximum likelihood and mean value is expected for skewed distributions, we utilise
+    the method ``scipy.stats.skewtest`` to report the p-values for each marginalised parameter
+    to determine which show skewness. In the above plot, all parameters bar :math:`t_0` show
+    skewness with :math:`p < 10^{-15}`, with actual skewness (from ``scipy.stats.skew``) of
+    :math:`x_1: 0.56,\ c:0.52,\ x_0:-0.04,\ t:-0.0001,\ \mu:-0.43`. In comparison to this,
+    the light curve fit with the least deviation shows skewness values of
+    only :math:`x_1: 0.02,\ c:0.03,\ x_0:-0.02,\ t:0.01,\ \mu:-0.01`. This explains why
+    the minimiser utilised by ``iminuit`` - which finds the point of maximum likelihood,
+    can give biased results - the point of maximum likelihood and mean are significantly
+    different.
 
 
 
@@ -169,7 +193,7 @@ Summary
 From investigating the biases imparted onto :math:`\mu +M` from the assumption of posterior
 gaussianity, we find the assumption of gaussianity to hold for ``emcee`` or ``nestle`` based
 fits across all redshifts, and the assumption to only hold for :math:`z<0.5` objects when
-using ``iminuit``. From this, we recommend utilising the ``emcee` or ``nestle`` fitting
+using ``iminuit``. From this, we recommend utilising the ``emcee`` or ``nestle`` fitting
 methods. When using either of those methods, we find no evidence of detectable bias
 in the output distance modulus for supernova events.
 
