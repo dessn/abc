@@ -140,6 +140,9 @@ statistics. Below this redshift, and for all other fitting methodologies, expres
 posterior via gaussian approximation loses negligible information about the posterior surface
 and introduces no detectable bias.
 
+We find identical results when generating non-canonical supernova (with :math:`x_1,\ c` not
+set to zero).
+
 
 
 Deep Field

@@ -61,8 +61,8 @@ def realise_light_curve(temp_dir, seed):
     mabs = np.random.normal(-19.3, 0.3)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab')
     x0 = model.get('x0')
-    x1 = 0
-    c = 0
+    x1 = np.random.normal()
+    c = np.random.normal(scale=0.1)
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
 
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
@@ -248,11 +248,11 @@ def polyval2d(x, y, m):
 
 if __name__ == "__main__":
 
-    temp_dir = os.path.dirname(__file__) + "/output/dessky"
+    temp_dir = os.path.dirname(__file__) + "/output/dessky_mixed"
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 465
+    n = 40
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
@@ -307,5 +307,5 @@ if __name__ == "__main__":
             ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt='o', yerr=std, label=l)
     axes[0].legend(loc=2)
     plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky_mixed.png", dpi=300, bbox_inches="tight", transparent=True)
     # plt.show()
