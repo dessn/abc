@@ -2,16 +2,12 @@ from dessn.framework.model import Model
 from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
     ParameterTransformation
-from dessn.framework.samplers.batch import BatchMetroploisHastings
+from dessn.framework.samplers.batch import BatchMetropolisHastings
 from dessn.chain.chain import ChainConsumer
-from dessn.utility.viewer import Viewer
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import logging
-from scipy.special import erf
-from scipy.integrate import simps
-from scipy.interpolate import RegularGridInterpolator, interp1d
 
 
 class ObservedCounts(ParameterObserved):
@@ -433,7 +429,7 @@ if __name__ == "__main__":
 
         kwargs = {"num_steps": 3000, "num_burn": 320000, "save_interval": 60,
                   "plot_covariance": True}
-        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
+        sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(cs, zs, ts, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)

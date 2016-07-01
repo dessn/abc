@@ -53,15 +53,32 @@ def generate_ia_light_curve(z, mabs, x1, c, **kwargs):
     return lc
 
 
-def get_summary_stats(z, lc, method="emcee"):
+def get_summary_stats(z, lc, method="emcee", convert_x0_to_mb=True):
     model = sncosmo.Model(source='salt2-extended')
     model.set(z=z)
     if method == "emcee":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'])
     elif method == "iminuit":
         res, fitted_model = sncosmo.fit_lc(lc, model, ['t0', 'x0', 'x1', 'c'])
-    parameters = res.parameters[1:]
-    cov = res.covariance
+    else:
+        raise ValueError("Method %s not recognised" % method)
+    parameters = res.parameters[2:]
+
+    if convert_x0_to_mb:
+        determined_parameters = {k: v for k, v in zip(res.param_names, res.parameters)}
+        model.set(**determined_parameters)
+        mb = fitted_model.source.peakmag("bessellb", "ab")
+        parameters = np.array([mb, parameters[1], parameters[2]])
+        x0, x1, c = 1, 2, 3
+        sigma_mb2 = 5 * np.sqrt(res.covariance[x0, x0]) / (2 * x0 * np.log(10))
+        sigma_mbx1 = -5 * res.covariance[x0, x1] / (2 * x0 * np.log(10))
+        sigma_mbc = -5 * res.covariance[x0, c] / (2 * x0 * np.log(10))
+        cov = res.covariance
+        cov = np.array([[sigma_mb2, sigma_mbx1, sigma_mbc],
+                        [sigma_mbx1, cov[x1, x1], cov[x1, c]],
+                        [sigma_mbc, cov[x1, c], cov[c, c]]])
+    else:
+        cov = res.covariance[1:, :][:, 1:]
     return parameters, cov
 
 

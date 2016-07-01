@@ -1,7 +1,7 @@
 from ...framework.model import Model
 from ...framework.parameter import ParameterUnderlying, ParameterObserved
 from ...framework.edge import Edge
-from ...framework.samplers.batch import BatchMetroploisHastings
+from ...framework.samplers.batch import BatchMetropolisHastings
 import numpy as np
 import pytest
 
@@ -40,7 +40,7 @@ def test_fit():
     m.add_edge(TheEdge())
     np.random.seed(0)
     kwargs = {"num_burn": 1000, "num_steps": 5000}
-    sampler = BatchMetroploisHastings(num_walkers=4, num_cores=1, kwargs=kwargs)
+    sampler = BatchMetropolisHastings(num_walkers=4, num_cores=1, kwargs=kwargs)
     consumer = m.fit(sampler)
     consumer.configure_general(bins=1.2)
     summary = np.array(consumer.get_summary()[0]["mean"])

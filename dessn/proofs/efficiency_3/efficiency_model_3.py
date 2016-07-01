@@ -1,7 +1,7 @@
 from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
-from dessn.framework.samplers.batch import BatchMetroploisHastings
+from dessn.framework.samplers.batch import BatchMetropolisHastings
 from dessn.chain.chain import ChainConsumer
 from dessn.utility.viewer import Viewer
 import matplotlib.pyplot as plt
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         theta_bias = [mean, std] + am.tolist()
         kwargs = {"num_steps": 70000, "num_burn": 20000, "save_interval": 300,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
-        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
+        sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(uo, oe, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)

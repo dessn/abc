@@ -6,7 +6,7 @@ import logging
 from joblib import Parallel, delayed
 
 
-class BatchMetroploisHastings(GenericSampler):
+class BatchMetropolisHastings(GenericSampler):
     """ An ensemble of self tuning Metropolis Hastings Sampler
 
     Parameters

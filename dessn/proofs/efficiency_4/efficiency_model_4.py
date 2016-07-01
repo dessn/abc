@@ -2,7 +2,7 @@ from dessn.framework.model import Model
 from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
     ParameterTransformation
-from dessn.framework.samplers.batch import BatchMetroploisHastings
+from dessn.framework.samplers.batch import BatchMetropolisHastings
 from dessn.chain.chain import ChainConsumer
 from dessn.utility.viewer import Viewer
 import matplotlib.pyplot as plt
@@ -269,7 +269,7 @@ if __name__ == "__main__":
 
         kwargs = {"num_steps": 8000, "num_burn": 4000, "save_interval": 60,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
-        sampler = BatchMetroploisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
+        sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(fall, zall, name="Good%d" % i)
         model_good.fit(sampler, chain_consumer=c)
