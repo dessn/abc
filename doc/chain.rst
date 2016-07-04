@@ -28,6 +28,14 @@ For examples and API usage, please follow the links.
    chain_examples
    chain_api
 
+ChainConsumer requires the following dependencies::
+
+   matplotlib
+   numpy
+   scipy
+   statsmodel
+   pytest
+
 For convenience, images of the examples are provided here, with click
 through links on each image.
 
