@@ -37,6 +37,7 @@ class Model(object):
         self._latent_nodes = []
         self._transformation_nodes = []
         self._underlying_nodes = []
+        self._underlying_names = []
         self._discrete_nodes = []
         self._discrete_params = []
         self._in = {}
@@ -85,6 +86,7 @@ class Model(object):
             self._transformation_nodes.append(node)
         elif isinstance(node, ParameterUnderlying):
             self._underlying_nodes.append(node)
+            self._underlying_names.append(node.name)
 
         self._finalised = False
 
@@ -320,13 +322,17 @@ class Model(object):
                 if type(discrete) == tuple:
                     n = 0
                     for key in t:
-                        value = t[key]
-                        if type(value) == list:
-                            n = len(value)
-                            t[key] = value * len(discrete)
-                        elif type(value) == np.ndarray:
-                            n = len(value)
-                            t[key] = np.tile(value, len(discrete))
+                        if key not in self._underlying_names:
+                            value = t[key]
+                            if type(value) == list:
+                                n = len(value)
+                                t[key] = value * len(discrete)
+                            elif type(value) == np.ndarray:
+                                n = len(value)
+                                shape = list(value.shape)
+                                nn = len(discrete)
+                                shape[0] *= nn
+                                t[key] = np.tile(value, nn).reshape(tuple(shape))
                     assert n > 0, "No observational data found to effect!"
                     t[first_name] = np.repeat(discrete, self.n)
                     combine = np.tile(np.arange(self.n), len(discrete))
