@@ -265,6 +265,32 @@ class Calibration(ParameterUnderlying):
         return chi2
 
 
+class Rate(ParameterUnderlying):
+    def __init__(self):
+        super().__init__("rate", "$r$", group="Rate")
+
+    def get_suggestion_sigma(self, data):
+        return 0.3
+
+    def get_suggestion(self, data):
+        return 0.6
+
+    def get_log_prior(self, data):
+        if data["rate"] < 0 or data["rate"] > 1:
+            return -np.inf
+        return 1
+
+
+class ToRate(Edge):
+    def __init__(self):
+        super().__init__("type", "rate")
+
+    def get_log_likelihood(self, data):
+        ias = data["type"] == "Ia"
+        r = data["rate"]
+        return np.log(r * ias + (1 - r) * (1 - ias))
+
+
 class ToType(Edge):
     def __init__(self):
         super().__init__("type_o", "type")
@@ -293,7 +319,8 @@ class ToFlux(EdgeTransformation):
     def get_transformation(self, data):
         lum = data["lum"]
         z = data["z_o"][:, None]
-        return {"f": lum / (z * z)}
+        flux = lum / (z * z)
+        return {"f": flux}
 
 
 class ToLuminosity(EdgeTransformation):
@@ -306,9 +333,10 @@ class ToLuminosity(EdgeTransformation):
         diff = data["t"][:, None] - data["t_o"]
         vals1 = np.exp(-(diff * diff) / (2 * s * s))
         vals2 = np.exp(-np.abs(diff) / (2 * s * s))
-        mask = data["type"] == "Ia"
-        vals = mask * vals1 + (1 - mask) * vals2
-        return {"lum": l0 * vals}
+        mask = 1.0 * (data["type"] == "Ia")
+        vals = mask[:, None] * vals1 + (1 - mask)[:, None] * vals2
+        lums = l0 * vals
+        return {"lum": lums}
 
 
 class ToObservedCounts(Edge):
@@ -376,12 +404,13 @@ class EfficiencyModelUncorrected(Model):
         # Underlying parameters
         self.add(LuminosityMeanIa())
         self.add(LuminositySigmaIa())
-        self.add(StretchMeanIa())
-        self.add(StretchSigmaIa())
         self.add(LuminosityMeanII())
         self.add(LuminositySigmaII())
+        self.add(StretchMeanIa())
+        self.add(StretchSigmaIa())
         self.add(StretchMeanII())
         self.add(StretchSigmaII())
+        self.add(Rate())
         self.add(Calibration(observed_zero_points, observed_calibration))
 
         # Transformed Edges
@@ -390,6 +419,7 @@ class EfficiencyModelUncorrected(Model):
         self.add(ToFlux())
 
         # Edges
+        self.add(ToRate())
         self.add(ToType())
         self.add(ToLuminosityDistribution())
         self.add(ToStretchDistribution())
@@ -398,14 +428,22 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-def get_weights(mul, sigmal, mus, sigmas, z0, z1, threshold, n=2e4):
+def get_weights(mul, mul2, sigmal, sigmal2, mus, mus2, sigmas, sigmas2, rate, z0, z1, threshold, n=3e4):
     n = int(n)
-    ls = np.random.normal(loc=mul, scale=sigmal, size=n)
-    ss = np.random.normal(loc=mus, scale=sigmas, size=n)
-    zs = np.random.uniform(1.1, high=1.5, size=n)
+    type = np.random.random(size=n) < rate
+    ls1 = np.random.normal(loc=mul, scale=sigmal, size=n)
+    ls2 = np.random.normal(loc=mul2, scale=sigmal2, size=n)
+    ss1 = np.random.normal(loc=mus, scale=sigmas, size=n)
+    ss2 = np.random.normal(loc=mus2, scale=sigmas2, size=n)
+    ls = type * ls1 + (1 - type) * ls2
+    ss = type * ss1 + (1 - type) * ss2
+    zs = np.random.uniform(0.6, high=1.5, size=n)
 
     ts = np.arange(-30, 30, 1)
-    interior = -(ts * ts)[:, None] / (2 * ss * ss)[None, :]
+    top1 = -(ts * ts)
+    top2 = -(ts * ts)**0.5
+    top = type * top1 + (1 - type) * top2
+    interior = top[:, None] / (2 * ss * ss)[None, :]
     fluxes = (ls / (zs * zs))[None, :] * np.exp(interior)
 
     masks = []
@@ -423,7 +461,7 @@ def get_weights(mul, sigmal, mus, sigmas, z0, z1, threshold, n=2e4):
     return mean
 
 
-def get_data(seed=5, n=30):
+def get_data(seed=5, n=50):
     np.random.seed(seed=seed)
 
     # Experimental Configuration
@@ -437,7 +475,8 @@ def get_data(seed=5, n=30):
     factor = np.power(10, zeros / 2.5)
 
     # Distributions
-    rate = 0.7
+    rate = 0.6
+    screwup = 0.3
     lmu = 500
     lmu2 = 300
     lsigma2 = 30
@@ -464,7 +503,7 @@ def get_data(seed=5, n=30):
             types.append("Ia")
             l0 = np.random.normal(loc=lmu, scale=lsigma)
             s = np.random.normal(loc=smu, scale=ssigma)
-            z = np.random.uniform(0.1, 1.5)
+            z = np.random.uniform(0.6, 1.5)
             lums = l0 * np.exp(-(t * t) / (2 * s * s))
         else:
             types.append("II")
@@ -480,7 +519,6 @@ def get_data(seed=5, n=30):
         mask_point = c_o > threshold
         mask_band = mask_point.sum(axis=1) >= 2
         mask_all = mask_band.sum() > 0
-
         zs.append(z)
         ts.append(t + t0)
         cs.append(c_o)
@@ -488,6 +526,13 @@ def get_data(seed=5, n=30):
         ls.append(l0)
         ss.append(s)
         t0s.append(t0)
+    for i, type in enumerate(types):
+        if np.random.random() < screwup:
+            if type == "Ia":
+                types[i] = "II"
+            elif type == "II":
+                types[i] = "Ia"
+
     zs = np.array(zs)
     ts = np.array(ts)
     cs = np.array(cs)
@@ -497,11 +542,11 @@ def get_data(seed=5, n=30):
     mask = np.array(mask)
     print(mask.sum(), n, mask.sum()/n, ls.mean(), ls[mask].mean(), np.std(ls), np.std(ls[mask]))
 
-    return lmu, lsigma, lmu2, lsigma2, smu, ssigma, smu2, ssigma2, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types
+    return lmu, lsigma, lmu2, lsigma2, smu, ssigma, smu2, ssigma2, rate, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types
 
 
 def plot_data(dir_name):
-    lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(n=2000)
+    lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, rate, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(n=2000)
 
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
@@ -524,38 +569,35 @@ if __name__ == "__main__":
     walk_file = os.path.abspath(dir_name + "/output/walk_%s.png")
 
     # plot_data(dir_name)
-    # lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(n=1000)
+    # lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, rate, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(n=1000)
     # model = EfficiencyModelUncorrected(cs, zs, ts, types, calibration, zeros, ls, ss, t0s, )
     # pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
-    # fig = model.get_pgm(pgm_file, seed=15)
+    # fig = model.get_pgm(pgm_file, seed=5)
     c = ChainConsumer()
     n = 1
     w = 4
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
     for i in range(n):
-        lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(seed=i)
-        theta = [lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2] + zeros.tolist()
+        lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, rate, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(seed=i)
+        theta = [lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, rate] + zeros.tolist() + ls.tolist() + t0s.tolist() + ss.tolist()
         theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
-
-        # kwargs = {"num_steps": 3000, "num_burn": 360000, "save_interval": 60, "plot_covariance": True, "covariance_adjust": 20000}
-        # sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=1)
-        sampler = EnsembleSampler(temp_dir=t % i, num_steps=1000, num_burn=900, save_interval=60)
+        kwargs = {"num_steps": 5000, "num_burn": 250000, "save_interval": 60, "plot_covariance": True, "covariance_adjust": 10000}
+        sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(cs, zs, ts, types, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
-        model_good.fit(sampler, chain_consumer=c)
 
-        # model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], types[mask], calibration,
+        model_good.fit(sampler, chain_consumer=c)
+        # mtypes = [t for t, m in zip(types, mask) if m]
+        # model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], mtypes, calibration,
         #                                       zeros, ls[mask], ss[mask], t0s[mask], name="Uncorrected%d" % i)
         # model_un.fit(sampler, chain_consumer=c)
         #
         # biased_chain = c.chains[-1]
-        # model_cor.fit(sampler, chain_consumer=c)
-
         # filename = dir_name + "/output/weights.txt"
         # if not os.path.exists(filename):
         #     weights = []
         #     for i, row in enumerate(biased_chain):
-        #         weights.append(get_weights(row[0], row[1], row[2], row[3], row[4], row[5], threshold))
+        #         weights.append(get_weights(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], threshold))
         #         print(100.0 * i / biased_chain.shape[0])
         #     weights = np.array(weights)
         #     np.savetxt(filename, weights)
@@ -567,7 +609,7 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
-    c.plot(filename=plot_file, truth=theta, figsize=(7, 7), legend=False, parameters=6)
+    c.plot(filename=plot_file, truth=theta, figsize=(7, 7), legend=False, parameters=10)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \

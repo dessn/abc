@@ -329,10 +329,7 @@ class Model(object):
                                 t[key] = value * len(discrete)
                             elif type(value) == np.ndarray:
                                 n = len(value)
-                                shape = list(value.shape)
-                                nn = len(discrete)
-                                shape[0] *= nn
-                                t[key] = np.tile(value, nn).reshape(tuple(shape))
+                                t[key] = np.tile(value.T, len(discrete)).T
                     assert n > 0, "No observational data found to effect!"
                     t[first_name] = np.repeat(discrete, self.n)
                     combine = np.tile(np.arange(self.n), len(discrete))
@@ -501,6 +498,7 @@ class Model(object):
         if np.any(np.isnan(result)):
             self.logger.error("Got NaN probability from %s: %s" % (edge, theta_dict))
             raise ValueError("NaN")
+        # print(edge, result)
         return result
 
     def get_pgm(self, filename=None, seed=0, num=1):  # pragma: no cover

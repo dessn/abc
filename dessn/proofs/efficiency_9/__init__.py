@@ -11,8 +11,8 @@ We now introduce another functional form (our type II analogue) with luminosity
     L = L_0 \exp\left[ - \frac{|t-t_0|}{2s_0^2} \right].
 
 We utilise different distributions for the peak luminosity and stretch. In addition, we
-also introduce an observed type. The observed type is determined to be correct 70% of the time,
-such that
+also introduce an observed type, which we implement with a flat prior. The observed type is
+determined to be correct 70% of the time, such that
 
 .. math::
     P(T_o|T) = \begin{cases}0.7 & \text{ if } T_o = T \\ 0.3 & \text{otherwise}\end{cases}
@@ -33,5 +33,14 @@ Example data that might be observed is shown below.
     distinct luminosity populations, and how the dimmer type II analogues suffer a greater
     amount of selection bias.
 
+Computing the weights to correct the biased posterior surface into an unbiased surface
+is done via Monte Carlo integration, following the previous example. This time, we also
+include integration over type.
 
+
+
+
+.. figure::     ../dessn/proofs/efficiency_9/output/surfaces.png
+    :width:     100%
+    :align:     center
 """
