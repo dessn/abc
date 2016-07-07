@@ -609,7 +609,7 @@ if __name__ == "__main__":
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
     c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
-    c.plot(filename=plot_file, truth=theta, figsize=(7, 7), legend=False, parameters=10)
+    c.plot(filename=plot_file, truth=theta, figsize=(10, 10), legend=False, parameters=10)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
         # c.divide_chain(i, w).configure_general(rainbow=True) \
