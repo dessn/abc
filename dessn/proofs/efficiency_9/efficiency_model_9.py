@@ -442,9 +442,12 @@ def get_weights(mul, mul2, sigmal, sigmal2, mus, mus2, sigmas, sigmas2, rate, z0
     ts = np.arange(-30, 30, 1)
     top1 = -(ts * ts)
     top2 = -(ts * ts)**0.5
-    top = type * top1 + (1 - type) * top2
-    interior = top[:, None] / (2 * ss * ss)[None, :]
-    fluxes = (ls / (zs * zs))[None, :] * np.exp(interior)
+    interior1 = top1[:, None] / (2 * ss * ss)[None, :]
+    interior2 = top2[:, None] / (2 * ss * ss)[None, :]
+    fluxes1 = (ls / (zs * zs))[None, :] * np.exp(interior1)
+    fluxes2 = (ls / (zs * zs))[None, :] * np.exp(interior2)
+
+    fluxes = type * fluxes1 + (1 - type) * fluxes2
 
     masks = []
     for z in [z0, z1]:
@@ -587,24 +590,25 @@ if __name__ == "__main__":
         model_good = EfficiencyModelUncorrected(cs, zs, ts, types, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
 
         model_good.fit(sampler, chain_consumer=c)
-        # mtypes = [t for t, m in zip(types, mask) if m]
-        # model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], mtypes, calibration,
-        #                                       zeros, ls[mask], ss[mask], t0s[mask], name="Uncorrected%d" % i)
-        # model_un.fit(sampler, chain_consumer=c)
-        #
-        # biased_chain = c.chains[-1]
-        # filename = dir_name + "/output/weights.txt"
-        # if not os.path.exists(filename):
-        #     weights = []
-        #     for i, row in enumerate(biased_chain):
-        #         weights.append(get_weights(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], threshold))
-        #         print(100.0 * i / biased_chain.shape[0])
-        #     weights = np.array(weights)
-        #     np.savetxt(filename, weights)
-        # else:
-        #     weights = np.loadtxt(filename)
-        # weights = (1 / np.power(weights, mask.sum()))
-        # c.add_chain(biased_chain, name="Importance Sampled", weights=weights)
+        mtypes = [t for t, m in zip(types, mask) if m]
+        model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], mtypes, calibration,
+                                              zeros, ls[mask], ss[mask], t0s[mask], name="Uncorrected%d" % i)
+        model_un.fit(sampler, chain_consumer=c)
+
+        biased_chain = c.chains[-1]
+        filename = dir_name + "/output/weights.txt"
+        if not os.path.exists(filename):
+            weights = []
+            for i, row in enumerate(biased_chain):
+                weights.append(get_weights(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                                           row[7], row[8], row[9], row[10], threshold))
+                print(100.0 * i / biased_chain.shape[0])
+            weights = np.array(weights)
+            np.savetxt(filename, weights)
+        else:
+            weights = np.loadtxt(filename)
+        weights = (1 / np.power(weights, mask.sum()))
+        c.add_chain(biased_chain, name="Importance Sampled", weights=weights)
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
