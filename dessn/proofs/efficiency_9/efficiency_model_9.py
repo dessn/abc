@@ -1,3 +1,4 @@
+from joblib import Parallel, delayed
 from dessn.framework.model import Model
 from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
@@ -428,7 +429,7 @@ class EfficiencyModelUncorrected(Model):
         self.finalise()
 
 
-def get_weights(mul, mul2, sigmal, sigmal2, mus, mus2, sigmas, sigmas2, rate, z0, z1, threshold, n=3e4):
+def get_weights(mul, sigmal, mul2, sigmal2, mus, sigmas, mus2, sigmas2, rate, z0, z1, threshold, n=1e4):
     n = int(n)
     type = np.random.random(size=n) < rate
     ls1 = np.random.normal(loc=mul, scale=sigmal, size=n)
@@ -563,6 +564,10 @@ def plot_data(dir_name):
     ax.legend(loc=3, fontsize=12)
     fig.savefig(os.path.abspath(dir_name + "/output/data.png"), bbox_inces="tight", dpi=300)
 
+def get_weight_from_row(row, threshold):
+    return get_weights(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                row[7], row[8], row[9], row[10], threshold)
+
 if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG)
@@ -598,11 +603,7 @@ if __name__ == "__main__":
         biased_chain = c.chains[-1]
         filename = dir_name + "/output/weights.txt"
         if not os.path.exists(filename):
-            weights = []
-            for i, row in enumerate(biased_chain):
-                weights.append(get_weights(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
-                                           row[7], row[8], row[9], row[10], threshold))
-                print(100.0 * i / biased_chain.shape[0])
+            weights = Parallel(n_jobs=4, verbose=100, batch_size=100)(delayed(get_weight_from_row)(row, threshold) for row in biased_chain)
             weights = np.array(weights)
             np.savetxt(filename, weights)
         else:

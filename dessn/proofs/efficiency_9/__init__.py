@@ -43,4 +43,12 @@ include integration over type.
 .. figure::     ../dessn/proofs/efficiency_9/output/surfaces.png
     :width:     100%
     :align:     center
+
+    The normal "good", uncorrected, and corrected surfaces in green, red and blue
+    respectively. Odd results are given for the rate parameter, as the data size
+    has been kept small (and now has to describe two populations). A much higher
+    number of samples is needed to produce high quality surfaces, however the
+    status of these surfaces as examples does not warrant burning that many CPU-hours.
+
+
 """
