@@ -26,11 +26,7 @@ class ObservedRedshift(ParameterObserved):
 
 class LatentFlux(ParameterLatent):
     def __init__(self, n):
-        super().__init__("f", "$f$")
-        self.n = n
-
-    def get_num(self):
-        return self.n
+        super().__init__("f", "$f$", num_param=n)
 
     def get_suggestion_requirements(self):
         return ["f_o"]
