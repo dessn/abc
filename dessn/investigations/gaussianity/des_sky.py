@@ -8,7 +8,7 @@ import sncosmo
 from astropy.table import Table
 from scipy.stats import skew, skewtest
 
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 from dessn.investigations.gaussianity.apparent_mags import generate_and_return
 from dessn.investigations.gaussianity.model import PerfectRedshift
 from dessn.framework.samplers.ensemble import EnsembleSampler
@@ -104,7 +104,7 @@ def get_posterior(z, t0, lc, seed, temp_dir, interped, special):
     my_model = PerfectRedshift([lc], [z], t0, name="posterior%d" % seed)
     num_steps = 1500
     if special:
-        num_steps *= 10
+        num_steps *= 2
     sampler = EnsembleSampler(temp_dir=temp_dir, num_burn=500, num_steps=num_steps)
     c = my_model.fit(sampler)
     chain = c.chains[-1]
@@ -208,6 +208,7 @@ def get_result(temp_dir, seed, special=False):
         try:
             plot_results(chain, parameters, chainf, chainf2, chainf3, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
         except Exception as e:
+            print(e)
             pass
 
         muf = chainf[:, -1]
@@ -223,7 +224,7 @@ def get_result(temp_dir, seed, special=False):
 
         mus = [np.mean(mu), np.mean(mu2), np.mean(muf), np.mean(muf2), np.mean(muf3)]
         stds = [np.std(mu), np.std(mu2), np.std(muf), np.std(muf2), np.std(muf3)]
-        res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds)
+        res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds + [skew(mu)])
         np.save(save_file, res)
         return res
 
@@ -252,7 +253,7 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 465
+    n = 330
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
@@ -263,6 +264,7 @@ if __name__ == "__main__":
     z = res[:, 1]
     s = res[:, 6] / 100
 
+    skews = res[:, -1]
     diff_mu_ps = -res[:, 7] + res[:, 8]
     diff_mu_fs = -res[:, 7] + res[:, 9]
     diff_mu_ms = -res[:, 7] + res[:, 10]
@@ -281,25 +283,27 @@ if __name__ == "__main__":
     diff_std_ns2 = 100 * (diff_std_ns - 1)
 
     # Create bias_surface.png and get skewness
-    im = diff_mu_fs.argmax()
-    index = int(res[im, 0])
-    print(index, diff_mu_fs[im])
-    os.remove(temp_dir + os.sep + "final%d.npy" % index)
-    get_result(temp_dir, index, special=True)
-    shutil.copyfile(temp_dir + os.sep + "surfaces_%d.png" % index,
-                    os.path.dirname(__file__) + "/output/bias_surface.png")
+    if True:
+        im = diff_mu_fs.argmax()
+        index = int(res[im, 0])
+        print(index, diff_mu_fs[im])
+        os.remove(temp_dir + os.sep + "final%d.npy" % index)
+        print("Getting special result for index %d" % index)
+        get_result(temp_dir, index, special=True)
+        shutil.copyfile(temp_dir + os.sep + "surfaces_%d.png" % index,
+                        os.path.dirname(__file__) + "/output/bias_surface.png")
 
-    # Min bias
-    im = np.abs(diff_mu_fs).argmin()
-    index = int(res[im, 0])
-    print(index, diff_mu_fs[im])
-    os.remove(temp_dir + os.sep + "final%d.npy" % index)
-    get_result(temp_dir, index, special=True)
+        # Min bias
+        im = np.abs(diff_mu_fs).argmin()
+        index = int(res[im, 0])
+        print(index, diff_mu_fs[im])
+        os.remove(temp_dir + os.sep + "final%d.npy" % index)
+        print("Getting special result for index %d" % index)
+        get_result(temp_dir, index, special=True)
 
-    exit()
-
+    print("Creating plots")
     import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(ncols=3, nrows=1, figsize=(11, 3.5))
+    fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(8, 7))
 
     axes = axes.T.flatten()
     datas = [[diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_mu_ns],
@@ -312,17 +316,28 @@ if __name__ == "__main__":
     axes[2].set_ylabel(r"Percent Ratio $\Delta \sigma_{\mu + M}$", fontsize=14)
     zs = np.linspace(z.min(), z.max(), 11)
 
+    n, _ = np.histogram(z, bins=zs)
     for ax, data, label in zip(axes, datas, labels):
         ax.set_xlabel("$z$", fontsize=14)
         for i, (d, l) in enumerate(zip(data, label)):
-            n, _ = np.histogram(z, bins=zs)
             mean, edges = np.histogram(z, bins=zs, weights=d)
             std, _ = np.histogram(z, bins=zs, weights=d*d)
             mean /= n
             std = np.sqrt(std / n - mean * mean)
             ec = 0.5 * (edges[:-1] + edges[1:])
             ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt='o', yerr=std, label=l)
+
     axes[0].legend(loc=2)
+    print("Creating skewness plot")
+
+    skewhist, edges = np.histogram(z, bins=zs, weights=skews)
+    std, _ = np.histogram(z, bins=zs, weights=skews * skews)
+    skewhist /= n
+    std = np.sqrt(std / n - skewhist * skewhist)
+    ec = 0.5 * (edges[:-1] + edges[1:])
+    axes[-1].errorbar(ec, skewhist, fmt='o', yerr=std, label="Skewness")
+    axes[-1].legend(loc=3)
+    axes[-1].set_xlabel("$z$")
     plt.tight_layout()
     fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky.png", dpi=300, bbox_inches="tight", transparent=True)
     # plt.show()
