@@ -104,7 +104,7 @@ def get_posterior(z, t0, lc, seed, temp_dir, interped, special):
     my_model = PerfectRedshift([lc], [z], t0, name="posterior%d" % seed)
     num_steps = 1500
     if special:
-        num_steps *= 2
+        num_steps *= 10
     sampler = EnsembleSampler(temp_dir=temp_dir, num_burn=500, num_steps=num_steps)
     c = my_model.fit(sampler)
     chain = c.chains[-1]
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     diff_std_ns2 = 100 * (diff_std_ns - 1)
 
     # Create bias_surface.png and get skewness
-    if True:
+    if False:
         im = diff_mu_fs.argmax()
         index = int(res[im, 0])
         print(index, diff_mu_fs[im])
@@ -297,9 +297,9 @@ if __name__ == "__main__":
         im = np.abs(diff_mu_fs).argmin()
         index = int(res[im, 0])
         print(index, diff_mu_fs[im])
-        os.remove(temp_dir + os.sep + "final%d.npy" % index)
+        # os.remove(temp_dir + os.sep + "final%d.npy" % index)
         print("Getting special result for index %d" % index)
-        get_result(temp_dir, index, special=True)
+        get_result(temp_dir, index)
 
     print("Creating plots")
     import matplotlib.pyplot as plt
