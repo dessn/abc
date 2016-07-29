@@ -648,7 +648,7 @@ class Model(object):
 
     def _get_consumer(self, results, chain_consumer=None, include_latent=False):
         if chain_consumer is None:
-            from dessn.chain.chain import ChainConsumer
+            from chainconsumer import ChainConsumer
             chain_consumer = ChainConsumer()
         n = len(self._theta_labels) if include_latent else self._num_actual
         chain_consumer.add_chain(results["chain"],
