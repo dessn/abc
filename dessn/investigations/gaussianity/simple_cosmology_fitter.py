@@ -75,11 +75,13 @@ class Likelihood(Edge):
     def __init__(self):
         self.H0 = 68
         super().__init__(["z", "mu", "mue"], ["omega_m", "w", "M"])
+        # super().__init__(["z", "mu", "mue"], ["omega_m", "w"])
 
     def get_log_likelihood(self, data):
         cosmology = FlatwCDM(H0=self.H0, Om0=data["omega_m"], w0=data["w"])
         distmod = cosmology.distmod(data["z"]).value
         diff = (distmod - data["mu"] + data["M"]) / data["mue"]
+        # diff = (distmod - data["mu"]) / data["mue"]
         return -0.5 * (diff * diff)
 
 

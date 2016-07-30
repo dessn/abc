@@ -25,7 +25,7 @@ if __name__ == "__main__":
         os.makedirs(temp_dir2)
     logging.basicConfig(level=logging.DEBUG)
 
-    n = 450
+    n = 330
     res = Parallel(n_jobs=4, max_nbytes="20M", batch_size=5)(delayed(get_result)(
         temp_dir, i) for i in range(n))
     res = np.array([r for r in res if r is not None])
@@ -33,24 +33,29 @@ if __name__ == "__main__":
     res = res[(s > 8), :]  # Cut low signal to noise
 
     seeds = res[:, 0]
-    z = res[:, 1]
+    zs = res[:, 1]
     s = res[:, 6] / 100
     skews = res[:, -1]
     mu_minuit = res[:, 9]
     mu_mcmc = res[:, 10]
     std_minuit = res[:, 14]
     std_mcmc = res[:, 15]
+    # zs = np.random.uniform(0.05, 0.9, size=n)
+    # cosmology = FlatwCDM(H0=68.0, Om0=0.3, w0=-1)
+    # mu_mcmc = cosmology.distmod(zs).value
+    # std_mcmc = np.ones(n) * 0.01
+    # mu_mcmc += np.random.normal(scale=0.01, size=n)
 
     import matplotlib.pyplot as plt
-    plt.scatter(z, mu_mcmc)
+    plt.errorbar(zs, mu_mcmc, yerr=std_mcmc, fmt='o')
     plt.show()
     exit()
 
-    fitter_mcmc = SimpleCosmologyFitter("mcmc fit", z, mu_mcmc, std_mcmc)
-    fitter_minuit = SimpleCosmologyFitter("minuit fit", z, mu_minuit, std_minuit)
+    fitter_mcmc = SimpleCosmologyFitter("mcmc fit", zs, mu_mcmc, std_mcmc)
+    # fitter_minuit = SimpleCosmologyFitter("minuit fit", zs, mu_minuit, std_minuit)
 
     sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60,
-                              num_steps=400, num_burn=0)
+                              num_steps=5000, num_burn=1000)
 
     c = fitter_mcmc.fit(sampler=sampler)
     # c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
