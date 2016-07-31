@@ -204,9 +204,9 @@ of 4. The output surfaces for this are shown below, and we can see a difference
 in both the recovered value for :math:`\Omega_m` and :math:`w`. However, the
 difference in recovered values is not significant in this example, where we find
 for ``minuit`` summary
-statistics :math:`\Omega_m = 0.415^{+0.026}_{-0.040},\ w= -1.45^{+0.19}_{-0.14}`
+statistics :math:`\Omega_m = 0.411^{+0.028}_{-0.038},\ w= -1.42^{+0.16}_{-0.17}`
 and for the ``emcee`` summary statistics we
-find :math:`\Omega_m = 0.417^{+0.027}_{-0.038},\ w=-1.44^{+0.16}_{-0.18}`.
+find :math:`\Omega_m = 0.416^{+0.029}_{-0.035},\ w=-1.45^{+0.16}_{-0.18}`.
 
 
  .. figure::     ../dessn/investigations/gaussianity/output/comparison5.png

@@ -52,7 +52,7 @@ if __name__ == "__main__":
         fitter_minuit = SimpleCosmologyFitter("minuit fit %d" % cut, zs, mu_minuit, std_minuit)
 
         sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60,
-                                  num_steps=10000, num_burn=2000)
+                                  num_steps=80000, num_burn=2000)
         from chainconsumer import ChainConsumer
         c = ChainConsumer()
         c = fitter_mcmc.fit(sampler=sampler, chain_consumer=c)
