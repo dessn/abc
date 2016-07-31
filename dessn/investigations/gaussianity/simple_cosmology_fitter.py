@@ -32,7 +32,7 @@ class M(ParameterUnderlying):
 
     def get_log_prior(self, data):
         om = data["M"]
-        if om < -25 or om > 25:
+        if om < -25 or om > -15:
             return -np.inf
         return 1
 
@@ -49,7 +49,7 @@ class OmegaM(ParameterUnderlying):
 
     def get_log_prior(self, data):
         om = data["omega_m"]
-        if om < 0.05 or om > 0.5:
+        if om < 0.05 or om > 0.8:
             return -np.inf
         return 1
 
@@ -66,7 +66,7 @@ class W(ParameterUnderlying):
 
     def get_log_prior(self, data):
         om = data["w"]
-        if om < -2 or om > 0:
+        if om < -4 or om > 0:
             return -np.inf
         return 1
 
@@ -80,7 +80,8 @@ class Likelihood(Edge):
     def get_log_likelihood(self, data):
         cosmology = FlatwCDM(H0=self.H0, Om0=data["omega_m"], w0=data["w"])
         distmod = cosmology.distmod(data["z"]).value
-        diff = (distmod - data["mu"] + data["M"]) / data["mue"]
+        error = np.sqrt(data["mue"]**2 + 0.01*0.01)
+        diff = (distmod - data["mu"] + data["M"]) / error
         # diff = (distmod - data["mu"]) / data["mue"]
         return -0.5 * (diff * diff)
 

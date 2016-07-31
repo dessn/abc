@@ -12,9 +12,9 @@ from chainconsumer import ChainConsumer
 from dessn.investigations.gaussianity.apparent_mags import generate_and_return
 from dessn.investigations.gaussianity.model import PerfectRedshift
 from dessn.framework.samplers.ensemble import EnsembleSampler
+from astropy.cosmology import WMAP9
 
-
-def realise_light_curve(temp_dir, seed):
+def realise_light_curve(temp_dir, zeros, seed, scatter=0.3):
     np.random.seed(seed)
     t0 = 1000
     num_obs = 20
@@ -26,7 +26,7 @@ def realise_light_curve(temp_dir, seed):
     ts = np.arange(t0 + deltat, (t0 + deltat) + 5 * num_obs, 5)
 
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
-    zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])
+    zps = np.array([b for t in ts for b in zeros])
     mins = np.array([b for t in ts for b in [22.1, 21.1, 20.1, 18.7]])
     maxs = np.array([b for t in ts for b in [19.4, 19.7, 19.4, 18.2]])
     seeing = np.array([b for t in ts for b in [1.06, 1.00, 0.96, 0.93]])
@@ -53,7 +53,7 @@ def realise_light_curve(temp_dir, seed):
 
     model = sncosmo.Model(source='salt2-extended')
     model.set(z=z)
-    mabs = np.random.normal(-19.3, 0.3)
+    mabs = np.random.normal(-19.3, scatter)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab')
     x0 = model.get('x0')
     x1 = 0
@@ -61,10 +61,10 @@ def realise_light_curve(temp_dir, seed):
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
 
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
-    fig = sncosmo.plot_lc(lc)
-    fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
+    # fig = sncosmo.plot_lc(lc)
+    # fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     ston = (lc["flux"] / lc["fluxerr"]).max()
-    print(z, t0, x0, x1, c, ston)
+    # print(z, t0, x0, x1, c, ston)
     return z, t0, x0, x1, c, ston, lc
 
 
@@ -84,6 +84,9 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
     elif type == "mcmc":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=500, nwalkers=20,
                                             nsamples=1500, guess_amplitude=False, guess_t0=False)
+        cosmo = WMAP9.distmod(z).value - 19.3
+        mmu = get_mu(interped, res.parameters[2], res.parameters[3], res.parameters[4])
+        print("MCMC FIT FOR z=%0.2f with mu=%0.2f is %0.2f. Diff is %0.2f" % (z, cosmo, mmu, mmu - cosmo))
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
     elif type == "nestle":
         bounds = {"t0": [980, 1020], "x0": [0.1e-6, 9e-3], "x1": [-10, 10], "c": [-1, 1]}
@@ -111,8 +114,8 @@ def get_posterior(z, t0, lc, seed, temp_dir, interped, special):
     parameters = c.parameters[-1]
 
     chain, parameters = add_mu_to_chain(interped, chain, parameters)
-    for i in range(chain.shape[1]):
-        print(parameters[i], skew(chain[:, i]), skewtest(chain[:, i]))
+    # for i in range(chain.shape[1]):
+    #     print(parameters[i], skew(chain[:, i]), skewtest(chain[:, i]))
     return chain, parameters
 
 
@@ -127,7 +130,7 @@ def is_fit_good(t0, x0, x1, c, means, cov):
 def get_mu(interped, x0, x1, c):
     alpha = 0.14
     beta = 3.15
-    mu = interped(x1, c, grid=False) - (0.4 * np.log10(np.abs(x0) / 1e-5)) + alpha * x1 - beta * c
+    mu = interped(x1, c, grid=False) - (2.5 * np.log10(np.abs(x0) / 1e-5)) + alpha * x1 - beta * c
     return mu
 
 
@@ -161,7 +164,7 @@ def is_unconstrained(chain, param):
     return False
 
 
-def get_result(temp_dir, seed, special=False):
+def get_result(temp_dir, zps, seed, scatter, special=False):
     save_file = temp_dir + "/final%d.npy" % seed
 
     if os.path.exists(save_file):
@@ -172,9 +175,9 @@ def get_result(temp_dir, seed, special=False):
             return res
     else:
         interp = generate_and_return()
-        z, t0, x0, x1, c, ston, lc = realise_light_curve(temp_dir, seed)
+        z, t0, x0, x1, c, ston, lc = realise_light_curve(temp_dir, zps, seed, scatter=scatter)
 
-        if ston < 2:
+        if ston < 4:
             np.save(save_file, np.array([]))
             return None
 
@@ -205,11 +208,12 @@ def get_result(temp_dir, seed, special=False):
             np.save(save_file, np.array([]))
             return None
 
-        try:
-            plot_results(chain, parameters, chainf, chainf2, chainf3, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
-        except Exception as e:
-            print(e)
-            pass
+        if special:
+            try:
+                plot_results(chain, parameters, chainf, chainf2, chainf3, parametersf, t0, x0, x1, c, temp_dir, seed, interp)
+            except Exception as e:
+                print(e)
+                pass
 
         muf = chainf[:, -1]
         muf2 = chainf2[:, -1]
@@ -247,15 +251,14 @@ def polyval2d(x, y, m):
         z += a * x**i * y**j
     return z
 
-if __name__ == "__main__":
 
-    temp_dir = os.path.dirname(__file__) + "/output/dessky"
+def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
+    temp_dir = os.path.dirname(__file__) + "/output/%s" % foldername
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    n = 330
     res = Parallel(n_jobs=4, max_nbytes="20M", verbose=100, batch_size=1)(delayed(get_result)(
-        temp_dir, i) for i in range(n))
+        temp_dir, zeropoints, i, scatter) for i in range(n))
     res = np.array([r for r in res if r is not None])
     s = res[:, 6]
     res = res[(s > 5), :]
@@ -283,13 +286,13 @@ if __name__ == "__main__":
     diff_std_ns2 = 100 * (diff_std_ns - 1)
 
     # Create bias_surface.png and get skewness
-    if False:
+    if savefigure:
         im = diff_mu_fs.argmax()
         index = int(res[im, 0])
         print(index, diff_mu_fs[im])
         os.remove(temp_dir + os.sep + "final%d.npy" % index)
         print("Getting special result for index %d" % index)
-        get_result(temp_dir, index, special=True)
+        get_result(temp_dir, zeropoints, index, special=True)
         shutil.copyfile(temp_dir + os.sep + "surfaces_%d.png" % index,
                         os.path.dirname(__file__) + "/output/bias_surface.png")
 
@@ -299,7 +302,7 @@ if __name__ == "__main__":
         print(index, diff_mu_fs[im])
         # os.remove(temp_dir + os.sep + "final%d.npy" % index)
         print("Getting special result for index %d" % index)
-        get_result(temp_dir, index)
+        get_result(temp_dir, zeropoints, index)
 
     print("Creating plots")
     import matplotlib.pyplot as plt
@@ -307,9 +310,10 @@ if __name__ == "__main__":
 
     axes = axes.T.flatten()
     datas = [[diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_mu_ns],
-             [diff_mu_ps/stdd, diff_mu_fs/stdd, diff_mu_ms/stdd, diff_mu_ns/stdd],
+             [diff_mu_ps / stdd, diff_mu_fs / stdd, diff_mu_ms / stdd, diff_mu_ns / stdd],
              [diff_std_ps2, diff_std_fs2, diff_std_ms2, diff_std_ns2]]
-    labels = [["Posterior", "minuit", "emcee", "nestle"], ["Posterior", "minuit", "emcee", "nestle"], ["P/PSS", "P/FSS", "P/MSS", "P/NSS"]]
+    labels = [["Posterior", "minuit", "emcee", "nestle"],
+              ["Posterior", "minuit", "emcee", "nestle"], ["P/PSS", "P/FSS", "P/MSS", "P/NSS"]]
 
     axes[0].set_ylabel(r"$\Delta (\mu + M)$", fontsize=14)
     axes[1].set_ylabel(r"$\Delta (\mu + M) / \sigma_{\mu + M}$", fontsize=14)
@@ -321,7 +325,7 @@ if __name__ == "__main__":
         ax.set_xlabel("$z$", fontsize=14)
         for i, (d, l) in enumerate(zip(data, label)):
             mean, edges = np.histogram(z, bins=zs, weights=d)
-            std, _ = np.histogram(z, bins=zs, weights=d*d)
+            std, _ = np.histogram(z, bins=zs, weights=d * d)
             mean /= n
             std = np.sqrt(std / n - mean * mean)
             ec = 0.5 * (edges[:-1] + edges[1:])
@@ -339,5 +343,10 @@ if __name__ == "__main__":
     axes[-1].legend(loc=3)
     axes[-1].set_xlabel("$z$")
     plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias_dessky.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias_%s.png" % foldername, dpi=300, bbox_inches="tight",
+                transparent=True)
     # plt.show()
+
+
+if __name__ == "__main__":
+    run_analysis("dessky", [32.46, 32.28, 32.55, 33.12], 0.3, savefigure=True)

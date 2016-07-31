@@ -14,3 +14,4 @@ pytest-cov
 coveralls
 statsmodels
 joblib
+chainconsumer

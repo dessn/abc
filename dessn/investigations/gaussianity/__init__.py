@@ -186,6 +186,38 @@ above :math:`z=0.5`.
     The same plot as the previous, except this time looking in the deep field. Notice
     the reduced bias in the ``iminuit`` fits (shown in green).
 
+Cosmology Impact
+----------------
+
+To test the impact on cosmology fits this bias might have, I use a very simplistic
+cosmology fitter and do not correct for selection bias. Thus we expect the final
+cosmology to be biased, however both input data (one using skewed ``minuit`` output
+and the other using the output summary stats from an ``emcee`` chain) have the same
+selection effects and so should still give the same output posterior surface.
+
+Any significant differences in these surfaces - which are generated assuming high
+quality observation of 500 supernova - would be grounds for a more in depth
+investigation where we correct for selection effects and can thus quantise the bias.
+
+Using selection effects of one point in one band being above a signal to noise
+of 4. The output surfaces for this are shown below, and we can see a difference
+in both the recovered value for :math:`\Omega_m` and :math:`w`. However, the
+difference in recovered values is not significant in this example, where we find
+for ``minuit`` summary
+statistics :math:`\Omega_m = 0.415^{+0.026}_{-0.040},\ w= -1.45^{+0.19}_{-0.14}`
+and for the ``emcee`` summary statistics we
+find :math:`\Omega_m = 0.417^{+0.027}_{-0.038},\ w=-1.44^{+0.16}_{-0.18}`.
+
+
+ .. figure::     ../dessn/investigations/gaussianity/output/comparison5.png
+    :align:     center
+    :width:     100%
+
+    Comparison of the likelihood surfaces when using summary statistics
+    of different light curve fitting algorithms.
+
+
+
 
 Summary
 -------
