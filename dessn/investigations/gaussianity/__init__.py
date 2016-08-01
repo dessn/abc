@@ -200,7 +200,17 @@ quality observation of 500 supernova - would be grounds for a more in depth
 investigation where we correct for selection effects and can thus quantise the bias.
 
 Using selection effects of one point in one band being above a signal to noise
-of 4. The output surfaces for this are shown below, and we can see a difference
+of 4, we plot the supernova distance modulus minus the cosmology distance
+modulus to show the bias in redshift.
+
+ .. figure::     ../dessn/investigations/gaussianity/output/obs_cosmology.png
+    :align:     center
+    :width:     100%
+
+    An illustration of the bias produced between the two different fitting methodologies.
+
+The output surfaces for the supernova data put through a simplistic cosmology analysis
+ are shown below, and we can see a difference
 in both the recovered value for :math:`\Omega_m` and :math:`w`. However, the
 difference in recovered values is not significant in this example, where we find
 for ``minuit`` summary

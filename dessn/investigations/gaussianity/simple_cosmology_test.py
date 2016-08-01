@@ -15,6 +15,7 @@ import os
 from joblib import Parallel, delayed
 import numpy as np
 import logging
+from astropy.cosmology import WMAP9
 
 
 if __name__ == "__main__":
@@ -50,6 +51,17 @@ if __name__ == "__main__":
 
         fitter_mcmc = SimpleCosmologyFitter("mcmc fit %d" % cut, zs, mu_mcmc, std_mcmc)
         fitter_minuit = SimpleCosmologyFitter("minuit fit %d" % cut, zs, mu_minuit, std_minuit)
+
+        distmod = WMAP9.distmod(zs).value - 19.3
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots(1, 1, figsize=(5, 4))
+        ax.axhline(0, color='k', ls="--")
+        ax.errorbar(zs, distmod - mu_minuit, yerr=std_minuit, ms=4, fmt='o', label=r"minuit", color="r")
+        ax.errorbar(zs, distmod - mu_mcmc, yerr=std_mcmc, fmt='o', ms=4, label=r"mcmc", color="b")
+        ax.set_xlabel("$z$")
+        ax.set_ylabel(r"$\mu(\mathcal{C}) - \mu_{{\rm obs}}$")
+        ax.legend(loc=2)
+        fig.savefig("output/obs_cosmology.png", bbox_inches="tight", dpi=300, transparent=True)
 
         sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60,
                                   num_steps=80000, num_burn=2000)
