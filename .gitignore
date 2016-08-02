@@ -16,7 +16,6 @@
 *.idx
 *.toc
 *.ist
-*.cls
 *.sty
 *.q
 .coverage

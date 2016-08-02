@@ -14,11 +14,20 @@ from dessn.investigations.gaussianity.model import PerfectRedshift
 from dessn.framework.samplers.ensemble import EnsembleSampler
 from astropy.cosmology import WMAP9
 
-def realise_light_curve(temp_dir, zeros, seed, scatter=0.3):
+
+def realise_light_curve(temp_dir, zeros, seed, scatter=0.3, cosmology=None, mabs=-19.3):
+    simulation = cosmology is None
+    if cosmology is None:
+        cosmology = WMAP9
     np.random.seed(seed)
     t0 = 1000
     num_obs = 20
-    z = np.random.uniform(0.1, 0.9)
+    if simulation:
+        zs = list(sncosmo.zdist(0.05, 1.2, area=30, time=10000))
+        z_ind = np.random.randint(0, len(zs))
+        z = zs[z_ind]
+    else:
+        z = np.random.uniform(0.1, 0.9)
     deltat = -35
 
     newmoon = 1000 - np.random.uniform(0, 29.5)
@@ -53,18 +62,19 @@ def realise_light_curve(temp_dir, zeros, seed, scatter=0.3):
 
     model = sncosmo.Model(source='salt2-extended')
     model.set(z=z)
-    mabs = np.random.normal(-19.3, scatter)
-    model.set_source_peakabsmag(mabs, 'bessellb', 'ab')
+    mabs = np.random.normal(mabs, scatter)
+    model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
     x0 = model.get('x0')
-    x1 = 0
-    c = 0
+    if not simulation:
+        x1 = 0
+        c = 0
+    else:
+        x1 = np.random.normal(0, 1)
+        c = np.random.normal(0, 0.1)
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
 
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
-    # fig = sncosmo.plot_lc(lc)
-    # fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     ston = (lc["flux"] / lc["fluxerr"]).max()
-    # print(z, t0, x0, x1, c, ston)
     return z, t0, x0, x1, c, ston, lc
 
 
@@ -84,9 +94,7 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
     elif type == "mcmc":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=500, nwalkers=20,
                                             nsamples=1500, guess_amplitude=False, guess_t0=False)
-        cosmo = WMAP9.distmod(z).value - 19.3
         mmu = get_mu(interped, res.parameters[2], res.parameters[3], res.parameters[4])
-        print("MCMC FIT FOR z=%0.2f with mu=%0.2f is %0.2f. Diff is %0.2f" % (z, cosmo, mmu, mmu - cosmo))
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
     elif type == "nestle":
         bounds = {"t0": [980, 1020], "x0": [0.1e-6, 9e-3], "x1": [-10, 10], "c": [-1, 1]}
@@ -164,7 +172,7 @@ def is_unconstrained(chain, param):
     return False
 
 
-def get_result(temp_dir, zps, seed, scatter, special=False):
+def get_result(temp_dir, zps, seed, scatter, special=False, full=True):
     save_file = temp_dir + "/final%d.npy" % seed
 
     if os.path.exists(save_file):
@@ -191,13 +199,13 @@ def get_result(temp_dir, zps, seed, scatter, special=False):
             else:
                 chainf2, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="mcmc")
                 np.save(mcmc_file, chainf2)
-
-            nestle_file = temp_dir + "/nestle%d.npy" % seed
-            if os.path.exists(nestle_file):
-                chainf3 = np.load(nestle_file)
-            else:
-                chainf3, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="nestle")
-                np.save(nestle_file, chainf3)
+            if full:
+                nestle_file = temp_dir + "/nestle%d.npy" % seed
+                if os.path.exists(nestle_file):
+                    chainf3 = np.load(nestle_file)
+                else:
+                    chainf3, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="nestle")
+                    np.save(nestle_file, chainf3)
             chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp, special)
 
             assert is_fit_good(t0, x0, x1, c, means, cov)
@@ -217,18 +225,25 @@ def get_result(temp_dir, zps, seed, scatter, special=False):
 
         muf = chainf[:, -1]
         muf2 = chainf2[:, -1]
-        muf3 = chainf3[:, -1]
-        mu = chain[:, -1]
+        if full:
+            muf3 = chainf3[:, -1]
+            mu = chain[:, -1]
 
-        mean2 = np.mean(chain[:, :-1], axis=0)
-        cov2 = np.cov(chain[:, :-1].T)
-        chain2 = np.random.multivariate_normal(mean2, cov2, size=int(1e6))
-        chain2, _ = add_mu_to_chain(interp, chain2, parameters[:-1])
-        mu2 = chain2[:, -1]
+            mean2 = np.mean(chain[:, :-1], axis=0)
+            cov2 = np.cov(chain[:, :-1].T)
+            chain2 = np.random.multivariate_normal(mean2, cov2, size=int(1e6))
+            chain2, _ = add_mu_to_chain(interp, chain2, parameters[:-1])
+            mu2 = chain2[:, -1]
 
-        mus = [np.mean(mu), np.mean(mu2), np.mean(muf), np.mean(muf2), np.mean(muf3)]
-        stds = [np.std(mu), np.std(mu2), np.std(muf), np.std(muf2), np.std(muf3)]
-        res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds + [skew(mu)])
+            mus = [np.mean(mu), np.mean(mu2), np.mean(muf), np.mean(muf2), np.mean(muf3)]
+            stds = [np.std(mu), np.std(mu2), np.std(muf), np.std(muf2), np.std(muf3)]
+            res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds + [skew(mu)])
+
+        else:
+            mus = [np.mean(muf), np.mean(muf2)]
+            stds = [np.std(muf), np.std(muf2)]
+            res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds)
+
         np.save(save_file, res)
         return res
 

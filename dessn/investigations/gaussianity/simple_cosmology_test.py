@@ -7,68 +7,108 @@ summary statistics fitting software cause any shift in output
 cosmological parameters.
 
 """
+from scipy.interpolate import RegularGridInterpolator
 
 from dessn.investigations.gaussianity.simple_cosmology_fitter import SimpleCosmologyFitter
-from dessn.investigations.gaussianity.des_sky import get_result
+from dessn.investigations.gaussianity.des_sky import get_result, realise_light_curve
 from dessn.framework.samplers.ensemble import EnsembleSampler
 import os
 from joblib import Parallel, delayed
 import numpy as np
 import logging
-from astropy.cosmology import WMAP9
+from astropy.cosmology import WMAP9, FlatwCDM
 
 
-if __name__ == "__main__":
-    temp_dir = os.path.dirname(__file__) + "/output/example"
-    temp_dir2 = os.path.dirname(__file__) + "/output/cosmology"
+def get_zp_and_name(shallow):
+    if shallow:
+        return [32.46, 32.28, 32.55, 33.12], "shallow"
+    else:
+        return [34.24, 34.85, 34.94, 35.42], "deep"
+
+
+def get_supernova_data(n=500, ston_thresh=5, shallow=True):
+    zp, name = get_zp_and_name(shallow)
+    temp_dir = os.path.dirname(__file__) + "/output/supernova_data_%s" % name
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
+    ress = Parallel(n_jobs=4, max_nbytes="20M", batch_size=5)(delayed(get_result)(
+        temp_dir, zp, i, 0.1, False) for i in range(n))
+    res = np.array([r for r in ress if r is not None])
+    ston = res[:, 6]
+    res = res[ston < ston_thresh, :]
+    # [seed, z, t0, x0, x1, c, ston] + mus + stds)
+    #            zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit
+    return res[:, 1], res[:, 7], res[:, 8], res[:, 9], res[:, 10]
+
+
+def get_bias(omega_m, w0, mabs, n=800, ston_thresh=5, shallow=True):
+    zp, name = get_zp_and_name(shallow)
+    cosmology = FlatwCDM(70, omega_m, w0=w0)
+    ress = Parallel(n_jobs=4, max_nbytes="20M", batch_size=100)(delayed(realise_light_curve)(
+        None, zp, i, 0.1, cosmology, mabs) for i in range(n))
+    res = np.array([r for r in ress if r is not None])
+    ston = res[:, 5]
+    mask = (ston > ston_thresh).sum()
+    return 1.0 * mask / n
+
+
+def get_bias_matrix(filename, shallow=True):
+    omega_ms = np.linspace(0.2, 0.4, 7)
+    ws = np.linspace(-1.5, -0.5, 7)
+    mabss = np.linspace(-20, -19, 7)
+
+    if os.path.exists(filename):
+        bs = np.load(filename)
+    else:
+        bs = np.zeros((omega_ms.size, ws.size, mabss.size)) - 1
+    if np.any(bs < 0.0):
+        print("Starting bias calculation")
+        for i, m in enumerate(omega_ms):
+            for j, w in enumerate(ws):
+                for k, a in enumerate(mabss):
+                    if bs[i, j, k] < 0:
+                        bs[i, j, k] = get_bias(m, w, a, shallow=shallow)
+                    else:
+                        print(bs[i, j, k])
+                print("...%0.2f" % (1.0 * (j + 1) / len(ws)))
+                np.save(filename, bs)
+            print("%0.2f" % ((i + 1) / omega_ms.size))
+        np.save(filename, bs)
+
+    return RegularGridInterpolator((omega_ms, ws, mabss), bs, bounds_error=False, fill_value=0.0)
+
+
+def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit):
+    distmod = WMAP9.distmod(zs).value - 19.3
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
+    ax.axhline(0, color='k', ls="--")
+    ax.errorbar(zs, distmod - mu_minuit, yerr=std_minuit, ms=4, fmt='o', label=r"minuit", color="r")
+    ax.errorbar(zs, distmod - mu_mcmc, yerr=std_mcmc, fmt='o', ms=4, label=r"mcmc", color="b")
+    ax.set_xlabel("$z$")
+    ax.set_ylabel(r"$\mu(\mathcal{C}) - \mu_{{\rm obs}}$")
+    ax.legend(loc=2)
+    fig.savefig("output/obs_cosmology.png", bbox_inches="tight", dpi=300, transparent=True)
+
+if __name__ == "__main__":
+    bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_shallow.npy"
+    temp_dir2 = os.path.dirname(__file__) + "/output/cosmology"
     if not os.path.exists(temp_dir2):
         os.makedirs(temp_dir2)
     logging.basicConfig(level=logging.DEBUG)
 
-    n = 500
-    ress = Parallel(n_jobs=4, max_nbytes="20M", batch_size=5)(delayed(get_result)(
-        temp_dir, [32.46, 32.28, 32.55, 33.12], i, 0.01) for i in range(n))
+    interp = get_bias_matrix(bias_file)
 
-    for cut in [5, 8]:
+    zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit = get_supernova_data()
 
-        res = np.array([r for r in ress if r is not None])
+    plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit)
 
-        s = res[:, 6]
-        res = res[(s > 8), :]  # Cut low signal to noise
-        zs = res[:, 1]
-        res = res[(zs < 1.7), :]
+    fitter_mcmc = SimpleCosmologyFitter("mcmc", zs, mu_mcmc, std_mcmc, interp)
+    fitter_minuit = SimpleCosmologyFitter("minuit", zs, mu_minuit, std_minuit, interp)
 
-        seeds = res[:, 0]
-        zs = res[:, 1]
-        s = res[:, 6] / 100
-        skews = res[:, -1]
-        mu_minuit = res[:, 9]
-        mu_mcmc = res[:, 10]
-        std_minuit = res[:, 14]
-        std_mcmc = res[:, 15]
-
-        fitter_mcmc = SimpleCosmologyFitter("mcmc fit %d" % cut, zs, mu_mcmc, std_mcmc)
-        fitter_minuit = SimpleCosmologyFitter("minuit fit %d" % cut, zs, mu_minuit, std_minuit)
-
-        distmod = WMAP9.distmod(zs).value - 19.3
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-        ax.axhline(0, color='k', ls="--")
-        ax.errorbar(zs, distmod - mu_minuit, yerr=std_minuit, ms=4, fmt='o', label=r"minuit", color="r")
-        ax.errorbar(zs, distmod - mu_mcmc, yerr=std_mcmc, fmt='o', ms=4, label=r"mcmc", color="b")
-        ax.set_xlabel("$z$")
-        ax.set_ylabel(r"$\mu(\mathcal{C}) - \mu_{{\rm obs}}$")
-        ax.legend(loc=2)
-        fig.savefig("output/obs_cosmology.png", bbox_inches="tight", dpi=300, transparent=True)
-
-        sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60,
-                                  num_steps=80000, num_burn=2000)
-        from chainconsumer import ChainConsumer
-        c = ChainConsumer()
-        c = fitter_mcmc.fit(sampler=sampler, chain_consumer=c)
-        c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
-        c.names = ["emcee", "minuit"]
-        c.plot(filename="output/comparison%d.png" % cut, parameters=2, figsize=(5.5, 5.5))
-        print(c.get_latex_table())
+    sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=80000, num_burn=2000)
+    c = fitter_mcmc.fit(sampler=sampler)
+    c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
+    c.names = ["emcee", "minuit"]
+    c.plot(filename="output/comparison_shallow.png", parameters=2, figsize=(5.5, 5.5))
+    print(c.get_latex_table())

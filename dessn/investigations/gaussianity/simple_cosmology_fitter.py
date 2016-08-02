@@ -71,6 +71,19 @@ class W(ParameterUnderlying):
         return 1
 
 
+class BiasCorrection(Edge):
+    def __init__(self, interpolator):
+        super().__init__("z", ["omega_m", "w", "M"])
+        self.interpolator = interpolator
+
+    def get_log_likelihood(self, data):
+        omega_m, w, mabs = data["omega_m"], data["w"], data["mabs"]
+        biases = self.interpolator([omega_m, w, mabs])
+        ps = -np.log(biases)
+        ps[ps == np.inf] = -np.inf
+        return np.ones(data["z"].shape) * ps
+
+
 class Likelihood(Edge):
     def __init__(self):
         self.H0 = 68
@@ -87,7 +100,7 @@ class Likelihood(Edge):
 
 
 class SimpleCosmologyFitter(Model):
-    def __init__(self, name, zs, mus, mues):
+    def __init__(self, name, zs, mus, mues, interpolator):
         super().__init__(name)
         self.add(Redshifts(zs))
         self.add(Mus(mus))
@@ -96,4 +109,5 @@ class SimpleCosmologyFitter(Model):
         self.add(W())
         self.add(M())
         self.add(Likelihood())
+        self.add(BiasCorrection(interpolator))
         self.finalise()

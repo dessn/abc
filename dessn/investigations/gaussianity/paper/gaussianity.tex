@@ -1,0 +1,208 @@
+% mnras_template.tex
+%
+% LaTeX template for creating an MNRAS paper
+%
+% v3.0 released 14 May 2015
+% (version numbers match those of mnras.cls)
+%
+% Copyright (C) Royal Astronomical Society 2015
+% Authors:
+% Keith T. Smith (Royal Astronomical Society)
+
+% Change log
+%
+% v3.0 May 2015
+%    Renamed to match the new package name
+%    Version number matches mnras.cls
+%    A few minor tweaks to wording
+% v1.0 September 2013
+%    Beta testing only - never publicly released
+%    First version: a simple (ish) template for creating an MNRAS paper
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Basic setup. Most papers should leave these options alone.
+\documentclass[a4paper,fleqn,usenatbib]{mnras}
+
+% MNRAS is set in Times font. If you don't have this installed (most LaTeX
+% installations will be fine) or prefer the old Computer Modern fonts, comment
+% out the following line
+\usepackage{newtxtext,newtxmath}
+% Depending on your LaTeX fonts installation, you might get better results with one of these:
+%\usepackage{mathptmx}
+%\usepackage{txfonts}
+
+% Use vector fonts, so it zooms properly in on-screen viewing software
+% Don't change these lines unless you know what you are doing
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+
+
+%%%%% AUTHORS - PLACE YOUR OWN PACKAGES HERE %%%%%
+
+% Only include extra packages if you really need them. Common packages are:
+\usepackage{graphicx}	% Including figure files
+\usepackage{amsmath}	% Advanced maths commands
+\usepackage{amssymb}	% Extra maths symbols
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% AUTHORS - PLACE YOUR OWN COMMANDS HERE %%%%%
+
+% Please keep new commands to a minimum, and use \newcommand not \def to avoid
+% overwriting existing commands. Example:
+%\newcommand{\pcm}{\,cm$^{-2}$}	% per cm-squared
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%
+
+% Title of the paper, and the short title which is used in the headers.
+% Keep the title short and informative.
+\title[Supernova Gaussianity]{Investigating the Gaussianity of Supernova SALT2 Summary Statistics}
+
+% The list of authors, and the short list which is used in the headers.
+% If you need two or more lines of authors, add an extra line using \newauthor
+\author[S. R. Hinton et al.]{
+Samuel R. Hinton,$^{1}$\thanks{E-mail: \href{samuelreay@gmail.com}}
+Alex G. Kim,$^{3}$
+Tamara M. Davis,$^{1,2}$
+Edward Macaulay$^{1,2}$
+\\
+% List of institutions
+$^{1}$School of Mathematics and Physics, The University of Queensland, Brisbane, QLD 4072, Australia\\
+$^{2}$ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)\\
+$^{3}$Physics Division, Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA
+}
+
+% These dates will be filled out by the publisher
+\date{Accepted XXX. Received YYY; in original form ZZZ}
+
+% Enter the current year, for the copyright statements etc.
+\pubyear{2016}
+
+% Don't change these lines
+\begin{document}
+\label{firstpage}
+\pagerange{\pageref{firstpage}--\pageref{lastpage}}
+\maketitle
+
+% Abstract of the paper
+\begin{abstract}
+Write an abstract.
+\end{abstract}
+
+% Select between one and six entries from the list of approved keywords.
+% Don't make up new ones.
+%\begin{keywords}
+%keyword1 -- keyword2 -- keyword3
+%\end{keywords}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%% BODY OF PAPER %%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+Few sentences on cosmology.
+
+Use of supernova in cosmology.
+
+
+SALT2.
+
+Previous studies using summary statistics and their data sets.
+
+Assumed gaussianity.
+
+DES supernova (segue to precision)
+
+Precision measurements, systematics more important than ever.
+
+Thus motivation
+
+\section{Next Section}
+Think of section title
+
+Supernova models, summary statistics, why they are used (instead of light curve data), and the fitting methodologies that have been used in the past to get summary statistics.
+
+\section{Next section}
+
+to investigate, go to lowest level and simulate light curves
+
+to start with, realise only canonical supernova from abs mag with some scatter, using WMAP9 cosmology. Do this for shallow and deep fields, and fit the light curves using different methods.
+
+ compare the different methods
+
+
+section detailing the bias as a function of redshift (and ston if possible). 
+
+
+%\begin{figure}
+%	% To include a figure from a file named example.*
+%	% Allowable file formats are eps or ps if compiling using latex
+%	% or pdf, png, jpg if compiling using pdflatex
+%	\includegraphics[width=\columnwidth]{example}
+%    \caption{This is an example figure. Captions appear below each figure.
+%	Give enough detail for the reader to understand what they're looking at,
+%	but leave detailed discussion to the main body of the text.}
+%    \label{fig:example_figure}
+%\end{figure}
+%
+%% Example table
+%\begin{table}
+%	\centering
+%	\caption{This is an example table. Captions appear above each table.
+%	Remember to define the quantities, symbols and units used.}
+%	\label{tab:example_table}
+%	\begin{tabular}{lccr} % four columns, alignment for each
+%		\hline
+%		A & B & C & D\\
+%		\hline
+%		1 & 2 & 3 & 4\\
+%		2 & 4 & 6 & 8\\
+%		3 & 5 & 7 & 9\\
+%		\hline
+%	\end{tabular}
+%\end{table}
+
+\section{Conclusions}
+
+The last numbered section should briefly summarise what has been done, and describe
+the final conclusions which the authors draw from their work.
+
+\section*{Acknowledgements}
+
+The Acknowledgements section is not numbered. Here you can thank helpful
+colleagues, acknowledge funding agencies, telescopes and facilities used etc.
+Try to keep it short.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%
+
+% The best way to enter references is to use BibTeX:
+
+\bibliographystyle{mnras}
+\bibliography{bibliography} % if your bibtex file is called example.bib
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%% APPENDICES %%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+\section{Some extra material}
+
+If you want to present additional material which would interrupt the flow of the main paper,
+it can be placed in an Appendix which appears after the list of references.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Don't change these lines
+\bsp	% typesetting comment
+\label{lastpage}
+\end{document}
+
+% End of mnras_template.tex

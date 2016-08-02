@@ -189,6 +189,32 @@ above :math:`z=0.5`.
 Cosmology Impact
 ----------------
 
+
+To test the impact on cosmology fits this bias might have, I implement a basic cosmology
+simulation.
+
+We start with the basics, and assume that supernova are drawn from some underlying
+distribution of absolute magnitude :math:`M_i \sim \mathcal{N}(M,\sigma_{\rm int})`. We
+set our simulation cosmology to ``astropy.cosmology.WMAP9``, and (as done before), set
+our Philip's relation variables :math:`\alpha` and :math:`\beta` to  :math:`0.14` and
+:math:`3.15` respectively, (following fiducial values from [1]_), and fix the values there.
+Supernova colours are drawn such that :math:`c_i \sim \mathcal{N}(0, 0.1)` and colours are drawn
+as :math:`x_{1i} \sim \mathcal{N}(0, 1)`. The redshift distribution is calculated from the
+comoving volume of the DES deep-field area of 30 square degrees using the ``sncosmo``
+function ``zdist``.
+
+We assume perfectly realised zero points, which at the time of analysis were given
+as :math:`34.24,\ 34.85,\ 34.94,\ 35.42` for the *g, r, i* and *z* bands. Observational cadence
+is set to 5 days, and weather conditions and moon cycle are simulated in light curve generation.
+
+Given this, we can compute the weight as a function of the two cosmological parameters free:
+:math:`\Omega_m` and :math:`w`. We generate 500 supernova having set :math:`\sigma_{\rm int} = 0.1`
+
+
+
+----------
+
+
 To test the impact on cosmology fits this bias might have, I use a very simplistic
 cosmology fitter and do not correct for selection bias. Thus we expect the final
 cosmology to be biased, however both input data (one using skewed ``minuit`` output
