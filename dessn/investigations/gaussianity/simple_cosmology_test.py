@@ -26,16 +26,17 @@ def get_zp_and_name(shallow):
         return [34.24, 34.85, 34.94, 35.42], "deep"
 
 
-def get_supernova_data(n=500, ston_thresh=5, shallow=True):
+def get_supernova_data(n=800, ston_thresh=5, shallow=True):
     zp, name = get_zp_and_name(shallow)
     temp_dir = os.path.dirname(__file__) + "/output/supernova_data_%s" % name
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
     ress = Parallel(n_jobs=4, max_nbytes="20M", batch_size=5)(delayed(get_result)(
-        temp_dir, zp, i, 0.1, False) for i in range(n))
+        temp_dir, zp, i, 0.05, False, False) for i in range(n))
+    print(ress)
     res = np.array([r for r in ress if r is not None])
     ston = res[:, 6]
-    res = res[ston < ston_thresh, :]
+    res = res[ston > ston_thresh, :]
     # [seed, z, t0, x0, x1, c, ston] + mus + stds)
     #            zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit
     return res[:, 1], res[:, 7], res[:, 8], res[:, 9], res[:, 10]
@@ -45,7 +46,7 @@ def get_bias(omega_m, w0, mabs, n=800, ston_thresh=5, shallow=True):
     zp, name = get_zp_and_name(shallow)
     cosmology = FlatwCDM(70, omega_m, w0=w0)
     ress = Parallel(n_jobs=4, max_nbytes="20M", batch_size=100)(delayed(realise_light_curve)(
-        None, zp, i, 0.1, cosmology, mabs) for i in range(n))
+        None, zp, i, 0.05, cosmology, mabs) for i in range(n))
     res = np.array([r for r in ress if r is not None])
     ston = res[:, 5]
     mask = (ston > ston_thresh).sum()
@@ -79,12 +80,18 @@ def get_bias_matrix(filename, shallow=True):
 
 
 def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit):
-    distmod = WMAP9.distmod(zs).value - 19.3
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    ax.axhline(0, color='k', ls="--")
-    ax.errorbar(zs, distmod - mu_minuit, yerr=std_minuit, ms=4, fmt='o', label=r"minuit", color="r")
-    ax.errorbar(zs, distmod - mu_mcmc, yerr=std_mcmc, fmt='o', ms=4, label=r"mcmc", color="b")
+    # ax.axhline(0, color='k', ls="--")
+    zsort = sorted(zs)
+    distmod = WMAP9.distmod(zsort).value - 19.3
+    distmod2 = FlatwCDM(70, 0.2, -1.0).distmod(zsort).value - 19.3
+    ax.plot(zsort, distmod, 'k')
+    # ax.plot(zsort, distmod2, 'g--')
+    ax.errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit + 0.05*0.05), ms=4, fmt='o',
+                label=r"minuit", color="r", alpha=0.5)
+    ax.errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc + 0.05*0.05), fmt='o', ms=4, label=r"mcmc",
+                color="b", alpha=0.5)
     ax.set_xlabel("$z$")
     ax.set_ylabel(r"$\mu(\mathcal{C}) - \mu_{{\rm obs}}$")
     ax.legend(loc=2)
@@ -98,17 +105,16 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     interp = get_bias_matrix(bias_file)
-
     zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit = get_supernova_data()
 
     plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit)
-
     fitter_mcmc = SimpleCosmologyFitter("mcmc", zs, mu_mcmc, std_mcmc, interp)
     fitter_minuit = SimpleCosmologyFitter("minuit", zs, mu_minuit, std_minuit, interp)
 
-    sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=80000, num_burn=2000)
+    sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=4000, num_burn=2000)
     c = fitter_mcmc.fit(sampler=sampler)
-    c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
-    c.names = ["emcee", "minuit"]
+    # c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
+    # c.names = ["emcee", "minuit"]
+    c.plot_walks(filename="output/walks.png")
     c.plot(filename="output/comparison_shallow.png", parameters=2, figsize=(5.5, 5.5))
     print(c.get_latex_table())

@@ -23,9 +23,12 @@ def realise_light_curve(temp_dir, zeros, seed, scatter=0.3, cosmology=None, mabs
     t0 = 1000
     num_obs = 20
     if simulation:
-        zs = list(sncosmo.zdist(0.05, 1.2, area=30, time=10000))
-        z_ind = np.random.randint(0, len(zs))
-        z = zs[z_ind]
+        if np.random.random() < 0.05:
+            z = np.random.uniform(0.05, 0.2)
+        else:
+            zs = list(sncosmo.zdist(0.05, 1.2, area=30, time=10000))
+            z_ind = np.random.randint(0, len(zs))
+            z = zs[z_ind]
     else:
         z = np.random.uniform(0.1, 0.9)
     deltat = -35
@@ -92,8 +95,8 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
         fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
         fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     elif type == "mcmc":
-        res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=500, nwalkers=20,
-                                            nsamples=1500, guess_amplitude=False, guess_t0=False)
+        res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=300, nwalkers=10,
+                                            nsamples=1300, guess_amplitude=False, guess_t0=False)
         mmu = get_mu(interped, res.parameters[2], res.parameters[3], res.parameters[4])
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
     elif type == "nestle":
@@ -186,6 +189,7 @@ def get_result(temp_dir, zps, seed, scatter, special=False, full=True):
         z, t0, x0, x1, c, ston, lc = realise_light_curve(temp_dir, zps, seed, scatter=scatter)
 
         if ston < 4:
+            print("Failed ", z)
             np.save(save_file, np.array([]))
             return None
 
@@ -206,10 +210,10 @@ def get_result(temp_dir, zps, seed, scatter, special=False, full=True):
                 else:
                     chainf3, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="nestle")
                     np.save(nestle_file, chainf3)
-            chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp, special)
+                chain, parameters = get_posterior(z, t0, lc, seed, temp_dir, interp, special)
 
+                assert not is_unconstrained(chain, parameters)
             assert is_fit_good(t0, x0, x1, c, means, cov)
-            assert not is_unconstrained(chain, parameters)
 
         except Exception as e:
             print(e)
@@ -243,7 +247,7 @@ def get_result(temp_dir, zps, seed, scatter, special=False, full=True):
             mus = [np.mean(muf), np.mean(muf2)]
             stds = [np.std(muf), np.std(muf2)]
             res = np.array([seed, z, t0, x0, x1, c, ston] + mus + stds)
-
+            # print("Faster", res)
         np.save(save_file, res)
         return res
 

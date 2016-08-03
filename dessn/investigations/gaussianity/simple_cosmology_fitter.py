@@ -28,11 +28,11 @@ class M(ParameterUnderlying):
         return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 1
+        return 0.5
 
     def get_log_prior(self, data):
         om = data["M"]
-        if om < -25 or om > -15:
+        if om < -20 or om > -19:
             return -np.inf
         return 1
 
@@ -49,7 +49,7 @@ class OmegaM(ParameterUnderlying):
 
     def get_log_prior(self, data):
         om = data["omega_m"]
-        if om < 0.05 or om > 0.8:
+        if om < 0.1 or om > 0.6:
             return -np.inf
         return 1
 
@@ -66,7 +66,7 @@ class W(ParameterUnderlying):
 
     def get_log_prior(self, data):
         om = data["w"]
-        if om < -4 or om > 0:
+        if om < -2 or om > -0.2:
             return -np.inf
         return 1
 
@@ -77,23 +77,23 @@ class BiasCorrection(Edge):
         self.interpolator = interpolator
 
     def get_log_likelihood(self, data):
-        omega_m, w, mabs = data["omega_m"], data["w"], data["mabs"]
+        omega_m, w, mabs = data["omega_m"], data["w"], data["M"]
         biases = self.interpolator([omega_m, w, mabs])
         ps = -np.log(biases)
         ps[ps == np.inf] = -np.inf
-        return np.ones(data["z"].shape) * ps
+        return np.ones(data["z"].shape)# * ps
 
 
 class Likelihood(Edge):
     def __init__(self):
-        self.H0 = 68
+        self.H0 = 70
         super().__init__(["z", "mu", "mue"], ["omega_m", "w", "M"])
         # super().__init__(["z", "mu", "mue"], ["omega_m", "w"])
 
     def get_log_likelihood(self, data):
         cosmology = FlatwCDM(H0=self.H0, Om0=data["omega_m"], w0=data["w"])
         distmod = cosmology.distmod(data["z"]).value
-        error = np.sqrt(data["mue"]**2 + 0.01*0.01)
+        error = np.sqrt(data["mue"]**2 + 0.05*0.05)
         diff = (distmod - data["mu"] + data["M"]) / error
         # diff = (distmod - data["mu"]) / data["mue"]
         return -0.5 * (diff * diff)
