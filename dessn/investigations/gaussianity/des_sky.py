@@ -16,19 +16,20 @@ from astropy.cosmology import WMAP9
 
 
 def realise_light_curve(temp_dir, zeros, seed, scatter=0.3, cosmology=None, mabs=-19.3):
-    simulation = cosmology is None
+    simulation = cosmology is not None
     if cosmology is None:
         cosmology = WMAP9
     np.random.seed(seed)
     t0 = 1000
     num_obs = 20
     if simulation:
-        if np.random.random() < 0.05:
-            z = np.random.uniform(0.05, 0.2)
+        if np.random.random() < 0.1:
+            z = np.random.uniform(0.03, 0.2)
         else:
             zs = list(sncosmo.zdist(0.05, 1.2, area=30, time=10000))
             z_ind = np.random.randint(0, len(zs))
             z = zs[z_ind]
+        print("Simulation: z=%0.6f" % z)
     else:
         z = np.random.uniform(0.1, 0.9)
     deltat = -35
@@ -65,15 +66,18 @@ def realise_light_curve(temp_dir, zeros, seed, scatter=0.3, cosmology=None, mabs
 
     model = sncosmo.Model(source='salt2-extended')
     model.set(z=z)
-    mabs = np.random.normal(mabs, scatter)
-    model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
-    x0 = model.get('x0')
+
     if not simulation:
         x1 = 0
         c = 0
     else:
-        x1 = np.random.normal(0, 1)
+        x1 = np.random.normal(0, 0.5)
         c = np.random.normal(0, 0.1)
+    alpha = 0.14
+    beta = 3.15
+    mabs = np.random.normal(mabs, scatter) - alpha * x1 + beta * c
+    model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmology)
+    x0 = model.get('x0')
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
 
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
@@ -92,8 +96,8 @@ def get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interped, type="iminu
         res, fitted_model = sncosmo.fit_lc(lc, model, ['t0', 'x0', 'x1', 'c'],
                                            guess_amplitude=False, guess_t0=False)
         chain = np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e5))
-        fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
-        fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
+        # fig = sncosmo.plot_lc(lc, model=[fitted_model, correct_model], errors=res.errors)
+        # fig.savefig(temp_dir + os.sep + "lc_%d.png" % seed, bbox_inches="tight", dpi=300)
     elif type == "mcmc":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'], nburn=300, nwalkers=10,
                                             nsamples=1300, guess_amplitude=False, guess_t0=False)
@@ -186,7 +190,11 @@ def get_result(temp_dir, zps, seed, scatter, special=False, full=True):
             return res
     else:
         interp = generate_and_return()
-        z, t0, x0, x1, c, ston, lc = realise_light_curve(temp_dir, zps, seed, scatter=scatter)
+        if full:
+            cosmology = None
+        else:
+            cosmology = WMAP9
+        z, t0, x0, x1, c, ston, lc = realise_light_curve(temp_dir, zps, seed, scatter=scatter, cosmology=cosmology)
 
         if ston < 4:
             print("Failed ", z)
@@ -196,13 +204,13 @@ def get_result(temp_dir, zps, seed, scatter, special=False, full=True):
         try:
             chainf, parametersf, means, cov = get_gaussian_fit(z, t0, x0, x1, c, lc, seed,
                                                                temp_dir, interp, type="iminuit")
-
             mcmc_file = temp_dir + "/mcmc%d.npy" % seed
             if os.path.exists(mcmc_file):
                 chainf2 = np.load(mcmc_file)
             else:
                 chainf2, _, _, _ = get_gaussian_fit(z, t0, x0, x1, c, lc, seed, temp_dir, interp, type="mcmc")
                 np.save(mcmc_file, chainf2)
+
             if full:
                 nestle_file = temp_dir + "/nestle%d.npy" % seed
                 if os.path.exists(nestle_file):
@@ -322,50 +330,51 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
         # os.remove(temp_dir + os.sep + "final%d.npy" % index)
         print("Getting special result for index %d" % index)
         get_result(temp_dir, zeropoints, index)
+    else:
+        print("Creating plots")
+        import matplotlib.pyplot as plt
+        fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(8, 7))
 
-    print("Creating plots")
-    import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(8, 7))
+        axes = axes.T.flatten()
+        datas = [[diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_mu_ns],
+                 [diff_mu_ps / stdd, diff_mu_fs / stdd, diff_mu_ms / stdd, diff_mu_ns / stdd],
+                 [diff_std_ps2, diff_std_fs2, diff_std_ms2, diff_std_ns2]]
+        labels = [["Posterior", "minuit", "emcee", "nestle"],
+                  ["Posterior", "minuit", "emcee", "nestle"], ["P/PSS", "P/FSS", "P/MSS", "P/NSS"]]
 
-    axes = axes.T.flatten()
-    datas = [[diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_mu_ns],
-             [diff_mu_ps / stdd, diff_mu_fs / stdd, diff_mu_ms / stdd, diff_mu_ns / stdd],
-             [diff_std_ps2, diff_std_fs2, diff_std_ms2, diff_std_ns2]]
-    labels = [["Posterior", "minuit", "emcee", "nestle"],
-              ["Posterior", "minuit", "emcee", "nestle"], ["P/PSS", "P/FSS", "P/MSS", "P/NSS"]]
+        axes[0].set_ylabel(r"$\Delta (\mu + M)$", fontsize=14)
+        axes[1].set_ylabel(r"$\Delta (\mu + M) / \sigma_{\mu + M}$", fontsize=14)
+        axes[2].set_ylabel(r"Percent Ratio $\Delta \sigma_{\mu + M}$", fontsize=14)
+        zs = np.linspace(z.min(), z.max(), 11)
 
-    axes[0].set_ylabel(r"$\Delta (\mu + M)$", fontsize=14)
-    axes[1].set_ylabel(r"$\Delta (\mu + M) / \sigma_{\mu + M}$", fontsize=14)
-    axes[2].set_ylabel(r"Percent Ratio $\Delta \sigma_{\mu + M}$", fontsize=14)
-    zs = np.linspace(z.min(), z.max(), 11)
+        n, _ = np.histogram(z, bins=zs)
+        for ax, data, label in zip(axes, datas, labels):
+            ax.set_xlabel("$z$", fontsize=14)
+            for i, (d, l) in enumerate(zip(data, label)):
+                mean, edges = np.histogram(z, bins=zs, weights=d)
+                std, _ = np.histogram(z, bins=zs, weights=d * d)
+                mean /= n
+                std = np.sqrt(std / n - mean * mean)
+                ec = 0.5 * (edges[:-1] + edges[1:])
+                ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt='o', yerr=std, label=l)
 
-    n, _ = np.histogram(z, bins=zs)
-    for ax, data, label in zip(axes, datas, labels):
-        ax.set_xlabel("$z$", fontsize=14)
-        for i, (d, l) in enumerate(zip(data, label)):
-            mean, edges = np.histogram(z, bins=zs, weights=d)
-            std, _ = np.histogram(z, bins=zs, weights=d * d)
-            mean /= n
-            std = np.sqrt(std / n - mean * mean)
-            ec = 0.5 * (edges[:-1] + edges[1:])
-            ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt='o', yerr=std, label=l)
+        axes[0].legend(loc=2)
+        print("Creating skewness plot")
 
-    axes[0].legend(loc=2)
-    print("Creating skewness plot")
-
-    skewhist, edges = np.histogram(z, bins=zs, weights=skews)
-    std, _ = np.histogram(z, bins=zs, weights=skews * skews)
-    skewhist /= n
-    std = np.sqrt(std / n - skewhist * skewhist)
-    ec = 0.5 * (edges[:-1] + edges[1:])
-    axes[-1].errorbar(ec, skewhist, fmt='o', yerr=std, label="Skewness")
-    axes[-1].legend(loc=3)
-    axes[-1].set_xlabel("$z$")
-    plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias_%s.png" % foldername, dpi=300, bbox_inches="tight",
-                transparent=True)
-    # plt.show()
+        skewhist, edges = np.histogram(z, bins=zs, weights=skews)
+        std, _ = np.histogram(z, bins=zs, weights=skews * skews)
+        skewhist /= n
+        std = np.sqrt(std / n - skewhist * skewhist)
+        ec = 0.5 * (edges[:-1] + edges[1:])
+        axes[-1].errorbar(ec, skewhist, fmt='o', yerr=std, label="Skewness")
+        axes[-1].legend(loc=3)
+        axes[-1].set_xlabel("$z$")
+        plt.tight_layout()
+        fig.savefig(os.path.dirname(__file__) + "/output/bias_%s.png" % foldername, dpi=300, bbox_inches="tight",
+                    transparent=True)
+        # plt.show()
 
 
 if __name__ == "__main__":
+    run_analysis("dessky", [32.46, 32.28, 32.55, 33.12], 0.3, savefigure=False)
     run_analysis("dessky", [32.46, 32.28, 32.55, 33.12], 0.3, savefigure=True)

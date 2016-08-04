@@ -28,7 +28,7 @@ class M(ParameterUnderlying):
         return -19.3
 
     def get_suggestion_sigma(self, data):
-        return 0.5
+        return 0.2
 
     def get_log_prior(self, data):
         om = data["M"]
@@ -93,7 +93,7 @@ class Likelihood(Edge):
     def get_log_likelihood(self, data):
         cosmology = FlatwCDM(H0=self.H0, Om0=data["omega_m"], w0=data["w"])
         distmod = cosmology.distmod(data["z"]).value
-        error = np.sqrt(data["mue"]**2 + 0.05*0.05)
+        error = np.sqrt(data["mue"]**2 + 0.1*0.1)
         diff = (distmod - data["mu"] + data["M"]) / error
         # diff = (distmod - data["mu"]) / data["mue"]
         return -0.5 * (diff * diff)

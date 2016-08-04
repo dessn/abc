@@ -3,7 +3,7 @@ from dessn.investigations.gaussianity.apparent_mags import generate_and_return
 import sncosmo
 import numpy as np
 from astropy.table import Table
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 from dessn.framework.samplers.ensemble import EnsembleSampler
 import os
 
@@ -46,9 +46,9 @@ if __name__ == "__main__":
     mcmc_chain = temp_dir + os.sep + "mcmc_simple.npy"
     c = ChainConsumer()
     my_model = PerfectRedshift(lcs, [z], t0, name="My posterior")
-    sampler = EnsembleSampler(temp_dir=temp_dir, num_steps=10000)
+    sampler = EnsembleSampler(temp_dir=temp_dir, num_steps=20000)
     my_model.fit(sampler, chain_consumer=c)
-    c.add_chain(np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e6)),
+    c.add_chain(np.random.multivariate_normal(res.parameters[1:], res.covariance, size=int(1e7)),
                 name="Summary Stats", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
 
     if False:
@@ -61,7 +61,7 @@ if __name__ == "__main__":
             mcchain = np.load(mcmc_chain)
         c.add_chain(mcchain, name="sncosmo mcmc", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
 
-    c.configure_contour(contourf=True, contourf_alpha=0.2, sigmas=[0.0, 0.5, 1.0, 2.0, 3.0])
+    c.configure_contour(shade=True, shade_alpha=0.2, sigmas=[0.0, 1.0, 2.0, 3.0])
     c.configure_bar(shade=True)
     c.plot(filename=surface, figsize=(7, 7))
     fig = sncosmo.plot_lc(lcs[0], model=fitted_model, errors=res.errors)
