@@ -26,7 +26,7 @@ def get_zp_and_name(shallow):
         return [34.24, 34.85, 34.94, 35.42], "deep"
 
 
-def get_supernova_data(n=600, ston_thresh=5, shallow=True):
+def get_supernova_data(n=1300, ston_thresh=5, shallow=True):
     zp, name = get_zp_and_name(shallow)
     temp_dir = os.path.dirname(__file__) + "/output/supernova_data_%s" % name
     if not os.path.exists(temp_dir):
@@ -40,6 +40,7 @@ def get_supernova_data(n=600, ston_thresh=5, shallow=True):
     # res = res[z < 0.7, :]
     # [seed, z, t0, x0, x1, c, ston] + mus + stds)
     #            zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit
+    print("Supernova data", res.shape)
     return res[:, 1], res[:, 7], res[:, 8], res[:, 9], res[:, 10]
 
 
@@ -80,42 +81,37 @@ def get_bias_matrix(filename, shallow=True):
     return RegularGridInterpolator((omega_ms, ws, mabss), bs, bounds_error=False, fill_value=0.0)
 
 
-def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit):
+def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    # ax.axhline(0, color='k', ls="--")
     zsort = sorted(zs)
     distmod = WMAP9.distmod(zsort).value - 19.3
-    distmod2 = FlatwCDM(70, 0.1, -0.8).distmod(zsort).value - 19.3
-    distmod3 = FlatwCDM(70, 0.25, -2).distmod(zsort).value - 19.5
-    ax.errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1), ms=4, fmt='o', label=r"minuit", color="r", alpha=0.1)
-    # ax.errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.05*0.05), fmt='o', ms=4, label=r"mcmc", color="b", alpha=0.1)
+    ax.errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1), ms=4, fmt='o', label=r"minuit", color="r", alpha=0.2)
+    ax.errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.05*0.05), fmt='o', ms=4, label=r"mcmc", color="b", alpha=0.2)
     ax.plot(zsort, distmod, 'k')
-    ax.plot(zsort, distmod2, 'g--')
-    ax.plot(zsort, distmod3, 'r:')
     ax.set_xlabel("$z$")
-    ax.set_ylabel(r"$\mu(\mathcal{C}) - \mu_{{\rm obs}}$")
+    ax.set_ylabel(r"$\mu(\mathcal{C})$")
     ax.legend(loc=2)
-    fig.savefig("output/obs_cosmology.png", bbox_inches="tight", dpi=300, transparent=True)
+    fig.savefig("output/obs_cosmology_%s.png" % n, bbox_inches="tight", dpi=300, transparent=True)
 
 if __name__ == "__main__":
-    bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_shallow.npy"
-    temp_dir2 = os.path.dirname(__file__) + "/output/cosmology"
-    if not os.path.exists(temp_dir2):
-        os.makedirs(temp_dir2)
-    logging.basicConfig(level=logging.DEBUG)
+    for n in ["deep", "shallow"]:
+        is_shallow = n == "shallow"
+        bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_%s.npy" % n
+        temp_dir2 = os.path.dirname(__file__) + "/output/cosmology_%s" % n
+        if not os.path.exists(temp_dir2):
+            os.makedirs(temp_dir2)
+        logging.basicConfig(level=logging.DEBUG)
 
-    interp = get_bias_matrix(bias_file)
-    zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit = get_supernova_data()
+        zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit = get_supernova_data(shallow=is_shallow)
 
-    plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit)
-    fitter_mcmc = SimpleCosmologyFitter("mcmc", zs, mu_mcmc, std_mcmc, interp)
-    fitter_minuit = SimpleCosmologyFitter("minuit", zs, mu_minuit, std_minuit, interp)
+        plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n)
+        fitter_mcmc = SimpleCosmologyFitter("mcmc", zs, mu_mcmc, std_mcmc)
+        fitter_minuit = SimpleCosmologyFitter("minuit", zs, mu_minuit, std_minuit)
 
-    sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=5000, num_burn=1000)
-    c = fitter_mcmc.fit(sampler=sampler)
-    c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
-    c.names = ["emcee", "minuit"]
-    #c.plot_walks(filename="output/walks.png")
-    c.plot(filename="output/comparison_shallow.png", parameters=2, figsize=(5.5, 5.5))
-    print(c.get_latex_table())
+        sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=5000, num_burn=1000)
+        c = fitter_mcmc.fit(sampler=sampler)
+        c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
+        c.names = ["emcee", "minuit"]
+        c.plot(filename="output/comparison_%s.png" % n, parameters=2, figsize=(5.5, 5.5))
+        print(c.get_latex_table())

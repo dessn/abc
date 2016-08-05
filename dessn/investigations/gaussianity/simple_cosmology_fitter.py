@@ -100,7 +100,7 @@ class Likelihood(Edge):
 
 
 class SimpleCosmologyFitter(Model):
-    def __init__(self, name, zs, mus, mues, interpolator):
+    def __init__(self, name, zs, mus, mues): #, interpolator):
         super().__init__(name)
         self.add(Redshifts(zs))
         self.add(Mus(mus))
@@ -109,5 +109,5 @@ class SimpleCosmologyFitter(Model):
         self.add(W())
         self.add(M())
         self.add(Likelihood())
-        self.add(BiasCorrection(interpolator))
+        # self.add(BiasCorrection(interpolator))
         self.finalise()
