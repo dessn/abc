@@ -36,7 +36,9 @@ if __name__ == "__main__":
     model = sncosmo.Model(source='salt2-extended')
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': colour}
     model.set(z=z)
+    print("Realise LCs")
     lcs = sncosmo.realize_lcs(obs, model, [p])
+    print("Fit LCs")
     res, fitted_model = sncosmo.fit_lc(lcs[0], model, ['t0', 'x0', 'x1', 'c'])
 
     dir_name = os.path.dirname(__file__)
@@ -45,6 +47,7 @@ if __name__ == "__main__":
     mu_simple = temp_dir + os.sep + "mu_simple.png"
     mcmc_chain = temp_dir + os.sep + "mcmc_simple.npy"
     c = ChainConsumer()
+    print("Fit model")
     my_model = PerfectRedshift(lcs, [z], t0, name="My posterior")
     sampler = EnsembleSampler(temp_dir=temp_dir, num_steps=20000)
     my_model.fit(sampler, chain_consumer=c)
@@ -60,12 +63,13 @@ if __name__ == "__main__":
         else:
             mcchain = np.load(mcmc_chain)
         c.add_chain(mcchain, name="sncosmo mcmc", parameters=["$t_0$", "$x_0$", "$x_1$", "$c$"])
-
+    print("Plot surfaces")
     c.configure_contour(shade=True, shade_alpha=0.2, sigmas=[0.0, 1.0, 2.0, 3.0])
     c.configure_bar(shade=True)
     c.plot(filename=surface, figsize=(7, 7))
-    fig = sncosmo.plot_lc(lcs[0], model=fitted_model, errors=res.errors)
-    fig.savefig(temp_dir + os.sep + "lc_simple.png", bbox_inches="tight", dpi=300)
+    if False:
+        fig = sncosmo.plot_lc(lcs[0], model=fitted_model, errors=res.errors)
+        fig.savefig(temp_dir + os.sep + "lc_simple.png", bbox_inches="tight", dpi=300)
 
     alpha = 0.14
     beta = 3.15
@@ -73,6 +77,7 @@ if __name__ == "__main__":
     c2 = ChainConsumer()
     means = []
     stds = []
+    print("Add chains")
     for i in range(len(c.chains)):
         chain = c.chains[i]
         apparent_interp = generate_and_return()

@@ -17,6 +17,7 @@ from joblib import Parallel, delayed
 import numpy as np
 import logging
 from astropy.cosmology import WMAP9, FlatwCDM
+import matplotlib.pyplot as plt
 
 
 def get_zp_and_name(shallow):
@@ -26,7 +27,7 @@ def get_zp_and_name(shallow):
         return [34.24, 34.85, 34.94, 35.42], "deep"
 
 
-def get_supernova_data(n=1300, ston_thresh=5, shallow=True):
+def get_supernova_data(n=1500, ston_thresh=5, shallow=True):
     zp, name = get_zp_and_name(shallow)
     temp_dir = os.path.dirname(__file__) + "/output/supernova_data_%s" % name
     if not os.path.exists(temp_dir):
@@ -36,8 +37,10 @@ def get_supernova_data(n=1300, ston_thresh=5, shallow=True):
     res = np.array([r for r in ress if r is not None])
     ston = res[:, 6]
     res = res[ston > ston_thresh, :]
-    z = res[:, 1]
-    # res = res[z < 0.7, :]
+
+    diff = np.abs(res[:, 7] - (WMAP9.distmod(res[:, 1]).value - 19.3))
+    print(diff)
+    res = res[(diff < 4), :]
     # [seed, z, t0, x0, x1, c, ston] + mus + stds)
     #            zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit
     print("Supernova data", res.shape)
@@ -87,7 +90,7 @@ def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
     zsort = sorted(zs)
     distmod = WMAP9.distmod(zsort).value - 19.3
     ax.errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1), ms=4, fmt='o', label=r"minuit", color="r", alpha=0.2)
-    ax.errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.05*0.05), fmt='o', ms=4, label=r"mcmc", color="b", alpha=0.2)
+    ax.errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.1*0.1), fmt='o', ms=4, label=r"mcmc", color="b", alpha=0.2)
     ax.plot(zsort, distmod, 'k')
     ax.set_xlabel("$z$")
     ax.set_ylabel(r"$\mu(\mathcal{C})$")
@@ -95,6 +98,8 @@ def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
     fig.savefig("output/obs_cosmology_%s.png" % n, bbox_inches="tight", dpi=300, transparent=True)
 
 if __name__ == "__main__":
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
     for n in ["deep", "shallow"]:
         is_shallow = n == "shallow"
         bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_%s.npy" % n
@@ -109,7 +114,7 @@ if __name__ == "__main__":
         fitter_mcmc = SimpleCosmologyFitter("mcmc", zs, mu_mcmc, std_mcmc)
         fitter_minuit = SimpleCosmologyFitter("minuit", zs, mu_minuit, std_minuit)
 
-        sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=5000, num_burn=1000)
+        sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=25000, num_burn=1000)
         c = fitter_mcmc.fit(sampler=sampler)
         c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
         c.names = ["emcee", "minuit"]
