@@ -3,7 +3,7 @@ from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
     ParameterTransformation
 from dessn.framework.samplers.batch import BatchMetropolisHastings
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 from dessn.utility.viewer import Viewer
 import matplotlib.pyplot as plt
 import numpy as np

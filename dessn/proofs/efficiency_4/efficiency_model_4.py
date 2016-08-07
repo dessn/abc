@@ -3,7 +3,7 @@ from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
     ParameterTransformation
 from dessn.framework.samplers.batch import BatchMetropolisHastings
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 from dessn.utility.viewer import Viewer
 import matplotlib.pyplot as plt
 import numpy as np
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     plot_weights(dir_name)
     c = ChainConsumer()
     v = Viewer([[100, 300], [0, 70]], parameters=[r"$\mu$", r"$\sigma$"], truth=[200, 40])
-    n = 2
+    n = 1
     w = 8
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n
 
@@ -267,7 +267,7 @@ if __name__ == "__main__":
         mean, std, threshold, lall, zall, fall, mask = get_data(seed=i, n=500)
         theta = [mean, std]
 
-        kwargs = {"num_steps": 8000, "num_burn": 4000, "save_interval": 60,
+        kwargs = {"num_steps": 30000, "num_burn": 4000, "save_interval": 60,
                   "plot_covariance": True, "unify_latent": True}  # , "callback": v.callback
         sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
-    c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
+    c.configure_contour(sigmas=[0, 1, 2], shade=True, shade_alpha=0.3)
     c.plot(filename=plot_file, truth=theta, figsize=(5, 5), legend=False)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
