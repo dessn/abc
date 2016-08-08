@@ -204,7 +204,8 @@ comoving volume of the DES deep-field area of 30 square degrees using the ``snco
 function ``zdist``.
 
 We assume perfectly realised zero points, which at the time of analysis were given
-as :math:`34.24,\ 34.85,\ 34.94,\ 35.42` for the *g, r, i* and *z* bands. Observational cadence
+as :math:`[32.46, 32.28, 32.55, 33.12]` for the *g, r, i* and *z* bands in the shallow field,
+and :math:`[34.24, 34.85, 34.94, 35.42]`. Observational cadence
 is set to 5 days, and weather conditions and moon cycle are simulated in light curve generation.
 
 Given this, we can compute the weight as a function of the two cosmological parameters free:
