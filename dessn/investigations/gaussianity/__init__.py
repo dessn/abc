@@ -190,7 +190,7 @@ Cosmology Impact
 ----------------
 
 
-To test the impact on cosmology fits this bias might have, I implement a basic cosmology
+To test the impact on cosmology fits this bias might have, I implemented a basic cosmology
 simulation.
 
 We start with the basics, and assume that supernova are drawn from some underlying
@@ -221,38 +221,55 @@ cosmology to be biased, however both input data (one using skewed ``minuit`` out
 and the other using the output summary stats from an ``emcee`` chain) have the same
 selection effects and so should still give the same output posterior surface.
 
-Any significant differences in these surfaces - which are generated assuming high
-quality observation of 500 supernova - would be grounds for a more in depth
-investigation where we correct for selection effects and can thus quantise the bias.
-
 Using selection effects of one point in one band being above a signal to noise
 of 4, we plot the supernova distance modulus minus the cosmology distance
-modulus to show the bias in redshift.
+modulus to show the bias in redshift, for both the shallow and deep field.
 
- .. figure::     ../dessn/investigations/gaussianity/output/obs_cosmology.png
+ .. figure::     ../dessn/investigations/gaussianity/output/obs_cosmology_shallow.png
     :align:     center
     :width:     100%
 
-    An illustration of the bias produced between the two different fitting methodologies.
+    An illustration of the bias produced between the two different fitting methodologies
+    for observations in the shallow field of 1031 supernova.
+
+ .. figure::     ../dessn/investigations/gaussianity/output/obs_cosmology_deep.png
+    :align:     center
+    :width:     100%
+
+    An illustration of the bias produced between the two different fitting methodologies
+    for observations in the deep field of 1474 supernova.
+
 
 The output surfaces for the supernova data put through a simplistic cosmology analysis
- are shown below, and we can see a difference
-in both the recovered value for :math:`\Omega_m` and :math:`w`. However, the
-difference in recovered values is not significant in this example, where we find
-for ``minuit`` summary
-statistics :math:`\Omega_m = 0.411^{+0.028}_{-0.038},\ w= -1.42^{+0.16}_{-0.17}`
-and for the ``emcee`` summary statistics we
-find :math:`\Omega_m = 0.416^{+0.029}_{-0.035},\ w=-1.45^{+0.16}_{-0.18}`.
+are shown below, and we can see a difference in both the recovered value for :math:`\Omega_m` and :math:`w`.
 
 
- .. figure::     ../dessn/investigations/gaussianity/output/comparison5.png
++--------+-----------------------------------------------------------------+---------------------------------------------------------+
+| Method | **Shallow**                                                     | **Deep**                                                |
++--------+---------------------------------+-------------------------------+---------------------------------+-----------------------+
+|        | :math:`\Omega_m`                | :math:`w`                     | :math:`\Omega_m`                | :math:`w`             |
++--------+---------------------------------+-------------------------------+---------------------------------+-----------------------+
+| emcee  | :math:`0.326^{+0.025}_{-0.029}` | :math:`-1.13\pm 0.12`         | :math:`0.323^{+0.041}_{-0.050}` | :math:`-1.11\pm 0.17` |
++--------+---------------------------------+-------------------------------+---------------------------------+-----------------------+
+| minuit | :math:`0.369^{+0.019}_{-0.022}` | :math:`-1.30^{+0.12}_{-0.13}` | :math:`0.416^{+0.023}_{-0.030}` | :math:`-1.51\pm 0.20` |
++--------+---------------------------------+-------------------------------+---------------------------------+-----------------------+
+
+The offset is more clearly shown in the likelihood surfaces:
+
+
+ .. figure::     ../dessn/investigations/gaussianity/output/comparison_shallow.png
     :align:     center
     :width:     100%
 
     Comparison of the likelihood surfaces when using summary statistics
-    of different light curve fitting algorithms.
+    of different light curve fitting algorithms for observations in the shallow field.
 
+ .. figure::     ../dessn/investigations/gaussianity/output/comparison_deep.png
+    :align:     center
+    :width:     100%
 
+    Comparison of the likelihood surfaces when using summary statistics
+    of different light curve fitting algorithms for observations in the deep field.
 
 
 Summary
