@@ -52,6 +52,7 @@
 % overwriting existing commands. Example:
 %\newcommand{\pcm}{\,cm$^{-2}$}	% per cm-squared
 \newcommand{\blue}{\color{blue}}
+\newcommand{\red}{\color{red}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%
@@ -103,78 +104,56 @@ Write an abstract.
 
 \section{Introduction}
 
-
-In the years since the discovery of the acceleration of our universe \citep{RiessFilippenko1998, SchmidtSuntzeff1998, PerlmutterAldering1999}, supernova cosmology continued to grow as an important cosmological probe. Recent supernova studies offer far greater statistical power than ever before, systematics are better understood, and the very phenomenon of supernova are described with improved models \citep{GuyAstier2007, ConleyGuy2011, BetouleKessler2014, RubinAldering2015}. 
-
+In the years since the discovery of the acceleration of our universe \citep{RiessFilippenko1998, SchmidtSuntzeff1998, PerlmutterAldering1999}, supernova cosmology continued to grow as an important cosmological probe. Recent supernova studies offer far greater statistical power than ever before, systematics are better understood, and the very phenomenon of supernova are described with improved models \citep{GuyAstier2007, ConleyGuy2011, BetouleKessler2014, RubinAldering2015}, and with increased statistical power and model fidelity, systematics are now the limiting constraint in supernova studies \citep{ConleyGuy2011, SuzukiRubin2012, ScolnicRest2014} {\red UPDATE citations, used from Betoule}. In this paper we investigate a potential source of systematics unaddressed in prior studies -- the gaussianity of supernova summary statistics. We perform this investigation within the context of the Dark Energy Survey, which is introduced in Section~\ref{sec:des}. In Section~\ref{sec:motivation} we summarise recent supernova models and analyses, and in Section~\ref{sec:methodology} and Section~\ref{sec:cosmology} we investigate the effect of the assumption of gaussianity on both the supernova distributions obtained and the follow on impact on cosmology.
 
 
-\vspace{10mm}
-
-SNLS \citep{AstierGuy2006, SullivanGuy2011}
-
-ESSENCE \citep{WoodVaseyMiknaitis2007}
-
-Pan-STARRS \citep{TonryStubbs2012, ScolnicRest2014, RestScolnic2014}
-
-SDSS-II \citep{FriemanBassett2008, KesslerBecker2009, SollermanMortsell2009, LampeitlNichol2010, CampbellDAndrea2013}
-
-Harvard-Smithsonian Center for Astrophysics survey \citep[CfA,][]{HickenChallis2009}
-
-Carnegie Supernova Project \citep[CSP,][]{ContrerasHamuy2010, FolatelliPhillips2010, StritzingerPhillips2011}
-
-Lick Observatory Supernova Search \citep[LOSS,][]{GaneshalingamLi2013}
-	
-Nearby Supernova Factory \cite[SNF,][]{AlderingAdam2002}
-
-HST used in \citep{RiessStrolger2007, SuzukiRubin2012}
-
-Modern results systematic limited \citep{ConleyGuy2011, SuzukiRubin2012, ScolnicRest2014}
-
-Efforts overcome \citep{IvezicSmith2007, RegnaultConley2009, TonryStubbs2012}
 
 
-DES
 
-Compilations:
 
-Suzuki 2012: Union 2.1
-For citing SALT2, cite Guy2007, Guy2010, Mosher2014
+
+
+\section{The Dark Energy Survey}
+\label{sec:des}
+
+The Dark Energy Survey \citep[DES,][]{des2005, des2016} is a 5000 sq. deg. photometric redshift survey. The survey will image approximately 300 million galaxies in 5 broadband filters (\textit{grizY}) using the Dark Energy Camera \citep[DECam,][]{FlaugherDiehl2015}. Forty sq. deg. of the sky will be repeatedly images in the \textit{griz} bands for the supernova luminosity distance probe, and is expected to yield observations of approximately 1900 Type Ia supernova up to a redshift of $z=1.2$. {\red No idea where to look for more details on this. On cadence, updated estimates, cadence, difference between shallow and deep fields.}
+
+
+
+
+
+
+
+
+\section{Motivation}
+\label{sec:motivation}
+
+In order to perform a supernova analysis, an underlying Type Ia supernova model must be adopted. The most used model in recent years has been that of the SALT2 model \citep{GuyAstier2007, GuySullivan2010, MosherGuy2014} and in this analysis we restrict our investigations to this model. The SALT2 model characterises the Type Ia spectral energy distribution (SED) as a function of magnitude $x_0$, stretch $x_1$, colour $c$, phase $p$ and wavelength $\lambda$ via
+\begin{align}
+F(p,\lambda) &= x_0 \left[ M_0(p,\lambda) + x_1 M_1(p,\lambda)\right] \exp\left[c CL(\lambda)\right].
+\end{align} 
+Thus characterising an individual supernova's magnitude, colour and stretch (and associated covariance) allows recovery of the modelled SED. These summary statistics are used instead of the observed light curves in supernova analyses for computational reasons across many different fitting methodologies. In the Bayesian hierarchical analysis performed on the Unity 2.1 dataset \citep{SuzukiRubin2012} in \citet{RubinAldering2015}, each supernova is described by a latent colour and stretch, which means an analysis with $N$ supernova grows in dimensionality as $2N + x$, where $x$ represents underlying (non-latent) parameters (such as $\Omega_m$). If each supernova has $M$ observations, a full hierarchical model would increase in dimensionality to $(2+M)N + x$, providing vastly increased computational complexity in resolving the underlying posterior surface. In frequentist analyses like that of the Joint Lightcurve Analysis \citep{BetouleKessler2014}, the correlation of all light curve points via the calibration zero points instead leads to computational difficulties in that a covariance matrix of approximate size $MN$ is introduced into the likelihood calculation, which would be prohibitively expensive to invert. Therefore, instead of utilising light curve data directly in cosmological models, light curves are fit to the supernova data to produce summary statistics, and these are then used in cosmology analyses. 
+
+One key assumption when doing this is that these summary statistics are in fact gaussian in nature. Often this is explicitly assumed in the analysis \citep{MarchTrotta2011, RubinAldering2015}, however it is often implicitly assumed \citep{SullivanGuy2011, SuzukiRubin2012, CampbellDAndrea2013, BetouleKessler2014}. Investigation into asymmetries in the summary statistics are generally limited to asymmetries in the parent colour and stretch distribution \citep{ScolnicRest2014}. {\red More citations.} In our paper we therefore do not investigate biases or asymmetries found in underlying population distributions, but asymmetries and biases in the SALT2 parameter probability surface, and the impact of assuming the Gaussianity of said surface.
+
+
+
+
+
+
+\section{Methodology}
+\label{sec:methodology}
+
+We begin our investigation by generating supernova light curves for mock supernova in both the DES deep and shallow fields. As prior studies have investigated the effects of parent colour and stretch distributions, we generate all canonical supernova ($x_1 = c = 0$). The supernova are simulated in the \textit{griz} bands with an observational cadence of 5 days, starting from a time $t = -35$, giving 7 observations before the peak to remove the biases introduced by having little data before the luminosity peak {\red CITE}. Weather conditions and moon phase are simulated based on observed DES seeing {\red Cite excel file?}. Simulated light curves undergo a simple selection cut of having at least one observation in any band above a signal to noise of $5$.
+
+We investigate the potential asymmetries in SALT2 summary statistics by fitting the light curves and obtaining summary statistics using different algorithms in the software package \verb|sncosmo| \citep{Barbary2014}. Specifically, we obtain a full posterior surface using our own MCMC fitting methodology, and compare against summary statistics generated using a different MCMC approach (the \verb|mcmc_lc| method in \verb|sncosmo|), nestled sampling (the \verb|nest_lc| method) and minuit (via the \verb|fit_lc| method). The MCMC based algorithm utilises the package \verb|emcee| \citep{ForemanMackey2013}, whilst the nestled sampling is based off \verb|nestle| \citep{Skilling2004, Barbary2015}
+
 
 
 
 
 
 {\blue
-Few sentences on cosmology.
-
-
-
-Use of supernova in cosmology.
-
-
-DES supernova (segue to precision)
-
-Precision measurements, systematics more important than ever.
-
-Thus motivation}
-
-\section{Motivation}
-
-
-SALT2 and other models
-
-why summary stats are used (instead of light curve data)
-
-fitting methodologies
-
-highlight Previous studies using summary statistics and their data sets.
-
-Assumed gaussianity.
-
-
-
-\section{Methodology}
-
 to investigate, go to lowest level and simulate light curves
 
 to start with, realise only canonical supernova from abs mag with some scatter, using WMAP9 cosmology. Do this for shallow and deep fields, and fit the light curves using different methods.
@@ -183,10 +162,10 @@ state skewness introduced as z increases and ston decreases
 
 which creates difference when between mean and max likelihood
 
-section detailing the bias as a function of redshift (and ston if possible). 
+section detailing the bias as a function of redshift (and ston if possible). }
 
 \section{Cosmological Impact}
-
+\label{sec:cosmology}
 Fit cosmology against simulated SN
 
 Do for des shallow and deep, using survey area to produce z dist plus extra low-z sample (0.05<z<0.2). simulate from light curves, apply selection effect of ston>5to cull bad fits. have <x> shallow.
@@ -262,3 +241,28 @@ Try to keep it short.
 \end{document}
 
 % End of mnras_template.tex
+
+
+
+
+%SNLS \citep{AstierGuy2006, SullivanGuy2011}
+%
+%ESSENCE \citep{WoodVaseyMiknaitis2007}
+%
+%Pan-STARRS \citep{TonryStubbs2012, ScolnicRest2014, RestScolnic2014}
+%
+%SDSS-II \citep{FriemanBassett2008, KesslerBecker2009, SollermanMortsell2009, LampeitlNichol2010, CampbellDAndrea2013}
+%
+%Harvard-Smithsonian Center for Astrophysics survey \citep[CfA,][]{HickenChallis2009}
+%
+%Carnegie Supernova Project \citep[CSP,][]{ContrerasHamuy2010, FolatelliPhillips2010, StritzingerPhillips2011}
+%
+%Lick Observatory Supernova Search \citep[LOSS,][]{GaneshalingamLi2013}
+%	
+%Nearby Supernova Factory \cite[SNF,][]{AlderingAdam2002}
+%
+%HST used in \citep{RiessStrolger2007, SuzukiRubin2012}
+%
+%Modern results systematic limited \citep{ConleyGuy2011, SuzukiRubin2012, ScolnicRest2014}
+%
+%Efforts overcome \citep{IvezicSmith2007, RegnaultConley2009, TonryStubbs2012}
