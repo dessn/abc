@@ -289,12 +289,13 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
     res = np.array([r for r in res if r is not None])
     s = res[:, 6]
     res = res[(s > 5), :]
-
+    skews = res[:, -1]
+    res = res[np.abs(skews) < 1, :]
+    skews = res[:, -1]
     seeds = res[:, 0]
     z = res[:, 1]
     s = res[:, 6] / 100
 
-    skews = res[:, -1]
     diff_mu_ps = -res[:, 7] + res[:, 8]
     diff_mu_fs = -res[:, 7] + res[:, 9]
     diff_mu_ms = -res[:, 7] + res[:, 10]
@@ -319,7 +320,7 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
         print(index, diff_mu_fs[im])
         os.remove(temp_dir + os.sep + "final%d.npy" % index)
         print("Getting special result for index %d" % index)
-        get_result(temp_dir, zeropoints, index, special=True)
+        get_result(temp_dir, zeropoints, index, scatter, special=True)
         shutil.copyfile(temp_dir + os.sep + "surfaces_%d.png" % index,
                         os.path.dirname(__file__) + "/output/bias_surface.png")
 
@@ -329,49 +330,59 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
         print(index, diff_mu_fs[im])
         # os.remove(temp_dir + os.sep + "final%d.npy" % index)
         print("Getting special result for index %d" % index)
-        get_result(temp_dir, zeropoints, index)
+        get_result(temp_dir, zeropoints, index, scatter)
     else:
         print("Creating plots")
         import matplotlib.pyplot as plt
-        fig, axes = plt.subplots(ncols=2, nrows=2, figsize=(8, 7))
+        from matplotlib import gridspec
+        from matplotlib.ticker import MaxNLocator
+        gs = gridspec.GridSpec(3, 1, height_ratios=[2, 2, 1], hspace=0.0, wspace=0.0)
+        fig = plt.figure(figsize=(4.5, 8))
+        ax1 = fig.add_subplot(gs[0])
+        ax2 = fig.add_subplot(gs[1], sharex=ax1)
+        ax3 = fig.add_subplot(gs[2], sharex=ax1)
+        axes = [ax1, ax2, ax3]
+        plt.setp(ax2.get_xticklabels(), visible=False)
+        plt.setp(ax1.get_xticklabels(), visible=False)
 
-        axes = axes.T.flatten()
+
         datas = [[diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_mu_ns],
-                 [diff_mu_ps / stdd, diff_mu_fs / stdd, diff_mu_ms / stdd, diff_mu_ns / stdd],
-                 [diff_std_ps2, diff_std_fs2, diff_std_ms2, diff_std_ns2]]
-        labels = [["Posterior", "minuit", "emcee", "nestle"],
-                  ["Posterior", "minuit", "emcee", "nestle"], ["P/PSS", "P/FSS", "P/MSS", "P/NSS"]]
-
-        axes[0].set_ylabel(r"$\Delta (\mu + M)$", fontsize=14)
-        axes[1].set_ylabel(r"$\Delta (\mu + M) / \sigma_{\mu + M}$", fontsize=14)
-        axes[2].set_ylabel(r"Percent Ratio $\Delta \sigma_{\mu + M}$", fontsize=14)
+                 [diff_mu_ps / stdd, diff_mu_fs / stdd, diff_mu_ms / stdd, diff_mu_ns / stdd]]
+        labels = ["Posterior", "minuit", "emcee", "nestle"]
+        fmts= ["o", "s", "d", "^"]
+        axes[0].set_ylabel(r"$\Delta \mu$", fontsize=14)
+        axes[1].set_ylabel(r"$\Delta \mu / \sigma_{\mu}$", fontsize=14)
+        axes[2].set_ylabel(r"Skewness", fontsize=12)
         zs = np.linspace(z.min(), z.max(), 11)
 
         n, _ = np.histogram(z, bins=zs)
-        for ax, data, label in zip(axes, datas, labels):
-            ax.set_xlabel("$z$", fontsize=14)
-            for i, (d, l) in enumerate(zip(data, label)):
+        for ax, data in zip(axes, datas):
+            for i, (d, l, f) in enumerate(zip(data, labels, fmts)):
                 mean, edges = np.histogram(z, bins=zs, weights=d)
                 std, _ = np.histogram(z, bins=zs, weights=d * d)
                 mean /= n
                 std = np.sqrt(std / n - mean * mean)
                 ec = 0.5 * (edges[:-1] + edges[1:])
-                ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt='o', yerr=std, label=l)
+                ax.errorbar(ec + (0.01 * (i - 1)), mean, fmt=f, yerr=std, label=l)
 
-        axes[0].legend(loc=2)
+        axes[0].legend(loc=2, frameon=False)
         print("Creating skewness plot")
-
         skewhist, edges = np.histogram(z, bins=zs, weights=skews)
         std, _ = np.histogram(z, bins=zs, weights=skews * skews)
         skewhist /= n
         std = np.sqrt(std / n - skewhist * skewhist)
         ec = 0.5 * (edges[:-1] + edges[1:])
-        axes[-1].errorbar(ec, skewhist, fmt='o', yerr=std, label="Skewness")
-        axes[-1].legend(loc=3)
-        axes[-1].set_xlabel("$z$")
+        axes[-1].errorbar(ec, skewhist, fmt='o', yerr=std, color='k', label="Skewness")
+        axes[-1].set_xlabel("$z$", fontsize=14)
+
+        ax1.yaxis.set_major_locator(MaxNLocator(7, prune="lower"))
+        ax2.yaxis.set_major_locator(MaxNLocator(7, prune="lower"))
+        ax3.yaxis.set_major_locator(MaxNLocator(5, prune="upper"))
+
         plt.tight_layout()
-        fig.savefig(os.path.dirname(__file__) + "/output/bias_%s.png" % foldername, dpi=300, bbox_inches="tight",
-                    transparent=True)
+
+        fig.savefig(os.path.dirname(__file__) + "/output/bias_%s.png" % foldername, dpi=300, bbox_inches="tight", transparent=True)
+        fig.savefig(os.path.dirname(__file__) + "/output/bias_%s.pdf" % foldername, dpi=300, bbox_inches="tight", transparent=True)
         # plt.show()
 
 

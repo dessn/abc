@@ -248,37 +248,34 @@ if __name__ == "__main__":
 
     xx, yy = np.meshgrid(zs, ston, indexing='ij')
 
-    fig, axes = plt.subplots(ncols=2, nrows=3, figsize=(12, 14))
+    fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(5, 4.5))
+    data = diff_mu_fs
 
-    axes = axes.T.flatten()
-    datas = [diff_mu_ps, diff_mu_fs, diff_mu_ms, diff_std_ps, diff_std_fs, diff_std_ms]
-    titles = ["PSS - P", "FSS - P", "MSS - P", "P/PSS", "P/FSS", "P/MSS"]
-    for ax, data, title in zip(axes, datas, titles):
-        if True:
-            m = polyfit2d(z, s, data, order=2)
-            zz = polyval2d(xx, yy, m)
-        else:
-            zz = griddata((z, s), data, (xx, yy), method="nearest")
+    if True:
+        m = polyfit2d(z, s, data, order=2)
+        zz = polyval2d(xx, yy, m)
+    else:
+        zz = griddata((z, s), data, (xx, yy), method="nearest")
 
-        if np.min(zz) > 0.0:
-            vmax = np.max(np.abs(zz - 1)) + 1
-            vmin = 1 - (vmax - 1)
-        else:
-            vmax = np.max(np.abs(zz))
-            vmin = -vmax
-        h = ax.contourf(xx, yy, zz, 30, cmap='bwr', vmin=vmin, vmax=vmax)
-        ax.scatter(z, s, c=data, s=20, cmap='bwr', vmin=vmin, vmax=vmax)
-        ax.set_ylim(5, 10)
-        ax.set_xlim(z.min(), z.max())
-        div1 = make_axes_locatable(ax)
-        cax1 = div1.append_axes("right", size="5%", pad=0.05)
-        plt.colorbar(h, cax=cax1)
-        if False:
-            for i, zp, sp in zip(seeds, z, s):
-                ax.text(zp, sp, "%d" % i, alpha=0.3)
-        ax.set_xlabel("$z$")
-        ax.set_ylabel("$S/N$")
-        ax.set_title(title)
+    if np.min(zz) > 0.0:
+        vmax = np.max(np.abs(zz - 1)) + 1
+        vmin = 1 - (vmax - 1)
+    else:
+        vmax = np.max(np.abs(zz))
+        vmin = -vmax
+    h = ax.contourf(xx, yy, zz, 30, cmap='bwr', vmin=vmin, vmax=vmax)
+    ax.scatter(z, s, c=data, s=20, cmap='bwr', vmin=vmin, vmax=vmax, edgecolor="none")
+    ax.set_ylim(5, 10)
+    ax.set_xlim(z.min(), z.max())
+    div1 = make_axes_locatable(ax)
+    cax1 = div1.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(h, cax=cax1)
+    if False:
+        for i, zp, sp in zip(seeds, z, s):
+            ax.text(zp, sp, "%d" % i, alpha=0.3)
+    ax.set_xlabel("$z$")
+    ax.set_ylabel("$S/N$")
     plt.tight_layout()
-    fig.savefig(os.path.dirname(__file__) + "/output/bias2.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias.png", dpi=300, bbox_inches="tight", transparent=True)
+    fig.savefig(os.path.dirname(__file__) + "/output/bias.pdf", dpi=300, bbox_inches="tight", transparent=True)
 
