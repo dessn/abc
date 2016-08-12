@@ -86,16 +86,38 @@ def get_bias_matrix(filename, shallow=True):
 
 def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
+    from matplotlib import gridspec
+    from matplotlib.ticker import MaxNLocator
+    fig = plt.figure(figsize=(4.5, 4))
+    gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1], hspace=0.0, wspace=0.0)
+    ax0 = fig.add_subplot(gs[0])
+    ax1 = fig.add_subplot(gs[1], sharex=ax0)
+    axes = [ax0, ax1]
     zsort = sorted(zs)
     distmod = WMAP9.distmod(zsort).value - 19.3
-    ax.errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1), ms=4, fmt='o', label=r"minuit", color="r", alpha=0.2)
-    ax.errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.1*0.1), fmt='o', ms=4, label=r"mcmc", color="b", alpha=0.2)
-    ax.plot(zsort, distmod, 'k')
-    ax.set_xlabel("$z$")
-    ax.set_ylabel(r"$\mu(\mathcal{C})$")
-    ax.legend(loc=2)
+    distmod2 = WMAP9.distmod(zs).value - 19.3
+    ms = 2
+    alpha = 0.4
+    axes[0].errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1),
+                     ms=ms, fmt='o', label=r"minuit", color="r", alpha=alpha)
+    axes[0].errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.1*0.1), fmt='o',
+                     ms=ms, label=r"mcmc", color="b", alpha=alpha)
+    axes[1].errorbar(zs, mu_minuit - distmod2, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1),
+                     ms=ms, fmt='o', label=r"minuit", color="r", alpha=alpha)
+    axes[1].errorbar(zs, mu_mcmc - distmod2, yerr=np.sqrt(std_mcmc*std_mcmc + 0.1*0.1), fmt='o',
+                     ms=ms, label=r"mcmc", color="b", alpha=alpha)
+    axes[0].plot(zsort, distmod, 'k')
+    axes[1].axhline(0, color='k')
+    axes[1].set_xlabel("$z$")
+    axes[0].set_ylabel(r"$\mu$")
+    axes[1].set_ylabel(r"$\mu_{\rm obs} - \mu(\mathcal{C})$")
+    axes[0].legend(loc=2, frameon=False)
+    plt.setp(ax0.get_xticklabels(), visible=False)
+    ax0.yaxis.set_major_locator(MaxNLocator(7, prune="lower"))
+    ax1.yaxis.set_major_locator(MaxNLocator(3))
+
     fig.savefig("output/obs_cosmology_%s.png" % n, bbox_inches="tight", dpi=300, transparent=True)
+    fig.savefig("output/obs_cosmology_%s.pdf" % n, bbox_inches="tight", dpi=300, transparent=True)
 
 if __name__ == "__main__":
     plt.rc('text', usetex=True)
@@ -119,4 +141,5 @@ if __name__ == "__main__":
         c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
         c.names = ["emcee", "minuit"]
         c.plot(filename="output/comparison_%s.png" % n, parameters=2, figsize=(5.5, 5.5))
+        c.plot(filename="output/comparison_%s.pdf" % n, parameters=2, figsize=(5.5, 5.5))
         print(c.get_latex_table())
