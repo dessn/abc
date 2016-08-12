@@ -151,11 +151,16 @@ We investigate the potential asymmetries in SALT2 summary statistics by fitting 
 \mu = m_B - M + \alpha x_1 - \beta c,
 \end{align}
 where we adopt the fiducial $\alpha = 0.14$ and $\beta = 3.15$ values from \citet{BetouleKessler2014}. This allows us to directly see the effects of any skewness or non-Gaussianity in any parameter on the cosmologically important distance modulus. We can compare the distributions in $\mu$ for the full posterior surface and for summary statistics, and also verify the skewness of the full distribution of $\mu$. We investigate any shift in $\langle \mu \rangle$, and change in the standard deviation $\sigma_\mu$, binning by redshift, with results illustrated in Figure~\ref{fig:bias_des}. We find strong evidence that, with increasing redshift, the skewness of the SALT2 fit posterior increases, and causes the maximum likelihood estimator to not only produce biased output, but overestimate the uncertainty of the result.
-\begin{figure*}
-	\includegraphics[width=\textwidth]{../output/bias_dessky.png}
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/bias_dessky.pdf}
     \caption{The mean bias in {\red fill out caption when updated figure}}
     \label{fig:bias_des}
-\end{figure*}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/bias_dessky_deep.pdf}
+	\caption{The mean bias in {\red fill out caption when updated figure}}
+	\label{fig:bias_des_deep}
+\end{figure}
 The likelihood surface for one of the skewed supernova fits is shown as an example in Figure \ref{fig:example}, where the effect of the skewness is readily apparent.
 \begin{figure*}
 	\includegraphics[width=\textwidth]{../output/bias_surface.png}
@@ -163,11 +168,11 @@ The likelihood surface for one of the skewed supernova fits is shown as an examp
 	\label{fig:example}
 \end{figure*}
 To confirm that the skewness is a result of redshift and not simply a result of the general trend of decreasing signal to noise, we plot the skewness as a function of both redshift and signal to noise in Figure \ref{fig:bias_skew}. Interestingly, doing this shows a negative skewness for low redshift, low signal-to-noise light curves, and a positive skewness for high redshift light curves, regardless of signal-to-noise.
-\begin{figure*}
-	\includegraphics[width=\textwidth]{../output/bias2.png}
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/bias.pdf}
 	\caption{{\red Fill out caption in updated figure}}
 	\label{fig:bias_skew}
-\end{figure*}
+\end{figure}
 Having confirmed that skewness becomes significant at higher redshift, we now seek to characterise this potential impact on cosmology.
 
 
@@ -181,6 +186,26 @@ toy cosmology model. adopt $\alpha$ and $\beta$ values for Phillips correction f
 
 Show cosmology results.
 
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/obs_cosmology_shallow.pdf}
+	\caption{{\red Fill out caption in updated figure}}
+	\label{fig:obs_cosmology_shallow}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/obs_cosmology_deep.pdf}
+	\caption{{\red Fill out caption in updated figure}}
+	\label{fig:obs_cosmology_deep}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/comparison_shallow.pdf}
+	\caption{{\red Fill out caption in updated figure}}
+	\label{fig:comparison_shallow}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=\columnwidth]{../output/comparison_deep.pdf}
+	\caption{{\red Fill out caption in updated figure}}
+	\label{fig:comparison_deep}
+\end{figure}
 
 %\begin{figure}
 %	% To include a figure from a file named example.*
