@@ -7,6 +7,7 @@ summary statistics fitting software cause any shift in output
 cosmological parameters.
 
 """
+from chainconsumer import ChainConsumer
 from scipy.interpolate import RegularGridInterpolator
 
 from dessn.investigations.gaussianity.simple_cosmology_fitter import SimpleCosmologyFitter
@@ -88,7 +89,7 @@ def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
     import matplotlib.pyplot as plt
     from matplotlib import gridspec
     from matplotlib.ticker import MaxNLocator
-    fig = plt.figure(figsize=(4.5, 4))
+    fig = plt.figure(figsize=(4.5, 5.5))
     gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1], hspace=0.0, wspace=0.0)
     ax0 = fig.add_subplot(gs[0])
     ax1 = fig.add_subplot(gs[1], sharex=ax0)
@@ -122,6 +123,7 @@ def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
 if __name__ == "__main__":
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
+    cc = ChainConsumer()
     for n in ["deep", "shallow"]:
         is_shallow = n == "shallow"
         bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_%s.npy" % n
@@ -138,8 +140,17 @@ if __name__ == "__main__":
 
         sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=25000, num_burn=1000)
         c = fitter_mcmc.fit(sampler=sampler)
+        cc.add_chain(c.chains[-1], parameters=c.parameters[-1], name="%s emcee" % n)
         c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
+        cc.add_chain(c.chains[-1], parameters=c.parameters[-1], name="%s minuit" % n)
         c.names = ["emcee", "minuit"]
-        c.plot(filename="output/comparison_%s.png" % n, parameters=2, figsize=(5.5, 5.5))
-        c.plot(filename="output/comparison_%s.pdf" % n, parameters=2, figsize=(5.5, 5.5))
+        c.plot(filename="output/comparison_%s.png" % n, parameters=2, figsize=(5.5, 5.5), truth=[0.3, -1.0])
+        c.plot(filename="output/comparison_%s.pdf" % n, parameters=2, figsize=(5.5, 5.5), truth=[0.3, -1.0])
         print(c.get_latex_table())
+    print(cc.get_latex_table())
+    cc.configure_general(colours=["#1E88E5", "#1E88E5", "#D32F2F", "#D32F2F"],
+                         linewidths=[1, 2, 1, 2],
+                         linestyles=["-", "--", "-", "--"])
+    cc.configure_contour(shade=[True, False, True, False])
+    cc.plot(filename="output/comparison.png", parameters=2, figsize=(5.5, 5.5), truth=[0.3, -1.0])
+    cc.plot(filename="output/comparison.pdf", parameters=2, figsize=(5.5, 5.5), truth=[0.3, -1.0])
