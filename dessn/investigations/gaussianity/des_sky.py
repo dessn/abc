@@ -289,12 +289,13 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
     res = np.array([r for r in res if r is not None])
     s = res[:, 6]
     res = res[(s > 5), :]
-
+    skews = res[:, -1]
+    res = res[np.abs(skews) < 1, :]
+    skews = res[:, -1]
     seeds = res[:, 0]
     z = res[:, 1]
     s = res[:, 6] / 100
 
-    skews = res[:, -1]
     diff_mu_ps = -res[:, 7] + res[:, 8]
     diff_mu_fs = -res[:, 7] + res[:, 9]
     diff_mu_ms = -res[:, 7] + res[:, 10]
@@ -366,7 +367,6 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
 
         axes[0].legend(loc=2, frameon=False)
         print("Creating skewness plot")
-
         skewhist, edges = np.histogram(z, bins=zs, weights=skews)
         std, _ = np.histogram(z, bins=zs, weights=skews * skews)
         skewhist /= n
