@@ -337,7 +337,7 @@ def run_analysis(foldername, zeropoints, scatter, savefigure=False, n=400):
         from matplotlib import gridspec
         from matplotlib.ticker import MaxNLocator
         gs = gridspec.GridSpec(3, 1, height_ratios=[2, 2, 1], hspace=0.0, wspace=0.0)
-        fig = plt.figure(figsize=(4.5, 8))
+        fig = plt.figure(figsize=(5, 9))
         ax1 = fig.add_subplot(gs[0])
         ax2 = fig.add_subplot(gs[1], sharex=ax1)
         ax3 = fig.add_subplot(gs[2], sharex=ax1)

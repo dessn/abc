@@ -269,7 +269,9 @@ if __name__ == "__main__":
     ax.set_xlim(z.min(), z.max())
     div1 = make_axes_locatable(ax)
     cax1 = div1.append_axes("right", size="5%", pad=0.05)
-    plt.colorbar(h, cax=cax1)
+    cb = plt.colorbar(h, cax=cax1)
+    cb.set_label(r"$\Delta \mu$")
+    cb.ax.tick_params(labelsize=8)
     if False:
         for i, zp, sp in zip(seeds, z, s):
             ax.text(zp, sp, "%d" % i, alpha=0.3)

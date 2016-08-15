@@ -28,7 +28,7 @@ def get_zp_and_name(shallow):
         return [34.24, 34.85, 34.94, 35.42], "deep"
 
 
-def get_supernova_data(n=1500, ston_thresh=5, shallow=True):
+def get_supernova_data(n=1500, nact=1000, ston_thresh=5, shallow=True):
     zp, name = get_zp_and_name(shallow)
     temp_dir = os.path.dirname(__file__) + "/output/supernova_data_%s" % name
     if not os.path.exists(temp_dir):
@@ -38,9 +38,8 @@ def get_supernova_data(n=1500, ston_thresh=5, shallow=True):
     res = np.array([r for r in ress if r is not None])
     ston = res[:, 6]
     res = res[ston > ston_thresh, :]
-
+    res = res[:nact, :]
     diff = np.abs(res[:, 7] - (WMAP9.distmod(res[:, 1]).value - 19.3))
-    print(diff)
     res = res[(diff < 4), :]
     # [seed, z, t0, x0, x1, c, ston] + mus + stds)
     #            zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit
@@ -100,13 +99,13 @@ def plot_cosmology(zs, mu_mcmc, mu_minuit, std_mcmc, std_minuit, n):
     ms = 2
     alpha = 0.4
     axes[0].errorbar(zs, mu_minuit, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1),
-                     ms=ms, fmt='o', label=r"minuit", color="r", alpha=alpha)
+                     ms=ms, fmt='o', label=r"Max. Likelihood", color="r", alpha=alpha)
     axes[0].errorbar(zs, mu_mcmc, yerr=np.sqrt(std_mcmc*std_mcmc + 0.1*0.1), fmt='o',
-                     ms=ms, label=r"mcmc", color="b", alpha=alpha)
+                     ms=ms, label=r"MCMC", color="b", alpha=alpha)
     axes[1].errorbar(zs, mu_minuit - distmod2, yerr=np.sqrt(std_minuit*std_minuit + 0.1*0.1),
-                     ms=ms, fmt='o', label=r"minuit", color="r", alpha=alpha)
+                     ms=ms, fmt='o', label=r"Max. Likelihood", color="r", alpha=alpha)
     axes[1].errorbar(zs, mu_mcmc - distmod2, yerr=np.sqrt(std_mcmc*std_mcmc + 0.1*0.1), fmt='o',
-                     ms=ms, label=r"mcmc", color="b", alpha=alpha)
+                     ms=ms, label=r"MCMC", color="b", alpha=alpha)
     axes[0].plot(zsort, distmod, 'k')
     axes[1].axhline(0, color='k')
     axes[1].set_xlabel("$z$")
@@ -126,8 +125,8 @@ if __name__ == "__main__":
     cc = ChainConsumer()
     for n in ["deep", "shallow"]:
         is_shallow = n == "shallow"
-        bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_%s.npy" % n
-        temp_dir2 = os.path.dirname(__file__) + "/output/cosmology_%s" % n
+        # bias_file = os.path.dirname(__file__) + "/output/cosmology/bias_%s.npy" % n
+        temp_dir2 = os.path.dirname(__file__) + "/output/cosmology2_%s" % n
         if not os.path.exists(temp_dir2):
             os.makedirs(temp_dir2)
         logging.basicConfig(level=logging.DEBUG)
@@ -138,12 +137,12 @@ if __name__ == "__main__":
         fitter_mcmc = SimpleCosmologyFitter("mcmc", zs, mu_mcmc, std_mcmc)
         fitter_minuit = SimpleCosmologyFitter("minuit", zs, mu_minuit, std_minuit)
 
-        sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=25000, num_burn=1000)
+        sampler = EnsembleSampler(temp_dir=temp_dir2, save_interval=60, num_steps=8000, num_burn=1000)
         c = fitter_mcmc.fit(sampler=sampler)
-        cc.add_chain(c.chains[-1], parameters=c.parameters[-1], name="%s emcee" % n)
+        cc.add_chain(c.chains[-1], parameters=c.parameters[-1], name="%s MCMC" % n.title())
         c = fitter_minuit.fit(sampler=sampler, chain_consumer=c)
-        cc.add_chain(c.chains[-1], parameters=c.parameters[-1], name="%s minuit" % n)
-        c.names = ["emcee", "minuit"]
+        cc.add_chain(c.chains[-1], parameters=c.parameters[-1], name="%s Max. Like." % n.title())
+        c.names = ["MCMC", "Max. Like."]
         c.plot(filename="output/comparison_%s.png" % n, parameters=2, figsize=(5.5, 5.5), truth=[0.3, -1.0])
         c.plot(filename="output/comparison_%s.pdf" % n, parameters=2, figsize=(5.5, 5.5), truth=[0.3, -1.0])
         print(c.get_latex_table())
