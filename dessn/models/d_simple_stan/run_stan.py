@@ -103,7 +103,7 @@ def get_analysis_data():
 
 def init_fn():
     vals = get_truths_labels_significance()
-    randoms = {k[0]: uniform[k[4], k[5]] for k in vals}
+    randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
 
     data = get_analysis_data()
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
