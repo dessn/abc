@@ -3,28 +3,41 @@ import pickle
 from astropy.cosmology import FlatwCDM
 import numpy as np
 from numpy.random import normal
+from scipy.stats import skewnorm
 
 def get_data():
     np.random.seed(0)
     n_sne = 500
-    obs_mBx1c = []
-    obs_mBx1c_cov = []
-    obs_mBx1c_cor = []
-    redshifts = np.linspace(0.05, 1.1, n_sne)
+
     MB = -19.3
     Om = 0.3
     w = -1.0
     H0 = 70.0
     intrinsic = 0.1
-    cosmology = FlatwCDM(H0, Om, w0=w)
-    dist_mod = cosmology.distmod(redshifts).value
     alpha = 0.1
     beta = 3
+
+    c_alpha = 0.0
+    c_loc = 0.1
+    c_scale = 0.1
+
+    x1_alpha = -0.5
+    x1_loc = 0.0
+    x1_scale = 1.0
+
+    obs_mBx1c = []
+    obs_mBx1c_cov = []
+    obs_mBx1c_cor = []
+
+    redshifts = np.linspace(0.05, 1.1, n_sne)
+    cosmology = FlatwCDM(H0, Om, w0=w)
+    dist_mod = cosmology.distmod(redshifts).value
+
     for mu in dist_mod:
-        x1 = np.random.normal(0, 1)
-        c = np.random.normal(0, 0.1)
-        mb = MB + mu - alpha * x1 + beta * c + normal(scale=intrinsic) + normal(scale=0.1)
-        diag = np.array([0.1, 0.02, 0.02])**2
+        x1 = skewnorm.rvs(x1_alpha, loc=x1_loc, scale=x1_scale)
+        c = skewnorm.rvs(c_alpha, loc=c_loc, scale=c_scale)
+        mb = MB + mu - alpha * x1 + beta * c + normal(scale=intrinsic) + normal(scale=0.05)
+        diag = np.array([0.05, 0.02, 0.02])**2
         cov = np.diag(diag)
         cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
         obs_mBx1c_cor.append(cor)
@@ -85,7 +98,8 @@ def init_fn():
         "beta": 3 + normal(scale=0.1),
         "true_c": cs + normal(scale=0.05, size=n_sne),
         "true_x1": x1s + normal(scale=0.1, size=n_sne),
-        "sigma_int": np.random.uniform(0.05, 0.3)
+        "sigma_int": np.random.uniform(0.05, 0.3),
+        "w": normal(loc=-1.0, scale=0.05)
     }
 
 
@@ -100,7 +114,7 @@ if __name__ == "__main__":
     data = get_data()
     import pystan
     sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=6000, warmup=1000, chains=4, init=init_fn)
+    fit = sm.sampling(data=data, iter=5000, warmup=1000, chains=4, init=init_fn)
     with open(t, 'wb') as output:
-        dictionary = fit.extract(pars=["MB", "Om",  "alpha", "beta", "sigma_int", "PointPosteriors"])
+        dictionary = fit.extract(pars=["MB", "Om", "w", "alpha", "beta", "sigma_int", "PointPosteriors"])
         pickle.dump(dictionary, output)

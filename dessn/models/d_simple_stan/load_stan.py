@@ -13,7 +13,8 @@ name_map = {
     "alpha": r"$\alpha$",
     "beta": r"$\beta$",
     "MB": "$M_B$",
-    "sigma_int": r"$\sigma_{\rm int}$"
+    "sigma_int": r"$\sigma_{\rm int}$",
+    "w": "$w$"
 }
 with open(t, 'rb') as output:
     chain = pickle.load(output)
@@ -32,7 +33,8 @@ truths = {
     "$w$": -1,
     r"$\sigma_{\rm int}$": 0.1,
     r"$\alpha$": 0.1,
-    r"$\beta$": 3
+    r"$\beta$": 3,
+    r"$w$": -1.0
 }
 c.plot(filename=td+"plot.png", truth=truths)
 # c.plot_walks(filename=td+"walk.png")

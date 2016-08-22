@@ -1,23 +1,28 @@
 data {
+
+    // Declaring array and data sizes
     int<lower=0> n_sne; // Number of supernovae
     int<lower=0> n_z; // Number of redshift points
     int<lower=0> n_simps; // Number of points in simpsons algorithm
 
+    // The input summary statistics from light curve fitting
     vector[3] obs_mBx1c [n_sne]; // SALT2 fits
     matrix[3,3] obs_mBx1c_cov [n_sne]; // Covariance of SALT2 fits
     matrix[3,3] obs_mBx1c_cor [n_sne]; // Correlation of SALT2 fits
 
-    real <lower=0> redshifts[n_sne]; // The redshift for each SN. Union2.1 used z_CMB, but this could be improved
+    // Input redshift data, assumed perfect redshift for spectroscopic sample
+    real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
-    real <lower=0> zs[n_z];
-    int redshift_indexes[n_sne]; // Index of supernova zs in redshift_array
+    // Helper data used for Simpsons rule.
+    real <lower=0> zs[n_z]; // List of redshifts to manually integrate over.
+    int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
 }
 
 parameters {
     // Underlying parameters
     real <lower = -20, upper = -18.> MB;
     real <lower = 0, upper = 1> Om;
-    //real <lower = -2, upper = -0.4> w;
+    real <lower = -2, upper = -0.4> w;
     real <lower = -0.3, upper = 0.5> alpha;
     real <lower = 0, upper = 5> beta;
     real <lower = 0, upper = 1> sigma_int;
@@ -25,6 +30,10 @@ parameters {
     // Latent Parameters
     real <lower = -8, upper = 8> true_x1[n_sne];
     real <lower = -1, upper = 2> true_c[n_sne];
+
+    // Hyper Parameters
+
+
 
 }
 
@@ -43,7 +52,7 @@ transformed parameters {
 
     // -------------Begin numerical integration-----------------
     for (i in 1:n_z) {
-        Hinv[i] <- 1./sqrt( Om*pow(1. + zs[i], 3) + (1. - Om)); // * pow(1. + zs[i], 3 * (1 + w)) );
+        Hinv[i] <- 1./sqrt( Om*pow(1. + zs[i], 3) + (1. - Om) * pow(1. + zs[i], 3 * (1 + w))) ;
     }
     cum_simps[1] <- 0.; // Redshift = 0 should be first element!
     for (i in 2:n_simps) {
@@ -79,5 +88,5 @@ transformed parameters {
 }
 model {
     increment_log_prob(sum(PointPosteriors));
-    // sigma_int ~ cauchy(0, 2.5);
+    sigma_int ~ cauchy(0, 2.5);
 }
