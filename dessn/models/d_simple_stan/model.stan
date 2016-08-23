@@ -13,6 +13,10 @@ data {
     // Input redshift data, assumed perfect redshift for spectroscopic sample
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
+    // Input ancillary data
+    real <lower=0.0, upper = 1.0> p_high_mass [n_sne]; // Probability each SN is in high mass gal
+    real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Probability each SN is in high mass gal
+
     // Helper data used for Simpsons rule.
     real <lower=0> zs[n_z]; // List of redshifts to manually integrate over.
     int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
@@ -28,6 +32,9 @@ parameters {
     real <lower = -0.3, upper = 0.5> alpha;
     real <lower = 0, upper = 5> beta;
     real <lower = 0, upper = 1> sigma_int;
+    // Other effects
+    real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
+    real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
 
     ///////////////// Latent Parameters
     real <lower = -8, upper = 8> true_x1[n_sne];
@@ -41,7 +48,6 @@ parameters {
     // Stretch distribution
     real <lower=-5, upper=5> x1_loc;
     real <lower=0, upper=5> x1_scale;
-    real <lower=-2, upper=2> x1_alpha;
 
 }
 
@@ -50,17 +56,20 @@ transformed parameters {
     vector [3] model_mBx1c [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
 
-    // Helper variables for simpsons rule
+    // Helper variables for Simpsons rule
     real Hinv [n_z];
     real cum_simps[n_simps];
     real model_mu[n_sne];
 
-    // Modelling instrincis dispersion
+    // Modelling intrinsic dispersion
     vector [3] intrinsic;
     matrix [3,3] int_mat;
 
-    // Lets actually record the propr posterior values
+    // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
+
+    // Other temp variables for corrections
+    real mass_correction;
 
     // -------------Begin numerical integration-----------------
     for (i in 1:n_z) {
@@ -84,7 +93,9 @@ transformed parameters {
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
-        model_mBx1c[i][1] = MB + model_mu[i] - alpha*true_x1[i] + beta*true_c[i];
+        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
+
+        model_mBx1c[i][1] = MB + model_mu[i] - alpha*true_x1[i] + beta*true_c[i] - mass_correction * p_high_mass[i];
         model_mBx1c[i][2] = true_x1[i];
         model_mBx1c[i][3] = true_c[i];
 
@@ -95,7 +106,7 @@ transformed parameters {
         //if (i == 1) { print("mb=", i, " ", model_mBx1c[i][1], "|", obs_mBx1c[i][1],"  ", alpha, " ", beta, " ", MB, " ", model_mu[i], " ", true_x1[i], " ", true_c[i]); }
 
         PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], model_mBx1c_cov[i]);
-        PointPosteriors[i] = PointPosteriors[i] + skew_normal_lpdf(true_x1[i] | x1_loc, x1_scale, x1_alpha);
+        PointPosteriors[i] = PointPosteriors[i] + normal_lpdf(true_x1[i] | x1_loc, x1_scale);
         PointPosteriors[i] = PointPosteriors[i] + skew_normal_lpdf(true_c[i] | c_loc, c_scale, c_alpha);
     }
 

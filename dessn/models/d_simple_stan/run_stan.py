@@ -13,19 +13,20 @@ def get_truths_labels_significance():
         ("w", -1.0, r"$w$", True, -1.5, -0.5),
         ("MB", -19.3, r"$M_B$", True, -20, -18.5),
         ("sigma_int", 0.1, r"$\sigma_{\rm int}$", True, 0.05, 0.4),
-        ("alpha", 0.1, r"$\alpha$", True, -1, 1),
-        ("beta", 3.0, r"$\beta$", True, -1, 4),
+        ("alpha", 0.1, r"$\alpha$", True, -0.3, 0.5),
+        ("beta", 3.0, r"$\beta$", True, 0, 5),
         ("c_loc", 0.1, r"$\langle c \rangle$", False, -0.2, 0.2),
         ("c_scale", 0.1, r"$\sigma_c$", False, 0.05, 0.2),
         ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
         ("x1_loc", 0.0, r"$\langle x_1 \rangle$", False, -1.0, 1.0),
         ("x1_scale", 1.0, r"$\sigma_{x1}$", False, 0.1, 2.0),
-        ("x1_alpha", -0.5, r"$\alpha_{x1}$", False, -2.0, 2.0)
+        ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
+        ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0)
     ]
     return result
 
 
-def get_physical_data(n_sne=1000, seed=0):
+def get_physical_data(n_sne=500, seed=0):
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
     np.random.seed(seed)
@@ -38,15 +39,24 @@ def get_physical_data(n_sne=1000, seed=0):
     cosmology = FlatwCDM(70.0, mapping["Om"], w0=mapping["w"])
     dist_mod = cosmology.distmod(redshifts).value
 
+    redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
     MB = mapping["MB"]
     alpha = mapping["alpha"]
     beta = mapping["beta"]
     intrinsic = mapping["sigma_int"]
-    for mu in dist_mod:
-        x1 = skewnorm.rvs(mapping["x1_alpha"], loc=mapping["x1_loc"], scale=mapping["x1_scale"])
+    dscale = mapping["dscale"]
+    dratio = mapping["dratio"]
+    p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
+    for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
+        x1 = normal(loc=mapping["x1_loc"], scale=mapping["x1_scale"])
         c = skewnorm.rvs(mapping["c_alpha"], loc=mapping["c_loc"], scale=mapping["c_scale"])
+        if np.random.random() < p:
+            mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
+        else:
+            mass_correction = 0.0
         mb = MB + mu - alpha * x1 + beta * c + normal(scale=intrinsic) + normal(scale=0.05)
-        diag = np.array([0.05, 0.02, 0.02]) ** 2
+        mb += -mass_correction * p
+        diag = np.array([0.05, 0.3, 0.05]) ** 2
         cov = np.diag(diag)
         cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
         obs_mBx1c_cor.append(cor)
@@ -58,7 +68,9 @@ def get_physical_data(n_sne=1000, seed=0):
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": obs_mBx1c_cov,
         "obs_mBx1c_cor": obs_mBx1c_cor,
-        "redshifts": redshifts
+        "redshifts": redshifts,
+        "redshift_pre_comp": redshift_pre_comp,
+        "p_high_mass": p_high_masses
     }
 
 
@@ -109,8 +121,8 @@ def init_fn():
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
     n_sne = x1s.size
-    randoms["true_c"] = cs + normal(scale=0.05, size=n_sne),
-    randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne),
+    randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
+    randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
     return randoms
 
 
@@ -132,7 +144,7 @@ if __name__ == "__main__":
     # Run that stan
     import pystan
     sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=3000, warmup=1000, chains=4, init=init_fn)
+    fit = sm.sampling(data=data, iter=1000, chains=4, init=init_fn)
 
     # Dump relevant chains to file
     with open(t, 'wb') as output:
