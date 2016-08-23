@@ -21,7 +21,10 @@ def get_truths_labels_significance():
         ("x1_loc", 0.0, r"$\langle x_1 \rangle$", False, -1.0, 1.0),
         ("x1_scale", 1.0, r"$\sigma_{x1}$", False, 0.1, 2.0),
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
-        ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0)
+        ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
+        ("intrinsic_fractions", np.array([1.0, 0.0, 0.0]), ["$f_{m}$", "$f_{x1}$", "$f_c$"], False,
+         None, None),
+        ("intrinsic_correlation", np.identity(3), None, False, None, None),
     ]
     return result
 
@@ -47,21 +50,30 @@ def get_physical_data(n_sne=500, seed=0):
     dscale = mapping["dscale"]
     dratio = mapping["dratio"]
     p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
+    fractions = mapping["intrinsic_fractions"][:, None] * mapping["intrinsic_fractions"][None, :]
+    correlations = np.dot(mapping["intrinsic_correlation"], mapping["intrinsic_correlation"].T)
+    full = fractions * correlations * intrinsic ** 2
     for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
+
+        # Generate the actual mB, x1 and c values
         x1 = normal(loc=mapping["x1_loc"], scale=mapping["x1_scale"])
         c = skewnorm.rvs(mapping["c_alpha"], loc=mapping["c_loc"], scale=mapping["c_scale"])
         if np.random.random() < p:
             mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
         else:
             mass_correction = 0.0
-        mb = MB + mu - alpha * x1 + beta * c + normal(scale=intrinsic) + normal(scale=0.05)
-        mb += -mass_correction * p
+        mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
+        vector = np.array([mb, x1, c])
+        # Add intrinsic scatter to the mix
+        vector += np.random.multivariate_normal([0, 0, 0], full)
+
         diag = np.array([0.05, 0.3, 0.05]) ** 2
         cov = np.diag(diag)
+        vector += np.random.multivariate_normal([0, 0, 0], cov)
         cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
         obs_mBx1c_cor.append(cor)
         obs_mBx1c_cov.append(cov)
-        obs_mBx1c.append([mb, x1, c])
+        obs_mBx1c.append(vector)
 
     return {
         "n_sne": n_sne,
@@ -95,13 +107,13 @@ def get_analysis_data():
         added_zs += new_points
         pz = z
     n_z = n_sne + len(added_zs)
-    n_simps = int((n_z + 1)/ 2)
+    n_simps = int((n_z + 1) / 2)
     to_sort = [(z, -1) for z in added_zs] + [(z, i) for i, z in enumerate(redshifts)]
     to_sort.sort()
     final_redshifts = [z[0] for z in to_sort]
     sorted_vals = [(z[1], i) for i, z in enumerate(to_sort) if z[1] != -1]
     sorted_vals.sort()
-    final = [int(z[1]/2 + 1) for z in sorted_vals]
+    final = [int(z[1] / 2 + 1) for z in sorted_vals]
 
     update = {
         "n_z": n_z,
@@ -123,6 +135,14 @@ def init_fn():
     n_sne = x1s.size
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
     randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
+    simplex = np.random.random(size=3)
+    simplex /= simplex.sum()
+    randoms["intrinsic_fractions"] = simplex
+    chol = [[1.0, 0.0, 0.0],
+            [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
+            [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
+             np.random.random() * 0.1 + 0.7]]
+    randoms["intrinsic_correlation"] = chol
     return randoms
 
 
@@ -137,14 +157,15 @@ if __name__ == "__main__":
     data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
-    init_pos = init_fn()
-    params = [key for key in init_pos if isinstance(init_pos[key], float)]
+    init_pos = get_truths_labels_significance()
+    params = [key[0] for key in init_pos if key[2] is not None]
     params.append("PointPosteriors")
 
     # Run that stan
     import pystan
+
     sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=1000, chains=4, init=init_fn)
+    fit = sm.sampling(data=data, iter=1500, chains=4, init=init_fn)
 
     # Dump relevant chains to file
     with open(t, 'wb') as output:

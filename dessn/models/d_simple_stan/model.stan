@@ -31,7 +31,10 @@ parameters {
     real <lower = -20, upper = -18.> MB;
     real <lower = -0.3, upper = 0.5> alpha;
     real <lower = 0, upper = 5> beta;
+    // Intrinsic dispersion
     real <lower = 0, upper = 1> sigma_int;
+    simplex [3] intrinsic_fractions;
+    cholesky_factor_corr[3] intrinsic_correlation;
     // Other effects
     real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
     real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
@@ -64,6 +67,9 @@ transformed parameters {
     // Modelling intrinsic dispersion
     vector [3] intrinsic;
     matrix [3,3] int_mat;
+    matrix [3,3] correlations;
+    matrix [3,3] intrinsic_variance;
+
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
@@ -86,10 +92,11 @@ transformed parameters {
 
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
-    intrinsic[1] = sigma_int;
-    intrinsic[2] = 0.;
-    intrinsic[3] = 0.;
-    int_mat = intrinsic * intrinsic';
+    correlations = intrinsic_correlation * intrinsic_correlation';
+    intrinsic[1] = sqrt(intrinsic_fractions[1]) * sigma_int;
+    intrinsic[2] = sqrt(intrinsic_fractions[2]) * sigma_int / 0.13;
+    intrinsic[3] = sqrt(intrinsic_fractions[3]) * sigma_int / -3.0;
+    intrinsic_variance = correlations .* (intrinsic * intrinsic');
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
@@ -100,11 +107,9 @@ transformed parameters {
         model_mBx1c[i][3] = true_c[i];
 
         // Add in intrinsic scatter
-        model_mBx1c_cov[i] = obs_mBx1c_cov[i] + obs_mBx1c_cor[i] .* int_mat ;
+        model_mBx1c_cov[i] = obs_mBx1c_cov[i] + intrinsic_variance;
 
-
-        //if (i == 1) { print("mb=", i, " ", model_mBx1c[i][1], "|", obs_mBx1c[i][1],"  ", alpha, " ", beta, " ", MB, " ", model_mu[i], " ", true_x1[i], " ", true_c[i]); }
-
+        // Track and update posterior
         PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], model_mBx1c_cov[i]);
         PointPosteriors[i] = PointPosteriors[i] + normal_lpdf(true_x1[i] | x1_loc, x1_scale);
         PointPosteriors[i] = PointPosteriors[i] + skew_normal_lpdf(true_c[i] | c_loc, c_scale, c_alpha);
