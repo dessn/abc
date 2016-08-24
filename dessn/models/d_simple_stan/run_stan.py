@@ -29,7 +29,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_physical_data(n_sne=500, seed=0):
+def get_physical_data(n_sne=1000, seed=0):
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
     np.random.seed(seed)
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     import pystan
 
     sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=1500, chains=4, init=init_fn)
+    fit = sm.sampling(data=data, iter=2500, warmup=1000, chains=4, init=init_fn)
 
     # Dump relevant chains to file
     with open(t, 'wb') as output:
