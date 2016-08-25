@@ -3,17 +3,22 @@ import sncosmo
 from astropy.table import Table
 
 
-def get_obs_times_and_conditions(shallow=True, num_obs=20, cadence=5, t0=1000,
-                                 new_moon_t0=None, deltat=-30, weather=0.05):
+def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t0=1000,
+                                 new_moon_t0=None, deltat=-30, weather=0.05, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
     if new_moon_t0 is None:
         new_moon_t0 = t0 - np.random.uniform(0, 29.5)
     ts = np.arange(t0 + deltat, (t0 + deltat) + cadence * num_obs, cadence)
 
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
-    if shallow:
-        zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])
+    if zp is None:
+        if shallow:
+            zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])
+        else:
+            zps = np.array([b for t in ts for b in [34.24, 34.85, 34.94, 35.42]])
     else:
-        zps = np.array([b for t in ts for b in [34.24, 34.85, 34.94, 35.42]])
+        zps = np.array([b for t in ts for b in zp])
     mins = np.array([b for t in ts for b in [22.1, 21.1, 20.1, 18.7]])
     maxs = np.array([b for t in ts for b in [19.4, 19.7, 19.4, 18.2]])
     times = np.array([[t, t + 0.05, t + 0.1, t + 0.2] for t in ts]).flatten()
@@ -58,7 +63,7 @@ def get_summary_stats(z, lc, method="emcee", convert_x0_to_mb=True):
     model.set(z=z)
     if method == "emcee":
         res, fitted_model = sncosmo.mcmc_lc(lc, model, ['t0', 'x0', 'x1', 'c'])
-    elif method == "iminuit":
+    elif method == "minuit":
         res, fitted_model = sncosmo.fit_lc(lc, model, ['t0', 'x0', 'x1', 'c'])
     else:
         raise ValueError("Method %s not recognised" % method)

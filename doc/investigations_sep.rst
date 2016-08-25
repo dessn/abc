@@ -14,3 +14,4 @@ Investigations
    :hidden:
 
    inv_gauss
+   inv_zp
