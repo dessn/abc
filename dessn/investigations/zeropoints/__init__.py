@@ -20,4 +20,6 @@ surface which takes into account zero point uncertainties rigorously.
 We then determine the SALT2 parameter surface using the traditional
 method, and compare the resulting distributions in the hope that
 differences are negligible.
+
+*Investigation on hold until can figure out covariance*
 """

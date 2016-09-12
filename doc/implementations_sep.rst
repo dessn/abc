@@ -15,3 +15,4 @@ Implementations
 
    a_pure_snia
    c_pure_snia_simplified
+   d_simple_stan

@@ -14,7 +14,7 @@ data {
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
     // Input ancillary data
-    real <lower=0.0, upper = 1.0> p_high_mass [n_sne]; // Probability each SN is in high mass gal
+    real <lower=0.0, upper = 1.0> p_high_mass [n_sne]; // Normalised mass estimate
     real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Probability each SN is in high mass gal
 
     // Helper data used for Simpsons rule.

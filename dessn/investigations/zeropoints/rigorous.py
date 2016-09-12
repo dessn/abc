@@ -14,7 +14,7 @@ def get_fit(mabs=-19.3, x1=0.5, c=0.1, z=0.3):
     return param, cov
 
 
-def get_mean_cov(n_samp=2000):
+def get_mean_cov_rigorous(n_samp=2000):
     ps = []
     cs = []
     for i in range(n_samp):
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    mean, cov, ps, cs, samples = get_mean_cov()
+    mean, cov, ps, cs, samples = get_mean_cov_rigorous()
     np.save(temp_dir + "/rigorous.npy", samples)
     c = ChainConsumer()
     c.add_chain(samples, parameters=["$x_0$", "$x_1$", "$c$"])
