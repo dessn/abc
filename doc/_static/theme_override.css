@@ -4,7 +4,9 @@
 .wy-side-nav-search {
     background-color: #DC3535 !important;
 }
-
+.wy-nav-content {
+    max-width: 1000px !important;
+}
 .wy-nav-side {
     box-shadow: 0px 0px 15px 0px #444444;
 }

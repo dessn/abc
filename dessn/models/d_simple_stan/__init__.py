@@ -166,10 +166,43 @@ effects :math:`S` need to apply onto some data:
 .. math::
     P(S|\theta) = \int dR P(R,S|\theta)
 
-where :math:`R` is a potential realisation of our experiment. To fully write this down,
-we have
+where :math:`R` is a potential realisation of our experiment. To write this down,
+and taking into account we can model supernova such that we can determine
+the efficiency as a function of constructed :math:`\lbrace m_B, x_1, c \rbrace`, we
+have:
 
 .. math::
-    P(S|\theta) = \int dm_B \int dx_1 \int dc \int dz \int dm P(m_B, x_1, c, z, m, S|\theta)
+    P(S|\theta) &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
+    \int dz \int dm \int dm_B \int dx_1 \int dc \
+    P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, z, m, S|\theta) \\
+
+    &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
+    \int dz \int dm \int dm_B \int dx_1 \int dc \
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, z, m, S|\theta) \\
+
+    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c) P(m_B, x_1, c, z, m|\theta) \\
+
+    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c) P(c|\theta) P(x_1 | \theta) P(m_B, z, m|\theta) \\
+
+Note again that we assume redshift ans mass are perfectly known, so relationship between
+actual (latent) redshift and mass and the observed quantity is a delta function, hence why
+they only appear once in the equation above.
+
+Now enter the observational specifics of our survey: how many bands, the band passes,
+frequency of observation, weather effects, etc. The selection effects we need to model are
+
+    * At least 5 epochs between :math:`-99 < t < 60`.
+    * :math:`0.0 < z < 1.2`.
+    * At least one point :math:`t < -2`.
+    * At least one point :math:`t > 10`.
+    * At least 2 filters with :math:`S/N > 5`.
+
+These cuts there require us to model the light curves themselves, not just
+the magnitude, colour and stretch distribution. We thus need to be able to
+go from a given :math:`\lbrace m_B, x_1, c, z, m\rbrace`, to a supernova
+light curve.
+
 
 """
