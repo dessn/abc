@@ -153,6 +153,13 @@ all other variables.
      \mathcal{N}_{\rm skew}(c|\langle c \rangle, \sigma_c, \alpha_c)
      \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1})
 
+A very rough fit for this (defintiely not enough steps), is shown below, for a thousand generated
+supernova.
+
+.. figure::     ../dessn/models/d_simple_stan/output/plot.png
+    :align:     center
+
+
 Selection Effects
 ~~~~~~~~~~~~~~~~~
 
@@ -203,6 +210,38 @@ These cuts there require us to model the light curves themselves, not just
 the magnitude, colour and stretch distribution. We thus need to be able to
 go from a given :math:`\lbrace m_B, x_1, c, z, m\rbrace`, to a supernova
 light curve.
+
+--------
+
+Now at this point, I am stuck. In general, I want to know the efficiency
+(ratio of observed sn to ratio of all sn) for each cosmology. There are several
+ways that one could potentially do this:
+
+**Full SNANA**
+
+    Run a full SNANA simulation for each input cosmology. Assumes things like a dispersion
+    model as given above exist in SNANA. Also would require 1 sim per step, which may be slow.
+    Also involves splitting the project (no press enter and it runs start to finish).
+    Have a partial python interface thanks to Elise and Rachel, but would have to adapt.
+
+**Pre-gen**
+
+    If I can model the chance of detecting a SN as a function of m_B, x_1 and c (and z), I
+    can pre-generate a host of potential supernova, and then as a function of m_B, x_1 and c
+    determine the probability of them passing selection cuts. I could then use the cosmology and
+    hyperparameters to draw from this pool of supernova to determine efficiency. This would
+    be faster (one big sim and then sample from it), but would involve running a sim without
+    cuts (danger), so that I can actually calculate the chance of a particular m_B, x_1, c
+    passing the cuts. Would also then need a way of coming up with the m_B distribution. If
+    I can get a redshift distribution, I could combine that with cosmology, dispersion (etc)
+    and come up with m_B samples from the right distribution, but I worry this would be
+    different to the m_B distribution I would get if I just used SNANA.
+
+Now, have been trying to the second option, however there are too many effects
+not taken into account by sncosmo when I create mock supernova, such that I get almost
+perfect efficiency for the deep fields up to z=1.2. Things like weather, epochs are done
+too roughly, and extinction is just not taken into account at all.
+
 
 
 """
