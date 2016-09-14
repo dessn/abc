@@ -2,7 +2,7 @@ from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying
 from dessn.framework.samplers.batch import BatchMetropolisHastings
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 from dessn.utility.viewer import Viewer
 import matplotlib.pyplot as plt
 import numpy as np
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     c = ChainConsumer()
     v = Viewer([[80, 120], [10, 40]], parameters=[r"$\mu$", r"$\sigma$"], truth=[100, 20])
 
-    n = 2
+    n = 1
     w = 8
     colours = ["#4CAF50", "#D32F2F", "#1E88E5"] * n * 2
 
@@ -229,10 +229,10 @@ if __name__ == "__main__":
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
-    c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.3)
+    c.configure_contour(sigmas=[0, 0.01, 1, 2], shade=True, shade_alpha=0.3)
     c.plot(filename=plot_file, truth=theta_bias, figsize=(5, 5), legend=False)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=[mean, std])
-        c.divide_chain(i, w).configure_general(rainbow=True) \
-            .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
-                  truth=theta_bias)
+        # c.divide_chain(i, w).configure_general(rainbow=True) \
+        #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
+        #           truth=theta_bias)

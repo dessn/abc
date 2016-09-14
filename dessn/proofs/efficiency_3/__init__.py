@@ -110,11 +110,12 @@ The model PGM:
     :width:     80%
 
 The models, corrected (blue), uncorrected (red) and if the data was not biased
-(green). We show two random realisations of the data.
+(green).
 
-.. figure::     ../dessn/proofs/efficiency_3/output/surfaces.png
+.. figure::     ../dessn/proofs/efficiency_3/output/surfaces_2.png
     :align:     center
     :width:     80%
+
 
 
 

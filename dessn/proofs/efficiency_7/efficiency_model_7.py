@@ -2,7 +2,7 @@ from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterUnderlying
 from dessn.framework.samplers.ensemble import EnsembleSampler
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 import numpy as np
 import os
 import logging

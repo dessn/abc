@@ -4,7 +4,7 @@ from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
     ParameterTransformation, ParameterDiscrete
 from dessn.framework.samplers.batch import BatchMetropolisHastings
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -589,17 +589,18 @@ if __name__ == "__main__":
         lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, rate, zeros, calibration, threshold, ls, ss, t0s, zs, ts, cs, mask, num_obs, types = get_data(seed=i)
         theta = [lmu, lmu2, lsigma, lsigma2, smu, smu2, ssigma, ssigma2, rate] + zeros.tolist() + ls.tolist() + t0s.tolist() + ss.tolist()
         theta2 = theta + ls.tolist() + t0s.tolist() + ss.tolist()
-        kwargs = {"num_steps": 5000, "num_burn": 250000, "save_interval": 60, "plot_covariance": True, "covariance_adjust": 10000}
+        kwargs = {"num_steps": 6000, "num_burn": 250000, "save_interval": 60, "plot_covariance": True, "covariance_adjust": 10000}
         sampler = BatchMetropolisHastings(num_walkers=w, kwargs=kwargs, temp_dir=t % i, num_cores=4)
 
         model_good = EfficiencyModelUncorrected(cs, zs, ts, types, calibration, zeros, ls, ss, t0s, name="Good%d" % i)
-
         model_good.fit(sampler, chain_consumer=c)
+        print("Good sampler finished")
         mtypes = [t for t, m in zip(types, mask) if m]
         model_un = EfficiencyModelUncorrected(cs[mask], zs[mask], ts[mask], mtypes, calibration,
                                               zeros, ls[mask], ss[mask], t0s[mask], name="Uncorrected%d" % i)
         model_un.fit(sampler, chain_consumer=c)
-
+        print("Uncorrected sampler finished")
+        print("Getting weights")
         biased_chain = c.chains[-1]
         filename = dir_name + "/output/weights.txt"
         if not os.path.exists(filename):
@@ -610,13 +611,11 @@ if __name__ == "__main__":
             weights = np.loadtxt(filename)
         weights = (1 / np.power(weights, mask.sum()))
         c.add_chain(biased_chain, name="Importance Sampled", weights=weights)
+        print("Weights finished")
 
     c.configure_bar(shade=True)
     c.configure_general(bins=1.0, colours=colours)
-    c.configure_contour(sigmas=[0, 0.01, 1, 2], contourf=True, contourf_alpha=0.2)
+    c.configure_contour(sigmas=[0, 0.01, 1, 2], shade=True, shade_alpha=0.2)
     c.plot(filename=plot_file, truth=theta, figsize=(10, 10), legend=False, parameters=10)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
-        # c.divide_chain(i, w).configure_general(rainbow=True) \
-        #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
-        #           truth=theta)

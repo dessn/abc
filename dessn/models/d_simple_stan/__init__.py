@@ -182,16 +182,13 @@ have:
     P(S|\theta) &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
     \int dz \int dm \int dm_B \int dx_1 \int dc \
     P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, z, m, S|\theta) \\
-
     &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
     \int dz \int dm \int dm_B \int dx_1 \int dc \
     P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, z, m, S|\theta) \\
-
     &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
     P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c) P(m_B, x_1, c, z, m|\theta) \\
-
     &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
-    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c) P(c|\theta) P(x_1 | \theta) P(m_B, z, m|\theta) \\
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c, z) P(c|\theta) P(x_1 | \theta) P(m_B, z, m|\theta) \\
 
 Note again that we assume redshift ans mass are perfectly known, so relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
@@ -236,6 +233,13 @@ ways that one could potentially do this:
     I can get a redshift distribution, I could combine that with cosmology, dispersion (etc)
     and come up with m_B samples from the right distribution, but I worry this would be
     different to the m_B distribution I would get if I just used SNANA.
+
+**Functional Form**
+
+    The alternative method is to use a functional form for :math:`P(S|m_B, x_1, c, z)`. However,
+    the presence of the :math:`P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c)` term still implies
+    the use of simulations to perform the integral, although there is a chance we might be able
+    to do this analytically. A very small chance.
 
 Now, have been trying to the second option, however there are too many effects
 not taken into account by sncosmo when I create mock supernova, such that I get almost

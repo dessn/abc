@@ -2,7 +2,7 @@ from dessn.framework.model import Model
 from dessn.framework.edge import Edge
 from dessn.framework.parameter import ParameterObserved, ParameterUnderlying
 from dessn.framework.samplers.ensemble import EnsembleSampler
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 import numpy as np
 import os
 import logging
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         pgm_file = os.path.abspath(dir_name + "/output/pgm.png")
         fig = model_cor.get_pgm(pgm_file)
 
-        sampler = EnsembleSampler(num_steps=5000, num_burn=1000, temp_dir=t % i)
+        sampler = EnsembleSampler(num_steps=5000, num_burn=1000, temp_dir=t % i, num_walkers=50)
         model_un.fit(sampler, chain_consumer=c)
         model_cor.fit(sampler, chain_consumer=c)
 

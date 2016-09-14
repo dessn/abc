@@ -3,7 +3,7 @@ from dessn.framework.edge import Edge, EdgeTransformation
 from dessn.framework.parameter import ParameterObserved, ParameterLatent, ParameterUnderlying, \
     ParameterTransformation
 from dessn.framework.samplers.batch import BatchMetropolisHastings
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -460,6 +460,3 @@ if __name__ == "__main__":
     c.plot(filename=plot_file, truth=theta, figsize=(7, 7), legend=False, parameters=6)
     for i in range(len(c.chains)):
         c.plot_walks(filename=walk_file % c.names[i], chain=i, truth=theta)
-        # c.divide_chain(i, w).configure_general(rainbow=True) \
-        #     .plot(figsize=(5, 5), filename=plot_file.replace(".png", "_%s.png" % c.names[i]),
-        #           truth=theta)
