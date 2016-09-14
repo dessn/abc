@@ -240,7 +240,11 @@ ways that one could potentially do this:
 Now, have been trying to the second option, however there are too many effects
 not taken into account by sncosmo when I create mock supernova, such that I get almost
 perfect efficiency for the deep fields up to z=1.2. Things like weather, epochs are done
-too roughly, and extinction is just not taken into account at all.
+too roughly, and extinction is just not taken into account at all. To now try and do the
+second option better, I want to run a big SNANA simulation. The normal outputs of the simulation
+(supernova light curves / summary stats), are not what I need to use. I need, for every supernova
+put in the simulation (not just the detected ones), its generation parameters, and whether it
+was detected (and whether it was then spectroscopically typed).
 
 
 
