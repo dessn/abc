@@ -194,7 +194,7 @@ if __name__ == "__main__":
             pickle.dump(dictionary, output)
     else:
         # Run that stan locally
-        if True or "centos" in platform.platform():
+        if "centos" in platform.platform():
             # Assuming this is obelix
             dessn_dir = file[: file.index("dessn")]
             sys.path.append(dessn_dir)
