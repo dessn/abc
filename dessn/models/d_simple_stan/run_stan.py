@@ -4,7 +4,8 @@ from astropy.cosmology import FlatwCDM
 import numpy as np
 from numpy.random import normal, uniform
 from scipy.stats import skewnorm
-import pickle
+import sys
+import platform
 
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
@@ -83,6 +84,7 @@ def get_physical_data(n_sne=1000, seed=0):
         "mass": p_high_masses
     }
 
+
 def get_snana_data(filename="output/des_sim.pickle"):
     with open(filename, 'rb') as f:
         data = pickle.load(f)
@@ -93,12 +95,11 @@ def get_analysis_data(snana=True):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n_sne = 1000
     if snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(n_sne=n_sne, seed=0)
-
+        data = get_physical_data(n_sne=1000, seed=0)
+    n_sne = data["n_sne"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
         d = np.sqrt(np.diag(c))
@@ -163,27 +164,50 @@ def init_fn():
 
 
 if __name__ == "__main__":
+    file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
     output_dir = os.path.abspath(dir_name + "/output")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    i = 0
-    t = output_dir + "/temp%d.pkl" % i
+    t = output_dir + "/temp.pkl"
     data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("PointPosteriors")
+    if len(sys.argv) == 2:
+        print("Running single walker")
+        # Assuming linux environment for single thread
+        dessn_dir = file[: file.index("dessn")]
+        sys.path.append(dessn_dir)
+        import pystan
+        i = int(sys.argv[1])
+        t = output_dir + "/temp%d.pkl" % i
+        sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
+        fit = sm.sampling(data=data, iter=10000, warmup=5000, chains=1, init=init_fn)
 
-    # Run that stan
-    import pystan
+        # Dump relevant chains to file
+        with open(t, 'wb') as output:
+            dictionary = fit.extract(pars=params)
+            pickle.dump(dictionary, output)
+    else:
+        # Run that stan locally
+        if True or "centos" in platform.platform():
+            # Assuming this is obelix
+            dessn_dir = file[: file.index("dessn")]
+            sys.path.append(dessn_dir)
+            from dessn.utility.doJob import write_jobscript
+            write_jobscript(file)
+        else:
+            print("Running short steps")
+            # Assuming its my laptop vbox
+            import pystan
+            sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
+            fit = sm.sampling(data=data, iter=500, warmup=200, chains=4, init=init_fn)
 
-    sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=2500, warmup=1000, chains=4, init=init_fn)
-
-    # Dump relevant chains to file
-    with open(t, 'wb') as output:
-        dictionary = fit.extract(pars=params)
-        pickle.dump(dictionary, output)
+            # Dump relevant chains to file
+            with open(t, 'wb') as output:
+                dictionary = fit.extract(pars=params)
+                pickle.dump(dictionary, output)

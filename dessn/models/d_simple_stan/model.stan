@@ -14,7 +14,7 @@ data {
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
     // Input ancillary data
-    real <lower=0.0, upper = 1.0> p_high_mass [n_sne]; // Normalised mass estimate
+    real <lower=0.0, upper = 1.0> mass [n_sne]; // Normalised mass estimate
     real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Probability each SN is in high mass gal
 
     // Helper data used for Simpsons rule.
@@ -102,7 +102,7 @@ transformed parameters {
     for (i in 1:n_sne) {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
-        model_mBx1c[i][1] = MB + model_mu[i] - alpha*true_x1[i] + beta*true_c[i] - mass_correction * p_high_mass[i];
+        model_mBx1c[i][1] = MB + model_mu[i] - alpha*true_x1[i] + beta*true_c[i] - mass_correction * mass[i];
         model_mBx1c[i][2] = true_x1[i];
         model_mBx1c[i][3] = true_c[i];
 

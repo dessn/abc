@@ -17,7 +17,6 @@
 *.toc
 *.ist
 *.sty
-*.q
 .coverage
 htmlcov/**
 *.pyc

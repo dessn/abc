@@ -37,6 +37,7 @@ for mb, x0, x1, c, mbe, x1e, ce, cx1c, cx0c, cx1x0 in zip(mbs, x0s, x1s, cs, mbs
     obs_mBx1c.append(np.array([mb, x1, c]))
     
 final = {}
+masses = np.random.random(size=mbs.size)  # No masses yet
 final["n_sne"] = mbs.size
 final["obs_mBx1c"] = obs_mBx1c
 final["obs_mBx1c_cov"] = covs
