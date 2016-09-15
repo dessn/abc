@@ -4,7 +4,7 @@ from astropy.cosmology import FlatwCDM
 import numpy as np
 from numpy.random import normal, uniform
 from scipy.stats import skewnorm
-
+import pickle
 
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
@@ -79,20 +79,36 @@ def get_physical_data(n_sne=1000, seed=0):
         "n_sne": n_sne,
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": obs_mBx1c_cov,
-        "obs_mBx1c_cor": obs_mBx1c_cor,
         "redshifts": redshifts,
-        "redshift_pre_comp": redshift_pre_comp,
-        "p_high_mass": p_high_masses
+        "mass": p_high_masses
     }
 
+def get_snana_data(filename="output/des_sim.pickle"):
+    with open(filename, 'rb') as f:
+        data = pickle.load(f)
+    return data
 
-def get_analysis_data():
+
+def get_analysis_data(snana=True):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
     n_sne = 1000
-    data = get_physical_data(n_sne=n_sne, seed=0)
+    if snana:
+        data = get_snana_data()
+    else:
+        data = get_physical_data(n_sne=n_sne, seed=0)
+
+    cors = []
+    for c in data["obs_mBx1c_cov"]:
+        d = np.sqrt(np.diag(c))
+        div = (d[:, None] * d[None, :])
+        cor = c / div
+        cors.append(cor)
+
+    data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
+    data["redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * redshifts)
     n_z = 1000
     dz = redshifts.max() / n_z
     zs = sorted(redshifts.tolist())
