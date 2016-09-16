@@ -1,7 +1,7 @@
 import os
 
 
-def write_jobscript(filename, queue="low.q", num_cpu=50, num_walks=50):
+def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
