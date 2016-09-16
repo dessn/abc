@@ -200,9 +200,9 @@ if __name__ == "__main__":
             sys.path.append(dessn_dir)
             from dessn.utility.doJob import write_jobscript
             print(sys.argv)
-            if len(sys.argv) == 4:
-                num_walks = int(sys.argv[2])
-                num_jobs = int(sys.argv[3])
+            if len(sys.argv) == 3:
+                num_walks = int(sys.argv[1])
+                num_jobs = int(sys.argv[2])
             else:
                 num_walks = 50
                 num_jobs = 50
