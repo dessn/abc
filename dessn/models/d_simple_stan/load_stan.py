@@ -3,29 +3,15 @@ import os
 from chainconsumer import ChainConsumer
 from dessn.models.d_simple_stan.run_stan import get_truths_labels_significance
 import itertools
+import numpy as np
 
-if __name__ == "__main__":
-    dir_name = os.path.dirname(__file__)
 
-    i = 0
-    td = dir_name + "/output/"
-    t = os.path.abspath(td + "temp%d.pkl" % i)
-    vals = get_truths_labels_significance()
-    full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
-    params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[3] and k[2] is not None]
-    full_params = list(itertools.chain.from_iterable(full_params))
-    params = list(itertools.chain.from_iterable(params))
-
-    # full_params = [k[2] for k in vals if k[2] is not None and isinstance(k[1], float)]
-    # params = [k[2] for k in vals if k[3] and k[2] is not None and isinstance(k[1], float)]
-
-    name_map = {k[0]: k[2] for k in vals}
-    truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
+def get_chain(filename, name_map):
     with open(t, 'rb') as output:
         chain = pickle.load(output)
         keys = list(chain.keys())
-        posterior = chain["PointPosteriors"]
-        del chain["PointPosteriors"]
+        # posterior = chain["PointPosteriors"]
+        # del chain["PointPosteriors"]
         for key in keys:
             if key in name_map:
                 label = name_map[key]
@@ -40,7 +26,37 @@ if __name__ == "__main__":
                 if new_key != key:
                     chain[new_key] = chain[key]
                     del chain[key]
+    return chain
+
+if __name__ == "__main__":
+    dir_name = os.path.dirname(__file__)
+
+    i = 0
+    td = dir_name + "/output/"
+    vals = get_truths_labels_significance()
+    full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
+    params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[3] and k[2] is not None]
+    full_params = list(itertools.chain.from_iterable(full_params))
+    params = list(itertools.chain.from_iterable(params))
+    name_map = {k[0]: k[2] for k in vals}
+    truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
+
+    fs = [f for f in os.listdir(td) if f.startswith("stan") and f.endswith(".pkl")]
+    chains = []
+    for f in fs:
+        t = os.path.abspath(td + f)
+        chains.append(get_chain(t, name_map))
+    assert len(chains) > 0, "No results found"
+    chain = chains[0]
+    for c in chains[1:]:
+        for key in chain.keys():
+            print(c[key], chain[key], np.concatenate((chain[key], c[key])))
+            chain[key] = np.concatenate((chain[key], c[key]))
+    posterior = chain["PointPosteriors"]
+    del chain["PointPosteriors"]
+    # full_params = [k[2] for k in vals if k[2] is not None and isinstance(k[1], float)]
+    # params = [k[2] for k in vals if k[3] and k[2] is not None and isinstance(k[1], float)]
     c = ChainConsumer().add_chain(chain, posterior=posterior)
+    c.plot_walks(filename=td+"walk.png")
     c.plot(filename=td+"plot.png", truth=truths, parameters=params)
-    c.plot(filename=td+"plot_full.png", truth=truths, parameters=full_params)
-    # c.plot_walks(filename=td+"walk.png")
+    # c.plot(filename=td+"plot_full.png", truth=truths, parameters=full_params)

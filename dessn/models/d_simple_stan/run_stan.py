@@ -91,7 +91,7 @@ def get_snana_data(filename="output/des_sim.pickle"):
     return data
 
 
-def get_analysis_data(snana=True):
+def get_analysis_data(snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    t = output_dir + "/temp.pkl"
+    t = output_dir + "/stan.pkl"
     data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
@@ -184,9 +184,9 @@ if __name__ == "__main__":
         sys.path.append(dessn_dir)
         import pystan
         i = int(sys.argv[1])
-        t = output_dir + "/temp%d.pkl" % i
+        t = output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=10000, warmup=5000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=10000, warmup=2000, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:
@@ -199,7 +199,13 @@ if __name__ == "__main__":
             dessn_dir = file[: file.index("dessn")]
             sys.path.append(dessn_dir)
             from dessn.utility.doJob import write_jobscript
-            write_jobscript(file)
+            if len(sys.argv) == 3:
+                num_walks = int(sys.argv[2])
+                num_jobs = int(sys.argv[3])
+            else:
+                num_walks = 50
+                num_jobs = 50
+            write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs)
         else:
             print("Running short steps")
             # Assuming its my laptop vbox
