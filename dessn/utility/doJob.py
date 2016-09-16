@@ -7,7 +7,7 @@ def write_jobscript(filename, queue="low.q", num_cpu=50, num_walks=50):
     executable = os.path.basename(filename)
     name = executable[:-3]
     output_dir = directory + os.sep + "out_files"
-    error_dir = output_dir + os.sep + "error"
+    error_dir = output_dir + os.sep + "errors"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if not os.path.exists(error_dir):
