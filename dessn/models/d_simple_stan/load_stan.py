@@ -56,7 +56,7 @@ if __name__ == "__main__":
     del chain["PointPosteriors"]
     # full_params = [k[2] for k in vals if k[2] is not None and isinstance(k[1], float)]
     # params = [k[2] for k in vals if k[3] and k[2] is not None and isinstance(k[1], float)]
-    c = ChainConsumer().add_chain(chain, posterior=posterior)
+    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=len(fs))
     c.plot_walks(filename=td+"walk.png")
     c.plot(filename=td+"plot.png", truth=truths, parameters=params)
     # c.plot(filename=td+"plot_full.png", truth=truths, parameters=full_params)

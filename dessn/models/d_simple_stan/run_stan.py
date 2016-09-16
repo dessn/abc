@@ -7,6 +7,7 @@ from scipy.stats import skewnorm
 import sys
 import platform
 
+
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
     result = [
