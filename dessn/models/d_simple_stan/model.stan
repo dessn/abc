@@ -73,6 +73,7 @@ transformed parameters {
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
+    real Posterior;
 
     // Other temp variables for corrections
     real mass_correction;
@@ -114,10 +115,11 @@ transformed parameters {
         PointPosteriors[i] = PointPosteriors[i] + normal_lpdf(true_x1[i] | x1_loc, x1_scale);
         PointPosteriors[i] = PointPosteriors[i] + skew_normal_lpdf(true_c[i] | c_loc, c_scale, c_alpha);
     }
+    Posterior = sum(PointPosteriors);
 
 }
 model {
-    target += sum(PointPosteriors);
+    target += Posterior;
     sigma_int ~ cauchy(0, 2.5);
     x1_scale ~ cauchy(0, 2.5);
     c_scale ~ cauchy(0, 2.5);

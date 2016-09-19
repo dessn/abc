@@ -7,7 +7,8 @@ import numpy as np
 
 
 def get_chain(filename, name_map):
-    with open(t, 'rb') as output:
+    print("Loading chain from %s" % filename)
+    with open(filename, 'rb') as output:
         chain = pickle.load(output)
         keys = list(chain.keys())
         # posterior = chain["PointPosteriors"]
@@ -50,13 +51,16 @@ if __name__ == "__main__":
     chain = chains[0]
     for c in chains[1:]:
         for key in chain.keys():
-            print(c[key], chain[key], np.concatenate((chain[key], c[key])))
             chain[key] = np.concatenate((chain[key], c[key]))
-    posterior = chain["PointPosteriors"]
+    # posterior = chain["Posterior"]
+    # del chain["Posterior"]
     del chain["PointPosteriors"]
     # full_params = [k[2] for k in vals if k[2] is not None and isinstance(k[1], float)]
     # params = [k[2] for k in vals if k[3] and k[2] is not None and isinstance(k[1], float)]
-    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=len(fs))
+    # c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=len(fs))
+    c = ChainConsumer().add_chain(chain, walkers=len(fs))
+    print("Plotting walks")
     c.plot_walks(filename=td+"walk.png")
+    print("Plotting surfaces")
     c.plot(filename=td+"plot.png", truth=truths, parameters=params)
     # c.plot(filename=td+"plot_full.png", truth=truths, parameters=full_params)

@@ -27,6 +27,7 @@ def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24):
 #$ -o %s/$JOB_NAME.$JOB_ID.out
 #$ -e %s/errors
 IDIR=%s
+export PATH=$HOME/miniconda/bin:$PATH
 source activate sam35
 
 export OMP_NUM_THREADS="1" # set this for OpenMP threads control

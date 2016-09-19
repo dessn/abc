@@ -177,7 +177,7 @@ if __name__ == "__main__":
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
-    params.append("PointPosteriors")
+    params.append("Posterior")
     if len(sys.argv) == 2:
         print("Running single walker")
         # Assuming linux environment for single thread
