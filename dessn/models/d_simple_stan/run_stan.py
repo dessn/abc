@@ -187,7 +187,7 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         t = output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=10000, warmup=2000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=20000, warmup=10000, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:
