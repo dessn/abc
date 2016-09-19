@@ -45,3 +45,4 @@ python $PROG $PARAMS'''
     with open(n, 'w') as f:
         f.write(t)
     print(n)
+    return n

@@ -6,7 +6,7 @@ from numpy.random import normal, uniform
 from scipy.stats import skewnorm
 import sys
 import platform
-
+from subprocess import call
 
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
@@ -207,7 +207,9 @@ if __name__ == "__main__":
             else:
                 num_walks = 50
                 num_jobs = 50
-            write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs)
+            filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs)
+            call(["qsub", filename], shell=True)
+            print("Called qsub")
         else:
             print("Running short steps")
             # Assuming its my laptop vbox
