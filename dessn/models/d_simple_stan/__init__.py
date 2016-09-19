@@ -92,7 +92,7 @@ Latent colour is drawn from a skew normal. Latent stretch is drawn from a normal
 We continue to follow Rubin et al. (2015) and model the mass correction as
 
 .. math::
-    \Delta M = \hat{m} \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
+    \Delta M = \hat{m} k(z) = \hat{m} \, \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
     \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right]
 
 **Dispersion**:
@@ -190,9 +190,27 @@ have:
     &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
     P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c, z) P(c|\theta) P(x_1 | \theta) P(m_B, z, m|\theta) \\
 
-Note again that we assume redshift ans mass are perfectly known, so relationship between
+Note again that we assume redshift and mass are perfectly known, so relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
 they only appear once in the equation above.
+
+As we integrate over all possible realisations, we have that over all space
+:math:`P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) = \iiint_{-\infty}^{\infty} \mathcal{N}( \hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c, \sqrt{\sigma^2_{\rm obs} + \sigma^2_{\rm add}})= 1`,
+and as such we can remove it from the integral. We also note that at the moment the model
+not contain any details of the mass distribution of galaxies, which may be an issue.
+
+.. math::
+    P(S|\theta) &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc  P(S|m_B, x_1, c, z) P(m_B|z, m, x_1, c, \theta) P(z) P(m) P(c|\theta) P(x_1 | \theta) \\
+
+Addressing each component individually:
+
+.. math::
+    P(z)&= \text{Redshift distribution from DES volume}\\
+    P(m) &= \text{Unknown mass distribution} \\
+    P(c|\theta) &= P(c| \langle c \rangle, \sigma_c, \alpha_c) = \mathcal{N}_{\rm skew}(c|\langle c \rangle, \sigma_c, \alpha_c) \\
+    P(x_1|\theta) &= P(x_1| \langle x_1 \rangle, \sigma_{x1}) = \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1}) \\
+    P(m_B|z, m, x_1, c, \theta) &= \delta(m_B, \Omega_m, w, z, x_1, c, m \alpha, \beta, M_B) \\
+    P(S|m_B, x_1, c, z) &= \text{Ratio of SN generated that pass selection cuts for given SN parameters}
 
 Now enter the observational specifics of our survey: how many bands, the band passes,
 frequency of observation, weather effects, etc. The selection effects we need to model are
@@ -208,48 +226,19 @@ the magnitude, colour and stretch distribution. We thus need to be able to
 go from a given :math:`\lbrace m_B, x_1, c, z, m\rbrace`, to a supernova
 light curve.
 
---------
+-------
 
-Now at this point, I am stuck. In general, I want to know the efficiency
-(ratio of observed sn to ratio of all sn) for each cosmology. There are several
-ways that one could potentially do this:
+    **Technical aside**: Calculating :math:`\delta(m_B, \Omega_m, w, z, x_1, c, m \alpha, \beta, M_B)`
+    is not an analytic task. It has complications not just in the distance modulus being the
+    result of an integral, but also that the colour and stretch correction factors make
+    extra use of supernova specific values. The way to efficiently determine :math:`P(m_B|...)`
+    is given as follows:
 
-**Full SNANA**
+        1. Draw samples of :math:`z` from the DES redshift distribution.
+        2. Using :math:`\Omega_m` and :math:`w` to translate this to a :math:`\mu` distribution.
+        3. Take simulated supernova :math:`m_B, x_1, c, m, z` values, and use :math:`\alpha, \beta, \delta(0), \delta(\infty), M_B` to get :math:`\mu^* = m_B + \alpha x_1 - \beta c + m k(z) - M`
+        4. Using :math:`P(\mu)` from step 2, determine :math:`P(-\mu^*)`, which is equivalent to :math:`P(m_B|z, m, x_1, c, \theta)`.
 
-    Run a full SNANA simulation for each input cosmology. Assumes things like a dispersion
-    model as given above exist in SNANA. Also would require 1 sim per step, which may be slow.
-    Also involves splitting the project (no press enter and it runs start to finish).
-    Have a partial python interface thanks to Elise and Rachel, but would have to adapt.
-
-**Pre-gen**
-
-    If I can model the chance of detecting a SN as a function of m_B, x_1 and c (and z), I
-    can pre-generate a host of potential supernova, and then as a function of m_B, x_1 and c
-    determine the probability of them passing selection cuts. I could then use the cosmology and
-    hyperparameters to draw from this pool of supernova to determine efficiency. This would
-    be faster (one big sim and then sample from it), but would involve running a sim without
-    cuts (danger), so that I can actually calculate the chance of a particular m_B, x_1, c
-    passing the cuts. Would also then need a way of coming up with the m_B distribution. If
-    I can get a redshift distribution, I could combine that with cosmology, dispersion (etc)
-    and come up with m_B samples from the right distribution, but I worry this would be
-    different to the m_B distribution I would get if I just used SNANA.
-
-**Functional Form**
-
-    The alternative method is to use a functional form for :math:`P(S|m_B, x_1, c, z)`. However,
-    the presence of the :math:`P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c)` term still implies
-    the use of simulations to perform the integral, although there is a chance we might be able
-    to do this analytically. A very small chance.
-
-Now, have been trying to the second option, however there are too many effects
-not taken into account by sncosmo when I create mock supernova, such that I get almost
-perfect efficiency for the deep fields up to z=1.2. Things like weather, epochs are done
-too roughly, and extinction is just not taken into account at all. To now try and do the
-second option better, I want to run a big SNANA simulation. The normal outputs of the simulation
-(supernova light curves / summary stats), are not what I need to use. I need, for every supernova
-put in the simulation (not just the detected ones), its generation parameters, and whether it
-was detected (and whether it was then spectroscopically typed).
-
-
+-------
 
 """
