@@ -44,5 +44,5 @@ python $PROG $PARAMS'''
     t = template % (name, queue, num_walks, num_cpu + 1, output_dir, output_dir, output_dir, directory, executable)
     with open(n, 'w') as f:
         f.write(t)
-    print(n)
+    print("Jobscript at %s" % n)
     return n

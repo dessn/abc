@@ -6,7 +6,6 @@ from numpy.random import normal, uniform
 from scipy.stats import skewnorm
 import sys
 import platform
-from subprocess import call
 
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
@@ -200,7 +199,6 @@ if __name__ == "__main__":
             dessn_dir = file[: file.index("dessn")]
             sys.path.append(dessn_dir)
             from dessn.utility.doJob import write_jobscript
-            print(sys.argv)
             if len(sys.argv) == 3:
                 num_walks = int(sys.argv[1])
                 num_jobs = int(sys.argv[2])
@@ -208,7 +206,7 @@ if __name__ == "__main__":
                 num_walks = 50
                 num_jobs = 50
             filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs)
-            call(["qsub", filename], shell=True)
+            os.system("qsub %s" % filename)
             print("Called qsub")
         else:
             print("Running short steps")
