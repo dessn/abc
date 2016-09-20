@@ -30,7 +30,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_physical_data(n_sne=1000, seed=0):
+def get_physical_data(n_sne=5000, seed=0):
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
     np.random.seed(seed)
