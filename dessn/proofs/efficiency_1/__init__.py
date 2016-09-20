@@ -91,13 +91,13 @@ Looking only at the denominator:
 Evaluating this by transforming coordinate to :math:`x = R-\mu` such that we get
 
 .. math::
-    \int dR \ \epsilon(R,e) P_g(R|\mu) = \int_{\alpha e - \mu}^{\infty}
+    \int dR \ \epsilon(R) P_g(R|\mu) = \int_{\alpha e - \mu}^{\infty}
     \frac{1}{\sqrt{2\pi}e} \exp\left[ -\frac{x^2}{2 e^2} \right] dx
 
 gives the answer
 
 .. math::
-     \int_{\alpha e}^{\infty} dR\ \mathcal{N}(R;\mu,e) = \begin{cases}
+     \int dR \ \epsilon(R) P_g(R|\mu)  = \begin{cases}
     \frac{1}{2} - \frac{1}{2}{\rm erf} \left[ \frac{\alpha e - \mu}{\sqrt{2} e} \right] &
     \text{ if } \alpha e - \mu > 0 \\
     \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{\mu- \alpha e}{\sqrt{2} e} \right] &
@@ -107,10 +107,10 @@ gives the answer
 Restricting ourselves to :math:`\mu > \alpha e`, we have
 
 .. math::
-     \int_{\alpha e}^{\infty} dR\ \mathcal{N}(R;\mu,e) =
+     \int dR \ \epsilon(R) P_g(R|\mu)  =
      \frac{1}{2} + \frac{1}{2}{\rm erf} \left[ \frac{\mu- \alpha e}{\sqrt{2} e} \right]
 
-     \int_{\alpha e}^{\infty} dR\ \mathcal{N}(R;\mu,e) =
+     \int dR \ \epsilon(R) P_g(R|\mu)  =
      \frac{1}{2}{\rm erfc} \left[ \frac{\alpha e - \mu}{\sqrt{2} e} \right]
 
 
