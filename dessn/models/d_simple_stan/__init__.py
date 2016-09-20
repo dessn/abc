@@ -209,7 +209,7 @@ Addressing each component individually:
     P(m) &= \text{Unknown mass distribution} \\
     P(c|\theta) &= P(c| \langle c \rangle, \sigma_c, \alpha_c) = \mathcal{N}_{\rm skew}(c|\langle c \rangle, \sigma_c, \alpha_c) \\
     P(x_1|\theta) &= P(x_1| \langle x_1 \rangle, \sigma_{x1}) = \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1}) \\
-    P(m_B|z, m, x_1, c, \theta) &= \delta(m_B, \Omega_m, w, z, x_1, c, m \alpha, \beta, M_B) \\
+    P(m_B|z, m, x_1, c, \theta) &= \delta(m_B, \Omega_m, w, z, x_1, c, m, \alpha, \beta, M_B) \\
     P(S|m_B, x_1, c, z) &= \text{Ratio of SN generated that pass selection cuts for given SN parameters}
 
 Now enter the observational specifics of our survey: how many bands, the band passes,
@@ -236,9 +236,22 @@ light curve.
 
         1. Draw samples of :math:`z` from the DES redshift distribution.
         2. Using :math:`\Omega_m` and :math:`w` to translate this to a :math:`\mu` distribution.
-        3. Take simulated supernova :math:`m_B, x_1, c, m, z` values, and use :math:`\alpha, \beta, \delta(0), \delta(\infty), M_B` to get :math:`\mu^* = m_B + \alpha x_1 - \beta c + m k(z) - M`
+        3. Take simulated supernova :math:`m_B, x_1, c, m, z` values, and use :math:`\alpha, \beta, \delta(0), \delta(\infty), M_B` to get :math:`\mu^* = m_B + \alpha x_1 - \beta c + m k(z) - M_B`
         4. Using :math:`P(\mu)` from step 2, determine :math:`P(-\mu^*)`, which is equivalent to :math:`P(m_B|z, m, x_1, c, \theta)`.
 
+    However, this breaks down because we move dispersion into the observation and thus remove it from the integral.
+    This means that :math:`P(\mu)` remains a delta function, and thus :math:`P(m_B|z, m, x_1, c, \theta) = 0` for
+    all supernova. So what we realistically need is a better way of modelling the magnitude, colour and stretch
+    population. One way is to do it as a multivariate normal, but then we lose the ability to skew the colour
+    distribution. I cannot find a way of doing a multivariate skew distribution. Perhaps we could manually
+    combine them. Regardless, I cannot see how modelling populations *and* intrinsic dispersion is the correct
+    method to go with, because your population should really encompass the dispersion in the actual events.
+
+    I need to address this point before continuing. I feel the easiest thing to do at the moment is to
+    move to a multivariate normal model of :math:`\lbrace m_B, x_1, c \rbrace`.
+
 -------
+
+
 
 """
