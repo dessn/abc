@@ -25,22 +25,17 @@ that the data :math:`d` *also* makes it into our final dataset and is not droppe
 in the previous example we define the likelihood :math:`\mathcal{L} = P(d|\mu,\sigma)` as
 
 .. math::
-    \mathcal{L} = P(D=d | D > \alpha, \mu, \sigma)
-
-    \mathcal{L} = \frac{P(D=d, D > \alpha | \mu, \sigma)}
-    {\int dR \ P(D > \alpha, D=R|\mu,\sigma)}
-
-    \mathcal{L} = \frac{P(D > \alpha | D=d, \mu, \sigma) P(D=d|\mu,\sigma)}
-    {\int dR \ P(D > \alpha|D=R,\mu,\sigma) P(D=R|\mu,\sigma)}
-
-    \mathcal{L} = \frac{P(d > \alpha | d, \mu, \sigma) P(d|\mu,\sigma)}
-    {\int dR \ P(R > \alpha|R,\mu,\sigma) P(R|\mu,\sigma)}
-
-    \mathcal{L} = \frac{P(d > \alpha | d) P(d|\mu,\sigma)}
-    {\int dR \ P(R > \alpha|R) P(R|\mu,\sigma)}
-
-    \mathcal{L} = \frac{\epsilon(d,\alpha) P(d|\mu,\sigma)}
-    {\int dR \ \epsilon(R,\alpha)  P(R|\mu,\sigma)}
+    \mathcal{L} &= P(D=d | D > \alpha, \mu, \sigma) \\[10pt]
+    &= \frac{P(D=d, D > \alpha | \mu, \sigma)}
+    {\int dR \ P(D > \alpha, D=R|\mu,\sigma)} \\[10pt]
+    &= \frac{P(D > \alpha | D=d, \mu, \sigma) P(D=d|\mu,\sigma)}
+    {\int dR \ P(D > \alpha|D=R,\mu,\sigma) P(D=R|\mu,\sigma)} \\[10pt]
+    &= \frac{P(d > \alpha | d, \mu, \sigma) P(d|\mu,\sigma)}
+    {\int dR \ P(R > \alpha|R,\mu,\sigma) P(R|\mu,\sigma)} \\[10pt]
+     &= \frac{P(d > \alpha | d) P(d|\mu,\sigma)}
+    {\int dR \ P(R > \alpha|R) P(R|\mu,\sigma)} \\[10pt]
+    &= \frac{\epsilon(d,\alpha) P(d|\mu,\sigma)}
+    {\int dR \ \epsilon(R,\alpha)  P(R|\mu,\sigma)} \\
 
 where :math:`R` is used to denote a potential realisation of the data, given the underlying
 model. The last line represents the general form of the likelihood which shall be presented
@@ -50,10 +45,9 @@ realisations of the data.
 Putting in our efficiency and distributions
 
 .. math::
-    \mathcal{L} = \frac{\mathcal{H}(d-\alpha) \mathcal{N}(d;\mu,\sigma)}
-    {\int dR \ \mathcal{H}(R-\alpha)  \mathcal{N}(R;\mu,\sigma)}
-
-    \mathcal{L} = \frac{\mathcal{N}(d;\mu,\sigma)}
+    \mathcal{L} &= \frac{\mathcal{H}(d-\alpha) \mathcal{N}(d;\mu,\sigma)}
+    {\int dR \ \mathcal{H}(R-\alpha)  \mathcal{N}(R;\mu,\sigma)}\\[10pt]
+    &= \frac{\mathcal{N}(d;\mu,\sigma)}
     {\int_\alpha^\infty dR \ \mathcal{N}(R;\mu,\sigma)}
 
 Looking at the denominator:
