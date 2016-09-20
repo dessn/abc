@@ -11,8 +11,6 @@ def get_chain(filename, name_map):
     with open(filename, 'rb') as output:
         chain = pickle.load(output)
         keys = list(chain.keys())
-        # posterior = chain["PointPosteriors"]
-        # del chain["PointPosteriors"]
         for key in keys:
             if key in name_map:
                 label = name_map[key]
@@ -52,15 +50,11 @@ if __name__ == "__main__":
     for c in chains[1:]:
         for key in chain.keys():
             chain[key] = np.concatenate((chain[key], c[key]))
-    # posterior = chain["Posterior"]
-    # del chain["Posterior"]
-    del chain["PointPosteriors"]
-    # full_params = [k[2] for k in vals if k[2] is not None and isinstance(k[1], float)]
-    # params = [k[2] for k in vals if k[3] and k[2] is not None and isinstance(k[1], float)]
-    # c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=len(fs))
-    c = ChainConsumer().add_chain(chain, walkers=len(fs))
+    posterior = chain["Posterior"]
+    del chain["Posterior"]
+    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=len(fs))
     print("Plotting walks")
-    c.plot_walks(filename=td+"walk.png")
-    print("Plotting surfaces")
-    c.plot(filename=td+"plot.png", truth=truths, parameters=params)
-    # c.plot(filename=td+"plot_full.png", truth=truths, parameters=full_params)
+    # c.plot_walks(filename=td+"walk.png")
+    # print("Plotting surfaces")
+    # c.plot(filename=td+"plot.png", truth=truths, parameters=params)
+    c.plot(filename=td+"plot_full.png", truth=truths, parameters=full_params)
