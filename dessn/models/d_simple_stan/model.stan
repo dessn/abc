@@ -8,14 +8,13 @@ data {
     // The input summary statistics from light curve fitting
     vector[3] obs_mBx1c [n_sne]; // SALT2 fits
     matrix[3,3] obs_mBx1c_cov [n_sne]; // Covariance of SALT2 fits
-    matrix[3,3] obs_mBx1c_cor [n_sne]; // Correlation of SALT2 fits
 
     // Input redshift data, assumed perfect redshift for spectroscopic sample
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
     // Input ancillary data
-    real <lower=0.0, upper = 1.0> mass [n_sne]; // Normalised mass estimate
-    real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Probability each SN is in high mass gal
+    //real <lower=0.0, upper = 1.0> mass [n_sne]; // Normalised mass estimate
+    // real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Precomputed function of redshift for speed
 
     // Helper data used for Simpsons rule.
     real <lower=0> zs[n_z]; // List of redshifts to manually integrate over.
@@ -26,37 +25,35 @@ parameters {
     ///////////////// Underlying parameters
     // Cosmology
     real <lower = 0, upper = 1> Om;
-    real <lower = -2, upper = -0.4> w;
+    //real <lower = -2, upper = -0.4> w;
     // Supernova model
-    real <lower = -20, upper = -18.> MB;
     real <lower = -0.3, upper = 0.5> alpha;
     real <lower = 0, upper = 5> beta;
-    // Intrinsic dispersion
-    real <lower = 0, upper = 1> sigma_int;
-    simplex [3] intrinsic_fractions;
-    cholesky_factor_corr[3] intrinsic_correlation;
+
     // Other effects
-    real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
-    real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
+    // real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
+    // real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
 
     ///////////////// Latent Parameters
+    real <lower = -21, upper = -18> true_MB[n_sne];
     real <lower = -8, upper = 8> true_x1[n_sne];
     real <lower = -1, upper = 2> true_c[n_sne];
 
-    ///////////////// Hyper Parameters
-    // Colour distribution
-    real <lower=-2, upper=2> c_loc;
-    real <lower=0, upper=1> c_scale;
-    real <lower=-5, upper=5> c_alpha;
-    // Stretch distribution
-    real <lower=-5, upper=5> x1_loc;
-    real <lower=0, upper=5> x1_scale;
+    ///////////////// Population (Hyper) Parameters
+    real <lower = -21, upper = -18> mean_MB;
+    real <lower = -3, upper = 3> mean_x1;
+    real <lower = -1, upper = 1> mean_c;
+    real <lower = 0.01, upper = 1> sigma_MB;
+    real <lower = 0.01, upper = 3> sigma_x1;
+    real <lower = 0.01, upper = 1> sigma_c;
+    cholesky_factor_corr[3] intrinsic_correlation;
 
 }
 
 transformed parameters {
     // Our SALT2 model
     vector [3] model_mBx1c [n_sne];
+    vector [3] model_mBx1c_uncorrected [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
 
     // Helper variables for Simpsons rule
@@ -65,10 +62,9 @@ transformed parameters {
     real model_mu[n_sne];
 
     // Modelling intrinsic dispersion
-    vector [3] intrinsic;
-    matrix [3,3] int_mat;
-    matrix [3,3] correlations;
-    matrix [3,3] intrinsic_variance;
+    matrix [3,3] population;
+    vector [3] mean_mBx1c;
+    vector [3] sigmas;
 
 
     // Lets actually record the proper posterior values
@@ -76,11 +72,11 @@ transformed parameters {
     real Posterior;
 
     // Other temp variables for corrections
-    real mass_correction;
+    // real mass_correction;
 
     // -------------Begin numerical integration-----------------
     for (i in 1:n_z) {
-        Hinv[i] = 1./sqrt( Om*pow(1. + zs[i], 3) + (1. - Om) * pow(1. + zs[i], 3 * (1 + w))) ;
+        Hinv[i] = 1./sqrt( Om*pow(1. + zs[i], 3) + (1. - Om)); // * pow(1. + zs[i], 3 * (1 + w))) ;
     }
     cum_simps[1] = 0.;
     for (i in 2:n_simps) {
@@ -93,34 +89,39 @@ transformed parameters {
 
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
-    correlations = intrinsic_correlation * intrinsic_correlation';
-    intrinsic[1] = sqrt(intrinsic_fractions[1]) * sigma_int;
-    intrinsic[2] = sqrt(intrinsic_fractions[2]) * sigma_int / 0.13;
-    intrinsic[3] = sqrt(intrinsic_fractions[3]) * sigma_int / -3.0;
-    intrinsic_variance = correlations .* (intrinsic * intrinsic');
+    mean_mBx1c[1] = mean_MB;
+    mean_mBx1c[2] = mean_x1;
+    mean_mBx1c[3] = mean_c;
+    sigmas[1] = sigma_MB;
+    sigmas[2] = sigma_x1;
+    sigmas[3] = sigma_c;
+    population = diag_pre_multiply(sigmas, intrinsic_correlation);
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
-        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
+        // mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
-        model_mBx1c[i][1] = MB + model_mu[i] - alpha*true_x1[i] + beta*true_c[i] - mass_correction * mass[i];
-        model_mBx1c[i][2] = true_x1[i];
-        model_mBx1c[i][3] = true_c[i];
+        model_mBx1c_uncorrected[i][1] = true_MB[i];
+        model_mBx1c_uncorrected[i][2] = true_x1[i];
+        model_mBx1c_uncorrected[i][3] = true_c[i];
+
+        model_mBx1c[i][1] = model_mBx1c_uncorrected[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i]; // - mass_correction * mass[i];
+        model_mBx1c[i][2] = model_mBx1c_uncorrected[i][2];
+        model_mBx1c[i][3] = model_mBx1c_uncorrected[i][3];
 
         // Add in intrinsic scatter
-        model_mBx1c_cov[i] = obs_mBx1c_cov[i] + intrinsic_variance;
+        // model_mBx1c_cov[i] = obs_mBx1c_cov[i];
 
         // Track and update posterior
-        PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], model_mBx1c_cov[i]);
-        PointPosteriors[i] = PointPosteriors[i] + normal_lpdf(true_x1[i] | x1_loc, x1_scale);
-        PointPosteriors[i] = PointPosteriors[i] + skew_normal_lpdf(true_c[i] | c_loc, c_scale, c_alpha);
+        PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], obs_mBx1c_cov[i]) + multi_normal_cholesky_lpdf(model_mBx1c_uncorrected[i] | mean_mBx1c, population);
     }
     Posterior = sum(PointPosteriors);
 
 }
 model {
     target += Posterior;
-    sigma_int ~ cauchy(0, 2.5);
-    x1_scale ~ cauchy(0, 2.5);
-    c_scale ~ cauchy(0, 2.5);
+    sigma_MB ~ cauchy(0, 2.5);
+    sigma_x1 ~ cauchy(0, 2.5);
+    sigma_c ~ cauchy(0, 2.5);
+    intrinsic_correlation ~ lkj_corr_cholesky(4);
 }
