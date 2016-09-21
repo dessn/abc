@@ -16,8 +16,8 @@ def get_truths_labels_significance():
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -20, -18.5),
         ("mean_x1", 0.0, r"$\langle x_1 \rangle$", True, -1.0, 1.0),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
-        ("sigma_MB", 0.1, r"$\sigma_{\rm mB}$", True, 0.05, 0.4),
-        ("sigma_x1", 0.5, r"$\sigma_{x1}$", True, 0.1, 2.0),
+        ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.4),
+        ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
         ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.2),
         # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
         # ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
@@ -27,7 +27,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_physical_data(n_sne=500, seed=0):
+def get_physical_data(n_sne=500, seed=1):
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
     np.random.seed(seed)
@@ -104,7 +104,7 @@ def get_analysis_data(snana=False):
     data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
     # data["redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * redshifts)
-    n_z = 500
+    n_z = 2000
     dz = redshifts.max() / n_z
     zs = sorted(redshifts.tolist())
     added_zs = [0]
@@ -178,7 +178,7 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         t = output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=20000, warmup=10000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=5000, warmup=2000, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:
