@@ -69,19 +69,19 @@ values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
 known (:math:`\hat{z} = z,\ \hat{m}=m)`.
 
 .. math::
-    P(\theta S|d) &\propto P(d|S\theta) P(\theta)
+    P(\theta S|d) & \propto P(d|S\theta) P(\theta)
 
 Let us separate out the selection effects:
 
 .. math::
-    P(\theta S|d) &\propto  \frac{P(d,S|\theta) P(\theta)}{P(S|\theta)}   \\[10pt]
+    P(\theta S|d) & \propto  \frac{P(d,S|\theta) P(\theta)}{P(S|\theta)}   \\[10pt]
     &\propto \frac{P(S|d,\theta) P(d|\theta) P(\theta)}{P(S|\theta)}
 
 As our data must have passed the selection cuts, by definition, the numerator
 reduces down.
 
 .. math::
-    P(\theta S|d) &\propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)}
+    P(\theta S|d) & \propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)}
 
 STAN Model
 ~~~~~~~~~~
