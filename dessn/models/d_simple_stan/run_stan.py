@@ -161,8 +161,6 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
-    if os.path.exists(stan_output_dir):
-        shutil.rmtree(stan_output_dir)
     os.makedirs(stan_output_dir)
 
     t = stan_output_dir + "/stan.pkl"
@@ -200,6 +198,8 @@ if __name__ == "__main__":
             else:
                 num_walks = 50
                 num_jobs = 50
+            if os.path.exists(stan_output_dir):
+                shutil.rmtree(stan_output_dir)
             filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs, delete=True)
             os.system("qsub %s" % filename)
             print("Called qsub")
