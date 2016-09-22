@@ -52,8 +52,8 @@ parameters {
 
 transformed parameters {
     // Our SALT2 model
+    vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
-    vector [3] model_mBx1c_uncorrected [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
 
     // Helper variables for Simpsons rule
@@ -101,19 +101,19 @@ transformed parameters {
     for (i in 1:n_sne) {
         // mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
-        model_mBx1c_uncorrected[i][1] = true_MB[i];
-        model_mBx1c_uncorrected[i][2] = true_x1[i];
-        model_mBx1c_uncorrected[i][3] = true_c[i];
+        model_MBx1c_uncorrected[i][1] = true_MB[i];
+        model_MBx1c_uncorrected[i][2] = true_x1[i];
+        model_MBx1c_uncorrected[i][3] = true_c[i];
 
-        model_mBx1c[i][1] = model_mBx1c_uncorrected[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i]; // - mass_correction * mass[i];
-        model_mBx1c[i][2] = model_mBx1c_uncorrected[i][2];
-        model_mBx1c[i][3] = model_mBx1c_uncorrected[i][3];
+        model_mBx1c[i][1] = model_MBx1c[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i]; // - mass_correction * mass[i];
+        model_mBx1c[i][2] = model_MBx1c[i][2];
+        model_mBx1c[i][3] = model_Bx1c[i][3];
 
         // Add in intrinsic scatter
         // model_mBx1c_cov[i] = obs_mBx1c_cov[i];
 
         // Track and update posterior
-        PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], obs_mBx1c_cov[i]) + multi_normal_cholesky_lpdf(model_mBx1c_uncorrected[i] | mean_mBx1c, population);
+        PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], obs_mBx1c_cov[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_mBx1c, population);
     }
     Posterior = sum(PointPosteriors);
 

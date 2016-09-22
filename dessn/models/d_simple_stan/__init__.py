@@ -112,10 +112,10 @@ So now we can focus on the likelihood's numerator, which is
     P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)
 
 Now, in order to calculate :math:`P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)`,
-we need to transform from :math:`m_B to M_B`. This is done via the following maths:
+we need to transform from :math:`m_B` to :math:`M_B`. This is done via the following maths:
 
 .. math::
-    M_B = m_B + \mu + \alpha x_1 - \beta c
+    M_B = m_B - \mu + \alpha x_1 - \beta c
 
 .. + k(z) m
 
@@ -130,88 +130,50 @@ where we define :math:`\mu` as
 .. k(z) &= \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
     \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right]
 
-Thus :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`.
-
-----------
-
-**Distributions**:
-
-Latent colour is drawn from a skew normal. Latent stretch is drawn from a normal.
+Thus :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`. We can substitute
+:math:`M_B` into our conditional probability:
 
 .. math::
-    P(c| \langle c \rangle, \sigma_c, \alpha_c) &= \mathcal{N}_{\rm skew}
-    (c|\langle c \rangle, \sigma_c, \alpha_c) \\
+    P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)
+    &= P(M_B, m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
+    &= P(M_B, x_1, c, | \gamma) \\[10pt]
+    &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V) \right)
 
-    P(x_1| \langle x_1 \rangle, \sigma_{x1}) &= \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1})
-
-**Mass correction**:
-
-We continue to follow Rubin et al. (2015) and model the mass correction as
+where
 
 .. math::
-    \Delta M = \hat{m} k(z) = \hat{m} \, \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
-    \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right]
+    V &= \begin{pmatrix}
+    \sigma_{M_B}^2                        & \rho_{12} \sigma_{M_B} \sigma_{x_1}         & \rho_{13} \sigma_{M_B} \sigma_{c}  \\
+    \rho_{21} \sigma_{M_B} \sigma_{x_1}           & \sigma_{x_1}^2                    & \rho_{23} \sigma_{x_1} \sigma_{c}  \\
+    \rho_{31} \sigma_{M_B} \sigma_{c}          & \rho_{32} \sigma_{x_1} \sigma_{c}       & \sigma_{c}^2  \\
+    \end{pmatrix}
 
-**Dispersion**:
 
-Dispersion is modelled by adjusting the covariance matrix between the
-model :math:`\lbrace m_B,x_1,c \rbrace` and the observed. The extra factor
-added to the covariance is
+.. note::
+    In this implementation there is no skewness in the colour distribution.
+    As we do not require normalised probabilities, we can simply add in correcting
+    factors (such as an additional linear probability for colour) that can emulate skewness.
 
-.. math::
-    \sigma^2_{\rm add} = \sigma^2_{\rm int} \times \begin{pmatrix} f_m &
-    \rho_{12}\frac{\sqrt{f_m f_{x1}}}{0.13} & \rho_{13} \frac{\sqrt{f_m f_c}}{-3.0} \\
-    \rho_{12} \frac{\sqrt{f_m f_{x1}}}{0.13} & \frac{f_{x1}}{0.13^2} &
-    \rho_{23} \frac{\sqrt{f_{x1} f_{c}}}{(-3.0)(0.13)} \\
-    \rho_{13} \frac{\sqrt{f_m f_c}}{-3.0} & \rho_{23}
-    \frac{\sqrt{f_{x1} f_c }}{(-3.0)(0.13)} & \frac{f_c}{(-3.0)^2}    \end{pmatrix}
-
-**Combined**:
-
-Whilst it is tempting to write out everything with all variables clearly displayed, I
-am going to pass. But once, for posterity, we want to calculate:
+Putting this back together, we now have a simple hierarchical multi-normal model:
 
 .. math::
-    P(d|\theta) = P(\hat{m_B},\hat{x_1},\hat{c}, \hat{z}, \hat{m}|\Omega_M, w, \alpha, \beta,
-    \langle c \rangle, \sigma_c, \alpha_c, \langle x_1 \rangle, \sigma_{x_1}, M_B,
-    \sigma_{\rm int}, f_{m},\ f_{x_1},\ f_{c}, \rho, \delta(0), \delta(\infty))
+    \mathcal{L} &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
+    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V) \right)
 
-Let us introduce several transformations. Firstly, from cosmology to distance modulus, such that
-
-.. math::
-    \mu = 5 \log_{10} \left[ \frac{(1 + z)c}{H_0 \times 10{\rm pc}} \int_0^z \left(
-    \Omega_m (1 + z)^3 + (1 - \Omega_m)(1+z)^{3(1+w)} \right) \right]
-
-Secondly, the predicted apparent magnitudes :math:`m_B` can be constructed
-using the distance modulus, the Phillips relation, and the mass correction.
-
-.. math::
-    m_B = M - \mu - \alpha x_1 + \beta c - \Delta M
-
-Putting these together, we have that
-
-.. math::
-    P(d|\theta) = \prod_{\rm obs} \mathcal{N} \left(\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace |
-     \lbrace {m_B}, {c}, {x_1},  \rbrace, C + \sigma_{\rm add}^2\right)
-     \mathcal{N}_{\rm skew}(c|\langle c \rangle, \sigma_c, \alpha_c)
-     \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1})
-
-Looking now at the priors, we implement :math:`{\rm Cauchy}(0,2.5)` priors on
-:math:`\sigma_{\rm int}`, :math:`\sigma_{x_1}` and :math:`\sigma_c` and flat priors on
-all other variables.
+Adding in the priors, and taking into account that we observe multiple supernova, we have
+that a final numerator of:
 
 .. math::
     P(d|\theta)P(\theta) &\propto
-    \rm{Cauchy}(\sigma_{\rm int}|0,2.5)
+    \int dm_B \int dx_1 \int dc \
+    \rm{Cauchy}(\sigma_{M_B}|0,2.5)
     \rm{Cauchy}(\sigma_{x_1}|0,2.5)
-    \rm{Cauchy}(\sigma_{c}|0,2.5) \\
-    &\quad\quad\quad \prod_{\rm obs} \mathcal{N} \left(\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace |
-     \lbrace {m_B}, {c}, {x_1},  \rbrace, C + \sigma_{\rm add}^2\right)
-     \mathcal{N}_{\rm skew}(c|\langle c \rangle, \sigma_c, \alpha_c)
-     \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1})
+    \rm{Cauchy}(\sigma_{c}|0,2.5)
+    \rm{LKJ}(\rho|4) \\
+    &\quad\quad\quad \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
+    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V) \right)
 
-A very rough fit for this (defintiely not enough steps), is shown below, for a thousand generated
-supernova.
+A rough fit for this, is shown below, for five hundred generated supernova.
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot.png
     :align:     center
