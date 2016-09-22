@@ -87,7 +87,6 @@ transformed parameters {
     }
     // -------------End numerical integration---------------
 
-
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
     mean_mBx1c[1] = mean_MB;
     mean_mBx1c[2] = mean_x1;
@@ -101,9 +100,9 @@ transformed parameters {
     for (i in 1:n_sne) {
         // mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
-        model_MBx1c_uncorrected[i][1] = true_MB[i];
-        model_MBx1c_uncorrected[i][2] = true_x1[i];
-        model_MBx1c_uncorrected[i][3] = true_c[i];
+        model_MBx1c[i][1] = true_MB[i];
+        model_MBx1c[i][2] = true_x1[i];
+        model_MBx1c[i][3] = true_c[i];
 
         model_mBx1c[i][1] = model_MBx1c[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i]; // - mass_correction * mass[i];
         model_mBx1c[i][2] = model_MBx1c[i][2];
