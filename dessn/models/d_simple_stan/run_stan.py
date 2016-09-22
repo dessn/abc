@@ -123,7 +123,7 @@ def get_analysis_data(snana=False):
     n_simps = int((n_z + 1) / 2)
     to_sort = [(z, -1) for z in added_zs] + [(z, i) for i, z in enumerate(redshifts)]
     to_sort.sort()
-    final_redshifts = [z[0] for z in to_sort]
+    final_redshifts = np.array([z[0] for z in to_sort])
     sorted_vals = [(z[1], i) for i, z in enumerate(to_sort) if z[1] != -1]
     sorted_vals.sort()
     final = [int(z[1] / 2 + 1) for z in sorted_vals]
@@ -132,6 +132,8 @@ def get_analysis_data(snana=False):
         "n_z": n_z,
         "n_simps": n_simps,
         "zs": final_redshifts,
+        "zspo": 1 + final_redshifts,
+        "zsom": (1 + final_redshifts) ** 3,
         "redshift_indexes": final
     }
     # If you want python2: data.update(update), return data
@@ -177,7 +179,7 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=3000, warmup=1000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=1000, warmup=250, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:

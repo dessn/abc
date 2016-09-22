@@ -18,6 +18,7 @@ data {
 
     // Helper data used for Simpsons rule.
     real <lower=0> zs[n_z]; // List of redshifts to manually integrate over.
+    real <lower=0> zsom[n_z]; // List of redshifts to manually integrate over.
     int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
 }
 
@@ -75,8 +76,9 @@ transformed parameters {
     // real mass_correction;
 
     // -------------Begin numerical integration-----------------
+    real expon = 3 * (1 + w);
     for (i in 1:n_z) {
-        Hinv[i] = 1./sqrt( Om*pow(1. + zs[i], 3) + (1. - Om) * pow(1. + zs[i], 3 * (1 + w))) ;
+        Hinv[i] = 1./sqrt( Om * zsom[i] + (1. - Om) * pow(zspo[i], expon)) ;
     }
     cum_simps[1] = 0.;
     for (i in 2:n_simps) {
