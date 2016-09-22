@@ -1,5 +1,7 @@
 import os
 import pickle
+
+import shutil
 from astropy.cosmology import FlatwCDM
 import numpy as np
 from numpy.random import normal, uniform
@@ -158,11 +160,12 @@ def init_fn():
 if __name__ == "__main__":
     file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
-    output_dir = os.path.abspath(dir_name + "/output")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    stan_output_dir = os.path.abspath(dir_name + "/stan_output")
+    if os.path.exists(stan_output_dir):
+        shutil.rmtree(stan_output_dir)
+    os.makedirs(stan_output_dir)
 
-    t = output_dir + "/stan.pkl"
+    t = stan_output_dir + "/stan.pkl"
     data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
@@ -176,7 +179,7 @@ if __name__ == "__main__":
         sys.path.append(dessn_dir)
         import pystan
         i = int(sys.argv[1])
-        t = output_dir + "/stan%d.pkl" % i
+        t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
         fit = sm.sampling(data=data, iter=3000, warmup=1000, chains=1, init=init_fn)
 
@@ -197,7 +200,7 @@ if __name__ == "__main__":
             else:
                 num_walks = 50
                 num_jobs = 50
-            filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs)
+            filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs, delete=True)
             os.system("qsub %s" % filename)
             print("Called qsub")
         else:

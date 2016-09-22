@@ -1,13 +1,17 @@
 import os
+import shutil
 
 
-def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24):
+def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24, delete=False):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
     name = executable[:-3]
     output_dir = directory + os.sep + "out_files"
     error_dir = output_dir + os.sep + "errors"
+    if delete and os.path.exists(output_dir):
+        print("Deleting ", output_dir)
+        # shutil.rmtree(output_dir)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if not os.path.exists(error_dir):
