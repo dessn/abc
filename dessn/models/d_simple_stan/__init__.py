@@ -69,7 +69,7 @@ values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
 known (:math:`\hat{z} = z,\ \hat{m}=m)`.
 
 .. math::
-    P(\theta S|d) & \propto P(d|S\theta) P(\theta)
+    P(\theta S|d) & \propto P(d|S\theta) P(\theta) \\
 
 Let us separate out the selection effects:
 
@@ -178,6 +178,8 @@ that a final numerator of:
 
 A rough fit for this, is shown below, for five hundred generated supernova.
 
+.. figure::     ../dessn/models/d_simple_stan/output/plot.png
+    :align:     center
 
 --------
 
