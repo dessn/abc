@@ -12,7 +12,7 @@ def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
     result = [
         ("Om", 0.3, r"$\Omega_m$", True, 0.1, 0.6),
-        # ("w", -1.0, r"$w$", True, -1.5, -0.5),
+        ("w", -1.0, r"$w$", True, -1.5, -0.5),
         ("alpha", 0.1, r"$\alpha$", True, -0.3, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -20, -18.5),
