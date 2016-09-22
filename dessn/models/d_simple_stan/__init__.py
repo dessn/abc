@@ -178,8 +178,6 @@ that a final numerator of:
 
 A rough fit for this, is shown below, for five hundred generated supernova.
 
-.. figure::     ../dessn/models/d_simple_stan/output/plot.png
-    :align:     center
 
 --------
 
