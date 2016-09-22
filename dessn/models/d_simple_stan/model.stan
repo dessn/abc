@@ -106,7 +106,7 @@ transformed parameters {
 
         model_mBx1c[i][1] = model_MBx1c[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i]; // - mass_correction * mass[i];
         model_mBx1c[i][2] = model_MBx1c[i][2];
-        model_mBx1c[i][3] = model_Bx1c[i][3];
+        model_mBx1c[i][3] = model_MBx1c[i][3];
 
         // Add in intrinsic scatter
         // model_mBx1c_cov[i] = obs_mBx1c_cov[i];
