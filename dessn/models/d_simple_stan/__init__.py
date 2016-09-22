@@ -171,7 +171,7 @@ that a final numerator of:
     \rm{Cauchy}(\sigma_{c}|0,2.5)
     \rm{LKJ}(\rho|4) \\
     &\quad\quad\quad \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
-    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V) \right)
+    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)
 
 A rough fit for this, is shown below, for five hundred generated supernova.
 
@@ -190,7 +190,7 @@ of our likelihood! Now, for :math:`P(S|\theta)` to make mathematical sense, the 
 effects :math:`S` need to apply onto some data:
 
 .. math::
-    P(S|\theta) = \int dR P(R,S|\theta)
+    P(S|\theta) = \int dR\ P(R,S|\theta)
 
 where :math:`R` is a potential realisation of our experiment. To write this down,
 and taking into account we can model supernova such that we can determine
@@ -200,35 +200,44 @@ have:
 .. math::
     P(S|\theta) &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
     \int dz \int dm \int dm_B \int dx_1 \int dc \
-    P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, z, m, S|\theta) \\
+    P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, z, m, S|\theta) \\[10pt]
     &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
     \int dz \int dm \int dm_B \int dx_1 \int dc \
-    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, z, m, S|\theta) \\
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, z, m, S|\theta) \\[10pt]
     &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
-    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c) P(m_B, x_1, c, z, m|\theta) \\
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c) P(m_B, x_1, c, z, m|\theta) \\[10pt]
     &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \
-    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) P(S|m_B, x_1, c, z) P(c|\theta) P(x_1 | \theta) P(m_B, z, m|\theta) \\
+    P(S|m_B, x_1, c, z) P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c)
+    P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta)
 
 Note again that we assume redshift and mass are perfectly known, so relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
-they only appear once in the equation above.
+they only appear once in the equation above. In the last line I simply substitute the multivariate
+normal probabilities distributions reached in the previous section and utilise the
+transformation from apparent magnitude to absolute magnitude. The important assumption
+in the last line fo the equation is that the detection efficiency is to good approximation
+captured by the apparent magnitude, colour, stretch and redshift of the supernova.
 
-As we integrate over all possible realisations, we have that over all space
-:math:`P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) = \iiint_{-\infty}^{\infty} \mathcal{N}( \hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c, \sqrt{\sigma^2_{\rm obs} + \sigma^2_{\rm add}})= 1`,
-and as such we can remove it from the integral. We also note that at the moment the model
-not contain any details of the mass distribution of galaxies, which may be an issue.
+As we integrate over all possible realisations, we have that over all space we have
 
 .. math::
-    P(S|\theta) &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc  P(S|m_B, x_1, c, z) P(m_B|z, m, x_1, c, \theta) P(z) P(m) P(c|\theta) P(x_1 | \theta) \\
+    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) =
+    \iiint_{-\infty}^{\infty} d\hat{m_B} d\hat{x_1} d\hat{c}\
+    \mathcal{N}(\lbrace \hat{m_B}, \hat{x}_1, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C) = 1
+
+and as such we can remove it from the integral.
+
+.. We also note that at the moment the model not contain any details of the mass distribution of galaxies, which may be an issue.
+
+.. math::
+    P(S|\theta) &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \  P(S|m_B, x_1, c, z)  P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta)
 
 Addressing each component individually:
 
 .. math::
     P(z)&= \text{Redshift distribution from DES volume}\\
     P(m) &= \text{Unknown mass distribution} \\
-    P(c|\theta) &= P(c| \langle c \rangle, \sigma_c, \alpha_c) = \mathcal{N}_{\rm skew}(c|\langle c \rangle, \sigma_c, \alpha_c) \\
-    P(x_1|\theta) &= P(x_1| \langle x_1 \rangle, \sigma_{x1}) = \mathcal{N}(x_1|\langle  x_1 \rangle, \sigma_{x1}) \\
-    P(m_B|z, m, x_1, c, \theta) &= \delta(m_B, \Omega_m, w, z, x_1, c, m, \alpha, \beta, M_B) \\
+    P(M_B, x_1, c|\theta) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
     P(S|m_B, x_1, c, z) &= \text{Ratio of SN generated that pass selection cuts for given SN parameters}
 
 Now enter the observational specifics of our survey: how many bands, the band passes,
@@ -240,36 +249,19 @@ frequency of observation, weather effects, etc. The selection effects we need to
     * At least one point :math:`t > 10`.
     * At least 2 filters with :math:`S/N > 5`.
 
-These cuts there require us to model the light curves themselves, not just
-the magnitude, colour and stretch distribution. We thus need to be able to
-go from a given :math:`\lbrace m_B, x_1, c, z, m\rbrace`, to a supernova
-light curve.
 
--------
-
-    **Technical aside**: Calculating :math:`\delta(m_B, \Omega_m, w, z, x_1, c, m \alpha, \beta, M_B)`
+.. note::
+    **Technical aside**: Calculating this correction
     is not an analytic task. It has complications not just in the distance modulus being the
     result of an integral, but also that the colour and stretch correction factors make
-    extra use of supernova specific values. The way to efficiently determine :math:`P(m_B|...)`
+    extra use of supernova specific values. The way to efficiently determine the efficiency
     is given as follows:
 
-        1. Draw samples of :math:`z` from the DES redshift distribution.
-        2. Using :math:`\Omega_m` and :math:`w` to translate this to a :math:`\mu` distribution.
-        3. Take simulated supernova :math:`m_B, x_1, c, m, z` values, and use :math:`\alpha, \beta, \delta(0), \delta(\infty), M_B` to get :math:`\mu^* = m_B + \alpha x_1 - \beta c + m k(z) - M_B`
-        4. Using :math:`P(\mu)` from step 2, determine :math:`P(-\mu^*)`, which is equivalent to :math:`P(m_B|z, m, x_1, c, \theta)`.
+        1. Initially run a large DES-like simulation, recording all generated SN parameters and whether they pass the cuts.
+        2. Using input cosmology to translate :math:`m_B, x_1, c` distribution to a :math:`M_B, x_1, c` distribution.
+        3. Perform Monte-Carlo integration using the distribution. The value is :math:`P(S|m_B,x_1,c,z) = 1.0` if detected, :math:`0` otherwise, weighted by the probability of :math:`M_B,x_1,c,z,m` for that cosmology.
 
-    However, this breaks down because we move dispersion into the observation and thus remove it from the integral.
-    This means that :math:`P(\mu)` remains a delta function, and thus :math:`P(m_B|z, m, x_1, c, \theta) = 0` for
-    all supernova. So what we realistically need is a better way of modelling the magnitude, colour and stretch
-    population. One way is to do it as a multivariate normal, but then we lose the ability to skew the colour
-    distribution. I cannot find a way of doing a multivariate skew distribution. Perhaps we could manually
-    combine them. Regardless, I cannot see how modelling populations *and* intrinsic dispersion is the correct
-    method to go with, because your population should really encompass the dispersion in the actual events.
 
-    I need to address this point before continuing. I feel the easiest thing to do at the moment is to
-    move to a multivariate normal model of :math:`\lbrace m_B, x_1, c \rbrace`.
-
--------
 
 
 
