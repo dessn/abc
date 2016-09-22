@@ -81,7 +81,7 @@ As our data must have passed the selection cuts, by definition, the numerator
 reduces down.
 
 .. math::
-    P(\theta S|d) & \propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)}
+    P(\theta S|d) & \propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)} \\
 
 
 ----------
@@ -97,7 +97,7 @@ differently. For simplicity, let us denote the population parameters
 .. math::
     P(d|\theta)P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
     \Omega_m, w, \alpha, \beta, \gamma)
-    P(\Omega_m, w, \alpha, \beta, \gamma)
+    P(\Omega_m, w, \alpha, \beta, \gamma) \\
 
 Now, let us quickly deal with the priors so I don't have to type them out again and again.
 We will treat :math:`\sigma_{M_B},\ \sigma_{x_1},\, \sigma_c`
@@ -161,7 +161,7 @@ Putting this back together, we now have a simple hierarchical multi-normal model
 
 .. math::
     \mathcal{L} &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
-    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V) \right)
+    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V) \right) \\
 
 Adding in the priors, and taking into account that we observe multiple supernova, we have
 that a final numerator of:
@@ -176,7 +176,7 @@ that a final numerator of:
     &\quad\quad\quad \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)
 
-A rough fit for this, is shown below, for five hundred generated supernova.
+A rough fit for this, is shown below, for a thousand generated supernova.
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot.png
     :align:     center
@@ -234,7 +234,7 @@ and as such we can remove it from the integral.
 .. We also note that at the moment the model not contain any details of the mass distribution of galaxies, which may be an issue.
 
 .. math::
-    P(S|\theta) &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \  P(S|m_B, x_1, c, z)  P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta)
+    P(S|\theta) &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \  P(S|m_B, x_1, c, z)  P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta) \\
 
 Addressing each component individually:
 
