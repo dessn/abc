@@ -29,7 +29,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_physical_data(n_sne=500, seed=0):
+def get_physical_data(n_sne, seed):
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
     np.random.seed(seed)
@@ -94,7 +94,7 @@ def get_analysis_data(snana=False):
     if snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(n_sne=1000, seed=1)
+        data = get_physical_data(500, 2)
     n_sne = data["n_sne"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
@@ -106,7 +106,7 @@ def get_analysis_data(snana=False):
     data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
     # data["redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * redshifts)
-    n_z = 4000
+    n_z = 1000
     dz = redshifts.max() / n_z
     zs = sorted(redshifts.tolist())
     added_zs = [0]
