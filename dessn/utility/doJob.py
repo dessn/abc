@@ -11,7 +11,7 @@ def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24, delete=Fa
     error_dir = output_dir + os.sep + "errors"
     if delete and os.path.exists(output_dir):
         print("Deleting ", output_dir)
-        # shutil.rmtree(output_dir)
+        shutil.rmtree(output_dir)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if not os.path.exists(error_dir):
