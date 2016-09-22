@@ -34,3 +34,11 @@ table.borderless p {
 .wy-table-responsive {
     overflow: auto !important;
 }
+
+.rst-content .green.note .admonition-title {
+    background: #55c764 !important;
+}
+
+.rst-content .green.note {
+    background: #dbffd9 !important;
+}

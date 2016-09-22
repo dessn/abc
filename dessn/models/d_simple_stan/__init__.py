@@ -178,6 +178,7 @@ A rough fit for this, is shown below, for five hundred generated supernova.
 .. figure::     ../dessn/models/d_simple_stan/output/plot.png
     :align:     center
 
+--------
 
 Selection Effects
 ~~~~~~~~~~~~~~~~~
@@ -251,6 +252,8 @@ frequency of observation, weather effects, etc. The selection effects we need to
 
 
 .. note::
+    :class: green
+
     **Technical aside**: Calculating this correction
     is not an analytic task. It has complications not just in the distance modulus being the
     result of an integral, but also that the colour and stretch correction factors make
