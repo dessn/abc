@@ -7,10 +7,13 @@ I follow Rubin et al. (2015) with some changes:
     3. I do not take zero point covariance into account.
     4. I do not take selection effects into account, *in the STAN model.*
     5. I consider :math:`w` as a free parameter, instead of just :math:`\Omega_m`.
+    6. I incorporate intrinsic dispersion via SN population, not as an observational effect.
 
 Instead, selection effects are taken into account via the methodology discussed
 and verified in the model proofs section of this work. To continue, we should
 first formalise the model itself.
+
+----------
 
 Parameters
 ----------
@@ -22,60 +25,114 @@ Parameters
     * :math:`\alpha`: Phillips correction for stretch
     * :math:`\beta`: Phillips correction for colour
 
-**Hyperparameters**:
+**Population parameters**:
 
-    * :math:`\langle c \rangle`: colour distribution mean
-    * :math:`\sigma_c`: colour distribution standard deviation
-    * :math:`\alpha_c`: colour distribution skewness
-    * :math:`\langle x_1 \rangle`: scale distribution mean
-    * :math:`\sigma_{x_1}`: scale distribution standard deviation
+    * :math:`\langle M_B \rangle`: mean absolute magnitude of supernova
+    * :math:`\sigma_{M_B}`: standard deviation of absolute magnitudes
+    * :math:`\langle c \rangle`: mean colour
+    * :math:`\sigma_c`: standard deviation of  colour
+    * :math:`\langle x_1 \rangle`: mean scale
+    * :math:`\sigma_{x_1}`: standard deviation of scale
+    * :math:`\rho`: correlation (matrix) between absolute magnitude, colour and stretch
 
-**Marginalised Parameters**:
+.. warning::
+    Not currently implemented:
 
-    * :math:`M_B`: absolute magnitude of type Ia supernova
-    * :math:`\sigma_{\rm int}`: unexplained/intrinsic dispersion of supernova
-    * :math:`f_{m},\ f_{x_1},\ f_{c}`: simplex fraction of intrinsic dispersion accorded to magnitude, stretch and colour
-    * :math:`\rho`: correlation of intrinsic dispersion model, used in conjuction with parameters above
-    * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
+    **Marginalised Parameters**:
+        * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
+
+----------
 
 Model
 -----
 
-You may need a wide screen for this section.
+.. note::
+    In this section I will briefly outline the model I am using. For the
+    methodology used to incorporate selection effects, I recommend reading through the
+    simpler and more detailed examples provided at:
 
-Specifically, we wish to model our posterior, given our
-observations :math:`x`, our model :math:`\theta`, and selection effects :math:`S`. Our
-observations are the light curves themselves, the summary statistics that result from them
-:math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace`, the covariance for the summary statistics
-:math:`C`, the redshifts of the objects :math:`\hat{z}` and a
-normalised mass estimate :math:`\hat{m}`.
+        * :ref:`efficiency1`
+        * :ref:`efficiency2`
+        * :ref:`efficiency3`
 
-Note that in this work we will be modelling :math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace`
-as having true underlying values, however assume that  :math:`\hat{z}`
-and :math:`\hat{m}` are known (:math:`\hat{z} = z,\ \hat{m}=m)`.
+    There are more examples that can be found at :ref:`proofs`, however the first few
+    should be sufficient.
+
+We wish to model our posterior, given our observations, our model :math:`\theta`, and
+selection effects :math:`S`. Our observations are the light curves themselves,
+the summary statistics that result from them :math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace`,
+the covariance for the summary statistics :math:`\hat{C}`, the redshifts of the
+objects :math:`\hat{z}` and a normalised mass estimate :math:`\hat{m}`. We thus signify
+observed variables with the hat operator. In this work we will be modelling
+:math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace` as having true underlying
+values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
+known (:math:`\hat{z} = z,\ \hat{m}=m)`.
 
 .. math::
-    P(\theta|d) \propto P(d|S\theta) P(\theta)
+    P(\theta S|d) &\propto P(d|S\theta) P(\theta)
 
-Let us separate out the selection effects and focus on the likelihood.
+Let us separate out the selection effects:
 
 .. math::
-    \mathcal{L} = \frac{P(d,S|\theta)}{P(S|\theta)}
-
-    \mathcal{L} = \frac{P(S|d,\theta) P(d|\theta)}{P(S|\theta)}
+    P(\theta S|d) &\propto  \frac{P(d,S|\theta) P(\theta)}{P(S|\theta)}   \\[10pt]
+    &\propto \frac{P(S|d,\theta) P(d|\theta) P(\theta)}{P(S|\theta)}
 
 As our data must have passed the selection cuts, by definition, the numerator
 reduces down.
 
 .. math::
-    \mathcal{L} = \frac{P(d|\theta)}{P(S|\theta)}
+    P(\theta S|d) &\propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)}
 
 STAN Model
 ~~~~~~~~~~
 
 Let us examine only the numerator for the time being. The numerator is the model
 which ends up implemented in STAN, whilst the denominator must be implemented
-differently. To try and make the maths more digestible, let us split up components:
+differently. For simplicity, let us denote the population parameters
+:math:`\langle M_B \rangle... \rho` shown under the Population header as :math:`\gamma`.
+
+.. math::
+    P(d|\theta)P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+    \Omega_m, w, \alpha, \beta, \gamma)
+    P(\Omega_m, w, \alpha, \beta, \gamma)
+
+Now, let us quickly deal with the priors so I don't have to type them out again and again.
+We will treat :math:`\sigma_{M_B},\ \sigma_{x_1},\, \sigma_c`
+with Cauchy priors, :math:`\rho` with an LKJ prior, and other parameters with flat priors.
+So now we can focus on the likelihood's numerator, which is
+
+.. math::
+    \mathcal{L} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+    \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c |
+    \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c) P(m_b, x_1, c, \hat{z}, \hat{m}|
+    \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
+    P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)
+
+Now, in order to calculate :math:`P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)`,
+we need to transform from :math:`m_B to M_B`. This is done via the following maths:
+
+.. math::
+    M_B = m_B + \mu + \alpha x_1 - \beta c
+
+.. + k(z) m
+
+where we define :math:`\mu` as
+
+.. and :math:`k(z)` as
+
+.. math::
+    \mu &= 5 \log_{10} \left[ \frac{(1 + z)c}{H_0 \times 10{\rm pc}} \int_0^z \left(
+    \Omega_m (1 + z)^3 + (1 - \Omega_m)(1+z)^{3(1+w)} \right) \right] \\[10pt]
+
+.. k(z) &= \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
+    \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right]
+
+Thus :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`.
+
+----------
 
 **Distributions**:
 

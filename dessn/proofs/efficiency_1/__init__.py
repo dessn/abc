@@ -37,9 +37,8 @@ the probability of realising the experimental data"*.
 Now, performing some mathematics, we can get this to a better state:
 
 .. math::
-    \mathcal{L} = P(D = d|D > \alpha e, \mu)
-
-    \mathcal{L} = \frac{P(D=d, D>\alpha e | \mu)}{P(D > \alpha e | \mu)}
+    \mathcal{L} &= P(D = d|D > \alpha e, \mu) \\[10pt]
+    &= \frac{P(D=d, D>\alpha e | \mu)}{P(D > \alpha e | \mu)}
 
 It is important to note here that, by itself, :math:`P(D > \alpha e | \mu)` is not
 quantifiable until :math:`D` is set to some realisation of the data. In other
@@ -49,11 +48,9 @@ this is identical to enforcing the normalisation of the likelihood over all data
 must be true).
 
 .. math::
-    \mathcal{L} = \frac{P(D=d, D>\alpha e | \mu) }{\int dR\ P(D > \alpha e, D=R | \mu)}
-
-    \mathcal{L} = \frac{P(d, d>\alpha e | \mu) }{\int dR\ P(R > \alpha e, R | \mu)}
-
-    \mathcal{L} = \frac{P(d>\alpha e | d \mu) P(d|\mu)}{\int dR\ P(R > \alpha e, R | \mu) P(R|\mu)}
+    \mathcal{L} &= \frac{P(D=d, D>\alpha e | \mu) }{\int dR\ P(D > \alpha e, D=R | \mu)} \\[10pt]
+    &= \frac{P(d, d>\alpha e | \mu) }{\int dR\ P(R > \alpha e, R | \mu)} \\[10pt]
+    &= \frac{P(d>\alpha e | d \mu) P(d|\mu)}{\int dR\ P(R > \alpha e, R | \mu) P(R|\mu)}
 
 We call the term :math:`P(d>\alpha e | d \mu)` the efficiency, for it is the probability
 that, given input data and a model parametrisation, our data passes our cuts. We denote this
