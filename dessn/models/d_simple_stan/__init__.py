@@ -83,6 +83,9 @@ reduces down.
 .. math::
     P(\theta S|d) & \propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)}
 
+
+----------
+
 STAN Model
 ~~~~~~~~~~
 
