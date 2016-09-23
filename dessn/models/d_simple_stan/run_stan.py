@@ -105,7 +105,6 @@ def get_analysis_data(snana=False):
 
     data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
-    # data["redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * redshifts)
     n_z = 1000
     dz = redshifts.max() / n_z
     zs = sorted(redshifts.tolist())
@@ -134,7 +133,8 @@ def get_analysis_data(snana=False):
         "zs": final_redshifts,
         "zspo": 1 + final_redshifts,
         "zsom": (1 + final_redshifts) ** 3,
-        "redshift_indexes": final
+        "redshift_indexes": final,
+        "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts)
     }
     # If you want python2: data.update(update), return data
     return {**data, **update}
