@@ -91,7 +91,7 @@ def get_analysis_data(snana=False):
     if snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(1000, 2)
+        data = get_physical_data(500, 2)
     n_sne = data["n_sne"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
@@ -176,7 +176,7 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=3000, warmup=1000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:
