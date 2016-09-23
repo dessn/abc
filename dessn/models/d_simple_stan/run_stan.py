@@ -57,10 +57,7 @@ def get_physical_data(n_sne, seed):
 
         # Generate the actual mB, x1 and c values
         MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-        if np.random.random() < p:
-            mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
-        else:
-            mass_correction = 0.0
+        mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
         mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix

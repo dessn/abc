@@ -108,7 +108,7 @@ transformed parameters {
         model_MBx1c[i][2] = true_x1[i];
         model_MBx1c[i][3] = true_c[i];
 
-        model_mBx1c[i][1] = model_MBx1c[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i]- mass_correction * mass[i];
+        model_mBx1c[i][1] = model_MBx1c[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i] - mass_correction * mass[i];
         model_mBx1c[i][2] = model_MBx1c[i][2];
         model_mBx1c[i][3] = model_MBx1c[i][3];
 
