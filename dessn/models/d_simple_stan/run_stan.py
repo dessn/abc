@@ -12,7 +12,7 @@ def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
     result = [
         ("Om", 0.3, r"$\Omega_m$", True, 0.1, 0.6),
-        ("w", -1.0, r"$w$", True, -1.5, -0.5),
+        # ("w", -1.0, r"$w$", True, -1.5, -0.5),
         ("alpha", 0.1, r"$\alpha$", True, -0.3, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -20, -18.5),
@@ -22,8 +22,8 @@ def get_truths_labels_significance():
         ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
         ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.2),
         # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
-        # ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
-        # ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
+        ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
+        ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
         ("intrinsic_correlation", np.identity(3), None, False, None, None),
     ]
     return result
@@ -45,8 +45,8 @@ def get_physical_data(n_sne, seed):
     redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
     alpha = mapping["alpha"]
     beta = mapping["beta"]
-    # dscale = mapping["dscale"]
-    # dratio = mapping["dratio"]
+    dscale = mapping["dscale"]
+    dratio = mapping["dratio"]
     p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
     means = np.array([mapping["mean_MB"], mapping["mean_x1"], mapping["mean_c"]])
     sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
@@ -57,11 +57,11 @@ def get_physical_data(n_sne, seed):
 
         # Generate the actual mB, x1 and c values
         MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-        # if np.random.random() < p:
-        #     mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
-        # else:
-        #     mass_correction = 0.0
-        mb = MB + mu - alpha * x1 + beta * c# - mass_correction * p
+        if np.random.random() < p:
+            mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
+        else:
+            mass_correction = 0.0
+        mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
         diag = np.array([0.05, 0.3, 0.05]) ** 2
@@ -77,7 +77,7 @@ def get_physical_data(n_sne, seed):
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": obs_mBx1c_cov,
         "redshifts": redshifts,
-        # "mass": p_high_masses
+        "mass": p_high_masses
     }
 
 
