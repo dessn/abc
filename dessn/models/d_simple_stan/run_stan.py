@@ -91,7 +91,7 @@ def get_analysis_data(snana=False):
     if snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(500, 2)
+        data = get_physical_data(1000, 2)
     n_sne = data["n_sne"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
@@ -193,8 +193,8 @@ if __name__ == "__main__":
                 num_walks = int(sys.argv[1])
                 num_jobs = int(sys.argv[2])
             else:
-                num_walks = 50
-                num_jobs = 50
+                num_walks = 30
+                num_jobs = 30
             if os.path.exists(stan_output_dir):
                 shutil.rmtree(stan_output_dir)
             os.makedirs(stan_output_dir)
