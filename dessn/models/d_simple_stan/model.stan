@@ -77,8 +77,8 @@ transformed parameters {
     real mass_correction;
 
     // -------------Begin numerical integration-----------------
-    real expon;
-    expon = 3 * (1 + w);
+    //real expon;
+    //expon = 3 * (1 + w);
     for (i in 1:n_z) {
         Hinv[i] = 1./sqrt( Om * zsom[i] + (1. - Om)); // * pow(zspo[i], expon)) ;
     }
