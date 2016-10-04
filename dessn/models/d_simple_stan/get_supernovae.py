@@ -27,7 +27,7 @@ class RedshiftSampler(object):
         return self.sampler(uniforms)
 
     def get_sampler(self):
-        zs = np.linspace(0.01, 1.2, 100000)
+        zs = np.linspace(0.01, 0.5, 100000)
 
         # These are the rates from the SNANA input files.
         # DNDZ:  POWERLAW2  2.60E-5  1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
@@ -88,8 +88,8 @@ def get_supernovae(n):
                 "covariance": cov,
                 "prob": multivariate_normal.pdf([MB, x1, c], means, pop_cov)
             })
-            print("Generated %s nova: %0.2f %0.2f %0.2f %0.3f" %
-                  ("passed" if result is not None else "failed", MB, x1, c, z))
+            print("%s nova: %0.2f %0.2f %0.2f %0.3f" %
+                  ("PASSED" if result is not None else "failed", MB, x1, c, z))
         except RuntimeError:
             print("Error on nova: %0.2f %0.2f %0.2f %0.3f" %
                   (MB, x1, c, z))
