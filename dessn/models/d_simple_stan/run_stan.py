@@ -118,7 +118,7 @@ def get_analysis_data(output_dir, sim=True, snana=False):
         cors.append(cor)
 
     data["obs_mBx1c_cor"] = cors
-    redshifts = data["redshifts"]
+    redshifts = np.array(data["redshifts"])
     n_z = 1000
     dz = redshifts.max() / n_z
     zs = sorted(redshifts.tolist())
