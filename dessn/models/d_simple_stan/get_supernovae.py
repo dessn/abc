@@ -27,7 +27,7 @@ class RedshiftSampler(object):
         return self.sampler(uniforms)
 
     def get_sampler(self):
-        zs = np.linspace(0.01, 0.5, 100000)
+        zs = np.linspace(0.01, 0.5, 10000)
 
         # These are the rates from the SNANA input files.
         # DNDZ:  POWERLAW2  2.60E-5  1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
@@ -39,6 +39,7 @@ class RedshiftSampler(object):
         # of the redshift rate function, so will just do it numerically for now
         cdf = pdf.cumsum()
         cdf = cdf / cdf.max()
+        cdf[0] = 0
         self.sampler = interp1d(cdf, zs)
 
 
@@ -93,7 +94,7 @@ def get_supernovae(n):
         except RuntimeError:
             print("Error on nova: %0.2f %0.2f %0.2f %0.3f" %
                   (MB, x1, c, z))
-
+    return results
 
 if __name__ == "__main__":
     n = 10000  # 10k samples seems a good starting point
@@ -101,7 +102,8 @@ if __name__ == "__main__":
     npr = n // jobs
 
     results = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr) for i in range(jobs))
-
+    results = [s for r in results for s in r]
+    print("%d supernova generated" % len(results))
     dir_name = os.path.dirname(__file__) or "."
     filename = os.path.abspath(dir_name + "/output/supernovae.pickle")
     with open(filename, 'wb') as output:
