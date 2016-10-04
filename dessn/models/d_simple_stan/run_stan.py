@@ -29,6 +29,20 @@ def get_truths_labels_significance():
     return result
 
 
+def get_pickle_data(n_sne, output_dir):
+    pickle_file = output_dir + os.sep + "supernovae.pickle"
+    with open(pickle_file, 'rb') as pkl:
+        supernovae = pickle.load(pkl)
+    passed = [s for s in supernovae if s["passed_cut"]][:n_sne]
+    return {
+        "n_sne": n_sne,
+        "obs_mBx1c": [s["parameters"] for s in passed],
+        "obs_mBx1c_cov": [s["covariance"] for s in passed],
+        "redshifts": [s["redshift"] for s in passed],
+        "mass": [s["mass"] for s in passed]
+    }
+
+
 def get_physical_data(n_sne, seed):
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
@@ -84,14 +98,17 @@ def get_snana_data(filename="output/des_sim.pickle"):
     return data
 
 
-def get_analysis_data(snana=False):
+def get_analysis_data(output_dir, sim=True, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    if snana:
+    n = 800
+    if sim:
+        data = get_pickle_data(n, output_dir)
+    elif snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(500, 2)
+        data = get_physical_data(n, 2)
     n_sne = data["n_sne"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
@@ -160,8 +177,9 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
+    output_dir = os.path.abspath(dir_name + "/output")
     t = stan_output_dir + "/stan.pkl"
-    data = get_analysis_data()
+    data = get_analysis_data(output_dir)
 
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()

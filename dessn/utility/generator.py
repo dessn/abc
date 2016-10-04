@@ -87,6 +87,22 @@ def get_summary_stats(z, lc, method="emcee", convert_x0_to_mb=True):
     return parameters, cov
 
 
+def check_lc_passes_cut(lc):
+    """ Checks to see if the supplied light curve passes selection cuts."""
+    bands = lc["band"]
+    sn = lc["flux"] / lc["fluxerr"]
+    sn_in_band = np.array([np.any(sn[bands == b] > 5.0) for b in np.unique(bands)])
+    return sn_in_band.sum() >= 2
+
+
+def get_ia_summary_stats(z, mabs, x1, c, method="minuit", **kwargs):
+    lc = generate_ia_light_curve(z, mabs, x1, c, **kwargs)
+    if check_lc_passes_cut(lc):
+        return get_summary_stats(z, lc, method=method)
+    else:
+        return None
+
+
 def generate_ii_light_curve(z, mabs, source=None, **kwargs):
     if source is None:
         sources = [a[0] for a in sncosmo.builtins.models if a[1] == "SN IIP"]
