@@ -8,6 +8,7 @@ from numpy.random import normal, uniform
 import sys
 import platform
 
+
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
     result = [
@@ -24,13 +25,13 @@ def get_truths_labels_significance():
         # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
-        ("intrinsic_correlation", np.identity(3), None, False, None, None),
+        ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
     ]
     return result
 
 
-def get_pickle_data(n_sne, output_dir):
-    pickle_file = output_dir + os.sep + "supernovae.pickle"
+def get_pickle_data(n_sne):
+    pickle_file = "output/supernovae.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
     passed = [s for s in supernovae if s["passed_cut"]][:n_sne]
@@ -98,13 +99,13 @@ def get_snana_data(filename="output/des_sim.pickle"):
     return data
 
 
-def get_analysis_data(output_dir, sim=True, snana=False):
+def get_analysis_data(sim=True, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
     n = 800
     if sim:
-        data = get_pickle_data(n, output_dir)
+        data = get_pickle_data(n)
     elif snana:
         data = get_snana_data()
     else:
@@ -184,6 +185,7 @@ if __name__ == "__main__":
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
+    print(params)
     params.append("Posterior")
     if len(sys.argv) == 2:
         print("Running single walker")
@@ -224,7 +226,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=500, warmup=200, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=1500, warmup=1000, chains=4, init=init_fn)
 
             # Dump relevant chains to file
             with open(t, 'wb') as output:

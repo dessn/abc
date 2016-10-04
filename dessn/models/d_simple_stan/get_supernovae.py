@@ -1,8 +1,10 @@
 import pickle
 import os
 import numpy as np
+from joblib import Parallel, delayed
+from astropy.cosmology import FlatwCDM
 from scipy.interpolate import interp1d
-
+from scipy.stats import multivariate_normal
 from dessn.models.d_simple_stan.run_stan import get_truths_labels_significance
 from dessn.utility.generator import get_ia_summary_stats
 
@@ -25,7 +27,7 @@ class RedshiftSampler(object):
         return self.sampler(uniforms)
 
     def get_sampler(self):
-        zs = np.linspace(0.01, 1.2, 10000)
+        zs = np.linspace(0.01, 1.2, 100000)
 
         # These are the rates from the SNANA input files.
         # DNDZ:  POWERLAW2  2.60E-5  1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
@@ -40,10 +42,8 @@ class RedshiftSampler(object):
         self.sampler = interp1d(cdf, zs)
 
 
-if __name__ == "__main__":
+def get_supernovae(n):
     redshifts = RedshiftSampler()
-
-    n = 10000  # 10k samples seems a good starting point
 
     # Redshift distribution
     zs = redshifts.sample(size=n)
@@ -51,6 +51,8 @@ if __name__ == "__main__":
     # Population stats
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
+    cosmology = FlatwCDM(70.0, mapping["Om"])
+    mus = cosmology.distmod(zs).value
 
     alpha = mapping["alpha"]
     beta = mapping["beta"]
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     pop_cov = correlations * sigmas_mat
 
     results = []
-    for z, p in zip(zs, p_high_masses):
+    for z, p, mu in zip(zs, p_high_masses, mus):
         try:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
             mass_correction = dscale * (1.9 * (1 - dratio) / z + dratio)
@@ -76,19 +78,29 @@ if __name__ == "__main__":
                 parameters, cov = result
             results.append({
                 "MB": MB,
+                "mB": MB_adj + mu,
                 "x1": x1,
                 "c": c,
                 "mass": p,
                 "redshift": z,
                 "passed_cut": result is not None,
                 "parameters": parameters,
-                "covariance": cov
+                "covariance": cov,
+                "prob": multivariate_normal.pdf([MB, x1, c], means, pop_cov)
             })
             print("Generated %s nova: %0.2f %0.2f %0.2f %0.3f" %
                   ("passed" if result is not None else "failed", MB, x1, c, z))
         except RuntimeError:
             print("Error on nova: %0.2f %0.2f %0.2f %0.3f" %
                   (MB, x1, c, z))
+
+
+if __name__ == "__main__":
+    n = 10000  # 10k samples seems a good starting point
+    jobs = 4  # Using 4 cores
+    npr = n // jobs
+
+    results = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr) for i in range(jobs))
 
     dir_name = os.path.dirname(__file__) or "."
     filename = os.path.abspath(dir_name + "/output/supernovae.pickle")

@@ -1,7 +1,7 @@
 import numpy as np
 import sncosmo
 from astropy.table import Table
-
+from astropy.cosmology import WMAP9
 
 def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t0=1000,
                                  new_moon_t0=None, deltat=-30, weather=0.05, seed=None):
@@ -47,10 +47,15 @@ def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t
 
 
 def generate_ia_light_curve(z, mabs, x1, c, **kwargs):
+    if "cosmo" in kwargs:
+        cosmo = kwargs["cosmo"]
+        del kwargs["cosmo"]
+    else:
+        cosmo = WMAP9
     obs, t0 = get_obs_times_and_conditions(**kwargs)
     model = sncosmo.Model(source='salt2-extended')
     model.set(z=z)
-    model.set_source_peakabsmag(mabs, 'bessellb', 'ab')
+    model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmo)
     x0 = model.get('x0')
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
 
