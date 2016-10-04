@@ -21,9 +21,9 @@ def calculate_bias(chain_dictionary, supernovae):
     weight = []
 
     speed_dict = {}
-
+    print(list(chain_dictionary.keys()))
     for i in range(chain_dictionary["mean_MB"].size):
-        om = np.round(chain_dictionary["Om"][i], decimals=3)
+        om = np.round(chain_dictionary["Om"][i], decimals=2)
         key = "%0.3f" % om
         if speed_dict.get(key) is None:
             cosmology = FlatwCDM(70.0, om)
@@ -52,7 +52,7 @@ def calculate_bias(chain_dictionary, supernovae):
         weight.append(np.average(passed, weights=reweight))
         print(weight[-1])
 
-    return weight
+    return np.array(weight)
 
 
 if __name__ == "__main__":
@@ -67,6 +67,7 @@ if __name__ == "__main__":
         chain_dictionary = pickle.load(pkl)
 
     weights = calculate_bias(chain_dictionary, supernovae)
+
     del chain_dictionary["intrinsic_correlation"]
     for key in list(chain_dictionary.keys()):
         if "_" in key:
@@ -76,6 +77,11 @@ if __name__ == "__main__":
     c = ChainConsumer()
     c.add_chain(chain_dictionary, name="Unweighted")
     n_sne = get_analysis_data()["n_sne"]
-    c.add_chain(chain_dictionary, posterior=np.log(weights), name="Reweighted")
-    c.add_chain(chain_dictionary, posterior=n_sne * np.log(weights), name="Reweighted Mult")
+    logw = n_sne * np.log(weights)
+    print(logw.min(), logw.max())
+    logw -= logw.min() + 5
+    print(logw.min(), logw.max())
+    print(weights.min(), weights.max(), weights.mean())
+    weights = 1 / np.exp(logw)
+    c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
     c.plot(filename="output/comparison.png")
