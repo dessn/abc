@@ -39,8 +39,8 @@ def get_pickle_data(n_sne):
         "n_sne": n_sne,
         "obs_mBx1c": [s["parameters"] for s in passed],
         "obs_mBx1c_cov": [s["covariance"] for s in passed],
-        "redshifts": [s["redshift"] for s in passed],
-        "mass": [s["mass"] for s in passed]
+        "redshifts": np.array([s["redshift"] for s in passed]),
+        "mass": np.array([s["mass"] for s in passed])
     }
 
 
@@ -104,7 +104,7 @@ def get_analysis_data(sim=False, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 400
+    n = 500
     if sim:
         data = get_pickle_data(n)
     elif snana:
@@ -120,7 +120,7 @@ def get_analysis_data(sim=False, snana=False):
         cors.append(cor)
 
     data["obs_mBx1c_cor"] = cors
-    redshifts = np.array(data["redshifts"])
+    redshifts = data["redshifts"]
     n_z = 1000
     dz = redshifts.max() / n_z
     zs = sorted(redshifts.tolist())
