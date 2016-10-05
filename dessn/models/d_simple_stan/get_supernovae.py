@@ -72,7 +72,7 @@ def get_supernovae(n):
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
             mass_correction = dscale * (1.9 * (1 - dratio) / z + dratio)
             MB_adj = MB - alpha * x1 + beta * c - mass_correction * p
-            result = get_ia_summary_stats(z, MB_adj, x1, c)
+            result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology)
             if result is None:
                 parameters, cov = None, None
             else:
@@ -98,7 +98,7 @@ def get_supernovae(n):
 
 if __name__ == "__main__":
     n1 = 1000  # 1k samples from which we can draw data
-    n2 = 10000  # 10k samples for Monte Carlo integration of the weights
+    n2 = 2000  # 10k samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
