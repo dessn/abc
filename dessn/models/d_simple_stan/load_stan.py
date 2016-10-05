@@ -38,6 +38,7 @@ if __name__ == "__main__":
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[3] and k[2] is not None]
     full_params = list(itertools.chain.from_iterable(full_params))
+    full_params.remove("$\\rho$")
     params = list(itertools.chain.from_iterable(params))
     name_map = {k[0]: k[2] for k in vals}
     truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
