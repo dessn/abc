@@ -10,6 +10,7 @@ def get_chain(filename, name_map):
     print("Loading chain from %s" % filename)
     with open(filename, 'rb') as output:
         chain = pickle.load(output)
+        del chain["intrinsic_correlation"]
         keys = list(chain.keys())
         for key in keys:
             if key in name_map:

@@ -16,7 +16,7 @@ def get_truths_labels_significance():
         # ("w", -1.0, r"$w$", True, -1.5, -0.5),
         ("alpha", 0.1, r"$\alpha$", True, -0.3, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
-        ("mean_MB", -21.3, r"$\langle M_B \rangle$", True, -20, -18.5),
+        ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -20, -18.5),
         ("mean_x1", 0.0, r"$\langle x_1 \rangle$", True, -1.0, 1.0),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
         ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.4),
@@ -45,6 +45,7 @@ def get_pickle_data(n_sne):
 
 
 def get_physical_data(n_sne, seed):
+    print("Getting simple data")
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
     np.random.seed(seed)
@@ -99,11 +100,11 @@ def get_snana_data(filename="output/des_sim.pickle"):
     return data
 
 
-def get_analysis_data(sim=True, snana=False):
+def get_analysis_data(sim=False, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 800
+    n = 400
     if sim:
         data = get_pickle_data(n)
     elif snana:
@@ -185,7 +186,6 @@ if __name__ == "__main__":
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
-    print(params)
     params.append("Posterior")
     if len(sys.argv) == 2:
         print("Running single walker")
@@ -226,7 +226,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=1500, warmup=1000, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=1300, warmup=800, chains=4, init=init_fn)
 
             # Dump relevant chains to file
             with open(t, 'wb') as output:
