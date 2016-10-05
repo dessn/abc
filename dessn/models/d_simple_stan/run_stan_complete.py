@@ -179,12 +179,16 @@ def init_fn():
     dic = {k[0]: k[1] for k in vals}
 
     data = get_analysis_data()
+    zs = data["redshifts"]
+    mus = FlatwCDM(70.0, dic["Om"]).distmod(zs).value
+    mBs = np.array([x[1] for x in data["obs_mBx1c"]])
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
+    MBs = mBs - mus + dic["alpha"] * x1s - dic["beta"] * cs
     n_sne = x1s.size
-    randoms["true_MB"] = normal(loc=dic["mean_MB"], scale=dic["sigma_MB"], size=n_sne)
+    randoms["true_MB"] = MBs + normal(loc=0, scale=0.1 * dic["sigma_MB"], size=n_sne)
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
-    randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
+    randoms["true_x1"] = x1s + normal(scale=0.1, size=n_sne)
     chol = [[1.0, 0.0, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,

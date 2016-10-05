@@ -27,7 +27,7 @@ class RedshiftSampler(object):
         return self.sampler(uniforms)
 
     def get_sampler(self):
-        zs = np.linspace(0.01, 0.5, 10000)
+        zs = np.linspace(0.01, 0.8, 10000)
 
         # These are the rates from the SNANA input files.
         # DNDZ:  POWERLAW2  2.60E-5  1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
@@ -70,8 +70,10 @@ def get_supernovae(n):
     for z, p, mu in zip(zs, p_high_masses, mus):
         try:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-            mass_correction = dscale * (1.9 * (1 - dratio) / z + dratio)
-            MB_adj = MB - alpha * x1 + beta * c - mass_correction * p
+            mass_correction = dscale * (1.9 * (1 - dratio) / (0.9 + np.power(10, 0.95 * z)) + dratio)
+            adjustment = - alpha * x1 + beta * c - mass_correction * p
+            MB_adj = MB + adjustment
+            mb = MB_adj + mu
             result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology)
             if result is None:
                 parameters, cov = None, None
@@ -79,7 +81,7 @@ def get_supernovae(n):
                 parameters, cov = result
             results.append({
                 "MB": MB,
-                "mB": MB_adj + mu,
+                "mB": mb,
                 "x1": x1,
                 "c": c,
                 "mass": p,
@@ -97,8 +99,8 @@ def get_supernovae(n):
     return results
 
 if __name__ == "__main__":
-    n1 = 1000  # 1k samples from which we can draw data
-    n2 = 2000  # 10k samples for Monte Carlo integration of the weights
+    n1 = 1000  # samples from which we can draw data
+    n2 = 4000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
