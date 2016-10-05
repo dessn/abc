@@ -181,7 +181,7 @@ def init_fn():
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
     n_sne = x1s.size
-    randoms["true_MB"] = normal(loc=-19.3, scale=0.1, size=n_sne)
+    randoms["true_MB"] = normal(loc=data["mean_MB"], scale=data["sigma_MB"], size=n_sne)
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
     randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
     chol = [[1.0, 0.0, 0.0],
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
     output_dir = os.path.abspath(dir_name + "/output")
     t = stan_output_dir + "/stan.pkl"
-    data = get_analysis_data(output_dir)
+    data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()

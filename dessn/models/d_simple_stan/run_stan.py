@@ -31,6 +31,7 @@ def get_truths_labels_significance():
 
 
 def get_pickle_data(n_sne):
+    print("Getting data from supernovae pickle")
     pickle_file = "output/supernovae.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
@@ -95,12 +96,13 @@ def get_physical_data(n_sne, seed):
 
 
 def get_snana_data(filename="output/des_sim.pickle"):
+    print("Getting SNANA data")
     with open(filename, 'rb') as f:
         data = pickle.load(f)
     return data
 
 
-def get_analysis_data(sim=False, snana=False):
+def get_analysis_data(sim=True, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -164,7 +166,7 @@ def init_fn():
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
     n_sne = x1s.size
-    randoms["true_MB"] = normal(loc=-19.3, scale=0.1, size=n_sne)
+    randoms["true_MB"] = normal(loc=data["mean_MB"], scale=data["sigma_MB"], size=n_sne)
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
     randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
     chol = [[1.0, 0.0, 0.0],
