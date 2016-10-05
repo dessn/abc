@@ -181,7 +181,7 @@ if __name__ == "__main__":
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
     output_dir = os.path.abspath(dir_name + "/output")
     t = stan_output_dir + "/stan.pkl"
-    data = get_analysis_data(output_dir)
+    data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
@@ -226,7 +226,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=1300, warmup=800, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=800, warmup=300, chains=4, init=init_fn)
 
             # Dump relevant chains to file
             with open(t, 'wb') as output:
