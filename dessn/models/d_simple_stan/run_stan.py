@@ -14,8 +14,8 @@ def get_truths_labels_significance():
     result = [
         ("Om", 0.3, r"$\Omega_m$", True, 0.1, 0.6),
         # ("w", -1.0, r"$w$", True, -1.5, -0.5),
-        ("alpha", 0.1, r"$\alpha$", True, -0.3, 0.5),
-        ("beta", 3.0, r"$\beta$", True, 0, 5),
+        ("alpha", 0.0, r"$\alpha$", True, -0.3, 0.5),
+        ("beta", 0.0, r"$\beta$", True, 0, 5),
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -20, -18.5),
         ("mean_x1", 0.0, r"$\langle x_1 \rangle$", True, -1.0, 1.0),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
@@ -23,7 +23,7 @@ def get_truths_labels_significance():
         ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
         ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.2),
         # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
-        ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
+        ("dscale", 0.00, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
         ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
     ]
@@ -161,12 +161,13 @@ def get_analysis_data(sim=True, snana=False):
 def init_fn():
     vals = get_truths_labels_significance()
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
+    dic = {k[0]: k[1] for k in vals}
 
     data = get_analysis_data()
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
     n_sne = x1s.size
-    randoms["true_MB"] = normal(loc=data["mean_MB"], scale=data["sigma_MB"], size=n_sne)
+    randoms["true_MB"] = normal(loc=dic["mean_MB"], scale=dic["sigma_MB"], size=n_sne)
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
     randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
     chol = [[1.0, 0.0, 0.0],

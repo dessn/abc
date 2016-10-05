@@ -176,12 +176,13 @@ def get_analysis_data(sim=False, snana=False):
 def init_fn():
     vals = get_truths_labels_significance()
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
+    dic = {k[0]: k[1] for k in vals}
 
     data = get_analysis_data()
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
     n_sne = x1s.size
-    randoms["true_MB"] = normal(loc=data["mean_MB"], scale=data["sigma_MB"], size=n_sne)
+    randoms["true_MB"] = normal(loc=dic["mean_MB"], scale=dic["sigma_MB"], size=n_sne)
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
     randoms["true_x1"] = cs + normal(scale=0.1, size=n_sne)
     chol = [[1.0, 0.0, 0.0],
