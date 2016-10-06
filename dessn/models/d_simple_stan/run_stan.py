@@ -235,6 +235,8 @@ if __name__ == "__main__":
             print("Called qsub")
         else:
             print("Running short steps")
+            if not os.path.exists(stan_output_dir):
+                os.makedirs(stan_output_dir)
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")

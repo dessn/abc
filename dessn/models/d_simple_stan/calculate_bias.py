@@ -23,7 +23,7 @@ def calculate_bias(chain_dictionary, supernovae):
     speed_dict = {}
     print(list(chain_dictionary.keys()))
     for i in range(chain_dictionary["mean_MB"].size):
-        om = np.round(chain_dictionary["Om"][i], decimals=2)
+        om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
         if speed_dict.get(key) is None:
             cosmology = FlatwCDM(70.0, om)

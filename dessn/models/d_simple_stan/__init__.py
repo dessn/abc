@@ -35,11 +35,8 @@ Parameters
     * :math:`\sigma_{x_1}`: standard deviation of scale
     * :math:`\rho`: correlation (matrix) between absolute magnitude, colour and stretch
 
-.. warning::
-    Not currently implemented:
-
-    **Marginalised Parameters**:
-        * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
+**Marginalised Parameters**:
+    * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
 
 ----------
 
@@ -267,6 +264,21 @@ frequency of observation, weather effects, etc. The selection effects we need to
         2. Using input cosmology to translate :math:`m_B, x_1, c` distribution to a :math:`M_B, x_1, c` distribution.
         3. Perform Monte-Carlo integration using the distribution. The value is :math:`P(S|m_B,x_1,c,z) = 1.0` if detected, :math:`0` otherwise, weighted by the probability of :math:`M_B,x_1,c,z,m` for that cosmology.
 
+.. warning::
+    A primary concern with selection effects is that they grow exponentially worse with
+    more data. To intuitively understand this, if you have an increased number of (biased)
+    data points, the posterior maximum becomes better constrained and you need an increased
+    re-weighting (bias correction) to shift the posterior maximum to the correct location.
+
+    To provide a concrete example, suppose our weight (denominator) is 0.99 in one section
+    of the parameter space, and 1.01 in another section (normalised to some arbitrary point).
+    With 300 data points, the difference in weights between those two points would be
+    :math:`(1.01/0.99)^{300} \approx 404`. This difference in weights is potentially beyond
+    the ability to re-weight an existing chain of results, and so the weights may need to
+    be implemented directly inside the posterior evaluated by the fitting algorithm. We note
+    that the 7th proof, :ref:`efficiency7`, shows undesired noise in the
+    contours when looking at different values of :math:`\sigma`, and the ratio difference there
+    for 2000 data points is only 81 (so 404 would be several times worse).
 
 
 

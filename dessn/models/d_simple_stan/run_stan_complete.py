@@ -31,6 +31,7 @@ def get_truths_labels_significance():
 
 
 def get_pickle_data(n_sne):
+    print("Getting data from supernovae pickle")
     pickle_file = "output/supernovae.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
@@ -49,6 +50,7 @@ def get_simulation_data():
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
     return {
+        "n_sim": len(supernovae),
         "sim_mBx1c": [s["parameters"] for s in supernovae],
         "sim_prob": [s["prob"] for s in supernovae],
         "sim_passed": [1.0 * s["passed_cut"] for s in supernovae],
@@ -108,16 +110,17 @@ def get_physical_data(n_sne, seed):
 
 
 def get_snana_data(filename="output/des_sim.pickle"):
+    print("Getting SNANA data")
     with open(filename, 'rb') as f:
         data = pickle.load(f)
     return data
 
 
-def get_analysis_data(sim=False, snana=False):
+def get_analysis_data(sim=True, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 500
+    n = 200
     if sim:
         data = get_pickle_data(n)
     elif snana:
@@ -127,7 +130,7 @@ def get_analysis_data(sim=False, snana=False):
     n_sne = data["n_sne"]
 
     sim_data = get_simulation_data()
-
+    n_sim = sim_data["n_sim"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
         d = np.sqrt(np.diag(c))
@@ -140,7 +143,7 @@ def get_analysis_data(sim=False, snana=False):
     sim_redshifts = sim_data["sim_redshifts"]
     n_z = 2000
     dz = max(redshifts.max(), sim_redshifts.max()) / n_z
-    zs = sorted(redshifts.tolist())
+    zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
     added_zs = [0]
     pz = 0
     for z in zs:
@@ -151,14 +154,17 @@ def get_analysis_data(sim=False, snana=False):
         new_points = np.linspace(pz, z, est_point)[1:-1].tolist()
         added_zs += new_points
         pz = z
-    n_z = n_sne + len(added_zs)
+    n_z = n_sne + n_sim + len(added_zs)
     n_simps = int((n_z + 1) / 2)
-    to_sort = [(z, -1) for z in added_zs] + [(z, i) for i, z in enumerate(redshifts)]
+    to_sort = [(z, -1, -1) for z in added_zs] + [(z, i, -1) for i, z in enumerate(redshifts)] + [(z, -1, i) for i, z in enumerate(sim_redshifts)]
     to_sort.sort()
     final_redshifts = np.array([z[0] for z in to_sort])
     sorted_vals = [(z[1], i) for i, z in enumerate(to_sort) if z[1] != -1]
+    sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
     sorted_vals.sort()
+    sim_sorted_vals.sort()
     final = [int(z[1] / 2 + 1) for z in sorted_vals]
+    sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
 
     update = {
         "n_z": n_z,
@@ -167,7 +173,9 @@ def get_analysis_data(sim=False, snana=False):
         "zspo": 1 + final_redshifts,
         "zsom": (1 + final_redshifts) ** 3,
         "redshift_indexes": final,
-        "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts)
+        "sim_redshift_indexes": sim_final,
+        "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
+        "sim_redshift_pre_comp": 0.9 + np.power(10, 0.95 * sim_redshifts)
     }
     # If you want python2: data.update(update), return data
     return {**data, **update}
@@ -180,13 +188,18 @@ def init_fn():
 
     data = get_analysis_data()
     zs = data["redshifts"]
+    z_precomp = (0.9 + np.power(10, 0.95 * zs))
     mus = FlatwCDM(70.0, dic["Om"]).distmod(zs).value
-    mBs = np.array([x[1] for x in data["obs_mBx1c"]])
+    mBs = np.array([x[0] for x in data["obs_mBx1c"]])
     x1s = np.array([x[1] for x in data["obs_mBx1c"]])
     cs = np.array([x[2] for x in data["obs_mBx1c"]])
-    MBs = mBs - mus + dic["alpha"] * x1s - dic["beta"] * cs
+    mass_correction = dic["dscale"] * (1.9 * (1 - dic["dratio"]) / z_precomp + dic["dratio"])
+    mass = data["mass"]
+    MBs = mBs - mus + dic["alpha"] * x1s - dic["beta"] * cs + mass_correction * mass
     n_sne = x1s.size
-    randoms["true_MB"] = MBs + normal(loc=0, scale=0.1 * dic["sigma_MB"], size=n_sne)
+    MBs = MBs + normal(loc=0, scale=0.2 * dic["sigma_MB"], size=n_sne)
+    MBs = np.clip(MBs, -20.0, -18.7)
+    randoms["true_MB"] = MBs
     randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
     randoms["true_x1"] = x1s + normal(scale=0.1, size=n_sne)
     chol = [[1.0, 0.0, 0.0],
@@ -200,7 +213,7 @@ def init_fn():
 if __name__ == "__main__":
     file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
-    stan_output_dir = os.path.abspath(dir_name + "/stan_output")
+    stan_output_dir = os.path.abspath(dir_name + "/stan_output_complete")
     output_dir = os.path.abspath(dir_name + "/output")
     t = stan_output_dir + "/stan.pkl"
     data = get_analysis_data()
@@ -218,7 +231,7 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=4000, warmup=2000, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:
@@ -245,11 +258,12 @@ if __name__ == "__main__":
             print("Called qsub")
         else:
             print("Running short steps")
+            if not os.path.exists(stan_output_dir):
+                os.makedirs(stan_output_dir)
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=1300, warmup=800, chains=4, init=init_fn)
-
+            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
