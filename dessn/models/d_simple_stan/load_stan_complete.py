@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     i = 0
     td = dir_name + "/output/"
-    std = dir_name + "/stan_output_complex/"
+    std = dir_name + "/stan_output_complete/"
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[3] and k[2] is not None]
