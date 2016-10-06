@@ -208,7 +208,7 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=4000, warmup=2000, chains=1, init=init_fn)
 
         # Dump relevant chains to file
         with open(t, 'wb') as output:
@@ -238,7 +238,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=1000, warmup=600, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
