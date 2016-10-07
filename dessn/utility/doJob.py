@@ -67,8 +67,8 @@ def write_jobscript_slurm(filename, num_cpu=24, num_walks=24, delete=False):
     template = '''#!/bin/bash -l
 #SBATCH -p regular
 #SBATCH -J %s
-#SBATCH --array=1-%d
-#SBATCH -n %d
+#SBATCH --array=1-%d%%%d
+#SBATCH -n 1
 #SBATCH --tasks-per-node=24
 #SBATCH -t 24:00:00
 #SBATCH -o %s/%s.o%%j
