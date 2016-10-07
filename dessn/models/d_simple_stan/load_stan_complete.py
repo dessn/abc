@@ -1,9 +1,7 @@
 import pickle
 import os
 from chainconsumer import ChainConsumer
-from dessn.models.d_simple_stan.run_stan import get_truths_labels_significance
-import itertools
-import numpy as np
+from dessn.models.d_simple_stan.load_stan import load_stan_from_folder
 
 
 def get_chain(filename, name_map):
@@ -33,29 +31,11 @@ if __name__ == "__main__":
 
     i = 0
     td = dir_name + "/output/"
-    std = dir_name + "/stan_output_complete/"
-    vals = get_truths_labels_significance()
-    full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
-    params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[3] and k[2] is not None]
-    full_params = list(itertools.chain.from_iterable(full_params))
-    full_params.remove("$\\rho$")
-    params = list(itertools.chain.from_iterable(params))
-    name_map = {k[0]: k[2] for k in vals}
-    truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
-
-    fs = [f for f in os.listdir(std) if f.startswith("stan") and f.endswith(".pkl")]
-    chains = []
-    for f in fs:
-        t = os.path.abspath(std + f)
-        chains.append(get_chain(t, name_map))
-    assert len(chains) > 0, "No results found"
-    chain = chains[0]
-    for c in chains[1:]:
-        for key in chain.keys():
-            chain[key] = np.concatenate((chain[key], c[key]))
-    posterior = chain["Posterior"]
-    del chain["Posterior"]
-    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=len(fs))
+    std_simple = dir_name + "/stan_output"
+    std = dir_name + "/stan_output_complete"
+    chain1, posterior1, _, _, _, num_walks1 = load_stan_from_folder(std)
+    chain, posterior, truths, params, full_params, num_walks = load_stan_from_folder(std)
+    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks)
     print("Plotting walks")
     c.plot_walks(filename=td+"complete_plot_walk.png")
     print("Plotting surfaces")

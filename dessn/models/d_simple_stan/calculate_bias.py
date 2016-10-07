@@ -5,6 +5,7 @@ from chainconsumer import ChainConsumer
 from scipy.stats import multivariate_normal
 from astropy.cosmology import FlatwCDM
 
+from dessn.models.d_simple_stan.load_stan import load_stan_from_folder
 from dessn.models.d_simple_stan.run_stan import get_analysis_data
 
 
@@ -59,12 +60,10 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__) or "."
     output_dir = os.path.abspath(dir_name + "/output")
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
-    stan_file = stan_output_dir + os.sep + "stan.pkl"
-    pickle_file = output_dir + os.sep + "supernovae.pickle"
+    pickle_file = output_dir + os.sep + "supernovae2.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    with open(stan_file, 'rb') as pkl:
-        chain_dictionary = pickle.load(pkl)
+    chain_dictionary, posterior, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
 
     weights = calculate_bias(chain_dictionary, supernovae)
 
@@ -73,7 +72,7 @@ if __name__ == "__main__":
         if "_" in key:
             chain_dictionary[key.replace("_", "")] = chain_dictionary[key]
             del chain_dictionary[key]
-    del chain_dictionary["Posterior"]
+
     c = ChainConsumer()
     c.add_chain(chain_dictionary, name="Unweighted")
     n_sne = get_analysis_data()["n_sne"]

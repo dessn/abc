@@ -48,5 +48,44 @@ python $PROG $PARAMS'''
     t = template % (name, queue, num_walks, num_cpu + 1, output_dir, output_dir, output_dir, directory, executable)
     with open(n, 'w') as f:
         f.write(t)
-    print("Jobscript at %s" % n)
+    print("SGE Jobscript at %s" % n)
+    return n
+
+
+def write_jobscript_slurm(filename, num_cpu=24, num_walks=24, delete=False):
+
+    directory = os.path.dirname(os.path.abspath(filename))
+    executable = os.path.basename(filename)
+    name = executable[:-3]
+    output_dir = directory + os.sep + "out_files"
+    if delete and os.path.exists(output_dir):
+        print("Deleting ", output_dir)
+        shutil.rmtree(output_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    template = '''#!/bin/bash -l
+#SBATCH -p regular
+#SBATCH -J %s
+#SBATCH --array=1-%d
+#SBATCH -n %d
+#SBATCH --tasks-per-node=24
+#SBATCH -t 24:00:00
+#SBATCH -o %s/%s.o%%j
+#SBATCH -L project
+
+IDIR=%s
+export PATH=$HOME/miniconda/bin:$PATH
+source activate mypython
+
+PROG=%s
+PARAMS=`expr ${SLURM_ARRAY_TASK_ID} - 1`
+cd $IDIR
+python $PROG $PARAMS'''
+
+    n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
+    t = template % (name, num_walks, num_cpu, output_dir, name, directory, executable)
+    with open(n, 'w') as f:
+        f.write(t)
+    print("SLURM Jobscript at %s" % n)
     return n

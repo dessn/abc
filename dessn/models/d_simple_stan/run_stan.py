@@ -7,6 +7,7 @@ import numpy as np
 from numpy.random import normal, uniform
 import sys
 import platform
+import socket
 
 
 def get_truths_labels_significance():
@@ -216,11 +217,14 @@ if __name__ == "__main__":
             pickle.dump(dictionary, output)
     else:
         # Run that stan locally
-        if "centos" in platform.platform():
+        p = platform.platform()
+        h = socket.gethostname()
+        if "smp-cluster" in h or "edison" in h:
             # Assuming this is obelix
             dessn_dir = file[: file.index("dessn")]
             sys.path.append(dessn_dir)
-            from dessn.utility.doJob import write_jobscript
+            from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
+
             if len(sys.argv) == 3:
                 num_walks = int(sys.argv[1])
                 num_jobs = int(sys.argv[2])
@@ -230,9 +234,15 @@ if __name__ == "__main__":
             if os.path.exists(stan_output_dir):
                 shutil.rmtree(stan_output_dir)
             os.makedirs(stan_output_dir)
-            filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs, delete=True)
-            os.system("qsub %s" % filename)
-            print("Called qsub")
+
+            if "smp-cluster" in h:
+                filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs, delete=True)
+                os.system("qsub %s" % filename)
+                print("Submitted SGE job")
+            elif "edison" in h:
+                filename = write_jobscript_slurm(file, num_walks=num_walks, num_cpu=num_jobs, delete=True)
+                os.system("sbatch %s" % filename)
+                print("Submitted SLURM job")
         else:
             print("Running short steps")
             if not os.path.exists(stan_output_dir):

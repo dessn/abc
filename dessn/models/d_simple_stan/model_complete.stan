@@ -151,7 +151,7 @@ transformed parameters {
         weights[i] = weight;
         weight_vals[i] = weight * sim_passed[i];
     }
-    Posterior = sum(PointPosteriors) + n_sne * log(sum(weight_vals) / sum(weights));
+    Posterior = sum(PointPosteriors) - n_sne * log(sum(weight_vals) / sum(weights));
 
 }
 model {
