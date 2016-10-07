@@ -221,10 +221,9 @@ if __name__ == "__main__":
         h = socket.gethostname()
         if "smp-cluster" in h or "edison" in h:
             # Assuming this is obelix
-            dessn_dir = file[: file.index("dessn")]
+            dessn_dir = file[: file.index("dessn/model")]
             sys.path.append(dessn_dir)
             from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
-
             if len(sys.argv) == 3:
                 num_walks = int(sys.argv[1])
                 num_jobs = int(sys.argv[2])
