@@ -5,9 +5,7 @@ I follow Rubin et al. (2015) with some changes:
     1. I do not model :math:`\alpha` and :math:`\beta` as functions of redshift, due to my limited dataset.
     2. I do not take outlier detection into account.
     3. I do not take zero point covariance into account.
-    4. I do not take selection effects into account, *in the STAN model.*
-    5. I consider :math:`w` as a free parameter, instead of just :math:`\Omega_m`.
-    6. I incorporate intrinsic dispersion via SN population, not as an observational effect.
+    4. I incorporate intrinsic dispersion via SN population, not as an observational effect.
 
 Instead, selection effects are taken into account via the methodology discussed
 and verified in the model proofs section of this work. To continue, we should
