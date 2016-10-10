@@ -33,7 +33,7 @@ if __name__ == "__main__":
     td = dir_name + "/output/"
     std_simple = dir_name + "/stan_output"
     std = dir_name + "/stan_output_complete"
-    chain1, posterior1, _, _, _, num_walks1 = load_stan_from_folder(std)
+    chain1, posterior1, _, _, _, num_walks1 = load_stan_from_folder(std_simple)
     chain, posterior, truths, params, full_params, num_walks = load_stan_from_folder(std)
     c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks)
     print("Plotting walks")
@@ -41,3 +41,7 @@ if __name__ == "__main__":
     print("Plotting surfaces")
     c.plot(filename=td+"complete_plot.png", truth=truths, parameters=params)
     c.plot(filename=td+"complete_plot_full.png", truth=truths, parameters=full_params)
+
+    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks, name="Corrected")
+    c.add_chain(chain1, posterior=posterior1, walkers=num_walks1, name="Uncorrected")
+    c.plot(filename=td+"complete_comparison.png", truth=truths, parameters=params)

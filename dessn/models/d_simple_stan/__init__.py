@@ -280,7 +280,19 @@ frequency of observation, weather effects, etc. The selection effects we need to
     contours when looking at different values of :math:`\sigma`, and the ratio difference there
     for 2000 data points is only 81 (so 404 would be several times worse).
 
+    .. figure::     ../dessn/models/d_simple_stan/output/comparison.png
+        :align:     center
+
+        You can see that importance sampling fails in this case, where some areas of
+        the parameter space have radically increased weight.
 
 
+Having implemented a simple bias correction in STAN, we can see the effect one 300 supernova,
+using bias calculations coming from Monte Carlo integration of twenty thousand supernova.
+
+.. figure::     ../dessn/models/d_simple_stan/output/complete_comparison.png
+    :align:     center
+
+    Perhaps need a longer burnin and more chains, but you get the idea!
 
 """
