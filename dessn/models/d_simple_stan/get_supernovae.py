@@ -99,7 +99,7 @@ def get_supernovae(n):
     return results
 
 if __name__ == "__main__":
-    n1 = 1000  # samples from which we can draw data
+    n1 = 4000  # samples from which we can draw data
     n2 = 20000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
@@ -107,15 +107,16 @@ if __name__ == "__main__":
 
     results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1) for i in range(jobs))
     results1 = [s for r in results1 for s in r]
+    dir_name = os.path.dirname(__file__) or "."
+    filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
+    with open(filename1, 'wb') as output:
+        pickle.dump(results1, output)
     print("%d supernova generated for data" % len(results1))
+
     results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2) for i in range(jobs))
     results2 = [s for r in results2 for s in r]
     print("%d supernova generated for weights" % len(results2))
-    dir_name = os.path.dirname(__file__) or "."
-    filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
     filename2 = os.path.abspath(dir_name + "/output/supernovae2.pickle")
-    with open(filename1, 'wb') as output:
-        pickle.dump(results1, output)
     with open(filename2, 'wb') as output:
         pickle.dump(results2, output)
     print("Pickle dumped")
