@@ -36,6 +36,8 @@ if __name__ == "__main__":
     chain1, posterior1, _, _, _, num_walks1 = load_stan_from_folder(std_simple)
     chain, posterior, truths, params, full_params, num_walks = load_stan_from_folder(std)
     c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks)
+    print(c.diagnostic_geweke())
+    print(c.diagnostic_gelman_rubin())
     print("Plotting walks")
     c.plot_walks(filename=td+"complete_plot_walk.png")
     print("Plotting surfaces")
