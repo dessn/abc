@@ -107,7 +107,7 @@ def get_analysis_data(sim=True, snana=False):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 800
+    n = 300
     if sim:
         data = get_pickle_data(n)
     elif snana:
@@ -201,18 +201,15 @@ if __name__ == "__main__":
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("Posterior")
     if len(sys.argv) == 2:
-        print("Running single walker")
+        i = int(sys.argv[1])
+        print("Running single walker, index $d" % i)
         # Assuming linux environment for single thread
         dessn_dir = file[: file.index("dessn")]
         sys.path.append(dessn_dir)
         import pystan
-        i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
-        print("RUNNING STAN NORMALLY %d" % i)
-        exit()
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=20000, warmup=15000, chains=1, init=init_fn)
-
+        fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=1, init=init_fn)
         # Dump relevant chains to file
         with open(t, 'wb') as output:
             dictionary = fit.extract(pars=params)
