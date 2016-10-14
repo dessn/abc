@@ -69,7 +69,7 @@ def write_jobscript_slurm(filename, num_cpu=24, num_walks=24, delete=False):
 #SBATCH -J %s
 #SBATCH --array=1-%d%%%d
 #SBATCH -n 1
-#SBATCH --tasks-per-node=24
+##SBATCH --tasks-per-node=24
 #SBATCH -t 00:01:00
 #SBATCH -o %s/%s.o%%j
 #SBATCH -L project
@@ -79,7 +79,7 @@ def write_jobscript_slurm(filename, num_cpu=24, num_walks=24, delete=False):
 IDIR=%s
 export PATH=$HOME/miniconda/bin:$PATH
 source activate mypython
-
+echo "Activated python"
 executable = $(which python)
 echo $executable
 
