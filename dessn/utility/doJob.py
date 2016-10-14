@@ -65,23 +65,28 @@ def write_jobscript_slurm(filename, num_cpu=24, num_walks=24, delete=False):
         os.makedirs(output_dir)
 
     template = '''#!/bin/bash -l
-#SBATCH -p regular
+#SBATCH -p debug
 #SBATCH -J %s
 #SBATCH --array=1-%d%%%d
 #SBATCH -n 1
 #SBATCH --tasks-per-node=24
-#SBATCH -t 24:00:00
+#SBATCH -t 00:01:00
 #SBATCH -o %s/%s.o%%j
 #SBATCH -L project
+#SBATCH --qos=premium
+#SBATCH -A dessn
 
 IDIR=%s
 export PATH=$HOME/miniconda/bin:$PATH
 source activate mypython
 
+executable = $(which python)
+echo $executable
+
 PROG=%s
 PARAMS=`expr ${SLURM_ARRAY_TASK_ID} - 1`
 cd $IDIR
-python $PROG $PARAMS'''
+srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS'''
 
     n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
     t = template % (name, num_walks, num_cpu, output_dir, name, directory, executable)

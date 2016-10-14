@@ -208,6 +208,8 @@ if __name__ == "__main__":
         import pystan
         i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
+        print("RUNNING STAN NORMALLY %d" % i)
+        exit()
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
         fit = sm.sampling(data=data, iter=20000, warmup=15000, chains=1, init=init_fn)
 
