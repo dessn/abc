@@ -22,6 +22,12 @@ data {
     real <lower=0> zspo[n_z]; // Precomputed (1+zs)
     int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
 }
+transformed data {
+    matrix[3, 3] obs_mBx1c_chol [n_sne];
+    for (i in 1:n_sne) {
+        obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
+    }
+}
 
 parameters {
     ///////////////// Underlying parameters
@@ -37,9 +43,10 @@ parameters {
     real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
 
     ///////////////// Latent Parameters
-    real <lower = -21, upper = -18> true_MB[n_sne];
-    real <lower = -8, upper = 8> true_x1[n_sne];
-    real <lower = -1, upper = 2> true_c[n_sne];
+    vector[3] deviations [n_sne];
+    //real <lower = -21, upper = -18> true_mB[n_sne];
+    //real <lower = -8, upper = 8> true_x1[n_sne];
+    //real <lower = -1, upper = 2> true_c[n_sne];
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
@@ -105,18 +112,16 @@ transformed parameters {
         // Calculate mass correction
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
-        // Model true underlying distribution
-        model_MBx1c[i][1] = true_MB[i];
-        model_MBx1c[i][2] = true_x1[i];
-        model_MBx1c[i][3] = true_c[i];
+        // Convert into apparent magnitude
+        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
-        // Convert population distribution into apparent magnitude
-        model_mBx1c[i][1] = model_MBx1c[i][1] + model_mu[i] - alpha*true_x1[i] + beta*true_c[i] - mass_correction * mass[i];
-        model_mBx1c[i][2] = model_MBx1c[i][2];
-        model_mBx1c[i][3] = model_MBx1c[i][3];
+        // Convert population into absolute magnitude
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
+        model_MBx1c[i][2] = model_mBx1c[i][2];
+        model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Track and update posterior
-        PointPosteriors[i] = multi_normal_lpdf(obs_mBx1c[i] | model_mBx1c[i], obs_mBx1c_cov[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_mBx1c, population);
+        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_mBx1c, population);
     }
     Posterior = sum(PointPosteriors) + cauchy_lpdf(sigma_MB | 0, 2.5) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 

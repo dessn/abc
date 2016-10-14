@@ -46,7 +46,7 @@ def get_pickle_data(n_sne):
     }
 
 
-def get_simulation_data(n=3000):
+def get_simulation_data(n=5000):
     pickle_file = "output/supernovae2.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
@@ -202,9 +202,7 @@ def init_fn():
     n_sne = x1s.size
     MBs = MBs + normal(loc=0, scale=0.2 * dic["sigma_MB"], size=n_sne)
     MBs = np.clip(MBs, -20.0, -18.7)
-    randoms["true_MB"] = MBs
-    randoms["true_c"] = cs + normal(scale=0.05, size=n_sne)
-    randoms["true_x1"] = x1s + normal(scale=0.1, size=n_sne)
+    randoms["deviations"] = np.random.normal(scale=0.2, size=(mass.size, 3))
     chol = [[1.0, 0.0, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
@@ -226,16 +224,15 @@ if __name__ == "__main__":
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("Posterior")
     if len(sys.argv) == 2:
-        print("Running single walker")
+        i = int(sys.argv[1])
+        print("Running single walker, index %d" % i)
         # Assuming linux environment for single thread
         dessn_dir = file[: file.index("dessn")]
         sys.path.append(dessn_dir)
         import pystan
-        i = int(sys.argv[1])
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=9000, warmup=5000, chains=1, init=init_fn)
-
+        fit = sm.sampling(data=data, iter=3000, warmup=2000, chains=1, init=init_fn)
         # Dump relevant chains to file
         with open(t, 'wb') as output:
             dictionary = fit.extract(pars=params)
@@ -274,7 +271,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=3000, warmup=1000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
