@@ -80,7 +80,7 @@ IDIR=%s
 export PATH=$HOME/miniconda/bin:$PATH
 source activate mypython
 echo "Activated python"
-executable = $(which python)
+executable=$(which python)
 echo $executable
 
 PROG=%s
