@@ -55,7 +55,7 @@ def get_simulation_data(n=5000):
     return {
         "n_sim": len(supernovae),
         "sim_mBx1c": [s["parameters"] for s in supernovae],
-        "sim_prob": [s["prob"] for s in supernovae],
+        "sim_log_prob": [s["log_prob"] for s in supernovae],
         "sim_passed": [1.0 * s["passed_cut"] for s in supernovae],
         "sim_redshifts": np.array([s["redshift"] for s in supernovae]),
         "sim_mass": np.array([s["mass"] for s in supernovae])

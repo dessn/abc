@@ -89,7 +89,7 @@ def get_supernovae(n):
                 "passed_cut": result is not None,
                 "parameters": parameters,
                 "covariance": cov,
-                "prob": multivariate_normal.pdf([MB, x1, c], means, pop_cov)
+                "log_prob": multivariate_normal.logpdf([MB, x1, c], means, pop_cov)
             })
             print("%s nova: %0.2f %0.2f %0.2f %0.3f" %
                   ("PASSED" if result is not None else "failed", MB, x1, c, z))
