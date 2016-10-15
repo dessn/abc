@@ -260,7 +260,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=1000, warmup=500, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
