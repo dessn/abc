@@ -156,7 +156,7 @@ transformed parameters {
         weights[i] = weight;
         weight_vals[i] = weight * sim_passed[i];
     }
-    Posterior = sum(PointPosteriors) - n_sne * log(sum(weight_vals) / sum(weights)) + cauchy_lpdf(sigma_MB | 0, 2.5) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    Posterior = sum(PointPosteriors) - n_sne * (log(sum(weight_vals)) - log(sum(weights))) + cauchy_lpdf(sigma_MB | 0, 2.5) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
 model {

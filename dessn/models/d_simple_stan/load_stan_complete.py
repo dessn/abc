@@ -35,6 +35,8 @@ if __name__ == "__main__":
     std = dir_name + "/stan_output_complete"
     chain1, posterior1, _, _, _, num_walks1 = load_stan_from_folder(std_simple)
     chain, posterior, truths, params, full_params, num_walks = load_stan_from_folder(std)
+    if num_walks == 1:
+        num_walks = 4
     c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks)
     print(c.diagnostic_geweke())
     print(c.diagnostic_gelman_rubin())

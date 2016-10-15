@@ -190,18 +190,18 @@ def init_fn():
     dic = {k[0]: k[1] for k in vals}
 
     data = get_analysis_data()
-    zs = data["redshifts"]
-    z_precomp = (0.9 + np.power(10, 0.95 * zs))
-    mus = FlatwCDM(70.0, dic["Om"]).distmod(zs).value
-    mBs = np.array([x[0] for x in data["obs_mBx1c"]])
-    x1s = np.array([x[1] for x in data["obs_mBx1c"]])
-    cs = np.array([x[2] for x in data["obs_mBx1c"]])
-    mass_correction = dic["dscale"] * (1.9 * (1 - dic["dratio"]) / z_precomp + dic["dratio"])
+    # zs = data["redshifts"]
+    # z_precomp = (0.9 + np.power(10, 0.95 * zs))
+    # mus = FlatwCDM(70.0, dic["Om"]).distmod(zs).value
+    # mBs = np.array([x[0] for x in data["obs_mBx1c"]])
+    # x1s = np.array([x[1] for x in data["obs_mBx1c"]])
+    # cs = np.array([x[2] for x in data["obs_mBx1c"]])
+    # mass_correction = dic["dscale"] * (1.9 * (1 - dic["dratio"]) / z_precomp + dic["dratio"])
     mass = data["mass"]
-    MBs = mBs - mus + dic["alpha"] * x1s - dic["beta"] * cs + mass_correction * mass
-    n_sne = x1s.size
-    MBs = MBs + normal(loc=0, scale=0.2 * dic["sigma_MB"], size=n_sne)
-    MBs = np.clip(MBs, -20.0, -18.7)
+    # MBs = mBs - mus + dic["alpha"] * x1s - dic["beta"] * cs + mass_correction * mass
+    # n_sne = x1s.size
+    # MBs = MBs + normal(loc=0, scale=0.2 * dic["sigma_MB"], size=n_sne)
+    # MBs = np.clip(MBs, -20.0, -18.7)
     randoms["deviations"] = np.random.normal(scale=0.2, size=(mass.size, 3))
     chol = [[1.0, 0.0, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
@@ -271,7 +271,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=3000, warmup=1000, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
