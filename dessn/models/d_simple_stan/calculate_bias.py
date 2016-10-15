@@ -4,6 +4,7 @@ import numpy as np
 from chainconsumer import ChainConsumer
 from scipy.stats import multivariate_normal
 from astropy.cosmology import FlatwCDM
+from scipy.misc import logsumexp
 
 from dessn.models.d_simple_stan.load_stan import load_stan_from_folder
 from dessn.models.d_simple_stan.run_stan import get_analysis_data
@@ -17,7 +18,7 @@ def calculate_bias(chain_dictionary, supernovae):
     apparents = np.array([s["mB"] for s in supernovae])
     colours = np.array([s["c"] for s in supernovae])
     stretches = np.array([s["x1"] for s in supernovae])
-    existing_prob = np.array([s["prob"] for s in supernovae])
+    existing_prob = np.array([s["log_prob"] for s in supernovae])
 
     weight = []
 
@@ -48,9 +49,9 @@ def calculate_bias(chain_dictionary, supernovae):
         chain_pop_cov = chain_correlations * chain_sigmas_mat
         chain_mean = np.array([chain_MB, chain_x1, chain_c])
 
-        chain_prob = multivariate_normal.pdf(mbx1cs, chain_mean, chain_pop_cov)
-        reweight = chain_prob / existing_prob
-        weight.append(np.average(passed, weights=reweight))
+        chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
+        reweight = logsumexp(np.log(passed) + chain_prob - existing_prob)
+        weight.append(np.mean(reweight))
         print(weight[-1])
 
     return np.array(weight)

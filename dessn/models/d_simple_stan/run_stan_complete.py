@@ -46,17 +46,19 @@ def get_pickle_data(n_sne):
     }
 
 
-def get_simulation_data(n=10000):
+def get_simulation_data(n=5000):
     pickle_file = "output/supernovae2.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    if n != -1:
-        supernovae = supernovae[:n]
+    passed = [s for s in supernovae if s["passed_cut"]]
+    if n == -1:
+        n = len(passed)
+    supernovae = passed[:n]
     return {
         "n_sim": len(supernovae),
         "sim_mBx1c": [s["parameters"] for s in supernovae],
         "sim_log_prob": [s["log_prob"] for s in supernovae],
-        "sim_passed": [1.0 * s["passed_cut"] for s in supernovae],
+        # "sim_passed": [1.0 * s["passed_cut"] for s in supernovae],
         "sim_redshifts": np.array([s["redshift"] for s in supernovae]),
         "sim_mass": np.array([s["mass"] for s in supernovae])
     }

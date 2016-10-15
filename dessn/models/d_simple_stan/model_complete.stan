@@ -25,7 +25,6 @@ data {
     // All data for calculating the biases
     int<lower=0> n_sim; // Number of simulated supernova
     real<lower=0.0> sim_prob[n_sim]; // Probability of drawing supernova from distribution
-    real sim_passed[n_sim]; // If supernova was selected
     vector[3] sim_mBx1c [n_sim]; // SALT2 fits to simulated supernova
     real <lower=0> sim_redshifts[n_sim]; // The redshift for each simulated SN.
     real <lower=0.0, upper = 1.0> sim_mass [n_sim]; // Normalised mass estimate for simulated SN.
@@ -156,7 +155,7 @@ transformed parameters {
         // the supernova that passed. No point calculating n2/n1 if you just times it by zero
         // Will do this after verifying current model.
         weight = multi_normal_cholesky_lpdf(sim_MBx1c[i] | mean_MBx1c, population) - sim_log_prob[i];
-        weight_vals[i] = weight * sim_passed[i];
+        weight_vals[i] = weight;
     }
     Posterior = sum(PointPosteriors) - n_sne * log_sum_exp(weight_vals) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
