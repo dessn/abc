@@ -96,7 +96,6 @@ transformed parameters {
     vector [n_sne] PointPosteriors;
     real Posterior;
     real weight;
-    vector [n_sim] weights;
     vectot [n_sim] weight_vals;
 
     // Other temp variables for corrections
@@ -152,11 +151,14 @@ transformed parameters {
         sim_MBx1c[i][1] = sim_mBx1c[i][1] + sim_model_mu[i] - alpha*sim_mBx1c[i][2] + beta*sim_mBx1c[i][3] - mass_correction * sim_mass[i];
         sim_MBx1c[i][2] = sim_mBx1c[i][2]
         sim_MBx1c[i][3] = sim_mBx1c[i][3]
+
+        // This could be improved by having n_sim be num of gen. sn, but only giving to stan
+        // the supernova that passed. No point calculating n2/n1 if you just times it by zero
+        // Will do this after verifying current model.
         weight = multi_normal_cholesky_lpdf(sim_MBx1c[i] | mean_MBx1c, population) - sim_log_prob[i];
-        weights[i] = weight;
         weight_vals[i] = weight * sim_passed[i];
     }
-    Posterior = sum(PointPosteriors) - n_sne * log_sum_exp(weight_vals) + cauchy_lpdf(sigma_MB | 0, 2.5) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    Posterior = sum(PointPosteriors) - n_sne * log_sum_exp(weight_vals) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
 model {
