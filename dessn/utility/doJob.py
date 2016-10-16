@@ -2,12 +2,13 @@ import os
 import shutil
 
 
-def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24, delete=False):
+def write_jobscript(filename, queue="low.q", num_cpu=24, num_walks=24,
+                    outdir="out_files", delete=False):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
     name = executable[:-3]
-    output_dir = directory + os.sep + "out_files"
+    output_dir = directory + os.sep + outdir
     error_dir = output_dir + os.sep + "errors"
     if delete and os.path.exists(output_dir):
         print("Deleting ", output_dir)

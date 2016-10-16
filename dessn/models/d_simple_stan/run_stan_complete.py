@@ -247,7 +247,7 @@ if __name__ == "__main__":
             os.makedirs(stan_output_dir)
 
             if "smp-cluster" in h:
-                filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs, delete=True)
+                filename = write_jobscript(file, num_walks=num_walks, num_cpu=num_jobs, outdir="clog", delete=True)
                 os.system("qsub %s" % filename)
                 print("Submitted SGE job")
             elif "edison" in h:
