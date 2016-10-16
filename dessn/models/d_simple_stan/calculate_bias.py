@@ -7,7 +7,7 @@ from astropy.cosmology import FlatwCDM
 from scipy.misc import logsumexp
 
 from dessn.models.d_simple_stan.load_stan import load_stan_from_folder
-from dessn.models.d_simple_stan.run_stan import get_analysis_data
+from dessn.models.d_simple_stan.run_stan import get_analysis_data, get_truths_labels_significance
 
 
 def calculate_bias(chain_dictionary, supernovae):
@@ -36,7 +36,8 @@ def calculate_bias(chain_dictionary, supernovae):
 
         dscale = chain_dictionary["dscale"][i]
         dratio = chain_dictionary["dratio"][i]
-        mass_correction = dscale * (1.9 * (1 - dratio) / redshifts + dratio)
+        redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
+        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp + dratio)
         mabs = apparents - mus + chain_dictionary["alpha"][i] * stretches - chain_dictionary["beta"][i] * colours + mass_correction * masses
 
         mbx1cs = np.vstack((mabs, stretches, colours)).T
@@ -51,7 +52,7 @@ def calculate_bias(chain_dictionary, supernovae):
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(np.log(passed) + chain_prob - existing_prob)
-        weight.append(np.mean(reweight))
+        weight.append(reweight)
         print(weight[-1])
 
     return np.array(weight)
@@ -74,14 +75,18 @@ if __name__ == "__main__":
             chain_dictionary[key.replace("_", "")] = chain_dictionary[key]
             del chain_dictionary[key]
 
+    vals = get_truths_labels_significance()
+    truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
+
     c = ChainConsumer()
     c.add_chain(chain_dictionary, name="Unweighted")
     n_sne = get_analysis_data()["n_sne"]
-    logw = n_sne * np.log(weights)
+    logw = n_sne * weights
     print(logw.min(), logw.max())
     logw -= logw.min() + 5
     print(logw.min(), logw.max())
     print(weights.min(), weights.max(), weights.mean())
     weights = 1 / np.exp(logw)
     c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
-    c.plot(filename="output/comparison.png")
+    # c.add_chain(chain_dictionary, name="Reweighted")
+    c.plot(filename="output/comparison.png", truth=truths)

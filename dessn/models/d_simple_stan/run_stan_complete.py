@@ -46,7 +46,7 @@ def get_pickle_data(n_sne):
     }
 
 
-def get_simulation_data(n=5000):
+def get_simulation_data(n=7000):
     pickle_file = "output/supernovae2.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
@@ -261,7 +261,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model_complete.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=4000, warmup=2000, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=4000, warmup=3000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
