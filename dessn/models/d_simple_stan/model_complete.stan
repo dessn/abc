@@ -24,7 +24,7 @@ data {
 
     // All data for calculating the biases
     int<lower=0> n_sim; // Number of simulated supernova
-    real<lower=0.0> sim_prob[n_sim]; // Probability of drawing supernova from distribution
+    real<lower=0.0> sim_log_prob[n_sim]; // Probability of drawing supernova from distribution
     vector[3] sim_mBx1c [n_sim]; // SALT2 fits to simulated supernova
     real <lower=0> sim_redshifts[n_sim]; // The redshift for each simulated SN.
     real <lower=0.0, upper = 1.0> sim_mass [n_sim]; // Normalised mass estimate for simulated SN.
