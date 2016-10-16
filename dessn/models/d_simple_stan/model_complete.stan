@@ -95,7 +95,7 @@ transformed parameters {
     vector [n_sne] PointPosteriors;
     real Posterior;
     real weight;
-    vectot [n_sim] weight_vals;
+    vector [n_sim] weight_vals;
 
     // Other temp variables for corrections
     real mass_correction;
