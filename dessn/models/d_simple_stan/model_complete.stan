@@ -87,7 +87,7 @@ transformed parameters {
 
     // Modelling intrinsic dispersion
     matrix [3,3] population;
-    vector [3] mean_mBx1c;
+    vector [3] mean_MBx1c;
     vector [3] sigmas;
 
 
@@ -118,7 +118,7 @@ transformed parameters {
     }
     // -------------End numerical integration---------------
 
-    // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
+    // Calculate SN population
     mean_MBx1c[1] = mean_MB;
     mean_MBx1c[2] = mean_x1;
     mean_MBx1c[3] = mean_c;

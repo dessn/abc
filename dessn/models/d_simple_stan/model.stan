@@ -72,7 +72,7 @@ transformed parameters {
 
     // Modelling intrinsic dispersion
     matrix [3,3] population;
-    vector [3] mean_mBx1c;
+    vector [3] mean_MBx1c;
     vector [3] sigmas;
 
 
@@ -99,9 +99,9 @@ transformed parameters {
     // -------------End numerical integration---------------
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
-    mean_mBx1c[1] = mean_MB;
+    mean_MBx1c[1] = mean_MB;
     mean_mBx1c[2] = mean_x1;
-    mean_mBx1c[3] = mean_c;
+    mean_MBx1c[3] = mean_c;
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
     sigmas[3] = sigma_c;
@@ -121,7 +121,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Track and update posterior
-        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_mBx1c, population);
+        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
     }
     Posterior = sum(PointPosteriors) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
