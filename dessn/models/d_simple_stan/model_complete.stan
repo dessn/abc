@@ -148,8 +148,8 @@ transformed parameters {
     for (i in 1:n_sim) {
         mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
         sim_MBx1c[i][1] = sim_mBx1c[i][1] + sim_model_mu[i] - alpha*sim_mBx1c[i][2] + beta*sim_mBx1c[i][3] - mass_correction * sim_mass[i];
-        sim_MBx1c[i][2] = sim_mBx1c[i][2]
-        sim_MBx1c[i][3] = sim_mBx1c[i][3]
+        sim_MBx1c[i][2] = sim_mBx1c[i][2];
+        sim_MBx1c[i][3] = sim_mBx1c[i][3];
 
         // This could be improved by having n_sim be num of gen. sn, but only giving to stan
         // the supernova that passed. No point calculating n2/n1 if you just times it by zero
