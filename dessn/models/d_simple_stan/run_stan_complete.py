@@ -183,7 +183,7 @@ def get_analysis_data(sim=True, snana=False):
         "sim_redshift_pre_comp": 0.9 + np.power(10, 0.95 * sim_redshifts)
     }
     # If you want python2: data.update(update), return data
-    return {**data, **update}
+    return {**data, **update, **sim_data}
 
 
 def init_fn():
@@ -260,8 +260,8 @@ if __name__ == "__main__":
                 os.makedirs(stan_output_dir)
             # Assuming its my laptop vbox
             import pystan
-            sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=1000, warmup=500, chains=4, init=init_fn)
+            sm = pystan.StanModel(file="model_complete.stan", model_name="Cosmology")
+            fit = sm.sampling(data=data, iter=4000, warmup=2000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)

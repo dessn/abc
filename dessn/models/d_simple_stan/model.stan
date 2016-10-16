@@ -100,7 +100,7 @@ transformed parameters {
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
     mean_MBx1c[1] = mean_MB;
-    mean_mBx1c[2] = mean_x1;
+    mean_MBx1c[2] = mean_x1;
     mean_MBx1c[3] = mean_c;
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
