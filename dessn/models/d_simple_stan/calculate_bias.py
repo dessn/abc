@@ -10,7 +10,10 @@ from dessn.models.d_simple_stan.load_stan import load_stan_from_folder
 from dessn.models.d_simple_stan.run_stan import get_analysis_data, get_truths_labels_significance
 
 
-def calculate_bias(chain_dictionary, supernovae):
+def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.npy"):
+
+    if os.path.exists(filename):
+        return np.load(filename)
 
     passed = np.array([s["passed_cut"] for s in supernovae])
     masses = np.array([s["mass"] for s in supernovae])
@@ -55,7 +58,9 @@ def calculate_bias(chain_dictionary, supernovae):
         weight.append(reweight)
         print(weight[-1])
 
-    return np.array(weight)
+    weights = np.array(weight)
+    np.save(filename, weights)
+    return weights
 
 
 if __name__ == "__main__":
@@ -78,15 +83,16 @@ if __name__ == "__main__":
     vals = get_truths_labels_significance()
     truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
 
-    c = ChainConsumer()
-    c.add_chain(chain_dictionary, name="Unweighted")
     n_sne = get_analysis_data()["n_sne"]
-    logw = n_sne * weights
+    logw = 300 * weights
     print(logw.min(), logw.max())
-    logw -= logw.min() + 5
+    logw -= logw.min() + 0
     print(logw.min(), logw.max())
     print(weights.min(), weights.max(), weights.mean())
     weights = 1 / np.exp(logw)
+    print(weights.min(), weights.max(), weights.mean())
+
+    c = ChainConsumer()
+    c.add_chain(chain_dictionary, name="Unweighted")
     c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
-    # c.add_chain(chain_dictionary, name="Reweighted")
     c.plot(filename="output/comparison.png", truth=truths)
