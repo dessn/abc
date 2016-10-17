@@ -70,7 +70,7 @@ if __name__ == "__main__":
     pickle_file = output_dir + os.sep + "supernovae2.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    chain_dictionary, posterior, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
+    chain_dictionary, post, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
 
     weights = calculate_bias(chain_dictionary, supernovae)
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
 
     n_sne = get_analysis_data()["n_sne"]
-    logw = 300 * weights
+    logw = n_sne * weights
     print(logw.min(), logw.max())
     logw -= logw.min() + 0
     print(logw.min(), logw.max())
