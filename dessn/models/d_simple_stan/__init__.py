@@ -197,7 +197,8 @@ the efficiency as a function of constructed :math:`\lbrace m_B, x_1, c \rbrace`,
 have:
 
 .. math::
-    P(S|\theta) &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
+    P(S|\theta) &= w^N \\
+    w &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
     \int dz \int dm \int dm_B \int dx_1 \int dc \
     P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, z, m, S|\theta) \\[10pt]
     &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
@@ -209,7 +210,11 @@ have:
     P(S|m_B, x_1, c, z) P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c)
     P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta)
 
-Note again that we assume redshift and mass are perfectly known, so relationship between
+We should note that we have an integral over :math:`m_B, x_1, c` for
+*each* supernova, however each term will be identical, and that is why we switch to writing
+the weight :math:`w`.
+
+Again that we assume redshift and mass are perfectly known, so relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
 they only appear once in the equation above. In the last line I simply substitute the multivariate
 normal probabilities distributions reached in the previous section and utilise the
@@ -226,10 +231,12 @@ As we integrate over all possible realisations, we have that over all space we h
 
 and as such we can remove it from the integral.
 
-.. We also note that at the moment the model not contain any details of the mass distribution of galaxies, which may be an issue.
+.. We also note that at the moment the model not contain any details
+of the mass distribution of galaxies, which may be an issue.
 
 .. math::
-    P(S|\theta) &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \  P(S|m_B, x_1, c, z)  P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta) \\
+    w &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \
+    P(S|m_B, x_1, c, z)  P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta) \\
 
 Addressing each component individually:
 
@@ -261,6 +268,25 @@ frequency of observation, weather effects, etc. The selection effects we need to
         1. Initially run a large DES-like simulation, recording all generated SN parameters and whether they pass the cuts.
         2. Using input cosmology to translate :math:`m_B, x_1, c` distribution to a :math:`M_B, x_1, c` distribution.
         3. Perform Monte-Carlo integration using the distribution. The value is :math:`P(S|m_B,x_1,c,z) = 1.0` if detected, :math:`0` otherwise, weighted by the probability of :math:`M_B,x_1,c,z,m` for that cosmology.
+
+    To go into the math, our Monte Carlo integration for the weights. Our initial sample
+    of supernova simulated is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
+
+    .. math::
+        P(S
+        |\theta) &= w^N \\
+        &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+        &= \left[ \frac{1}{N_{\rm sim}} \sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+        &=  \frac{1}{N_{\rm sim}^N} \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N
+
+    As the weights do not have to be normalised, we can discard the constant factor out front.
+
+    .. math::
+       w^N &\propto  \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+       \log\left(w^N\right) - {\rm const} &=  N \log\left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]
+
+    Given a set of points to use in the integration, we can see that subtracting the above
+    term from our likelihood provides a simple implementation of our bias correction.
 
 .. warning::
     A primary concern with selection effects is that they grow exponentially worse with

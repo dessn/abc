@@ -99,8 +99,8 @@ def get_supernovae(n):
     return results
 
 if __name__ == "__main__":
-    n1 = 4000  # samples from which we can draw data
-    n2 = 20000  # samples for Monte Carlo integration of the weights
+    n1 = 6000  # samples from which we can draw data
+    n2 = 40000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
