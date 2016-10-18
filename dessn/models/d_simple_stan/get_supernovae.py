@@ -1,11 +1,13 @@
-import pickle
 import os
+import pickle
+
 import numpy as np
-from joblib import Parallel, delayed
 from astropy.cosmology import FlatwCDM
+from joblib import Parallel, delayed
 from scipy.interpolate import interp1d
 from scipy.stats import multivariate_normal
-from dessn.models.d_simple_stan.run_stan import get_truths_labels_significance
+
+from dessn.models.d_simple_stan.simple.run_stan import get_truths_labels_significance
 from dessn.utility.generator import get_ia_summary_stats
 
 """
@@ -43,7 +45,7 @@ class RedshiftSampler(object):
         self.sampler = interp1d(cdf, zs)
 
 
-def get_supernovae(n):
+def get_supernovae(n, data=True):
     redshifts = RedshiftSampler()
 
     # Redshift distribution
@@ -74,49 +76,54 @@ def get_supernovae(n):
             adjustment = - alpha * x1 + beta * c - mass_correction * p
             MB_adj = MB + adjustment
             mb = MB_adj + mu
-            result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology)
+            result = get_ia_summary_stats(z, MB_adj, x1, c, do_fit=data, cosmo=cosmology)
             if result is None:
                 parameters, cov = None, None
             else:
                 parameters, cov = result
-            results.append({
+            d = {
                 "MB": MB,
                 "mB": mb,
                 "x1": x1,
                 "c": c,
-                "mass": p,
-                "redshift": z,
-                "passed_cut": result is not None,
-                "parameters": parameters,
-                "covariance": cov,
-                "log_prob": multivariate_normal.logpdf([MB, x1, c], means, pop_cov)
-            })
-            print("%s nova: %0.2f %0.2f %0.2f %0.3f" %
-                  ("PASSED" if result is not None else "failed", MB, x1, c, z))
+                "m": p,
+                "z": z,
+                "pc": 1 if result is not None else 0,
+                "lp": multivariate_normal.logpdf([MB, x1, c], means, pop_cov)
+            }
+            if data:
+                d["covariance"] = cov
+                d["parameters"] = parameters
+            results.append(d)
+            # print("%s nova: %0.2f %0.2f %0.2f %0.3f" % ("PASSED" if result is not None else "failed", MB, x1, c, z))
         except RuntimeError:
-            print("Error on nova: %0.2f %0.2f %0.2f %0.3f" %
-                  (MB, x1, c, z))
+            print("Error on nova: %0.2f %0.2f %0.2f %0.3f" % (MB, x1, c, z))
     return results
 
 if __name__ == "__main__":
     n1 = 6000  # samples from which we can draw data
-    n2 = 40000  # samples for Monte Carlo integration of the weights
+    n2 = 1000000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
 
-    results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1) for i in range(jobs))
-    results1 = [s for r in results1 for s in r]
     dir_name = os.path.dirname(__file__) or "."
-    filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
-    with open(filename1, 'wb') as output:
-        pickle.dump(results1, output)
-    print("%d supernova generated for data" % len(results1))
 
-    results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2) for i in range(jobs))
+    # results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1, True) for i in range(jobs))
+    # results1 = [s for r in results1 for s in r]
+    # filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
+    # with open(filename1, 'wb') as output:
+    #     pickle.dump(results1, output)
+    # print("%d supernova generated for data" % len(results1))
+
+    results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2, False) for i in range(jobs))
     results2 = [s for r in results2 for s in r]
     print("%d supernova generated for weights" % len(results2))
-    filename2 = os.path.abspath(dir_name + "/output/supernovae2.pickle")
-    with open(filename2, 'wb') as output:
-        pickle.dump(results2, output)
+    # filename2 = os.path.abspath(dir_name + "/output/supernovae2.pickle")
+    filename3 = os.path.abspath(dir_name + "/output/supernovae2.npy")
+    # with open(filename2, 'wb') as output:
+    #     pickle.dump(results2, output)
+    arr = np.array([[s['MB'], s['mB'], s['x1'], s['c'], s['m'], s['z'], s['pc'], s['lp']] for s in results2]).astype(np.float32)
+    print(arr.shape)
+    np.save(filename3, arr)
     print("Pickle dumped")

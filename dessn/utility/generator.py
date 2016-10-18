@@ -100,10 +100,13 @@ def check_lc_passes_cut(lc):
     return sn_in_band.sum() >= 2
 
 
-def get_ia_summary_stats(z, mabs, x1, c, method="minuit", **kwargs):
+def get_ia_summary_stats(z, mabs, x1, c, do_fit=True, method="minuit", **kwargs):
     lc = generate_ia_light_curve(z, mabs, x1, c, **kwargs)
     if check_lc_passes_cut(lc):
-        return get_summary_stats(z, lc, method=method)
+        if do_fit:
+            return get_summary_stats(z, lc, method=method)
+        else:
+            return True, True
     else:
         return None
 
