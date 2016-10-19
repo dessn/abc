@@ -46,7 +46,7 @@ def get_pickle_data(n_sne):
     }
 
 
-def get_simulation_data(n=500):
+def get_simulation_data(n=1000):
     pickle_file = "../output/supernovae2.npy"
     supernovae = np.load(pickle_file)
     mask = supernovae[:, 6] == 1
@@ -56,7 +56,7 @@ def get_simulation_data(n=500):
     supernovae = supernovae[:n, :]
     return {
         "n_sim": n,
-        "sim_mBx1c": supernovae[:, :3],
+        "sim_mBx1c": supernovae[:, 1:4],
         "sim_log_prob": supernovae[:, 7],
         "sim_redshifts": supernovae[:, 5],
         "sim_mass": supernovae[:, 4]
@@ -226,7 +226,7 @@ if __name__ == "__main__":
         import pystan
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=7000, warmup=5000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=5000, warmup=3000, chains=1, init=init_fn)
         # Dump relevant chains to file
         print("Saving chain %d" % i)
         with open(t, 'wb') as output:

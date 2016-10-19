@@ -173,7 +173,7 @@ that a final numerator of:
 
 A rough fit for this, is shown below, for a thousand generated supernova.
 
-.. figure::     ../dessn/models/d_simple_stan/output/plot.png
+.. figure::     ../dessn/models/d_simple_stan/output/plot_full.png
     :align:     center
 
 --------
