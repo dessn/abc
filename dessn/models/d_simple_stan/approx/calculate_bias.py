@@ -11,17 +11,19 @@ from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
 
 def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.npy"):
+    existing_correction = chain_dictionary["sumBias"]
 
     if os.path.exists(filename):
-        return np.load(filename)
+        return np.load(filename), existing_correction
 
-    n = 10000
-    masses = supernovae[:n, 4]
-    redshifts = supernovae[:n, 5]
-    apparents = supernovae[:n, 1]
-    colours = supernovae[:n, 3]
-    stretches = supernovae[:n, 2]
-    existing_prob = supernovae[:n, 7]
+    mask = supernovae[:, 6] == 1
+    supernovae = supernovae[mask, :]
+    masses = supernovae[:, 4]
+    redshifts = supernovae[:, 5]
+    apparents = supernovae[:, 1]
+    colours = supernovae[:, 3]
+    stretches = supernovae[:, 2]
+    existing_prob = supernovae[:, 7]
 
     weight = []
 
@@ -36,7 +38,6 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
             speed_dict[key] = mus
         else:
             mus = speed_dict[key]
-        existing_correction = chain_dictionary["sumBias"][i]
         dscale = chain_dictionary["dscale"][i]
         dratio = chain_dictionary["dratio"][i]
         redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
@@ -55,12 +56,12 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
-        weight.append(reweight - existing_correction)
+        weight.append(reweight)
         print(weight[-1])
 
     weights = np.array(weight)
     np.save(filename, weights)
-    return weights
+    return weights, existing_correction
 
 
 if __name__ == "__main__":
@@ -77,7 +78,7 @@ if __name__ == "__main__":
 
     chain_dictionary, post, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
 
-    weights = calculate_bias(chain_dictionary, supernovae)
+    weights, existing = calculate_bias(chain_dictionary, supernovae)
 
     del chain_dictionary["intrinsic_correlation"]
     for key in list(chain_dictionary.keys()):
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
 
     n_sne = get_analysis_data()["n_sne"]
-    logw = n_sne * weights
+    logw = n_sne * weights - existing
     print(logw.min(), logw.max())
     logw -= logw.min() + 0
     print(logw.min(), logw.max())
@@ -97,6 +98,7 @@ if __name__ == "__main__":
     weights = np.exp(-logw)
     print(weights.min(), weights.max(), weights.mean())
 
+    del chain_dictionary["sumBias"]
     c = ChainConsumer()
     c.add_chain(chain_dictionary, name="Unweighted")
     c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
