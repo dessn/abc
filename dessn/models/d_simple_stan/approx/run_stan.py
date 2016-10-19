@@ -9,6 +9,8 @@ import numpy as np
 from astropy.cosmology import FlatwCDM
 from numpy.random import uniform
 
+from dessn.models.d_simple_stan.approx.calculate_erf import get_approximate_mb_correction
+
 
 def get_truths_labels_significance():
     # Name, Truth, Label, is_significant, min, max
@@ -145,7 +147,7 @@ def get_analysis_data(sim=True, snana=False):
     sorted_vals = [(z[1], i) for i, z in enumerate(to_sort) if z[1] != -1]
     sorted_vals.sort()
     final = [int(z[1] / 2 + 1) for z in sorted_vals]
-    mB_mean, mB_width, cslope, cintercept = get_approximate_mb_correction()
+    mB_mean, mB_width = get_approximate_mb_correction()
     update = {
         "n_z": n_z,
         "n_simps": n_simps,
@@ -155,9 +157,7 @@ def get_analysis_data(sim=True, snana=False):
         "redshift_indexes": final,
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
         "mB_mean": mB_mean,
-        "mB_width": mB_width,
-        "c_slope": cslope,
-        "c_intercept": cintercept
+        "mB_width": mB_width
     }
     # If you want python2: data.update(update), return data
     return {**data, **update}
@@ -184,10 +184,6 @@ if __name__ == "__main__":
     output_dir = os.path.abspath(dir_name + "../output")
     t = stan_output_dir + "/stan.pkl"
 
-    dessn_dir = file[: file.index("dessn/model")]
-    sys.path.append(dessn_dir)
-    from dessn.models.d_simple_stan.approx.calculate_erf import get_approximate_mb_correction
-
     data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
@@ -195,8 +191,6 @@ if __name__ == "__main__":
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("Posterior")
     params.append("sumBias")
-
-
 
     if len(sys.argv) == 2:
         # Assuming linux environment for single thread

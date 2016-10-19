@@ -3,7 +3,7 @@ import os
 import numpy as np
 from astropy.cosmology import FlatwCDM
 from chainconsumer import ChainConsumer
-from dessn.models.d_simple_stan.run_stan import get_analysis_data, get_truths_labels_significance
+from dessn.models.d_simple_stan.simple.run_stan import get_analysis_data, get_truths_labels_significance
 from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
 
@@ -15,12 +15,13 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
     if os.path.exists(filename):
         return np.load(filename)
 
-    masses = supernovae[:, 4]
-    redshifts = supernovae[:, 5]
-    apparents = supernovae[:, 1]
-    colours = supernovae[:, 3]
-    stretches = supernovae[:, 2]
-    existing_prob = supernovae[:, 7]
+    n = 10000
+    masses = supernovae[:n, 4]
+    redshifts = supernovae[:n, 5]
+    apparents = supernovae[:n, 1]
+    colours = supernovae[:n, 3]
+    stretches = supernovae[:n, 2]
+    existing_prob = supernovae[:n, 7]
 
     weight = []
 
@@ -93,4 +94,4 @@ if __name__ == "__main__":
     c = ChainConsumer()
     c.add_chain(chain_dictionary, name="Unweighted")
     c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
-    c.plot(filename="output/comparison.png", truth=truths)
+    c.plot(filename="../output/plot_comparison.png", truth=truths)

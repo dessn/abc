@@ -33,10 +33,10 @@ def get_truths_labels_significance():
 
 def get_pickle_data(n_sne):
     print("Getting data from supernovae pickle")
-    pickle_file = "output/supernovae.pickle"
+    pickle_file = "../output/supernovae.pickle"
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    passed = [s for s in supernovae if s["passed_cut"]][:n_sne]
+    passed = [s for s in supernovae if s["pc"]][:n_sne]
     return {
         "n_sne": n_sne,
         "obs_mBx1c": [s["parameters"] for s in passed],
@@ -56,7 +56,7 @@ def get_simulation_data(n=500):
     supernovae = supernovae[:n, :]
     return {
         "n_sim": n,
-        "sim_mBx1c": supernovae[:, 3],
+        "sim_mBx1c": supernovae[:, :3],
         "sim_log_prob": supernovae[:, 7],
         "sim_redshifts": supernovae[:, 5],
         "sim_mass": supernovae[:, 4]
@@ -262,7 +262,7 @@ if __name__ == "__main__":
             # Assuming its my laptop vbox
             import pystan
             sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=4000, warmup=3000, chains=4, init=init_fn)
+            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)

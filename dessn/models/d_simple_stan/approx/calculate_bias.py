@@ -1,26 +1,27 @@
 import os
-
+import sys
 import numpy as np
 from astropy.cosmology import FlatwCDM
 from chainconsumer import ChainConsumer
-from dessn.models.d_simple_stan.run_stan import get_analysis_data, get_truths_labels_significance
+from dessn.models.d_simple_stan.approx.run_stan import get_analysis_data, get_truths_labels_significance
 from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
 
 from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
 
-def calculate_bias(chain_dictionary, supernovae, filename="stan_output_approx/biases.npy"):
+def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.npy"):
 
     if os.path.exists(filename):
         return np.load(filename)
 
-    masses = supernovae[:, 4]
-    redshifts = supernovae[:, 5]
-    apparents = supernovae[:, 1]
-    colours = supernovae[:, 3]
-    stretches = supernovae[:, 2]
-    existing_prob = supernovae[:, 7]
+    n = 10000
+    masses = supernovae[:n, 4]
+    redshifts = supernovae[:n, 5]
+    apparents = supernovae[:n, 1]
+    colours = supernovae[:n, 3]
+    stretches = supernovae[:n, 2]
+    existing_prob = supernovae[:n, 7]
 
     weight = []
 
@@ -35,7 +36,7 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output_approx/bi
             speed_dict[key] = mus
         else:
             mus = speed_dict[key]
-
+        existing_correction = chain_dictionary["sumBias"][i]
         dscale = chain_dictionary["dscale"][i]
         dratio = chain_dictionary["dratio"][i]
         redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
@@ -54,7 +55,7 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output_approx/bi
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
-        weight.append(reweight)
+        weight.append(reweight - existing_correction)
         print(weight[-1])
 
     weights = np.array(weight)
@@ -63,11 +64,16 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output_approx/bi
 
 
 if __name__ == "__main__":
+
+    file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
     output_dir = os.path.abspath(dir_name + "/../output")
-    stan_output_dir = os.path.abspath(dir_name + "/stan_output_approx")
+    stan_output_dir = os.path.abspath(dir_name + "/stan_output")
     pickle_file = output_dir + os.sep + "supernovae2.npy"
     supernovae = np.load(pickle_file)
+    file = file.replace("\\", "/")
+    dessn_dir = file[: file.index("dessn/model")]
+    sys.path.append(dessn_dir)
 
     chain_dictionary, post, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
 
@@ -88,10 +94,10 @@ if __name__ == "__main__":
     logw -= logw.min() + 0
     print(logw.min(), logw.max())
     print(weights.min(), weights.max(), weights.mean())
-    weights = 1 / np.exp(logw)
+    weights = np.exp(-logw)
     print(weights.min(), weights.max(), weights.mean())
 
     c = ChainConsumer()
     c.add_chain(chain_dictionary, name="Unweighted")
     c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
-    c.plot(filename="output/comparison.png", truth=truths)
+    c.plot(filename="../output/approx_comparison.png", truth=truths)
