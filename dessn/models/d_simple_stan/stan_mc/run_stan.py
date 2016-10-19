@@ -145,7 +145,7 @@ def get_analysis_data(sim=True, snana=False):
     data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
     sim_redshifts = sim_data["sim_redshifts"]
-    n_z = 2000
+    n_z = 1000
     dz = max(redshifts.max(), sim_redshifts.max()) / n_z
     zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
     added_zs = [0]
@@ -216,6 +216,7 @@ if __name__ == "__main__":
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("Posterior")
+    params.append("weight")
     if len(sys.argv) == 2:
         i = int(sys.argv[1])
         print("Running single walker, index %d" % i)

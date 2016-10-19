@@ -18,6 +18,7 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
+    supernovae = supernovae[:40000, :]
     masses = supernovae[:, 4]
     redshifts = supernovae[:, 5]
     apparents = supernovae[:, 1]

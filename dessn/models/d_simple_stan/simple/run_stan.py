@@ -179,6 +179,8 @@ if __name__ == "__main__":
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
     output_dir = os.path.abspath(dir_name + "../output")
     t = stan_output_dir + "/stan.pkl"
+    dessn_dir = file[: file.index("dessn/model")]
+    sys.path.append(dessn_dir)
     data = get_analysis_data()
 
     # Calculate which parameters we want to keep track of
@@ -206,8 +208,6 @@ if __name__ == "__main__":
         h = socket.gethostname()
         if "smp-cluster" in h or "edison" in h:
             # Assuming this is obelix
-            dessn_dir = file[: file.index("dessn/model")]
-            sys.path.append(dessn_dir)
             from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
             if len(sys.argv) == 3:
                 num_walks = int(sys.argv[1])

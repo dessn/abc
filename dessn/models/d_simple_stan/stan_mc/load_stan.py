@@ -40,6 +40,8 @@ if __name__ == "__main__":
     print("Plotting walks")
     c.plot_walks(filename=td+"complete_plot_walk.png")
     print("Plotting surfaces")
+    del chain["weight"]
+    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks)
     # c.plot(filename=td+"complete_plot.png", truth=truths, parameters=params)
     c.plot(filename=td+"complete_plot_full.png", truth=truths, parameters=full_params)
 

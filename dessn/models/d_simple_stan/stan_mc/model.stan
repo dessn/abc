@@ -95,6 +95,7 @@ transformed parameters {
     vector [n_sne] PointPosteriors;
     real Posterior;
     vector [n_sim] weight_vals;
+    real weight;
 
     // Other temp variables for corrections
     real mass_correction;
@@ -146,13 +147,14 @@ transformed parameters {
     // Calculate the weights
     for (i in 1:n_sim) {
         mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
-        sim_MBx1c[i][1] = sim_mBx1c[i][1] + sim_model_mu[i] - alpha*sim_mBx1c[i][2] + beta*sim_mBx1c[i][3] - mass_correction * sim_mass[i];
+        sim_MBx1c[i][1] = sim_mBx1c[i][1] - sim_model_mu[i] + alpha*sim_mBx1c[i][2] - beta*sim_mBx1c[i][3] + mass_correction * sim_mass[i];
         sim_MBx1c[i][2] = sim_mBx1c[i][2];
         sim_MBx1c[i][3] = sim_mBx1c[i][3];
 
         weight_vals[i] = multi_normal_cholesky_lpdf(sim_MBx1c[i] | mean_MBx1c, population) - sim_log_prob[i];
     }
-    Posterior = sum(PointPosteriors) - n_sne * log_sum_exp(weight_vals) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    weight = n_sne * log_sum_exp(weight_vals);
+    Posterior = sum(PointPosteriors) - weight + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
 model {
