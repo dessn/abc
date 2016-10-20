@@ -1,8 +1,7 @@
 import os
+import inspect
 import numpy as np
-from astropy.cosmology import FlatwCDM
 from chainconsumer import ChainConsumer
-from dessn.models.d_simple_stan.approx.run_stan import get_analysis_data, get_truths_labels_significance
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
@@ -11,10 +10,6 @@ from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_output/biases.npy"):
-    existing_correction = chain_dictionary["sumBias"]
-
-    if os.path.exists(filename):
-        return np.load(filename), existing_correction
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -28,7 +23,6 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_out
 
     weight = []
 
-    print(list(chain_dictionary.keys()))
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
@@ -53,11 +47,27 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_out
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
         weight.append(reweight)
-        print(weight[-1])
 
     weights = np.array(weight)
-    np.save(filename, weights)
-    return weights, existing_correction
+    return weights
+
+
+def add_weight_to_chain(chain_dictionary, n_sne):
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    output_dir = os.path.abspath(dir_name + "/../output")
+    pickle_file = output_dir + os.sep + "supernovae2.npy"
+    supernovae = np.load(pickle_file)
+    d = get_cosmology_dictionary()
+
+    weights = calculate_bias(chain_dictionary, supernovae, d)
+    existing = chain_dictionary["sumBias"]
+
+    logw = n_sne * weights - existing
+    logw -= logw.min()
+    weights = np.exp(-logw)
+    chain_dictionary["weights"] = weights
+    return chain_dictionary
 
 
 if __name__ == "__main__":
@@ -82,13 +92,14 @@ if __name__ == "__main__":
             chain_dictionary[key.replace("_", "")] = chain_dictionary[key]
             del chain_dictionary[key]
 
+    from dessn.models.d_simple_stan.approx.run_stan import get_truths_labels_significance, get_analysis_data
     vals = get_truths_labels_significance()
     truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
 
     n_sne = get_analysis_data()["n_sne"]
     logw = n_sne * weights - existing
     print(logw.min(), logw.max())
-    logw -= logw.min() + 0
+    logw -= logw.min()
     print(logw.min(), logw.max())
     print(weights.min(), weights.max(), weights.mean())
     weights = np.exp(-logw)

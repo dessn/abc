@@ -10,6 +10,7 @@ from astropy.cosmology import FlatwCDM
 from numpy.random import uniform
 
 from dessn.models.d_simple_stan.approx.calculate_erf import get_approximate_mb_correction
+from dessn.models.d_simple_stan.approx.calculate_bias import add_weight_to_chain
 
 
 def get_truths_labels_significance():
@@ -33,12 +34,15 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne):
+def get_pickle_data(n_sne, seed=0):
     print("Getting data from supernovae pickle")
     pickle_file = os.path.abspath("../output/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    passed = [s for s in supernovae if s["pc"]][:n_sne]
+    passed = [s for s in supernovae if s["pc"]]
+    np.random.seed(seed)
+    np.random.shuffle(passed)
+    passed = passed[:n_sne]
     return {
         "n_sne": n_sne,
         "obs_mBx1c": [s["parameters"] for s in passed],
@@ -48,7 +52,7 @@ def get_pickle_data(n_sne):
     }
 
 
-def get_physical_data(n_sne, seed):
+def get_physical_data(n_sne, seed=0):
     print("Getting simple data")
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
@@ -105,17 +109,17 @@ def get_snana_data(filename="../output/des_sim.pickle"):
     return data
 
 
-def get_analysis_data(sim=True, snana=False):
+def get_analysis_data(sim=True, snana=False, seed=0):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
     n = 200
     if sim:
-        data = get_pickle_data(n)
+        data = get_pickle_data(n, seed=seed)
     elif snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(n, 2)
+        data = get_physical_data(n, seed=seed)
     n_sne = data["n_sne"]
     cors = []
     for c in data["obs_mBx1c_cov"]:
@@ -188,7 +192,7 @@ if __name__ == "__main__":
     sys.path.append(dessn_dir)
 
     data = get_analysis_data()
-
+    n_sne = data["n_sne"]
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
@@ -207,6 +211,7 @@ if __name__ == "__main__":
         print("Saving chain %d" % i)
         with open(t, 'wb') as output:
             dictionary = fit.extract(pars=params)
+            dictionary = add_weight_to_chain(dictionary, n_sne)
             pickle.dump(dictionary, output)
     else:
         # Run that stan locally
@@ -248,4 +253,5 @@ if __name__ == "__main__":
             # Dump relevant chains to file
             with open(t, 'wb') as output:
                 dictionary = fit.extract(pars=params)
+                dictionary = add_weight_to_chain(dictionary, n_sne)
                 pickle.dump(dictionary, output)

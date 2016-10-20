@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-from astropy.cosmology import FlatwCDM
 from chainconsumer import ChainConsumer
 from dessn.models.d_simple_stan.simple.run_stan import get_analysis_data, get_truths_labels_significance
 from scipy.misc import logsumexp

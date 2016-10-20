@@ -43,23 +43,30 @@ def load_stan_from_folder(folder, replace=True):
     name_map = {k[0]: k[2] for k in vals}
     truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
 
-    fs = [f for f in os.listdir(folder) if f.startswith("stan") and f.endswith(".pkl")]
-    chains = []
+    cs = {}
+    fs = [f for f in os.listdir(folder) if f.startswith("ston") and f.endswith(".pkl")]
     for f in fs:
+        splits = f.split("_")
+        c = splits[1]
         t = os.path.abspath(folder + os.sep + f)
-        chains.append(get_chain(t, name_map, replace=replace))
-    assert len(chains) > 0, "No results found"
-    chain = chains[0]
-    for c in chains[1:]:
-        for key in chain.keys():
-            chain[key] = np.concatenate((chain[key], c[key]))
-    posterior = chain["Posterior"]
-    bias = chain["sumBias"]
-    weights = chain["weights"]
-    del chain["weights"]
-    del chain["Posterior"]
-    del chain["sumBias"]
-    return chain, posterior, truths, params, full_params, len(fs), bias, weights
+        if cs.get(c) is None:
+            cs[c] = []
+        cs[c].append(get_chain(t, name_map, replace=replace))
+    assert len(cs.keys()) > 0, "No results found"
+    result = []
+    for k, chains in cs.items():
+        chain = chains[0]
+        for c in chains[1:]:
+            for key in chain.keys():
+                chain[key] = np.concatenate((chain[key], c[key]))
+        posterior = chain["Posterior"]
+        bias = chain["sumBias"]
+        weights = chain["weights"]
+        del chain["weights"]
+        del chain["Posterior"]
+        del chain["sumBias"]
+        result.append((chain, posterior, truths, params, full_params, len(fs), bias, weights))
+    return result
 
 
 if __name__ == "__main__":
@@ -68,14 +75,18 @@ if __name__ == "__main__":
     i = 0
     td = dir_name + "/../output/"
     std = dir_name + "/stan_output"
-    chain, posterior, truths, params, full_params, num_walks, bias, w = load_stan_from_folder(std)
-    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks)
-    print("Plotting walks")
-    c.plot_walks(filename=td+"approx_plot_walk.png")
-    print("Plotting surfaces")
-    c.plot(filename=td+"approx_plot_full.png", truth=truths, parameters=full_params)
+    results = load_stan_from_folder(std)
+    c = ChainConsumer()
 
-    c = ChainConsumer().add_chain(chain, posterior=posterior, walkers=num_walks, name="Uncorrected")
-    c.add_chain(chain, posterior=posterior, walkers=num_walks, weights=w, name="Corrected")
-    # c.plot(filename=td+"approx_plot.png", truth=truths, parameters=params)
-    c.plot(filename=td+"approx_plot_full.png", truth=truths, parameters=full_params)
+    c = ChainConsumer()
+    c_all = c.all_colours
+    ls = []
+    cs = []
+    for i, (chain, posterior, truths, params, full_params, num_walks, bias, w) in enumerate(results):
+        print(w.mean(), w.max(), w.min())
+        c.add_chain(chain, posterior=posterior, walkers=num_walks, name="Uncorrected")
+        c.add_chain(chain, posterior=posterior, walkers=num_walks, weights=w, name="Corrected")
+        ls += ["-", ":"]
+        cs += [c_all[i], c_all[i]]
+    c.configure_general(linestyles=ls, colours=cs)
+    c.plot(filename=td+"approx_plot_full_cosmo.png", truth=truths, parameters=full_params)

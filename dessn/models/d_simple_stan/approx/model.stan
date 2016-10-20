@@ -129,7 +129,7 @@ transformed parameters {
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
         // Get the approximate bias correction
-        bias_correction[i] = normal_lccdf(model_mBx1c[i][1] | mB_mean, mB_width) - mean_c; //0.5 * log(sigma_c) -
+        bias_correction[i] = normal_lccdf(model_mBx1c[i][1] | mB_mean, mB_width) - mean_c;
     }
     sumBias = sum(bias_correction);
     Posterior = sum(PointPosteriors) - sumBias + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
