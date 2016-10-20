@@ -171,7 +171,7 @@ that a final numerator of:
     &\quad\quad\quad \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)
 
-A rough fit for this, is shown below, for a thousand generated supernova.
+A rough fit for this, is shown below, for two hundred generated supernova.
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot_full.png
     :align:     center
