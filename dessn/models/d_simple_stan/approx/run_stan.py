@@ -188,9 +188,6 @@ if __name__ == "__main__":
     output_dir = os.path.abspath(dir_name + "../output")
     t = stan_output_dir + "/stan.pkl"
 
-    dessn_dir = file[: file.index("dessn/model")]
-    sys.path.append(dessn_dir)
-
     data = get_analysis_data()
     n_sne = data["n_sne"]
     # Calculate which parameters we want to keep track of

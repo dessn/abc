@@ -31,12 +31,15 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne):
+def get_pickle_data(n_sne, seed=0):
     print("Getting data from supernovae pickle")
-    pickle_file = "../output/supernovae.pickle"
+    pickle_file = os.path.abspath("../output/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    passed = [s for s in supernovae if s["pc"]][:n_sne]
+    passed = [s for s in supernovae if s["pc"]]
+    np.random.seed(seed)
+    np.random.shuffle(passed)
+    passed = passed[:n_sne]
     return {
         "n_sne": n_sne,
         "obs_mBx1c": [s["parameters"] for s in passed],
@@ -63,7 +66,7 @@ def get_simulation_data(n=5000):
     }
 
 
-def get_physical_data(n_sne, seed):
+def get_physical_data(n_sne, seed=0):
     print("Getting simple data")
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
@@ -120,17 +123,17 @@ def get_snana_data(filename="../output/des_sim.pickle"):
     return data
 
 
-def get_analysis_data(sim=True, snana=False):
+def get_analysis_data(sim=True, snana=False, seed=0):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 100
+    n = 200
     if sim:
-        data = get_pickle_data(n)
+        data = get_pickle_data(n, seed=seed)
     elif snana:
         data = get_snana_data()
     else:
-        data = get_physical_data(n, 2)
+        data = get_physical_data(n, seed=seed)
     n_sne = data["n_sne"]
 
     sim_data = get_simulation_data()
@@ -206,27 +209,21 @@ if __name__ == "__main__":
     output_dir = os.path.abspath(dir_name + "../output")
     t = stan_output_dir + "/stan.pkl"
 
-    # Assuming this is obelix
-    dessn_dir = file[: file.index("dessn/model")]
-    sys.path.append(dessn_dir)
-
     data = get_analysis_data()
-
+    n_sne = data["n_sne"]
     # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("Posterior")
     params.append("weight")
     if len(sys.argv) == 2:
+        # Assuming linux environment for single thread
         i = int(sys.argv[1])
         print("Running single walker, index %d" % i)
-        # Assuming linux environment for single thread
-        dessn_dir = file[: file.index("dessn")]
-        sys.path.append(dessn_dir)
         import pystan
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=8000, warmup=5000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=4000, warmup=2000, chains=1, init=init_fn)
         # Dump relevant chains to file
         print("Saving chain %d" % i)
         with open(t, 'wb') as output:
@@ -237,6 +234,7 @@ if __name__ == "__main__":
         p = platform.platform()
         h = socket.gethostname()
         if "smp-cluster" in h or "edison" in h:
+            # Assuming this is obelix
             from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
             if len(sys.argv) == 3:
                 num_walks = int(sys.argv[1])
