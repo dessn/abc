@@ -46,7 +46,7 @@ def get_pickle_data(n_sne):
     }
 
 
-def get_simulation_data(n=1000):
+def get_simulation_data(n=5000):
     pickle_file = "../output/supernovae2.npy"
     supernovae = np.load(pickle_file)
     mask = supernovae[:, 6] == 1
@@ -226,7 +226,7 @@ if __name__ == "__main__":
         import pystan
         t = stan_output_dir + "/stan%d.pkl" % i
         sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=5000, warmup=3000, chains=1, init=init_fn)
+        fit = sm.sampling(data=data, iter=8000, warmup=5000, chains=1, init=init_fn)
         # Dump relevant chains to file
         print("Saving chain %d" % i)
         with open(t, 'wb') as output:
@@ -249,11 +249,15 @@ if __name__ == "__main__":
             os.makedirs(stan_output_dir)
 
             if "smp-cluster" in h:
-                filename = write_jobscript(file, name=dir_name, num_walks=num_walks, num_cpu=num_jobs, outdir="log", delete=True)
+                filename = write_jobscript(file, name=os.path.basename(dir_name),
+                                           num_walks=num_walks, num_cpu=num_jobs,
+                                           outdir="log", delete=True)
                 os.system("qsub %s" % filename)
                 print("Submitted SGE job")
             elif "edison" in h:
-                filename = write_jobscript_slurm(file, name=dir_name, num_walks=num_walks, num_cpu=num_jobs, delete=True)
+                filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
+                                                 num_walks=num_walks, num_cpu=num_jobs,
+                                                 delete=True)
                 os.system("sbatch %s" % filename)
                 print("Submitted SLURM job")
         else:

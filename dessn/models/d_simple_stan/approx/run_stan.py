@@ -226,11 +226,15 @@ if __name__ == "__main__":
             os.makedirs(stan_output_dir)
 
             if "smp-cluster" in h:
-                filename = write_jobscript(file, name=dir_name, num_walks=num_walks, num_cpu=num_jobs, outdir="log", delete=True)
+                filename = write_jobscript(file, name=os.path.basename(dir_name),
+                                           num_walks=num_walks, num_cpu=num_jobs,
+                                           outdir="log", delete=True)
                 os.system("qsub %s" % filename)
                 print("Submitted SGE job")
             elif "edison" in h:
-                filename = write_jobscript_slurm(file, name=dir_name, num_walks=num_walks, num_cpu=num_jobs, delete=True)
+                filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
+                                                 num_walks=num_walks, num_cpu=num_jobs,
+                                                 delete=True)
                 os.system("sbatch %s" % filename)
                 print("Submitted SLURM job")
         else:

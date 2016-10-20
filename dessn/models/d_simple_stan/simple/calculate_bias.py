@@ -17,13 +17,13 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
-    n = 10000
-    masses = supernovae[:n, 4]
-    redshifts = supernovae[:n, 5]
-    apparents = supernovae[:n, 1]
-    colours = supernovae[:n, 3]
-    stretches = supernovae[:n, 2]
-    existing_prob = supernovae[:n, 7]
+    supernovae = supernovae[:20000, :]
+    masses = supernovae[:, 4]
+    redshifts = supernovae[:, 5]
+    apparents = supernovae[:, 1]
+    colours = supernovae[:, 3]
+    stretches = supernovae[:, 2]
+    existing_prob = supernovae[:, 7]
 
     weight = []
 
@@ -38,7 +38,6 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
             speed_dict[key] = mus
         else:
             mus = speed_dict[key]
-
         dscale = chain_dictionary["dscale"][i]
         dratio = chain_dictionary["dratio"][i]
         redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
@@ -66,6 +65,8 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
 
 
 if __name__ == "__main__":
+
+    file = os.path.abspath(__file__)
     dir_name = os.path.dirname(__file__) or "."
     output_dir = os.path.abspath(dir_name + "/../output")
     stan_output_dir = os.path.abspath(dir_name + "/stan_output")
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     logw -= logw.min() + 0
     print(logw.min(), logw.max())
     print(weights.min(), weights.max(), weights.mean())
-    weights = 1 / np.exp(logw)
+    weights = np.exp(-logw)
     print(weights.min(), weights.max(), weights.mean())
 
     c = ChainConsumer()

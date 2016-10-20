@@ -19,7 +19,7 @@ model implementations.
     |                                                                |                                                                         |
     |:ref:`a_pure_snia`                                              |:ref:`c_pure_snia_simplified`                                            |
     +----------------------------------------------------------------+-------------------------------------------------------------------------+
-    |..  image:: ../dessn/models/d_simple_stan/output/plot.png       |                                                                         |
+    |..  image:: ../dessn/models/d_simple_stan/output/plot_full.png  |                                                                         |
     |    :width: 95%                                                 |                                                                         |
     |    :align: center                                              |                                                                         |
     |    :target: d_simple_stan.html                                 |                                                                         |

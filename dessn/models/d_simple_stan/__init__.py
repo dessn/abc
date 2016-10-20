@@ -273,8 +273,7 @@ frequency of observation, weather effects, etc. The selection effects we need to
     of supernova simulated is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
 
     .. math::
-        P(S
-        |\theta) &= w^N \\
+        P(S|\theta) &= w^N \\
         &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
         &= \left[ \frac{1}{N_{\rm sim}} \sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
         &=  \frac{1}{N_{\rm sim}^N} \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N
@@ -294,7 +293,7 @@ frequency of observation, weather effects, etc. The selection effects we need to
     data points, the posterior maximum becomes better constrained and you need an increased
     re-weighting (bias correction) to shift the posterior maximum to the correct location.
 
-    To provide a concrete example, suppose our weight (denominator) is 0.99 in one section
+    To provide a concrete example, suppose our weight (:math:`w`) is 0.99 in one section
     of the parameter space, and 1.01 in another section (normalised to some arbitrary point).
     With 300 data points, the difference in weights between those two points would be
     :math:`(1.01/0.99)^{300} \approx 404`. This difference in weights is potentially beyond
@@ -304,12 +303,53 @@ frequency of observation, weather effects, etc. The selection effects we need to
     contours when looking at different values of :math:`\sigma`, and the ratio difference there
     for 2000 data points is only 81 (so 404 would be several times worse).
 
+    An example of importance sampling an uncorrected posterior surface is shown below.
+
     .. figure::     ../dessn/models/d_simple_stan/output/plot_comparison.png
         :align:     center
 
-        You can see that importance sampling fails in this case, where some areas of
-        the parameter space have radically increased weight.
+        In blue we have the posterior surface for a likelihood that does not have any
+        bias correction, and the red shows the same posterior after I have applied the
+        :math:`w^-N` bias correction. Normalised to one, the mean weight of points
+        after resampling is :math:`0.0003`, with the minimum weighted point weighted
+        at :math:`1.92706802135\times 10^{-12}`. The staggeringly low weights attributed
+        is an artifact of the concerns stated above. The only good news I can see in this
+        posterior is that there *does* seem to be a shift in :math:`\langle c \rangle` towards
+        the correct value.
 
+    If we focus on :math:`\langle c \rangle` for a second, we can see that the correct
+    value falls roughly :math:`3\sigma` away from the sampled mean, and so this raises the
+    question; *Is the issue simply that we have too few samples in the correct region of
+    parameter space? Is that why our weights are on average so low?*
+
+    The can investigate this easily. By looking at the selection efficiency simply as
+    a function of apparent magnitude for the supernova simulated (that are used in the bias
+    correction), we can implement an approximate *data dependent* bias correction using
+    apparent magnitude (and colour) with an error function. That is identical to the
+    current popular method of diving each supernova by its modelled selection efficiency,
+    and so our likelihood becomes gains (for each supernova) a correcting term
+
+    .. math::
+        \Phi^{-1}(m_B | x_1, x_2) e^{\langle c \rangle},
+
+    where :math:`\Phi` is the complimentary normal cumulative distribution function
+    and :math:`x_1, x_2` respectively represent the mean apparent magnitude and the width
+    of the cdf. It is important to note here that the actual functional form of the correction above
+    does not matter - all we care about is that it moves the sampled region of the
+    parameter space. We then apply the bias correction
+    :math:`w^-N \Phi(m_B | x_1, x_2) e^{-\langle c \rangle}, which implements our
+    original bias correction whilst removing the approximate correction introduced
+    to shift the region of sampling.
+
+    .. figure::     ../dessn/models/d_simple_stan/output/approx_comparison.png
+        :align:     center
+
+        In blue we have the posterior surface for a likelihood that does not have any
+        bias correction, and the red shows the same posterior after I have applied the
+        :math:`w^-N` bias correction. Normalised to one, the mean weight of points
+        after resampling is :math:`0.001` (three times better than before),
+        with the minimum weighted point weighted at :math:`1.92706802135\times 10^{-09}`.
+        Due to the increased number of steps I ran this for
 
 Having implemented a simple bias correction in STAN, we can see the effect when the
 correction is implemented explicitly in STAN
