@@ -61,7 +61,7 @@ objects :math:`\hat{z}` and a normalised mass estimate :math:`\hat{m}`. We thus 
 observed variables with the hat operator. In this work we will be modelling
 :math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace` as having true underlying
 values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
-known (:math:`\hat{z} = z,\ \hat{m}=m)`.
+known :math:`(\hat{z} = z,\ \hat{m}=m)`.
 
 .. math::
     P(\theta S|d) & \propto P(d|S\theta) P(\theta) \\
