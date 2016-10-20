@@ -193,7 +193,7 @@ effects :math:`S` need to apply onto some data:
 
 where :math:`R` is a potential realisation of our experiment. To write this down,
 and taking into account we can model supernova such that we can determine
-the efficiency as a function of constructed :math:`\lbrace m_B, x_1, c \rbrace`, we
+the efficiency as a function of constructed :math:`\lbrace m_B, x_1, c, m, z \rbrace`, we
 have:
 
 .. math::
@@ -210,17 +210,17 @@ have:
     P(S|m_B, x_1, c, z) P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c)
     P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta)
 
-We should note that we have an integral over :math:`m_B, x_1, c` for
+We should note that we have an integral over :math:`m_B, x_1, c, z, m` for
 *each* supernova, however each term will be identical, and that is why we switch to writing
 the weight :math:`w`.
 
-Again that we assume redshift and mass are perfectly known, so relationship between
+Again that we assume redshift and mass are perfectly known, so the relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
 they only appear once in the equation above. In the last line I simply substitute the multivariate
 normal probabilities distributions reached in the previous section and utilise the
 transformation from apparent magnitude to absolute magnitude. The important assumption
 in the last line fo the equation is that the detection efficiency is to good approximation
-captured by the apparent magnitude, colour, stretch and redshift of the supernova.
+captured by the apparent magnitude, colour, stretch, mass and redshift of the supernova.
 
 As we integrate over all possible realisations, we have that over all space we have
 
