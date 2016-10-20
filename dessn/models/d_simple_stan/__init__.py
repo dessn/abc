@@ -341,7 +341,7 @@ frequency of observation, weather effects, etc. The selection effects we need to
     original bias correction whilst removing the approximate correction introduced
     to shift the region of sampling.
 
-    .. figure::     ../dessn/models/d_simple_stan/output/approx_comparison.png
+    .. figure::     ../dessn/models/d_simple_stan/output/approx_plot_full.png
         :align:     center
 
         In blue we have the posterior surface for a likelihood that does not have any
