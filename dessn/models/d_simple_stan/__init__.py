@@ -347,8 +347,8 @@ frequency of observation, weather effects, etc. The selection effects we need to
         In blue we have the posterior surface for a likelihood that does not have any
         bias correction, and the red shows the same posterior after I have applied the
         :math:`w^-N` bias correction. Normalised to one, the mean weight of points
-        after resampling is :math:`0.001` (three times better than before),
-        with the minimum weighted point weighted at :math:`1.92706802135\times 10^{-09}`.
+        after resampling is :math:`0.001` (three times better than before). This is so
+        far the most promising technique.
 
 
 Given the concerns with the importance sampling methods, I also decided to implement
@@ -371,7 +371,7 @@ Current Concerns
 ~~~~~~~~~~~~~~~~
 
 1. Unsure how to fix STAN model with bias corrections inside. Cannot un-center those distributions more than they currently are.
-2. For the approximate correction method, :math:`\Omega_m` seems to be biased. But have a data size of 1. Will adapt code to check on multiple realisations.
+2. Need to ensure that my results are not just "Got lucky with the random number seed". Will rerun fits realising multiple cosmologies.
 
 
 """

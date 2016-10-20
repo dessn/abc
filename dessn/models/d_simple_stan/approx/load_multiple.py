@@ -44,7 +44,7 @@ def load_stan_from_folder(folder, replace=True):
     truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
 
     cs = {}
-    fs = [f for f in os.listdir(folder) if f.startswith("ston") and f.endswith(".pkl")]
+    fs = sorted([f for f in os.listdir(folder) if f.startswith("ston") and f.endswith(".pkl")])
     for f in fs:
         splits = f.split("_")
         c = splits[1]
@@ -54,7 +54,8 @@ def load_stan_from_folder(folder, replace=True):
         cs[c].append(get_chain(t, name_map, replace=replace))
     assert len(cs.keys()) > 0, "No results found"
     result = []
-    for k, chains in cs.items():
+    for k in sorted(list(cs.keys())):
+        chains = cs[k]
         chain = chains[0]
         for c in chains[1:]:
             for key in chain.keys():
@@ -83,9 +84,10 @@ if __name__ == "__main__":
     ls = []
     cs = []
     for i, (chain, posterior, truths, params, full_params, num_walks, bias, w) in enumerate(results):
+        if i == 5: continue
         print(w.mean(), w.max(), w.min())
-        c.add_chain(chain, posterior=posterior, walkers=num_walks, name="Uncorrected")
-        c.add_chain(chain, posterior=posterior, walkers=num_walks, weights=w, name="Corrected")
+        c.add_chain(chain, posterior=posterior, walkers=num_walks, name="Uncorrected %d" % i)
+        c.add_chain(chain, posterior=posterior, walkers=num_walks, weights=w, name="Corrected %d" % i)
         ls += ["-", ":"]
         cs += [c_all[i], c_all[i]]
     c.configure_general(linestyles=ls, colours=cs)
