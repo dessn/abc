@@ -337,7 +337,7 @@ frequency of observation, weather effects, etc. The selection effects we need to
     of the cdf. It is important to note here that the actual functional form of the correction above
     does not matter - all we care about is that it moves the sampled region of the
     parameter space. We then apply the bias correction
-    :math:`w^-N \Phi(m_B | x_1, x_2) e^{-\langle c \rangle}, which implements our
+    :math:`w^-N \Phi(m_B | x_1, x_2) e^{-\langle c \rangle}`, which implements our
     original bias correction whilst removing the approximate correction introduced
     to shift the region of sampling.
 
