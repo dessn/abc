@@ -109,12 +109,12 @@ if __name__ == "__main__":
 
     dir_name = os.path.dirname(__file__) or "."
 
-    # results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1, True) for i in range(jobs))
-    # results1 = [s for r in results1 for s in r]
-    # filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
-    # with open(filename1, 'wb') as output:
-    #     pickle.dump(results1, output)
-    # print("%d supernova generated for data" % len(results1))
+    results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1, True) for i in range(jobs))
+    results1 = [s for r in results1 for s in r]
+    filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
+    with open(filename1, 'wb') as output:
+        pickle.dump(results1, output)
+    print("%d supernova generated for data" % len(results1))
 
     results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2, False) for i in range(jobs))
     results2 = [s for r in results2 for s in r]

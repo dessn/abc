@@ -10,7 +10,7 @@ from scipy.stats import multivariate_normal
 from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
 
-def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.npy"):
+def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_output/biases.npy"):
 
     if os.path.exists(filename):
         return np.load(filename)
@@ -27,17 +27,12 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
 
     weight = []
 
-    speed_dict = {}
     print(list(chain_dictionary.keys()))
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
-        if speed_dict.get(key) is None:
-            cosmology = FlatwCDM(70.0, om)
-            mus = cosmology.distmod(redshifts).value
-            speed_dict[key] = mus
-        else:
-            mus = speed_dict[key]
+        mus = cosmologies[key](redshifts)
+
         dscale = chain_dictionary["dscale"][i]
         dratio = chain_dictionary["dratio"][i]
         redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)

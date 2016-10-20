@@ -1,16 +1,16 @@
 import os
-import sys
 import numpy as np
 from astropy.cosmology import FlatwCDM
 from chainconsumer import ChainConsumer
 from dessn.models.d_simple_stan.approx.run_stan import get_analysis_data, get_truths_labels_significance
+from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
 
 from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
 
-def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.npy"):
+def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_output/biases.npy"):
     existing_correction = chain_dictionary["sumBias"]
 
     if os.path.exists(filename):
@@ -28,17 +28,12 @@ def calculate_bias(chain_dictionary, supernovae, filename="stan_output/biases.np
 
     weight = []
 
-    speed_dict = {}
     print(list(chain_dictionary.keys()))
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
-        if speed_dict.get(key) is None:
-            cosmology = FlatwCDM(70.0, om)
-            mus = cosmology.distmod(redshifts).value
-            speed_dict[key] = mus
-        else:
-            mus = speed_dict[key]
+        mus = cosmologies[key](redshifts)
+
         dscale = chain_dictionary["dscale"][i]
         dratio = chain_dictionary["dratio"][i]
         redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
@@ -74,12 +69,12 @@ if __name__ == "__main__":
     pickle_file = output_dir + os.sep + "supernovae2.npy"
     supernovae = np.load(pickle_file)
     file = file.replace("\\", "/")
-    dessn_dir = file[: file.index("dessn/model")]
-    sys.path.append(dessn_dir)
+
+    d = get_cosmology_dictionary()
 
     chain_dictionary, post, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
 
-    weights, existing = calculate_bias(chain_dictionary, supernovae)
+    weights, existing = calculate_bias(chain_dictionary, supernovae, d)
 
     del chain_dictionary["intrinsic_correlation"]
     for key in list(chain_dictionary.keys()):

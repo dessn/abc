@@ -367,5 +367,11 @@ sampling issues, with some walkers sampling some areas of posterior space more t
 .. figure::     ../dessn/models/d_simple_stan/output/complete_plot_walk.png
     :align:     center
 
+Current Concerns
+~~~~~~~~~~~~~~~~
+
+1. Unsure how to fix STAN model with bias corrections inside. Cannot un-center those distributions more than they currently are.
+2. For the approximate correction method, :math:`\Omega_m` seems to be biased. But have a data size of 1. Will adapt code to check on multiple realisations.
+
 
 """
