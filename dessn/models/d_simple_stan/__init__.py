@@ -311,8 +311,8 @@ frequency of observation, weather effects, etc. The selection effects we need to
         In blue we have the posterior surface for a likelihood that does not have any
         bias correction, and the red shows the same posterior after I have applied the
         :math:`w^-N` bias correction. Normalised to one, the mean weight of points
-        after resampling is :math:`0.0003`, with the minimum weighted point weighted
-        at :math:`1.92706802135\times 10^{-12}`. The staggeringly low weights attributed
+        after resampling is :math:`0.0002`, with the minimum weighted point weighted
+        at :math:`2.7\times 10^{-13}`. The staggeringly low weights attributed
         is an artifact of the concerns stated above. The only good news I can see in this
         posterior is that there *does* seem to be a shift in :math:`\langle c \rangle` towards
         the correct value.
@@ -349,14 +349,23 @@ frequency of observation, weather effects, etc. The selection effects we need to
         :math:`w^-N` bias correction. Normalised to one, the mean weight of points
         after resampling is :math:`0.001` (three times better than before),
         with the minimum weighted point weighted at :math:`1.92706802135\times 10^{-09}`.
-        Due to the increased number of steps I ran this for
 
-Having implemented a simple bias correction in STAN, we can see the effect when the
-correction is implemented explicitly in STAN
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete_comparison.png
+Given the concerns with the importance sampling methods, I also decided to implement
+the bias corrections within STAN itself. Inserting the relevant data and structures
+into STAn such that I can perform Monte Carlo integration in a BHM framework significantly
+slows down the fits, however I believed it would at least give good results.
+
+.. figure::     ../dessn/models/d_simple_stan/output/complete_plot_full.png
     :align:     center
 
-    This is not what I want.
+    As you can see, I was wrong.
+
+In addition to the odd contours, we can also see in the walk itself that we have
+sampling issues, with some walkers sampling some areas of posterior space more than others.
+
+.. figure::     ../dessn/models/d_simple_stan/output/complete_plot_walk.png
+    :align:     center
+
 
 """
