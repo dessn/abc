@@ -65,6 +65,7 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     logw -= logw.min()
     weights = np.exp(-logw)
     chain_dictionary["weight"] = weights
+    chain_dictionary["old_weight"] = existing
     return chain_dictionary
 
 

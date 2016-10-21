@@ -5,6 +5,6 @@ if __name__ == "__main__":
 
     file = os.path.abspath(__file__)
     stan_model = os.path.dirname(file) + "/model.stan"
-    data = {"add_sim": 1000}
+    data = {"add_sim": 3000}
     print("Running %s" % file)
     run(data, stan_model, file)

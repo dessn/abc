@@ -1,7 +1,7 @@
 import itertools
 import os
 import pickle
-
+import inspect
 import numpy as np
 from chainconsumer import ChainConsumer
 
@@ -69,7 +69,12 @@ def load_stan_from_folder(folder, replace=True, merge=True):
             del chain["weight"]
         else:
             weights = np.ones(posterior.shape)
-        result.append((chain, posterior, truths, params, full_params, len(chains), weights))
+        if "weight_old" in chain.keys():
+            ow = chain["weight_old"]
+            del chain["weight_old"]
+        else:
+            ow = np.ones(posterior.shape)
+        result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
     if merge:
         return result[0]
     else:
@@ -78,7 +83,7 @@ def load_stan_from_folder(folder, replace=True, merge=True):
 
 def plot_all(folder, output, output_walk=None):
     """ Plot all chains as one """
-    chain, posterior, t, p, f, l, w = load_stan_from_folder(folder, merge=True)
+    chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l)
     c.plot(filename=output, truth=t)
@@ -90,7 +95,7 @@ def plot_single_cosmology(folder, output, i=0, output_walk=None):
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
     print(i)
-    chain, posterior, t, p, f, l, w = res[i]
+    chain, posterior, t, p, f, l, w, ow = res[i]
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
     c.plot(filename=output, truth=t)
     if output_walk is not None:
@@ -99,9 +104,9 @@ def plot_single_cosmology(folder, output, i=0, output_walk=None):
 
 def plot_all_weight(folder, output):
     """ Plot all chains as one, with and without weights applied """
-    chain, posterior, t, p, f, l, w = load_stan_from_folder(folder, merge=True)
+    chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
-    c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
+    c.add_chain(chain, weights=ow, posterior=posterior, walkers=l, name="Uncorrected")
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
     c.plot(filename=output, truth=t)
 
@@ -110,7 +115,7 @@ def plot_separate(folder, output):
     """ Plot separate cosmologies """
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
-    for i, (chain, posterior, t, p, f, l, w) in enumerate(res):
+    for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
     c.plot(filename=output, truth=t)
 
@@ -119,10 +124,25 @@ def plot_separate_weight(folder, output):
     """ Plot separate cosmologies, with and without weights applied """
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
-    for i, (chain, posterior, t, p, f, l, w) in enumerate(res):
-        c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected %d"%i)
+    for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
+        c.add_chain(chain, weights=ow, posterior=posterior, walkers=l, name="Uncorrected %d"%i)
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
     c.plot(filename=output, truth=t)
+
+
+def plot_quick(folder, uid, include_sep=False):
+    td = os.path.dirname(inspect.stack()[0][1]) + "/output/"
+    plot_name = td + "plot_%s.png" % uid
+    plot_name_single = td + "plot_%s_single.png" % uid
+    plot_name_weight = td + "plot_%s_weight.png" % uid
+    plot_name_sep = td + "plot_%s_sep.png" % uid
+    walk_name = td + "plot_%s_walk.png" % uid
+
+    plot_all(folder, plot_name)
+    plot_all_weight(folder, plot_name_weight)
+    plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
+    if include_sep:
+        plot_separate(folder, plot_name_sep)
 
 
 if __name__ == "__main__":
