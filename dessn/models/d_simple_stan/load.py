@@ -124,9 +124,12 @@ def plot_separate_weight(folder, output):
     """ Plot separate cosmologies, with and without weights applied """
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
+    ls = []
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
         c.add_chain(chain, weights=ow, posterior=posterior, walkers=l, name="Uncorrected %d"%i)
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
+        ls += ["-", "--"]
+    c.configure_general(linestyles=ls)
     c.plot(filename=output, truth=t)
 
 
@@ -142,7 +145,7 @@ def plot_quick(folder, uid, include_sep=False):
     plot_all_weight(folder, plot_name_weight)
     plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
     if include_sep:
-        plot_separate(folder, plot_name_sep)
+        plot_separate_weight(folder, plot_name_sep)
 
 
 if __name__ == "__main__":
