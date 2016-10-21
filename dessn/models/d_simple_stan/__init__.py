@@ -64,18 +64,25 @@ values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
 known :math:`(\hat{z} = z,\ \hat{m}=m)`.
 
 .. math::
-    P(\theta S|d) & \propto P(d|S\theta) P(\theta) \\
+    :label: a
+
+    P(\theta, S|d) & \propto P(d|S,\theta) P(\theta)  \\
+
 
 Let us separate out the selection effects:
 
 .. math::
-    P(\theta S|d) & \propto  \frac{P(d,S|\theta) P(\theta)}{P(S|\theta)}   \\[10pt]
+    :label: b
+
+    P(\theta, S|d) &\propto  \frac{P(d,S|\theta) P(\theta)}{P(S|\theta)}  \\[10pt]
     &\propto \frac{P(S|d,\theta) P(d|\theta) P(\theta)}{P(S|\theta)}
 
 As our data must have passed the selection cuts, by definition, the numerator
 reduces down.
 
 .. math::
+    :label: c
+
     P(\theta S|d) & \propto  \frac{P(d|\theta)P(\theta)}{P(S|\theta)} \\
 
 
@@ -90,6 +97,8 @@ differently. For simplicity, let us denote the population parameters
 :math:`\langle M_B \rangle... \rho` shown under the Population header as :math:`\gamma`.
 
 .. math::
+    :label: d
+
     P(d|\theta)P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
     \Omega_m, w, \alpha, \beta, \gamma)
     P(\Omega_m, w, \alpha, \beta, \gamma) \\
@@ -100,6 +109,8 @@ with Cauchy priors, :math:`\rho` with an LKJ prior, and other parameters with fl
 So now we can focus on the likelihood's numerator, which is
 
 .. math::
+    :label: e
+
     \mathcal{L} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
     \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
     &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c |
@@ -113,25 +124,33 @@ Now, in order to calculate :math:`P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, 
 we need to transform from :math:`m_B` to :math:`M_B`. This is done via the following maths:
 
 .. math::
-    M_B = m_B - \mu + \alpha x_1 - \beta c
+    :label: f
 
-.. + k(z) m
+    M_B = m_B - \mu + \alpha x_1 - \beta c + k(z) m
 
 where we define :math:`\mu` as
 
-.. and :math:`k(z)` as
 
 .. math::
+    :label: g
+
     \mu &= 5 \log_{10} \left[ \frac{(1 + z)c}{H_0 \times 10{\rm pc}} \int_0^z \left(
     \Omega_m (1 + z)^3 + (1 - \Omega_m)(1+z)^{3(1+w)} \right) \right] \\[10pt]
 
-.. k(z) &= \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
+and :math:`k(z)` as
+
+.. math::
+    :label: h
+
+    k(z) &= \delta(0) \left[\frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
     \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right]
 
 Thus :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`. We can substitute
 :math:`M_B` into our conditional probability:
 
 .. math::
+    :label: i
+
     P(m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)
     &= P(M_B, m_b, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
     &= P(M_B, x_1, c, | \gamma) \\[10pt]
@@ -140,6 +159,8 @@ Thus :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`.
 where
 
 .. math::
+    :label: j
+
     V &= \begin{pmatrix}
     \sigma_{M_B}^2                        & \rho_{12} \sigma_{M_B} \sigma_{x_1}         & \rho_{13} \sigma_{M_B} \sigma_{c}  \\
     \rho_{21} \sigma_{M_B} \sigma_{x_1}           & \sigma_{x_1}^2                    & \rho_{23} \sigma_{x_1} \sigma_{c}  \\
@@ -162,6 +183,8 @@ Adding in the priors, and taking into account that we observe multiple supernova
 that a final numerator of:
 
 .. math::
+    :label: k
+
     P(d|\theta)P(\theta) &\propto
     \int dm_B \int dx_1 \int dc \
     \rm{Cauchy}(\sigma_{M_B}|0,2.5)
@@ -189,6 +212,8 @@ of our likelihood! Now, for :math:`P(S|\theta)` to make mathematical sense, the 
 effects :math:`S` need to apply onto some data:
 
 .. math::
+    :label: l
+
     P(S|\theta) = \int dR\ P(R,S|\theta)
 
 where :math:`R` is a potential realisation of our experiment. To write this down,
@@ -197,6 +222,8 @@ the efficiency as a function of constructed :math:`\lbrace m_B, x_1, c, m, z \rb
 have:
 
 .. math::
+    :label: m
+
     P(S|\theta) &= w^N \\
     w &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c}
     \int dz \int dm \int dm_B \int dx_1 \int dc \
@@ -225,6 +252,8 @@ captured by the apparent magnitude, colour, stretch, mass and redshift of the su
 As we integrate over all possible realisations, we have that over all space we have
 
 .. math::
+    :label: n
+
     P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) =
     \iiint_{-\infty}^{\infty} d\hat{m_B} d\hat{x_1} d\hat{c}\
     \mathcal{N}(\lbrace \hat{m_B}, \hat{x}_1, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C) = 1
@@ -235,12 +264,16 @@ and as such we can remove it from the integral.
 of the mass distribution of galaxies, which may be an issue.
 
 .. math::
+    :label: o
+
     w &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \
     P(S|m_B, x_1, c, z)  P(M_B, x_1, c | \theta) P(z|\theta) P(m|\theta) \\
 
 Addressing each component individually:
 
 .. math::
+    :label: p
+
     P(z)&= \text{Redshift distribution from DES volume}\\
     P(m) &= \text{Unknown mass distribution} \\
     P(M_B, x_1, c|\theta) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\

@@ -42,3 +42,10 @@ table.borderless p {
 .rst-content .green.note {
     background: #dbffd9 !important;
 }
+
+.math .eqno {
+    float: right;
+    margin-top: 5px;
+    font-family: serif;
+    font-size: 1.2em;
+}
