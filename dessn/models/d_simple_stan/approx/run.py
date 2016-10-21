@@ -1,18 +1,14 @@
 import os
-
-import numpy as np
-from chainconsumer import ChainConsumer
-from dessn.models.d_simple_stan.simple.run_stan import get_analysis_data, get_truths_labels_significance
+import inspect
+from scipy.interpolate import interp1d
 from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
+import numpy as np
+from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
+from dessn.models.d_simple_stan.run import run, get_mc_simulation_data
 
-from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
-
-def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_output/biases.npy"):
-
-    if os.path.exists(filename):
-        return np.load(filename)
+def calculate_bias(chain_dictionary, supernovae, cosmologies):
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -26,7 +22,6 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_out
 
     weight = []
 
-    print(list(chain_dictionary.keys()))
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
@@ -51,44 +46,55 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_out
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
         weight.append(reweight)
-        print(weight[-1])
 
     weights = np.array(weight)
-    np.save(filename, weights)
     return weights
+
+
+def add_weight_to_chain(chain_dictionary, n_sne):
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    output_dir = os.path.abspath(dir_name + "/../output")
+    pickle_file = output_dir + os.sep + "supernovae2.npy"
+    supernovae = np.load(pickle_file)
+    d = get_cosmology_dictionary()
+
+    weights = calculate_bias(chain_dictionary, supernovae, d)
+    existing = chain_dictionary["weight"]
+
+    logw = n_sne * weights - existing
+    logw -= logw.min()
+    weights = np.exp(-logw)
+    chain_dictionary["weight"] = weights
+    return chain_dictionary
+
+
+def get_approximate_mb_correction():
+    d = get_mc_simulation_data()
+    mask = d["sim_passed"] == 1
+    mB = d["sim_mB"]
+
+    hist_all, bins = np.histogram(mB, bins=200)
+    hist_passed, _ = np.histogram(mB[mask], bins=bins)
+    binc = 0.5 * (bins[:-1] + bins[1:])
+    ratio = 1.0 * hist_passed / hist_all
+    inter = interp1d(ratio, binc)
+    mean = inter(0.5)
+    width = 0.5 * (inter(0.16) - inter(0.84))
+
+    return mean, width
 
 
 if __name__ == "__main__":
 
     file = os.path.abspath(__file__)
-    dir_name = os.path.dirname(__file__) or "."
-    output_dir = os.path.abspath(dir_name + "/../output")
-    stan_output_dir = os.path.abspath(dir_name + "/stan_output")
-    pickle_file = output_dir + os.sep + "supernovae2.npy"
-    supernovae = np.load(pickle_file)
-    chain_dictionary, post, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
+    stan_model = os.path.dirname(file) + "/model.stan"
 
-    weights = calculate_bias(chain_dictionary, supernovae)
+    mB_mean, mB_width = get_approximate_mb_correction()
 
-    del chain_dictionary["intrinsic_correlation"]
-    for key in list(chain_dictionary.keys()):
-        if "_" in key:
-            chain_dictionary[key.replace("_", "")] = chain_dictionary[key]
-            del chain_dictionary[key]
-
-    vals = get_truths_labels_significance()
-    truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
-
-    n_sne = get_analysis_data()["n_sne"]
-    logw = n_sne * weights
-    print(logw.min(), logw.max())
-    logw -= logw.min() + 0
-    print(logw.min(), logw.max())
-    print(weights.min(), weights.max(), weights.mean())
-    weights = np.exp(-logw)
-    print(weights.min(), weights.max(), weights.mean())
-
-    c = ChainConsumer()
-    c.add_chain(chain_dictionary, name="Unweighted")
-    c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
-    c.plot(filename="../output/plot_comparison.png", truth=truths)
+    data = {
+        "mB_mean": mB_mean,
+        "mB_width": mB_width
+    }
+    print("Running %s" % file)
+    run(data, stan_model, file, weight_function=add_weight_to_chain)

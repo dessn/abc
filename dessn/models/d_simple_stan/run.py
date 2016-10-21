@@ -5,9 +5,8 @@ import inspect
 import shutil
 from astropy.cosmology import FlatwCDM
 import numpy as np
-from numpy.random import normal, uniform
+from numpy.random import uniform
 import sys
-import platform
 import socket
 
 
@@ -128,7 +127,7 @@ def get_snana_data():
     return data
 
 
-def get_analysis_data(sim=True, snana=False, seed=0, add_sim=False):
+def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -152,7 +151,7 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=False):
     redshifts = data["redshifts"]
     n_z = 1000
     if add_sim:
-        sim_data = get_simulation_data()
+        sim_data = get_simulation_data(n=add_sim)
         n_sim = sim_data["n_sim"]
         sim_redshifts = sim_data["sim_redshifts"]
 
@@ -176,7 +175,9 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=False):
         pz = z
     n_z = n_sne + n_sim + len(added_zs)
     n_simps = int((n_z + 1) / 2)
-    to_sort = [(z, -1, -1) for z in added_zs] + [(z, i, -1) for i, z in enumerate(redshifts)] + [(z, -1, i) for i, z in enumerate(sim_redshifts)]
+    to_sort = [(z, -1, -1) for z in added_zs] + [(z, i, -1) for i, z in enumerate(redshifts)]
+    if add_sim:
+        to_sort += [(z, -1, i) for i, z in enumerate(sim_redshifts)]
     to_sort.sort()
     final_redshifts = np.array([z[0] for z in to_sort])
     sorted_vals = [(z[1], i) for i, z in enumerate(to_sort) if z[1] != -1]
@@ -200,8 +201,11 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=False):
         update["sim_redshift_indexes"] = sim_final
         update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
 
+    if extra_args is None:
+        extra_args = {}
+
     # If you want python2: data.update(update), return data
-    return {**data, **update, **sim_data}
+    return {**data, **update, **sim_data, **extra_args}
 
 
 def init_fn():
@@ -218,85 +222,105 @@ def init_fn():
     return randoms
 
 
+def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weight_function=None):
+    n_cosmology = i // num_walks_per_cosmology
+    n_run = i % num_walks_per_cosmology
+    run_single(data_args, stan_model, n_cosmology, n_run, weight_function=weight_function)
 
 
-
-
-def run_single(data, stan_model):
-    pass
-
-def run_multiple(data, stan_model):
-
-def run_cluster(data, stan_model):
-    pass
-
-
-
-if __name__ == "__main__":
-    file = os.path.abspath(__file__)
-    dir_name = os.path.dirname(file)
-    stan_output_dir = os.path.abspath(dir_name + "/stan_output")
-    output_dir = os.path.abspath(dir_name + "../output")
-    t = stan_output_dir + "/stan.pkl"
-
-    data = get_analysis_data()
+def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None):
+    data = get_analysis_data(seed=n_cosmology, **data_args)
     n_sne = data["n_sne"]
-    # Calculate which parameters we want to keep track of
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
     params.append("Posterior")
     params.append("weight")
-    if len(sys.argv) == 2:
-        # Assuming linux environment for single thread
-        i = int(sys.argv[1])
-        print("Running single walker, index %d" % i)
-        import pystan
-        t = stan_output_dir + "/stan%d.pkl" % i
-        sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=4000, warmup=2000, chains=1, init=init_fn)
-        # Dump relevant chains to file
-        print("Saving chain %d" % i)
-        with open(t, 'wb') as output:
-            dictionary = fit.extract(pars=params)
-            pickle.dump(dictionary, output)
-    else:
-        # Run that stan locally
-        p = platform.platform()
-        h = socket.gethostname()
-        if "smp-cluster" in h or "edison" in h:
-            # Assuming this is obelix
-            from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
-            if len(sys.argv) == 3:
-                num_walks = int(sys.argv[1])
-                num_jobs = int(sys.argv[2])
-            else:
-                num_walks = 30
-                num_jobs = 30
-            if os.path.exists(stan_output_dir):
-                shutil.rmtree(stan_output_dir)
-            os.makedirs(stan_output_dir)
+    print("Running single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
+    import pystan
+    dir_name = os.path.dirname(stan_model)
+    t = dir_name + "/stan_output/stan_%d_%d.pkl" % (n_cosmology, n_run)
+    sm = pystan.StanModel(file=stan_model, model_name="Cosmology")
+    fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=chains, init=init_fn)
+    # Dump relevant chains to file
+    print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
+    with open(t, 'wb') as output:
+        dictionary = fit.extract(pars=params)
+        if weight_function is not None:
+            weight_function(dictionary, n_sne)
+        pickle.dump(dictionary, output)
 
-            if "smp-cluster" in h:
-                filename = write_jobscript(file, name=os.path.basename(dir_name),
-                                           num_walks=num_walks, num_cpu=num_jobs,
-                                           outdir="log", delete=True)
-                os.system("qsub %s" % filename)
-                print("Submitted SGE job")
-            elif "edison" in h:
-                filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
-                                                 num_walks=num_walks, num_cpu=num_jobs,
-                                                 delete=True)
-                os.system("sbatch %s" % filename)
-                print("Submitted SLURM job")
+
+def get_mc_simulation_data():
+    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/output/supernovae2.npy"
+    supernovae = np.load(pickle_file)
+
+    return {
+        "n_sim": supernovae.shape[0],
+        "sim_MB": supernovae[:, 0],
+        "sim_mB": supernovae[:, 1],
+        "sim_x1": supernovae[:, 2],
+        "sim_c": supernovae[:, 3],
+        "sim_passed": supernovae[:, 6],
+        "sim_log_prob": supernovae[:, 7],
+        "sim_redshift": supernovae[:, 5],
+        "sim_mass": supernovae[:, 4]
+    }
+
+
+def run_multiple(data_args, stan_model, n_cosmology, weight_function=None):
+    print("Running short steps")
+    run_single(data_args, stan_model, n_cosmology, 0, chains=4, weight_function=weight_function)
+
+
+def run_cluster(file, n_cosmo=10, n_walks=20, n_jobs=30):
+    print("Running %s for %d cosmologies, %d walks per cosmology, using %d cores"
+          % (file, n_cosmo, n_walks, n_jobs))
+
+    index = n_cosmo * n_walks
+    dir_name = os.path.dirname(file)
+    stan_output_dir = dir_name + "/stan_output"
+    h = socket.gethostname()
+    from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
+
+    if os.path.exists(stan_output_dir):
+        shutil.rmtree(stan_output_dir)
+    os.makedirs(stan_output_dir)
+
+    if "smp-cluster" in h:
+        filename = write_jobscript(file, name=os.path.basename(dir_name),
+                                   num_walks=index, num_cpu=n_jobs,
+                                   outdir="log", delete=True)
+        os.system("qsub %s" % filename)
+        print("Submitted SGE job")
+    elif "edison" in h:
+        filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
+                                         num_walks=index, num_cpu=n_jobs,
+                                         delete=True)
+        os.system("sbatch %s" % filename)
+        print("Submitted SLURM job")
+    else:
+        print("Hostname not recognised as a cluster computer")
+
+
+def run(data_args, stan_model, filename, weight_function=None):
+    h = socket.gethostname()
+    if "science" in h:
+        n_cosmology = 0 if len(sys.argv) == 1 else int(sys.argv[1])
+        run_multiple(data_args, stan_model, n_cosmology, weight_function=weight_function)
+    else:
+        if len(sys.argv) == 2:
+            i = int(sys.argv[1])
+            run_single_input(data_args, stan_model, i, weight_function=weight_function)
         else:
-            print("Running short steps")
-            if not os.path.exists(stan_output_dir):
-                os.makedirs(stan_output_dir)
-            # Assuming its my laptop vbox
-            import pystan
-            sm = pystan.StanModel(file="model.stan", model_name="Cosmology")
-            fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=4, init=init_fn)
-            # Dump relevant chains to file
-            with open(t, 'wb') as output:
-                dictionary = fit.extract(pars=params)
-                pickle.dump(dictionary, output)
+            if len(sys.argv) == 4:
+                kwargs = {
+                    "n_cosmo": int(sys.argv[1]),
+                    "n_walks": int(sys.argv[2]),
+                    "n_jobs": int(sys.argv[3])
+                }
+            else:
+                kwargs = {}
+            run_cluster(filename, **kwargs)
+
+if __name__ == "__main__":
+    print("You probably want to go into a sub directory")

@@ -1,15 +1,13 @@
 import os
 import inspect
-import numpy as np
-from chainconsumer import ChainConsumer
-from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
+import numpy as np
+from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
+from dessn.models.d_simple_stan.run import run
 
-from dessn.models.d_simple_stan.simple.load_stan import load_stan_from_folder
 
-
-def calculate_bias(chain_dictionary, supernovae, cosmologies, filename="stan_output/biases.npy"):
+def calculate_bias(chain_dictionary, supernovae, cosmologies):
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -61,52 +59,19 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     d = get_cosmology_dictionary()
 
     weights = calculate_bias(chain_dictionary, supernovae, d)
-    existing = chain_dictionary["sumBias"]
+    existing = chain_dictionary["weight"]
 
     logw = n_sne * weights - existing
     logw -= logw.min()
     weights = np.exp(-logw)
-    chain_dictionary["weights"] = weights
+    chain_dictionary["weight"] = weights
     return chain_dictionary
 
 
 if __name__ == "__main__":
 
     file = os.path.abspath(__file__)
-    dir_name = os.path.dirname(__file__) or "."
-    output_dir = os.path.abspath(dir_name + "/../output")
-    stan_output_dir = os.path.abspath(dir_name + "/stan_output")
-    pickle_file = output_dir + os.sep + "supernovae2.npy"
-    supernovae = np.load(pickle_file)
-    file = file.replace("\\", "/")
-
-    d = get_cosmology_dictionary()
-
-    chain_dictionary, post, t, p, fp, nw = load_stan_from_folder(stan_output_dir, replace=False)
-
-    weights, existing = calculate_bias(chain_dictionary, supernovae, d)
-
-    del chain_dictionary["intrinsic_correlation"]
-    for key in list(chain_dictionary.keys()):
-        if "_" in key:
-            chain_dictionary[key.replace("_", "")] = chain_dictionary[key]
-            del chain_dictionary[key]
-
-    from dessn.models.d_simple_stan.approx.run_stan import get_truths_labels_significance, get_analysis_data
-    vals = get_truths_labels_significance()
-    truths = {k[0].replace("_", ""): k[1] for k in vals if not isinstance(k[2], list)}
-
-    n_sne = get_analysis_data()["n_sne"]
-    logw = n_sne * weights - existing
-    print(logw.min(), logw.max())
-    logw -= logw.min()
-    print(logw.min(), logw.max())
-    print(weights.min(), weights.max(), weights.mean())
-    weights = np.exp(-logw)
-    print(weights.min(), weights.max(), weights.mean())
-
-    del chain_dictionary["sumBias"]
-    c = ChainConsumer()
-    c.add_chain(chain_dictionary, name="Unweighted")
-    c.add_chain(chain_dictionary, weights=weights, name="Reweighted")
-    c.plot(filename="../output/approx_comparison.png", truth=truths)
+    stan_model = os.path.dirname(file) + "/model.stan"
+    data = {}
+    print("Running %s" % file)
+    run(data, stan_model, file, weight_function=add_weight_to_chain)
