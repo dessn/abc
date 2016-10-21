@@ -48,14 +48,13 @@ def load_stan_from_folder(folder, replace=True, merge=True):
     for f in fs:
         splits = f.split("_")
         c = splits[1]
-        if merge:
-            c = "0"
         t = os.path.abspath(folder + os.sep + f)
         if cs.get(c) is None:
             cs[c] = []
         cs[c].append(get_chain(t, name_map, replace=replace))
     assert len(cs.keys()) > 0, "No results found"
     result = []
+    good_ks = []
     for k in sorted(list(cs.keys())):
         chains = cs[k]
         chain = chains[0]
@@ -69,20 +68,39 @@ def load_stan_from_folder(folder, replace=True, merge=True):
             del chain["weight"]
         else:
             weights = np.ones(posterior.shape)
-        if "weight_old" in chain.keys():
-            ow = chain["weight_old"]
-            del chain["weight_old"]
+        if "old\\_weight" in chain.keys():
+            ow = chain["old\\_weight"]
+            ow -= ow.min()
+            ow = np.exp(ow)
+            del chain["old\\_weight"]
         else:
-            ow = np.ones(posterior.shape)
-        result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
+            pass
+        ow = np.ones(posterior.shape)
+        c = ChainConsumer()
+        c.add_chain(chain, weights=weights)
+        summary = c.get_summary()
+        num_failed = sum([1 if summary[k][0] is None else 0 for k in summary.keys()])
+        num_param = len(list(summary.keys()))
+        if num_failed < 0.5 * num_param:
+            good_ks.append(k)
+            result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
     if merge:
-        return result[0]
+        rr = list(result[0])
+        for r in result[1:]:
+            for key in rr[0].keys():
+                rr[0][key] = np.concatenate((rr[0][key], r[0][key]))
+            rr[1] = np.concatenate((rr[1], r[1]))
+            rr[6] = np.concatenate((rr[6], r[6]))
+            rr[7] = np.concatenate((rr[7], r[7]))
+            rr[5] += r[5]
+        return tuple(rr)
     else:
         return result
 
 
 def plot_all(folder, output, output_walk=None):
     """ Plot all chains as one """
+    print("Plotting all as one")
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l)
@@ -92,6 +110,7 @@ def plot_all(folder, output, output_walk=None):
 
 
 def plot_single_cosmology(folder, output, i=0, output_walk=None):
+    print("Plotting cosmology realisation %d" % i)
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
     print(i)
@@ -104,6 +123,7 @@ def plot_single_cosmology(folder, output, i=0, output_walk=None):
 
 def plot_all_weight(folder, output):
     """ Plot all chains as one, with and without weights applied """
+    print("Plotting all as one, with old and new weights")
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, weights=ow, posterior=posterior, walkers=l, name="Uncorrected")
@@ -113,6 +133,7 @@ def plot_all_weight(folder, output):
 
 def plot_separate(folder, output):
     """ Plot separate cosmologies """
+    print("Plotting all cosmologies separately")
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
@@ -122,6 +143,7 @@ def plot_separate(folder, output):
 
 def plot_separate_weight(folder, output):
     """ Plot separate cosmologies, with and without weights applied """
+    print("Plotting all cosmologies separately, with old and new weights")
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
     ls = []
@@ -134,6 +156,7 @@ def plot_separate_weight(folder, output):
 
 
 def plot_quick(folder, uid, include_sep=False):
+    print("Performing the slowest function - quick plot. Quick to call, slow to execute.")
     td = os.path.dirname(inspect.stack()[0][1]) + "/output/"
     plot_name = td + "plot_%s.png" % uid
     plot_name_single = td + "plot_%s_single.png" % uid
@@ -151,14 +174,17 @@ def plot_quick(folder, uid, include_sep=False):
 if __name__ == "__main__":
     dir_name = os.path.dirname(os.path.abspath(__file__))
     output = dir_name + "/output/complete.png"
-    folders = ["approx", "simple", "stan_mc"]
+    folders = ["simple", "stan_mc", "approx"]
 
     c = ChainConsumer()
     for f in folders:
         loc = dir_name + os.sep + f + "/stan_output"
+        t = None
         try:
-            chain, posterior, t, p, f, l, w = load_stan_from_folder(loc, merge=True)
-            c.add_chain(chain, parameters=f, weights=w, posterior=posterior, walkers=l, name=f)
-        except Exception:
+            chain, posterior, t, p, ff, l, w, ow = load_stan_from_folder(loc, merge=True)
+            print(ow.mean())
+            c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name=f)
+        except Exception as e:
+            print(e)
             print("No files found in %s" % loc)
     c.plot(filename=output, truth=t)
