@@ -2,8 +2,8 @@ import os
 import shutil
 
 
-def write_jobscript(filename, name=None, queue="low.q", num_cpu=24, num_walks=24,
-                    outdir="out_files", delete=False):
+def write_jobscript(filename, name=None, queue="low.q", num_tasks=24, num_cpu=24,
+                    num_walks=24, outdir="out_files", delete=False):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
@@ -44,17 +44,19 @@ echo 'running with NSLOTS=' $NSLOTS # number of SGE calcs
 PROG=%s
 PARAMS=`expr $SGE_TASK_ID - 1`
 cd $IDIR
-python $PROG $PARAMS'''
+python $PROG $PARAMS %d'''
 
     n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
-    t = template % (name, queue, num_walks, num_cpu + 1, output_dir, output_dir, output_dir, directory, executable)
+    t = template % (name, queue, num_tasks, num_cpu + 1, output_dir,
+                    output_dir, output_dir, directory, executable, num_walks)
     with open(n, 'w') as f:
         f.write(t)
     print("SGE Jobscript at %s" % n)
     return n
 
 
-def write_jobscript_slurm(filename, name=None, num_cpu=24, num_walks=24, delete=False):
+def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
+                          num_walks=24, delete=False):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
@@ -89,10 +91,10 @@ echo $executable
 PROG=%s
 PARAMS=`expr ${SLURM_ARRAY_TASK_ID} - 1`
 cd $IDIR
-srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS'''
+srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS %d'''
 
     n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
-    t = template % (name, num_walks, num_cpu, output_dir, name, directory, executable)
+    t = template % (name, num_tasks, num_cpu, output_dir, name, directory, executable, num_walks)
     with open(n, 'w') as f:
         f.write(t)
     print("SLURM Jobscript at %s" % n)

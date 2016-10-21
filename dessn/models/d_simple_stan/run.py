@@ -288,13 +288,13 @@ def run_cluster(file, n_cosmo=10, n_walks=20, n_jobs=30):
 
     if "smp-cluster" in h:
         filename = write_jobscript(file, name=os.path.basename(dir_name),
-                                   num_walks=index, num_cpu=n_jobs,
+                                   num_taks=index, num_walks=n_walks, num_cpu=n_jobs,
                                    outdir="log", delete=True)
         os.system("qsub %s" % filename)
         print("Submitted SGE job")
     elif "edison" in h:
         filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
-                                         num_walks=index, num_cpu=n_jobs,
+                                         num_taks=index, num_walks=n_walks, num_cpu=n_jobs,
                                          delete=True)
         os.system("sbatch %s" % filename)
         print("Submitted SLURM job")
@@ -308,9 +308,12 @@ def run(data_args, stan_model, filename, weight_function=None):
         n_cosmology = 0 if len(sys.argv) == 1 else int(sys.argv[1])
         run_multiple(data_args, stan_model, n_cosmology, weight_function=weight_function)
     else:
-        if len(sys.argv) == 2:
+        if len(sys.argv) < 4:
             i = int(sys.argv[1])
-            run_single_input(data_args, stan_model, i, weight_function=weight_function)
+            num_walks_per_cosmology = int(sys.argv[2])
+            run_single_input(data_args, stan_model, i,
+                             num_walks_per_cosmology=num_walks_per_cosmology,
+                             weight_function=weight_function)
         else:
             if len(sys.argv) == 4:
                 kwargs = {
@@ -324,3 +327,4 @@ def run(data_args, stan_model, filename, weight_function=None):
 
 if __name__ == "__main__":
     print("You probably want to go into a sub directory")
+    print("Youll want to give run.py three params: n_cosmo, n_walks, n_jobs")
