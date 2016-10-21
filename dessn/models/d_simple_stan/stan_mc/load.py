@@ -12,7 +12,7 @@ if __name__ == "__main__":
     plot_name_sep = td + "plot_complete_sep.png"
     walk_name = td + "plot_complete_walk.png"
 
-    plot_all(std, plot_name, walk_name)
+    plot_all(std, plot_name)
     plot_all_weight(std, plot_name_weight)
     # plot_separate(std, plot_name_sep)
-    plot_single_cosmology(std, plot_name_single)
+    plot_single_cosmology(std, plot_name_single, output_walk=walk_name)

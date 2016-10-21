@@ -89,6 +89,7 @@ def plot_all(folder, output, output_walk=None):
 def plot_single_cosmology(folder, output, i=0, output_walk=None):
     res = load_stan_from_folder(folder, merge=False)
     c = ChainConsumer()
+    print(i)
     chain, posterior, t, p, f, l, w = res[i]
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
     c.plot(filename=output, truth=t)
