@@ -240,7 +240,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     dir_name = os.path.dirname(stan_model)
     t = dir_name + "/stan_output/stan_%d_%d.pkl" % (n_cosmology, n_run)
     sm = pystan.StanModel(file=stan_model, model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=2000, warmup=1000, chains=chains, init=init_fn)
+    fit = sm.sampling(data=data, iter=10000, warmup=2000, chains=chains, init=init_fn)
     # Dump relevant chains to file
     print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     with open(t, 'wb') as output:
@@ -288,13 +288,13 @@ def run_cluster(file, n_cosmo=10, n_walks=20, n_jobs=30):
 
     if "smp-cluster" in h:
         filename = write_jobscript(file, name=os.path.basename(dir_name),
-                                   num_taks=index, num_walks=n_walks, num_cpu=n_jobs,
+                                   num_tasks=index, num_walks=n_walks, num_cpu=n_jobs,
                                    outdir="log", delete=True)
         os.system("qsub %s" % filename)
         print("Submitted SGE job")
     elif "edison" in h:
         filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
-                                         num_taks=index, num_walks=n_walks, num_cpu=n_jobs,
+                                         num_tasks=index, num_walks=n_walks, num_cpu=n_jobs,
                                          delete=True)
         os.system("sbatch %s" % filename)
         print("Submitted SLURM job")
