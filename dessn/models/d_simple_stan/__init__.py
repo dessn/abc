@@ -242,9 +242,11 @@ that a final numerator of:
     &\quad\quad\quad \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z) P(m)
 
-A rough fit for this, is shown below, for two hundred generated supernova.
+We fit for this using 20 realisations of 200 supernova, is shown below. Note the bias in matter density
+and mean colour (as the redder supernova are cut off at high redshift).
 
-.. figure::     ../dessn/models/d_simple_stan/output/plot_full.png
+
+.. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
     :align:     center
 
 --------
@@ -391,7 +393,7 @@ frequency of observation, weather effects, etc. The selection effects we need to
 
     An example of importance sampling an uncorrected posterior surface is shown below.
 
-    .. figure::     ../dessn/models/d_simple_stan/output/plot_comparison.png
+    .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_single_weight.png
         :align:     center
 
         In blue we have the posterior surface for a likelihood that does not have any
@@ -427,7 +429,7 @@ frequency of observation, weather effects, etc. The selection effects we need to
     original bias correction whilst removing the approximate correction introduced
     to shift the region of sampling.
 
-    .. figure::     ../dessn/models/d_simple_stan/output/approx_plot_full.png
+    .. figure::     ../dessn/models/d_simple_stan/output/plot_approx_weight.png
         :align:     center
 
         In blue we have the posterior surface for a likelihood that does not have any
@@ -442,7 +444,7 @@ the bias corrections within STAN itself. Inserting the relevant data and structu
 into STAn such that I can perform Monte Carlo integration in a BHM framework significantly
 slows down the fits, however I believed it would at least give good results.
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete_plot_full.png
+.. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_single.png
     :align:     center
 
     As you can see, I was wrong.
@@ -450,14 +452,8 @@ slows down the fits, however I believed it would at least give good results.
 In addition to the odd contours, we can also see in the walk itself that we have
 sampling issues, with some walkers sampling some areas of posterior space more than others.
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete_plot_walk.png
+.. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_walk.png
     :align:     center
-
-Current Concerns
-~~~~~~~~~~~~~~~~
-
-1. Unsure how to fix STAN model with bias corrections inside. Cannot un-center those distributions more than they currently are.
-2. Need to ensure that my results are not just "Got lucky with the random number seed". Will rerun fits realising multiple cosmologies.
 
 
 """
