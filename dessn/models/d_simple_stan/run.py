@@ -131,7 +131,7 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 200
+    n = 500
     if sim:
         data = get_pickle_data(n, seed=seed)
     elif snana:
