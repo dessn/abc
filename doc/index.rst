@@ -5,26 +5,6 @@ DESSN Cosmology Analysis
 
 This document should detail the code structure, examples, and all other goodies.
 
-.. _examples:
-
-Examples
-========
-
-.. include:: examples.rst
-
-Chain Consumer
-==============
-
-Also written for this project is a robust tool that consumes chains and produces plots.
-This tool is detailed at :ref:`chain`.
-
-
-Core Functionality
-==================
-
-To learn how the underlying models function, and specific details on the sorts of parameters
-and edges allowed, please see the documentation located at :ref:`core`.
-
 
 Model Proofs
 ============
@@ -58,3 +38,24 @@ The general project structure is as follows:
     proofs_sep
     investigations_sep
     implementations_sep
+
+
+--------------
+
+I also implemented a general BHM framework which I think is pretty nifty,
+but needed to move to STAN so its being unused at the moment.
+
+
+.. _examples:
+
+Examples
+========
+
+.. include:: examples.rst
+
+
+Core Functionality
+==================
+
+To learn how the underlying models function, and specific details on the sorts of parameters
+and edges allowed, please see the documentation located at :ref:`core`.

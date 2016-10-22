@@ -7,7 +7,7 @@ from astropy.table import Table
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.interpolate import griddata
 
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 from dessn.investigations.gaussianity.apparent_mags import generate_and_return
 from dessn.investigations.gaussianity.model import PerfectRedshift
 from dessn.framework.samplers.ensemble import EnsembleSampler

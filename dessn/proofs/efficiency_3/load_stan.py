@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 import os
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 
 dir_name = os.path.dirname(__file__)
 c = ChainConsumer()

@@ -3,7 +3,7 @@ from dessn.investigations.gaussianity.apparent_mags import generate_and_return
 import sncosmo
 import numpy as np
 from astropy.table import Table
-from dessn.chain.chain import ChainConsumer
+from chainconsumer import ChainConsumer
 import os
 from joblib import Parallel, delayed
 from scipy.interpolate import griddata
