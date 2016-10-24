@@ -312,7 +312,7 @@ def run(data_args, stan_model, filename, weight_function=None):
         n_cosmology = 1 if len(sys.argv) == 1 else int(sys.argv[1])
         run_multiple(data_args, stan_model, n_cosmology, weight_function=weight_function)
     else:
-        if len(sys.argv) < 4:
+        if len(sys.argv) == 3:
             i = int(sys.argv[1])
             num_walks_per_cosmology = int(sys.argv[2])
             run_single_input(data_args, stan_model, i,
