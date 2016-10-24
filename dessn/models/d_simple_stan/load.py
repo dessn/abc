@@ -32,7 +32,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=True):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -80,7 +80,7 @@ def load_stan_from_folder(folder, replace=True, merge=True):
         summary = c.get_summary()
         num_failed = sum([1 if summary[k][0] is None else 0 for k in summary.keys()])
         num_param = len(list(summary.keys()))
-        if num_failed < 0.5 * num_param:
+        if not cut or num_failed < 0.5 * num_param:
             good_ks.append(k)
             result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
     if merge:

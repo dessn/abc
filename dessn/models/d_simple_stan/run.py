@@ -228,7 +228,11 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
     run_single(data_args, stan_model, n_cosmology, n_run, weight_function=weight_function)
 
 
-def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None):
+def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
+    if short:
+        w, n = 1000, 3000
+    else:
+        w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)
     n_sne = data["n_sne"]
     init_pos = get_truths_labels_significance()
@@ -240,7 +244,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     dir_name = os.path.dirname(stan_model)
     t = dir_name + "/stan_output/stan_%d_%d.pkl" % (n_cosmology, n_run)
     sm = pystan.StanModel(file=stan_model, model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=10000, warmup=2000, chains=chains, init=init_fn)
+    fit = sm.sampling(data=data, iter=n, warmup=w, chains=chains, init=init_fn)
     # Dump relevant chains to file
     print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     with open(t, 'wb') as output:
@@ -269,10 +273,10 @@ def get_mc_simulation_data():
 
 def run_multiple(data_args, stan_model, n_cosmology, weight_function=None):
     print("Running short steps")
-    run_single(data_args, stan_model, n_cosmology, 0, chains=4, weight_function=weight_function)
+    run_single(data_args, stan_model, n_cosmology, 0, chains=4, weight_function=weight_function, short=True)
 
 
-def run_cluster(file, n_cosmo=10, n_walks=20, n_jobs=30):
+def run_cluster(file, n_cosmo=15, n_walks=30, n_jobs=30):
     print("Running %s for %d cosmologies, %d walks per cosmology, using %d cores"
           % (file, n_cosmo, n_walks, n_jobs))
 
@@ -305,7 +309,7 @@ def run_cluster(file, n_cosmo=10, n_walks=20, n_jobs=30):
 def run(data_args, stan_model, filename, weight_function=None):
     h = socket.gethostname()
     if "science" in h:
-        n_cosmology = 0 if len(sys.argv) == 1 else int(sys.argv[1])
+        n_cosmology = 1 if len(sys.argv) == 1 else int(sys.argv[1])
         run_multiple(data_args, stan_model, n_cosmology, weight_function=weight_function)
     else:
         if len(sys.argv) < 4:
