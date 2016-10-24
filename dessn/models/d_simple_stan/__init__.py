@@ -294,7 +294,7 @@ Addressing each component individually:
     P(m) &= \text{Unknown mass distribution} \\
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
     S(m_B, x_1, c, z, m) &= \text{If the data passes the cut} \\
-    \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function}
+    \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
 
 Now enter the observational specifics of our survey: how many bands, the band passes,
 frequency of observation, weather effects, etc. The selection effects we need to model are
@@ -315,7 +315,7 @@ account the number of supernova we have:
 
     P(\theta|D) &\propto \frac{P(\theta)}{w^N} \idotsint d\vec{z}\,d\vec{m}\,d\vec{\hat{m_B}}\, d\vec{m_B}\,
     d\vec{\hat{x_1}}\,  d\vec{x_1}\, d\vec{\hat{c}}\, d\vec{c}
-    \prod_{i=1}^N P(D_i|\theta)
+    \prod_{i=1}^N P(D_i|\theta) \\
 
 
 
