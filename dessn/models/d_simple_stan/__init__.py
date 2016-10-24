@@ -77,7 +77,7 @@ but instead has :math:`\theta` dependent normalisation, we also must enforce nor
 .. math::
     :label: b
 
-    \mathcal{L} &= \frac{ P(D|\theta)}{\int dD^\prime P(D^\prime|\theta)},
+    \mathcal{L} &= \frac{ P(D|\theta)}{\int dD^\prime P(D^\prime|\theta)}, \\
 
 where :math:`D^\prime` represents all possible experimental outcomes. It is important to note that this is where
 our selection effects kick in: :math:`D^\prime` is the subset of all possible data that satisfies our
@@ -89,14 +89,14 @@ such that
 .. math::
     :label: c
 
-    \int d D^\prime\  f(D^\prime) = \int d R\  S(R) f(R).
+    \int d D^\prime\  f(D^\prime) = \int d R\  S(R) f(R).\\
 
 To put everything back together, we thus have
 
 .. math::
     :label: cg
 
-    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int d R\  S(R) P(D|\theta) }
+    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int d R\  S(R) P(D|\theta) } \\
 
 ----------
 
