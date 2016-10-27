@@ -240,7 +240,7 @@ Selection Effects
 ~~~~~~~~~~~~~~~~~
 
 Having formulated a probabilistic model for the numerator of our posterior (and sent it off
-to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\  S(R) P(D|\theta)`.
+to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\ d\theta  S(R) P(R|\theta)`.
 
 As the bias correction is not data dependent, but model parameter dependent (cosmology dependent),
 the correction for each data point is identical, such that the correction for each individual supernova
