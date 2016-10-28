@@ -394,14 +394,27 @@ account the number of supernova we have:
     and so our likelihood becomes gains (for each supernova) a correcting term
 
     .. math::
-        \Phi^{-1}(m_B | x_1, x_2) e^{\langle c \rangle},
+        \Phi_i^{-1}(\langle m_{Bi} \rangle | x_1, x_2),
 
     where :math:`\Phi` is the complimentary normal cumulative distribution function
     and :math:`x_1, x_2` respectively represent the mean apparent magnitude and the width
-    of the cdf. It is important to note here that the actual functional form of the correction above
+    of the cdf and most importantly, :math:`\langle m_{Bi} \rangle` represents the
+    population mean apparent magnitude for supernova :math:`i`. More formally,
+    :math:`\langle m_{Bi} \rangle = \langle M_B \rangle + \mu(z_i) - \alpha \langle x_1 \rangle + \beta \langle c \rangle - k(z_i) m`.
+
+    The mean and width of the CDF is calculated from an input DES-like simulation.
+    Unintuitively, :math:`x_2` - the width of the CDF, is not simply the width of the
+    selection efficiency as a function of apparent magnitude (denoted :math:`v`), but instead takes
+    extra variance using fiducial :math:`\alpha` and :math:`\beta` values, via
+    :math:`x_2 = v + \alpha \sigma_{x_1} + \beta \sigma_c`. The extra variance is needed
+    as we are using the population mean parameters in the CDF, and must therefore take
+    into account the difference in colour and stretch between supernova :math:`i`
+    and the mean colour and stretch.
+
+    It is important to note here that the actual functional form of the correction above
     does not matter - all we care about is that it moves the sampled region of the
     parameter space. We then apply the bias correction
-    :math:`w^-N \Phi(m_B | x_1, x_2) e^{-\langle c \rangle}`, which implements our
+    :math:`w^{-N} \Phi(\langle m_{Bi} \rangle | x_1, x_2)`, which implements our
     original bias correction whilst removing the approximate correction introduced
     to shift the region of sampling.
 
