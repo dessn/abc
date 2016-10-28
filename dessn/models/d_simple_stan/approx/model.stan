@@ -66,6 +66,7 @@ parameters {
 transformed parameters {
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
+    real mbs [n_sne];
     vector [3] model_mBx1c [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
 
@@ -126,10 +127,12 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
+        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i];
+
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
         // Get the approximate bias correction
-        bias_correction[i] = normal_lccdf(model_mBx1c[i][1] | mB_mean, mB_width) - mean_c;
+        bias_correction[i] = normal_lccdf(mbs[i] | mB_mean, mB_width);
     }
     weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);

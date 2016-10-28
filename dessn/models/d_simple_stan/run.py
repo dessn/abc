@@ -31,13 +31,13 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne, seed=0):
+def get_pickle_data(n_sne, seed=0, zt=10.0):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
-    passed = [s for s in supernovae if s["pc"]]
+    passed = [s for s in supernovae if s["pc"] and s["z"] < zt]
     np.random.seed(seed)
     np.random.shuffle(passed)
     passed = passed[:n_sne]
@@ -230,10 +230,17 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 1000, 3000
+        w, n = 1000, 2000
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)
+    # import matplotlib.pyplot as plt
+    # plt.hist([a[0] for a in data["obs_mBx1c"]], 30)
+    # plt.axvline(24.33)
+    # plt.figure()
+    # plt.hist(data["redshifts"], 30)
+    # plt.show()
+    # exit()
     n_sne = data["n_sne"]
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
@@ -309,7 +316,7 @@ def run_cluster(file, n_cosmo=15, n_walks=30, n_jobs=30):
 def run(data_args, stan_model, filename, weight_function=None):
     h = socket.gethostname()
     if "science" in h:
-        n_cosmology = 1 if len(sys.argv) == 1 else int(sys.argv[1])
+        n_cosmology = 0 if len(sys.argv) == 1 else int(sys.argv[1])
         run_multiple(data_args, stan_model, n_cosmology, weight_function=weight_function)
     else:
         if len(sys.argv) == 3:

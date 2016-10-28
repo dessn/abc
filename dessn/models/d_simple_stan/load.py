@@ -32,7 +32,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=True):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -45,6 +45,10 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True):
 
     cs = {}
     fs = sorted([f for f in os.listdir(folder) if f.startswith("stan") and f.endswith(".pkl")])
+    if num is not None:
+        filter = "_%d_" % num
+        fs = [f for f in fs if filter in f]
+
     for f in fs:
         splits = f.split("_")
         c = splits[1]
@@ -81,8 +85,11 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True):
         num_failed = sum([1 if summary[k][0] is None else 0 for k in summary.keys()])
         num_param = len(list(summary.keys()))
         if not cut or num_failed < 0.5 * num_param:
+            print("Chain %s good" % k)
             good_ks.append(k)
             result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
+        else:
+            print("Chain %s is bad" % k)
     if merge:
         rr = list(result[0])
         for r in result[1:]:
