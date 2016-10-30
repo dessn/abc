@@ -76,7 +76,7 @@ def get_approximate_mb_correction():
     mB = d["sim_mB"]
     c = d["sim_c"]
     x1 = d["sim_x1"]
-    alpha = 0.2
+    alpha = 0.15
     beta = 4.0
 
     hist_all, bins = np.histogram(mB, bins=200)
@@ -86,8 +86,8 @@ def get_approximate_mb_correction():
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    # width += alpha * np.std(x1) + beta * np.std(c)
-    return mean, width
+    width += alpha * np.std(x1) + beta * np.std(c)
+    return mean, width + 0.02
 
 
 if __name__ == "__main__":

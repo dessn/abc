@@ -84,7 +84,7 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
         summary = c.get_summary()
         num_failed = sum([1 if summary[k][0] is None else 0 for k in summary.keys()])
         num_param = len(list(summary.keys()))
-        if not cut or num_failed < 2:
+        if not cut or num_failed < 3:
             print("Chain %s good" % k)
             good_ks.append(k)
             result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
