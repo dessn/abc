@@ -76,8 +76,8 @@ def get_approximate_mb_correction():
     mB = d["sim_mB"]
     c = d["sim_c"]
     x1 = d["sim_x1"]
-    alpha = 0.1
-    beta = 3.0
+    alpha = 0.2
+    beta = 4.0
 
     hist_all, bins = np.histogram(mB, bins=200)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
