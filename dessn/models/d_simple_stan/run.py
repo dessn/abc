@@ -15,7 +15,7 @@ def get_truths_labels_significance():
     result = [
         ("Om", 0.3, r"$\Omega_m$", True, 0.1, 0.6),
         # ("w", -1.0, r"$w$", True, -1.5, -0.5),
-        ("alpha", 0.1, r"$\alpha$", True, -0.3, 0.5),
+        ("alpha", 0.1, r"$\alpha$", True, 0, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -18.8),
         ("mean_x1", 0.0, r"$\langle x_1 \rangle$", True, -1.0, 1.0),

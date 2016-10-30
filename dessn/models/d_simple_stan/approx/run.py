@@ -86,7 +86,7 @@ def get_approximate_mb_correction():
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += alpha * np.std(x1) + beta * np.std(c)
+    # width += alpha * np.std(x1) + beta * np.std(c)
     return mean, width
 
 
