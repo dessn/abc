@@ -364,6 +364,7 @@ account the number of supernova we have:
 
     .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_single_weight.png
         :align:     center
+        :width: 70%
 
         In blue we have the posterior surface for a likelihood that does not have any
         bias correction, and the red shows the same posterior after I have applied the
@@ -379,63 +380,145 @@ account the number of supernova we have:
     question; *Is the issue simply that we have too few samples in the correct region of
     parameter space? Is that why our weights are on average so low?*
 
-    The can investigate this easily. By looking at the selection efficiency simply as
-    a function of apparent magnitude for the supernova simulated (that are used in the bias
-    correction), we can implement an approximate *data dependent* bias correction using
-    apparent magnitude (and colour) with an error function. That is identical to the
-    current popular method of diving each supernova by its modelled selection efficiency,
-    and so our likelihood becomes gains (for each supernova) a correcting term
+The can investigate this easily. By looking at the selection efficiency simply as
+a function of apparent magnitude for the supernova simulated (that are used in the bias
+correction), we can implement an approximate bias correction using
+apparent magnitude with an error function. As such, we introduce an approximate
+bias correction that corrects for the selection effects of a canoncial supernova
+at the redshift of each discovered supernova. More formally, we introduce
+at each redshift :math:`z_i` and mass :math:`m_i` the canonical apparent magnitude :math:`\langle m_{Bi} \rangle = \langle M_B \rangle + \mu(z_i) - \alpha \langle x_1 \rangle + \beta \langle c \rangle - k(z_i) m_i`.
 
-    .. math::
-        \Phi_i^{-1}(\langle m_{Bi} \rangle | x_1, x_2),
+The reason for correcting for a canonical supernova, instead of the observed supernova, is that the
+former allows a bias correction dependent on cosmology, and the latter allows a bias correction dependent
+only on data (which - given our posterior is not normalised - gives us no bias correction at all).
 
-    where :math:`\Phi` is the complimentary normal cumulative distribution function
-    and :math:`x_1, x_2` respectively represent the mean apparent magnitude and the width
-    of the cdf and most importantly, :math:`\langle m_{Bi} \rangle` represents the
-    population mean apparent magnitude for supernova :math:`i`. More formally,
-    :math:`\langle m_{Bi} \rangle = \langle M_B \rangle + \mu(z_i) - \alpha \langle x_1 \rangle + \beta \langle c \rangle - k(z_i) m`.
+Having an apparent magnitude, we utilise our DES-like simulation to quantify the
+selection effect (assuming a simple error function model, which matches the data well)
+as a function of apparent magnitude. By binning the supernova, both discovered and failed,
+into bins of :math:`m_B`, we fit for the functional parameters :math:`m_{B,{\rm sel}}` and  :math:`\sigma_{{\rm sel}}`,
+such that our selection function becomes
 
-    The mean and width of the CDF is calculated from an input DES-like simulation.
-    Unintuitively, :math:`x_2` - the width of the CDF, is not simply the width of the
-    selection efficiency as a function of apparent magnitude (denoted :math:`v`), but instead takes
-    extra variance using fiducial :math:`\alpha` and :math:`\beta` values, via
-    :math:`x_2 = v + \alpha \sigma_{x_1} + \beta \sigma_c`. The extra variance is needed
-    as we are using the population mean parameters in the CDF, and must therefore take
-    into account the difference in colour and stretch between supernova :math:`i`
-    and the mean colour and stretch.
+.. math::
+    :label: ee1
 
-    It is important to note here that the actual functional form of the correction above
-    does not matter - all we care about is that it moves the sampled region of the
-    parameter space. We then apply the bias correction
-    :math:`w^{-N} \Phi(\langle m_{Bi} \rangle | x_1, x_2)`, which implements our
-    original bias correction whilst removing the approximate correction introduced
-    to shift the region of sampling.
+    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}}),
 
-    .. figure::     ../dessn/models/d_simple_stan/output/plot_approx_weight.png
+where :math:`\Phi` is the complimentary normal cumulative distribution function
+and:math:` m_B \rangle` represents the apparent magnitude at which we wish to know the selection efficiency.
+
+The above quantification of selection effects does not take into account colour or stretch, and as our canonical
+supernova utilise the mean colour and mean stretch (as opposed to the observed colour and stretch), we need to
+increase the width of the above selection efficiency function to
+
+.. math::
+    :label: ee2
+
+    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}} + |\alpha| \sigma_{x_1} + |\beta| \sigma_c),
+
+where :math:`\alpha,\, \beta,\, \sigma_{x_1},\, \sigma_c` are taken from the fiducial DES-like simulation.
+Whilst it would be more correct for us to calculate the extra terms in the width of the CDF above in the
+model fitting, using the model parameters instead of simulation parameters, this lead to unstable fitting results
+in STAN, where changes in bias correction allowed several parameters to walk off. For simplificty, let
+us denote :math:`\sigma_{\rm cdf} \equiv \sigma_{{\rm sel}} + |\alpha| \sigma_{x_1} + |\beta| \sigma_c`.
+
+And as stated before, this is
+only meant to be an approximation correction, so any difference between actual model parameters and simulation
+fiducial parameters does not matter - so long as we are still sampling the right area of parameter space. With this
+approximation correction, our approximate likelihood and prior (which are fit in STAN) become:
+
+.. math::
+    :label: ee22
+
+    P(\theta|D) &\propto P(\theta) \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} \,d\vec{M_B}\  \prod_{i=1}^N \frac{P(D_i|\theta)}{\Phi(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf})} \\
+
+
+After fitting the above posterior surface, we can remove the approximation correction
+and implement the actual Monte Carlo correction by assigning each point the chain the weight :math:`W`
+
+.. math::
+    :label: ee3
+
+    W = w^{-N} \prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf}).
+
+The results of doing this (with and without setting :math:`W`) are shown below, to show the difference
+between the approximation bias correction and Monte Carlo bias correction. Fifteen realisations
+of 500 supernova were used in the contours below, to test systematics.
+
+.. figure::     ../dessn/models/d_simple_stan/output/plot_approx_weight.png
+    :align:     center
+    :width: 70%
+
+    In blue we have the posterior surface for a likelihood that does not have any
+    bias correction, and the red shows the same posterior after I have applied the
+    :math:`W` bias correction. Normalised to one, the mean weight of points
+    after resampling is :math:`0.001` (three times better than before). This is so
+    far the most promising technique.
+
+Final Model
+~~~~~~~~~~~
+
+To lay out all the math in one go, the blue section represents the model fitted using STAN, and the red math
+represents are post-fit weight corrections to correctly take into account bias.
+
+.. math::
+    \definecolor{blue}{RGB}{18,110,213}
+    \definecolor{red}{RGB}{230,0,29}
+
+
+    P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf})}{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
+    \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
+    \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N} \\
+    &\quad\quad\quad \color{blue} \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} \,d\vec{M_B}\ \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
+    &\quad\quad\quad \color{blue} \prod_{i=1}^N \frac{ \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
+    \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right)
+    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(\hat{z}) P(\hat{m}) }{\Phi(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf})} \\
+
+
+
+.. figure::     ../dessn/models/d_simple_stan/output/complete.png
+    :align:     center
+
+    Final cosmology fits contrasting a fit without bias correction (blue) and a fit with bias correction
+    (red) applied. The contours shown are the combination of fifteen realisations of the given
+    fiducial cosmology, shown as dashed lines, with each realisation having 500 observed supernova. We can see
+    that the uncorrected posterior surface shows bias in :math:`\Omega_m` and :math:`\langle c \rangle`, whilst
+    the model the includes bias corrections (red) successfully recovers the true underlying cosmology.
+
+------------------
+
+|
+|
+|
+|
+|
+|
+|
+|
+|
+
+Appendix - Failed Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+    Given the concerns with the importance sampling methods, I also decided to implement
+    the bias corrections within STAN itself. Inserting the relevant data and structures
+    into STAN such that I can perform Monte Carlo integration in a BHM framework significantly
+    slows down the fits, however I believed it would at least give good results.
+
+    .. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_single.png
         :align:     center
+        :width: 50%
 
-        In blue we have the posterior surface for a likelihood that does not have any
-        bias correction, and the red shows the same posterior after I have applied the
-        :math:`w^{-N}` bias correction. Normalised to one, the mean weight of points
-        after resampling is :math:`0.001` (three times better than before). This is so
-        far the most promising technique.
+        As you can see, I was wrong.
 
+    In addition to the odd contours, we can also see in the walk itself that we have
+    sampling issues, with some walkers sampling some areas of posterior space more than others.
 
-Given the concerns with the importance sampling methods, I also decided to implement
-the bias corrections within STAN itself. Inserting the relevant data and structures
-into STAn such that I can perform Monte Carlo integration in a BHM framework significantly
-slows down the fits, however I believed it would at least give good results.
-
-.. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_single.png
-    :align:     center
-
-    As you can see, I was wrong.
-
-In addition to the odd contours, we can also see in the walk itself that we have
-sampling issues, with some walkers sampling some areas of posterior space more than others.
-
-.. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_walk.png
-    :align:     center
+    .. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_walk.png
+        :align:     center
+        :width: 50%
 
 
 """
