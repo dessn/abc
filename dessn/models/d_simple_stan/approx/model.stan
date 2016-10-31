@@ -54,8 +54,8 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    real <lower = -3, upper = 3> mean_x1;
-    real <lower = -1, upper = 1> mean_c;
+    real <lower = -1, upper = 1> mean_x1;
+    real <lower = -0.2, upper = 0.2> mean_c;
     real <lower = 0.01, upper = 1> sigma_MB;
     real <lower = 0.01, upper = 3> sigma_x1;
     real <lower = 0.01, upper = 1> sigma_c;
