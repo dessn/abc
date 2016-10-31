@@ -41,18 +41,6 @@ Parameters
 Model
 -----
 
-.. note::
-    In this section I will briefly outline the model I am using. For the
-    methodology used to incorporate selection effects, I recommend reading through the
-    simpler and more detailed examples provided at:
-
-        * :ref:`efficiency1`
-        * :ref:`efficiency2`
-        * :ref:`efficiency3`
-
-    There are more examples that can be found at :ref:`proofs`, however the first few
-    should be sufficient.
-
 We wish to model our posterior, given our observations, our model :math:`\theta`, and
 selection effects :math:`S`.
 Our specific observations :math:`D` are the light curves themselves,
@@ -72,18 +60,19 @@ known :math:`(\hat{z} = z,\ \hat{m}=m)`.
                 &\propto P(D|\theta) P(\theta) \\
 
 As our likelihood :math:`\mathcal{L}` does not have a fixed normalisation constant,
-but instead has :math:`\theta` dependent normalisation, we also must enforce normalisation of the likelihood:
+but instead has :math:`\theta` dependent normalisation, we also must enforce normalisation of the likelihood
+over all possible data realisations:
 
 .. math::
     :label: b
 
-    \mathcal{L} &= \frac{ P(D|\theta)}{\int  P(D^\prime|\theta) \ dD^\prime\}, \\
+    \mathcal{L} &= \frac{ P(D|\theta)}{\int  P(D^\prime|\theta) \ dD^\prime}, \\
 
 where :math:`D^\prime` represents all possible experimental outcomes. It is important to note that this is where
 our selection effects kick in: :math:`D^\prime` is the subset of all possible data that satisfies our
 selection effect, as only data that passes our cuts can be an experimental outcome that could
 appear in the likelihood. We can formally model this inside the integral by denoting our selection function
-as :math:`S(R)` that returns :math:`0` if the data does not pass the cut, and :math:`1` if the input data does
+as :math:`S(R)` that returns :math:`0` if the data :math:`R` does not pass the cut, and :math:`1` if the input data does
 pass the cut, such that
 
 .. math::
@@ -91,12 +80,13 @@ pass the cut, such that
 
     \int d D^\prime\  f(D^\prime) = \int d R\  S(R) f(R),\\
 
-where :math:`R` represents all possible data. To put everything back together, we thus have
+where :math:`R` represents all possible data - not just all possible experimental outcomes.
+To put everything back together, we thus have
 
 .. math::
     :label: cg
 
-    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\iint  S(R) P(D|\theta) \ dR  \,d\theta^\prime} \\
+    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\
 
 ----------
 
@@ -130,10 +120,12 @@ So now we can focus on the likelihood's numerator, which is
 
     \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
     \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \int dz \int dm \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \int dz \int dm \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{m_B}, \hat{x_1}, \hat{c}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
     &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
 
-Where in the last line I have used the fact that we assume mass and redshift are precisely known.
+Where in the last two lines I have used the fact that we assume mass and redshift are precisely known, and therefore
+do not need to be modelled with latent parameters.
 Also, as we assume that the observed summary statistics :math:`\hat{m_B}, \hat{x_1}, \hat{c}` are normally
 distributed around the true values :math:`m_B,x_1,c`, we can separate them out:
 
@@ -169,7 +161,10 @@ and :math:`k(z)` as
     k(z) &= \delta(0) \left[ \frac{1.9\left( 1 - \frac{\delta(\infty)}{\delta(0)}
     \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right] \\
 
-Thus :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`. Or, more probabilistically,
+We note that :math:`\mu` is a function of :math:`\hat{z},\Omega_m,w`, however we will simply denote it
+:math:`mu` to keep the notation from spreading over too many lines.
+
+From the above,  :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`. Or, more probabilistically,
 
 .. math::
     P(M_B, m_B) = \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right).
@@ -184,10 +179,10 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: ig
 
-    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, z, m \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, z, m \Omega_m, w, \alpha, \beta, \gamma | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, z, m \Omega_m, w, \alpha, \beta, \gamma | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) P(z) P(m)  \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z) P(m) \\[10pt]
+    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) P (M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) P (M_B, x_1, c, | \gamma) P(\hat{z}) P(\hat{m})  \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(\hat{z}) P(\hat{m}) \\[10pt]
 
 where
 
@@ -200,14 +195,14 @@ where
     \rho_{31} \sigma_{M_B} \sigma_{c}          & \rho_{32} \sigma_{x_1} \sigma_{c}       & \sigma_{c}^2  \\
     \end{pmatrix}
 
-and :math:`P(z)` is the DES specific redshift distribution, and :math:`P(m)` is the mass distribution (currently assumed to not be a function cosmology and
+and :math:`P(\hat{z})` is the DES specific redshift distribution, and :math:`P(\hat{m})` is the mass distribution (currently assumed to not be a function cosmology and
 just set to a uniform distribution, but this will need to be updated).
 
 
 .. note::
     In this implementation there is no skewness in the colour distribution.
     As we do not require normalised probabilities, we can simply add in correcting
-    factors (such as an additional linear probability for colour) that can emulate skewness.
+    factors that can emulate skewness.
 
 Putting this back together, we now have a simple hierarchical multi-normal model.
 Adding in the priors, and taking into account that we observe multiple supernova, we have
@@ -223,9 +218,9 @@ that a final numerator of:
     \rm{Cauchy}(\sigma_{c}|0,2.5)
     \rm{LKJ}(\rho|4) \\
     &\quad\quad\quad \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)
-    \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \\
+    \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) \\
     &\quad\quad\quad \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z) P(m)
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(\hat{z}) P(\hat{m})
 
 We fit for this using 20 realisations of 200 supernova, is shown below. Note the bias in matter density
 and mean colour (as the redder supernova are cut off at high redshift).
@@ -240,7 +235,7 @@ Selection Effects
 ~~~~~~~~~~~~~~~~~
 
 Having formulated a probabilistic model for the numerator of our posterior (and sent it off
-to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\ d\theta  S(R) P(R|\theta)`.
+to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\ S(R) P(R|\theta)`.
 
 As the bias correction is not data dependent, but model parameter dependent (cosmology dependent),
 the correction for each data point is identical, such that the correction for each individual supernova
@@ -313,9 +308,7 @@ account the number of supernova we have:
 .. math::
     :label: final
 
-    P(\theta|D) &\propto \frac{P(\theta)}{w^N} \idotsint d\vec{z}\,d\vec{m}\,d\vec{\hat{m_B}}\, d\vec{m_B}\,
-    d\vec{\hat{x_1}}\,  d\vec{x_1}\, d\vec{\hat{c}}\, d\vec{c}
-    \prod_{i=1}^N P(D_i|\theta) \\
+    P(\theta|D) &\propto \frac{P(\theta)}{w^N} \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} d\vec{M_B} \prod_{i=1}^N P(D_i|\theta) \\
 
 
 
@@ -334,8 +327,8 @@ account the number of supernova we have:
         2. Using input cosmology to translate :math:`m_B, x_1, c` distribution to a :math:`M_B, x_1, c` distribution.
         3. Perform Monte-Carlo integration using the distribution.
 
-    To go into the math, our Monte Carlo integration for the weights. Our initial sample
-    of supernova simulated is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
+    To go into the math, our Monte Carlo integration sample
+    of simulated supernova is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
 
     .. math::
         w^N &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z,m)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
