@@ -401,7 +401,7 @@ such that our selection function becomes
 .. math::
     :label: ee1
 
-    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}}),
+    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}}),\\
 
 where :math:`\Phi` is the complimentary normal cumulative distribution function
 and:math:` m_B \rangle` represents the apparent magnitude at which we wish to know the selection efficiency.
@@ -413,7 +413,7 @@ increase the width of the above selection efficiency function to
 .. math::
     :label: ee2
 
-    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}} + |\alpha| \sigma_{x_1} + |\beta| \sigma_c),
+    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}} + |\alpha| \sigma_{x_1} + |\beta| \sigma_c), \\
 
 where :math:`\alpha,\, \beta,\, \sigma_{x_1},\, \sigma_c` are taken from the fiducial DES-like simulation.
 Whilst it would be more correct for us to calculate the extra terms in the width of the CDF above in the
@@ -438,7 +438,7 @@ and implement the actual Monte Carlo correction by assigning each point the chai
 .. math::
     :label: ee3
 
-    W = w^{-N} \prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf}).
+    W = w^{-N} \prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf}). \\
 
 The results of doing this (with and without setting :math:`W`) are shown below, to show the difference
 between the approximation bias correction and Monte Carlo bias correction. Fifteen realisations
@@ -463,8 +463,6 @@ represents are post-fit weight corrections to correctly take into account bias.
 .. math::
     \definecolor{blue}{RGB}{18,110,213}
     \definecolor{red}{RGB}{230,0,29}
-
-
     P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf})}{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
     \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N} \\
