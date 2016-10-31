@@ -77,7 +77,7 @@ but instead has :math:`\theta` dependent normalisation, we also must enforce nor
 .. math::
     :label: b
 
-    \mathcal{L} &= \frac{ P(D|\theta)}{\iint  P(D^\prime|\theta^\prime) \ dD^\prime\,d\theta^\prime}, \\
+    \mathcal{L} &= \frac{ P(D|\theta)}{\int  P(D^\prime|\theta) \ dD^\prime\}, \\
 
 where :math:`D^\prime` represents all possible experimental outcomes. It is important to note that this is where
 our selection effects kick in: :math:`D^\prime` is the subset of all possible data that satisfies our
