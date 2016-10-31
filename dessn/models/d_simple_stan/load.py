@@ -84,7 +84,7 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
         summary = c.get_summary()
         num_failed = sum([1 if summary[k][0] is None else 0 for k in summary.keys()])
         num_param = len(list(summary.keys()))
-        if not cut or num_failed < 3:
+        if not cut or num_failed < 4:
             print("Chain %s good" % k)
             good_ks.append(k)
             result.append((chain, posterior, truths, params, full_params, len(chains), weights, ow))
@@ -201,16 +201,19 @@ def plot_quick(folder, uid, include_sep=False):
 if __name__ == "__main__":
     dir_name = os.path.dirname(os.path.abspath(__file__))
     output = dir_name + "/output/complete.png"
-    folders = ["simple", "stan_mc", "approx"]
+    folders = ["simple", "approx"] # "stan_mc",
+    use_weight = [False, True]
 
     c = ChainConsumer()
-    for f in folders:
+    for f, u in zip(folders,use_weight):
         loc = dir_name + os.sep + f + "/stan_output"
         t = None
         try:
             chain, posterior, t, p, ff, l, w, ow = load_stan_from_folder(loc, merge=True)
-            print(ow.mean())
-            c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name=f)
+            if u:
+                c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name=f)
+            else:
+                c.add_chain(chain, posterior=posterior, walkers=l, name=f)
         except Exception as e:
             print(e)
             print("No files found in %s" % loc)

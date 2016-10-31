@@ -39,9 +39,9 @@ def debug_plots(std):
 if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     std = dir_name + "/stan_output"
-    # plot_quick(std, "approx", include_sep=True)
+    plot_quick(std, "approx", include_sep=True)
     # plot_all_weight(std, dir_name + "/../output/plot_approx_weight.png")
-    for i in range(15):
-        plot_single_cosmology_weight(std, dir_name + "/../output/plot_approx_single_weight_%d.png" % i, i=i)
+    # for i in range(15):
+    #     plot_single_cosmology_weight(std, dir_name + "/../output/plot_approx_single_weight_%d.png" % i, i=i)
     # debug_plots(std)
 

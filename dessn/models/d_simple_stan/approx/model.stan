@@ -39,7 +39,7 @@ parameters {
     real <lower = 0, upper = 1> Om;
     // real <lower = -2, upper = -0.4> w;
     // Supernova model
-    real <lower = 0, upper = 0.5> alpha;
+    real <lower = -0.1, upper = 0.5> alpha;
     real <lower = 0, upper = 5> beta;
 
     // Other effects
