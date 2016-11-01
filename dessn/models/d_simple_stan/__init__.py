@@ -185,8 +185,8 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: ig
 
-    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) P (M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
+    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, \hat{z}, \hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, \hat{z}, \hat{m} | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) P (M_B, x_1, c, \hat{z}, \hat{m} | \Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
     &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) P (M_B, x_1, c, | \gamma) P(\hat{z}) P(\hat{m})  \\[10pt]
     &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(\hat{z}) \hat{m}\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(\hat{z}) P(\hat{m}) \\[10pt]
 
