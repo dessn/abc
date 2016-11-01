@@ -16,7 +16,7 @@ first formalise the model itself.
 Parameters
 ----------
 
-**Cosmological Parameters**:
+**Cosmological parameters**:
 
     * :math:`\Omega_m`: matter density
     * :math:`w`: dark energy equation of state
@@ -33,8 +33,14 @@ Parameters
     * :math:`\sigma_{x_1}`: standard deviation of scale
     * :math:`\rho`: correlation (matrix) between absolute magnitude, colour and stretch
 
-**Marginalised Parameters**:
+**Marginalised parameters**:
     * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
+
+**Per supernova parameters**:
+
+    * :math:`m_B`: the true (latent) apparent magnitude
+    * :math:`x_1`: the true (latent) stretch
+    * :math:`c`: the true (latent) colour
 
 ----------
 
@@ -124,8 +130,8 @@ So now we can focus on the likelihood's numerator, which is
     &= \int dm_B \int dx_1 \int dc \int dz \int dm \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{m_B}, \hat{x_1}, \hat{c}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
     &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
 
-Where in the last two lines I have used the fact that we assume mass and redshift are precisely known, and therefore
-do not need to be modelled with latent parameters.
+Where in the last two lines I have used the fact that we assume mass and redshift are precisely known (
+:math:`\hat{z}=z` and :math:`\hat{m}=m`, and therefore do not need to be modelled with latent parameters.
 Also, as we assume that the observed summary statistics :math:`\hat{m_B}, \hat{x_1}, \hat{c}` are normally
 distributed around the true values :math:`m_B,x_1,c`, we can separate them out:
 
