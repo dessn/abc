@@ -473,10 +473,10 @@ represents are post-fit weight corrections to correctly take into account bias.
     \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N} \\
     &\quad\quad\quad \color{blue} \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} \,d\vec{M_B}\  \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
-    &\quad\quad\quad \color{blue} \prod_{i=1}^N \frac{ \mathcal{N}\left( \lbrace \hat{m_{Bi}}, \hat{x_{1i}}, \hat{c_i} \rbrace | \lbrace m_{Bi}, x_{1i}, c_i \rbrace, C_i \right)
-    \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i \right]\right)
-    \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z_i=\hat{z_i}) P(m_i = \hat{m_i}) }{\Phi(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf})} \\
+    &\quad\quad\quad \color{blue} \prod_{i=1}^N \bigg[ \mathcal{N}\left( \lbrace \hat{m_{Bi}}, \hat{x_{1i}}, \hat{c_i} \rbrace | \lbrace m_{Bi}, x_{1i}, c_i \rbrace, C_i \right)
+    \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i \right]\right)  \\
+    &\quad\quad\quad\quad\quad \color{blue}  \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z_i=\hat{z_i}) P(m_i = \hat{m_i}) \Phi^{-1}(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf}) \bigg] \\
 
 
 
