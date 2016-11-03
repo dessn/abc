@@ -41,6 +41,8 @@ Parameters
     * :math:`m_B`: the true (latent) apparent magnitude
     * :math:`x_1`: the true (latent) stretch
     * :math:`c`: the true (latent) colour
+    * :math:`z`: the true redshift of the supernova
+    * :math:`m`: the true mass of the host galaxy
 
 ----------
 
@@ -113,22 +115,24 @@ supernova as :math:`\mathcal{L}_i`.
     :label: d
 
     \mathcal{L_i} P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
-    \Omega_m, w, \alpha, \beta, \gamma)
-    P(\Omega_m, w, \alpha, \beta, \gamma) \\
+    \Omega_m, w, \alpha, \beta, \gamma, z, m)
+    P(\Omega_m, w, \alpha, \beta, \gamma, z, m) \\
 
 Now, let us quickly deal with the priors so I don't have to type them out again and again.
 We will treat :math:`\sigma_{M_B},\ \sigma_{x_1},\, \sigma_c`
-with Cauchy priors, :math:`\rho` with an LKJ prior, and other parameters with flat priors.
-So now we can focus on the likelihood's numerator, which is
+with Cauchy priors, :math:`\rho` with an LKJ prior, and other parameters with flat priors. The prior
+distributions on redshift and host mass are for this implementation set to a uniform distribution,
+but actually do no matter in this likelihood (without bias corrections), as we assume redshift and mass are
+precisely known. So now we can focus on the likelihood's numerator, which is
 
 .. math::
     :label: e
 
     \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
-    \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \int dz \int dm \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \int dz \int dm \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{m_B}, \hat{x_1}, \hat{c}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c |  z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P(z=\hat{z}) P(m=\hat{m})\\[10pt]
+    \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{m_B}, \hat{x_1}, \hat{c}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c |  z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 Where in the last two lines I have used the fact that we assume mass and redshift are precisely known
 (:math:`\hat{z}=z` and :math:`\hat{m}=m`), and therefore do not need to be modelled with latent parameters.
@@ -138,11 +142,11 @@ distributed around the true values :math:`m_B,x_1,c`, we can separate them out:
 .. math::
     :label: eg
 
-    \mathcal{L_i} &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c, z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P(m_B, x_1, c| z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P(z=\hat{z}) P(m=\hat{m}) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, | z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma)  P(z=\hat{z}) P(m=\hat{m}) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, x_1, c| z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma)  P(z=\hat{z}) P(m=\hat{m}) \\
+    \mathcal{L_i} &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma) P(m_B, x_1, c| z, m, \Omega_m, w, \alpha, \beta, \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, x_1, c| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
-Now, in order to calculate :math:`P(m_B, x_1, c, \hat{z}, \hat{m}| \Omega_m, w, \alpha, \beta, \gamma)`,
+Now, in order to calculate :math:`P(m_B, x_1, c| \Omega_m, w, \alpha, \beta, \gamma, z, m)`,
 we need to transform from :math:`m_B` to :math:`M_B`. We transform using the following relationship:
 
 .. math::
@@ -180,15 +184,15 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: i
 
-    \mathcal{L} &= \int dm_B \int dx_1 \int dc \int M_B \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, M_B, x_1, c, | z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P(z=\hat{z}) P(m=\hat{m})\\[10pt]
+    \mathcal{L} &= \int dm_B \int dx_1 \int dc \int M_B \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 .. math::
     :label: ig
 
-    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, | z=\hat{z}, m=\hat{m}, \Omega_m, w, \alpha, \beta, \gamma) P(z=\hat{z}) P(m=\hat{m}) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z=\hat{z}, m=\hat{m},\Omega_m, w, \alpha, \beta, \gamma) P(z=\hat{z}) P(m=\hat{m}) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) P(z=\hat{z}) P(m=\hat{m}) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z=\hat{z}) P(m=\hat{m})  \\[10pt]
+    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 where
 
@@ -226,7 +230,7 @@ that a final numerator of:
     \mathcal{N}\left( \lbrace \hat{m_{Bi}}, \hat{x_{1i}}, \hat{c_i} \rbrace | \lbrace m_{Bi}, x_{1i}, c_i \rbrace, C_i \right)
     \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i\right]\right) \\
     &\quad\quad\quad \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z_i=\hat{z_i}) P(m_i=\hat{m_i})
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z_i} - z_i) \delta(\hat{m_i}-m_i)
 
 We fit for this using 15 realisations of 500 supernova, is shown below. Note the bias in matter density
 and mean colour (as the redder supernova are cut off at high redshift).
@@ -254,13 +258,18 @@ colour, stretch, redshift and mass.
     :label: m
 
     w &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c} \int d\hat{z} \int d\hat{m}
-    \int dz \int dm \int dm_B \int dx_1 \int dc \int dM_B\
-    P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, z, \hat{z}, m, \hat{m}, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
-    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm \, dm_B \, dx_1 \, dc \, dM_B\
+    \int dm_B \int dx_1 \int dc \int dM_B\
+    P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, \hat{z}, \hat{m}, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
+    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{z} \, d\hat{m}\, d\hat{c} \, dm_B \, dx_1 \, dc \, dM_B\
     \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z=\hat{z}) P(m=\hat{m}) \\
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm\,dm_B \, dx_1 \, dc \, dM_B\
+    \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)\   S(m_B, x_1, c, z, m) \\
+    &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
+    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
 
 Again that we assume redshift and mass are perfectly known, so the relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
@@ -284,15 +293,13 @@ except with some extra integral signs that marginalise over all possible experim
     :label: o
 
     w &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \, dM_B\
-    S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) P(z=\hat{z}) P(m=\hat{m}) \\
+    S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) \\
 
 Addressing each component individually:
 
 .. math::
     :label: p
 
-    P(z=\hat{z})&= \text{Redshift distribution from DES volume}\\
-    P(m=\hat{m}) &= \text{Unknown mass distribution} \\
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
     S(m_B, x_1, c, z, m) &= \text{If the data passes the cut} \\
     \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
