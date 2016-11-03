@@ -78,9 +78,9 @@ def get_supernovae(n, data=True):
             mb = MB_adj + mu
             result = get_ia_summary_stats(z, MB_adj, x1, c, do_fit=data, cosmo=cosmology)
             if result is None:
-                parameters, cov = None, None
+                parameters, cov, detadcalib = None, None, None
             else:
-                parameters, cov = result
+                parameters, cov, detadcalib = result
             d = {
                 "MB": MB,
                 "mB": mb,
@@ -89,7 +89,8 @@ def get_supernovae(n, data=True):
                 "m": p,
                 "z": z,
                 "pc": 1 if result is not None else 0,
-                "lp": multivariate_normal.logpdf([MB, x1, c], means, pop_cov)
+                "lp": multivariate_normal.logpdf([MB, x1, c], means, pop_cov),
+                "ce": detadcalib
             }
             if data:
                 d["covariance"] = cov
