@@ -21,7 +21,7 @@ Parameters
     * :math:`\Omega_m`: matter density
     * :math:`w`: dark energy equation of state
     * :math:`\alpha`: Phillips correction for stretch
-    * :math:`\beta`: Phillips correction for colour
+    * :math:`\beta`: Tripp correction for colour
 
 **Population parameters**:
 
@@ -128,23 +128,20 @@ precisely known. So now we can focus on the likelihood's numerator, which is
 .. math::
     :label: e
 
-    \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
-    \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{m_B}, \hat{x_1}, \hat{c}, z, m, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c |  z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} | \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
+    &= P(\hat{z}|z) P(\hat{m}|m) P(\hat{m_B}, \hat{x_1}, \hat{c}| \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) P(\hat{z}|z) P(\hat{m}|m)  \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c) P(m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
 
-Where in the last two lines I have used the fact that we assume mass and redshift are precisely known
-(:math:`\hat{z}=z` and :math:`\hat{m}=m`), and therefore do not need to be modelled with latent parameters.
-Also, as we assume that the observed summary statistics :math:`\hat{m_B}, \hat{x_1}, \hat{c}` are normally
-distributed around the true values :math:`m_B,x_1,c`, we can separate them out:
+We assume that the observed summary statistics :math:`\hat{m_B}, \hat{x_1}, \hat{c}` are normally
+distributed around the true values :math:`m_B,x_1,c`, and that we have perfect redshift and mass
+measurements, such that :math:`P(\hat{z}|z) = \delta(\hat{z}-z)` and :math:`P(\hat{m}|m) = \delta(\hat{m}-m)`. Thus,
 
 .. math::
     :label: eg
 
-    \mathcal{L_i} &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma) P(m_B, x_1, c| z, m, \Omega_m, w, \alpha, \beta, \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c) P(m_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, x_1, c| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
+    \mathcal{L_i} &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, x_1, c| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
 Now, in order to calculate :math:`P(m_B, x_1, c| \Omega_m, w, \alpha, \beta, \gamma, z, m)`,
 we need to transform from :math:`m_B` to :math:`M_B`. We transform using the following relationship:
@@ -189,10 +186,10 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: ig
 
-    P(m_B, M_B, x_1, c, z, m| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    P(m_B, M_B, x_1, c| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma)\\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)  \\[10pt]
 
 where
 
