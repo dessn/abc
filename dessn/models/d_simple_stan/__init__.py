@@ -54,7 +54,7 @@ selection effects :math:`S`.
 Our specific observations :math:`D` are the light curves themselves,
 the summary statistics that result from them :math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace`,
 the covariance for the summary statistics :math:`\hat{C}`, the redshifts of the
-objects :math:`\hat{z}` and a normalised mass estimate :math:`\hat{m}`. We thus signify
+object :math:`\hat{z}` and a normalised mass estimate :math:`\hat{m}`. We thus signify
 observed variables with the hat operator. In this work we will be modelling
 :math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace` as having true underlying
 values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
@@ -244,12 +244,10 @@ Selection Effects
 Having formulated a probabilistic model for the numerator of our posterior (and sent it off
 to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\ S(R) P(R|\theta)`.
 
-As the bias correction is not data dependent, but model parameter dependent (cosmology dependent),
-the correction for each data point is identical, such that the correction for each individual supernova
-is identical.
-
 We assume that selection effects can be determined as a function of apparent magnitude,
-colour, stretch, redshift and mass.
+colour, stretch, redshift and mass, and further assume that the redshift and mass distribution is reasonably
+well sampled, such that we can draw the distributions instead of using the vector of :math:`z` and :math:`m` values
+that form model parameters.
 
 .. math::
     :label: m
