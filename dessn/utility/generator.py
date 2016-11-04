@@ -4,11 +4,9 @@ from astropy.table import Table
 from astropy.cosmology import WMAP9
 
 def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t0=1000,
-                                 new_moon_t0=None, deltat=-30, weather=0.05, seed=None, deltas=None):
+                                 new_moon_t0=None, deltat=-30, weather=0.05, seed=None):
     if seed is not None:
         np.random.seed(seed)
-    if deltas is None:
-        deltas = np.zeros(4)
     if new_moon_t0 is None:
         new_moon_t0 = t0 - np.random.uniform(0, 29.5)
     ts = np.arange(t0 + deltat, (t0 + deltat) + cadence * num_obs, cadence)
@@ -16,9 +14,9 @@ def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t
     bands = [b for t in ts for b in ['desg', 'desr', 'desi', 'desz']]
     if zp is None:
         if shallow:
-            zps = np.array([b for t in ts for b in deltas+np.array([32.46, 32.28, 32.55, 33.12])])
+            zps = np.array([b for t in ts for b in [32.46, 32.28, 32.55, 33.12]])
         else:
-            zps = np.array([b for t in ts for b in deltas+np.array([34.24, 34.85, 34.94, 35.42])])
+            zps = np.array([b for t in ts for b in [34.24, 34.85, 34.94, 35.42]])
     else:
         zps = np.array([b for t in ts for b in zp])
     mins = np.array([b for t in ts for b in [22.1, 21.1, 20.1, 18.7]])
@@ -45,7 +43,7 @@ def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t
                  'zp': zps,
                  'zpsys': zpsys})
 
-    return obs, t0
+    return obs, t0, bands, zps
 
 
 def generate_ia_light_curve(z, mabs, x1, c, get_calib=True, **kwargs):
@@ -59,22 +57,27 @@ def generate_ia_light_curve(z, mabs, x1, c, get_calib=True, **kwargs):
     model.set(z=z)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmo)
     x0 = model.get('x0')
-    seed = int(mabs + z * 100 + x1 * 10 + c * 10)
+    seed = int(mabs + z * 100 + x1 * 10 + c * 10) % 4294967294
 
+    obs, t0, bands, zps = get_obs_times_and_conditions(seed=seed, **kwargs)
+    p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
+    np.random.seed(seed)
+    lc = sncosmo.realize_lcs(obs, model, [p])[0]
     if get_calib:
-        deltas = [np.array([0, 0, 0, 0]),
-                  np.array([0.01, 0, 0, 0]),
-                  np.array([0, 0.01, 0, 0]),
-                  np.array([0, 0, 0.01, 0]),
-                  np.array([0, 0, 0, 0.01])]
+        count = lc['flux'] / np.power(10, zps)
+        count_error = lc['fluxerr'] / np.power(10, zps)
+        filters = ['desg', 'desr', 'desi', 'desz']
+        delta = 0.01
+        lcs = [(None, 0, lc)]
+        for f in filters:
+            l = lc.copy()
+            zp2 = zps + [0 if b == f else delta for b in bands]
+            l['flux'] = count * np.power(10, zp2)
+            l['fluxerr'] = count_error * np.power(10, zp2)
+            lcs.append((f, delta, l))
     else:
-        deltas = [None]
-    lcs = []
-    for delta in deltas:
-        obs, t0 = get_obs_times_and_conditions(deltas=delta, seed=seed, **kwargs)
-        p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
-        np.random.seed(seed)
-        lcs.append(sncosmo.realize_lcs(obs, model, [p])[0])
+        lcs = [(None, 0, lc)]
+
     return lcs
 
 
@@ -117,14 +120,22 @@ def check_lc_passes_cut(lc):
 
 def get_ia_summary_stats(z, mabs, x1, c, do_fit=True, method="minuit", **kwargs):
     lcs = generate_ia_light_curve(z, mabs, x1, c, **kwargs)
-    if check_lc_passes_cut(lcs[0]):
+    if check_lc_passes_cut(lcs[0][-1]):
         if do_fit:
-            results = [get_summary_stats(z, lc, method=method) for lc in lcs]
+            results = [get_summary_stats(z, lc[-1], method=method) for lc in lcs]
             if len(results) == 1:
-                return results[0]
-
+                return results[0][0], results[0][1], None, None
+            base_param, base_cov = results[0]
+            diffp = []
+            diffc = []
+            conv = 1  # Change to 1000 for millimag
+            for result, lc in zip(results[1:], lcs[1:]):
+                diffp.append((result[0] - base_param) / lc[1] / conv)
+                diffc.append((result[1] - base_cov) / lc[1] / conv / conv)
+                print(lc[0], diffp[-1])
+            return base_param, base_param, np.array(diffp), np.array(diffc)
         else:
-            return True, True, True
+            return True, True, None, None
     else:
         return None
 
@@ -133,7 +144,7 @@ def generate_ii_light_curve(z, mabs, source=None, **kwargs):
     if source is None:
         sources = [a[0] for a in sncosmo.builtins.models if a[1] == "SN IIP"]
         source = sources[np.random.randint(0, len(sources))]
-    obs, t0 = get_obs_times_and_conditions(**kwargs)
+    obs, t0, bands, zps = get_obs_times_and_conditions(**kwargs)
     model = sncosmo.Model(source=source)
     model.set(z=z)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab')
