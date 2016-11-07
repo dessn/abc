@@ -27,6 +27,7 @@ def get_truths_labels_significance():
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
         ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
+        ("calibration", np.zeros(4), r"calib", True, None, None)
     ]
     return result
 
@@ -46,7 +47,8 @@ def get_pickle_data(n_sne, seed=0, zt=10.0):
         "obs_mBx1c": [s["parameters"] for s in passed],
         "obs_mBx1c_cov": [s["covariance"] for s in passed],
         "redshifts": np.array([s["z"] for s in passed]),
-        "mass": np.array([s["m"] for s in passed])
+        "mass": np.array([s["m"] for s in passed]),
+        "deta_dcalib": [s["dp"] for s in passed]
     }
 
 
@@ -77,6 +79,7 @@ def get_physical_data(n_sne, seed=0):
     obs_mBx1c = []
     obs_mBx1c_cov = []
     obs_mBx1c_cor = []
+    deta_dcalib = []
 
     redshifts = np.linspace(0.05, 1.1, n_sne)
     cosmology = FlatwCDM(70.0, mapping["Om"]) #, w0=mapping["w"])
@@ -108,11 +111,13 @@ def get_physical_data(n_sne, seed=0):
         obs_mBx1c_cor.append(cor)
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
+        deta_dcalib.append(np.ones((3,4)))
 
     return {
         "n_sne": n_sne,
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": obs_mBx1c_cov,
+        "deta_dcalib": deta_dcalib,
         "redshifts": redshifts,
         "mass": p_high_masses
     }

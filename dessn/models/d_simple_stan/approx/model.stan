@@ -27,7 +27,8 @@ data {
     real mB_width;
 
     // Calibration std
-    vector[4] calib_std;
+    vector[4] calib_std; // std of calibration uncertainty, so we can draw from regular normal
+    matrix[3,4] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -124,7 +125,7 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
+        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i] + deta_dcalib[i] * (calib_std * calibration);
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
@@ -139,7 +140,7 @@ transformed parameters {
         bias_correction[i] = normal_lccdf(mbs[i] | mB_mean, mB_width);
     }
     weight = sum(bias_correction);
-    Posterior = sum(PointPosteriors) - weight + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 1) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
 model {
