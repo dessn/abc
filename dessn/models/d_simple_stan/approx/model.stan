@@ -25,6 +25,9 @@ data {
     // Approximate correction in mB
     real mB_mean;
     real mB_width;
+
+    // Calibration std
+    vector[4] calib_std;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -45,6 +48,7 @@ parameters {
     // Other effects
     real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
     real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
+    vector[4] calibration;
 
     ///////////////// Latent Parameters
     vector[3] deviations [n_sne];
