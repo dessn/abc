@@ -125,7 +125,10 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i] + deta_dcalib[i] * (calib_std * calibration);
+        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
+
+        // Add calibration uncertainty
+        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];

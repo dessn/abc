@@ -197,6 +197,7 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
         "zsom": (1 + final_redshifts) ** 3,
         "redshift_indexes": final,
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
+        "calib_std": np.ones(4) * 0.01
     }
 
     if add_sim:
@@ -224,6 +225,7 @@ def init_fn():
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
+    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.1
     return randoms
 
 

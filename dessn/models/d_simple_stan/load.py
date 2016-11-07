@@ -79,6 +79,16 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
             del chain["old\\_weight"]
         else:
             ow = np.ones(posterior.shape)
+        print(chain.keys())
+        if "calib" in chain:
+            print("Got calibration")
+            num_calib = chain["calib"].shape[1]
+            for i in range(num_calib):
+                chain["calib %d" % i] = chain["calib"][:, i]
+                print(i)
+                print(np.mean(chain["calib"][:, i]))
+                print(np.std(chain["calib"][:, i]))
+            del chain["calib"]
         c = ChainConsumer()
         c.add_chain(chain, weights=weights)
         summary = c.get_summary()
@@ -153,7 +163,6 @@ def plot_all_no_weight(folder, output):
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l)
     c.plot(filename=output, truth=t)
-
 
 
 def plot_separate(folder, output):

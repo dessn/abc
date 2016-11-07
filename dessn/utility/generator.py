@@ -64,16 +64,16 @@ def generate_ia_light_curve(z, mabs, x1, c, get_calib=True, **kwargs):
     np.random.seed(seed)
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
     if get_calib:
-        count = lc['flux'] / np.power(10, zps)
-        count_error = lc['fluxerr'] / np.power(10, zps)
+        count = lc['flux'] / np.power(10, zps / 2.5)
+        count_error = lc['fluxerr'] / np.power(10, zps / 2.5)
         filters = ['desg', 'desr', 'desi', 'desz']
-        delta = 0.01
+        delta = 0.001
         lcs = [(None, 0, lc)]
         for f in filters:
             l = lc.copy()
-            zp2 = zps + [0 if b == f else delta for b in bands]
-            l['flux'] = count * np.power(10, zp2)
-            l['fluxerr'] = count_error * np.power(10, zp2)
+            zp2 = zps + [delta if b == f else 0 for b in bands]
+            l['flux'] = count * np.power(10, zp2 / 2.5)
+            l['fluxerr'] = count_error * np.power(10, zp2 / 2.5)
             lcs.append((f, delta, l))
     else:
         lcs = [(None, 0, lc)]
@@ -133,7 +133,7 @@ def get_ia_summary_stats(z, mabs, x1, c, do_fit=True, method="minuit", **kwargs)
                 diffp.append((result[0] - base_param) / lc[1] / conv)
                 diffc.append((result[1] - base_cov) / lc[1] / conv / conv)
                 print(lc[0], diffp[-1])
-            return base_param, base_param, np.array(diffp), np.array(diffc)
+            return base_param, base_cov, np.array(diffp).T, np.array(diffc).T
         else:
             return True, True, None, None
     else:
