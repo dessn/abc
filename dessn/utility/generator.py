@@ -118,24 +118,21 @@ def check_lc_passes_cut(lc):
     return sn_in_band.sum() >= 2
 
 
-def get_ia_summary_stats(z, mabs, x1, c, do_fit=True, method="minuit", **kwargs):
+def get_ia_summary_stats(z, mabs, x1, c, method="minuit", **kwargs):
     lcs = generate_ia_light_curve(z, mabs, x1, c, **kwargs)
     if check_lc_passes_cut(lcs[0][-1]):
-        if do_fit:
-            results = [get_summary_stats(z, lc[-1], method=method) for lc in lcs]
-            if len(results) == 1:
-                return results[0][0], results[0][1], None, None
-            base_param, base_cov = results[0]
-            diffp = []
-            diffc = []
-            conv = 1  # Change to 1000 for millimag
-            for result, lc in zip(results[1:], lcs[1:]):
-                diffp.append((result[0] - base_param) / lc[1] / conv)
-                diffc.append((result[1] - base_cov) / lc[1] / conv / conv)
-                print(lc[0], diffp[-1])
-            return base_param, base_cov, np.array(diffp).T, np.array(diffc).T
-        else:
-            return True, True, None, None
+        results = [get_summary_stats(z, lc[-1], method=method) for lc in lcs]
+        if len(results) == 1:
+            return results[0][0], results[0][1], [None]*4, None
+        base_param, base_cov = results[0]
+        diffp = []
+        diffc = []
+        conv = 1  # Change to 1000 for millimag
+        for result, lc in zip(results[1:], lcs[1:]):
+            diffp.append((result[0] - base_param) / lc[1] / conv)
+            diffc.append((result[1] - base_cov) / lc[1] / conv / conv)
+            # print(lc[0], diffp[-1])
+        return base_param, base_cov, np.array(diffp).T, np.array(diffc).T
     else:
         return None
 

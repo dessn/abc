@@ -76,11 +76,13 @@ def get_supernovae(n, data=True):
             adjustment = - alpha * x1 + beta * c - mass_correction * p
             MB_adj = MB + adjustment
             mb = MB_adj + mu
-            result = get_ia_summary_stats(z, MB_adj, x1, c, do_fit=data, cosmo=cosmology)
+            result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology)
             if result is None:
-                parameters, cov, deltaparam, deltacov = None, None, None, None
+                parameters, cov, deltaparam, deltacov = None, None, [None]*12, None
             else:
                 parameters, cov, deltaparam, deltacov = result
+                if data:
+                    deltaparam = deltaparam.flatten().tolist()
             d = {
                 "MB": MB,
                 "mB": mb,
@@ -104,14 +106,14 @@ def get_supernovae(n, data=True):
 
 if __name__ == "__main__":
     n1 = 4000  # samples from which we can draw data
-    n2 = 1000000  # samples for Monte Carlo integration of the weights
+    n2 = 10000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
 
     dir_name = os.path.dirname(__file__) or "."
 
-    if True:
+    if False:
         results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1, True) for i in range(jobs))
         results1 = [s for r in results1 for s in r]
         filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
@@ -119,12 +121,13 @@ if __name__ == "__main__":
             pickle.dump(results1, output)
         print("%d supernova generated for data" % len(results1))
 
-    if False:
-        results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2, False) for i in range(jobs))
+    if True:
+        results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2, True) for i in range(jobs))
         results2 = [s for r in results2 for s in r]
         print("%d supernova generated for weights" % len(results2))
         filename3 = os.path.abspath(dir_name + "/output/supernovae2.npy")
-        arr = np.array([[s['MB'], s['mB'], s['x1'], s['c'], s['m'], s['z'], s['pc'], s['lp']] for s in results2]).astype(np.float32)
+        print([s['dp'] for s in results2])
+        arr = np.array([[s['MB'], s['mB'], s['x1'], s['c'], s['m'], s['z'], s['pc'], s['lp']] + s['dp'] for s in results2]).astype(np.float32)
         print(arr.shape)
         np.save(filename3, arr)
         print("Pickle dumped")
