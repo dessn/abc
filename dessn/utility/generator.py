@@ -118,12 +118,12 @@ def check_lc_passes_cut(lc):
     return sn_in_band.sum() >= 2
 
 
-def get_ia_summary_stats(z, mabs, x1, c, method="minuit", **kwargs):
-    lcs = generate_ia_light_curve(z, mabs, x1, c, **kwargs)
+def get_ia_summary_stats(z, mabs, x1, c, data=True, method="minuit", **kwargs):
+    lcs = generate_ia_light_curve(z, mabs, x1, c, get_calib=data, **kwargs)
     if check_lc_passes_cut(lcs[0][-1]):
         results = [get_summary_stats(z, lc[-1], method=method) for lc in lcs]
         if len(results) == 1:
-            return results[0][0], results[0][1], [None]*4, None
+            return {"passed_cut": True, "params": results[0][0], "cov": results[0][1], "lc": lcs[0][-1]}
         base_param, base_cov = results[0]
         diffp = []
         diffc = []
@@ -131,10 +131,9 @@ def get_ia_summary_stats(z, mabs, x1, c, method="minuit", **kwargs):
         for result, lc in zip(results[1:], lcs[1:]):
             diffp.append((result[0] - base_param) / lc[1] / conv)
             diffc.append((result[1] - base_cov) / lc[1] / conv / conv)
-            # print(lc[0], diffp[-1])
-        return base_param, base_cov, np.array(diffp).T, np.array(diffc).T
+        return {"passed_cut": True, "params": base_param, "cov": base_cov, "diff_p": np.array(diffp).T, "diff_c": np.array(diffc).T}
     else:
-        return None
+        return {"passed_cut": False, "lc": lcs[0][-1]}
 
 
 def generate_ii_light_curve(z, mabs, source=None, **kwargs):
