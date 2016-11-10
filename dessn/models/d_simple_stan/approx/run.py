@@ -55,7 +55,7 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     output_dir = os.path.abspath(dir_name + "/../output")
-    pickle_file = output_dir + os.sep + "supernovae2.npy"
+    pickle_file = output_dir + os.sep + "supernovae_passed.npy"
     supernovae = np.load(pickle_file)
     d = get_cosmology_dictionary()
 

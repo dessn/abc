@@ -89,7 +89,7 @@ def get_supernovae(n, data=True):
                 "dp": result["delta_p"].flatten().tolist() if "delta_p" in results else None,
                 "parameters": result.get("params"),
                 "covariance": result.get("cov"),
-                "lc": result.get("lc")
+                "lc": None if data else result.get("lc")
             }
             results.append(d)
         except RuntimeError:
@@ -106,8 +106,8 @@ def is_secure(supernova_dic):
     bands = lc["band"]
     sn = lc["flux"] / lc["fluxerr"]
     max_sn_per_band = np.array([np.max(sn[bands == b]) for b in np.unique(bands)])
-    secure_pass = (max_sn_per_band > 5.3).sum() >= 2
-    secure_fail = (max_sn_per_band > 4.7).sum() <= 1
+    secure_pass = (max_sn_per_band > 5.2).sum() >= 2
+    secure_fail = (max_sn_per_band > 4.8).sum() <= 1
     return secure_pass or secure_fail
 
 
@@ -115,6 +115,10 @@ def get_data_files(n, data=True):
     supernovae = get_supernovae(n, data=data)
     if data:
         return supernovae
+
+    # If we dont consider calibration an issue on bias correction
+    passed = [sn for sn in supernovae if sn["pc"]]
+    arr_passed = get_array_from_list_dict(passed)
 
     # Determine which supernova are secure, such that any reasonable change in zp will not affect them
     secure_flag = [is_secure(s) for s in supernovae]
@@ -135,12 +139,12 @@ def get_data_files(n, data=True):
         del s["lc"]
 
     # Combine secure and unsecure into tuple pair
-    data = (arr, insecures)
+    data = (arr_passed, arr, insecures)
     return data
 
 if __name__ == "__main__":
     n1 = 4000  # samples from which we can draw data
-    n2 = 10000  # samples for Monte Carlo integration of the weights
+    n2 = 100000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
@@ -157,8 +161,19 @@ if __name__ == "__main__":
 
     if True:
         results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr2, False) for i in range(jobs))
-        results2 = [s for r in results2 for s in r]
-        filename2 = os.path.abspath(dir_name + "/output/supernovae2.pickle")
-        with open(filename2, 'wb') as output:
-            pickle.dump(results2, output)
-        print("%d secure supernova generated for data, %d insecure" % (len(results2[0]), len(results2[1])))
+        filename_insecure = os.path.abspath(dir_name + "/output/supernovae_insecure.pickle")
+        filename_passed = os.path.abspath(dir_name + "/output/supernovae_passed.npy")
+        filename_secure = os.path.abspath(dir_name + "/output/supernovae_secure.npy")
+
+        arr_passed = np.concatenate([r[0] for r in results2])
+        arr_secure = np.concatenate([r[1] for r in results2])
+        list_insecure = [s for r in results2 for s in r[2]]
+        print(arr_passed.shape)
+        print("%d passed, %d secure and, %d insecure SN generated" % (arr_passed.shape[0], arr_secure.shape[0], len(list_insecure)))
+
+        np.save(filename_passed, arr_passed)
+        np.save(filename_secure, arr_secure)
+
+        with open(filename_insecure, 'wb') as output:
+            pickle.dump(list_insecure, output)
+        print("All files saved")
