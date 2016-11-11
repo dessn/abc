@@ -57,11 +57,8 @@ def generate_ia_light_curve(z, mabs, x1, c, get_calib=True, **kwargs):
     model.set(z=z)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmo)
     x0 = model.get('x0')
-    seed = int(mabs + z * 100 + x1 * 10 + c * 10) % 4294967294
-
-    obs, t0, bands, zps = get_obs_times_and_conditions(seed=seed, **kwargs)
+    obs, t0, bands, zps = get_obs_times_and_conditions(**kwargs)
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
-    np.random.seed(seed)
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
     if get_calib:
         filters = ['desg', 'desr', 'desi', 'desz']
