@@ -86,7 +86,7 @@ def get_supernovae(n, data=True):
                 "z": z,
                 "pc": result["passed_cut"],
                 "lp": multivariate_normal.logpdf([MB, x1, c], means, pop_cov),
-                "dp": result["delta_p"].flatten().tolist() if "delta_p" in results else None,
+                "dp": result.get("delta_p"),
                 "parameters": result.get("params"),
                 "covariance": result.get("cov"),
                 "lc": None if data else result.get("lc")
@@ -143,7 +143,7 @@ def get_data_files(n, data=True):
     return data
 
 if __name__ == "__main__":
-    n1 = 4000  # samples from which we can draw data
+    n1 = 2000  # samples from which we can draw data
     n2 = 100000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     dir_name = os.path.dirname(__file__) or "."
 
-    if False:
+    if True:
         results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr1, True) for i in range(jobs))
         results1 = [s for r in results1 for s in r]
         filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
@@ -159,7 +159,7 @@ if __name__ == "__main__":
             pickle.dump(results1, output)
         print("%d supernova generated for data" % len(results1))
 
-    if True:
+    if False:
         results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr2, False) for i in range(jobs))
         filename_insecure = os.path.abspath(dir_name + "/output/supernovae_insecure.pickle")
         filename_passed = os.path.abspath(dir_name + "/output/supernovae_passed.npy")
