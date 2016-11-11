@@ -27,7 +27,7 @@ def get_truths_labels_significance():
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
         ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
-        ("calibration", np.zeros(4), r"calib", True, None, None)
+        ("calibration", np.zeros(4), r"$\delta \mathcal{Z}_%d$", True, None, None)
     ]
     return result
 
@@ -225,7 +225,7 @@ def init_fn():
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
-    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.1
+    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.001
     return randoms
 
 
@@ -237,7 +237,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 1000, 2000
+        w, n = 1000, 3000
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)

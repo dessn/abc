@@ -261,21 +261,24 @@ is identical. This does require the assumption that our redshift and mass distri
 that we can draw from them instead of using the model :math:`z` and :math:`m`. As such, :math:`z` and :math:`m` move
 from the right hand side of the model to the left hand side.
 
-We assume that selection effects can be determined as a function of zero points, apparent magnitude,
-colour, stretch, redshift and mass.
+We assume that selection effects can be determined as a function of apparent magnitude,
+colour, stretch, redshift and mass. We might expect that the zero points have an effect
+on selection efficiency, however this is because we normally consider zero points and
+photon counts hand in hand. As we have a fixed experiment (fixed photon counts and statistics)
+with different zero points, the selection efficiency is actually independent from zero points.
 
 .. math::
     :label: m
 
     w &= \iiint d\hat{\eta} \iiint d\eta \int dM_B\  \int d\hat{z} \int \hat{m} \int dz \int dm \,
-    P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b) \\[10pt]
+    P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
     &= \idotsint d\hat{\eta} \, d\eta \, d\hat{z} \, dz\, d\hat{m}\, dm\, dM_B\
-    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b) \\
+    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
     &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
-    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b) \\
+    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
@@ -303,7 +306,7 @@ except with some extra integral signs that marginalise over all possible experim
     :label: o
 
     w &= \idotsint d\eta\, dz \, dm \, dM_B\
-    S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) \\
+    S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) \\
 
 Addressing each component individually:
 
@@ -311,7 +314,7 @@ Addressing each component individually:
     :label: p
 
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
-    S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b) &= \text{If the data passes the cut given the zeropoints} \\
+    S(m_B, x_1, c, z, m) &= \text{If the data passes the cut given the zeropoints} \\
     \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
 
 Now enter the observational specifics of our survey: how many bands, the band passes,
@@ -356,7 +359,7 @@ account the number of supernova we have:
     of simulated supernova is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
 
     .. math::
-        w^N &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z,m, \delta\mathcal{Z}_b)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+        w^N &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z,m)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
         &= \left[ \frac{1}{N_{\rm sim}} \sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
         &=  \frac{1}{N_{\rm sim}^N} \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N
 
