@@ -73,6 +73,7 @@ transformed parameters {
     vector [3] model_MBx1c [n_sne];
     real mbs [n_sne];
     vector [3] model_mBx1c [n_sne];
+    vector [3] calib_mBx1c [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
 
     // Helper variables for Simpsons rule
@@ -128,14 +129,15 @@ transformed parameters {
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
-        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
+        calib_mBx1c[i] = deta_dcalib[i] * (calib_std .* calibration);
+        model_mBx1c[i] = model_mBx1c[i] + calib_mBx1c[i];
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i];
+        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i] + calib_mBx1c[i][1];
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);

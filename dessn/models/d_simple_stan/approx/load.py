@@ -25,15 +25,15 @@ def debug_plots(std):
 
     chain["ww"] = logw
     c = ChainConsumer()
-    # c.add_chain(chain, weights=w, name="calib")
-    c.add_chain(chain, name="calib")
+    c.add_chain(chain, weights=w, name="calib")
+    # c.add_chain(chain, name="calib")
     # c.plot_walks(chain="new", truth=t, filename="walk_new.png")
     res2 = load_stan_from_folder(std + "_no_calib", merge=False, cut=False)
     chain, posterior, t, p, f, l, w, ow = res2[0]
     chain["ww"] = np.log10(w)
     chain["ow"] = np.log10(ow)
-    # c.add_chain(chain, weights=w, name="nocalib")
-    c.add_chain(chain,  name="nocalib")
+    c.add_chain(chain, weights=w, name="nocalib")
+    # c.add_chain(chain, name="nocalib")
     c.plot(filename="output.png", truth=t)
 
     # c = ChainConsumer()
