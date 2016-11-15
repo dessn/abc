@@ -31,13 +31,14 @@ def debug_plots(std):
     # chain["ow"] = np.log10(ow)
     # c.add_chain(chain, weights=w, name="original")
 
-    c.plot_walks(chain="new", truth=t, filename="walk_new.png")
+    # c.plot_walks(chain="new", truth=t, filename="walk_new.png")
     # c.plot_walks(chain="original", truth=t, filename="walk_original.png")
-    c.plot(filename="output.png", truth=t)
+    # c.plot(filename="output.png", truth=t)
 
     c = ChainConsumer()
-    c.add_chain(chain, name="new")
-    c.plot(filename="output2.png", truth=t)
+    c.add_chain(chain, name="approx")
+    c.add_chain(chain, weights=w, name="full")
+    c.plot(filename="output.png", truth=t)
 
 if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)

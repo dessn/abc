@@ -125,9 +125,12 @@ def get_ia_summary_stats(z, mabs, x1, c, data=True, method="minuit", **kwargs):
         for result, lc in zip(results[1:], lcs[1:]):
             diffp.append((result[0] - base_param) / lc[1])
             diffc.append((result[1] - base_cov) / lc[1])
-        return {"passed_cut": True, "params": base_param, "cov": base_cov, "delta_p": np.array(diffp).T, "delta_c": np.array(diffc).T}
-    else:
-        return {"passed_cut": False, "lc": lcs[0][-1]}
+        max_diff = 3
+        if np.any(np.abs(diffp) > max_diff):
+            print("Diff too large for %f %f %f %f" % (z, mabs, x1, c))
+        else:
+            return {"passed_cut": True, "params": base_param, "cov": base_cov, "delta_p": np.array(diffp).T, "delta_c": np.array(diffc).T}
+    return {"passed_cut": False, "lc": lcs[0][-1]}
 
 
 def generate_ii_light_curve(z, mabs, source=None, **kwargs):
