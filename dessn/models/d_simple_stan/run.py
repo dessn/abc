@@ -48,7 +48,7 @@ def get_pickle_data(n_sne, seed=0, zt=10.0):
         "obs_mBx1c_cov": [s["covariance"] for s in passed],
         "redshifts": np.array([s["z"] for s in passed]),
         "mass": np.array([s["m"] for s in passed]),
-        "deta_dcalib": [s["dp"] for s in passed]
+        # "deta_dcalib": [s["dp"] for s in passed]
     }
 
 
