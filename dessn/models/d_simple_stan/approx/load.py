@@ -7,38 +7,39 @@ from chainconsumer import ChainConsumer
 
 
 def debug_plots(std):
+    print(std)
+
     res = load_stan_from_folder(std, merge=False, num=0, cut=False)
     chain, posterior, t, p, f, l, w, ow = res[0]
+
     logw = np.log10(w)
-    a = np.argsort(logw)
-    a = np.argsort(ow)
-    # logw = logw[a]
     chain["ow"] = np.log10(ow)
-    # for k in chain:
-    #     chain[k] = chain[k][a]
+
+    # tosort = chain[r"$\delta \mathcal{Z}_0$"] + chain[r"$\delta \mathcal{Z}_1$"] + chain[r"$\delta \mathcal{Z}_2$"] + chain[r"$\delta \mathcal{Z}_3$"]
+    tosort = chain[r"$\delta \mathcal{Z}_1$"]
+    a = np.argsort(tosort)
+
+    logw = logw[a]
+    for k in chain:
+        chain[k] = chain[k][a]
+
     chain["ww"] = logw
     c = ChainConsumer()
-    c.add_chain(chain, weights=w, name="new")
-
-    # res2 = load_stan_from_folder(std, merge=False, num=1, cut=False)
-    # chain, posterior, t, p, f, l, w, ow = res2[0]
-    # logw = np.log10(w)
-    # a = np.argsort(logw)
-    # logw = logw[a]
-    # for k in chain:
-    #     chain[k] = chain[k][a]
-    # chain["ww"] = logw
-    # chain["ow"] = np.log10(ow)
-    # c.add_chain(chain, weights=w, name="original")
-
+    # c.add_chain(chain, weights=w, name="calib")
+    c.add_chain(chain, name="calib")
     # c.plot_walks(chain="new", truth=t, filename="walk_new.png")
-    # c.plot_walks(chain="original", truth=t, filename="walk_original.png")
-    # c.plot(filename="output.png", truth=t)
-
-    c = ChainConsumer()
-    c.add_chain(chain, name="approx")
-    c.add_chain(chain, weights=w, name="full")
+    res2 = load_stan_from_folder(std + "_no_calib", merge=False, cut=False)
+    chain, posterior, t, p, f, l, w, ow = res2[0]
+    chain["ww"] = np.log10(w)
+    chain["ow"] = np.log10(ow)
+    # c.add_chain(chain, weights=w, name="nocalib")
+    c.add_chain(chain,  name="nocalib")
     c.plot(filename="output.png", truth=t)
+
+    # c = ChainConsumer()
+    # c.add_chain(chain, name="approx")
+    # c.add_chain(chain, weights=w, name="full")
+    # c.plot(filename="output.png", truth=t)
 
 if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)

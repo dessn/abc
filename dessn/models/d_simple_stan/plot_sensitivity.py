@@ -16,14 +16,14 @@ if __name__ == "__main__":
     zs = np.array([d[p] for d in use])
     bands = [(0, '$g$', 'g'), (1, '$r$', 'r'), (2, '$i$', 'b'), (3, '$z$', 'k')]
     patches = [mpatches.Patch(color=b[2], label=b[1]) for b in bands]
-
-    labels = [r"$\delta m_B$", r"$\delta x_1$", r"$\delta c$"]
+    template = r"$\partial %s / \partial \mathcal{Z}_b$"
+    labels = ["m_B", "x_1", "c"]
     fig, axes = plt.subplots(3, 1, figsize=(5, 8), sharex=True)
     plt.tight_layout()
 
     axes[2].set_xlabel("$z$", fontsize=14)
     for i, ax in enumerate(axes):
-        ax.set_ylabel(labels[i], fontsize=14)
+        ax.set_ylabel(template % labels[i], fontsize=14)
         for index, label, color in bands:
             data = np.array([d['dp'][i][index] for d in use])
             ax.scatter(zs, data, lw=0, alpha=0.3, s=2, c=color, label=label)
