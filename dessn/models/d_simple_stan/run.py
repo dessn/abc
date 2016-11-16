@@ -54,7 +54,7 @@ def get_pickle_data(n_sne, seed=0, zt=10.0):
 
 def get_simulation_data(n=5000):
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = this_dir + "/output/supernovae2.npy"
+    pickle_file = this_dir + "/output/supernovae_passed.npy"
     supernovae = np.load(pickle_file)
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -269,7 +269,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
 
 
 def get_mc_simulation_data():
-    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/output/supernovae2.npy"
+    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/output/supernovae_all.npy"
     supernovae = np.load(pickle_file)
 
     return {

@@ -119,6 +119,7 @@ def get_data_files(n, data=True):
     # If we dont consider calibration an issue on bias correction
     passed = [sn for sn in supernovae if sn["pc"]]
     arr_passed = get_array_from_list_dict(passed)
+    arr_all = get_array_from_list_dict(supernovae)
 
     # Determine which supernova are secure, such that any reasonable change in zp will not affect them
     secure_flag = [is_secure(s) for s in supernovae]
@@ -139,7 +140,7 @@ def get_data_files(n, data=True):
         del s["lc"]
 
     # Combine secure and unsecure into tuple pair
-    data = (arr_passed, arr, insecures)
+    data = (arr_passed, arr_all, arr, insecures)
     return data
 
 if __name__ == "__main__":
@@ -151,7 +152,7 @@ if __name__ == "__main__":
 
     dir_name = os.path.dirname(__file__) or "."
 
-    if True:
+    if False:
         results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr1, True) for i in range(jobs))
         results1 = [s for r in results1 for s in r]
         filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
@@ -159,19 +160,22 @@ if __name__ == "__main__":
             pickle.dump(results1, output)
         print("%d supernova generated for data" % len(results1))
 
-    if False:
+    if True:
         results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr2, False) for i in range(jobs))
         filename_insecure = os.path.abspath(dir_name + "/output/supernovae_insecure.pickle")
         filename_passed = os.path.abspath(dir_name + "/output/supernovae_passed.npy")
+        filename_all = os.path.abspath(dir_name + "/output/supernovae_all.npy")
         filename_secure = os.path.abspath(dir_name + "/output/supernovae_secure.npy")
 
         arr_passed = np.concatenate([r[0] for r in results2])
-        arr_secure = np.concatenate([r[1] for r in results2])
-        list_insecure = [s for r in results2 for s in r[2]]
+        arr_all = np.concatenate([r[1] for r in results2])
+        arr_secure = np.concatenate([r[2] for r in results2])
+        list_insecure = [s for r in results2 for s in r[3]]
         print(arr_passed.shape)
         print("%d passed, %d secure and, %d insecure SN generated" % (arr_passed.shape[0], arr_secure.shape[0], len(list_insecure)))
 
         np.save(filename_passed, arr_passed)
+        np.save(filename_all, arr_all)
         np.save(filename_secure, arr_secure)
 
         with open(filename_insecure, 'wb') as output:

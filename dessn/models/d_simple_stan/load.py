@@ -92,7 +92,6 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
                 truths[latex % i] = truth_val[i]
                 print(i, np.mean(column), np.std(column))
             del chain[latex]
-            del truths[latex]
 
         c = ChainConsumer()
         c.add_chain(chain, weights=weights)
