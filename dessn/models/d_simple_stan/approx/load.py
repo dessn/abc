@@ -34,7 +34,7 @@ def debug_plots(std):
     chain["ow"] = np.log10(ow)
     # c.add_chain(chain, weights=w, name="nocalib")
     c.add_chain(chain, name="nocalib")
-    c.plot(filename="output.png", truth=t)
+    c.plot(filename="output.png", truth=t, figsize=0.75)
 
     # c = ChainConsumer()
     # c.add_chain(chain, name="approx")

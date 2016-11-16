@@ -137,7 +137,7 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i] + calib_mBx1c[i][1];
+        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i];
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
