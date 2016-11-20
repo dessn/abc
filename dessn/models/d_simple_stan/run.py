@@ -32,7 +32,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne, seed=0, zt=10.0):
+def get_pickle_data(n_sne, seed=0, zt=10.1):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
@@ -237,7 +237,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 500, 1500
+        w, n = 500, 3500
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)

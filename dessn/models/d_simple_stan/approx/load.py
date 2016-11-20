@@ -13,7 +13,6 @@ def debug_plots(std):
     chain, posterior, t, p, f, l, w, ow = res[0]
 
     logw = np.log10(w)
-    chain["ow"] = np.log10(ow)
 
     # tosort = chain[r"$\delta \mathcal{Z}_0$"] + chain[r"$\delta \mathcal{Z}_1$"] + chain[r"$\delta \mathcal{Z}_2$"] + chain[r"$\delta \mathcal{Z}_3$"]
     tosort = chain[r"$\delta \mathcal{Z}_1$"]
@@ -23,17 +22,25 @@ def debug_plots(std):
     for k in chain:
         chain[k] = chain[k][a]
 
-    chain["ww"] = logw
     c = ChainConsumer()
-    # c.add_chain(chain, weights=w, name="calib")
-    c.add_chain(chain, name="calib")
+
+    do_weight = True
+    if do_weight:
+        chain["ow"] = np.log10(ow)
+        chain["ww"] = logw
+        c.add_chain(chain, weights=w, name="calib")
+    else:
+        c.add_chain(chain, name="calib")
     # c.plot_walks(chain="new", truth=t, filename="walk_new.png")
     res2 = load_stan_from_folder(std + "_calib_data_no_calib_model_and_bias", num=0, merge=False, cut=False)
     chain, posterior, _, p, f, l, w, ow = res2[0]
-    chain["ww"] = np.log10(w)
-    chain["ow"] = np.log10(ow)
-    # c.add_chain(chain, weights=w, name="nocalib")
-    c.add_chain(chain, name="nocalib")
+
+    if do_weight:
+        chain["ww"] = np.log10(w)
+        chain["ow"] = np.log10(ow)
+        c.add_chain(chain, weights=w, name="nocalib")
+    else:
+        c.add_chain(chain, name="nocalib")
     c.plot(filename="output.png", truth=t, figsize=0.75)
 
     # c = ChainConsumer()

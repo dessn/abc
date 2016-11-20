@@ -18,16 +18,23 @@ if __name__ == "__main__":
     patches = [mpatches.Patch(color=b[2], label=b[1]) for b in bands]
     template = r"$\partial %s / \partial \mathcal{Z}_b$"
     labels = ["m_B", "x_1", "c"]
-    fig, axes = plt.subplots(3, 1, figsize=(5, 8), sharex=True)
+    fig, axes = plt.subplots(4, 1, figsize=(5, 8), sharex=True)
     plt.tight_layout()
 
-    axes[2].set_xlabel("$z$", fontsize=14)
-    for i, ax in enumerate(axes):
+    axes[3].set_xlabel("$z$", fontsize=14)
+    for i, ax in enumerate(axes[:-1]):
         ax.set_ylabel(template % labels[i], fontsize=14)
         for index, label, color in bands:
             data = np.array([d['dp'][i][index] for d in use])
             ax.scatter(zs, data, lw=0, alpha=0.3, s=2, c=color, label=label)
         ax.axis('tight')
+
+    ax = axes[-1]
+    ax.set_ylabel(r"$\partial m_B^* / \partial \mathcal{Z}_b, \ \alpha=0.1,\  \beta=3$")
+    for index, label, color in bands:
+        data = np.array([d['dp'][0][index]+0.1*d['dp'][1][index] - 3.0*d['dp'][2][index] for d in use])
+        ax.scatter(zs, data, lw=0, alpha=0.3, s=2, c=color, label=label)
+
     axes[0].legend(handles=patches, frameon=False, ncol=4)
     if p == 'z':
         axes[0].set_xlim(0, 0.9)

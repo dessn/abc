@@ -128,21 +128,22 @@ transformed parameters {
         // Convert into apparent magnitude
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
-        // Add calibration uncertainty
-        calib_mBx1c[i] = deta_dcalib[i] * (calib_std .* calibration);
-        model_mBx1c[i] = model_mBx1c[i] + calib_mBx1c[i];
-
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i];
+        // Add calibration uncertainty
+        calib_mBx1c[i] = deta_dcalib[i] * (calib_std .* calibration);
+        model_mBx1c[i] = model_mBx1c[i] + calib_mBx1c[i];
+
+        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i]; // + calib_mBx1c[i][1];
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
         // Get the approximate bias correction
-        bias_correction[i] = normal_lccdf(mbs[i] | mB_mean, mB_width);
+        bias_correction[i] = normal_lccdf(mbs[i] | mB_mean, mB_width) - mean_c;
+        //bias_correction[i] = 0;
     }
     weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 1) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);

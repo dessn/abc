@@ -12,7 +12,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies):
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
-    supernovae = supernovae[:20000, :]
+    supernovae = supernovae[:15000, :]
     masses = supernovae[:, 4]
     redshifts = supernovae[:, 5]
     apparents = supernovae[:, 1]

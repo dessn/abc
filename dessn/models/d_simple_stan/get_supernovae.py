@@ -36,6 +36,9 @@ class RedshiftSampler(object):
         # DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
         zlo = zs < 1
         pdf = zlo * 2.6e-5 * (1 + zs) ** 1.5 + (1 - zlo) * 7.35e-5 * (1 + zs)
+        pdf = pdf.cumsum()
+        lowz = zs < 0.05
+        pdf += lowz * 2e-1
 
         # Note you can do the power law analytically, but I don't know the final form
         # of the redshift rate function, so will just do it numerically for now
@@ -50,6 +53,11 @@ def get_supernovae(n, data=True):
 
     # Redshift distribution
     zs = redshifts.sample(size=n)
+
+    # import matplotlib.pyplot as plt
+    # plt.hist(zs, 100)
+    # plt.show()
+    # exit()
 
     # Population stats
     vals = get_truths_labels_significance()
@@ -144,8 +152,8 @@ def get_data_files(n, data=True):
     return data
 
 if __name__ == "__main__":
-    n1 = 4000  # samples from which we can draw data
-    n2 = 50000  # samples for Monte Carlo integration of the weights
+    n1 = 10000  # samples from which we can draw data
+    n2 = 100000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
