@@ -16,31 +16,39 @@ def debug_plots(std):
 
     # tosort = chain[r"$\delta \mathcal{Z}_0$"] + chain[r"$\delta \mathcal{Z}_1$"] + chain[r"$\delta \mathcal{Z}_2$"] + chain[r"$\delta \mathcal{Z}_3$"]
     tosort = chain[r"$\delta \mathcal{Z}_1$"]
-    a = np.argsort(tosort)
+    a = np.argsort(logw)
 
     logw = logw[a]
     for k in chain:
         chain[k] = chain[k][a]
 
-    c = ChainConsumer()
-
     do_weight = True
-    if do_weight:
+    do_walk = True
+    load_second = False
+
+    if do_walk:
+        # print("owww ", ow.min(), ow.max())
+        # print("www ", w.min(), w.max())
         chain["ow"] = np.log10(ow)
         chain["ww"] = logw
+        c = ChainConsumer()
+        c.add_chain(chain, weights=w, name="calib")
+        c.plot_walks(truth=t, filename="walk_new.png")
+
+    c = ChainConsumer()
+    if do_weight:
         c.add_chain(chain, weights=w, name="calib")
     else:
         c.add_chain(chain, name="calib")
-    # c.plot_walks(chain="new", truth=t, filename="walk_new.png")
-    res2 = load_stan_from_folder(std + "_calib_data_no_calib_model_and_bias", num=0, merge=False, cut=False)
-    chain, posterior, _, p, f, l, w, ow = res2[0]
 
-    if do_weight:
-        chain["ww"] = np.log10(w)
-        chain["ow"] = np.log10(ow)
-        c.add_chain(chain, weights=w, name="nocalib")
-    else:
-        c.add_chain(chain, name="nocalib")
+    if load_second:
+        res2 = load_stan_from_folder(std + "_calib_data_no_calib_model_and_bias", num=0, merge=False, cut=False)
+        chain, posterior, _, p, f, l, w, ow = res2[0]
+
+        if do_weight:
+            c.add_chain(chain, weights=w, name="nocalib")
+        else:
+            c.add_chain(chain, name="nocalib")
     c.plot(filename="output.png", truth=t, figsize=0.75)
 
     # c = ChainConsumer()

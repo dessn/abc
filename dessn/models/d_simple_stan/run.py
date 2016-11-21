@@ -214,10 +214,11 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
     return {**data, **update, **sim_data, **extra_args}
 
 
-def init_fn():
+def init_fn(data=None):
     vals = get_truths_labels_significance()
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
-    data = get_analysis_data()
+    if data is None:
+        data = get_analysis_data()
     mass = data["mass"]
     randoms["deviations"] = np.random.normal(scale=0.2, size=(mass.size, 3))
     chol = [[1.0, 0.0, 0.0],
