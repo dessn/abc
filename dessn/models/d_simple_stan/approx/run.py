@@ -12,7 +12,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
-    supernovae = supernovae[:15000, :]
+    supernovae = supernovae[:20000, :]
     masses = supernovae[:, 4]
     redshifts = supernovae[:, 5]
     apparents = supernovae[:, 1]
@@ -78,7 +78,6 @@ def approx_bias():
     plt.show()
 
 
-
 def add_weight_to_chain(chain_dictionary, n_sne):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
@@ -104,8 +103,8 @@ def get_approximate_mb_correction():
     mB = d["sim_mB"]
     c = d["sim_c"]
     x1 = d["sim_x1"]
-    alpha = 0.12
-    beta = 3.5
+    alpha = 0.15
+    beta = 4.0
 
     hist_all, bins = np.histogram(mB, bins=200)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)

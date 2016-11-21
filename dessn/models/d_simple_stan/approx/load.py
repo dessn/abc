@@ -9,30 +9,26 @@ from chainconsumer import ChainConsumer
 def debug_plots(std):
     print(std)
 
-    res = load_stan_from_folder(std, merge=False, num=0, cut=False)
-    chain, posterior, t, p, f, l, w, ow = res[0]
-
-    logw = np.log10(w)
-
-    # tosort = chain[r"$\delta \mathcal{Z}_0$"] + chain[r"$\delta \mathcal{Z}_1$"] + chain[r"$\delta \mathcal{Z}_2$"] + chain[r"$\delta \mathcal{Z}_3$"]
-    tosort = chain[r"$\delta \mathcal{Z}_1$"]
-    a = np.argsort(logw)
-
-    logw = logw[a]
-    for k in chain:
-        chain[k] = chain[k][a]
-
     do_weight = True
     do_walk = True
-    load_second = False
+    load_second = True
+
+    res = load_stan_from_folder(std, merge=False, num=0, cut=False)
+    chain, posterior, t, p, f, l, w, ow = res[0]
 
     if do_walk:
         # print("owww ", ow.min(), ow.max())
         # print("www ", w.min(), w.max())
-        chain["ow"] = np.log10(ow)
-        chain["ww"] = logw
+        chain2 = chain.copy()
+        logw = np.log10(w)
+        a = np.argsort(logw)
+        logw = logw[a]
+        for k in chain:
+            chain2[k] = chain2[k][a]
+        chain2["ow"] = np.log10(ow)
+        chain2["ww"] = logw
         c = ChainConsumer()
-        c.add_chain(chain, weights=w, name="calib")
+        c.add_chain(chain2, weights=w, name="calib")
         c.plot_walks(truth=t, filename="walk_new.png")
 
     c = ChainConsumer()
