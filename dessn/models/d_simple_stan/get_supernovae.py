@@ -29,7 +29,7 @@ class RedshiftSampler(object):
         return self.sampler(uniforms)
 
     def get_sampler(self):
-        zs = np.linspace(0.01, 1.2, 10000)
+        zs = np.linspace(0.01, 1.0, 10000)
 
         # These are the rates from the SNANA input files.
         # DNDZ:  POWERLAW2  2.60E-5  1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
@@ -81,7 +81,7 @@ def get_supernovae(n, data=True):
         try:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
             mass_correction = dscale * (1.9 * (1 - dratio) / (0.9 + np.power(10, 0.95 * z)) + dratio)
-            adjustment = - alpha * x1 + beta * c - mass_correction * p
+            adjustment = - alpha * x1 + beta * c # - mass_correction * p
             MB_adj = MB + adjustment
             mb = MB_adj + mu
             result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology, data=data)
@@ -152,7 +152,7 @@ def get_data_files(n, data=True):
     return data
 
 if __name__ == "__main__":
-    n1 = 10000  # samples from which we can draw data
+    n1 = 6000  # samples from which we can draw data
     n2 = 100000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     dir_name = os.path.dirname(__file__) or "."
 
-    if False:
+    if True:
         results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr1, True) for i in range(jobs))
         results1 = [s for r in results1 for s in r]
         filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
@@ -168,7 +168,7 @@ if __name__ == "__main__":
             pickle.dump(results1, output)
         print("%d supernova generated for data" % len(results1))
 
-    if True:
+    if False:
         results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr2, False) for i in range(jobs))
         filename_insecure = os.path.abspath(dir_name + "/output/supernovae_insecure.pickle")
         filename_passed = os.path.abspath(dir_name + "/output/supernovae_passed.npy")

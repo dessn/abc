@@ -18,7 +18,7 @@ def get_truths_labels_significance():
         ("alpha", 0.1, r"$\alpha$", True, 0, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -18.8),
-        ("mean_x1", 0.0, r"$\langle x_1 \rangle$", True, -1.0, 1.0),
+        ("mean_x1", 0.2, r"$\langle x_1 \rangle$", True, -1.0, 1.0),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
         ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.4),
         ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
@@ -32,7 +32,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne, seed=0, zt=10.1):
+def get_pickle_data(n_sne, seed=0, zt=0.4):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
@@ -42,6 +42,13 @@ def get_pickle_data(n_sne, seed=0, zt=10.1):
     np.random.seed(seed)
     np.random.shuffle(passed)
     passed = passed[:n_sne]
+    # dd = [s["dp"] for s in passed]
+    # for d in dd:
+    #     d[0, :] = 0
+    #     d[1, :] = 0
+    #     d[:, 0] = 0
+    #     d[:, 2] = 0
+    #     d[:, 3] = 0
     return {
         "n_sne": n_sne,
         "obs_mBx1c": [s["parameters"] for s in passed],
@@ -238,7 +245,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 500, 2500
+        w, n = 500, 1500
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)

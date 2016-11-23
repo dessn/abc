@@ -42,8 +42,7 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
     params = list(itertools.chain.from_iterable(params))
     name_map = {k[0]: k[2] for k in vals}
     truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
-    is_array = [k[0] for k in vals if not isinstance(k[1], float)]
-
+    is_array = [k[0] for k in vals if not isinstance(k[1], float) and not isinstance(k[1], int)]
     cs = {}
     fs = sorted([f for f in os.listdir(folder) if f.startswith("stan") and f.endswith(".pkl")])
     if num is not None:

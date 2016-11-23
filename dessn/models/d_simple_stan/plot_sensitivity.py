@@ -57,8 +57,9 @@ if __name__ == "__main__":
 
     axes[0].legend(handles=patches, frameon=False, ncol=4)
     if p == 'z':
-        axes[0].set_xlim(0, 0.9)
+        axes[0].set_xlim(0, 1.0)
+    axes[0].set_ylim(-1.2, 0.8)
     plt.subplots_adjust(wspace=0, hspace=0.05)
-
+    print("Saving to " + output_dir + "sensitivity.png")
     fig.savefig(output_dir + "sensitivity.png", bbox_inches="tight", transparent=True, dpi=250)
     fig.savefig(output_dir + "sensitivity.pdf", bbox_inches="tight", transparent=True, dpi=250)

@@ -21,7 +21,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     existing_prob = supernovae[:, 7]
 
     weight = []
-
+    return np.ones(chain_dictionary["mean_MB"].size)
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
