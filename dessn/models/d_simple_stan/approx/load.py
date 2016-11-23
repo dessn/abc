@@ -9,9 +9,9 @@ from chainconsumer import ChainConsumer
 def debug_plots(std):
     print(std)
 
-    do_weight = False
+    do_weight = True
     do_walk = True
-    load_second = False
+    load_second = True
 
     res = load_stan_from_folder(std, merge=False, num=0, cut=False)
     chain, posterior, t, p, f, l, w, ow = res[0]

@@ -81,7 +81,7 @@ def get_supernovae(n, data=True):
         try:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
             mass_correction = dscale * (1.9 * (1 - dratio) / (0.9 + np.power(10, 0.95 * z)) + dratio)
-            adjustment = - alpha * x1 + beta * c # - mass_correction * p
+            adjustment = - alpha * x1 + beta * c - mass_correction * p
             MB_adj = MB + adjustment
             mb = MB_adj + mu
             result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology, data=data)

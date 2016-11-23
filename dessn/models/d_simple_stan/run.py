@@ -32,7 +32,7 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne, seed=0, zt=0.4):
+def get_pickle_data(n_sne, seed=0, zt=10.4):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
