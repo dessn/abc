@@ -59,7 +59,7 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    real <lower = -1, upper = 1> mean_x1;
+    real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
     real <lower = 0.001, upper = 0.3> sigma_MB;
     real <lower = 0.001, upper = 2> sigma_x1;
@@ -143,7 +143,7 @@ transformed parameters {
         bias_correction[i] = normal_lccdf(mbs[i] | mB_mean, mB_width);
     }
     weight = sum(bias_correction);
-    Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 0.05) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 0.01) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
 model {
