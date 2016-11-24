@@ -240,8 +240,8 @@ that a final numerator of:
     &\quad\quad\quad \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z_i} - z_i) \delta(\hat{m_i}-m_i)
 
-We fit for this using 15 realisations of 500 supernova, is shown below. Note the bias in matter density
-and mean colour (as the redder supernova are cut off at high redshift).
+We fit for this using 10 realisations of 500 supernova, is shown below. Note the small bias in matter density
+and large bias in mean colour (as the redder supernova are cut off at high redshift).
 
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
@@ -398,7 +398,7 @@ account the number of supernova we have:
 
         In blue we have the posterior surface for a likelihood that does not have any
         bias correction, and the red shows the same posterior after I have applied the
-        :math:`w^-N` bias correction. Normalised to one, the mean weight of points
+        :math:`w^{-N}` bias correction. Normalised to one, the mean weight of points
         after resampling is :math:`0.0002`, with the minimum weighted point weighted
         at :math:`2.7\times 10^{-13}`. The staggeringly low weights attributed
         is an artifact of the concerns stated above. The only good news I can see in this
@@ -476,7 +476,7 @@ of 500 supernova were used in the contours below, to test systematics.
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot_approx_weight.png
     :align:     center
-    :width: 70%
+    :width: 100%
 
     In blue we have the posterior surface for a likelihood that does not have any
     bias correction, and the red shows the same posterior after I have applied the
@@ -504,7 +504,7 @@ represents are post-fit weight corrections to correctly take into account bias.
 
 
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete.png
+.. figure::     ../dessn/models/d_simple_stan/output/complete2.png
     :align:     center
 
     Final cosmology fits contrasting a fit without bias correction (blue) and a fit with bias correction
@@ -512,6 +512,13 @@ represents are post-fit weight corrections to correctly take into account bias.
     fiducial cosmology, shown as dashed lines, with each realisation having 500 observed supernova. We can see
     that the uncorrected posterior surface shows bias in :math:`\Omega_m` and :math:`\langle c \rangle`, whilst
     the model the includes bias corrections (red) successfully recovers the true underlying cosmology.
+
+.. figure::     ../dessn/models/d_simple_stan/output/complete_many.png
+    :align:     center
+    :width:     70%
+
+    The same plot as above, but only looking at cosmology the central population parameters, and with more
+    realisations of cosmology.
 
 ------------------
 

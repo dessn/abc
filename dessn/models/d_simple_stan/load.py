@@ -122,7 +122,7 @@ def plot_all(folder, output, output_walk=None):
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
     if output_walk is not None:
         c.plot_walks(filename=output_walk)
 
@@ -133,7 +133,7 @@ def plot_single_cosmology(folder, output, i=0, output_walk=None):
     c = ChainConsumer()
     chain, posterior, t, p, f, l, w, ow = res[i]
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
     if output_walk is not None:
         c.plot_walks(filename=output_walk)
 
@@ -145,7 +145,7 @@ def plot_single_cosmology_weight(folder, output, i=0):
     chain, posterior, t, p, f, l, w, ow = res[i]
     c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected %d"%i)
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_all_weight(folder, output):
@@ -155,7 +155,7 @@ def plot_all_weight(folder, output):
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_all_no_weight(folder, output):
@@ -164,7 +164,7 @@ def plot_all_no_weight(folder, output):
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_separate(folder, output):
@@ -174,7 +174,7 @@ def plot_separate(folder, output):
     c = ChainConsumer()
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_separate_weight(folder, output):
@@ -188,7 +188,7 @@ def plot_separate_weight(folder, output):
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
         ls += ["-", "--"]
     c.configure_general(linestyles=ls)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_quick(folder, uid, include_sep=False):
@@ -201,10 +201,10 @@ def plot_quick(folder, uid, include_sep=False):
     plot_name_sep = td + "plot_%s_sep.png" % uid
     walk_name = td + "plot_%s_walk.png" % uid
 
-    plot_all(folder, plot_name)
+    # plot_all(folder, plot_name)
     plot_all_weight(folder, plot_name_weight)
-    plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
-    plot_single_cosmology_weight(folder, plot_name_single_weight)
+    # plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
+    # plot_single_cosmology_weight(folder, plot_name_single_weight)
     if include_sep:
         plot_separate_weight(folder, plot_name_sep)
 
