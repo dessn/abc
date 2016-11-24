@@ -18,20 +18,21 @@ def get_truths_labels_significance():
         ("alpha", 0.1, r"$\alpha$", True, 0, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -18.8),
-        ("mean_x1", 0.0, r"$\langle x_1 \rangle$", True, -1.0, 1.0),
+        ("mean_x1", 0.2, r"$\langle x_1 \rangle$", True, -0.5, 0.5),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
-        ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.4),
+        ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.3),
         ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
         ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.4),
         # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
         ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
+        ("calibration", np.zeros(4), r"$\delta \mathcal{Z}_%d$", True, None, None)
     ]
     return result
 
 
-def get_pickle_data(n_sne, seed=0, zt=10.0):
+def get_pickle_data(n_sne, seed=0, zt=10.4):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
@@ -41,18 +42,26 @@ def get_pickle_data(n_sne, seed=0, zt=10.0):
     np.random.seed(seed)
     np.random.shuffle(passed)
     passed = passed[:n_sne]
+    # dd = [s["dp"] for s in passed]
+    # for d in dd:
+    #     d[0, :] = 0
+    #     d[1, :] = 0
+    #     d[:, 0] = 0
+    #     d[:, 2] = 0
+    #     d[:, 3] = 0
     return {
         "n_sne": n_sne,
         "obs_mBx1c": [s["parameters"] for s in passed],
         "obs_mBx1c_cov": [s["covariance"] for s in passed],
         "redshifts": np.array([s["z"] for s in passed]),
-        "mass": np.array([s["m"] for s in passed])
+        "mass": np.array([s["m"] for s in passed]),
+        "deta_dcalib": [s["dp"] for s in passed]
     }
 
 
 def get_simulation_data(n=5000):
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = this_dir + "/output/supernovae2.npy"
+    pickle_file = this_dir + "/output/supernovae_passed.npy"
     supernovae = np.load(pickle_file)
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -77,6 +86,7 @@ def get_physical_data(n_sne, seed=0):
     obs_mBx1c = []
     obs_mBx1c_cov = []
     obs_mBx1c_cor = []
+    deta_dcalib = []
 
     redshifts = np.linspace(0.05, 1.1, n_sne)
     cosmology = FlatwCDM(70.0, mapping["Om"]) #, w0=mapping["w"])
@@ -108,11 +118,13 @@ def get_physical_data(n_sne, seed=0):
         obs_mBx1c_cor.append(cor)
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
+        deta_dcalib.append(np.ones((3,4)))
 
     return {
         "n_sne": n_sne,
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": obs_mBx1c_cov,
+        "deta_dcalib": deta_dcalib,
         "redshifts": redshifts,
         "mass": p_high_masses
     }
@@ -192,6 +204,7 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
         "zsom": (1 + final_redshifts) ** 3,
         "redshift_indexes": final,
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
+        "calib_std": np.ones(4) * 0.01
     }
 
     if add_sim:
@@ -208,10 +221,11 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
     return {**data, **update, **sim_data, **extra_args}
 
 
-def init_fn():
+def init_fn(data=None):
     vals = get_truths_labels_significance()
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
-    data = get_analysis_data()
+    if data is None:
+        data = get_analysis_data()
     mass = data["mass"]
     randoms["deviations"] = np.random.normal(scale=0.2, size=(mass.size, 3))
     chol = [[1.0, 0.0, 0.0],
@@ -219,6 +233,7 @@ def init_fn():
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
+    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.001
     return randoms
 
 
@@ -230,7 +245,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 1000, 2000
+        w, n = 500, 1500
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)
@@ -262,7 +277,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
 
 
 def get_mc_simulation_data():
-    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/output/supernovae2.npy"
+    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/output/supernovae_all.npy"
     supernovae = np.load(pickle_file)
 
     return {

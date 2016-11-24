@@ -25,6 +25,10 @@ data {
     // Approximate correction in mB
     real mB_mean;
     real mB_width;
+
+    // Calibration std
+    vector[4] calib_std; // std of calibration uncertainty, so we can draw from regular normal
+    matrix[3,4] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -36,15 +40,16 @@ transformed data {
 parameters {
     ///////////////// Underlying parameters
     // Cosmology
-    real <lower = 0, upper = 1> Om;
+    real <lower = 0.1, upper = 1> Om;
     // real <lower = -2, upper = -0.4> w;
     // Supernova model
-    real <lower = -0.1, upper = 0.5> alpha;
+    real <lower = -0.2, upper = 0.5> alpha;
     real <lower = 0, upper = 5> beta;
 
     // Other effects
     real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
     real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
+    vector[4] calibration;
 
     ///////////////// Latent Parameters
     vector[3] deviations [n_sne];
@@ -54,11 +59,11 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    real <lower = -1, upper = 1> mean_x1;
+    real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = 0.01, upper = 0.4> sigma_MB;
-    real <lower = 0.01, upper = 2> sigma_x1;
-    real <lower = 0.01, upper = 0.4> sigma_c;
+    real <lower = 0.001, upper = 0.3> sigma_MB;
+    real <lower = 0.001, upper = 2> sigma_x1;
+    real <lower = 0.001, upper = 0.4> sigma_c;
     cholesky_factor_corr[3] intrinsic_correlation;
 
 }
@@ -122,12 +127,15 @@ transformed parameters {
         // Convert into apparent magnitude
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
+        // Add calibration uncertainty
+        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
+
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i];
+        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3] - mass_correction * mass[i]; // + calib_mBx1c[i][1];
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
@@ -135,7 +143,7 @@ transformed parameters {
         bias_correction[i] = normal_lccdf(mbs[i] | mB_mean, mB_width);
     }
     weight = sum(bias_correction);
-    Posterior = sum(PointPosteriors) - weight + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 0.01) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
 model {

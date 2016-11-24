@@ -32,7 +32,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -42,7 +42,7 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
     params = list(itertools.chain.from_iterable(params))
     name_map = {k[0]: k[2] for k in vals}
     truths = {k[2]: k[1] for k in vals if not isinstance(k[2], list)}
-
+    is_array = [k[0] for k in vals if not isinstance(k[1], float) and not isinstance(k[1], int)]
     cs = {}
     fs = sorted([f for f in os.listdir(folder) if f.startswith("stan") and f.endswith(".pkl")])
     if num is not None:
@@ -79,6 +79,18 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
             del chain["old\\_weight"]
         else:
             ow = np.ones(posterior.shape)
+        print(chain.keys())
+        for param in is_array:
+            latex = name_map[param]
+            truth_val = truths[latex]
+            shape = truth_val.shape
+            if len(shape) > 1 or latex not in chain: continue  # Dont do 2D parameters
+            for i in range(shape[0]):
+                column = chain[latex][:, i]
+                chain[latex % i] = column
+                truths[latex % i] = truth_val[i]
+            del chain[latex]
+
         c = ChainConsumer()
         c.add_chain(chain, weights=weights)
         summary = c.get_summary()
@@ -110,7 +122,7 @@ def plot_all(folder, output, output_walk=None):
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
     if output_walk is not None:
         c.plot_walks(filename=output_walk)
 
@@ -121,7 +133,7 @@ def plot_single_cosmology(folder, output, i=0, output_walk=None):
     c = ChainConsumer()
     chain, posterior, t, p, f, l, w, ow = res[i]
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
     if output_walk is not None:
         c.plot_walks(filename=output_walk)
 
@@ -133,7 +145,7 @@ def plot_single_cosmology_weight(folder, output, i=0):
     chain, posterior, t, p, f, l, w, ow = res[i]
     c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected %d"%i)
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_all_weight(folder, output):
@@ -143,7 +155,7 @@ def plot_all_weight(folder, output):
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_all_no_weight(folder, output):
@@ -152,8 +164,7 @@ def plot_all_no_weight(folder, output):
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(folder, merge=True)
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l)
-    c.plot(filename=output, truth=t)
-
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_separate(folder, output):
@@ -163,7 +174,7 @@ def plot_separate(folder, output):
     c = ChainConsumer()
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_separate_weight(folder, output):
@@ -177,7 +188,7 @@ def plot_separate_weight(folder, output):
         c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
         ls += ["-", "--"]
     c.configure_general(linestyles=ls)
-    c.plot(filename=output, truth=t)
+    c.plot(filename=output, truth=t, figsize=0.75)
 
 
 def plot_quick(folder, uid, include_sep=False):
@@ -190,10 +201,10 @@ def plot_quick(folder, uid, include_sep=False):
     plot_name_sep = td + "plot_%s_sep.png" % uid
     walk_name = td + "plot_%s_walk.png" % uid
 
-    plot_all(folder, plot_name)
+    # plot_all(folder, plot_name)
     plot_all_weight(folder, plot_name_weight)
-    plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
-    plot_single_cosmology_weight(folder, plot_name_single_weight)
+    # plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
+    # plot_single_cosmology_weight(folder, plot_name_single_weight)
     if include_sep:
         plot_separate_weight(folder, plot_name_sep)
 
@@ -201,20 +212,28 @@ def plot_quick(folder, uid, include_sep=False):
 if __name__ == "__main__":
     dir_name = os.path.dirname(os.path.abspath(__file__))
     output = dir_name + "/output/complete.png"
+    output2 = dir_name + "/output/complete2.png"
     folders = ["simple", "approx"] # "stan_mc",
     use_weight = [False, True]
-
     c = ChainConsumer()
-    for f, u in zip(folders,use_weight):
+    for f, u in zip(folders, use_weight):
         loc = dir_name + os.sep + f + "/stan_output"
         t = None
         try:
             chain, posterior, t, p, ff, l, w, ow = load_stan_from_folder(loc, merge=True)
             if u:
-                c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name=f)
+                c.add_chain(chain, posterior=posterior, walkers=l, name=f)
+                c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="full")
             else:
                 c.add_chain(chain, posterior=posterior, walkers=l, name=f)
         except Exception as e:
             print(e)
             print("No files found in %s" % loc)
-    c.plot(filename=output, truth=t)
+    print(p)
+    c.configure_general(linestyles=['-', '--', '-'], colours=["#1E88E5", "#555555", "#D32F2F"]) #4CAF50
+    c.configure_bar(shade=[True, True, True])
+    c.configure_contour(shade=[True, True, True])
+    pp = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\langle x_1 \\rangle$',
+          '$\\langle c \\rangle$'] #, '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$']
+    c.plot(filename=output, truth=t, parameters=pp)
+    c.plot(filename=output2, truth=t)

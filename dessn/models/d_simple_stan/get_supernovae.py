@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 from scipy.interpolate import interp1d
 from scipy.stats import multivariate_normal
 
-from dessn.models.d_simple_stan.simple.run_stan import get_truths_labels_significance
+from dessn.models.d_simple_stan.run import get_truths_labels_significance
 from dessn.utility.generator import get_ia_summary_stats
 
 """
@@ -29,13 +29,16 @@ class RedshiftSampler(object):
         return self.sampler(uniforms)
 
     def get_sampler(self):
-        zs = np.linspace(0.01, 1.2, 10000)
+        zs = np.linspace(0.01, 1.0, 10000)
 
         # These are the rates from the SNANA input files.
         # DNDZ:  POWERLAW2  2.60E-5  1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
         # DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
         zlo = zs < 1
         pdf = zlo * 2.6e-5 * (1 + zs) ** 1.5 + (1 - zlo) * 7.35e-5 * (1 + zs)
+        pdf = pdf.cumsum()
+        lowz = zs < 0.05
+        pdf += lowz * 2e-1
 
         # Note you can do the power law analytically, but I don't know the final form
         # of the redshift rate function, so will just do it numerically for now
@@ -50,6 +53,11 @@ def get_supernovae(n, data=True):
 
     # Redshift distribution
     zs = redshifts.sample(size=n)
+
+    # import matplotlib.pyplot as plt
+    # plt.hist(zs, 100)
+    # plt.show()
+    # exit()
 
     # Population stats
     vals = get_truths_labels_significance()
@@ -76,11 +84,7 @@ def get_supernovae(n, data=True):
             adjustment = - alpha * x1 + beta * c - mass_correction * p
             MB_adj = MB + adjustment
             mb = MB_adj + mu
-            result = get_ia_summary_stats(z, MB_adj, x1, c, do_fit=data, cosmo=cosmology)
-            if result is None:
-                parameters, cov = None, None
-            else:
-                parameters, cov = result
+            result = get_ia_summary_stats(z, MB_adj, x1, c, cosmo=cosmology, data=data)
             d = {
                 "MB": MB,
                 "mB": mb,
@@ -88,42 +92,100 @@ def get_supernovae(n, data=True):
                 "c": c,
                 "m": p,
                 "z": z,
-                "pc": 1 if result is not None else 0,
-                "lp": multivariate_normal.logpdf([MB, x1, c], means, pop_cov)
+                "pc": result["passed_cut"],
+                "lp": multivariate_normal.logpdf([MB, x1, c], means, pop_cov),
+                "dp": result.get("delta_p"),
+                "parameters": result.get("params"),
+                "covariance": result.get("cov"),
+                "lc": None if data else result.get("lc")
             }
-            if data:
-                d["covariance"] = cov
-                d["parameters"] = parameters
             results.append(d)
-            # print("%s nova: %0.2f %0.2f %0.2f %0.3f" % ("PASSED" if result is not None else "failed", MB, x1, c, z))
         except RuntimeError:
             print("Error on nova: %0.2f %0.2f %0.2f %0.3f" % (MB, x1, c, z))
     return results
 
+
+def get_array_from_list_dict(list_dic):
+    return np.array([[s['MB'], s['mB'], s['x1'], s['c'], s['m'], s['z'], s['pc'], s['lp']] for s in list_dic]).astype(np.float32)
+
+
+def is_secure(supernova_dic):
+    lc = supernova_dic["lc"]
+    bands = lc["band"]
+    sn = lc["flux"] / lc["fluxerr"]
+    max_sn_per_band = np.array([np.max(sn[bands == b]) for b in np.unique(bands)])
+    secure_pass = (max_sn_per_band > 5.2).sum() >= 2
+    secure_fail = (max_sn_per_band > 4.8).sum() <= 1
+    return secure_pass or secure_fail
+
+
+def get_data_files(n, data=True):
+    supernovae = get_supernovae(n, data=data)
+    if data:
+        return supernovae
+
+    # If we dont consider calibration an issue on bias correction
+    passed = [sn for sn in supernovae if sn["pc"]]
+    arr_passed = get_array_from_list_dict(passed)
+    arr_all = get_array_from_list_dict(supernovae)
+
+    # Determine which supernova are secure, such that any reasonable change in zp will not affect them
+    secure_flag = [is_secure(s) for s in supernovae]
+    secures = [sn for sn, sec in zip(supernovae, secure_flag) if sec]
+    insecures = [sn for sn, sec in zip(supernovae, secure_flag) if not sec]
+
+    # Turn all secure supernova in nparray
+    arr = get_array_from_list_dict(secures)
+
+    # For all unsecure supernova, precalc ston
+
+    for s in insecures:
+        lc = s["lc"]
+        ston = lc["flux"] / lc["fluxerr"]
+        bands = lc["band"]
+        s["ston"] = ston
+        s["bands"] = bands
+        del s["lc"]
+
+    # Combine secure and unsecure into tuple pair
+    data = (arr_passed, arr_all, arr, insecures)
+    return data
+
 if __name__ == "__main__":
     n1 = 6000  # samples from which we can draw data
-    n2 = 1000000  # samples for Monte Carlo integration of the weights
+    n2 = 100000  # samples for Monte Carlo integration of the weights
     jobs = 4  # Using 4 cores
     npr1 = n1 // jobs
     npr2 = n2 // jobs
 
     dir_name = os.path.dirname(__file__) or "."
 
-    results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr1, True) for i in range(jobs))
-    results1 = [s for r in results1 for s in r]
-    filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
-    with open(filename1, 'wb') as output:
-        pickle.dump(results1, output)
-    print("%d supernova generated for data" % len(results1))
+    if True:
+        results1 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr1, True) for i in range(jobs))
+        results1 = [s for r in results1 for s in r]
+        filename1 = os.path.abspath(dir_name + "/output/supernovae.pickle")
+        with open(filename1, 'wb') as output:
+            pickle.dump(results1, output)
+        print("%d supernova generated for data" % len(results1))
 
-    results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_supernovae)(npr2, False) for i in range(jobs))
-    results2 = [s for r in results2 for s in r]
-    print("%d supernova generated for weights" % len(results2))
-    # filename2 = os.path.abspath(dir_name + "/output/supernovae2.pickle")
-    filename3 = os.path.abspath(dir_name + "/output/supernovae2.npy")
-    # with open(filename2, 'wb') as output:
-    #     pickle.dump(results2, output)
-    arr = np.array([[s['MB'], s['mB'], s['x1'], s['c'], s['m'], s['z'], s['pc'], s['lp']] for s in results2]).astype(np.float32)
-    print(arr.shape)
-    np.save(filename3, arr)
-    print("Pickle dumped")
+    if False:
+        results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr2, False) for i in range(jobs))
+        filename_insecure = os.path.abspath(dir_name + "/output/supernovae_insecure.pickle")
+        filename_passed = os.path.abspath(dir_name + "/output/supernovae_passed.npy")
+        filename_all = os.path.abspath(dir_name + "/output/supernovae_all.npy")
+        filename_secure = os.path.abspath(dir_name + "/output/supernovae_secure.npy")
+
+        arr_passed = np.concatenate([r[0] for r in results2])
+        arr_all = np.concatenate([r[1] for r in results2])
+        arr_secure = np.concatenate([r[2] for r in results2])
+        list_insecure = [s for r in results2 for s in r[3]]
+        print(arr_passed.shape)
+        print("%d passed, %d secure and, %d insecure SN generated" % (arr_passed.shape[0], arr_secure.shape[0], len(list_insecure)))
+
+        np.save(filename_passed, arr_passed)
+        np.save(filename_all, arr_all)
+        np.save(filename_secure, arr_secure)
+
+        with open(filename_insecure, 'wb') as output:
+            pickle.dump(list_insecure, output)
+        print("All files saved")

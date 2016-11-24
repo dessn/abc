@@ -5,10 +5,10 @@ from scipy.misc import logsumexp
 from scipy.stats import multivariate_normal
 import numpy as np
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
-from dessn.models.d_simple_stan.run import run, get_mc_simulation_data
+from dessn.models.d_simple_stan.run import run, get_mc_simulation_data, init_fn, get_analysis_data
 
 
-def calculate_bias(chain_dictionary, supernovae, cosmologies):
+def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
 
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -21,7 +21,6 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies):
     existing_prob = supernovae[:, 7]
 
     weight = []
-
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
@@ -45,17 +44,44 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies):
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
+        if reweight < 1:
+            for key in chain_dictionary.keys():
+                print(key, chain_dictionary[key][i])
         weight.append(reweight)
 
     weights = np.array(weight)
+    if return_mbs:
+        mean_mb = chain_dictionary["mean_MB"] - chain_dictionary["alpha"] * chain_dictionary["mean_x1"] + \
+                  chain_dictionary["beta"] * chain_dictionary["mean_c"]
+        return weights, mean_mb
     return weights
+
+
+def approx_bias():
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    output_dir = os.path.abspath(dir_name + "/../output")
+    pickle_file = output_dir + os.sep + "supernovae_passed.npy"
+    supernovae = np.load(pickle_file)
+    d = get_cosmology_dictionary()
+    data = get_analysis_data()
+    n = 1000
+    init_vals = [init_fn(data=data) for i in range(n)]
+    keys = list(init_vals[0].keys())
+    chain_dictionary = {}
+    for key in keys:
+        chain_dictionary[key] = np.array([elem[key] for elem in init_vals])
+    weights, mean_abs = calculate_bias(chain_dictionary, supernovae, d, return_mbs=True)
+    import matplotlib.pyplot as plt
+    plt.scatter(mean_abs, weights)
+    plt.show()
 
 
 def add_weight_to_chain(chain_dictionary, n_sne):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     output_dir = os.path.abspath(dir_name + "/../output")
-    pickle_file = output_dir + os.sep + "supernovae2.npy"
+    pickle_file = output_dir + os.sep + "supernovae_passed.npy"
     supernovae = np.load(pickle_file)
     d = get_cosmology_dictionary()
 

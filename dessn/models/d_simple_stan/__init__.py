@@ -35,6 +35,7 @@ Parameters
 
 **Marginalised parameters**:
     * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
+    * :math:`\delta \mathcal{Z}_b`: Zeropoint uncertainty for each of the *g,r,i,z* bands.
 
 **Per supernova parameters**:
 
@@ -46,8 +47,8 @@ Parameters
 
 ----------
 
-Model
------
+Model Overview
+--------------
 
 We wish to model our posterior, given our observations, our model :math:`\theta`, and
 selection effects :math:`S`.
@@ -59,6 +60,8 @@ observed variables with the hat operator. In this work we will be modelling
 :math:`\lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace` as having true underlying
 values, however assume that  :math:`\hat{z}` and :math:`\hat{m}` are
 known :math:`(\hat{z} = z,\ \hat{m}=m)`.
+
+For simplicity, we adopt the commonly used notation that :math:`\eta\equiv \lbrace \hat{m_B}, \hat{c}, \hat{x_1} \rbrace`.
 
 
 .. math::
@@ -99,7 +102,7 @@ To put everything back together, we thus have
 ----------
 
 STAN Model
-~~~~~~~~~~
+----------
 
 Let us examine only the numerator for the time being. The numerator is the model
 which ends up implemented in STAN, whilst the denominator can be implemented
@@ -115,12 +118,14 @@ supernova as :math:`\mathcal{L}_i`.
     :label: d
 
     \mathcal{L_i} P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
-    \Omega_m, w, \alpha, \beta, \gamma, z, m)
-    P(\Omega_m, w, \alpha, \beta, \gamma, z, m) \\
+    \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m)
+    P(\Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\
 
 Now, let us quickly deal with the priors so I don't have to type them out again and again.
 We will treat :math:`\sigma_{M_B},\ \sigma_{x_1},\, \sigma_c`
-with Cauchy priors, :math:`\rho` with an LKJ prior, and other parameters with flat priors. The prior
+with Cauchy priors, :math:`\rho` with an LKJ prior, :math:`\delta \mathcal{Z}_b` is constrained by
+zero point uncertainty from photometry (currently just set to 0.01 mag normal uncertainty)
+and other parameters with flat priors. The prior
 distributions on redshift and host mass are for this implementation set to a uniform distribution,
 but actually do no matter in this likelihood (without bias corrections), as we assume redshift and mass are
 precisely known. So now we can focus on the likelihood's numerator, which is
@@ -128,22 +133,28 @@ precisely known. So now we can focus on the likelihood's numerator, which is
 .. math::
     :label: e
 
-    \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} | \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
-    &= P(\hat{z}|z) P(\hat{m}|m) P(\hat{m_B}, \hat{x_1}, \hat{c}| \Omega_m, w, \alpha, \beta, \gamma, z, m) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) P(\hat{z}|z) P(\hat{m}|m)  \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c} | m_B, x_1, c) P(m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, z, m) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
+    \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+    \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+    &= \iiint d\eta \  P(\hat{\eta}, \hat{z}, \hat{m}, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+    &= \iiint d\eta \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{\eta}, z, m, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+    &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
-We assume that the observed summary statistics :math:`\hat{m_B}, \hat{x_1}, \hat{c}` are normally
-distributed around the true values :math:`m_B,x_1,c`, and that we have perfect redshift and mass
-measurements, such that :math:`P(\hat{z}|z) = \delta(\hat{z}-z)` and :math:`P(\hat{m}|m) = \delta(\hat{m}-m)`. Thus,
+Where in the last two lines I have used the fact that we assume mass and redshift are precisely known
+(:math:`\hat{z}=z` and :math:`\hat{m}=m`), and therefore do not need to be modelled with latent parameters.
+We take zeropoint uncertainty into account by computing :math:`\frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b}` for each supernova
+light curve. We thus model what would be the observed values :math:`\hat{\eta}_{\rm True} = \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b}`,
+and then assume that true observed summary statistics :math:`\hat{\eta}_{\rm True}` are normally
+distributed around the true values :math:`\eta`, we can separate them out.
 
 .. math::
     :label: eg
 
-    \mathcal{L_i} &= \int dm_B \int dx_1 \int dc \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, x_1, c| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
+    \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta} | \eta, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+    &= \iiint d\eta \  P(\hat{\eta} | \eta, \delta \mathcal{Z}_b) P(\eta | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+    &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
-Now, in order to calculate :math:`P(m_B, x_1, c| \Omega_m, w, \alpha, \beta, \gamma, z, m)`,
+Now, in order to calculate :math:`P(\eta| \Omega_m, w, \alpha, \beta, \gamma, z, m, \delta\mathcal{Z}_b)`,
 we need to transform from :math:`m_B` to :math:`M_B`. We transform using the following relationship:
 
 .. math::
@@ -171,7 +182,7 @@ and :math:`k(z)` as
 We note that :math:`\mu` is a function of :math:`\hat{z},\Omega_m,w`, however we will simply denote it
 :math:`mu` to keep the notation from spreading over too many lines.
 
-From the above,  :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z`. Or, more probabilistically,
+From the above,  :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z, m`. Or, more probabilistically,
 
 .. math::
     P(M_B, m_B) = \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right).
@@ -181,15 +192,15 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: i
 
-    \mathcal{L} &= \int dm_B \int dx_1 \int dc \int M_B \  \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right) P(m_B, M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    \mathcal{L} &= \iiint d\eta  \int M_B \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} | \eta, C \right) P(\eta, M_B | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 .. math::
     :label: ig
 
-    P(m_B, M_B, x_1, c| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma)\\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma)  \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)  \\[10pt]
+    P(\eta, M_B| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b ) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b )\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
+    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 where
 
@@ -223,14 +234,14 @@ that a final numerator of:
     \rm{Cauchy}(\sigma_{x_1}|0,2.5)
     \rm{Cauchy}(\sigma_{c}|0,2.5)
     \rm{LKJ}(\rho|4) \\
-    &\quad  \int dm_{Bi} \int dx_{1i} \int dc_i \int M_{Bi}\
-    \mathcal{N}\left( \lbrace \hat{m_{Bi}}, \hat{x_{1i}}, \hat{c_i} \rbrace | \lbrace m_{Bi}, x_{1i}, c_i \rbrace, C_i \right)
+    &\quad  \iiint d\eta_i \int M_{Bi}\
+    \mathcal{N}\left( \hat{\eta_i} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta_i}}{\partial\mathcal{Z}_b} | \eta_i, C_i \right)
     \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i\right]\right) \\
     &\quad\quad\quad \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z_i} - z_i) \delta(\hat{m_i}-m_i)
 
-We fit for this using 15 realisations of 500 supernova, is shown below. Note the bias in matter density
-and mean colour (as the redder supernova are cut off at high redshift).
+We fit for this using 10 realisations of 500 supernova, is shown below. Note the small bias in matter density
+and large bias in mean colour (as the redder supernova are cut off at high redshift).
 
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
@@ -239,29 +250,35 @@ and mean colour (as the redder supernova are cut off at high redshift).
 --------
 
 Selection Effects
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Having formulated a probabilistic model for the numerator of our posterior (and sent it off
 to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\ S(R) P(R|\theta)`.
 
+As the bias correction is not data dependent, but model parameter dependent (cosmology dependent),
+the correction for each data point is identical, such that the correction for each individual supernova
+is identical. This does require the assumption that our redshift and mass distributions are well sampled, such
+that we can draw from them instead of using the model :math:`z` and :math:`m`. As such, :math:`z` and :math:`m` move
+from the right hand side of the model to the left hand side.
+
 We assume that selection effects can be determined as a function of apparent magnitude,
-colour, stretch, redshift and mass, and further assume that the redshift and mass distribution is reasonably
-well sampled, such that we can draw the distributions instead of using the vector of :math:`z` and :math:`m` values
-that form model parameters.
+colour, stretch, redshift and mass. We might expect that the zero points have an effect
+on selection efficiency, however this is because we normally consider zero points and
+photon counts hand in hand. As we have a fixed experiment (fixed photon counts and statistics)
+with different zero points, the selection efficiency is actually independent from zero points.
 
 .. math::
     :label: m
 
-    w &= \int d\hat{m_B} \int d\hat{x}_1 \int d\hat{c} \int d\hat{z} \int d\hat{m}
-    \int dm_B \int dx_1 \int dc \int dM_B\
-    P(\hat{m_B}, m_B, \hat{x}_1, x_1, \hat{c}, c, \hat{z}, \hat{m}, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
-    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{z} \, d\hat{m}\, d\hat{c} \, dm_B \, dx_1 \, dc \, dM_B\
-    \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)\   S(m_B, x_1, c, z, m) \\
+    w &= \iiint d\hat{\eta} \iiint d\eta \int dM_B\  \int d\hat{z} \int \hat{m} \int dz \int dm \,
+    P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
+    &= \idotsint d\hat{\eta} \, d\eta \, d\hat{z} \, dz\, d\hat{m}\, dm\, dM_B\
+    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-    &= \idotsint d\hat{m_B}\, d\hat{x}_1 \, d\hat{c} \, dz \, dm\,dm_B \, dx_1 \, dc \, dM_B\
-    \mathcal{N}\left( \lbrace \hat{m_B}, \hat{x_1}, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C \right)\   S(m_B, x_1, c, z, m) \\
+    &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
+    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
@@ -270,16 +287,17 @@ Again that we assume redshift and mass are perfectly known, so the relationship 
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
 they only appear once in the equation above. The important assumption
 is that the detection efficiency is to good approximation
-captured by the apparent magnitude, colour, stretch, mass and redshift of the supernova.
+captured by the apparent magnitude, colour, stretch, mass and redshift of the supernova, *and* the zero points
+of the instrument used to capture them.
 
-As we integrate over all possible realisations, we have that over all space we have
+As we integrate over all possible realisations, we have that over all space
 
 .. math::
     :label: n
 
-    P(\hat{m_B}, \hat{x}_1, \hat{c} | m_B, x_1, c) =
-    \iiint_{-\infty}^{\infty} d\hat{m_B} d\hat{x_1} d\hat{c}\
-    \mathcal{N}(\lbrace \hat{m_B}, \hat{x}_1, \hat{c} \rbrace | \lbrace m_B, x_1, c \rbrace, C) = 1
+    \iiint d\hat{\eta} \, P(\hat{\eta} | \eta, \delta\mathcal{Z}_b) =
+    \iiint_{-\infty}^{\infty} d\hat{\eta}\,
+    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right) = 1 \\
 
 and as such we can remove it from the integral. As is expected, the final weight looks exactly like our likelihood,
 except with some extra integral signs that marginalise over all possible experimental realisations:
@@ -287,7 +305,7 @@ except with some extra integral signs that marginalise over all possible experim
 .. math::
     :label: o
 
-    w &= \idotsint dz \, dm \, dm_B \, dx_1 \, dc \, dM_B\
+    w &= \idotsint d\eta\, dz \, dm \, dM_B\
     S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) \\
 
 Addressing each component individually:
@@ -296,7 +314,7 @@ Addressing each component individually:
     :label: p
 
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
-    S(m_B, x_1, c, z, m) &= \text{If the data passes the cut} \\
+    S(m_B, x_1, c, z, m) &= \text{If the data passes the cut given the zeropoints} \\
     \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
 
 Now enter the observational specifics of our survey: how many bands, the band passes,
@@ -325,10 +343,12 @@ account the number of supernova we have:
 .. note::
     :class: green
 
-    **Technical aside**: Calculating :math:`S(m_B, x_1, c, z, m)`
+    **Technical aside**: Calculating :math:`S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b)`
     is not an analytic task. It has complications not just in the distance modulus being the
     result of an integral, but also that the colour and stretch correction factors make
-    extra use of supernova specific values. The way to efficiently determine the efficiency
+    extra use of supernova specific values. On top of this, add the fact the zero points affect flux measurements,
+    the step before summary statistics, and we need to take this into account as the selection effects primarily select
+    on flux and not summary stats! The way to efficiently determine the efficiency
     is given as follows:
 
         1. Initially run a large DES-like simulation, recording all generated SN parameters and whether they pass the cuts.
@@ -343,7 +363,9 @@ account the number of supernova we have:
         &= \left[ \frac{1}{N_{\rm sim}} \sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
         &=  \frac{1}{N_{\rm sim}^N} \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N
 
-    As the weights do not have to be normalised, we can discard the constant factor out front.
+    As the weights do not have to be normalised, we can discard the constant factor out front. We also note that
+    determining whether a simulated supernova has passed the cut now means converting light curve counts to flux
+    and checking that the new fluxes pass signal-to-noise cuts.
 
     .. math::
        w^N &\propto  \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
@@ -376,7 +398,7 @@ account the number of supernova we have:
 
         In blue we have the posterior surface for a likelihood that does not have any
         bias correction, and the red shows the same posterior after I have applied the
-        :math:`w^-N` bias correction. Normalised to one, the mean weight of points
+        :math:`w^{-N}` bias correction. Normalised to one, the mean weight of points
         after resampling is :math:`0.0002`, with the minimum weighted point weighted
         at :math:`2.7\times 10^{-13}`. The staggeringly low weights attributed
         is an artifact of the concerns stated above. The only good news I can see in this
@@ -454,7 +476,7 @@ of 500 supernova were used in the contours below, to test systematics.
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot_approx_weight.png
     :align:     center
-    :width: 70%
+    :width: 100%
 
     In blue we have the posterior surface for a likelihood that does not have any
     bias correction, and the red shows the same posterior after I have applied the
@@ -463,7 +485,7 @@ of 500 supernova were used in the contours below, to test systematics.
     far the most promising technique.
 
 Final Model
-~~~~~~~~~~~
+-----------
 
 To lay out all the math in one go, the blue section represents the model fitted using STAN, and the red math
 represents are post-fit weight corrections to correctly take into account bias.
@@ -474,15 +496,15 @@ represents are post-fit weight corrections to correctly take into account bias.
     P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf})}{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
     \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N} \\
-    &\quad\quad\quad \color{blue} \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} \,d\vec{M_B}\  \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
-    &\quad\quad\quad \color{blue} \prod_{i=1}^N \bigg[ \mathcal{N}\left( \lbrace \hat{m_{Bi}}, \hat{x_{1i}}, \hat{c_i} \rbrace | \lbrace m_{Bi}, x_{1i}, c_i \rbrace, C_i \right)
+    &\quad\quad\quad \color{blue} \idotsint d\vec{\eta} \,d\vec{M_B}\  \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
+    &\quad\quad\quad \color{blue} \prod_{i=1}^N \bigg[ \mathcal{N}\left(  \hat{\eta_i} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta_i}}{\partial\mathcal{Z}}  | \eta_i, C_i \right)
     \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i \right]\right)  \\
     &\quad\quad\quad\quad\quad \color{blue}  \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i}) \delta(m_i - \hat{m_i}) \Phi^{-1}(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf}) \bigg] \\
 
 
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete.png
+.. figure::     ../dessn/models/d_simple_stan/output/complete2.png
     :align:     center
 
     Final cosmology fits contrasting a fit without bias correction (blue) and a fit with bias correction
@@ -490,6 +512,13 @@ represents are post-fit weight corrections to correctly take into account bias.
     fiducial cosmology, shown as dashed lines, with each realisation having 500 observed supernova. We can see
     that the uncorrected posterior surface shows bias in :math:`\Omega_m` and :math:`\langle c \rangle`, whilst
     the model the includes bias corrections (red) successfully recovers the true underlying cosmology.
+
+.. figure::     ../dessn/models/d_simple_stan/output/complete_many.png
+    :align:     center
+    :width:     70%
+
+    The same plot as above, but only looking at cosmology the central population parameters, and with more
+    realisations of cosmology.
 
 ------------------
 
@@ -504,7 +533,7 @@ represents are post-fit weight corrections to correctly take into account bias.
 |
 
 Appendix - Failed Methods
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 .. warning::
 

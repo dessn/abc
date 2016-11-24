@@ -43,24 +43,37 @@ def get_obs_times_and_conditions(shallow=True, zp=None, num_obs=20, cadence=5, t
                  'zp': zps,
                  'zpsys': zpsys})
 
-    return obs, t0
+    return obs, t0, bands, zps
 
 
-def generate_ia_light_curve(z, mabs, x1, c, **kwargs):
+def generate_ia_light_curve(z, mabs, x1, c, get_calib=True, **kwargs):
     if "cosmo" in kwargs:
         cosmo = kwargs["cosmo"]
         del kwargs["cosmo"]
     else:
         cosmo = WMAP9
-    obs, t0 = get_obs_times_and_conditions(**kwargs)
+
     model = sncosmo.Model(source='salt2-extended')
     model.set(z=z)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab', cosmo=cosmo)
     x0 = model.get('x0')
+    obs, t0, bands, zps = get_obs_times_and_conditions(**kwargs)
     p = {'z': z, 't0': t0, 'x0': x0, 'x1': x1, 'c': c}
-
     lc = sncosmo.realize_lcs(obs, model, [p])[0]
-    return lc
+    if get_calib:
+        filters = ['desg', 'desr', 'desi', 'desz']
+        delta = 0.01
+        lcs = [(None, 0, lc)]
+        for f in filters:
+            l = lc.copy()
+            delta_zps = np.array([delta if b == f else 0 for b in bands])
+            l['flux'] *= np.power(10, delta_zps / 2.5)
+            l['fluxerr'] *= np.power(10, delta_zps / 2.5)
+            lcs.append((f, delta, l))
+    else:
+        lcs = [(None, 0, lc)]
+
+    return lcs
 
 
 def get_summary_stats(z, lc, method="emcee", convert_x0_to_mb=True):
@@ -100,22 +113,31 @@ def check_lc_passes_cut(lc):
     return sn_in_band.sum() >= 2
 
 
-def get_ia_summary_stats(z, mabs, x1, c, do_fit=True, method="minuit", **kwargs):
-    lc = generate_ia_light_curve(z, mabs, x1, c, **kwargs)
-    if check_lc_passes_cut(lc):
-        if do_fit:
-            return get_summary_stats(z, lc, method=method)
+def get_ia_summary_stats(z, mabs, x1, c, data=True, method="minuit", **kwargs):
+    lcs = generate_ia_light_curve(z, mabs, x1, c, get_calib=data, **kwargs)
+    if check_lc_passes_cut(lcs[0][-1]):
+        results = [get_summary_stats(z, lc[-1], method=method) for lc in lcs]
+        if len(results) == 1:
+            return {"passed_cut": True, "params": results[0][0], "cov": results[0][1], "lc": lcs[0][-1]}
+        base_param, base_cov = results[0]
+        diffp = []
+        diffc = []
+        for result, lc in zip(results[1:], lcs[1:]):
+            diffp.append((result[0] - base_param) / lc[1])
+            diffc.append((result[1] - base_cov) / lc[1])
+        max_diff = 3
+        if np.any(np.abs(diffp) > max_diff):
+            print("Diff too large for %f %f %f %f" % (z, mabs, x1, c))
         else:
-            return True, True
-    else:
-        return None
+            return {"passed_cut": True, "params": base_param, "cov": base_cov, "delta_p": np.array(diffp).T, "delta_c": np.array(diffc).T}
+    return {"passed_cut": False, "lc": lcs[0][-1]}
 
 
 def generate_ii_light_curve(z, mabs, source=None, **kwargs):
     if source is None:
         sources = [a[0] for a in sncosmo.builtins.models if a[1] == "SN IIP"]
         source = sources[np.random.randint(0, len(sources))]
-    obs, t0 = get_obs_times_and_conditions(**kwargs)
+    obs, t0, bands, zps = get_obs_times_and_conditions(**kwargs)
     model = sncosmo.Model(source=source)
     model.set(z=z)
     model.set_source_peakabsmag(mabs, 'bessellb', 'ab')
