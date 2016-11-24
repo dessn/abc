@@ -9,17 +9,40 @@ generally propagated into analysis by determining the numerical
 derivative of the parameters of interest (generally apparent magnitude,
 stretch and colour of the supernovae) with respect to the zero points
 by simulations. In doing this, there is an assumption made about the
-Gaussianity of the uncertainties, namely that the the posterior
-in a full analysis remains Gaussian.
+linearity of the gradient surface.
+For our DES-like data sample, we find that numerical derivatives
+remain linear on scales exceeding :math:`5\sigma`, and so utilise this method
+like previous analyses.
 
-We inspect this assumption for the case of a single supernova, where
-we fit not only the SALT2 parameters but the zero points simultaneously,
-where the zero points are marginalised. This gives us a full posterior
-surface which takes into account zero point uncertainties rigorously.
+As normal, we take a base light curve, and then - for each band we have -
+we shift the flux and flux error for those observations lke we had perturbed
+the zero point, and compare the difference in SALT2 fit summary statistics
+between the base light curve and the perturbed light curve.
 
-We then determine the SALT2 parameter surface using the traditional
-method, and compare the resulting distributions in the hope that
-differences are negligible.
+With typical zero point uncertainty estimated to be of the order of :math:`0.01` mag,
+we calculate numerical derivatives using that :math:`\delta Z_b = 0.01`. Identical results were
+used found when using :math:`\delta Z_b = 0.05` and when using either Newton's
+difference quotient or symmetric difference quotient.
 
-*Investigation on hold until can figure out covariance*
+Using several thousand supernova and simulating an underlying population
+which has dispersion in magnitude, stretch and colour, we produce the following
+plot.
+
+
+.. figure::     ../dessn/models/d_simple_stan/output/sensitivity.png
+    :align:     center
+    :width:     60%
+
+    The lighter and more disperse colours show the numerical gradients I
+    have calculated. The darker, tighter and discontinuous lines are
+    gradients Chris Lidman has calculated (using canonical supernova). Whilst
+    he is using DES observations and I assume fixed cadence, the disparity
+    between the curves is a concern and needs to be figured out. I should note
+    that the underlying population I draw from is not the issue here - I still have
+    many times his dispersion when I collapse my underlying supernova population
+    into a delta function.
+
+
+
+
 """
