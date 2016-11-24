@@ -42,6 +42,19 @@ The general project structure is as follows:
 
 --------------
 
+Fun
+===
+
+Just for fun, here is a visualisation of the commit log.
+
+.. raw:: html
+
+   <video style="width: 100%;" controls src="_static/gource.mp4"></video>
+
+
+--------------
+
+
 I also implemented a general BHM framework which I think is pretty nifty,
 but needed to move to STAN so its being unused at the moment.
 
