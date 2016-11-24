@@ -32,7 +32,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=True, num=None):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -212,9 +212,9 @@ def plot_quick(folder, uid, include_sep=False):
 if __name__ == "__main__":
     dir_name = os.path.dirname(os.path.abspath(__file__))
     output = dir_name + "/output/complete.png"
+    output2 = dir_name + "/output/complete2.png"
     folders = ["simple", "approx"] # "stan_mc",
     use_weight = [False, True]
-
     c = ChainConsumer()
     for f, u in zip(folders, use_weight):
         loc = dir_name + os.sep + f + "/stan_output"
@@ -222,10 +222,18 @@ if __name__ == "__main__":
         try:
             chain, posterior, t, p, ff, l, w, ow = load_stan_from_folder(loc, merge=True)
             if u:
-                c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name=f)
+                c.add_chain(chain, posterior=posterior, walkers=l, name=f)
+                c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="full")
             else:
                 c.add_chain(chain, posterior=posterior, walkers=l, name=f)
         except Exception as e:
             print(e)
             print("No files found in %s" % loc)
-    c.plot(filename=output, truth=t)
+    print(p)
+    c.configure_general(linestyles=['-', '--', '-'], colours=["#1E88E5", "#555555", "#D32F2F"]) #4CAF50
+    c.configure_bar(shade=[True, True, True])
+    c.configure_contour(shade=[True, True, True])
+    pp = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\langle x_1 \\rangle$',
+          '$\\langle c \\rangle$'] #, '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$']
+    c.plot(filename=output, truth=t, parameters=pp)
+    c.plot(filename=output2, truth=t)
