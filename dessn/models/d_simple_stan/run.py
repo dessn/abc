@@ -20,7 +20,7 @@ def get_truths_labels_significance():
         ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -18.8),
         ("mean_x1", 0.2, r"$\langle x_1 \rangle$", True, -0.5, 0.5),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
-        ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.4),
+        ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.3),
         ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
         ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.4),
         # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),

@@ -216,7 +216,7 @@ if __name__ == "__main__":
     use_weight = [False, True]
 
     c = ChainConsumer()
-    for f, u in zip(folders,use_weight):
+    for f, u in zip(folders, use_weight):
         loc = dir_name + os.sep + f + "/stan_output"
         t = None
         try:
