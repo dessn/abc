@@ -5,6 +5,7 @@ import inspect
 import shutil
 from astropy.cosmology import FlatwCDM
 import numpy as np
+import pandas as pd
 from numpy.random import uniform
 import sys
 import socket
@@ -35,7 +36,7 @@ def get_truths_labels_significance():
 def get_pickle_data(n_sne, seed=0, zt=10.4):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
+    pickle_file = os.path.abspath(this_dir + "/data/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
     passed = [s for s in supernovae if s["pc"] and s["z"] < zt]
@@ -59,9 +60,57 @@ def get_pickle_data(n_sne, seed=0, zt=10.4):
     }
 
 
+def get_fitres_data():
+    print("Getting data from Fitres file")
+    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+    fitres_file = os.path.abspath(this_dir + "/data/FITOPT000.FITRES")
+    dataframe = pd.read_csv(fitres_file, sep='\s+', skiprows=5, comment="#")
+    data = dataframe.to_records()
+
+    n_sne = data.size
+    obs_mBx1c = data[['mB', 'x1', 'c']].view((float, 3))
+
+    zs = data["zCMB"]
+    masses = data["HOST_LOGMASS"]
+    gtz = masses > 0
+    masses = gtz * masses
+
+    # massese = data["HOST_LOGMASS_ERR"]
+
+    mbs = data["mB"]
+    x0s = data["x0"]
+    x1s = data["x1"]
+    cs = data["c"]
+
+    mbse = data["mBERR"]
+    x1se = data["x1ERR"]
+    cse = data["cERR"]
+
+    cov_x1_c = data["COV_x1_c"]
+    cov_x0_c = data["COV_c_x0"]
+    cov_x1_x0 = data["COV_x1_x0"]
+
+    covs = []
+    for mb, x0, x1, c, mbe, x1e, ce, cx1c, cx0c, cx1x0 in zip(mbs, x0s, x1s, cs, mbse, x1se, cse, cov_x1_c, cov_x0_c,
+                                                              cov_x1_x0):
+        cmbx1 = -5 * cx1x0 / (2 * x0 * np.log(10))
+        cmbc = -5 * cx0c / (2 * x0 * np.log(10))
+        cov = np.array([[mbe * mbe, cmbx1, cmbc], [cmbx1, x1e * x1e, cx1c], [cmbc, cx1c, ce * ce]])
+        covs.append(cov)
+
+    return {
+        "n_sne": n_sne,
+        "obs_mBx1c": obs_mBx1c,
+        "obs_mBx1c_cov": covs,
+        "redshifts": zs,
+        "mass": masses,
+        "deta_dcalib": np.zeros((n_sne, 3, 4))
+    }
+
+
 def get_simulation_data(n=5000):
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = this_dir + "/output/supernovae_passed.npy"
+    pickle_file = this_dir + "/data/supernovae_passed.npy"
     supernovae = np.load(pickle_file)
     mask = supernovae[:, 6] == 1
     supernovae = supernovae[mask, :]
@@ -132,14 +181,14 @@ def get_physical_data(n_sne, seed=0):
 
 def get_snana_data():
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    filename = this_dir + "/output/des_sim.pickle"
+    filename = this_dir + "/data/des_sim.pickle"
     print("Getting SNANA data")
     with open(filename, 'rb') as f:
         data = pickle.load(f)
     return data
 
 
-def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
+def get_analysis_data(sim=False, snana=False, seed=0, add_sim=0, fitres=True, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -148,6 +197,8 @@ def get_analysis_data(sim=True, snana=False, seed=0, add_sim=0, **extra_args):
         data = get_pickle_data(n, seed=seed)
     elif snana:
         data = get_snana_data()
+    elif fitres:
+        data = get_fitres_data()
     else:
         data = get_physical_data(n, seed=seed)
     n_sne = data["n_sne"]
@@ -245,7 +296,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 500, 1500
+        w, n = 500, 4500
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)
@@ -277,7 +328,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
 
 
 def get_mc_simulation_data():
-    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/output/supernovae_all.npy"
+    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/data/supernovae_all.npy"
     supernovae = np.load(pickle_file)
 
     return {

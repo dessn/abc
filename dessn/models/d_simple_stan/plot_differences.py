@@ -9,7 +9,7 @@ if __name__ == "__main__":
     filename = "shifts"
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = os.path.abspath(this_dir + "/output/supernovae.pickle")
+    pickle_file = os.path.abspath(this_dir + "/data/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
 

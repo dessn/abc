@@ -201,7 +201,7 @@ def plot_quick(folder, uid, include_sep=False):
     plot_name_sep = td + "plot_%s_sep.png" % uid
     walk_name = td + "plot_%s_walk.png" % uid
 
-    # plot_all(folder, plot_name)
+    plot_all(folder, plot_name)
     plot_all_weight(folder, plot_name_weight)
     # plot_single_cosmology(folder, plot_name_single, output_walk=walk_name)
     # plot_single_cosmology_weight(folder, plot_name_single_weight)

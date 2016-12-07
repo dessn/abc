@@ -10,7 +10,7 @@ import os
 
 if __name__ == "__main__":
     d = os.path.abspath(os.path.dirname(__file__))
-    file = r"%s/output/TEST_DATA_17677.dat" % d
+    file = r"%s/data/TEST_DATA_17677.dat" % d
 
     data = pd.read_csv(file, delim_whitespace=True, comment="#", header=0)
 
@@ -49,5 +49,5 @@ if __name__ == "__main__":
     final["mass"] = masses
 
     import pickle
-    filename = "%s/output/des_sim.pickle" % d
+    filename = "%s/data/des_sim.pickle" % d
     pickle.dump(final, open(filename, 'wb'))

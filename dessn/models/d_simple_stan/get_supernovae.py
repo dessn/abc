@@ -170,10 +170,10 @@ if __name__ == "__main__":
 
     if False:
         results2 = Parallel(n_jobs=jobs, max_nbytes="20M", verbose=100)(delayed(get_data_files)(npr2, False) for i in range(jobs))
-        filename_insecure = os.path.abspath(dir_name + "/output/supernovae_insecure.pickle")
-        filename_passed = os.path.abspath(dir_name + "/output/supernovae_passed.npy")
-        filename_all = os.path.abspath(dir_name + "/output/supernovae_all.npy")
-        filename_secure = os.path.abspath(dir_name + "/output/supernovae_secure.npy")
+        filename_insecure = os.path.abspath(dir_name + "/data/supernovae_insecure.pickle")
+        filename_passed = os.path.abspath(dir_name + "/data/supernovae_passed.npy")
+        filename_all = os.path.abspath(dir_name + "/data/supernovae_all.npy")
+        filename_secure = os.path.abspath(dir_name + "/data/supernovae_secure.npy")
 
         arr_passed = np.concatenate([r[0] for r in results2])
         arr_all = np.concatenate([r[1] for r in results2])

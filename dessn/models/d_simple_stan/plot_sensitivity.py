@@ -8,9 +8,10 @@ from astropy.io import fits
 if __name__ == "__main__":
     dir_name = os.path.abspath(os.path.dirname(__file__) or ".")
     output_dir = dir_name + "/output/"
-    pickle_file = output_dir + "supernovae.pickle"
-    chris_file = output_dir + "J_20161120.fits"
-    chris_file2 = output_dir + "zs.txt"
+    data_dir = dir_name + "/data/"
+    pickle_file = data_dir + "supernovae.pickle"
+    chris_file = data_dir + "J_20161120.fits"
+    chris_file2 = data_dir + "zs.txt"
     with open(pickle_file, 'rb') as f:
         data = pickle.load(f)
 
