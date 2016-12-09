@@ -2,26 +2,26 @@ import os
 import inspect
 from scipy.interpolate import interp1d
 from scipy.misc import logsumexp
-from scipy.stats import multivariate_normal
+from scipy.stats import multivariate_normal, norm
+from numpy.lib.recfunctions import append_fields
 import numpy as np
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from dessn.models.d_simple_stan.run import run, get_mc_simulation_data, init_fn, get_analysis_data
+import pandas as pd
 
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
+    supernovae = supernovae[supernovae['CUTMASK'] == 1023]
+    masses = np.ones(supernovae.size)
+    redshifts = supernovae['Z']
+    apparents = supernovae['S2mb']
+    colours = supernovae['S2c']
+    stretches = supernovae['S2x1']
+    smear = supernovae['MAGSMEAR_COH']
 
-    mask = supernovae[:, 6] == 1
-    supernovae = supernovae[mask, :]
-    supernovae = supernovae[:20000, :]
-    masses = supernovae[:, 4]
-    redshifts = supernovae[:, 5]
-    apparents = supernovae[:, 1]
-    colours = supernovae[:, 3]
-    stretches = supernovae[:, 2]
-    existing_prob = supernovae[:, 7]
+    existing_prob = norm.pdf(colours, 0, 0.15) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
 
     weight = []
-    return np.ones(chain_dictionary["mean_MB"].size)
     for i in range(chain_dictionary["mean_MB"].size):
         om = np.round(chain_dictionary["Om"][i], decimals=3)
         key = "%0.3f" % om
@@ -82,10 +82,16 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     data_dir = os.path.abspath(dir_name + "/../data")
-    pickle_file = data_dir + os.sep + "supernovae_passed.npy"
-    supernovae = np.load(pickle_file)
-    d = get_cosmology_dictionary()
 
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.DUMP")
+    dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
+
+    supernovae = dataframe.to_records()
+    d = get_cosmology_dictionary()
+    # import matplotlib.pyplot as plt
+    # plt.hist(supernovae['S2mb'], 30)
+    # plt.show()
+    # exit()
     weights = calculate_bias(chain_dictionary, supernovae, d)
     existing = chain_dictionary["weight"]
 
@@ -98,18 +104,31 @@ def add_weight_to_chain(chain_dictionary, n_sne):
 
 
 def get_approximate_mb_correction():
-    d = get_mc_simulation_data()
-    mask = d["sim_passed"] == 1
-    mB = d["sim_mB"]
-    c = d["sim_c"]
-    x1 = d["sim_x1"]
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    data_dir = os.path.abspath(dir_name + "/../data")
+
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.DUMP")
+    dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
+    d = dataframe.to_records()
+
+    mask = d["CUTMASK"] == 1023
+    mB = d["S2mb"]
+    c = d["S2c"]
+    x1 = d["S2x1"]
     alpha = 0.15
     beta = 4.0
 
-    hist_all, bins = np.histogram(mB, bins=200)
+    bins = np.linspace(19.5, 26, 40)
+
+    hist_all, bins = np.histogram(mB, bins=bins)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
     binc = 0.5 * (bins[:-1] + bins[1:])
     ratio = 1.0 * hist_passed / hist_all
+    ratio = ratio / ratio.max()
+    # import matplotlib.pyplot as plt
+    # plt.plot(binc, ratio)
+    # plt.show()
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
@@ -118,13 +137,13 @@ def get_approximate_mb_correction():
 
 
 if __name__ == "__main__":
-
+    # add_weight_to_chain(None, 212)
     file = os.path.abspath(__file__)
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width = get_approximate_mb_correction()
     print(mB_mean, mB_width)
-
+    # exit()
     data = {
         "mB_mean": mB_mean,
         "mB_width": mB_width,
