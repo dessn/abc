@@ -79,6 +79,7 @@ def approx_bias():
 
 
 def add_weight_to_chain(chain_dictionary, n_sne):
+    print(n_sne)
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     data_dir = os.path.abspath(dir_name + "/../data")
