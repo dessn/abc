@@ -127,6 +127,7 @@ def get_approximate_mb_correction():
     # import matplotlib.pyplot as plt
     # plt.plot(binc, ratio)
     # plt.show()
+    # exit()
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
@@ -141,7 +142,6 @@ if __name__ == "__main__":
 
     mB_mean, mB_width = get_approximate_mb_correction()
     print(mB_mean, mB_width)
-
     data = {
         "mB_mean": mB_mean,
         "mB_width": mB_width,
