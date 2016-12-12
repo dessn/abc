@@ -108,6 +108,48 @@ def get_fitres_data():
     }
 
 
+def get_snana_dummy_data(n_sne=500):
+    print("Getting SNANA dummy data")
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    data_dir = os.path.abspath(dir_name + "/data")
+
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
+    supernovae = np.load(dump_file)
+    supernovae = supernovae[supernovae['CUTMASK'] == 1023]
+    supernovae = supernovae[:n_sne]
+    masses = np.ones(supernovae.size)
+    redshifts = supernovae['Z']
+    apparents = supernovae['S2mb']
+    colours = supernovae['S2c']
+    stretches = supernovae['S2x1']
+
+    obs_mBx1c_cor = []
+    obs_mBx1c_cov = []
+    obs_mBx1c = []
+    for mb, x1, c in zip(apparents, stretches, colours):
+        vector = np.array([mb, x1, c])
+        # Add intrinsic scatter to the mix
+        diag = np.array([0.05, 0.3, 0.05]) ** 2
+        cov = np.diag(diag)
+        vector += np.random.multivariate_normal([0, 0, 0], cov)
+        cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
+        obs_mBx1c_cor.append(cor)
+        obs_mBx1c_cov.append(cov)
+        obs_mBx1c.append(vector)
+
+    covs = np.array(obs_mBx1c_cov)
+
+    return {
+        "n_sne": n_sne,
+        "obs_mBx1c": obs_mBx1c,
+        "obs_mBx1c_cov": covs,
+        "redshifts": redshifts,
+        "mass": masses,
+        "deta_dcalib": np.zeros((n_sne, 3, 4))
+    }
+
+
 def get_simulation_data(n=5000):
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = this_dir + "/data/supernovae_passed.npy"
@@ -188,13 +230,15 @@ def get_snana_data():
     return data
 
 
-def get_analysis_data(sim=False, snana=False, seed=0, add_sim=0, fitres=True, **extra_args):
+def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=0, fitres=True, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 500
+    n = 212
     if sim:
         data = get_pickle_data(n, seed=seed)
+    elif snana_dummy:
+        data = get_snana_dummy_data(n)
     elif snana:
         data = get_snana_data()
     elif fitres:
