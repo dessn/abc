@@ -19,7 +19,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     stretches = supernovae['S2x1']
     smear = supernovae['MAGSMEAR_COH']
 
-    existing_prob = norm.pdf(colours, 0, 0.15) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
+    existing_prob = norm.pdf(colours, 0, 0.1) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
 
     weight = []
     for i in range(chain_dictionary["mean_MB"].size):
@@ -84,10 +84,9 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     dir_name = os.path.dirname(file)
     data_dir = os.path.abspath(dir_name + "/../data")
 
-    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.DUMP")
-    dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
+    supernovae = np.load(dump_file)
 
-    supernovae = dataframe.to_records()
     d = get_cosmology_dictionary()
     # import matplotlib.pyplot as plt
     # plt.hist(supernovae['S2mb'], 30)
@@ -109,18 +108,16 @@ def get_approximate_mb_correction():
     dir_name = os.path.dirname(file)
     data_dir = os.path.abspath(dir_name + "/../data")
 
-    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.DUMP")
-    dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
-    d = dataframe.to_records()
-
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
+    d = np.load(dump_file)
     mask = d["CUTMASK"] == 1023
     mB = d["S2mb"]
     c = d["S2c"]
     x1 = d["S2x1"]
     alpha = 0.15
-    beta = 4.0
+    beta = 3.4
 
-    bins = np.linspace(19.5, 26, 40)
+    bins = np.linspace(19.5, 25, 40)
 
     hist_all, bins = np.histogram(mB, bins=bins)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
@@ -144,7 +141,7 @@ if __name__ == "__main__":
 
     mB_mean, mB_width = get_approximate_mb_correction()
     print(mB_mean, mB_width)
-    # exit()
+
     data = {
         "mB_mean": mB_mean,
         "mB_width": mB_width,
