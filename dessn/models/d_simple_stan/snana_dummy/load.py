@@ -11,20 +11,19 @@ def debug_plots(std):
 
     res = load_stan_from_folder(std, merge=True, cut=False)
     chain, posterior, t, p, f, l, w, ow = res
-    # print(w.mean())
+    print(w.mean(), np.std(w))
     # import matplotlib.pyplot as plt
     # plt.hist(np.log(w), 100)
     # plt.show()
     # exit()
     c = ChainConsumer()
+    truth = [0.3, 0.14, 3.1, -19.365, 0, 0, 0.1, 1.0, 0.1, 0, 0, 0, 0, 0, 0]
     c.add_chain(chain, name="uncorrected")
     c.add_chain(chain, weights=w, name="corrected")
-    # c.add_chain(chain, name="calib")
-    c.plot(filename="output.png", parameters=9, figsize=1.3)
-    c.plot_walks(chain=1, filename="walks.png")
-    # c.add_chain(chain, name="approx")
-    # c.add_chain(chain, weights=w, name="full")
-    # c.plot(filename="output.png", truth=t)
+    c.plot(filename="output.png", parameters=9, truth=truth, figsize=1.3)
+    # c = ChainConsumer()
+    # c.add_chain(chain, weights=w, name="corrected")
+    c.plot_walks(chain="corrected", filename="walks.png", truth=truth)
 
 if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)

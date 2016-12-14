@@ -12,13 +12,15 @@ import pandas as pd
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     supernovae = supernovae[supernovae['CUTMASK'] == 1023]
+    supernovae = supernovae[supernovae['Z'] < 0.3]
     masses = np.ones(supernovae.size)
     redshifts = supernovae['Z']
     apparents = supernovae['S2mb']
+    smear = supernovae['MAGSMEAR_COH']
+    apparents += smear
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
-    smear = supernovae['MAGSMEAR_COH']
-
+    # return np.ones(chain_dictionary["weight"].shape)
     existing_prob = norm.pdf(colours, 0, 0.1) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
 
     weight = []
@@ -95,7 +97,6 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     # exit()
     weights = calculate_bias(chain_dictionary, supernovae, d)
     existing = chain_dictionary["weight"]
-
     logw = n_sne * weights - existing
     logw -= logw.min()
     weights = np.exp(-logw)
@@ -115,8 +116,12 @@ def get_approximate_mb_correction():
     mB = d["S2mb"]
     c = d["S2c"]
     x1 = d["S2x1"]
-    alpha = 0.15
-    beta = 3.4
+    mu = d["MU"]
+    smear = d['MAGSMEAR_COH']
+    mB += smear
+    alpha = 0.14
+    beta = 3.1
+    MB = mB - mu + alpha * x1 - beta * c
 
     bins = np.linspace(19.5, 25, 40)
 
@@ -126,13 +131,27 @@ def get_approximate_mb_correction():
     ratio = 1.0 * hist_passed / hist_all
     ratio = ratio / ratio.max()
     # import matplotlib.pyplot as plt
-    # plt.plot(binc, ratio)
+    # mask = mask & (d["Z"] < 0.3)
+    # fig, axes = plt.subplots(3)
+    # axes[0].hist(MB[mask], 100, normed=True, histtype="step")
+    # axes[0].hist(MB, 100, normed=True, histtype="step")
+    # axes[1].hist(x1[mask], 100, normed=True, histtype="step")
+    # axes[1].hist(x1, 100, normed=True, histtype="step")
+    # axes[2].hist(c[mask], 100, normed=True, histtype="step")
+    # axes[2].hist(c, 100, normed=True, histtype="step")
+    #
     # plt.show()
     # exit()
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += alpha * np.std(x1) + beta * np.std(c)
+    # width += alpha * np.std(x1) + beta * np.std(c)
+    # import matplotlib.pyplot as plt
+    # from scipy.stats import norm
+    # plt.plot(binc, ratio)
+    # plt.plot(binc, 1-norm.cdf(binc, mean, width + 0.02))
+    # plt.show()
+    # exit()
     return mean, width + 0.02
 
 

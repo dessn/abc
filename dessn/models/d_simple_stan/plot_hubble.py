@@ -59,13 +59,13 @@ if __name__ == "__main__":
     zs = data["redshifts"]
     deta_dcalib = data["deta_dcalib"]
     obs_mBx1c = np.array(data["obs_mBx1c"])
-    abs = -19.3
-    mags = obs_mBx1c[:, 0] + 0.1 * obs_mBx1c[:, 1] - 3 * obs_mBx1c[:, 2]
+    abs = -19.365
+    mags = obs_mBx1c[:, 0] + 0.14 * obs_mBx1c[:, 1] - 3.1 * obs_mBx1c[:, 2]
     obs_mBx1c2 = np.copy(obs_mBx1c)
     calib = np.array([0, 0.01*9, 0, 0])
     calib_change = np.dot(deta_dcalib, calib)
     obs_mBx1c2 += calib_change
-    mags2 = obs_mBx1c2[:, 0] + 0.1 * obs_mBx1c2[:, 1] - 3 * obs_mBx1c2[:, 2]
+    mags2 = obs_mBx1c2[:, 0] + 0.14 * obs_mBx1c2[:, 1] - 3.1 * obs_mBx1c2[:, 2]
 
     h.add_config(0.3, abs, mags, zs, "No calib", 'b')
     h.add_config(0.24, abs, mags2, zs, "calib", 'r')

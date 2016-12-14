@@ -18,7 +18,7 @@ def get_truths_labels_significance():
         # ("w", -1.0, r"$w$", True, -1.5, -0.5),
         ("alpha", 0.1, r"$\alpha$", True, 0, 0.5),
         ("beta", 3.0, r"$\beta$", True, 0, 5),
-        ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -18.8),
+        ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -19),
         ("mean_x1", 0.2, r"$\langle x_1 \rangle$", True, -0.5, 0.5),
         ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
         ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.3),
@@ -108,7 +108,7 @@ def get_fitres_data():
     }
 
 
-def get_snana_dummy_data(n_sne=500):
+def get_snana_dummy_data(n_sne=500, zt=0.3):
     print("Getting SNANA dummy data")
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
@@ -117,24 +117,23 @@ def get_snana_dummy_data(n_sne=500):
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     supernovae = np.load(dump_file)
     supernovae = supernovae[supernovae['CUTMASK'] == 1023]
+    supernovae = supernovae[supernovae["Z"] < zt]
     supernovae = supernovae[:n_sne]
     masses = np.ones(supernovae.size)
     redshifts = supernovae['Z']
     apparents = supernovae['S2mb']
+    apparents += supernovae['MAGSMEAR_COH']
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
 
-    obs_mBx1c_cor = []
     obs_mBx1c_cov = []
     obs_mBx1c = []
     for mb, x1, c in zip(apparents, stretches, colours):
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.3, 0.05]) ** 2
+        diag = np.array([0.05, 0.2, 0.05]) ** 2
         cov = np.diag(diag)
         vector += np.random.multivariate_normal([0, 0, 0], cov)
-        cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
-        obs_mBx1c_cor.append(cor)
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
 
@@ -234,7 +233,7 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
-    n = 212
+    n = 412
     if sim:
         data = get_pickle_data(n, seed=seed)
     elif snana_dummy:
@@ -328,7 +327,7 @@ def init_fn(data=None):
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
-    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.001
+    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.0001
     return randoms
 
 
@@ -340,7 +339,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 500, 5000
+        w, n = 1000, 1500
     else:
         w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)
