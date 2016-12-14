@@ -12,7 +12,7 @@ import pandas as pd
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     supernovae = supernovae[supernovae['CUTMASK'] == 1023]
-    supernovae = supernovae[supernovae['Z'] < 0.3]
+    supernovae = supernovae[supernovae['Z'] < 10.3]
     masses = np.ones(supernovae.size)
     redshifts = supernovae['Z']
     apparents = supernovae['S2mb']
@@ -145,14 +145,14 @@ def get_approximate_mb_correction():
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += 0.5 * (alpha * np.std(x1) + beta * np.std(c))
+    width += (alpha * np.std(x1) + beta * np.std(c))
     # import matplotlib.pyplot as plt
     # from scipy.stats import norm
     # plt.plot(binc, ratio)
     # plt.plot(binc, 1-norm.cdf(binc, mean, width + 0.02))
     # plt.show()
     # exit()
-    return mean, width
+    return mean, width + 0.02
 
 
 if __name__ == "__main__":

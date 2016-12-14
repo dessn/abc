@@ -108,7 +108,7 @@ def get_fitres_data():
     }
 
 
-def get_snana_dummy_data(n_sne=500, zt=0.3):
+def get_snana_dummy_data(n_sne=500, zt=10.3):
     print("Getting SNANA dummy data")
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
@@ -229,7 +229,7 @@ def get_snana_data():
     return data
 
 
-def get_analysis_data(sim=True, snana=False, snana_dummy=False, seed=0, add_sim=0, fitres=False, **extra_args):
+def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=0, fitres=False, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -339,9 +339,9 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
 
 def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 1000, 1500
+        w, n = 500, 1000
     else:
-        w, n = 2000, 5000
+        w, n = 1000, 2000
     data = get_analysis_data(seed=n_cosmology, **data_args)
     # import matplotlib.pyplot as plt
     # plt.hist([a[0] for a in data["obs_mBx1c"]], 30)
