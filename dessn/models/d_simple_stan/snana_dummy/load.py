@@ -18,8 +18,8 @@ def debug_plots(std):
     # exit()
     c = ChainConsumer()
     truth = [0.3, 0.14, 3.1, -19.365, 0, 0, 0.1, 1.0, 0.1, 0, 0, 0, 0, 0, 0]
-    c.add_chain(chain, name="uncorrected")
-    c.add_chain(chain, weights=w, name="corrected")
+    c.add_chain(chain, name="uncorrected", posterior=posterior)
+    c.add_chain(chain, weights=w, name="corrected", posterior=posterior)
     c.plot(filename="output.png", parameters=9, truth=truth, figsize=1.3)
     # c = ChainConsumer()
     # c.add_chain(chain, weights=w, name="corrected")

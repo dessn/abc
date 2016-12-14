@@ -122,7 +122,7 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
     masses = np.ones(supernovae.size)
     redshifts = supernovae['Z']
     apparents = supernovae['S2mb']
-    apparents += supernovae['MAGSMEAR_COH']
+    apparents -= supernovae['MAGSMEAR_COH']
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
 

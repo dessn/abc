@@ -17,7 +17,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     redshifts = supernovae['Z']
     apparents = supernovae['S2mb']
     smear = supernovae['MAGSMEAR_COH']
-    apparents += smear
+    apparents -= smear
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
     # return np.ones(chain_dictionary["weight"].shape)
@@ -118,7 +118,7 @@ def get_approximate_mb_correction():
     x1 = d["S2x1"]
     mu = d["MU"]
     smear = d['MAGSMEAR_COH']
-    mB += smear
+    mB -= smear
     alpha = 0.14
     beta = 3.1
     MB = mB - mu + alpha * x1 - beta * c
@@ -131,15 +131,16 @@ def get_approximate_mb_correction():
     ratio = 1.0 * hist_passed / hist_all
     ratio = ratio / ratio.max()
     # import matplotlib.pyplot as plt
-    # mask = mask & (d["Z"] < 0.3)
-    # fig, axes = plt.subplots(3)
-    # axes[0].hist(MB[mask], 100, normed=True, histtype="step")
-    # axes[0].hist(MB, 100, normed=True, histtype="step")
-    # axes[1].hist(x1[mask], 100, normed=True, histtype="step")
-    # axes[1].hist(x1, 100, normed=True, histtype="step")
-    # axes[2].hist(c[mask], 100, normed=True, histtype="step")
-    # axes[2].hist(c, 100, normed=True, histtype="step")
-    #
+    # mask = mask #& (d["Z"] < 0.3)
+    # fig, axes = plt.subplots(4)
+    # axes[0].hist(MB[mask], 50, normed=True, histtype="step")
+    # axes[0].hist(MB, 50, normed=True, histtype="step")
+    # axes[1].hist(x1[mask], 50, normed=True, histtype="step")
+    # axes[1].hist(x1, 50, normed=True, histtype="step")
+    # axes[2].hist(c[mask], 50, normed=True, histtype="step")
+    # axes[2].hist(c, 50, normed=True, histtype="step")
+    # axes[3].hist(mB[mask], 50, normed=True, histtype="step")
+    # axes[3].hist(mB, 50, normed=True, histtype="step")
     # plt.show()
     # exit()
     inter = interp1d(ratio, binc)
@@ -165,8 +166,29 @@ if __name__ == "__main__":
     data = {
         "mB_mean": mB_mean,
         "mB_width": mB_width,
-        # "snana_dummy": True,
-        # "sim": False
+        "snana_dummy": True,
+        "sim": False
     }
+    # d = get_analysis_data(**data)
+    # dd = np.array(d["obs_mBx1c"])
+    # mb = dd[:, 0]
+    # x1 = dd[:, 1]
+    # c = dd[:, 2]
+    # zs = d["redshifts"]
+    # from astropy.cosmology import FlatLambdaCDM
+    # cosmo = FlatLambdaCDM(70, 0.3)
+    # mu = cosmo.distmod(zs).value
+    # alpha = 0.14
+    # beta = 3.1
+    # MB = mb - mu + alpha * x1 - beta * c
+    # import matplotlib.pyplot as plt
+    # fig, axes = plt.subplots(4)
+    # axes[0].hist(MB, 20, normed=True, histtype="step")
+    # axes[1].hist(x1, 20, normed=True, histtype="step")
+    # axes[2].hist(c, 20, normed=True, histtype="step")
+    # axes[3].hist(mb, 20, normed=True, histtype="step")
+    # plt.show()
+    #
+    # exit()
     print("Running %s" % file)
     run(data, stan_model, file, weight_function=add_weight_to_chain)
