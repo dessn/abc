@@ -229,7 +229,7 @@ def get_snana_data():
     return data
 
 
-def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=0, fitres=True, **extra_args):
+def get_analysis_data(sim=True, snana=False, snana_dummy=False, seed=0, add_sim=0, fitres=False, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """

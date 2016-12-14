@@ -165,8 +165,8 @@ if __name__ == "__main__":
     data = {
         "mB_mean": mB_mean,
         "mB_width": mB_width,
-        "snana_dummy": True,
-        "sim": False
+        # "snana_dummy": True,
+        # "sim": False
     }
     print("Running %s" % file)
     run(data, stan_model, file, weight_function=add_weight_to_chain)
