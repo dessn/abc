@@ -18,6 +18,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
     smear = supernovae['MAGSMEAR_COH']
+    apparents += smear
 
     existing_prob = norm.pdf(colours, 0, 0.1) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
 
