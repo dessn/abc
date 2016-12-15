@@ -21,7 +21,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
     # return np.ones(chain_dictionary["weight"].shape)
-    existing_prob = norm.pdf(colours, 0, 0.1) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
+    existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
 
     weight = []
     for i in range(chain_dictionary["mean_MB"].size):
