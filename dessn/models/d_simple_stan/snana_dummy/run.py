@@ -112,7 +112,6 @@ def get_approximate_mb_correction():
 
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     d = np.load(dump_file)
-    print(d)
     mask = d[:, 6] > 0.0
     mB = d[:, 1]
     x1 = d[:, 2]
