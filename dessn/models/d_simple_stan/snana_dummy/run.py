@@ -13,7 +13,7 @@ import pandas as pd
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     supernovae = supernovae[supernovae[:, 6] > 0.0]
     supernovae = supernovae[supernovae[:, 0] < 10.3]
-    masses = np.ones(supernovae.size)
+    masses = np.ones(supernovae.shape[0])
     redshifts = supernovae[:, 0]
     apparents = supernovae[:, 1]
     stretches = supernovae[:, 2]
