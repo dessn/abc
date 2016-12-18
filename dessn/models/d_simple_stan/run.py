@@ -131,9 +131,10 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
     for mb, x1, c in zip(apparents, stretches, colours):
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.2, 0.05]) ** 2
+        diag = np.array([0.005, 0.02, 0.005]) ** 2
         cov = np.diag(diag)
         vector += np.random.multivariate_normal([0, 0, 0], cov)
+        # vector[0] += np.random.normal(0, 0.1)
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
 

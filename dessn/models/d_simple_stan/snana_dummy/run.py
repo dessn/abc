@@ -20,7 +20,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     apparents -= smear
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
-    # return np.ones(chain_dictionary["weight"].shape)
+    return np.ones(chain_dictionary["weight"].shape)
     existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
 
     weight = []
@@ -122,17 +122,10 @@ def get_approximate_mb_correction():
     alpha = 0.14
     beta = 3.1
     MB = mB - mu + alpha * x1 - beta * c
-
-    bins = np.linspace(19.5, 25, 40)
-
-    hist_all, bins = np.histogram(mB, bins=bins)
-    hist_passed, _ = np.histogram(mB[mask], bins=bins)
-    binc = 0.5 * (bins[:-1] + bins[1:])
-    ratio = 1.0 * hist_passed / hist_all
-    ratio = ratio / ratio.max()
     # import matplotlib.pyplot as plt
     # mask = mask #& (d["Z"] < 0.3)
     # fig, axes = plt.subplots(4)
+    # print(MB[mask])
     # axes[0].hist(MB[mask], 50, normed=True, histtype="step")
     # axes[0].hist(MB, 50, normed=True, histtype="step")
     # axes[1].hist(x1[mask], 50, normed=True, histtype="step")
@@ -143,6 +136,14 @@ def get_approximate_mb_correction():
     # axes[3].hist(mB, 50, normed=True, histtype="step")
     # plt.show()
     # exit()
+
+    bins = np.linspace(19.5, 25, 40)
+    hist_all, bins = np.histogram(mB, bins=bins)
+    hist_passed, _ = np.histogram(mB[mask], bins=bins)
+    binc = 0.5 * (bins[:-1] + bins[1:])
+    ratio = 1.0 * hist_passed / hist_all
+    ratio = ratio / ratio.max()
+
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
@@ -188,7 +189,7 @@ if __name__ == "__main__":
     # axes[2].hist(c, 20, normed=True, histtype="step")
     # axes[3].hist(mb, 20, normed=True, histtype="step")
     # plt.show()
-    #
     # exit()
+
     print("Running %s" % file)
     run(data, stan_model, file, weight_function=add_weight_to_chain)
