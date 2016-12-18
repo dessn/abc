@@ -19,5 +19,6 @@ if __name__ == "__main__":
     dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
 
     supernovae = dataframe.to_records()
+    supernovae = supernovae.astype(np.float32)
     np.save(data_dir + "/SHINTON_SPEC_SALT2.npy", supernovae)
     print("Conversion done")

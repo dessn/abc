@@ -116,7 +116,7 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
 
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     supernovae = np.load(dump_file)
-    supernovae = supernovae[supernovae['CUTMASK'] == 1023]
+    supernovae = supernovae[supernovae['CUTMASK'] > 1022]
     supernovae = supernovae[supernovae["Z"] < zt]
     supernovae = supernovae[:n_sne]
     masses = np.ones(supernovae.size)

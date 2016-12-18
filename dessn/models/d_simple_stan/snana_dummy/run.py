@@ -11,7 +11,7 @@ import pandas as pd
 
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
-    supernovae = supernovae[supernovae['CUTMASK'] == 1023]
+    supernovae = supernovae[supernovae['CUTMASK'] > 1022]
     supernovae = supernovae[supernovae['Z'] < 10.3]
     masses = np.ones(supernovae.size)
     redshifts = supernovae['Z']
@@ -20,7 +20,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     apparents -= smear
     colours = supernovae['S2c']
     stretches = supernovae['S2x1']
-    return np.ones(chain_dictionary["weight"].shape)
+    # return np.ones(chain_dictionary["weight"].shape)
     existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
 
     weight = []
