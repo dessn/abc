@@ -118,8 +118,8 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
     supernovae = np.load(dump_file)
 
 
-    supernovae = supernovae[supernovae[:, 6] > 0.0, :]
-    supernovae = supernovae[supernovae[0] < zt, :]
+    supernovae = supernovae[supernovae[:, 6] > 0.0]
+    supernovae = supernovae[supernovae[:, 0] < zt]
     supernovae = supernovae[:n_sne, :]
     masses = np.ones(supernovae.size)
     redshifts = supernovae[:, 0]
