@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import inspect
 
+from numpy.lib.recfunctions import drop_fields, append_fields
 
 if __name__ == "__main__":
     file = os.path.abspath(inspect.stack()[0][1])
@@ -19,6 +20,19 @@ if __name__ == "__main__":
     dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
 
     supernovae = dataframe.to_records()
+
+    cutmask = (supernovae["CUTMASK"]) > 1022
+    cutmask = 1.0 * cutmask
+    supernovae = drop_fields(supernovae, "CUTMASK")
+    supernovae = drop_fields(supernovae, "S2x0")
+    supernovae = drop_fields(supernovae, "S2alpha")
+    supernovae = drop_fields(supernovae, "S2beta")
+    supernovae = drop_fields(supernovae, "VARNAMES:")
+    supernovae = drop_fields(supernovae, "index")
+    supernovae = append_fields(supernovae, "CUTMASK", data=cutmask, usemask=False)
+    print(supernovae.dtype)
+    supernovae = supernovae.view((supernovae.dtype[0], len(supernovae.dtype.names)))
     supernovae = supernovae.astype(np.float32)
+    print(supernovae.shape)
     np.save(data_dir + "/SHINTON_SPEC_SALT2.npy", supernovae)
     print("Conversion done")

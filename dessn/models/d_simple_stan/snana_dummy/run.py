@@ -11,15 +11,15 @@ import pandas as pd
 
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
-    supernovae = supernovae[supernovae['CUTMASK'] > 1022]
-    supernovae = supernovae[supernovae['Z'] < 10.3]
+    supernovae = supernovae[supernovae[:, 6] > 0.0]
+    supernovae = supernovae[supernovae[:, 0] < 10.3]
     masses = np.ones(supernovae.size)
-    redshifts = supernovae['Z']
-    apparents = supernovae['S2mb']
-    smear = supernovae['MAGSMEAR_COH']
+    redshifts = supernovae[:, 0]
+    apparents = supernovae[:, 1]
+    stretches = supernovae[:, 2]
+    colours = supernovae[:, 3]
+    smear = supernovae[:, 4]
     apparents -= smear
-    colours = supernovae['S2c']
-    stretches = supernovae['S2x1']
     # return np.ones(chain_dictionary["weight"].shape)
     existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
 
@@ -112,12 +112,13 @@ def get_approximate_mb_correction():
 
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     d = np.load(dump_file)
-    mask = d["CUTMASK"] == 1023
-    mB = d["S2mb"]
-    c = d["S2c"]
-    x1 = d["S2x1"]
-    mu = d["MU"]
-    smear = d['MAGSMEAR_COH']
+    print(d)
+    mask = d[:, 6] > 0.0
+    mB = d[:, 1]
+    x1 = d[:, 2]
+    c = d[:, 3]
+    mu = d[:, 5]
+    smear = d[:, 4]
     mB -= smear
     alpha = 0.14
     beta = 3.1

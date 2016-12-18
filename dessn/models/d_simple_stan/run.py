@@ -116,15 +116,17 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
 
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     supernovae = np.load(dump_file)
-    supernovae = supernovae[supernovae['CUTMASK'] > 1022]
-    supernovae = supernovae[supernovae["Z"] < zt]
-    supernovae = supernovae[:n_sne]
+
+
+    supernovae = supernovae[supernovae[:, 6] > 0.0, :]
+    supernovae = supernovae[supernovae[0] < zt, :]
+    supernovae = supernovae[:n_sne, :]
     masses = np.ones(supernovae.size)
-    redshifts = supernovae['Z']
-    apparents = supernovae['S2mb']
-    apparents -= supernovae['MAGSMEAR_COH']
-    colours = supernovae['S2c']
-    stretches = supernovae['S2x1']
+    redshifts = supernovae[:, 0]
+    apparents = supernovae[:, 1]
+    stretches = supernovae[:, 2]
+    colours = supernovae[:, 3]
+    apparents -= supernovae[: 4]
 
     obs_mBx1c_cov = []
     obs_mBx1c = []
