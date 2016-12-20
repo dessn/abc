@@ -147,7 +147,7 @@ def get_approximate_mb_correction():
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += (alpha * np.std(x1) + beta * np.std(c))
+    # width += (alpha * np.std(x1) + beta * np.std(c))
     # import matplotlib.pyplot as plt
     # from scipy.stats import norm
     # plt.plot(binc, ratio)
@@ -163,6 +163,8 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width = get_approximate_mb_correction()
+    # mB_mean += 1.5
+    # mB_width -= 1.0
     print(mB_mean, mB_width)
     data = {
         "mB_mean": mB_mean,

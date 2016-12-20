@@ -74,9 +74,12 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None)
             weights = np.ones(posterior.shape)
         if "old\\_weight" in chain.keys():
             ow = chain["old\\_weight"]
-            ow -= ow.min()
-            ow = np.exp(ow)
+            # ow -= ow.min()
+            # ow = np.exp(ow)
             del chain["old\\_weight"]
+        elif "old_weight" in chain.keys():
+            ow = chain["old_weight"]
+            del chain["old_weight"]
         else:
             ow = np.ones(posterior.shape)
         print(chain.keys())
@@ -84,6 +87,8 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None)
             latex = name_map[param]
             truth_val = truths[latex]
             shape = truth_val.shape
+            if not replace:
+                del chain[param]
             if len(shape) > 1 or latex not in chain: continue  # Dont do 2D parameters
             for i in range(shape[0]):
                 column = chain[latex][:, i]

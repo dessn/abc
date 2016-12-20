@@ -23,7 +23,7 @@ def debug_plots(std):
     c.plot(filename="output.png", parameters=9, truth=truth, figsize=1.3)
     # c = ChainConsumer()
     # c.add_chain(chain, weights=w, name="corrected")
-    c.plot_walks(chain="corrected", filename="walks.png", truth=truth)
+    c.plot_walks(chains="corrected", filename="walks.png", truth=truth)
 
 if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
