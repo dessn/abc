@@ -117,7 +117,6 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     supernovae = np.load(dump_file)
 
-
     supernovae = supernovae[supernovae[:, 6] > 0.0]
     supernovae = supernovae[supernovae[:, 0] < zt]
     supernovae = supernovae[:n_sne, :]
@@ -126,7 +125,7 @@ def get_snana_dummy_data(n_sne=500, zt=10.3):
     apparents = supernovae[:, 1]
     stretches = supernovae[:, 2]
     colours = supernovae[:, 3]
-    apparents -= supernovae[:, 4]
+    apparents += supernovae[:, 4]
 
     obs_mBx1c_cov = []
     obs_mBx1c = []

@@ -19,7 +19,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     stretches = supernovae[:, 2]
     colours = supernovae[:, 3]
     smear = supernovae[:, 4]
-    apparents -= smear
+    apparents += smear
     # return np.ones(chain_dictionary["weight"].shape)
     existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
 
@@ -118,7 +118,7 @@ def get_approximate_mb_correction():
     c = d[:, 3]
     mu = d[:, 5]
     smear = d[:, 4]
-    mB -= smear
+    mB += smear
     alpha = 0.14
     beta = 3.1
     MB = mB - mu + alpha * x1 - beta * c
