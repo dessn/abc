@@ -142,7 +142,7 @@ transformed parameters {
         // Get the approximate bias correction
         bias_correction[i] = log_sum_exp(normal_lccdf(mbs[i] | mB_mean, mB_width) - mean_c, log(0.01));
     }
-    weight = sum(bias_correction) - Om;
+    weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 1) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
 
 }
