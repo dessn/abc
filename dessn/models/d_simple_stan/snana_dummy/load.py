@@ -11,7 +11,7 @@ def debug_plots(std):
 
     res = load_stan_from_folder(std, merge=True, cut=False)
     chain, posterior, t, p, f, l, w, ow = res
-    print(w.mean(), np.std(w))
+    print(w.mean(), np.std(w), np.mean(np.log(w)), np.std(np.log(w)))
     # import matplotlib.pyplot as plt
     # plt.hist(np.log(w), 100)
     # plt.show()
