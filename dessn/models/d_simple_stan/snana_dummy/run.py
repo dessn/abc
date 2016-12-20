@@ -147,14 +147,14 @@ def get_approximate_mb_correction():
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    # width += (alpha * np.std(x1) + beta * np.std(c))
+    width += (alpha * np.std(x1) + beta * np.std(c))
     # import matplotlib.pyplot as plt
     # from scipy.stats import norm
     # plt.plot(binc, ratio)
     # plt.plot(binc, 1-norm.cdf(binc, mean, width + 0.02))
     # plt.show()
     # exit()
-    return mean, width + 0.02
+    return mean, width
 
 
 if __name__ == "__main__":
