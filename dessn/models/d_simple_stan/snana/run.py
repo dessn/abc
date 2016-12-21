@@ -11,16 +11,17 @@ import pandas as pd
 
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
-    supernovae = supernovae[supernovae['CUTMASK'] == 1023]
-    masses = np.ones(supernovae.size)
-    redshifts = supernovae['Z']
-    apparents = supernovae['S2mb']
-    colours = supernovae['S2c']
-    stretches = supernovae['S2x1']
-    smear = supernovae['MAGSMEAR_COH']
+    supernovae = supernovae[supernovae[:, 6] > 0.0]
+    supernovae = supernovae[supernovae[:, 0] < 10.3]
+    masses = np.ones(supernovae.shape[0])
+    redshifts = supernovae[:, 0]
+    apparents = supernovae[:, 1]
+    stretches = supernovae[:, 2]
+    colours = supernovae[:, 3]
+    smear = supernovae[:, 4]
     apparents += smear
-
-    existing_prob = norm.pdf(colours, 0, 0.1) * norm.pdf(stretches, 0, 1) * norm.pdf(smear, 0, 0.1)
+    # return np.ones(chain_dictionary["weight"].shape)
+    existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
 
     weight = []
     for i in range(chain_dictionary["mean_MB"].size):
@@ -112,12 +113,30 @@ def get_approximate_mb_correction():
 
     dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
     d = np.load(dump_file)
-    mask = d["CUTMASK"] == 1023
-    mB = d["S2mb"]
-    c = d["S2c"]
-    x1 = d["S2x1"]
-    alpha = 0.15
-    beta = 3.4
+    mask = d[:, 6] > 0.0
+    mB = d[:, 1]
+    x1 = d[:, 2]
+    c = d[:, 3]
+    mu = d[:, 5]
+    smear = d[:, 4]
+    mB += smear
+    alpha = 0.14
+    beta = 3.1
+    MB = mB - mu + alpha * x1 - beta * c
+    # import matplotlib.pyplot as plt
+    # mask = mask #& (d["Z"] < 0.3)
+    # fig, axes = plt.subplots(4)
+    # print(MB[mask])
+    # axes[0].hist(MB[mask], 50, normed=True, histtype="step")
+    # axes[0].hist(MB, 50, normed=True, histtype="step")
+    # axes[1].hist(x1[mask], 50, normed=True, histtype="step")
+    # axes[1].hist(x1, 50, normed=True, histtype="step")
+    # axes[2].hist(c[mask], 50, normed=True, histtype="step")
+    # axes[2].hist(c, 50, normed=True, histtype="step")
+    # axes[3].hist(mB[mask], 50, normed=True, histtype="step")
+    # axes[3].hist(mB, 50, normed=True, histtype="step")
+    # plt.show()
+    # exit()
 
     bins = np.linspace(19.5, 25, 40)
 
@@ -126,15 +145,18 @@ def get_approximate_mb_correction():
     binc = 0.5 * (bins[:-1] + bins[1:])
     ratio = 1.0 * hist_passed / hist_all
     ratio = ratio / ratio.max()
-    # import matplotlib.pyplot as plt
-    # plt.plot(binc, ratio)
-    # plt.show()
-    # exit()
+
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += alpha * np.std(x1) + beta * np.std(c)
-    return mean, width + 0.02
+    width += 0.75 * (alpha * np.std(x1) + beta * np.std(c))
+    # import matplotlib.pyplot as plt
+    # from scipy.stats import norm
+    # plt.plot(binc, ratio)
+    # plt.plot(binc, 1-norm.cdf(binc, mean, width + 0.02))
+    # plt.show()
+    # exit()
+    return mean, width
 
 
 if __name__ == "__main__":

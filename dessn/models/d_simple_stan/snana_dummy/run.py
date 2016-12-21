@@ -138,6 +138,7 @@ def get_approximate_mb_correction():
     # exit()
 
     bins = np.linspace(19.5, 25, 40)
+
     hist_all, bins = np.histogram(mB, bins=bins)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
     binc = 0.5 * (bins[:-1] + bins[1:])
