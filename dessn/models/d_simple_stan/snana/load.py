@@ -16,12 +16,26 @@ def debug_plots(std):
     # plt.hist(np.log(w), 100)
     # plt.show()
     # exit()
+    logw = np.log(w)
+    m = np.mean(logw)
+    s = np.std(logw)
+    print(m, s)
+    logw -= (m + 3 * s)
+    good = logw < 0
+    logw *= good
+    w = np.exp(logw)
+
+    c = ChainConsumer()
+    c.add_chain(chain, weights=w, name="corrected")
+    c.configure(summary=True)
+    c.plot(figsize=2.0, filename="output.png", parameters=9)
+
     c = ChainConsumer()
     c.add_chain(chain, name="uncorrected")
     c.add_chain(chain, weights=w, name="corrected")
     # c.add_chain(chain, name="calib")
-    c.plot(filename="output.png", parameters=9, figsize=1.3)
-    c.plot_walks(chain=1, filename="walks.png")
+    c.plot(filename="output_comparison.png", parameters=9, figsize=1.3)
+    c.plot_walks(chains=1, filename="walks.png")
     # c.add_chain(chain, name="approx")
     # c.add_chain(chain, weights=w, name="full")
     # c.plot(filename="output.png", truth=t)

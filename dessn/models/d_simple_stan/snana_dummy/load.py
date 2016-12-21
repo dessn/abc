@@ -16,6 +16,23 @@ def debug_plots(std):
     # plt.hist(np.log(w), 100)
     # plt.show()
     # exit()
+
+    logw = np.log(w)
+    m = np.mean(logw)
+    s = np.std(logw)
+    print(m, s)
+    logw -= (m + 3 * s)
+    good = logw < 0
+    logw *= good
+    w = np.exp(logw)
+
+    sorti = np.argsort(w)
+    for key in chain.keys():
+        chain[key] = chain[key][sorti]
+    w = w[sorti]
+    ow = ow[sorti]
+    posterior = posterior[sorti]
+
     c = ChainConsumer()
     truth = [0.3, 0.14, 3.1, -19.365, 0, 0, 0.1, 1.0, 0.1, 0, 0, 0, 0, 0, 0]
     c.add_chain(chain, name="uncorrected", posterior=posterior)
