@@ -33,8 +33,11 @@ def debug_plots(std):
 
     c = ChainConsumer()
     truth = [0.3, 0.14, 3.1, -19.365, 0, 0, 0.1, 1.0, 0.1, 0, 0, 0, 0, 0, 0]
+    chain["posterior"] = posterior
+    # chain["log_weight"] =np.log(w)
     c.add_chain(chain, name="uncorrected", posterior=posterior)
     # c.add_chain(chain, weights=w, name="corrected", posterior=posterior)
+    c.configure(color_params="posterior")
     c.plot(filename="output.png", parameters=9, truth=truth, figsize=1.3)
     # c = ChainConsumer()
     # c.add_chain(chain, weights=w, name="corrected")
