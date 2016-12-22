@@ -130,13 +130,13 @@ transformed parameters {
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
-        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
+        // mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Convert population into absolute magnitude
-        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3];// + mass_correction * mass[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
@@ -147,7 +147,7 @@ transformed parameters {
     // Calculate the weights
     for (i in 1:n_sim) {
         mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
-        sim_MBx1c[i][1] = sim_mBx1c[i][1] - sim_model_mu[i] + alpha*sim_mBx1c[i][2] - beta*sim_mBx1c[i][3] + mass_correction * sim_mass[i];
+        sim_MBx1c[i][1] = sim_mBx1c[i][1] - sim_model_mu[i] + alpha*sim_mBx1c[i][2] - beta*sim_mBx1c[i][3];// + mass_correction * sim_mass[i];
         sim_MBx1c[i][2] = sim_mBx1c[i][2];
         sim_MBx1c[i][3] = sim_mBx1c[i][3];
 

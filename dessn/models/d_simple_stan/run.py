@@ -9,6 +9,7 @@ import pandas as pd
 from numpy.random import uniform
 import sys
 import socket
+from scipy.stats import norm
 
 
 def get_truths_labels_significance():
@@ -169,6 +170,41 @@ def get_simulation_data(n=5000):
     }
 
 
+def get_snana_simulation_data(n=5000):
+    print("Getting SNANA simluation data")
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    data_dir = os.path.abspath(dir_name + "/data")
+
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
+    supernovae = np.load(dump_file)
+
+    supernovae = supernovae[supernovae[:, 6] > 0.0]
+    supernovae = supernovae[:n, :]
+    masses = np.ones(supernovae.shape[0])
+    redshifts = supernovae[:, 0]
+    apparents = supernovae[:, 1]
+    stretches = supernovae[:, 2]
+    colours = supernovae[:, 3]
+    smear = supernovae[:, 4]
+    apparents += smear
+
+    sim_log_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
+
+    obs_mBx1c = []
+    for mb, x1, c in zip(apparents, stretches, colours):
+        vector = np.array([mb, x1, c])
+        obs_mBx1c.append(vector)
+
+    return {
+        "n_sim": n,
+        "sim_mBx1c": obs_mBx1c,
+        "sim_redshifts": redshifts,
+        "sim_mass": masses,
+        "sim_log_prob": sim_log_prob
+    }
+
+
 def get_physical_data(n_sne, seed=0):
     print("Getting simple data")
     vals = get_truths_labels_significance()
@@ -259,7 +295,10 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=
     redshifts = data["redshifts"]
     n_z = 1000
     if add_sim:
-        sim_data = get_simulation_data(n=add_sim)
+        if snana or snana_dummy or fitres:
+            sim_data = get_snana_simulation_data(n=add_sim)
+        else:
+            sim_data = get_simulation_data(n=add_sim)
         n_sim = sim_data["n_sim"]
         sim_redshifts = sim_data["sim_redshifts"]
 
