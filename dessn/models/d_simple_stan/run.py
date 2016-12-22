@@ -382,7 +382,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     if short:
         w, n = 500, 1000
     else:
-        w, n = 3000, 50000
+        w, n = 2000, 5000
     data = get_analysis_data(seed=n_cosmology, **data_args)
     # import matplotlib.pyplot as plt
     # plt.hist([a[0] for a in data["obs_mBx1c"]], 30)
