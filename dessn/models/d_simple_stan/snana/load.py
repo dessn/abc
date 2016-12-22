@@ -20,14 +20,14 @@ def debug_plots(std):
     m = np.mean(logw)
     s = np.std(logw)
     print(m, s)
-    logw -= (m + 3 * s)
+    logw -= (m + 2.5 * s)
     good = logw < 0
     logw *= good
     w = np.exp(logw)
 
     c = ChainConsumer()
     c.add_chain(chain, weights=w, name="corrected")
-    c.configure(summary=True)
+    c.configure(summary=True, sigmas=[0,1,2])
     c.plot(figsize=2.0, filename="output.png", parameters=9)
 
     c = ChainConsumer()
