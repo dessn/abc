@@ -48,9 +48,9 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
-        if reweight < 1:
-            for key in chain_dictionary.keys():
-                print(key, chain_dictionary[key][i])
+        # if reweight < 1:
+            # for key in chain_dictionary.keys():
+                # print(key, chain_dictionary[key][i])
         weight.append(reweight)
 
     weights = np.array(weight)
@@ -82,7 +82,7 @@ def approx_bias():
 
 
 def add_weight_to_chain(chain_dictionary, n_sne):
-    print(n_sne)
+    # print(n_sne)
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     data_dir = os.path.abspath(dir_name + "/../data")

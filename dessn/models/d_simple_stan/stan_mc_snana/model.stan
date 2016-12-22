@@ -146,7 +146,7 @@ transformed parameters {
 
     // Calculate the weights
     for (i in 1:n_sim) {
-        mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
+        // mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
         sim_MBx1c[i][1] = sim_mBx1c[i][1] - sim_model_mu[i] + alpha*sim_mBx1c[i][2] - beta*sim_mBx1c[i][3];// + mass_correction * sim_mass[i];
         sim_MBx1c[i][2] = sim_mBx1c[i][2];
         sim_MBx1c[i][3] = sim_mBx1c[i][3];

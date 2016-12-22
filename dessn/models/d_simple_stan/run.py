@@ -405,6 +405,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     # Dump relevant chains to file
     print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     with open(t, 'wb') as output:
+        params = [p for p in params if p in fit.sim["pars_oi"]]
         dictionary = fit.extract(pars=params)
         if weight_function is not None:
             weight_function(dictionary, n_sne)
