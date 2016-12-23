@@ -164,7 +164,7 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width = get_approximate_mb_correction()
-    mB_mean += 1.5
+    # mB_mean += 1.5
     # mB_width -= 1.0
     print(mB_mean, mB_width)
     data = {
