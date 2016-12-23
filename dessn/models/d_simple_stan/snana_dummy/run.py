@@ -105,7 +105,7 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     return chain_dictionary
 
 
-def get_approximate_mb_correction():
+def get_approximate_mb_correction(ratio2=0.75):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     data_dir = os.path.abspath(dir_name + "/../data")
@@ -148,7 +148,7 @@ def get_approximate_mb_correction():
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += 0.75 * (alpha * np.std(x1) + beta * np.std(c))
+    width += ratio2 * (alpha * np.std(x1) + beta * np.std(c))
     # import matplotlib.pyplot as plt
     # from scipy.stats import norm
     # plt.plot(binc, ratio)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width = get_approximate_mb_correction()
-    # mB_mean += 1.5
+    mB_mean += 1.5
     # mB_width -= 1.0
     print(mB_mean, mB_width)
     data = {
