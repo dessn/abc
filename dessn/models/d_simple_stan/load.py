@@ -72,6 +72,12 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None)
             del chain["weight"]
         else:
             weights = np.ones(posterior.shape)
+
+        if "calc_weight" in chain.keys():
+            del chain["calc_weight"]
+        elif "calc\\_weight" in chain.keys():
+            del chain["calc\\_weight"]
+
         if "old\\_weight" in chain.keys():
             ow = chain["old\\_weight"]
             # ow -= ow.min()
