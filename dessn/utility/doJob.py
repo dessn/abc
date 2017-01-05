@@ -78,7 +78,7 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
 #SBATCH --mem=8G
 #SBATCH -t 04:00:00
 #SBATCH -o %s/%s.o%%j
-#SBATCH -L project
+####SBATCH -L project
 ####SBATCH --qos=premium
 ####SBATCH -A dessn
 ##SBATCH --tasks-per-node=24
