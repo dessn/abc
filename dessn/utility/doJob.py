@@ -56,7 +56,7 @@ python $PROG $PARAMS %d'''
 
 
 def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
-                          num_walks=24, delete=False):
+                          num_walks=24, delete=False, partition="smp"):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
@@ -70,20 +70,22 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
         os.makedirs(output_dir)
 
     template = '''#!/bin/bash -l
-#SBATCH -p regular
+#SBATCH -p %s
 #SBATCH -J %s
 #SBATCH --array=1-%d%%%d
 #SBATCH -n 1
-##SBATCH --tasks-per-node=24
+#SBATCH --ntasks=1
+#SBATCH --mem=8G
 #SBATCH -t 04:00:00
 #SBATCH -o %s/%s.o%%j
 #SBATCH -L project
-#SBATCH --qos=premium
-#SBATCH -A dessn
+####SBATCH --qos=premium
+####SBATCH -A dessn
+##SBATCH --tasks-per-node=24
 
 IDIR=%s
 export PATH=$HOME/miniconda/bin:$PATH
-source activate mypython
+source activate sam35
 echo "Activated python"
 executable=$(which python)
 echo $executable
@@ -94,7 +96,9 @@ cd $IDIR
 srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS %d'''
 
     n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
-    t = template % (name, num_tasks, num_cpu, output_dir, name, directory, executable, num_walks)
+    t = template % (partition, name, num_tasks, num_cpu, output_dir, name, directory, executable, num_walks)
+    if partition != "smp":
+        t = t.replace("####", "#")
     with open(n, 'w') as f:
         f.write(t)
     print("SLURM Jobscript at %s" % n)

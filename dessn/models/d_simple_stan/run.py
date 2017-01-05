@@ -454,10 +454,11 @@ def run_cluster(file, n_cosmo=15, n_walks=30, n_jobs=30):
                                    outdir="log", delete=True)
         os.system("qsub %s" % filename)
         print("Submitted SGE job")
-    elif "edison" in h:
+    elif "edison" in h or "smp-login" in h:
+        partition = "regular" if "edison" in h else "smp"
         filename = write_jobscript_slurm(file, name=os.path.basename(dir_name),
                                          num_tasks=index, num_walks=n_walks, num_cpu=n_jobs,
-                                         delete=True)
+                                         delete=True, partition=partition)
         os.system("sbatch %s" % filename)
         print("Submitted SLURM job")
     else:
