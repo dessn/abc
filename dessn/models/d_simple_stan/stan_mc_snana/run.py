@@ -7,7 +7,7 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
     stan_model = os.path.dirname(file) + "/model.stan"
     data = {
-        "add_sim": 1000,
+        "add_sim": 2000,
         "snana_dummy": True,
         "sim": False
     }

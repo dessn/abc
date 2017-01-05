@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 
 def get_cosmology_dictionary():
     this_file = inspect.stack()[0][1]
-    cosmology_pickle = os.path.dirname(this_file) + os.sep + "output/cosmologies.pkl"
+    cosmology_pickle = os.path.dirname(this_file) + os.sep + "data/cosmologies.pkl"
     if os.path.exists(cosmology_pickle):
         with open(cosmology_pickle, 'rb') as f:
             cosmology_dictionary = pickle.load(f)
