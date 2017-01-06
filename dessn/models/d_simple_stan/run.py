@@ -9,7 +9,11 @@ import pandas as pd
 from numpy.random import uniform
 import sys
 import socket
-from scipy.stats import norm
+from scipy.stats import norm, multivariate_normal
+from scipy.misc import logsumexp
+from sklearn.gaussian_process import GaussianProcessRegressor
+
+from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 
 
 def get_truths_labels_significance():
@@ -205,6 +209,83 @@ def get_snana_simulation_data(n=5000):
     }
 
 
+def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
+    supernovae = supernovae[supernovae[:, 6] > 0.0]
+    supernovae = supernovae[supernovae[:, 0] < 10.3]
+    masses = np.ones(supernovae.shape[0])
+    redshifts = supernovae[:, 0]
+    apparents = supernovae[:, 1]
+    stretches = supernovae[:, 2]
+    colours = supernovae[:, 3]
+    smear = supernovae[:, 4]
+    apparents += smear
+    # return np.ones(chain_dictionary["weight"].shape)
+    existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
+
+    weight = []
+    for i in range(chain_dictionary["mean_MB"].size):
+        om = np.round(chain_dictionary["Om"][i], decimals=3)
+        key = "%0.3f" % om
+        mus = cosmologies[key](redshifts)
+
+        # dscale = chain_dictionary["dscale"][i]
+        # dratio = chain_dictionary["dratio"][i]
+        # redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
+        # mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp + dratio)
+        mass_correction = 0
+        mabs = apparents - mus + chain_dictionary["alpha"][i] * stretches - chain_dictionary["beta"][i] * colours + mass_correction * masses
+
+        mbx1cs = np.vstack((mabs, stretches, colours)).T
+        chain_MB = chain_dictionary["mean_MB"][i]
+        chain_x1 = chain_dictionary["mean_x1"][i]
+        chain_c = chain_dictionary["mean_c"][i]
+        chain_sigmas = np.array([chain_dictionary["sigma_MB"][i], chain_dictionary["sigma_x1"][i], chain_dictionary["sigma_c"][i]])
+        chain_sigmas_mat = np.dot(chain_sigmas[:, None], chain_sigmas[None, :])
+        chain_correlations = np.dot(chain_dictionary["intrinsic_correlation"][i], chain_dictionary["intrinsic_correlation"][i].T)
+        chain_pop_cov = chain_correlations * chain_sigmas_mat
+        chain_mean = np.array([chain_MB, chain_x1, chain_c])
+
+        chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
+        reweight = logsumexp(chain_prob - existing_prob)
+        # if reweight < 1:
+            # for key in chain_dictionary.keys():
+                # print(key, chain_dictionary[key][i])
+        weight.append(reweight)
+
+    weights = np.array(weight)
+    if return_mbs:
+        mean_mb = chain_dictionary["mean_MB"] - chain_dictionary["alpha"] * chain_dictionary["mean_x1"] + \
+                  chain_dictionary["beta"] * chain_dictionary["mean_c"]
+        return weights, mean_mb
+    return weights
+
+
+
+def add_weight_to_chain(chain_dictionary, n_sne):
+    # print(n_sne)
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    data_dir = os.path.abspath(dir_name + "/data")
+
+    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
+    supernovae = np.load(dump_file)
+
+    d = get_cosmology_dictionary()
+    # import matplotlib.pyplot as plt
+    # plt.hist(supernovae['S2mb'], 30)
+    # plt.show()
+    # exit()
+    weights = calculate_bias(chain_dictionary, supernovae, d)
+    existing = chain_dictionary["weight"]
+    logw = n_sne * weights - existing
+    logw -= logw.min()
+    weights2 = np.exp(-logw)
+    chain_dictionary["weight"] = weights2
+    chain_dictionary["calc_weight"] = weights
+    chain_dictionary["old_weight"] = existing
+    return chain_dictionary
+
+
 def get_physical_data(n_sne, seed=0):
     print("Getting simple data")
     vals = get_truths_labels_significance()
@@ -267,7 +348,48 @@ def get_snana_data():
     return data
 
 
-def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=0, fitres=False, **extra_args):
+def get_gp_dict(data, n_sne, add_gp):
+    inits = [init_fn(data) for i in range(add_gp)]
+    keys = inits[0].keys()
+    d = {k: np.array([i[k] for i in inits]) for k in keys}
+    d["weight"] = np.ones(add_gp)
+    add_weight_to_chain(d, n_sne)
+
+    vals = d["calc_weight"]
+    vals -= np.mean(vals)
+    vals *= n_sne
+
+    keys_to_remove = ["Posterior", "weight", "old_weight", "dscale",
+                      "dratio", "calibration", "calc_weight", "deviations"]
+    keys = [k for k in sorted(d.keys()) if k not in keys_to_remove]
+    for key in keys:
+        v = d[key]
+        if len(v.shape) > 1:
+            if len(v.shape) > 2:
+                col = []
+                for item in v:
+                    item = item.dot(item.T)
+                    col.append([item[0, 1], item[0, 2], item[1, 2]])
+                v = np.array(col)
+            else:
+                v = v.reshape((v.shape[0], -1))
+        else:
+            v = np.atleast_2d(v).T
+        d[key] = v
+
+    flat = np.hstack(tuple([d[k] for k in keys]))
+    gp = GaussianProcessRegressor()
+    gp.fit(flat, vals)
+
+    result = {
+        "n_gp": add_gp,
+        "gp_points": flat,
+        "gp_alpha": gp.alpha_
+    }
+    return result
+
+
+def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0, add_sim=0, fitres=False, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -341,6 +463,9 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, seed=0, add_sim=
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
         "calib_std": np.ones(4) * 0.01
     }
+
+    if add_gp:
+        update = {**update, **get_gp_dict(data, n, add_gp)}
 
     if add_sim:
         sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
