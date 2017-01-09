@@ -509,13 +509,10 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     else:
         w, n = 1000, 5000
     data = get_analysis_data(seed=n_cosmology, **data_args)
-    # import matplotlib.pyplot as plt
-    # plt.hist([a[0] for a in data["obs_mBx1c"]], 30)
-    # plt.axvline(24.33)
-    # plt.figure()
-    # plt.hist(data["redshifts"], 30)
-    # plt.show()
-    # exit()
+
+    def init_wrapped():
+        return init_fn(data)
+
     n_sne = data["n_sne"]
     init_pos = get_truths_labels_significance()
     params = [key[0] for key in init_pos if key[2] is not None]
@@ -526,7 +523,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     dir_name = os.path.dirname(stan_model)
     t = dir_name + "/stan_output/stan_%d_%d.pkl" % (n_cosmology, n_run)
     sm = pystan.StanModel(file=stan_model, model_name="Cosmology")
-    fit = sm.sampling(data=data, iter=n, warmup=w, chains=chains, init=init_fn)
+    fit = sm.sampling(data=data, iter=n, warmup=w, chains=chains, init=init_wrapped)
     # Dump relevant chains to file
     print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     with open(t, 'wb') as output:
