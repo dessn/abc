@@ -12,7 +12,7 @@ import socket
 from scipy.stats import norm, multivariate_normal
 from scipy.misc import logsumexp
 from sklearn.gaussian_process import GaussianProcessRegressor
-
+from sklearn.gaussian_process.kernels import ConstantKernel, RBF
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 
 
@@ -38,14 +38,13 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne, seed=0, zt=10.4):
+def get_pickle_data(n_sne, zt=10.4):
     print("Getting data from supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     pickle_file = os.path.abspath(this_dir + "/data/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
     passed = [s for s in supernovae if s["pc"] and s["z"] < zt]
-    np.random.seed(seed)
     np.random.shuffle(passed)
     passed = passed[:n_sne]
     # dd = [s["dp"] for s in passed]
@@ -260,7 +259,6 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
     return weights
 
 
-
 def add_weight_to_chain(chain_dictionary, n_sne):
     # print(n_sne)
     file = os.path.abspath(inspect.stack()[0][1])
@@ -286,11 +284,10 @@ def add_weight_to_chain(chain_dictionary, n_sne):
     return chain_dictionary
 
 
-def get_physical_data(n_sne, seed=0):
+def get_physical_data(n_sne):
     print("Getting simple data")
     vals = get_truths_labels_significance()
     mapping = {k[0]: k[1] for k in vals}
-    np.random.seed(seed)
 
     obs_mBx1c = []
     obs_mBx1c_cov = []
@@ -348,7 +345,8 @@ def get_snana_data():
     return data
 
 
-def get_gp_dict(data, n_sne, add_gp):
+def get_gp(data, n_sne, add_gp, seed=0, alpha=0.001):
+    np.random.seed(seed)
     inits = [init_fn(data) for i in range(add_gp)]
     keys = inits[0].keys()
     d = {k: np.array([i[k] for i in inits]) for k in keys}
@@ -356,8 +354,8 @@ def get_gp_dict(data, n_sne, add_gp):
     add_weight_to_chain(d, n_sne)
 
     vals = d["calc_weight"]
-    vals -= np.mean(vals)
     vals *= n_sne
+    print("Fitting GP to values ", vals.mean(), np.std(vals))
 
     keys_to_remove = ["Posterior", "weight", "old_weight", "dscale",
                       "dratio", "calibration", "calc_weight", "deviations"]
@@ -378,9 +376,17 @@ def get_gp_dict(data, n_sne, add_gp):
         d[key] = v
 
     flat = np.hstack(tuple([d[k] for k in keys]))
-    gp = GaussianProcessRegressor()
+    # kernel = ConstantKernel(constant_value_bounds="fixed") * RBF(length_scale_bounds=(1e-2, 1e2))
+    # gp = GaussianProcessRegressor(kernel=kernel, alpha=alpha)
+    gp = GaussianProcessRegressor(alpha=alpha)
     gp.fit(flat, vals)
+    # print(gp.kernel.k1, gp.kernel.k2)
+    print("gp alpha ", np.mean(gp.alpha_), np.std(gp.alpha_))
+    return None, flat, vals
 
+
+def get_gp_dict(data, n_sne, add_gp):
+    gp, flat, _ = get_gp(data, n_sne, add_gp)
     result = {
         "n_gp": add_gp,
         "gp_points": flat,
@@ -393,9 +399,10 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
+    np.random.seed(seed)
     n = 412
     if sim:
-        data = get_pickle_data(n, seed=seed)
+        data = get_pickle_data(n)
     elif snana_dummy:
         data = get_snana_dummy_data(n)
     elif snana:
@@ -403,7 +410,7 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0
     elif fitres:
         data = get_fitres_data()
     else:
-        data = get_physical_data(n, seed=seed)
+        data = get_physical_data(n)
     n_sne = data["n_sne"]
 
     cors = []
@@ -486,8 +493,8 @@ def init_fn(data=None):
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
     if data is None:
         data = get_analysis_data()
-    mass = data["mass"]
-    randoms["deviations"] = np.random.normal(scale=0.2, size=(mass.size, 3))
+    n = data["n_sne"]
+    randoms["deviations"] = np.random.normal(scale=0.2, size=(n, 3))
     chol = [[1.0, 0.0, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
