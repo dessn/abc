@@ -207,6 +207,7 @@ def plot_debug(base_folder, data_source, sort=True):
     print("Plotting all cosmologies with no cuts, with old and new weights")
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(base_folder + "/stan_output_%s" % data_source,
                                                                 cut=False, merge=True)
+    print(posterior.max(), posterior.mean(), np.std(posterior))
     if sort:
         sorti = np.argsort(w)
         for key in chain.keys():
