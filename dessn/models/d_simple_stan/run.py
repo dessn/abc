@@ -185,7 +185,7 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
     redshifts = data["redshifts"]
     n_z = 1000
     if add_sim:
-        correction_source = get_correction_data_from_data_source()
+        correction_source = get_correction_data_from_data_source(data_source)
         sim_data = get_simulation_data(correction_source=correction_source, n=add_sim)
         n_sim = sim_data["n_sim"]
         sim_redshifts = sim_data["sim_redshifts"]

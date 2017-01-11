@@ -1,6 +1,6 @@
 import os
 from dessn.models.d_simple_stan.run import run
-from dessn.models.d_simple_stan.snana_dummy.run import add_weight_to_chain
+from dessn.models.d_simple_stan.run import add_weight_to_chain
 
 if __name__ == "__main__":
 
