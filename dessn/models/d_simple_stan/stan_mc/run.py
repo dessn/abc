@@ -8,7 +8,6 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
     data = {
         "data_source": "snana_dummy",
-        "correction_source": "snana",
         "n": 500,
         "add_sim": 2000
     }

@@ -38,7 +38,6 @@ if __name__ == "__main__":
         "mB_mean": mB_mean,
         "mB_width": mB_width,
         "data_source": "snana_dummy",
-        "correction_source": "snana",
         "n": 500
     }
     print("Running %s" % file)

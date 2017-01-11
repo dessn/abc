@@ -6,7 +6,7 @@ from astropy.cosmology import FlatwCDM
 import pandas as pd
 import pickle
 from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
-from dessn.models.d_simple_stan.run import get_truths_labels_significance
+from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 
 
 def load_fit_snana_correction(n_sne):

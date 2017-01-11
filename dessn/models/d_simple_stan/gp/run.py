@@ -29,7 +29,6 @@ if __name__ == "__main__":
 
     data = {
         "data_source": "snana_dummy",
-        "correction_source": "snana",
         "n": 500
     }
     n_gp = 500

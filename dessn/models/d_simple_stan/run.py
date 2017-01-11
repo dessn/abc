@@ -9,33 +9,11 @@ import sys
 import socket
 from scipy.stats import multivariate_normal
 from scipy.misc import logsumexp
-from sklearn.gaussian_process import GaussianProcessRegressor
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
 from dessn.models.d_simple_stan.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
     get_fitres_data, get_physical_data, get_snana_data
-
-
-def get_truths_labels_significance():
-    # Name, Truth, Label, is_significant, min, max
-    result = [
-        ("Om", 0.3, r"$\Omega_m$", True, 0.1, 0.6),
-        # ("w", -1.0, r"$w$", True, -1.5, -0.5),
-        ("alpha", 0.1, r"$\alpha$", True, 0, 0.5),
-        ("beta", 3.0, r"$\beta$", True, 0, 5),
-        ("mean_MB", -19.3, r"$\langle M_B \rangle$", True, -19.6, -19),
-        ("mean_x1", 0.2, r"$\langle x_1 \rangle$", True, -0.5, 0.5),
-        ("mean_c", 0.1, r"$\langle c \rangle$", True, -0.2, 0.2),
-        ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.3),
-        ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
-        ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.4),
-        # ("c_alpha", 2.0, r"$\alpha_c$", False, -2, 2.0),
-        ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
-        ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
-        ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
-        ("calibration", np.zeros(4), r"$\delta \mathcal{Z}_%d$", True, None, None)
-    ]
-    return result
+from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 
 
 def get_simulation_data(correction_source="snana", n=5000):
@@ -159,18 +137,17 @@ def get_gp_data(n_sne, add_gp, seed=0, correction_source="snana"):
 
 def get_base_data(data_source, n):
     if data_source == "sncosmo":
-        data = get_sncosmo_pickle_data(n)
+        return get_sncosmo_pickle_data(n)
     elif data_source == "snana_dummy":
-        data = load_fit_snana_correction(n)
+        return load_fit_snana_correction(n)
     elif data_source == "snana":
-        data = get_snana_data()
+        return get_snana_data()
     elif data_source == "fitres":
-        data = get_fitres_data()
+        return get_fitres_data()
     elif data_source == "simple":
-        data = get_physical_data(n)
+        return get_physical_data(n)
     else:
         raise ValueError("Data source %s not recognised" % data_source)
-    return data
 
 
 def get_correction_data_from_data_source(data_source):
@@ -303,7 +280,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     params.append("weight")
     print("Running single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     import pystan
-    t = stan_dir + "/stan_%d_%d.pkl" % (data_args["data_source"], n_cosmology, n_run)
+    t = stan_dir + "/stan_%d_%d.pkl" % (n_cosmology, n_run)
     sm = pystan.StanModel(file=stan_model, model_name="Cosmology")
     fit = sm.sampling(data=data, iter=n, warmup=w, chains=chains, init=init_wrapped)
     # Dump relevant chains to file
