@@ -532,13 +532,14 @@ represents are post-fit weight corrections to correctly take into account bias.
 |
 |
 
-Appendix - Failed Methods
--------------------------
+Appendix 1 - MC inside Stan
+---------------------------
 
 .. warning::
 
     Given the concerns with the importance sampling methods, I also decided to implement
-    the bias corrections within STAN itself. Inserting the relevant data and structures
+    the bias corrections within STAN itself - that is, have stan perform rough Monte-Carlo
+    integration to get the bias correction in explicitly. Inserting the relevant data and structures
     into STAN such that I can perform Monte Carlo integration in a BHM framework significantly
     slows down the fits, however I believed it would at least give good results.
 
@@ -550,10 +551,26 @@ Appendix - Failed Methods
 
     In addition to the odd contours, we can also see in the walk itself that we have
     sampling issues, with some walkers sampling some areas of posterior space more than others.
+    Stan's lack of convergence here is a big issue, indicating that the surfaces adding MC integration
+    creates are intractable to stan.
 
     .. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_walk.png
         :align:     center
         :width: 50%
 
 
+Appendix 2 - Gaussian Processes
+-------------------------------
+
+.. warning::
+
+    Add documentation
+
+
+Appendix 2 - Nearest Point GP
+-----------------------------
+
+.. warning::
+
+    Add documentation
 """
