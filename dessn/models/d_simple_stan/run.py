@@ -257,10 +257,10 @@ def init_fn(n_sne):
     return randoms
 
 
-def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weight_function=None):
+def run_single_input(data_args, stan_model, stan_dir, i, num_walks_per_cosmology=20, weight_function=None):
     n_cosmology = i // num_walks_per_cosmology
     n_run = i % num_walks_per_cosmology
-    run_single(data_args, stan_model, n_cosmology, n_run, weight_function=weight_function)
+    run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, weight_function=weight_function)
 
 
 def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, weight_function=None, short=False):
@@ -342,7 +342,7 @@ def run(data_args, stan_model, filename, weight_function=None):
         if len(sys.argv) == 3:
             i = int(sys.argv[1])
             num_walks_per_cosmology = int(sys.argv[2])
-            run_single_input(data_args, stan_model, i,
+            run_single_input(data_args, stan_model, stan_dir, i,
                              num_walks_per_cosmology=num_walks_per_cosmology,
                              weight_function=weight_function)
         else:
