@@ -15,3 +15,5 @@ coveralls
 statsmodels
 joblib
 chainconsumer
+pandas
+sklearn

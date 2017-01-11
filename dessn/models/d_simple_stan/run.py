@@ -3,17 +3,17 @@ import pickle
 import inspect
 
 import shutil
-from astropy.cosmology import FlatwCDM
 import numpy as np
-import pandas as pd
 from numpy.random import uniform
 import sys
 import socket
-from scipy.stats import norm, multivariate_normal
+from scipy.stats import multivariate_normal
 from scipy.misc import logsumexp
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import ConstantKernel, RBF
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
+from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
+from dessn.models.d_simple_stan.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
+    get_fitres_data, get_physical_data, get_snana_data
 
 
 def get_truths_labels_significance():
@@ -38,161 +38,15 @@ def get_truths_labels_significance():
     return result
 
 
-def get_pickle_data(n_sne, zt=10.4):
-    print("Getting data from supernovae pickle")
-    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = os.path.abspath(this_dir + "/data/supernovae.pickle")
-    with open(pickle_file, 'rb') as pkl:
-        supernovae = pickle.load(pkl)
-    passed = [s for s in supernovae if s["pc"] and s["z"] < zt]
-    np.random.shuffle(passed)
-    passed = passed[:n_sne]
-    # dd = [s["dp"] for s in passed]
-    # for d in dd:
-    #     d[0, :] = 0
-    #     d[1, :] = 0
-    #     d[:, 0] = 0
-    #     d[:, 2] = 0
-    #     d[:, 3] = 0
-    return {
-        "n_sne": n_sne,
-        "obs_mBx1c": [s["parameters"] for s in passed],
-        "obs_mBx1c_cov": [s["covariance"] for s in passed],
-        "redshifts": np.array([s["z"] for s in passed]),
-        "mass": np.array([s["m"] for s in passed]),
-        "deta_dcalib": [s["dp"] for s in passed]
-    }
-
-
-def get_fitres_data():
-    print("Getting data from Fitres file")
-    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    fitres_file = os.path.abspath(this_dir + "/data/FITOPT000.FITRES")
-    dataframe = pd.read_csv(fitres_file, sep='\s+', skiprows=5, comment="#")
-    data = dataframe.to_records()
-
-    n_sne = data.size
-    obs_mBx1c = data[['mB', 'x1', 'c']].view((float, 3))
-
-    zs = data["zCMB"]
-    masses = data["HOST_LOGMASS"]
-    gtz = masses > 0
-    masses = gtz * masses
-
-    # massese = data["HOST_LOGMASS_ERR"]
-
-    mbs = data["mB"]
-    x0s = data["x0"]
-    x1s = data["x1"]
-    cs = data["c"]
-
-    mbse = data["mBERR"]
-    x1se = data["x1ERR"]
-    cse = data["cERR"]
-
-    cov_x1_c = data["COV_x1_c"]
-    cov_x0_c = data["COV_c_x0"]
-    cov_x1_x0 = data["COV_x1_x0"]
-
-    covs = []
-    for mb, x0, x1, c, mbe, x1e, ce, cx1c, cx0c, cx1x0 in zip(mbs, x0s, x1s, cs, mbse, x1se, cse, cov_x1_c, cov_x0_c,
-                                                              cov_x1_x0):
-        cmbx1 = -5 * cx1x0 / (2 * x0 * np.log(10))
-        cmbc = -5 * cx0c / (2 * x0 * np.log(10))
-        cov = np.array([[mbe * mbe, cmbx1, cmbc], [cmbx1, x1e * x1e, cx1c], [cmbc, cx1c, ce * ce]])
-        covs.append(cov)
-
-    return {
-        "n_sne": n_sne,
-        "obs_mBx1c": obs_mBx1c,
-        "obs_mBx1c_cov": covs,
-        "redshifts": zs,
-        "mass": masses,
-        "deta_dcalib": np.zeros((n_sne, 3, 4))
-    }
-
-
-def get_snana_dummy_data(n_sne=500, zt=10.3):
-    print("Getting SNANA dummy data")
-    file = os.path.abspath(inspect.stack()[0][1])
-    dir_name = os.path.dirname(file)
-    data_dir = os.path.abspath(dir_name + "/data")
-
-    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
-    supernovae = np.load(dump_file)
-
-    supernovae = supernovae[supernovae[:, 6] > 0.0]
-    supernovae = supernovae[supernovae[:, 0] < zt]
-    supernovae = supernovae[:n_sne, :]
-    masses = np.ones(supernovae.shape[0])
-    redshifts = supernovae[:, 0]
-    apparents = supernovae[:, 1]
-    stretches = supernovae[:, 2]
-    colours = supernovae[:, 3]
-    apparents += supernovae[:, 4]
-
-    obs_mBx1c_cov = []
-    obs_mBx1c = []
-    for mb, x1, c in zip(apparents, stretches, colours):
-        vector = np.array([mb, x1, c])
-        # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.2, 0.05]) ** 2
-        cov = np.diag(diag)
-        vector += np.random.multivariate_normal([0, 0, 0], cov)
-        # vector[0] += np.random.normal(0, 0.1)
-        obs_mBx1c_cov.append(cov)
-        obs_mBx1c.append(vector)
-
-    covs = np.array(obs_mBx1c_cov)
-
-    return {
-        "n_sne": n_sne,
-        "obs_mBx1c": obs_mBx1c,
-        "obs_mBx1c_cov": covs,
-        "redshifts": redshifts,
-        "mass": masses,
-        "deta_dcalib": np.zeros((n_sne, 3, 4))
-    }
-
-
-def get_simulation_data(n=5000):
-    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = this_dir + "/data/supernovae_passed.npy"
-    supernovae = np.load(pickle_file)
-    mask = supernovae[:, 6] == 1
-    supernovae = supernovae[mask, :]
-    if n == -1:
-        n = supernovae.shape[0]
-    supernovae = supernovae[:n, :]
-    return {
-        "n_sim": n,
-        "sim_mBx1c": supernovae[:, 1:4],
-        "sim_log_prob": supernovae[:, 7],
-        "sim_redshifts": supernovae[:, 5],
-        "sim_mass": supernovae[:, 4]
-    }
-
-
-def get_snana_simulation_data(n=5000):
-    print("Getting SNANA simluation data")
-    file = os.path.abspath(inspect.stack()[0][1])
-    dir_name = os.path.dirname(file)
-    data_dir = os.path.abspath(dir_name + "/data")
-
-    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
-    supernovae = np.load(dump_file)
-
-    supernovae = supernovae[supernovae[:, 6] > 0.0]
-    supernovae = supernovae[:n, :]
-    masses = np.ones(supernovae.shape[0])
-    redshifts = supernovae[:, 0]
-    apparents = supernovae[:, 1]
-    stretches = supernovae[:, 2]
-    colours = supernovae[:, 3]
-    smear = supernovae[:, 4]
-    apparents += smear
-
-    sim_log_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
+def get_simulation_data(correction_source="snana", n=5000):
+    print("Getting %s simulation data" % correction_source)
+    supernovae = load_correction_supernova(correction_source=correction_source)
+    redshifts = supernovae["redshifts"][:n]
+    apparents = supernovae["apparents"][:n]
+    stretches = supernovae["stretches"][:n]
+    colours = supernovae["colours"][:n]
+    existing_prob = supernovae["existing_prob"][:n]
+    masses = supernovae["masses"][:n]
 
     obs_mBx1c = []
     for mb, x1, c in zip(apparents, stretches, colours):
@@ -204,22 +58,19 @@ def get_snana_simulation_data(n=5000):
         "sim_mBx1c": obs_mBx1c,
         "sim_redshifts": redshifts,
         "sim_mass": masses,
-        "sim_log_prob": sim_log_prob
+        "sim_log_prob": existing_prob
     }
 
 
-def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
-    supernovae = supernovae[supernovae[:, 6] > 0.0]
-    supernovae = supernovae[supernovae[:, 0] < 10.3]
-    masses = np.ones(supernovae.shape[0])
-    redshifts = supernovae[:, 0]
-    apparents = supernovae[:, 1]
-    stretches = supernovae[:, 2]
-    colours = supernovae[:, 3]
-    smear = supernovae[:, 4]
-    apparents += smear
-    # return np.ones(chain_dictionary["weight"].shape)
-    existing_prob = norm.logpdf(colours, 0, 0.1) + norm.logpdf(stretches, 0, 1) + norm.logpdf(smear, 0, 0.1)
+def calculate_bias(chain_dictionary, supernovae, cosmologies):
+    """ Calculates the correct per supernova bias for each step in chain_dictionary,
+    using the supernovae sample and dist_mod interpolators found in cosmologies. """
+    redshifts = supernovae["redshifts"]
+    apparents = supernovae["apparents"]
+    stretches = supernovae["stretches"]
+    colours = supernovae["colours"]
+    existing_prob = supernovae["existing_prob"]
+    masses = supernovae["masses"]
 
     weight = []
     for i in range(chain_dictionary["mean_MB"].size):
@@ -246,112 +97,39 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, return_mbs=False):
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
         reweight = logsumexp(chain_prob - existing_prob)
-        # if reweight < 1:
-            # for key in chain_dictionary.keys():
-                # print(key, chain_dictionary[key][i])
         weight.append(reweight)
 
     weights = np.array(weight)
-    if return_mbs:
-        mean_mb = chain_dictionary["mean_MB"] - chain_dictionary["alpha"] * chain_dictionary["mean_x1"] + \
-                  chain_dictionary["beta"] * chain_dictionary["mean_c"]
-        return weights, mean_mb
     return weights
 
 
-def add_weight_to_chain(chain_dictionary, n_sne):
-    # print(n_sne)
-    file = os.path.abspath(inspect.stack()[0][1])
-    dir_name = os.path.dirname(file)
-    data_dir = os.path.abspath(dir_name + "/data")
-
-    dump_file = os.path.abspath(data_dir + "/SHINTON_SPEC_SALT2.npy")
-    supernovae = np.load(dump_file)
-
+def add_weight_to_chain(chain_dictionary, n_sne, correction_source):
+    # Load supernova for correction
+    supernovae = load_correction_supernova(correction_source=correction_source)
+    # Load premade cosmology dictionary to speed up dist_mod calculation
     d = get_cosmology_dictionary()
-    # import matplotlib.pyplot as plt
-    # plt.hist(supernovae['S2mb'], 30)
-    # plt.show()
-    # exit()
+    # Get the weights
     weights = calculate_bias(chain_dictionary, supernovae, d)
+    # Get the approximation correction used in stan
     existing = chain_dictionary["weight"]
+    # Reweight the chain to match the difference from actual to approximation correction
     logw = n_sne * weights - existing
     logw -= logw.min()
     weights2 = np.exp(-logw)
+    # weight is the reweighted chain. calc_weight is the actual (log) correction for one SN. old_weight is the approx
     chain_dictionary["weight"] = weights2
     chain_dictionary["calc_weight"] = weights
     chain_dictionary["old_weight"] = existing
     return chain_dictionary
 
 
-def get_physical_data(n_sne):
-    print("Getting simple data")
-    vals = get_truths_labels_significance()
-    mapping = {k[0]: k[1] for k in vals}
-
-    obs_mBx1c = []
-    obs_mBx1c_cov = []
-    obs_mBx1c_cor = []
-    deta_dcalib = []
-
-    redshifts = np.linspace(0.05, 1.1, n_sne)
-    cosmology = FlatwCDM(70.0, mapping["Om"]) #, w0=mapping["w"])
-    dist_mod = cosmology.distmod(redshifts).value
-
-    redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
-    alpha = mapping["alpha"]
-    beta = mapping["beta"]
-    dscale = mapping["dscale"]
-    dratio = mapping["dratio"]
-    p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
-    means = np.array([mapping["mean_MB"], mapping["mean_x1"], mapping["mean_c"]])
-    sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
-    sigmas_mat = np.dot(sigmas[:, None], sigmas[None, :])
-    correlations = np.dot(mapping["intrinsic_correlation"], mapping["intrinsic_correlation"].T)
-    pop_cov = correlations * sigmas_mat
-    for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
-
-        # Generate the actual mB, x1 and c values
-        MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-        mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
-        mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
-        vector = np.array([mb, x1, c])
-        # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.3, 0.05]) ** 2
-        cov = np.diag(diag)
-        vector += np.random.multivariate_normal([0, 0, 0], cov)
-        cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
-        obs_mBx1c_cor.append(cor)
-        obs_mBx1c_cov.append(cov)
-        obs_mBx1c.append(vector)
-        deta_dcalib.append(np.ones((3,4)))
-
-    return {
-        "n_sne": n_sne,
-        "obs_mBx1c": obs_mBx1c,
-        "obs_mBx1c_cov": obs_mBx1c_cov,
-        "deta_dcalib": deta_dcalib,
-        "redshifts": redshifts,
-        "mass": p_high_masses
-    }
-
-
-def get_snana_data():
-    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    filename = this_dir + "/data/des_sim.pickle"
-    print("Getting SNANA data")
-    with open(filename, 'rb') as f:
-        data = pickle.load(f)
-    return data
-
-
-def get_gp(data, n_sne, add_gp, seed=0, alpha=0.001):
+def get_gp_data(n_sne, add_gp, seed=0, correction_source="snana"):
     np.random.seed(seed)
-    inits = [init_fn(data) for i in range(add_gp)]
+    inits = [init_fn(n_sne) for i in range(add_gp)]
     keys = inits[0].keys()
     d = {k: np.array([i[k] for i in inits]) for k in keys}
     d["weight"] = np.ones(add_gp)
-    add_weight_to_chain(d, n_sne)
+    add_weight_to_chain(d, n_sne, correction_source=correction_source)
 
     vals = d["calc_weight"]
     vals *= n_sne
@@ -376,41 +154,47 @@ def get_gp(data, n_sne, add_gp, seed=0, alpha=0.001):
         d[key] = v
 
     flat = np.hstack(tuple([d[k] for k in keys]))
-    # kernel = ConstantKernel(constant_value_bounds="fixed") * RBF(length_scale_bounds=(1e-2, 1e2))
-    # gp = GaussianProcessRegressor(kernel=kernel, alpha=alpha)
-    gp = GaussianProcessRegressor(alpha=alpha)
-    gp.fit(flat, vals)
-    # print(gp.kernel.k1, gp.kernel.k2)
-    print("gp alpha ", np.mean(gp.alpha_), np.std(gp.alpha_))
-    return None, flat, vals
+    return flat, vals, keys
 
 
-def get_gp_dict(data, n_sne, add_gp):
-    gp, flat, _ = get_gp(data, n_sne, add_gp)
-    result = {
-        "n_gp": add_gp,
-        "gp_points": flat,
-        "gp_alpha": gp.alpha_
-    }
-    return result
+def get_base_data(data_source, n):
+    if data_source == "sncosmo":
+        data = get_sncosmo_pickle_data(n)
+    elif data_source == "snana_dummy":
+        data = load_fit_snana_correction(n)
+    elif data_source == "snana":
+        data = get_snana_data()
+    elif data_source == "fitres":
+        data = get_fitres_data()
+    elif data_source == "simple":
+        data = get_physical_data(n)
+    else:
+        raise ValueError("Data source %s not recognised" % data_source)
+    return data
 
 
-def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0, add_sim=0, fitres=False, **extra_args):
+def get_correction_data_from_data_source(data_source):
+    if data_source == "sncosmo":
+        return "sncosmo"
+    elif data_source == "snana_dummy":
+        return "snana"
+    elif data_source == "snana":
+        return "snana"
+    elif data_source == "fitres":
+        return "snana"
+    elif data_source == "simple":
+        return None
+    else:
+        raise ValueError("Data source %s not recognised" % data_source)
+
+
+def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
     np.random.seed(seed)
-    n = 412
-    if sim:
-        data = get_pickle_data(n)
-    elif snana_dummy:
-        data = get_snana_dummy_data(n)
-    elif snana:
-        data = get_snana_data()
-    elif fitres:
-        data = get_fitres_data()
-    else:
-        data = get_physical_data(n)
+    data = get_base_data(data_source, n)
+
     n_sne = data["n_sne"]
 
     cors = []
@@ -424,10 +208,8 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0
     redshifts = data["redshifts"]
     n_z = 1000
     if add_sim:
-        if snana or snana_dummy or fitres:
-            sim_data = get_snana_simulation_data(n=add_sim)
-        else:
-            sim_data = get_simulation_data(n=add_sim)
+        correction_source = get_correction_data_from_data_source()
+        sim_data = get_simulation_data(correction_source=correction_source, n=add_sim)
         n_sim = sim_data["n_sim"]
         sim_redshifts = sim_data["sim_redshifts"]
 
@@ -471,9 +253,6 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0
         "calib_std": np.ones(4) * 0.01
     }
 
-    if add_gp:
-        update = {**update, **get_gp_dict(data, n, add_gp)}
-
     if add_sim:
         sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
         sim_sorted_vals.sort()
@@ -488,13 +267,10 @@ def get_analysis_data(sim=False, snana=False, snana_dummy=True, add_gp=0, seed=0
     return {**data, **update, **sim_data, **extra_args}
 
 
-def init_fn(data=None):
+def init_fn(n_sne):
     vals = get_truths_labels_significance()
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
-    if data is None:
-        data = get_analysis_data()
-    n = data["n_sne"]
-    randoms["deviations"] = np.random.normal(scale=0.2, size=(n, 3))
+    randoms["deviations"] = np.random.normal(scale=0.2, size=(n_sne, 3))
     chol = [[1.0, 0.0, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
@@ -510,7 +286,7 @@ def run_single_input(data_args, stan_model, i, num_walks_per_cosmology=20, weigh
     run_single(data_args, stan_model, n_cosmology, n_run, weight_function=weight_function)
 
 
-def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_function=None, short=False):
+def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
         w, n = 500, 1000
     else:
@@ -518,7 +294,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     data = get_analysis_data(seed=n_cosmology, **data_args)
 
     def init_wrapped():
-        return init_fn(data)
+        return init_fn(data["n_sne"])
 
     n_sne = data["n_sne"]
     init_pos = get_truths_labels_significance()
@@ -527,8 +303,7 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
     params.append("weight")
     print("Running single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     import pystan
-    dir_name = os.path.dirname(stan_model)
-    t = dir_name + "/stan_output/stan_%d_%d.pkl" % (n_cosmology, n_run)
+    t = stan_dir + "/stan_%d_%d.pkl" % (data_args["data_source"], n_cosmology, n_run)
     sm = pystan.StanModel(file=stan_model, model_name="Cosmology")
     fit = sm.sampling(data=data, iter=n, warmup=w, chains=chains, init=init_wrapped)
     # Dump relevant chains to file
@@ -537,39 +312,22 @@ def run_single(data_args, stan_model, n_cosmology, n_run, chains=1, weight_funct
         params = [p for p in params if p in fit.sim["pars_oi"]]
         dictionary = fit.extract(pars=params)
         if weight_function is not None:
-            weight_function(dictionary, n_sne)
+            correction_source = get_correction_data_from_data_source(data_args["data_source"])
+            weight_function(dictionary, n_sne, correction_source)
         pickle.dump(dictionary, output)
 
 
-def get_mc_simulation_data():
-    pickle_file = os.path.dirname(inspect.stack()[0][1]) + "/data/supernovae_all.npy"
-    supernovae = np.load(pickle_file)
-
-    return {
-        "n_sim": supernovae.shape[0],
-        "sim_MB": supernovae[:, 0],
-        "sim_mB": supernovae[:, 1],
-        "sim_x1": supernovae[:, 2],
-        "sim_c": supernovae[:, 3],
-        "sim_passed": supernovae[:, 6],
-        "sim_log_prob": supernovae[:, 7],
-        "sim_redshift": supernovae[:, 5],
-        "sim_mass": supernovae[:, 4]
-    }
-
-
-def run_multiple(data_args, stan_model, n_cosmology, weight_function=None):
+def run_multiple(data_args, stan_model, stan_dir, n_cosmology, weight_function=None):
     print("Running short steps")
-    run_single(data_args, stan_model, n_cosmology, 0, chains=4, weight_function=weight_function, short=True)
+    run_single(data_args, stan_model, stan_dir, n_cosmology, 0, chains=4, weight_function=weight_function, short=True)
 
 
-def run_cluster(file, n_cosmo=15, n_walks=30, n_jobs=30):
+def run_cluster(file, stan_output_dir, n_cosmo=15, n_walks=30, n_jobs=30):
     print("Running %s for %d cosmologies, %d walks per cosmology, using %d cores"
           % (file, n_cosmo, n_walks, n_jobs))
 
     index = n_cosmo * n_walks
     dir_name = os.path.dirname(file)
-    stan_output_dir = dir_name + "/stan_output"
     h = socket.gethostname()
     from dessn.utility.doJob import write_jobscript, write_jobscript_slurm
 
@@ -596,9 +354,13 @@ def run_cluster(file, n_cosmo=15, n_walks=30, n_jobs=30):
 
 def run(data_args, stan_model, filename, weight_function=None):
     h = socket.gethostname()
+    assert "data_source" in data_args.keys(), "You must specify a data_source in the data_args!"
+    stan_dir = os.path.dirname(os.path.abspath(filename)) + "/stan_output_%s" % data_args["data_source"]
+    if not os.path.exists(stan_dir):
+        os.makedirs(stan_dir)
     if "science" in h:
         n_cosmology = 0 if len(sys.argv) == 1 else int(sys.argv[1])
-        run_multiple(data_args, stan_model, n_cosmology, weight_function=weight_function)
+        run_multiple(data_args, stan_model, stan_dir, n_cosmology, weight_function=weight_function)
     else:
         if len(sys.argv) == 3:
             i = int(sys.argv[1])
@@ -615,7 +377,7 @@ def run(data_args, stan_model, filename, weight_function=None):
                 }
             else:
                 kwargs = {}
-            run_cluster(filename, **kwargs)
+            run_cluster(filename, stan_dir, **kwargs)
 
 if __name__ == "__main__":
     print("You probably want to go into a sub directory")

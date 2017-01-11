@@ -202,9 +202,28 @@ def plot_separate_weight(folder, output):
     c.plot(filename=output, truth=t, figsize=0.75)
 
 
+def plot_debug(base_folder, data_source, sort=True):
+    """ Plot all cosmologies, with no cuts, with and without weights applied """
+    print("Plotting all cosmologies with no cuts, with old and new weights")
+    chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(base_folder + "/stan_output_%s" % data_source,
+                                                                cut=False, merge=True)
+    if sort:
+        sorti = np.argsort(w)
+        for key in chain.keys():
+            chain[key] = chain[key][sorti]
+        w = w[sorti]
+        # ow = ow[sorti]
+        posterior = posterior[sorti]
+    c = ChainConsumer()
+    c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
+    c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
+    c.plot(filename=base_folder + "plot_%s.png" % data_source, truth=t, figsize=0.75)
+    c.plot_walks(chains="Corrected", filename=base_folder + "walk_%s.png" % data_source, truth=t)
+
+
 def plot_quick(folder, uid, include_sep=False):
     print("Performing the slowest function - quick plot. Quick to call, slow to execute.")
-    td = os.path.dirname(inspect.stack()[0][1]) + "/output/"
+    td = os.path.dirname(inspect.stack()[1][1]) + "/"
     plot_name = td + "plot_%s.png" % uid
     plot_name_single = td + "plot_%s_single.png" % uid
     plot_name_single_weight = td + "plot_%s_single_weight.png" % uid
