@@ -1,6 +1,6 @@
 import os
 
-from dessn.models.d_simple_stan.run import run, get_gp_data
+from dessn.models.d_simple_stan.run import run, get_gp_data, get_correction_data_from_data_source
 from dessn.models.d_simple_stan.run import add_weight_to_chain
 
 
@@ -23,8 +23,9 @@ if __name__ == "__main__":
         "data_source": "snana_dummy",
         "n": 500
     }
-    n_gp = 500
-    gp_dict = get_gp_dict(data["n"], n_gp, data["correction_source"])
+    n_gp = 2000
+    correction_source = get_correction_data_from_data_source(data["data_source"])
+    gp_dict = get_gp_dict(data["n"], n_gp, correction_source)
 
     data = {**data, **gp_dict}
 

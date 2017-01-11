@@ -158,7 +158,7 @@ transformed parameters {
         gp_diff = gp_pos - gp_points[i];
         gp_dist[i] = exp(-0.5 * 100 * (gp_diff' * gp_diff));
     }
-    gp_sum_dist = sum(gp_dist[i]);
+    gp_sum_dist = sum(gp_dist);
     for (i in 1:n_gp) {
         weights[i] = gp_alpha[i] * gp_dist[i] / gp_sum_dist;
     }
