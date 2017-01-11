@@ -217,8 +217,8 @@ def plot_debug(base_folder, data_source, sort=True):
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
-    c.plot(filename=base_folder + "plot_%s.png" % data_source, truth=t, figsize=0.75)
-    c.plot_walks(chains="Corrected", filename=base_folder + "walk_%s.png" % data_source, truth=t)
+    c.plot(filename=base_folder + "/zplot_%s.png" % data_source, truth=t, figsize=0.75)
+    c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s.png" % data_source, truth=t)
 
 
 def plot_quick(folder, uid, include_sep=False):

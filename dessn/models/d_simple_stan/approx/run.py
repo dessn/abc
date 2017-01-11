@@ -9,16 +9,22 @@ from dessn.models.d_simple_stan.run import run, add_weight_to_chain
 def get_approximate_mb_correction(correction_source):
     d = load_correction_supernova(correction_source=correction_source, only_passed=False)
     mask = d["passed"] == 1
-    mB = d["mB"]
-    c = d["c"]
-    x1 = d["x1"]
+    mB = d["apparents"]
+    c = d["colours"]
+    x1 = d["stretches"]
     alpha = 0.15
     beta = 3.0
-
-    hist_all, bins = np.histogram(mB, bins=200)
+    bins = np.linspace(19, mB.max(), 50)
+    hist_all, _ = np.histogram(mB, bins=bins)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
     binc = 0.5 * (bins[:-1] + bins[1:])
     ratio = 1.0 * hist_passed / hist_all
+    ratio /= ratio.max()
+
+    # import matplotlib.pyplot as plt
+    # plt.plot(ratio)
+    # plt.show()
+
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
