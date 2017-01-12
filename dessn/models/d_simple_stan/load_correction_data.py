@@ -22,8 +22,9 @@ def load_correction_supernova(correction_source, only_passed=True):
 def load_snana_correction():
     print("Getting SNANA correction data")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    data_file = this_dir + "/data/correction_snana.npy"
-    supernovae = np.load(data_file)
+    data_folder = this_dir + "/data/snana_cor"
+    supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder)]
+    supernovae = np.vstack(tuple(supernovae_files))
     result = {
         "passed": supernovae[:, 6] > 0.0,
         "masses": np.ones(supernovae.shape[0]),
