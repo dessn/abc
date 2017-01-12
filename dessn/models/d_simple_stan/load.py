@@ -213,12 +213,15 @@ def plot_debug(base_folder, data_source, sort=True):
         for key in chain.keys():
             chain[key] = chain[key][sorti]
         w = w[sorti]
-        # ow = ow[sorti]
+        ow = ow[sorti]
         posterior = posterior[sorti]
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
     c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
     c.plot(filename=base_folder + "/zplot_%s.png" % data_source)
+    c = ChainConsumer()
+    chain["ow"] = ow
+    c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
     c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s.png" % data_source)
 
 
