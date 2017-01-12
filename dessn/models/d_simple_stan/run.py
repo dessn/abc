@@ -40,7 +40,7 @@ def get_simulation_data(correction_source="snana", n=5000):
     }
 
 
-def calculate_bias(chain_dictionary, supernovae, cosmologies):
+def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
     """ Calculates the correct per supernova bias for each step in chain_dictionary,
     using the supernovae sample and dist_mod interpolators found in cosmologies. """
     redshifts = supernovae["redshifts"]
@@ -49,6 +49,13 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies):
     colours = supernovae["colours"]
     existing_prob = supernovae["existing_prob"]
     masses = supernovae["masses"]
+    if num is not None:
+        redshifts = redshifts[:num]
+        apparents = apparents[:num]
+        stretches = stretches[:num]
+        colours = colours[:num]
+        existing_prob = existing_prob[:num]
+        masses = masses[:num]
 
     weight = []
     for i in range(chain_dictionary["mean_MB"].size):
@@ -81,13 +88,13 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies):
     return weights
 
 
-def add_weight_to_chain(chain_dictionary, n_sne, correction_source):
+def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None):
     # Load supernova for correction
     supernovae = load_correction_supernova(correction_source=correction_source)
     # Load premade cosmology dictionary to speed up dist_mod calculation
     d = get_cosmology_dictionary()
     # Get the weights
-    weights = calculate_bias(chain_dictionary, supernovae, d)
+    weights = calculate_bias(chain_dictionary, supernovae, d, num=num)
     # Get the approximation correction used in stan
     existing = chain_dictionary["weight"]
     # Reweight the chain to match the difference from actual to approximation correction
@@ -101,17 +108,17 @@ def add_weight_to_chain(chain_dictionary, n_sne, correction_source):
     return chain_dictionary
 
 
-def get_gp_data(n_sne, add_gp, seed=0, correction_source="snana"):
+def get_gp_data(n_sne, add_gp, seed=0, correction_source="snana", num=None):
     np.random.seed(seed)
     inits = [init_fn(n_sne) for i in range(add_gp)]
     keys = inits[0].keys()
     d = {k: np.array([i[k] for i in inits]) for k in keys}
     d["weight"] = np.ones(add_gp)
-    add_weight_to_chain(d, n_sne, correction_source=correction_source)
+    add_weight_to_chain(d, n_sne, correction_source=correction_source, num=num)
 
     vals = d["calc_weight"]
     vals *= n_sne
-    print("Fitting GP to values ", vals.mean(), np.std(vals))
+    print("Get data has weight mean and std of ", vals.mean(), np.std(vals))
 
     keys_to_remove = ["Posterior", "weight", "old_weight", "dscale",
                       "dratio", "calibration", "calc_weight", "deviations"]
