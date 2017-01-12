@@ -88,7 +88,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
     return weights
 
 
-def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, max_deviation=2.5, trim=True, trim_v=-8):
+def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, max_deviation=2.5, trim=False, trim_v=-8):
     # Load supernova for correction
     supernovae = load_correction_supernova(correction_source=correction_source)
     # Load premade cosmology dictionary to speed up dist_mod calculation
@@ -98,15 +98,15 @@ def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, ma
     # Get the approximation correction used in stan
     existing = chain_dictionary["weight"]
     # Reweight the chain to match the difference from actual to approximation correction
-    logw = n_sne * weights - existing
+    logw = existing - n_sne * weights
     if not max_deviation:
         logw -= logw.min()
     else:
         logw -= logw.mean()
         logw -= max_deviation * np.std(logw)
-        logw[logw > 0] = 1
+        logw[logw > 0] = 0
 
-    weights2 = np.exp(-logw)
+    weights2 = np.exp(logw)
     # weight is the reweighted chain. calc_weight is the actual (log) correction for one SN. old_weight is the approx
     chain_dictionary["weight"] = weights2
     chain_dictionary["calc_weight"] = weights
@@ -286,7 +286,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     if short:
         w, n = 500, 1000
     else:
-        w, n = 1000, 5000
+        w, n = 2000, 10000
     data = get_analysis_data(seed=n_cosmology, **data_args)
 
     def init_wrapped():

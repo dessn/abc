@@ -195,8 +195,8 @@ def plot_separate_weight(folder, output):
     c = ChainConsumer()
     ls = []
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
-        c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected %d"%i)
-        c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected %d"%i)
+        c.add_chain(chain, posterior=posterior, name="Uncorrected %d"%i)
+        c.add_chain(chain, weights=w, posterior=posterior, name="Corrected %d"%i)
         ls += ["-", "--"]
     c.configure_general(linestyles=ls)
     c.plot(filename=output, truth=t, figsize=0.75)
@@ -216,12 +216,12 @@ def plot_debug(base_folder, data_source, sort=True):
         ow = ow[sorti]
         posterior = posterior[sorti]
     c = ChainConsumer()
-    c.add_chain(chain, posterior=posterior, walkers=l, name="Uncorrected")
-    c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
+    c.add_chain(chain, posterior=posterior, name="Uncorrected")
+    c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
     c.plot(filename=base_folder + "/zplot_%s.png" % data_source)
     c = ChainConsumer()
     chain["ow"] = ow
-    c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="Corrected")
+    c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
     c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s.png" % data_source)
 
 
