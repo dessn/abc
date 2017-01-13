@@ -198,10 +198,10 @@ def plot_all_no_weight(folder, output):
 def plot_separate(folder, output):
     """ Plot separate cosmologies """
     print("Plotting all cosmologies separately")
-    res = load_stan_from_folder(folder, merge=False)
+    res = load_stan_from_folder(folder, merge=False, cut=False)
     c = ChainConsumer()
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
-        c.add_chain(chain, weights=w, posterior=posterior, walkers=l, name="%d"%i)
+        c.add_chain(chain, weights=w, posterior=posterior, name="%d"%i)
     c.plot(filename=output, truth=t, figsize=0.75)
 
 
@@ -224,6 +224,7 @@ def plot_debug(base_folder, data_source, sort=True):
     print("Plotting all cosmologies with no cuts, with old and new weights")
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(base_folder + "/stan_output_%s" % data_source,
                                                                 cut=False, merge=True)
+    parent_dir = os.path.basename(base_folder)
     print(posterior.max(), posterior.mean(), np.std(posterior))
     if sort:
         sorti = np.argsort(w)
@@ -235,11 +236,11 @@ def plot_debug(base_folder, data_source, sort=True):
     c = ChainConsumer()
     c.add_chain(chain, posterior=posterior, name="Uncorrected")
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    c.plot(filename=base_folder + "/zplot_%s.png" % data_source)
+    c.plot(filename=base_folder + "/zplot_%s_%s.png" % (parent_dir, data_source))
     c = ChainConsumer()
     chain["ow"] = ow
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s.png" % data_source)
+    c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s_%s.png" % (parent_dir, data_source))
 
 
 def plot_quick(folder, uid, include_sep=False):
