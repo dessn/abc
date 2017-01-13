@@ -12,7 +12,7 @@ from scipy.stats import norm
 
 def load_fit_snana_correction(n_sne):
     print("Getting SNANA dummy data")
-    supernovae = load_correction_supernova(correction_source="snana")
+    supernovae = load_correction_supernova(correction_source="snana", shuffle=True)
     redshifts = supernovae["redshifts"][:n_sne]
     apparents = supernovae["apparents"][:n_sne]
     stretches = supernovae["stretches"][:n_sne]

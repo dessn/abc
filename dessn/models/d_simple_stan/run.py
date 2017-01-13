@@ -88,9 +88,9 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
     return weights
 
 
-def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, trim=True, trim_v=-10):
+def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, trim=False, trim_v=-10, shuffle=False):
     # Load supernova for correction
-    supernovae = load_correction_supernova(correction_source=correction_source)
+    supernovae = load_correction_supernova(correction_source=correction_source, shuffle=shuffle)
     # Load premade cosmology dictionary to speed up dist_mod calculation
     d = get_cosmology_dictionary()
     # Get the weights
@@ -119,7 +119,7 @@ def get_gp_data(n_sne, add_gp, seed=0, correction_source="snana", num=None):
     keys = inits[0].keys()
     d = {k: np.array([i[k] for i in inits]) for k in keys}
     d["weight"] = np.ones(add_gp)
-    add_weight_to_chain(d, n_sne, correction_source=correction_source, num=num)
+    add_weight_to_chain(d, n_sne, trim=False, shuffle=False, correction_source=correction_source, num=num)
 
     vals = d["calc_weight"]
     vals *= n_sne
@@ -281,7 +281,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     if short:
         w, n = 500, 1000
     else:
-        w, n = 2000, 5000
+        w, n = 1000, 3000
     data = get_analysis_data(seed=n_cosmology, **data_args)
 
     def init_wrapped():
