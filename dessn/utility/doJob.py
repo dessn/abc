@@ -44,6 +44,8 @@ echo 'running with NSLOTS=' $NSLOTS # number of SGE calcs
 PROG=%s
 PARAMS=`expr $SGE_TASK_ID - 1`
 cd $IDIR
+
+sleep $((RANDOM % 10))
 python $PROG $PARAMS %d'''
 
     n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
@@ -93,6 +95,7 @@ echo $executable
 PROG=%s
 PARAMS=`expr ${SLURM_ARRAY_TASK_ID} - 1`
 cd $IDIR
+sleep $((RANDOM % 10))
 srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS %d'''
 
     n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
