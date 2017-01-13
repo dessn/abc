@@ -42,8 +42,8 @@ if __name__ == "__main__":
     print(mB_mean, mB_width)
 
     data = {
-        "mB_mean": mB_mean + np.random.normal(0, 0.1),
-        "mB_width": mB_width + np.random.normal(0, 0.3),
+        "mB_mean": mB_mean,
+        "mB_width": mB_width,
         "data_source": "snana_dummy",
         "n": 500
     }
