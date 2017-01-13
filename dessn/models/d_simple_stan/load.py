@@ -35,7 +35,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=3):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=3, trim=True, trim_v=-8):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -80,11 +80,16 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None,
                 weights[weights > 0] = 0
             else:
                 weights -= weights.max()
+            if trim:
+                mask = (weights > trim_v) | (np.random.uniform(size=weights.size) > 0.99)
+                for k in chain.keys():
+                    chain[k] = chain[k][mask]
+                posterior = posterior[mask]
+                weights = weights[mask]
             weights = np.exp(weights)
             del chain["weight"]
         else:
             weights = np.ones(posterior.shape)
-
         if "calc_weight" in chain.keys():
             del chain["calc_weight"]
         elif "calc\\_weight" in chain.keys():
