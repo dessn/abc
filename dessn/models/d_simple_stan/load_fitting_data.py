@@ -18,7 +18,7 @@ def load_fit_snana_correction(n_sne):
     stretches = supernovae["stretches"][:n_sne]
     colours = supernovae["colours"][:n_sne]
     masses = supernovae["masses"][:n_sne]
-
+    print("SHUFFLE: ", apparents.mean(), colours.mean(), stretches.mean())
     obs_mBx1c_cov = []
     obs_mBx1c = []
     for mb, x1, c in zip(apparents, stretches, colours):
