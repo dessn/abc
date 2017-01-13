@@ -10,29 +10,32 @@ from dessn.models.d_simple_stan.run import get_truths_labels_significance
 
 def get_chain(filename, name_map, replace=True):
     print("Loading chain from %s" % filename)
-    with open(filename, 'rb') as output:
-        chain = pickle.load(output)
-        if replace:
-            del chain["intrinsic_correlation"]
-            keys = list(chain.keys())
-            for key in keys:
-                if key in name_map:
-                    label = name_map[key]
-                    if isinstance(label, list):
-                        for i, l in enumerate(label):
-                            chain[l] = chain[key][:, i]
-                    else:
-                        chain[label] = chain[key]
-                    del chain[key]
-                else:
-                    new_key = key.replace("_", r"\_")
-                    if new_key != key:
-                        chain[new_key] = chain[key]
+    try:
+        with open(filename, 'rb') as output:
+            chain = pickle.load(output)
+            if replace:
+                del chain["intrinsic_correlation"]
+                keys = list(chain.keys())
+                for key in keys:
+                    if key in name_map:
+                        label = name_map[key]
+                        if isinstance(label, list):
+                            for i, l in enumerate(label):
+                                chain[l] = chain[key][:, i]
+                        else:
+                            chain[label] = chain[key]
                         del chain[key]
+                    else:
+                        new_key = key.replace("_", r"\_")
+                        if new_key != key:
+                            chain[new_key] = chain[key]
+                            del chain[key]
+    except EOFError:
+        chain = None
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=3):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -55,7 +58,9 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None)
         t = os.path.abspath(folder + os.sep + f)
         if cs.get(c) is None:
             cs[c] = []
-        cs[c].append(get_chain(t, name_map, replace=replace))
+        file_chain = get_chain(t, name_map, replace=replace)
+        if file_chain is not None:
+            cs[c].append(file_chain)
     assert len(cs.keys()) > 0, "No results found"
     result = []
     good_ks = []
@@ -69,6 +74,13 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None)
         del chain["Posterior"]
         if "weight" in chain.keys():
             weights = chain["weight"]
+            if max_deviation:
+                weights -= weights.mean()
+                weights -= max_deviation * np.std(weights)
+                weights[weights > 0] = 0
+            else:
+                weights -= weights.max()
+            weights = np.exp(weights)
             del chain["weight"]
         else:
             weights = np.ones(posterior.shape)
