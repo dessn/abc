@@ -81,7 +81,7 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None,
             else:
                 weights -= weights.max()
             if trim:
-                mask = (weights > trim_v) | (np.random.uniform(size=weights.size) > 0.99)
+                mask = (weights > trim_v) | (np.random.uniform(size=weights.size) > 0.9)
                 for k in chain.keys():
                     chain[k] = chain[k][mask]
                 posterior = posterior[mask]
