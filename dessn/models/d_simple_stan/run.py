@@ -169,11 +169,7 @@ def get_base_data(data_source, n):
 def get_correction_data_from_data_source(data_source):
     if data_source == "sncosmo":
         return "sncosmo"
-    elif data_source == "snana_dummy":
-        return "snana"
-    elif data_source == "snana":
-        return "snana"
-    elif data_source == "fitres":
+    elif data_source in ["snana_dummy", "snana_diff", "snana", "fitres"]:
         return "snana"
     elif data_source == "simple":
         return None
