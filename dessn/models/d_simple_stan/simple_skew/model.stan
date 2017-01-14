@@ -61,8 +61,8 @@ parameters {
     real <lower = 0.001, upper = 2> sigma_x1;
     real <lower = 0.001, upper = 0.4> sigma_c;
     cholesky_factor_corr[3] intrinsic_correlation;
-    real <lower = -5, upper = 5> alpha_MB;
-    real <lower = -5, upper = 5> alpha_x1;
+    // real <lower = -5, upper = 5> alpha_MB;
+    // real <lower = -5, upper = 5> alpha_x1;
     real <lower = -5, upper = 5> alpha_c;
 
 }
@@ -135,9 +135,9 @@ transformed parameters {
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
                            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population)
-                           + normal_lcdf(alpha_MB * (model_MBx1c[i][1] - mean_MB) | 0, sigma_MB)
-                           + normal_lcdf(alpha_x1 * (model_MBx1c[i][2] - mean_x1) | 0, sigma_x1)
                            + normal_lcdf(alpha_c * (model_MBx1c[i][3] - mean_c) | 0, sigma_c);
+                           // + normal_lcdf(alpha_MB * (model_MBx1c[i][1] - mean_MB) | 0, sigma_MB)
+                           // + normal_lcdf(alpha_x1 * (model_MBx1c[i][2] - mean_x1) | 0, sigma_x1)
     }
     weight = 0;
     Posterior = sum(PointPosteriors)
@@ -146,10 +146,10 @@ transformed parameters {
               + cauchy_lpdf(sigma_MB | 0, 1.0)
               + cauchy_lpdf(sigma_x1 | 0, 2.5)
               + cauchy_lpdf(sigma_c | 0, 2.5)
-              + cauchy_lpdf(alpha_MB | 0, 2.5)
-              + cauchy_lpdf(alpha_x1 | 0, 2.5)
               + cauchy_lpdf(alpha_c | 0, 2.5)
               + lkj_corr_cholesky_lpdf(intrinsic_correlation | 1);
+              // + cauchy_lpdf(alpha_MB | 0, 2.5)
+              // + cauchy_lpdf(alpha_x1 | 0, 2.5)
 
 }
 model {
