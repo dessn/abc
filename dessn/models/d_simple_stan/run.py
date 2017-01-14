@@ -90,7 +90,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
     return weights
 
 
-def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, trim=True, trim_v=-12, shuffle=False):
+def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, trim=False, trim_v=-12, shuffle=False):
     # Load supernova for correction
     supernovae = load_correction_supernova(correction_source=correction_source, shuffle=shuffle)
     # Load premade cosmology dictionary to speed up dist_mod calculation
