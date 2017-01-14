@@ -12,13 +12,13 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
     stan_model = os.path.dirname(file) + "/model.stan"
 
-    mB_mean, mB_width = get_approximate_mb_correction("sncosmo")
+    mB_mean, mB_width = get_approximate_mb_correction("snana")
     print(mB_mean, mB_width)
 
     data = {
         "mB_mean": mB_mean,
         "mB_width": mB_width,
-        "data_source": "sncosmo",
+        "data_source": "snana_diff",
         "n": 500
     }
     print("Running %s" % file)
