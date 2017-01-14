@@ -241,6 +241,7 @@ def plot_debug(base_folder, data_source, sort=True):
     c = ChainConsumer()
     chain["ow"] = ow
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
+    print(c.get_latex_table(transpose=True))
     c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s_%s.png" % (parent_dir, data_source))
 
 
