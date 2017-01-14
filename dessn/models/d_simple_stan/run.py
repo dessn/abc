@@ -63,11 +63,13 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
         key = "%0.3f" % om
         mus = cosmologies[key](redshifts)
 
-        dscale = chain_dictionary["dscale"][i]
-        dratio = chain_dictionary["dratio"][i]
-        redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
-        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp + dratio)
-        # mass_correction = 0
+        if "dscale" in chain_dictionary.keys() and "dratio" in chain_dictionary.keys():
+            dscale = chain_dictionary["dscale"][i]
+            dratio = chain_dictionary["dratio"][i]
+            redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
+            mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp + dratio)
+        else:
+            mass_correction = 0
         mabs = apparents - mus + chain_dictionary["alpha"][i] * stretches - chain_dictionary["beta"][i] * colours + mass_correction * masses
 
         mbx1cs = np.vstack((mabs, stretches, colours)).T

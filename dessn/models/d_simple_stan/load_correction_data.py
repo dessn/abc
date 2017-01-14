@@ -30,7 +30,7 @@ def load_snana_correction(shuffle=True):
         np.random.shuffle(supernovae)
     result = {
         "passed": supernovae[:, 6] > 0.0,
-        "masses": np.ones(supernovae.shape[0]),
+        "masses": np.zeros(supernovae.shape[0]),
         "redshifts": supernovae[:, 0],
         "apparents": supernovae[:, 1],
         "stretches": supernovae[:, 2],
