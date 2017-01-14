@@ -297,12 +297,12 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     fit = sm.sampling(data=data, iter=n, warmup=w, chains=chains, init=init_wrapped)
     # Dump relevant chains to file
     print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
+    params = [p for p in params if p in fit.sim["pars_oi"]]
+    dictionary = fit.extract(pars=params)
+    if weight_function is not None:
+        correction_source = get_correction_data_from_data_source(data_args["data_source"])
+        weight_function(dictionary, n_sne, correction_source)
     with open(t, 'wb') as output:
-        params = [p for p in params if p in fit.sim["pars_oi"]]
-        dictionary = fit.extract(pars=params)
-        if weight_function is not None:
-            correction_source = get_correction_data_from_data_source(data_args["data_source"])
-            weight_function(dictionary, n_sne, correction_source)
         pickle.dump(dictionary, output)
 
 
