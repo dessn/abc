@@ -29,7 +29,7 @@ def get_approximate_mb_correction(correction_source):
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
-    width += 0.25 * (alpha * np.std(x1) + beta * np.std(c))
+    width += 0.5 * (alpha * np.std(x1) + beta * np.std(c))
     return mean, width + 0.02
 
 

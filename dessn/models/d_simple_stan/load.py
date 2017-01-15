@@ -203,7 +203,7 @@ def plot_separate(folder, output):
     c = ChainConsumer()
     for i, (chain, posterior, t, p, f, l, w, ow) in enumerate(res):
         c.add_chain(chain, weights=w, posterior=posterior, name="%d"%i)
-    c.plot(filename=output, truth=t, figsize=0.75)
+    c.plot(filename=output, truth=t)
 
 
 def plot_separate_weight(folder, output):
