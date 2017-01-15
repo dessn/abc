@@ -242,7 +242,7 @@ def plot_debug(base_folder, data_source, sort=True):
     chain["ow"] = ow
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
     c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s_%s.png" % (parent_dir, data_source))
-    print(c.get_latex_table(transpose=True))
+    print(c.get_latex_table(transpose=True, caption=base_folder))
 
 
 def plot_quick(folder, uid, include_sep=False):
