@@ -6,7 +6,7 @@ if __name__ == "__main__":
     std = dir_name + "/stan_output"
     data_source = "snana_dummy"
     # plot_separate(std + "_" + data_source, data_source)
-    plot_debug(dir_name, data_source)
+    plot_debug(dir_name, data_source, sort=False)
     # plot_quick(std, "approx", include_sep=False)
 
 
