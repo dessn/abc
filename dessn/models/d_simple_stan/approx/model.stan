@@ -47,9 +47,9 @@ parameters {
     real <lower = 0, upper = 5> beta;
 
     // Other effects
-    real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
-    real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
-    vector[4] calibration;
+    // real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
+    // real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
+    // vector[4] calibration;
 
     ///////////////// Latent Parameters
     vector[3] deviations [n_sne];
@@ -122,7 +122,7 @@ transformed parameters {
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
-        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
+        // mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
@@ -143,7 +143,12 @@ transformed parameters {
         bias_correction[i] = log_sum_exp(normal_lccdf(mbs[i] | mB_mean, mB_width), log(0.01));
     }
     weight = sum(bias_correction);
-    Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 1) + cauchy_lpdf(sigma_MB | 0, 1.0) + cauchy_lpdf(sigma_x1 | 0, 2.5) + cauchy_lpdf(sigma_c | 0, 2.5) + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
+    Posterior = sum(PointPosteriors) - weight
+        + cauchy_lpdf(sigma_MB | 0, 1.0)
+        + cauchy_lpdf(sigma_x1 | 0, 2.5)
+        + cauchy_lpdf(sigma_c | 0, 2.5)
+        + lkj_corr_cholesky_lpdf(intrinsic_correlation | 1);
+        // + normal_lpdf(calibration | 0, 1)
 
 }
 model {
