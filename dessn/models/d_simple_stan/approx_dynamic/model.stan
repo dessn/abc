@@ -61,7 +61,7 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = 0.001, upper = 0.3> sigma_MB;
+    real <lower = 0.001, upper = 0.5> sigma_MB;
     real <lower = 0.001, upper = 2> sigma_x1;
     real <lower = 0.001, upper = 0.4> sigma_c;
     cholesky_factor_corr[3] intrinsic_correlation;
@@ -120,7 +120,6 @@ transformed parameters {
     sigmas[3] = sigma_c;
     population = diag_pre_multiply(sigmas, intrinsic_correlation);
 
-
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
@@ -138,12 +137,12 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3]; // - mass_correction * mass[i]; // + calib_mBx1c[i][1];
-        widths[i] = sqrt(mB_width^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + obs_mBx1c_cov[i][1,1]);
+        widths[i] = sqrt(mB_width^2 + sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2);
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
         // Get the approximate bias correction
-        bias_correction[i] = log(normal_cdf(mB_mean, mbs[i], widths[i]) + 0.01);
+        bias_correction[i] = log_sum_exp(normal_lccdf(mbs[i] | mB_mean, widths[i]), log(0.01));
     }
     weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight

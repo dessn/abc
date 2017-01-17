@@ -412,54 +412,42 @@ account the number of supernova we have:
 
 The can investigate this easily. By looking at the selection efficiency simply as
 a function of apparent magnitude for the supernova simulated (that are used in the bias
-correction), we can implement an approximate bias correction using
-apparent magnitude with an error function. As such, we introduce an approximate
-bias correction that corrects for the selection effects of a canoncial supernova
-at the redshift of each discovered supernova. More formally, we introduce
-at each redshift :math:`z_i` and mass :math:`m_i` the canonical apparent magnitude :math:`\langle m_{Bi} \rangle = \langle M_B \rangle + \mu(z_i) - \alpha \langle x_1 \rangle + \beta \langle c \rangle - k(z_i) m_i`.
+correction), we can implement an approximate bias correction.
 
-The reason for correcting for a canonical supernova, instead of the observed supernova, is that the
-former allows a bias correction dependent on cosmology, and the latter allows a bias correction dependent
-only on data (which - given our posterior is not normalised - gives us no bias correction at all).
-
-Having an apparent magnitude, we utilise our DES-like simulation to quantify the
-selection effect (assuming a simple error function model, which matches the data well)
-as a function of apparent magnitude. By binning the supernova, both discovered and failed,
-into bins of :math:`m_B`, we fit for the functional parameters :math:`m_{B,{\rm sel}}` and  :math:`\sigma_{{\rm sel}}`,
-such that our selection function becomes
+To do this, we need both the survey efficiency as a function of apparent magnitude,
+and to project our high-dimensional model down to only apparent magnitude. We address the first
+issue by binning our simulations in apparent magnitude, and from the resultant histogram of
+selection efficiency as function of apparent magnitude, we can approximate the efficiency as a
+normal CDF parametrised as follows:
 
 .. math::
     :label: ee1
 
-    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}}),\\
+    S(m_B) = \Phi(m_B | m_{B,{\rm survey}}, \sigma_{{\rm survey}}),\\
 
-where :math:`\Phi` is the complimentary normal cumulative distribution function
-and:math:` m_B \rangle` represents the apparent magnitude at which we wish to know the selection efficiency.
+where :math:`\Phi` represents the *complimentary* CDF. With our survey efficiency thus defined, we need to describe our supernova model as a population
+in apparent magnitude (and redshift). This will be given by a normal function with mean
+:math:`m_B^* = \langle m_{Bi} \rangle = \langle M_B \rangle + \mu(z_i) - \alpha \langle x_1 \rangle + \beta \langle c \rangle`.
+The width of this normal is then given by :math:`(\sigma_{m_B}^*)^2 = \sigma_{m_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2`.
 
-The above quantification of selection effects does not take into account colour or stretch, and as our canonical
-supernova utilise the mean colour and mean stretch (as opposed to the observed colour and stretch), we need to
-increase the width of the above selection efficiency function to
-
-.. math::
-    :label: ee2
-
-    S(m_B) = \Phi(m_B | m_{B,{\rm sel}}, \sigma_{{\rm sel}} + |\alpha| \sigma_{x_1} + |\beta| \sigma_c), \\
-
-where :math:`\alpha,\, \beta,\, \sigma_{x_1},\, \sigma_c` are taken from the fiducial DES-like simulation.
-Whilst it would be more correct for us to calculate the extra terms in the width of the CDF above in the
-model fitting, using the model parameters instead of simulation parameters, this lead to unstable fitting results
-in STAN, where changes in bias correction allowed several parameters to walk off. For simplificty, let
-us denote :math:`\sigma_{\rm cdf} \equiv \sigma_{{\rm sel}} + |\alpha| \sigma_{x_1} + |\beta| \sigma_c`.
-
-And as stated before, this is
-only meant to be an approximation correction, so any difference between actual model parameters and simulation
-fiducial parameters does not matter - so long as we are still sampling the right area of parameter space. With this
-approximation correction, our approximate likelihood and prior (which are fit in STAN) become:
+From this, we can derive an approximate weight :math:`w^*`:
 
 .. math::
-    :label: ee22
+    :label: wstar
 
-    P(\theta|D) &\propto P(\theta) \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} \,d\vec{M_B}\  \prod_{i=1}^N \frac{P(D_i|\theta)}{\Phi(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf})} \\
+    w^*(z) = \int d m_B \ \mathcal{N}\left(m_B | m_B^*, \sigma_{m_B}^* \right) \Phi(m_B | m_{B,{\rm survey}}, \sigma_{{\rm survey}})
+
+`Thank you Wikipedia for laying it out so nicely <https://en.wikipedia.org/wiki/Error_function#Integral_of_error_function_with_Gaussian_density_function>`_,
+the above reduces down to
+
+.. math::
+    :label: wstar
+
+    w^*(z) = \Phi\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)
+
+By assuming that we have enough supernovae to decently sample the redshift range, we can implement
+this bias correction as supernovae dependent, and thus not have to re-integrate the distance modulus
+in Stan for an independent sample of redshifts.
 
 
 After fitting the above posterior surface, we can remove the approximation correction
@@ -468,7 +456,7 @@ and implement the actual Monte Carlo correction by assigning each point the chai
 .. math::
     :label: ee3
 
-    W = w^{-N} \prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf}). \\
+    W = w^{-N} \prod_{i=1}^N \Phi\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right). \\
 
 The results of doing this (with and without setting :math:`W`) are shown below, to show the difference
 between the approximation bias correction and Monte Carlo bias correction. Fifteen realisations
@@ -493,14 +481,14 @@ represents are post-fit weight corrections to correctly take into account bias.
 .. math::
     \definecolor{blue}{RGB}{18,110,213}
     \definecolor{red}{RGB}{230,0,29}
-    P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N \Phi(\langle m_{Bi} \rangle | m_{B,{\rm sel}}, \sigma_{\rm cdf})}{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
+    P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N  \Phi\left( \frac{m_{Bi}^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)    }{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
     \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N} \\
     &\quad\quad\quad \color{blue} \idotsint d\vec{\eta} \,d\vec{M_B}\  \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
     &\quad\quad\quad \color{blue} \prod_{i=1}^N \bigg[ \mathcal{N}\left(  \hat{\eta_i} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta_i}}{\partial\mathcal{Z}}  | \eta_i, C_i \right)
     \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i \right]\right)  \\
     &\quad\quad\quad\quad\quad \color{blue}  \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i}) \delta(m_i - \hat{m_i}) \Phi^{-1}(\langle m_{Bi} \rangle| m_{B,{\rm sel}}, \sigma_{\rm cdf}) \bigg] \\
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i}) \delta(m_i - \hat{m_i}) \Phi^{-1}\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right) \bigg] \\
 
 
 

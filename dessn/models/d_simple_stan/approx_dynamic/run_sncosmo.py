@@ -12,23 +12,33 @@ def get_approximate_mb_correction(correction_source):
     mB = d["apparents"]
     c = d["colours"]
     x1 = d["stretches"]
-    alpha = 0.15
-    beta = 3.0
-    bins = np.linspace(19.5, mB.max(), 50)
+    alpha = 0.14
+    beta = 3.1
+    mB = mB - alpha * x1 + beta * c
+    bins = np.linspace(20, 28, 100)
     hist_all, _ = np.histogram(mB, bins=bins)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
     binc = 0.5 * (bins[:-1] + bins[1:])
+    hist_all[hist_all == 0] = 1
     ratio = 1.0 * hist_passed / hist_all
     ratio /= ratio.max()
-
-    # import matplotlib.pyplot as plt
-    # plt.plot(ratio)
-    # plt.show()
-    # exit()
 
     inter = interp1d(ratio, binc)
     mean = inter(0.5)
     width = 0.5 * (inter(0.16) - inter(0.84))
+    print(mean, width)
+
+    # import matplotlib.pyplot as plt
+    # from scipy.stats import norm
+    # plt.plot(binc, ratio)
+    # plt.plot(binc, 1 - norm.cdf(binc, mean, width))
+    # plt.plot(binc, hist_all / hist_all.max())
+    # plt.plot(binc, hist_passed / hist_all.max())
+    # plt.xlabel("mB")
+    # plt.ylabel("Efficiency")
+    # plt.show()
+    # exit()
+
     return mean, width
 
 
@@ -38,7 +48,6 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width = get_approximate_mb_correction("sncosmo")
-    print(mB_mean, mB_width)
 
     data = {
         "mB_mean": mB_mean,

@@ -57,7 +57,7 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = 0.001, upper = 0.3> sigma_MB;
+    real <lower = 0.001, upper = 0.5> sigma_MB;
     real <lower = 0.001, upper = 2> sigma_x1;
     real <lower = 0.001, upper = 0.4> sigma_c;
     cholesky_factor_corr[3] intrinsic_correlation;
