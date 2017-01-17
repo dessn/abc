@@ -1,6 +1,10 @@
 r""" My attempt at a proper STAN model.
 
-I follow Rubin et al. (2015) with some changes:
+**Note to Alex/Tam:** Currently have turned off mass and calibration to try and get the
+approximate correction working.
+
+
+I follow Rubin et al. (2015) with some changes.
 
     1. I do not model :math:`\alpha` and :math:`\beta` as functions of redshift, due to my limited dataset.
     2. I do not take outlier detection into account.
