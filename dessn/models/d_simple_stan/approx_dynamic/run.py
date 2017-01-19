@@ -10,24 +10,25 @@ def get_approximate_mb_correction(correction_source):
     d = load_correction_supernova(correction_source=correction_source, only_passed=False)
     mask = d["passed"] == 1
     mB = d["apparents"]
-    c = d["colours"]
-    x1 = d["stretches"]
-    alpha = 0.14
-    beta = 3.1
-    mB = mB - alpha * x1 + beta * c
-    bins = np.linspace(19, mB.max(), 50)
+    # c = d["colours"]
+    # x1 = d["stretches"]
+    # alpha = 0.14
+    # beta = 3.1
+    # mB = mB - alpha * x1 + beta * c
+    bins = np.linspace(mB.min(), mB.max(), 150)
     hist_all, _ = np.histogram(mB, bins=bins)
     hist_passed, _ = np.histogram(mB[mask], bins=bins)
     binc = 0.5 * (bins[:-1] + bins[1:])
     hist_all[hist_all == 0] = 1
-    ratio = 1.0 * hist_passed / hist_all
+    ratio = hist_passed / hist_all
+    ratio = ratio.cumsum()
     ratio /= ratio.max()
+    ratio = 1 - ratio
 
     inter = interp1d(ratio, binc)
-    mean = inter(0.5)
+    mean = inter(0.05)
     width = 0.5 * (inter(0.16) - inter(0.84))
-
-
+    width = 0.5
     # import matplotlib.pyplot as plt
     # from scipy.stats import norm
     # plt.plot(binc, ratio)

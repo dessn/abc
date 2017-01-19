@@ -24,7 +24,8 @@ data {
 
     // Approximate correction in mB
     real mB_mean;
-    real mB_width;
+    real mB_width2;
+    real mB_alpha2;
 
     // Calibration std
     vector[4] calib_std; // std of calibration uncertainty, so we can draw from regular normal
@@ -71,8 +72,6 @@ parameters {
 transformed parameters {
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
-    real mbs [n_sne];
-    real widths [n_sne];
     vector [3] model_mBx1c [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
 
@@ -86,6 +85,12 @@ transformed parameters {
     vector [3] mean_MBx1c;
     vector [3] sigmas;
 
+    // Variables to calculate the bias correction
+    real cor_MB_mean;
+    real cor_mb_width2;
+    real cor_mB_mean [n_sne];
+    real cor_mB_cor [n_sne];
+    real cor_sigma2;
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
@@ -120,6 +125,11 @@ transformed parameters {
     sigmas[3] = sigma_c;
     population = diag_pre_multiply(sigmas, intrinsic_correlation);
 
+    // Calculate mean pop
+    cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];
+    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2;
+    cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
+
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
@@ -136,13 +146,16 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        mbs[i] = mean_MBx1c[1] + model_mu[i] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3]; // - mass_correction * mass[i]; // + calib_mBx1c[i][1];
-        widths[i] = sqrt(mB_width^2 + sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + obs_mBx1c_cov[i][1,1]);
+        // Calculate the correction for this redshift
+        cor_mB_mean[i] = cor_MB_mean + model_mu[i];
+        cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
+
+        print(redshifts[i], " ",cor_mB_mean[i], " ", mB_mean, cor_mB_cor[i], alpha, beta);
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
         // Get the approximate bias correction
-        bias_correction[i] = log_sum_exp(normal_lccdf(mbs[i] | mB_mean, widths[i]), log(0.01));
+        bias_correction[i] = log_sum_exp(cor_mB_cor[i], log(0.01));
     }
     weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight
