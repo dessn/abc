@@ -488,7 +488,7 @@ such that we formally have
 .. math::
     :label: poppdf
 
-    P(m_B | z,\theta) &= \mathcal{N}(m_B | m_B^*(z), \sigma_{m_B}^*)
+    P(m_B | z,\theta) &= \mathcal{N}(m_B | m_B^*(z), \sigma_{m_B}^*) \\
 
 From this, we can derive an approximate weight :math:`w^*`:
 
