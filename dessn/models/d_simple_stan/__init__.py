@@ -103,6 +103,11 @@ To put everything back together, we thus have
 
     P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\
 
+An equivalent way of writing this down is rephrase the probability of attaining an experimental outcome
+as the product of an event occurring given :math:`\theta` multiplied by the conditional probability
+of our experiment observing the event, given that it did occur. I simply write out :math:`S(R)` instead
+of writing it as a conditional probability to reduce the number of subscripts in the notation.
+
 ----------
 
 STAN Model
@@ -135,16 +140,23 @@ but actually do no matter in this likelihood (without bias corrections), as we a
 precisely known. So now we can focus on the likelihood's numerator, which is
 
 .. math::
-    :label: e
 
-    \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
-    \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
-    &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
-    &= \iiint d\eta \  P(\hat{\eta}, \hat{z}, \hat{m}, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
-    &= \iiint d\eta \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{\eta}, z, m, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
-    &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
-Where in the last two lines I have used the fact that we assume mass and redshift are precisely known
+.. admonition:: Show/Hide derivation
+   :class: toggle note math
+
+    .. math::
+        :label: e
+
+        \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+        \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+        &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+        &= \iiint d\eta \  P(\hat{\eta}, \hat{z}, \hat{m}, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+        &= \iiint d\eta \  \delta(\hat{z} - z) \delta(\hat{m}-m) P(\hat{\eta}, z, m, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
+        &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+
+Where I have used the fact that we assume mass and redshift are precisely known
 (:math:`\hat{z}=z` and :math:`\hat{m}=m`), and therefore do not need to be modelled with latent parameters.
 We take zeropoint uncertainty into account by computing :math:`\frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b}` for each supernova
 light curve. We thus model what would be the observed values :math:`\hat{\eta}_{\rm True} = \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b}`,
@@ -152,11 +164,19 @@ and then assume that true observed summary statistics :math:`\hat{\eta}_{\rm Tru
 distributed around the true values :math:`\eta`, we can separate them out.
 
 .. math::
-    :label: eg
 
-    \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta} | \eta, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
-    &= \iiint d\eta \  P(\hat{\eta} | \eta, \delta \mathcal{Z}_b) P(\eta | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
-    &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
+    \mathcal{L_i} &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
+
+
+.. admonition:: Show/Hide derivation
+   :class: toggle note math
+
+    .. math::
+        :label: eg
+
+        \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta} | \eta, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+        &= \iiint d\eta \  P(\hat{\eta} | \eta, \delta \mathcal{Z}_b) P(\eta | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+        &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
 Now, in order to calculate :math:`P(\eta| \Omega_m, w, \alpha, \beta, \gamma, z, m, \delta\mathcal{Z}_b)`,
 we need to transform from :math:`m_B` to :math:`M_B`. We transform using the following relationship:
@@ -198,15 +218,25 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 
     \mathcal{L} &= \iiint d\eta  \int M_B \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} | \eta, C \right) P(\eta, M_B | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
-.. math::
-    :label: ig
-
-    P(\eta, M_B| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b ) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b )\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
-    &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-
 where
+
+.. math::
+    :label: igg
+
+    P(\eta, M_B| \theta) &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+
+.. admonition:: Show/Hide derivation
+   :class: toggle note math
+
+    .. math::
+        :label: ig
+
+        P(\eta, M_B| \theta) &= P(m_B | M_B, x_1, c, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b ) P (M_B, x_1, c, | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b )\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+        &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c | z, m,\Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+        &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P (M_B, x_1, c, | \gamma) \delta(\hat{z} - z) \delta(\hat{m}-m)\\[10pt]
+        &= \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+
+with
 
 .. math::
     :label: j
@@ -224,11 +254,14 @@ just set to a uniform distribution, but this will need to be updated).
 .. note::
     In this implementation there is no skewness in the colour distribution.
     As we do not require normalised probabilities, we can simply add in correcting
-    factors that can emulate skewness.
+    factors that can emulate skewness. This has been done in the ``simple_skew`` model, where we
+    add in a CDF probability for the colour to turn our normal into a skew normal.
 
 Putting this back together, we now have a simple hierarchical multi-normal model.
 Adding in the priors, and taking into account that we observe multiple supernova, we have
 that a final numerator of:
+
+
 
 .. math::
     :label: k
@@ -244,55 +277,56 @@ that a final numerator of:
     &\quad\quad\quad \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(\hat{z_i} - z_i) \delta(\hat{m_i}-m_i)
 
-We fit for this using 10 realisations of 500 supernova, is shown below. Note the small bias in matter density
-and large bias in mean colour (as the redder supernova are cut off at high redshift).
-
-
-.. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
-    :align:     center
-
 --------
 
 Selection Effects
 -----------------
 
-Having formulated a probabilistic model for the numerator of our posterior (and sent it off
-to STAN), we can now turn our attention to the denominator :math:`w \equiv \int d R\ S(R) P(R|\theta)`.
-
+Now, the easy part of the model is done, we need to move on to the real issue - our data is biased.
 As the bias correction is not data dependent, but model parameter dependent (cosmology dependent),
 the correction for each data point is identical, such that the correction for each individual supernova
-is identical. This does require the assumption that our redshift and mass distributions are well sampled, such
-that we can draw from them instead of using the model :math:`z` and :math:`m`. As such, :math:`z` and :math:`m` move
-from the right hand side of the model to the left hand side.
+is identical.
 
-We assume that selection effects can be determined as a function of apparent magnitude,
+We assume, for any given supernova, the selection effect can be determined as a function of apparent magnitude,
 colour, stretch, redshift and mass. We might expect that the zero points have an effect
 on selection efficiency, however this is because we normally consider zero points and
 photon counts hand in hand. As we have a fixed experiment (fixed photon counts and statistics)
-with different zero points, the selection efficiency is actually independent from zero points.
+with different zero points, the selection efficiency is actually independent from zero points. Thus, we can
+compute the bias correction as
 
 .. math::
-    :label: m
+    :label: mmm
 
-    w &= \iiint d\hat{\eta} \iiint d\eta \int dM_B\  \int d\hat{z} \int \hat{m} \int dz \int dm \,
-    P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
-    &= \idotsint d\hat{\eta} \, d\eta \, d\hat{z} \, dz\, d\hat{m}\, dm\, dM_B\
-    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
-    &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
-    \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
-    &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
+    w &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
     \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
 
+.. admonition:: Show/Hide derivation
+   :class: toggle note math
+
+    .. math::
+        :label: m
+
+        w &= \iiint d\hat{\eta} \iiint d\eta \int dM_B\  \int d\hat{z} \int \hat{m} \int dz \int dm \,
+        P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
+        &= \idotsint d\hat{\eta} \, d\eta \, d\hat{z} \, dz\, d\hat{m}\, dm\, dM_B\
+        \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
+        &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
+        \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
+        \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+        &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
+        \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
+        &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
+        \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
+        \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
+
 Again that we assume redshift and mass are perfectly known, so the relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
 they only appear once in the equation above. The important assumption
 is that the detection efficiency is to good approximation
-captured by the apparent magnitude, colour, stretch, mass and redshift of the supernova, *and* the zero points
-of the instrument used to capture them.
+captured by the apparent magnitude, colour, stretch, mass and redshift of the supernova.
 
 As we integrate over all possible realisations, we have that over all space
 
@@ -318,27 +352,18 @@ Addressing each component individually:
     :label: p
 
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
-    S(m_B, x_1, c, z, m) &= \text{If the data passes the cut given the zeropoints} \\
+    S(m_B, x_1, c, z, m) &= \text{If the supernova (light curves and summary stats) pass the cut} \\
     \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
 
-Now enter the observational specifics of our survey: how many bands, the band passes,
-frequency of observation, weather effects, etc. The selection effects we need to model are
-
-    * At least 5 epochs between :math:`-99 < t < 60`.
-    * :math:`0.0 < z < 1.2`.
-    * At least one point :math:`t < -2`.
-    * At least one point :math:`t > 10`.
-    * At least 2 filters with :math:`S/N > 5`.
-
 Finally, we note that, having :math:`N` supernova instead of one, we need only to normalise the likelihood
-for each new point in parameter space, but not at each individual data point (supernova; because the normalisation
+for each new point in parameter space, but not at each individual data point (because the normalisation
 is independent of the data point). Thus our final posterior takes the following form, where I explicitly take into
 account the number of supernova we have:
 
 .. math::
     :label: final
 
-    P(\theta|D) &\propto \frac{P(\theta)}{w^N} \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c} d\vec{M_B} \prod_{i=1}^N P(D_i|\theta) \\
+    P(\theta|D) &\propto \frac{P(\theta)}{w^N} \idotsint d\vec{m_B}\, d\vec{x_1}\, \, d\vec{c}\, d\vec{M_B} \prod_{i=1}^N P(D_i|\theta) \\
 
 
 
@@ -347,12 +372,10 @@ account the number of supernova we have:
 .. note::
     :class: green
 
-    **Technical aside**: Calculating :math:`S(m_B, x_1, c, z, m, \delta\mathcal{Z}_b)`
+    **Technical aside**: Calculating :math:`S(m_B, x_1, c, z, m)`
     is not an analytic task. It has complications not just in the distance modulus being the
     result of an integral, but also that the colour and stretch correction factors make
-    extra use of supernova specific values. On top of this, add the fact the zero points affect flux measurements,
-    the step before summary statistics, and we need to take this into account as the selection effects primarily select
-    on flux and not summary stats! The way to efficiently determine the efficiency
+    extra use of supernova specific values. The way to efficiently determine the efficiency
     is given as follows:
 
         1. Initially run a large DES-like simulation, recording all generated SN parameters and whether they pass the cuts.
@@ -414,45 +437,116 @@ account the number of supernova we have:
     question; *Is the issue simply that we have too few samples in the correct region of
     parameter space? Is that why our weights are on average so low?*
 
-The can investigate this easily. By looking at the selection efficiency simply as
-a function of apparent magnitude for the supernova simulated (that are used in the bias
-correction), we can implement an approximate bias correction.
+To recap, we have a full bias correction that can be computed using Monte-Carlo integration. However,
+Monte-Carlo integration cannot be put inside the Stan framework, and having no bias corretion
+at all in the Stan framework means that our sampling efficiency drops to close to zero, which makes
+it very difficult to adequately sample the posterior adequately. As such, we need an approximate
+bias correction which *can* go inside Stan to improve our efficiency.
 
-To do this, we need both the survey efficiency as a function of apparent magnitude,
-and to project our high-dimensional model down to only apparent magnitude. We address the first
-issue by binning our simulations in apparent magnitude, and from the resultant histogram of
-selection efficiency as function of apparent magnitude, we can approximate the efficiency as a
-normal CDF parametrised as follows:
+We can do this by looking at the selection efficiency simply as
+a function of apparent magnitude for the supernova. There are two possibilities that we can do. The first
+is to approximate the selection efficiency as a normal CDF, as was done in Rubin (2005). However, when
+simulating the DES data, low spectroscopic efficiency at brighter magnitudes makes a CDF an inappropriate
+choice. Instead, the most general analytic form we can prescribe the approximate correction
+would be using a skew normal, as (depending on the value of the skew parameter :math:`\alpha`) we
+can smoothly transition from a normal CDF to a normal PDF. Thus the approximate bias function
+is described by
+
+.. math::
+    :label: approxbiassmall
+
+    w_{\rm approx} &= \int dz \left[ \int dm_B \,  S(m_B) P(m_B|z,\theta) \right] P(z|\theta) \\[10pt]
+
+.. admonition:: Show/Hide derivation
+   :class: toggle note math
+
+    .. math::
+        :label: approxbias
+
+        w_{\rm approx} &= \int d\hat{z} \int d\hat{m_B} \, P(\hat{z},\hat{m_B}|\theta) S(m_B) \\[10pt]
+        &= \int d\hat{z} \int d\hat{m_B} \int dz \int dm_B \, P(\hat{z},\hat{m_B},z,m_B|\theta)  S(m_B) \\[10pt]
+        &= \int d\hat{z} \int d\hat{m_B} \int dz \int dm_B \, P(\hat{z}|z) P(\hat{m_B}|m_B) P(m_B|z,\theta) P(z|\theta)  S(m_B) \\[10pt]
+        &= \int d\hat{z} \int d\hat{m_B} \int dz \int dm_B \, \delta(\hat{z}-z) \mathcal{N}(\hat{m_B}|m_B,\hat{\sigma_{m_B}}) P(m_B|z,\theta) P(z|\theta)  S(m_B) \\[10pt]
+        &= \int dz \int dm_B \, \left[ \int d\hat{m_B} \mathcal{N}(\hat{m_B}|m_B,\hat{\sigma_{m_B}}) \right] P(m_B|z,\theta) P(z|\theta) S(m_B) \\[10pt]
+        &= \int dz \left[ \int dm_B \,  S(m_B) P(m_B|z,\theta) \right] P(z|\theta) \\[10pt]
+
+
+
+As such, we have our efficiency function
 
 .. math::
     :label: ee1
 
-    S(m_B) = \Phi(m_B | m_{B,{\rm survey}}, \sigma_{{\rm survey}}),\\
+    S(m_B) = \mathcal{N}_{\rm skew} (m_B | m_{B,{\rm eff}}, \sigma_{{\rm eff}}, \alpha_{\rm eff})\\
 
-where :math:`\Phi` represents the *complimentary* CDF. With our survey efficiency thus defined, we need to describe our supernova model as a population
+With our survey efficiency thus defined, we need to describe our supernova model as a population
 in apparent magnitude (and redshift). This will be given by a normal function with mean
-:math:`m_B^* = \langle m_{Bi} \rangle = \langle M_B \rangle + \mu(z_i) - \alpha \langle x_1 \rangle + \beta \langle c \rangle`.
-The width of this normal is then given by :math:`(\sigma_{m_B}^*)^2 = \sigma_{m_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2`.
+:math:`m_B^*(z) = \langle M_B \rangle + \mu(z) - \alpha \langle x_1 \rangle + \beta \langle c \rangle`.
+The width of this normal is then given by :math:`(\sigma_{m_B}^*)^2 = \sigma_{m_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2`,
+such that we formally have
+
+.. math::
+    :label: poppdf
+
+    P(m_B | z,\theta) &= \mathcal{N}(m_B | m_B^*(z), \sigma_{m_B}^*)
 
 From this, we can derive an approximate weight :math:`w^*`:
 
 .. math::
-    :label: wstar
+    :label: wstarshort
 
-    w^*(z) = \int d m_B \ \mathcal{N}\left(m_B | m_B^*, \sigma_{m_B}^* \right) \Phi(m_B | m_{B,{\rm survey}}, \sigma_{{\rm survey}})
+    w_{\rm approx} &= 2 \int dz \,
+    \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+    \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2} \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 +      \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
+    P(z|\theta) \\[10pt]
 
-`Thank you Wikipedia for laying it out so nicely <https://en.wikipedia.org/wiki/Error_function#Integral_of_error_function_with_Gaussian_density_function>`_,
-the above reduces down to
 
-.. math::
-    :label: wstar
+.. admonition:: Show/Hide derivation
+   :class: toggle note math
 
-    w^*(z) = \Phi\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)
+    .. math::
+        :label: wstar
 
-By assuming that we have enough supernovae to decently sample the redshift range, we can implement
-this bias correction as supernovae dependent, and thus not have to re-integrate the distance modulus
-in Stan for an independent sample of redshifts.
+        w_{\rm approx} &= \int dz \left[ \int dm_B \,  S(m_B) P(m_B|z,\theta) \right] P(z|\theta) \\[10pt]
+        &= \int dz \left[
+        \int dm_B \,  \mathcal{N}_{\rm skew} (m_B | m_{B,{\rm eff}}, \sigma_{{\rm eff}}, \alpha_{\rm eff})
+        \mathcal{N}(m_B | m_B^*(z), \sigma_{m_B}^*)
+        \right] P(z|\theta) \\[10pt]
+        &= 2 \int dz \left[
+        \int dm_B \,  \mathcal{N} \left(\frac{m_B - m_{B,{\rm eff}}}{\sigma_{{\rm eff}}}\right) \Phi\left(\alpha_{\rm eff} \frac{m_B - m_{B,{\rm eff}}}{\sigma_{{\rm eff}}}\right)
+        \mathcal{N}\left(\frac{m_B - m_B^*(z)}{\sigma_{m_B}^*}\right)
+        \right] P(z|\theta) \\[10pt]
+        &= 2 \int dz \left[ \int dm_B \,
+        \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+        \mathcal{N} \left( \frac{ m_B - \bar{m_B} }{  \bar{\sigma}_{m_B}  }\right)
+        \Phi\left(\alpha_{\rm eff} \frac{m_B - m_{B,{\rm eff}}}{\sigma_{{\rm eff}}}\right)
+        \right] P(z|\theta) \\[10pt]
+        & {\rm where }\ \  \bar{m_B} = \left( m_{B,{\rm eff}} \sigma_{m_B}^{*2} +   m_B^*(z) \sigma_{{\rm eff}}^2 \right) / \left( \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 \right)  \\[10pt]
+        & {\rm where }\ \  \bar{\sigma}_{m_B}^2 = \left(  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  \right) / \left( \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 \right)   \\[10pt]
+        &= 2 \int dz \,
+        \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+        \left[ \int dm_B \,
+        \mathcal{N} \left( \frac{ m_B - \bar{m_B} }{  \bar{\sigma}_{m_B}  }\right)
+        \Phi\left(\alpha_{\rm eff} \frac{m_B - m_{B,{\rm eff}}}{\sigma_{{\rm eff}}}\right)
+        \right] P(z|\theta) \\[10pt]
+        &= 2 \int dz \,
+        \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+        \Phi\left( \frac{\bar{m_B} - m_{B,{\rm eff}} }{ \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 + \bar{\sigma}_{m_B}^2 } }  \right)
+        P(z|\theta) \\[10pt]
+        &= 2 \int dz \,
+        \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+        \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2} \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 +      \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
+        P(z|\theta) \\[10pt]
 
+
+    `Thank you Wikipedia for laying out the second last line out so nicely <https://en.wikipedia.org/wiki/Error_function#Integral_of_error_function_with_Gaussian_density_function>`_.
+
+We can see here that as our skew normal approaches a normal (:math:`\alpha \rightarrow 0`), the CDF function tends to
+:math:`\frac{1}{2}` and gives us only the expected normal residual.
+
+TODO: CONTINUE WRITING FROM HERE TOMORROW. Talk about difference between full correction and the way Rubin makes
+his equal and exact redshift assumption to turn the w^N into a product over all SN. Put in the plot which shows
+why I think this is wrong.
 
 After fitting the above posterior surface, we can remove the approximation correction
 and implement the actual Monte Carlo correction by assigning each point the chain the weight :math:`W`
@@ -495,6 +589,18 @@ represents are post-fit weight corrections to correctly take into account bias.
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i}) \delta(m_i - \hat{m_i}) \Phi^{-1}\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right) \bigg] \\
 
 
+
+
+
+
+
+
+.. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
+    :align:     center
+
+    A fit using 10 realisations of 500 supernova, for the simple model with no bias correction at all.
+    Note the small bias in matter density and large bias in mean colour
+    (as the redder supernova are cut off at high redshift).
 
 .. figure::     ../dessn/models/d_simple_stan/output/complete2.png
     :align:     center

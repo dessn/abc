@@ -49,3 +49,28 @@ table.borderless p {
     font-family: serif;
     font-size: 1.2em;
 }
+
+.toggle.admonition .admonition-title {
+    display: block;
+    clear: both;
+}
+
+.toggle.admonition .admonition-title:after {
+    content: " ▼";
+}
+
+.toggle.admonition .admonition-title.open:after {
+    content: " ▲";
+}
+
+.toggle.admonition {
+    padding: 0 12px;
+}
+.toggle.admonition .admonition-title {
+    background: #dfeaf1;
+    color: #404040;
+}
+
+.toggle.admonition.open {
+    padding: 12px;
+}
