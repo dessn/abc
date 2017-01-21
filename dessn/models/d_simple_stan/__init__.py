@@ -694,7 +694,11 @@ Did I mess up with how I create the data that Stan gets? Is there some pathology
     dont look too bad in :math:`\Omega_m`.
 
     **It is interesting to note that :math:`\alpha` and :math:`\beta` are roughly half of what I actually want.**
-    Perhaps somehow I am doing the correction twice.
+    Perhaps somehow I am doing the correction twice. From fiddling with the code and running
+    some more fits, I know the values for alpha and beta are highly dependent on the mean population, ie
+    this line in Stan: ``cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];``. Removing
+    the alpha and beta parts gives the runaway beta that I've seen in the other models, but keeping them as
+    is gives alpha and beta too small.
 
 .. code::
 
