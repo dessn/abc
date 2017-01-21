@@ -659,6 +659,10 @@ methods in appendices below which Stan does not converge on. ``simple`` is a mod
 without approximation bias correction, and ``simple_skew`` is making the underlying colour distribution
 skewed to see its effect.
 
+The main question I want to answer is why the ``approx_skewnorm`` model is not working. Did I mess up
+the math? Did I mess up the implementation with Simpson's rule? Did I mess up somewhere else in Stan?
+Did I mess up with how I create the data that Stan gets?
+
 
 
 .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
