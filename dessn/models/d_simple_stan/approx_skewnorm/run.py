@@ -10,9 +10,31 @@ def get_approximate_mb_correction(correction_source):
     d = load_correction_supernova(correction_source=correction_source, only_passed=False)
     mask = d["passed"] == 1
     mB = d["apparents"]
-    data = mB[mask][::10]
+    data = mB[mask]
     print("Fitting data profile")
-    alpha, mean, std = skewnorm.fit(data)
+
+    # Getting the efficiency pdf
+    hist_all, bins = np.histogram(mB, bins=100)
+    hist_passed, _ = np.histogram(data, bins=bins)
+    binc = 0.5 * (bins[:-1] + bins[1:])
+    hist_all[hist_all == 0] = 1
+    ratio = hist_passed / hist_all
+
+    # Inverse transformation sampling to sample from this random pdf
+    cdf = ratio.cumsum()
+    cdf = cdf / cdf.max()
+    n = 100000
+    u = np.random.random(size=n)
+    y = interp1d(cdf, binc)(u)
+
+    alpha, mean, std = skewnorm.fit(y)
+
+    # import matplotlib.pyplot as plt
+    # plt.plot(binc, ratio)
+    # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std))
+    # plt.hist(y, 100, histtype='step', normed=True)
+    # plt.show()
+    # exit()
 
     return mean, std, alpha
 
