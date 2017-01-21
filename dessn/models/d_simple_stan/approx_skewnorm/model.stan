@@ -102,7 +102,6 @@ transformed parameters {
     real cor_mB_cor [n_sim];
     real cor_mB_cor_weighted [n_sim];
     real cor_sigma2;
-    real weight2;
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
@@ -152,8 +151,6 @@ transformed parameters {
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i] + sim_log_prob[i];
     }
     weight = n_sne * (sim_log_factor + log_sum_exp(cor_mB_cor_weighted));
-    //print(weight);
-    //weight = 0;
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
