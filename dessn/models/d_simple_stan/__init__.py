@@ -382,60 +382,78 @@ account the number of supernova we have:
         2. Using input cosmology to translate :math:`m_B, x_1, c` distribution to a :math:`M_B, x_1, c` distribution.
         3. Perform Monte-Carlo integration using the distribution.
 
-    To go into the math, our Monte Carlo integration sample
-    of simulated supernova is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
+    This gives our correction :math:`w` as
 
     .. math::
-        w^N &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z,m)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
-        &= \left[ \frac{1}{N_{\rm sim}} \sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
-        &=  \frac{1}{N_{\rm sim}^N} \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N
+        :label: techw1
 
-    As the weights do not have to be normalised, we can discard the constant factor out front. We also note that
-    determining whether a simulated supernova has passed the cut now means converting light curve counts to flux
-    and checking that the new fluxes pass signal-to-noise cuts.
+        w \propto \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
 
-    .. math::
-       w^N &\propto  \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
-       \log\left(w^N\right) - {\rm const} &=  N \log\left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]
+    .. admonition:: Show/Hide derivation
+        :class: toggle note math
 
-    Given a set of points to use in the integration, we can see that subtracting the above
-    term from our likelihood provides a simple implementation of our bias correction.
+        To go into the math, our Monte Carlo integration sample
+        of simulated supernova is drawn from the multivariate normal distribution :math:`\mathcal{N}_{\rm sim}`.
+
+        .. math::
+            :label: techw2
+
+            w^N &= \left[ \frac{1}{N_{\rm sim}} \sum  P(S|m_B, x_1, c, z,m)  \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+            &= \left[ \frac{1}{N_{\rm sim}} \sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+            &=  \frac{1}{N_{\rm sim}^N} \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N
+
+        As the weights do not have to be normalised, we can discard the constant factor out front. We also note that
+        determining whether a simulated supernova has passed the cut now means converting light curve counts to flux
+        and checking that the new fluxes pass signal-to-noise cuts.
+
+        .. math::
+            :label: techw3
+
+            w^N &\propto  \left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N \\
+            \log\left(w^N\right) - {\rm const} &=  N \log\left[\sum_{\rm passed} \frac{\mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}     \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]
+
+        Given a set of points to use in the integration, we can see that subtracting the above
+        term from our log-likelihood provides an implementation of our bias correction.
 
 .. warning::
     A primary concern with selection effects is that they grow exponentially worse with
     more data. To intuitively understand this, if you have an increased number of (biased)
     data points, the posterior maximum becomes better constrained and you need an increased
-    re-weighting (bias correction) to shift the posterior maximum to the correct location.
+    re-weighting (bias correction) to shift the posterior maximum to the correct location. Because
+    of this, we will need to implement an approximate bias correction in Stan.
 
-    To provide a concrete example, suppose our weight (:math:`w`) is 0.99 in one section
-    of the parameter space, and 1.01 in another section (normalised to some arbitrary point).
-    With 300 data points, the difference in weights between those two points would be
-    :math:`(1.01/0.99)^{300} \approx 404`. This difference in weights is potentially beyond
-    the ability to re-weight an existing chain of results, and so the weights may need to
-    be implemented directly inside the posterior evaluated by the fitting algorithm. We note
-    that the 7th proof, :ref:`efficiency7`, shows undesired noise in the
-    contours when looking at different values of :math:`\sigma`, and the ratio difference there
-    for 2000 data points is only 81 (so 404 would be several times worse).
+    .. admonition:: Show/Hide discussion
+        :class: toggle note math
 
-    An example of importance sampling an uncorrected posterior surface is shown below.
+        To provide a concrete example, suppose our weight (:math:`w`) is 0.99 in one section
+        of the parameter space, and 1.01 in another section (normalised to some arbitrary point).
+        With 300 data points, the difference in weights between those two points would be
+        :math:`(1.01/0.99)^{300} \approx 404`. This difference in weights is potentially beyond
+        the ability to re-weight an existing chain of results, and so the weights may need to
+        be implemented directly inside the posterior evaluated by the fitting algorithm. We note
+        that the 7th proof, :ref:`efficiency7`, shows undesired noise in the
+        contours when looking at different values of :math:`\sigma`, and the ratio difference there
+        for 2000 data points is only 81 (so 404 would be several times worse).
 
-    .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_single_weight.png
-        :align:     center
-        :width: 70%
+        An example of importance sampling an uncorrected posterior surface is shown below.
 
-        In blue we have the posterior surface for a likelihood that does not have any
-        bias correction, and the red shows the same posterior after I have applied the
-        :math:`w^{-N}` bias correction. Normalised to one, the mean weight of points
-        after resampling is :math:`0.0002`, with the minimum weighted point weighted
-        at :math:`2.7\times 10^{-13}`. The staggeringly low weights attributed
-        is an artifact of the concerns stated above. The only good news I can see in this
-        posterior is that there *does* seem to be a shift in :math:`\langle c \rangle` towards
-        the correct value.
+        .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_single_weight.png
+            :align:     center
+            :width: 70%
 
-    If we focus on :math:`\langle c \rangle` for a second, we can see that the correct
-    value falls roughly :math:`3\sigma` away from the sampled mean, and so this raises the
-    question; *Is the issue simply that we have too few samples in the correct region of
-    parameter space? Is that why our weights are on average so low?*
+            In blue we have the posterior surface for a likelihood that does not have any
+            bias correction, and the red shows the same posterior after I have applied the
+            :math:`w^{-N}` bias correction. Normalised to one, the mean weight of points
+            after resampling is :math:`0.0002`, with the minimum weighted point weighted
+            at :math:`2.7\times 10^{-13}`. The staggeringly low weights attributed
+            is an artifact of the concerns stated above. The only good news I can see in this
+            posterior is that there *does* seem to be a shift in :math:`\langle c \rangle` towards
+            the correct value.
+
+        If we focus on :math:`\langle c \rangle` for a second, we can see that the correct
+        value falls roughly :math:`3\sigma` away from the sampled mean, and so this raises the
+        question; *Is the issue simply that we have too few samples in the correct region of
+        parameter space? Is that why our weights are on average so low?*
 
 To recap, we have a full bias correction that can be computed using Monte-Carlo integration. However,
 Monte-Carlo integration cannot be put inside the Stan framework, and having no bias corretion
@@ -629,34 +647,27 @@ represents are post-fit weight corrections to correctly take into account bias.
     \right]^{-N}\\
 
 
+If you want to investigate the folders I have under dessn/models/d_simpe_stan/*, the model described
+by the above equation is the ``approx_skewnorm`` folder, and gives matter density too low. The
+``approx_skewnorm_rubin`` is using the same approximate correction by evaluating it at each
+supernova (the exact and equal redshift approximation). ``approx`` uses the simple CDF approximation
+(not the skewnorm) with a fixed CDF with. ``approx_dynamic`` then has the width of the CDF
+determined properly, but adding that freedom makes :math:`\alpha` and :math:`\beta` balloon out.
+``approx_mass`` is approx with mass corrections in, tested only with sncosmo and not snana to make
+sure the mass didnt do anything too crazy. ``gp``, ``gp_closest`` and ``stan_mc`` are the three
+methods in appendices below which Stan does not converge on. ``simple`` is a model
+without approximation bias correction, and ``simple_skew`` is making the underlying colour distribution
+skewed to see its effect.
 
 
 
-..
+.. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
+    :align:     center
+    :width:     60%
 
-
-    .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
-        :align:     center
-
-        A fit using 10 realisations of 500 supernova, for the simple model with no bias correction at all.
-        Note the small bias in matter density and large bias in mean colour
-        (as the redder supernova are cut off at high redshift).
-
-    .. figure::     ../dessn/models/d_simple_stan/output/complete2.png
-        :align:     center
-
-        Final cosmology fits contrasting a fit without bias correction (blue) and a fit with bias correction
-        (red) applied. The contours shown are the combination of fifteen realisations of the given
-        fiducial cosmology, shown as dashed lines, with each realisation having 500 observed supernova. We can see
-        that the uncorrected posterior surface shows bias in :math:`\Omega_m` and :math:`\langle c \rangle`, whilst
-        the model the includes bias corrections (red) successfully recovers the true underlying cosmology.
-
-    .. figure::     ../dessn/models/d_simple_stan/output/complete_many.png
-        :align:     center
-        :width:     70%
-
-        The same plot as above, but only looking at cosmology the central population parameters, and with more
-        realisations of cosmology.
+    A fit using 10 realisations of 500 supernova, for the simple model with no bias correction at all.
+    Note the small bias in matter density and large bias in mean colour
+    (as the redder supernova are cut off at high redshift).
 
 ------------------
 
