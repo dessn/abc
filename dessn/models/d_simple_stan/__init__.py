@@ -675,10 +675,52 @@ Did I mess up with how I create the data that Stan gets? Is there some pathology
 
 .. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/snana_dummy.png
     :align:     center
-    :width:     60%
+    :width:     80%
 
-    A rough (laptop) fit to one realisation of 500 SNe for the SNANA dataset. Ignore the truth values,
-    they default to the SNCosmo truth values. I'm pretty happy with everything bar :math:`\beta`.
+    A rough fit to five realisation of 500 SNe for the SNANA dataset. I'm pretty happy with everything bar
+    :math:`\alpha` and :math:`\beta`. Showing only the approximate correction here, not the full
+    Monte-Carlo correction. Want
+    :math:`\Omega_m = 0.3, \alpha=0.14, \beta=3.1, \langle M_B \rangle = -19.36, \langle x_1 \rangle = 0, \langle c \rangle = 0, \sigma_{M_B}=0.1, \sigma_{x1} = 1, \sigma_c = 0.1`.
+
+
+
+.. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/zplot_approx_skewnorm_snana_dummy.png
+    :align:     center
+    :width:     80%
+
+    A rough fit to five realisation of 500 SNe for the SNANA dataset, as above. However this time
+    combining the chains and plotting the approximate correction in blue and the full correction in red.
+    I'd need to run at least 20 realisations to be happier with the scatter, but we can see the biases
+    dont look too bad in :math:`\Omega_m`.
+
+    **It is interesting to note that :math:`\alpha` and :math:`\beta` are roughly half of what I actually want.**
+    Perhaps somehow I am doing the correction twice.
+
+.. code::
+
+    \begin{table}
+        \centering
+        \caption{C:/Users/shint1/PycharmProjects/abc/dessn/models/d_simple_stan/approx_skewnorm}
+        \label{tab:model_params}
+        \begin{tabular}{cc}
+            \hline
+            Parameter & Corrected \\
+            \hline
+            $\Omega_m$ & $0.309^{+0.054}_{-0.058}$ \\
+            $\alpha$ & $0.073^{+0.054}_{-0.030}$ \\
+            $\beta$ & $1.72^{+0.45}_{-0.48}$ \\
+            $\langle M_B \rangle$ & $-19.364^{+0.034}_{-0.028}$ \\
+            $\langle x_1 \rangle$ & $-0.033^{+0.109}_{-0.076}$ \\
+            $\langle c \rangle$ & $\left( -0.5^{+6.1}_{-7.3} \right) \times 10^{-3}$ \\
+            $\sigma_{\rm m_B}$ & $0.190^{+0.045}_{-0.032}$ \\
+            $\sigma_{x_1}$ & $0.995^{+0.083}_{-0.034}$ \\
+            $\sigma_c$ & $\left( 101.6^{+5.3}_{-4.6} \right) \times 10^{-3}$ \\
+            ow & $-2068.7^{+9.0}_{-16.8}$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+
 
 ------------------
 
