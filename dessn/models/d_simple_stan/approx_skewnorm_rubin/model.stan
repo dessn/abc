@@ -27,15 +27,6 @@ data {
     real mB_width2;
     real mB_alpha2;
 
-    // Redshift grid to do integral
-    int<lower=0> n_sim; // Number of added redshift points
-    real <lower=0> sim_redshifts[n_sim]; // The redshift values
-    int sim_redshift_indexes[n_sim]; // Index of added redshifts (mapping zs -> redshifts)
-    real sim_log_prob[n_sim]; // Probability of the given redshift
-    real sim_log_weight[n_sim]; // The weights to use for simpsons rule
-    real sim_log_factor; // The prefactor (h/3) to use for simpsons rule
-
-
     // Calibration std
     vector[4] calib_std; // std of calibration uncertainty, so we can draw from regular normal
     matrix[3,4] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -95,17 +86,15 @@ transformed parameters {
     vector [3] sigmas;
 
     // Variables to calculate the bias correction
-    real sim_model_mu[n_sim];
     real cor_MB_mean;
     real cor_mb_width2;
-    real cor_mB_mean [n_sim];
-    real cor_mB_cor [n_sim];
-    real cor_mB_cor_weighted [n_sim];
+    real cor_mB_mean [n_sne];
+    real cor_mB_cor [n_sne];
     real cor_sigma2;
-    real weight2;
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
+    vector [n_sne] bias_correction;
     real weight;
     real Posterior;
 
@@ -125,9 +114,6 @@ transformed parameters {
     for (i in 1:n_sne) {
         model_mu[i] = 5.*log10((1. + redshifts[i])*cum_simps[redshift_indexes[i]]) + 43.158613314568356; // End is 5log10(c/H0/10pc), H0=70
     }
-    for (i in 1:n_sim) {
-        sim_model_mu[i] = 5.*log10((1. + sim_redshifts[i])*cum_simps[sim_redshift_indexes[i]]) + 43.158613314568356; // End is 5log10(c/H0/10pc), H0=70
-    }
     // -------------End numerical integration---------------
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
@@ -143,17 +129,6 @@ transformed parameters {
     cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];
     cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2;
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
-
-    // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
-    // and we add in log_sum_exp
-    for (i in 1:n_sim) {
-        cor_mB_mean[i] = cor_MB_mean + sim_model_mu[i];
-        cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
-        cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i] + sim_log_prob[i];
-    }
-    weight = n_sne * (sim_log_factor + log_sum_exp(cor_mB_cor_weighted));
-    //print(weight);
-    //weight = 0;
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
@@ -171,9 +146,18 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
+        // Calculate the correction for this redshift
+        cor_mB_mean[i] = cor_MB_mean + model_mu[i];
+        cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
+
+        print(redshifts[i], " ",cor_mB_mean[i], " ", mB_mean, cor_mB_cor[i], alpha, beta);
+
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
+        // Get the approximate bias correction
+        bias_correction[i] = log_sum_exp(cor_mB_cor[i], log(0.01));
     }
+    weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 1.0)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)

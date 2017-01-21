@@ -30,8 +30,7 @@ if __name__ == "__main__":
         "mB_width2": mB_width**2,
         "mB_alpha2": mB_alpha**2,
         "data_source": "snana_dummy",
-        "n": 500,
-        "add_zs": 501
+        "n": 500
     }
     print("Running %s" % file)
     run(data, stan_model, file, weight_function=add_weight_to_chain)

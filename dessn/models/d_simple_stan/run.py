@@ -6,6 +6,8 @@ import numpy as np
 from numpy.random import uniform
 import sys
 import socket
+
+from scipy.interpolate import interp1d
 from scipy.stats import multivariate_normal, norm
 from scipy.misc import logsumexp
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
@@ -36,6 +38,39 @@ def get_simulation_data(correction_source="snana", n=5000):
         "sim_redshifts": redshifts,
         "sim_mass": masses,
         "sim_log_prob": existing_prob
+    }
+
+
+def get_extra_zs(correction_source="snana", n=101, buffer=0.1):
+    assert n % 2 == 1, "n needs to be odd"
+    print("Getting extra redshifts for integration from %s" % correction_source)
+    supernovae = load_correction_supernova(correction_source=correction_source, only_passed=False)
+
+    # Need to determine the max redshift to sample to
+    zs = supernovae["redshifts"]
+    passed = supernovae["passed"]
+
+    hist, bins = np.histogram(zs, bins=50, density=True)
+    binc = 0.5 * (bins[1:] + bins[:-1])
+
+    max_zs = min(np.max(zs), np.max(zs[passed]) + buffer)
+    min_zs = max(0.05, np.min(zs[passed]))
+
+    zs_sample = np.linspace(min_zs, max_zs, n)
+
+    probs = interp1d(binc, hist, assume_sorted=True, bounds_error=False, fill_value="extrapolate")(zs_sample)
+
+    weights = np.ones(n)
+    weight_2_indexes = 2 * np.arange(1, (n // 2))
+    weight_4_indexes = 2 * np.arange(1, (n // 2) + 1) - 1
+    weights[weight_2_indexes] += 1
+    weights[weight_4_indexes] += 3
+    return {
+        "n_sim": n,
+        "sim_redshifts": zs_sample,
+        "sim_log_prob": np.log(probs),
+        "sim_log_factor": np.log(np.diff(zs_sample)[0] / 3),
+        "sim_log_weight": np.log(weights)
     }
 
 
@@ -180,7 +215,7 @@ def get_correction_data_from_data_source(data_source):
         raise ValueError("Data source %s not recognised" % data_source)
 
 
-def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **extra_args):
+def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, add_zs=0, **extra_args):
     """ Gets the full analysis data. That is, the observational data, and all the
     useful things we pre-calculate and give to stan to speed things up.
     """
@@ -198,13 +233,15 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
 
     data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
-    n_z = 1000
-    if add_sim:
+    n_z = 2000
+    if add_sim or add_zs:
         correction_source = get_correction_data_from_data_source(data_source)
-        sim_data = get_simulation_data(correction_source=correction_source, n=add_sim)
+        if add_sim:
+            sim_data = get_simulation_data(correction_source=correction_source, n=add_sim)
+        else:
+            sim_data = get_extra_zs(correction_source=correction_source, n=add_zs)
         n_sim = sim_data["n_sim"]
         sim_redshifts = sim_data["sim_redshifts"]
-
         dz = max(redshifts.max(), sim_redshifts.max()) / n_z
         zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
     else:
@@ -226,7 +263,7 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
     n_z = n_sne + n_sim + len(added_zs)
     n_simps = int((n_z + 1) / 2)
     to_sort = [(z, -1, -1) for z in added_zs] + [(z, i, -1) for i, z in enumerate(redshifts)]
-    if add_sim:
+    if add_sim or add_zs:
         to_sort += [(z, -1, i) for i, z in enumerate(sim_redshifts)]
     to_sort.sort()
     final_redshifts = np.array([z[0] for z in to_sort])
@@ -245,12 +282,13 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
         "calib_std": np.ones(4) * 0.01
     }
 
-    if add_sim:
+    if add_sim or add_zs:
         sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
         sim_sorted_vals.sort()
         sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
         update["sim_redshift_indexes"] = sim_final
-        update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
+        if add_sim:
+            update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
 
     if extra_args is None:
         extra_args = {}
@@ -374,3 +412,4 @@ def run(data_args, stan_model, filename, weight_function=None):
 if __name__ == "__main__":
     print("You probably want to go into a sub directory")
     print("Youll want to give run.py three params: n_cosmo, n_walks, n_jobs")
+    get_extra_zs()

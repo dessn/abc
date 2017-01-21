@@ -606,14 +606,27 @@ represents are post-fit weight corrections to correctly take into account bias.
 
     \definecolor{blue}{RGB}{18,110,213}
     \definecolor{red}{RGB}{230,0,29}
-    P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N  \Phi\left( \frac{m_{Bi}^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)    }{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
+    P(\theta|D) &\propto \color{red} \left[ \frac{
+     \int dz \,
+    \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+    \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2} \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 +      \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
+    P(z|\theta)  }
+    {\sum_{\rm passed} \frac{\mathcal{N}\left(
     \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
-    \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  \right]^N} \\
+    \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  }\right]^N \\
     &\quad\quad\quad \color{blue} \idotsint d\vec{\eta} \,d\vec{M_B}\  \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
-    &\quad\quad\quad \color{blue} \prod_{i=1}^N \bigg[ \mathcal{N}\left(  \hat{\eta_i} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta_i}}{\partial\mathcal{Z}}  | \eta_i, C_i \right)
+    &\quad\quad\quad \color{blue} \prod_{i=1}^N \Bigg[ \mathcal{N}\left(  \hat{\eta_i} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta_i}}{\partial\mathcal{Z}}  | \eta_i, C_i \right)
     \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i \right]\right)  \\
     &\quad\quad\quad\quad\quad \color{blue}  \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i}) \delta(m_i - \hat{m_i}) \Phi^{-1}\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right) \bigg] \\
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i})
+    \delta(m_i - \hat{m_i}) \Bigg] \\
+    &\quad\quad\quad\quad\quad \color{blue}  \left[
+    \int dz \,
+    \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
+    \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2}
+    \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 + \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
+    P(z|\theta)
+    \right]^{-N}\\
 
 
 
@@ -689,7 +702,7 @@ Appendix 2 - Gaussian Processes
 
 .. warning::
 
-    Add documentation
+    Add documentation. Conclusion is it didn't work.
 
 
 Appendix 2 - Nearest Point GP
@@ -697,5 +710,5 @@ Appendix 2 - Nearest Point GP
 
 .. warning::
 
-    Add documentation
+    Add documentation. Conclusion is that is really didn't work.
 """
