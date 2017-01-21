@@ -544,31 +544,56 @@ From this, we can derive an approximate weight :math:`w^*`:
 We can see here that as our skew normal approaches a normal (:math:`\alpha \rightarrow 0`), the CDF function tends to
 :math:`\frac{1}{2}` and gives us only the expected normal residual.
 
-TODO: CONTINUE WRITING FROM HERE TOMORROW. Talk about difference between full correction and the way Rubin makes
-his equal and exact redshift assumption to turn the w^N into a product over all SN. Put in the plot which shows
-why I think this is wrong.
+
+.. note::
+
+    If we wanted to use the original complimentary CDF approximation for the selection efficiency, we would get the integral
+    of the complimentary CDF function.
+
+    .. math::
+        :label: wstarshort2
+
+        w_{\rm approx} &= 2 \int dz \,
+        \Phi^c\left( \frac{m_B^* - m_{B,{\rm eff}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)
+        P(z|\theta) \\[10pt]
+
+    Now here we depart from Rubin (2015). Rubin (2015) formulate their likelihood in terms of a combinatorial
+    problem, taking into account the number of observed events and an unknown number of missed events. Detailed in
+    their Appendix B, they also make "the counterintuitive approximation that the redshift of each missed
+    SN is exactly equal to the redshift of a detected SN. This approximation is accurate because the SN samples have,
+    on average, enough SNe that the redshift distribution is reasonable sampled."
+
+    **Alex/Tam, looking for feedback:** Unfortunately, I must disagree that this approximation is valid, because
+    whilst the SN surveys *may* be able to reasonable sample the *observed* redshift distribution of SN, they
+    *do not* adequately sample the underlying redshift distribution. Now, the underlying redshift distribution
+    goes to a very high redshift, however we note that we would not have to integrate over all of it, because
+    above the observed redshift distribution the contribution to the integral quckly drops to zero. However,
+    sampling the high redshift tail is still necessary.
+
+    It is of interest that the difference in methodology (between my integral and Rubin's
+    combinatorics/redshift approximation/geometric series leads to the following difference in bias corrections.
+
+    Note that I use capital W below, to denote a correction for the entire model, not a single supernova.
+
+    .. math::
+        W_{\rm approx} &= 2 \left(\int dz \,
+        \Phi^c\left( \frac{m_B^* - m_{B,{\rm eff}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)
+        P(z|\theta) \right)^N \\[10pt]
+        W_{\rm Rubin} &= \prod_{i=1}^N \frac{P({\rm detect}|\lbrace \hat{m_{Bi}}, \hat{x_{1i}}, \hat{c_i} \rbrace) }{P({\rm detect} | z_i) }
+        = \prod_{i=1}^N (\epsilon + P({\rm detect} | z_i))^{-1} \\
+
+    where the last line utilises a small :math:`\epsilon` to aid convergences, and we discard the
+    numerator as Rubin states with :math:`\epsilon > 0` it didn't turn out to be important.
+
+    To try and compare these different methods, I've also tried a similar exact redshift approximation
+    to reduce my integral down to a product, however it does not work well. That said, nothing I have
+    tried has worked well, so maybe it is, in fact, alright.
+
 
 After fitting the above posterior surface, we can remove the approximation correction
-and implement the actual Monte Carlo correction by assigning each point the chain the weight :math:`W`
+and implement the actual Monte Carlo correction by assigning each point the chain the weight based on the
+difference between the approximate weight and the actual weight.
 
-.. math::
-    :label: ee3
-
-    W = w^{-N} \prod_{i=1}^N \Phi\left( \frac{m_B^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right). \\
-
-The results of doing this (with and without setting :math:`W`) are shown below, to show the difference
-between the approximation bias correction and Monte Carlo bias correction. Fifteen realisations
-of 500 supernova were used in the contours below, to test systematics.
-
-.. figure::     ../dessn/models/d_simple_stan/output/plot_approx_weight.png
-    :align:     center
-    :width: 100%
-
-    In blue we have the posterior surface for a likelihood that does not have any
-    bias correction, and the red shows the same posterior after I have applied the
-    :math:`W` bias correction. Normalised to one, the mean weight of points
-    after resampling is :math:`0.001` (three times better than before). This is so
-    far the most promising technique.
 
 Final Model
 -----------
@@ -577,6 +602,8 @@ To lay out all the math in one go, the blue section represents the model fitted 
 represents are post-fit weight corrections to correctly take into account bias.
 
 .. math::
+    :label: finall
+
     \definecolor{blue}{RGB}{18,110,213}
     \definecolor{red}{RGB}{230,0,29}
     P(\theta|D) &\propto \color{red} \frac{\prod_{i=1}^N  \Phi\left( \frac{m_{Bi}^* - m_{B,{\rm survey}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)    }{\left[\sum_{\rm passed} \frac{\mathcal{N}\left(
@@ -592,31 +619,31 @@ represents are post-fit weight corrections to correctly take into account bias.
 
 
 
+..
 
 
+    .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
+        :align:     center
 
-.. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
-    :align:     center
+        A fit using 10 realisations of 500 supernova, for the simple model with no bias correction at all.
+        Note the small bias in matter density and large bias in mean colour
+        (as the redder supernova are cut off at high redshift).
 
-    A fit using 10 realisations of 500 supernova, for the simple model with no bias correction at all.
-    Note the small bias in matter density and large bias in mean colour
-    (as the redder supernova are cut off at high redshift).
+    .. figure::     ../dessn/models/d_simple_stan/output/complete2.png
+        :align:     center
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete2.png
-    :align:     center
+        Final cosmology fits contrasting a fit without bias correction (blue) and a fit with bias correction
+        (red) applied. The contours shown are the combination of fifteen realisations of the given
+        fiducial cosmology, shown as dashed lines, with each realisation having 500 observed supernova. We can see
+        that the uncorrected posterior surface shows bias in :math:`\Omega_m` and :math:`\langle c \rangle`, whilst
+        the model the includes bias corrections (red) successfully recovers the true underlying cosmology.
 
-    Final cosmology fits contrasting a fit without bias correction (blue) and a fit with bias correction
-    (red) applied. The contours shown are the combination of fifteen realisations of the given
-    fiducial cosmology, shown as dashed lines, with each realisation having 500 observed supernova. We can see
-    that the uncorrected posterior surface shows bias in :math:`\Omega_m` and :math:`\langle c \rangle`, whilst
-    the model the includes bias corrections (red) successfully recovers the true underlying cosmology.
+    .. figure::     ../dessn/models/d_simple_stan/output/complete_many.png
+        :align:     center
+        :width:     70%
 
-.. figure::     ../dessn/models/d_simple_stan/output/complete_many.png
-    :align:     center
-    :width:     70%
-
-    The same plot as above, but only looking at cosmology the central population parameters, and with more
-    realisations of cosmology.
+        The same plot as above, but only looking at cosmology the central population parameters, and with more
+        realisations of cosmology.
 
 ------------------
 
