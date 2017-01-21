@@ -659,19 +659,26 @@ methods in appendices below which Stan does not converge on. ``simple`` is a mod
 without approximation bias correction, and ``simple_skew`` is making the underlying colour distribution
 skewed to see its effect.
 
-The main question I want to answer is why the ``approx_skewnorm`` model is not working. Did I mess up
+The main question I want to answer is why the ``approx_skewnorm`` model is not working. To clarify
+"not working", I am actually fairly happy that it seems to be working for the matter density
+correction, however :math:`\beta` fits around 1.75, which is not the best. I'll put a plot of the
+interim approximate surface below, ignore the truth values, they are for sncosmo and not snana. Want
+:math:`\Omega_m = 0.3, \alpha=0.14, \beta=3.1, \langle M_B \rangle = -19.36, \langle x_1 \rangle = 0, \langle c \rangle = 0, \sigma_{M_B}=0.1, \sigma_{x1} = 1, \sigma_c = 0.1`.
+
+
+
+So I ask myself, did I mess up
 the math? Did I mess up the implementation with Simpson's rule? Did I mess up somewhere else in Stan?
-Did I mess up with how I create the data that Stan gets?
+Did I mess up with how I create the data that Stan gets? Is there some pathology I am missing?
 
 
 
-.. figure::     ../dessn/models/d_simple_stan/output/plot_simple_no_weight.png
+.. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/snana_dummy.png
     :align:     center
     :width:     60%
 
-    A fit using 10 realisations of 500 supernova, for the simple model with no bias correction at all.
-    Note the small bias in matter density and large bias in mean colour
-    (as the redder supernova are cut off at high redshift).
+    A rough (laptop) fit to one realisation of 500 SNe for the SNANA dataset. Ignore the truth values,
+    they default to the SNCosmo truth values. I'm pretty happy with everything bar :math:`\beta`.
 
 ------------------
 
