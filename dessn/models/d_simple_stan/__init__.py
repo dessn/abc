@@ -71,12 +71,9 @@ For simplicity, we adopt the commonly used notation that :math:`\eta\equiv \lbra
 .. math::
     :label: a
 
-    P(\theta|D) &= \frac{ P(D|\theta) P(\theta) }{\int P(D|\theta^\prime) P(\theta^\prime)  \,d\theta^\prime}  \\[10pt]
-                &\propto P(D|\theta) P(\theta) \\
+    P(\theta|D) &= \frac{ \mathcal{L}(D|\theta) P(\theta) }{\int \mathcal{L}(D|\theta^\prime) P(\theta^\prime)  \,d\theta^\prime}  \\[10pt]
+                &\propto \mathcal{L}(D|\theta) P(\theta) \\
 
-As our likelihood :math:`\mathcal{L}` does not have a fixed normalisation constant,
-but instead has :math:`\theta` dependent normalisation, we also must enforce normalisation of the likelihood
-over all possible data realisations:
 
 .. math::
     :label: b
@@ -101,7 +98,10 @@ To put everything back together, we thus have
 .. math::
     :label: cg
 
-    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\
+    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\[10pt]
+    \equiv frac{P(D|\theta) P(\theta)}{w  }
+
+where in the last line to make the notation easier I define :math:`w \equiv \int  S(R) P(R|\theta) \ dR`.
 
 An equivalent way of writing this down is rephrase the probability of attaining an experimental outcome
 as the product of an event occurring given :math:`\theta` multiplied by the conditional probability
@@ -126,7 +126,7 @@ supernova as :math:`\mathcal{L}_i`.
 .. math::
     :label: d
 
-    \mathcal{L_i} P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+    \mathcal{P_i} (D|\theta) P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
     \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m)
     P(\Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\
 
@@ -135,11 +135,12 @@ We will treat :math:`\sigma_{M_B},\ \sigma_{x_1},\, \sigma_c`
 with Cauchy priors, :math:`\rho` with an LKJ prior, :math:`\delta \mathcal{Z}_b` is constrained by
 zero point uncertainty from photometry (currently just set to 0.01 mag normal uncertainty)
 and other parameters with flat priors. The prior
-distributions on redshift and host mass are for this implementation set to a uniform distribution,
-but actually do no matter in this likelihood (without bias corrections), as we assume redshift and mass are
-precisely known. So now we can focus on the likelihood's numerator, which is
+distributions on redshift and host mass do not matter in this likelihood (without bias corrections),
+as we assume redshift and mass are precisely known.
+So now we can focus on the likelihood's numerator, which is
 
 .. math::
+    :label: e
 
     \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
@@ -147,7 +148,6 @@ precisely known. So now we can focus on the likelihood's numerator, which is
    :class: toggle note math
 
     .. math::
-        :label: e
 
         \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
         \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
@@ -164,6 +164,7 @@ and then assume that true observed summary statistics :math:`\hat{\eta}_{\rm Tru
 distributed around the true values :math:`\eta`, we can separate them out.
 
 .. math::
+    :label: eg
 
     \mathcal{L_i} &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
@@ -172,7 +173,6 @@ distributed around the true values :math:`\eta`, we can separate them out.
    :class: toggle note math
 
     .. math::
-        :label: eg
 
         \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta} | \eta, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
         &= \iiint d\eta \  P(\hat{\eta} | \eta, \delta \mathcal{Z}_b) P(\eta | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
@@ -247,8 +247,7 @@ with
     \rho_{31} \sigma_{M_B} \sigma_{c}          & \rho_{32} \sigma_{x_1} \sigma_{c}       & \sigma_{c}^2  \\
     \end{pmatrix}
 
-and :math:`P(\hat{z})` is the DES specific redshift distribution, and :math:`P(\hat{m})` is the mass distribution (currently assumed to not be a function cosmology and
-just set to a uniform distribution, but this will need to be updated).
+giving the population covariance.
 
 
 .. note::
