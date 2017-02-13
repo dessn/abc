@@ -69,8 +69,7 @@ def get_extra_zs(correction_source="snana", n=101, buffer=0.1):
         "n_sim": n,
         "sim_redshifts": zs_sample,
         "sim_log_prob": np.log(probs),
-        "sim_log_factor": np.log(np.diff(zs_sample)[0] / 3),
-        "sim_log_weight": np.log(weights)
+        "sim_log_weight": np.log(weights * np.diff(zs_sample)[0] / 3)
     }
 
 

@@ -33,7 +33,6 @@ data {
     int sim_redshift_indexes[n_sim]; // Index of added redshifts (mapping zs -> redshifts)
     real sim_log_prob[n_sim]; // Probability of the given redshift
     real sim_log_weight[n_sim]; // The weights to use for simpsons rule
-    real sim_log_factor; // The prefactor (h/3) to use for simpsons rule
 
 
     // Calibration std
@@ -150,7 +149,7 @@ transformed parameters {
         cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i] + sim_log_prob[i];
     }
-    weight = n_sne * (sim_log_factor + log_sum_exp(cor_mB_cor_weighted));
+    weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
