@@ -158,7 +158,11 @@ So now we can focus on the likelihood's numerator, which is
         &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 Where I have used the fact that we assume mass and redshift are precisely known
-(:math:`\hat{z}=z` and :math:`\hat{m}=m`), and therefore do not need to be modelled with latent parameters.
+(:math:`\hat{z}=z` and :math:`\hat{m}=m`), and therefore do not need to be modelled with latent parameters. With precise
+measurements, we do not need to consider the underlying redshift and mass distributions
+:math:`P(z|\theta)` and :math:`P(m|\theta)` in this part of our model, as they will simply
+modify the constant of proportionality, and thus I do not write them out.
+
 We take zeropoint uncertainty into account by computing :math:`\frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b}` for each supernova
 light curve. We thus model what would be the observed values :math:`\hat{\eta}_{\rm True} = \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b}`,
 and then assume that true observed summary statistics :math:`\hat{\eta}_{\rm True}` are normally
@@ -285,7 +289,8 @@ Selection Effects
 Now, the easy part of the model is done, we need to move on to the real issue - our data is biased.
 As the bias correction is not data dependent, but model parameter dependent (cosmology dependent),
 the correction for each data point is identical, such that the correction for each individual supernova
-is identical.
+is identical. I also note that, unlike the previous section, here we have to care about the
+redshift and mass distributions, and so I will write them out.
 
 We assume, for any given supernova, the selection effect can be determined as a function of apparent magnitude,
 colour, stretch, redshift and mass. We might expect that the zero points have an effect
