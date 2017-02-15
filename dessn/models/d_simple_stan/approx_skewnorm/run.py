@@ -45,7 +45,7 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width, mB_alpha = get_approximate_mb_correction("snana")
-    print(mB_mean, mB_width, mB_alpha)
+    print("Mean, width and alpha of selection function are ", mB_mean, mB_width, mB_alpha)
 
     data = {
         "mB_mean": mB_mean,

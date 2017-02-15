@@ -31,8 +31,7 @@ data {
     int<lower=0> n_sim; // Number of added redshift points
     real <lower=0> sim_redshifts[n_sim]; // The redshift values
     int sim_redshift_indexes[n_sim]; // Index of added redshifts (mapping zs -> redshifts)
-    real sim_log_prob[n_sim]; // Probability of the given redshift
-    real sim_log_weight[n_sim]; // The weights to use for simpsons rule
+    real sim_log_weight[n_sim]; // The weights to use for simpsons rule multipled by the probability P(z) for each redshift
 
 
     // Calibration std
@@ -147,7 +146,7 @@ transformed parameters {
     for (i in 1:n_sim) {
         cor_mB_mean[i] = cor_MB_mean + sim_model_mu[i];
         cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
-        cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i] + sim_log_prob[i];
+        cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
 
