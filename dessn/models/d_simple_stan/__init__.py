@@ -100,7 +100,7 @@ To put everything back together, we thus have
     :label: cg
 
     P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\[10pt]
-    \equiv \frac{P(D|\theta) P(\theta)}{w  }
+    &= \frac{P(D|\theta) P(\theta)}{w  }
 
 where in the last line to make the notation easier I define :math:`w \equiv \int  S(R) P(R|\theta) \ dR`.
 
