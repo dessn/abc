@@ -100,7 +100,7 @@ To put everything back together, we thus have
     :label: cg
 
     P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\[10pt]
-    \equiv frac{P(D|\theta) P(\theta)}{w  }
+    \equiv \frac{P(D|\theta) P(\theta)}{w  }
 
 where in the last line to make the notation easier I define :math:`w \equiv \int  S(R) P(R|\theta) \ dR`.
 
@@ -121,13 +121,13 @@ differently. For simplicity, let us denote the population parameters
 shown under the Population header as :math:`\gamma`.
 
 Furthermore, in the interests of simplicity, let us examine only a single supernova for the time being. As I don't
-yet take calibration into account, the supernova are independent. Let us denote the likelihood for a single
-supernova as :math:`\mathcal{L}_i`.
+yet take calibration into account, the supernova are independent. Let us denote the unnormalised likelihood for a single
+supernova as :math:`P (D_i|\theta).
 
 .. math::
     :label: d
 
-    \mathcal{P_i} (D|\theta) P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+    P (D_i|\theta) P(\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
     \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m)
     P(\Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\
 
@@ -143,14 +143,14 @@ So now we can focus on the likelihood's numerator, which is
 .. math::
     :label: e
 
-    \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    P (D_i|\theta) &= \iiint d\eta \  P(\hat{\eta}, \eta |  z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b )  \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 .. admonition:: Show/Hide derivation
    :class: toggle note math
 
     .. math::
 
-        \mathcal{L_i} &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
+        P (D_i|\theta) &= P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m} |
         \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
         &= \int dm_B \int dx_1 \int dc \  P(\hat{m_B}, \hat{x_1}, \hat{c}, \hat{z}, \hat{m}, m_B, x_1, c | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
         &= \iiint d\eta \  P(\hat{\eta}, \hat{z}, \hat{m}, \eta | \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b, z, m) \\[10pt]
@@ -167,7 +167,7 @@ distributed around the true values :math:`\eta`, we can separate them out.
 .. math::
     :label: eg
 
-    \mathcal{L_i} &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
+    P (D_i|\theta) &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
 
 .. admonition:: Show/Hide derivation
@@ -175,7 +175,7 @@ distributed around the true values :math:`\eta`, we can separate them out.
 
     .. math::
 
-        \mathcal{L_i} &= \iiint d\eta \  P(\hat{\eta} | \eta, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
+        P (D_i|\theta) &= \iiint d\eta \  P(\hat{\eta} | \eta, z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta \mathcal{Z}_b ) \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
         &= \iiint d\eta \  P(\hat{\eta} | \eta, \delta \mathcal{Z}_b) P(\eta | z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\[10pt]
         &= \iiint d\eta \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} |\eta, C \right) P(\eta| z, m, \Omega_m, w, \alpha, \beta, \gamma)  \delta(\hat{z} - z) \delta(\hat{m}-m)  \\
 
@@ -217,7 +217,7 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: i
 
-    \mathcal{L} &= \iiint d\eta  \int dM_B \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} | \eta, C \right) P(\eta, M_B | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    P (D_i|\theta) &= \iiint d\eta  \int dM_B \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} | \eta, C \right) P(\eta, M_B | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 where
 
