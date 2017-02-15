@@ -550,11 +550,11 @@ From this, we can derive an approximate weight :math:`w^*`:
         \right] P(z|\theta) \\[10pt]
         &= 2 \int dz \,
         \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
-        \Phi\left( \frac{\bar{m_B} - m_{B,{\rm eff}} }{ \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 + 2\bar{\sigma}_{m_B}^2 } }  \right)
+        \Phi\left( \frac{\bar{m_B} - m_{B,{\rm eff}} }{ \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 + \bar{\sigma}_{m_B}^2 } }  \right)
         P(z|\theta) \\[10pt]
         &= 2 \int dz \,
         \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
-        \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2} \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 +      2\frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
+        \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2} \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 +      \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
         P(z|\theta) \\[10pt]
 
 
