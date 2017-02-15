@@ -502,7 +502,7 @@ With our survey efficiency thus defined, we need to describe our supernova model
 in apparent magnitude (and redshift). This will be given by a normal function with mean
 :math:`m_B^*(z) = \langle M_B \rangle + \mu(z) - \alpha \langle x_1 \rangle + \beta \langle c \rangle`.
 The width of this normal is then given by
-:math:`(\sigma_{m_B}^*)^2 = \sigma_{m_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2 + 2(\alpha \sigma_{m_B,x_1} + \beta \sigma_{m_B,c} + \alpha\beta\sigma_{x_1,c})`,
+:math:`(\sigma_{m_B}^*)^2 = \sigma_{m_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2 + 2(\beta \sigma_{m_B,c} -\alpha \sigma_{m_B,x_1} - \alpha\beta\sigma_{x_1,c})`,
 such that we formally have
 
 .. math::
