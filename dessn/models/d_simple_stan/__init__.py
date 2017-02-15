@@ -205,7 +205,7 @@ and :math:`k(z)` as
     \right)}{0.9 + 10^{0.95z}} + \frac{\delta(\infty)}{\delta(0)} \right] \\
 
 We note that :math:`\mu` is a function of :math:`\hat{z},\Omega_m,w`, however we will simply denote it
-:math:`mu` to keep the notation from spreading over too many lines.
+:math:`\mu` to keep the notation from spreading over too many lines.
 
 From the above,  :math:`M_B` is a function of :math:`\Omega_m, w, \alpha, \beta, x_1, c, z, m`. Or, more probabilistically,
 
