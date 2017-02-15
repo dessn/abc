@@ -74,11 +74,11 @@ For simplicity, we adopt the commonly used notation that :math:`\eta\equiv \lbra
     P(\theta|D) &= \frac{ \mathcal{L}(D|\theta) P(\theta) }{\int \mathcal{L}(D|\theta^\prime) P(\theta^\prime)  \,d\theta^\prime}  \\[10pt]
                 &\propto \mathcal{L}(D|\theta) P(\theta) \\
 
-
+with
 .. math::
     :label: b
 
-    \mathcal{L} &= \frac{ P(D|\theta)}{\int  P(D^\prime|\theta) \ dD^\prime}, \\
+    \mathcal{L}(D|\theta) &= \frac{ P(D|\theta)}{\int  P(D^\prime|\theta) \ dD^\prime}, \\
 
 where :math:`D^\prime` represents all possible experimental outcomes. It is important to note that this is where
 our selection effects kick in: :math:`D^\prime` is the subset of all possible data that satisfies our
