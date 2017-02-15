@@ -217,7 +217,7 @@ We can thus introduce a latent variable :math:`M_B` and immediately remove the :
 .. math::
     :label: i
 
-    \mathcal{L} &= \iiint d\eta  \int M_B \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} | \eta, C \right) P(\eta, M_B | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+    \mathcal{L} &= \iiint d\eta  \int dM_B \  \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}_b} | \eta, C \right) P(\eta, M_B | z, m, \Omega_m, w, \alpha, \beta, \gamma, \delta\mathcal{Z}_b) \delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
 
 where
 
