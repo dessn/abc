@@ -301,7 +301,7 @@ compute the bias correction as
     \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
+    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z|\theta) \\
 
 .. admonition:: Show/Hide derivation
    :class: toggle note math
@@ -315,12 +315,12 @@ compute the bias correction as
         \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
         &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
         \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
-        \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) \\[10pt]
+        \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) P(z|\theta) \\[10pt]
         &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
         \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
         &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
         \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
-        \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
+        \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z|\theta)  \\
 
 Again that we assume redshift and mass are perfectly known, so the relationship between
 actual (latent) redshift and mass and the observed quantity is a delta function, hence why
@@ -344,7 +344,7 @@ except with some extra integral signs that marginalise over all possible experim
     :label: o
 
     w &= \idotsint d\eta\, dz \, dm \, dM_B\
-    S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) \\
+    S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) P(z|\theta) \\
 
 Addressing each component individually:
 
@@ -354,6 +354,7 @@ Addressing each component individually:
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
     S(m_B, x_1, c, z, m) &= \text{If the supernova (light curves and summary stats) pass the cut} \\
     \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
+    P(z|\theta)   &= \text{Redshift distribution of supernova} \\
 
 Finally, we note that, having :math:`N` supernova instead of one, we need only to normalise the likelihood
 for each new point in parameter space, but not at each individual data point (because the normalisation
