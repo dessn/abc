@@ -108,7 +108,11 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
         chain_MB = chain_dictionary["mean_MB"][i]
         chain_x1 = chain_dictionary["mean_x1"][i]
         chain_c = chain_dictionary["mean_c"][i]
-        chain_sigmas = np.array([chain_dictionary["sigma_MB"][i], chain_dictionary["sigma_x1"][i], chain_dictionary["sigma_c"][i]])
+        try:
+            chain_sigmas = np.array([chain_dictionary["sigma_MB"][i], chain_dictionary["sigma_x1"][i], chain_dictionary["sigma_c"][i]])
+        except KeyError:
+            chain_sigmas = np.array([np.exp(chain_dictionary["log_sigma_MB"][i]), np.exp(chain_dictionary["log_sigma_x1"][i]), np.exp(chain_dictionary["log_sigma_c"][i])])
+
         chain_sigmas_mat = np.dot(chain_sigmas[:, None], chain_sigmas[None, :])
         chain_correlations = np.dot(chain_dictionary["intrinsic_correlation"][i], chain_dictionary["intrinsic_correlation"][i].T)
         chain_pop_cov = chain_correlations * chain_sigmas_mat
@@ -298,6 +302,10 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, add_z
 def init_fn(n_sne):
     vals = get_truths_labels_significance()
     randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
+    for key in randoms:
+        if key.find("sigma") == 0:
+            randoms["log_%s" % key] = np.log(randoms[key])
+
     randoms["deviations"] = np.random.normal(scale=0.2, size=(n_sne, 3))
     chol = [[1.0, 0.0, 0.0],
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
@@ -338,6 +346,10 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     print("Saving single walker, cosmology %d, walk %d" % (n_cosmology, n_run))
     params = [p for p in params if p in fit.sim["pars_oi"]]
     dictionary = fit.extract(pars=params)
+    for key in list(dictionary.keys()):
+        if key.find("log_") == 0:
+            dictionary[key[4:]] = np.exp(dictionary[key])
+            del dictionary[key]
     if weight_function is not None:
         correction_source = get_correction_data_from_data_source(data_args["data_source"])
         weight_function(dictionary, n_sne, correction_source)

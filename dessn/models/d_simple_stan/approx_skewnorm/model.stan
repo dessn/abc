@@ -69,14 +69,19 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = 0.001, upper = 0.5> sigma_MB;
-    real <lower = 0.001, upper = 2> sigma_x1;
-    real <lower = 0.001, upper = 0.4> sigma_c;
+    real <lower = -10, upper = 1> log_sigma_MB;
+    real <lower = -10, upper = 1> log_sigma_x1;
+    real <lower = -10, upper = 1> log_sigma_c;
     cholesky_factor_corr[3] intrinsic_correlation;
 
 }
 
 transformed parameters {
+    // Back to real space
+    real sigma_MB;
+    real sigma_x1;
+    real sigma_c;
+
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
@@ -108,6 +113,10 @@ transformed parameters {
 
     // Other temp variables for corrections
     real mass_correction;
+
+    sigma_MB = exp(log_sigma_MB);
+    sigma_x1 = exp(log_sigma_x1);
+    sigma_c = exp(log_sigma_c);
 
     // -------------Begin numerical integration-----------------
     //real expon;
