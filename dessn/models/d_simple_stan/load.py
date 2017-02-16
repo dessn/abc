@@ -35,7 +35,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=3, trim=False, trim_v=-8):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=2, trim=False, trim_v=-8):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -241,11 +241,11 @@ def plot_debug(base_folder, data_source, sort=True, weights=True):
     c.add_chain(chain, posterior=posterior, name="Uncorrected")
     if weights:
         c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    c.plot(filename=base_folder + "/zplot_%s_%s.png" % (parent_dir, data_source))
+    c.plot(filename=base_folder + "/zplot_%s_%s.png" % (parent_dir, data_source), truth=t)
     c = ChainConsumer()
     chain["ow"] = ow
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s_%s.png" % (parent_dir, data_source))
+    c.plot_walks(chains="Corrected", filename=base_folder + "/zwalk_%s_%s.png" % (parent_dir, data_source), truth=t)
     print(c.get_latex_table(transpose=True, caption=base_folder))
 
 
