@@ -94,6 +94,7 @@ transformed parameters {
 
     // Modelling intrinsic dispersion
     matrix [3,3] population;
+    matrix [3,3] full_sigma;
     vector [3] mean_MBx1c;
     vector [3] sigmas;
 
@@ -140,16 +141,15 @@ transformed parameters {
     mean_MBx1c[1] = mean_MB;
     mean_MBx1c[2] = mean_x1;
     mean_MBx1c[3] = mean_c;
-    sigmas[1] = sigma_MB^2;
-    sigmas[2] = sigma_x1^2;
-    sigmas[3] = sigma_c^2;
-    population = diag_matrix(sigmas);
-
-    //population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    sigmas[1] = sigma_MB;
+    sigmas[2] = sigma_x1;
+    sigmas[3] = sigma_c;
+    population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    full_sigma = population * population';
 
     // Calculate mean pop
     cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];
-    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * population[1][2] + beta * population[1][3] - alpha * beta * population[2][3]);
+    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * full_sigma[1][3] - alpha * beta * full_sigma[2][3]);
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
@@ -178,8 +178,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Track and update posterior
-        //PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
-        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_lpdf(model_MBx1c[i] | mean_MBx1c, population);
+        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
     }
     Posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)
