@@ -62,14 +62,19 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = 0.001, upper = 0.5> sigma_MB;
-    real <lower = 0.001, upper = 2> sigma_x1;
-    real <lower = 0.001, upper = 0.4> sigma_c;
+    real <lower = -10, upper = 1> log_sigma_MB;
+    real <lower = -10, upper = 1> log_sigma_x1;
+    real <lower = -10, upper = 1> log_sigma_c;
     cholesky_factor_corr[3] intrinsic_correlation;
 
 }
 
 transformed parameters {
+    // Back to real space
+    real sigma_MB;
+    real sigma_x1;
+    real sigma_c;
+
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
@@ -101,6 +106,10 @@ transformed parameters {
     // Other temp variables for corrections
     real mass_correction;
 
+    sigma_MB = exp(log_sigma_MB);
+    sigma_x1 = exp(log_sigma_x1);
+    sigma_c = exp(log_sigma_c);
+
     // -------------Begin numerical integration-----------------
     //real expon;
     //expon = 3 * (1 + w);
@@ -120,14 +129,16 @@ transformed parameters {
     mean_MBx1c[1] = mean_MB;
     mean_MBx1c[2] = mean_x1;
     mean_MBx1c[3] = mean_c;
-    sigmas[1] = sigma_MB;
-    sigmas[2] = sigma_x1;
-    sigmas[3] = sigma_c;
-    population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    sigmas[1] = sigma_MB^2;
+    sigmas[2] = sigma_x1^2;
+    sigmas[3] = sigma_c^2;
+    population = diag_matrix(sigmas);
+
+    //population = diag_pre_multiply(sigmas, intrinsic_correlation);
 
     // Calculate mean pop
     cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];
-    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2;
+    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2;// + 2 * (-alpha * population[1][2] + beta * population[1][3] - alpha * beta * population[2][3]);
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
     // Now update the posterior using each supernova sample
@@ -146,20 +157,20 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
+        // Track and update posterior
+        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
+
         // Calculate the correction for this redshift
         cor_mB_mean[i] = cor_MB_mean + model_mu[i];
         cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
 
-        print(redshifts[i], " ",cor_mB_mean[i], " ", mB_mean, cor_mB_cor[i], alpha, beta);
-
-        // Track and update posterior
-        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
         // Get the approximate bias correction
-        bias_correction[i] = log_sum_exp(cor_mB_cor[i], log(0.01));
+        // bias_correction[i] = log_sum_exp(cor_mB_cor[i], log(0.01));
+        bias_correction[i] = cor_mB_cor[i];
     }
     weight = sum(bias_correction);
     Posterior = sum(PointPosteriors) - weight
-        + cauchy_lpdf(sigma_MB | 0, 1.0)
+        + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c | 0, 2.5)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 1);
