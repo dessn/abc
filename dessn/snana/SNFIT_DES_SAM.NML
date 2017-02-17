@@ -1,4 +1,3 @@
-JOBNAME_LCFIT: psnid.exe
 BATCH_INFO:  sbatch  /home/rkessler/SBATCH_sandyb.TEMPLATE 12
 OUTDIR:  sam_data
 
