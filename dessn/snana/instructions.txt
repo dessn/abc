@@ -1,0 +1,7 @@
+1. Go to location      /project/rkessler/shinton/sim
+2. Run sim via         snlc_sim.exe SIMGEN_DES_SALT2_SAM.input > output.log &
+3. Wait for sim to finish.
+4. Copy dump file to directory    cp /project/rkessler/SN/SNDATA_ROOT/SIM/SHINTON_SPEC_SALT2_4/SHINTON_SPEC_SALT2.DUMP .
+    4a. SHINTON_SPEC_SALT2_4 is the GENVERSION name in the .input
+5. Put dump file in dessn/models/d_simple_stan/data/snana_dumps
+6. Run convert_snana_dump.py in dessn/models/d_simple_stan
