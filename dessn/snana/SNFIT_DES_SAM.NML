@@ -12,7 +12,6 @@ VERSION:  SHINTON_SPEC_SALT2
      SNTABLE_LIST       = 'SNANA FITRES'
      
 
-     HFILE_OUT        = 'SNFIT.HBOOK'
      TEXTFILE_PREFIX  = 'SHINTON_SPEC_SALT2'
      KCOR_FILE        = 'DES/kcor_DES_grizY.fits'
      USE_MINOS        = F
