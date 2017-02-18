@@ -5,3 +5,13 @@
     4a. SHINTON_SPEC_SALT2_4 is the GENVERSION name in the .input
 5. Put dump file in dessn/models/d_simple_stan/data/snana_dumps
 6. Run convert_snana_dump.py in dessn/models/d_simple_stan
+
+
+
+To generate the kcor files for the filter shifts:
+
+kcor.exe /project/rkessler/SN/SNDATA_ROOT/kcor/DES/20130322/kcor_DES.input FILTER_LAMSHIFT g 1 OUTFILE ~/shinton/sim/kcor_gshift.fits
+kcor.exe /project/rkessler/SN/SNDATA_ROOT/kcor/DES/20130322/kcor_DES.input FILTER_LAMSHIFT r 1 OUTFILE ~/shinton/sim/kcor_rshift.fits
+kcor.exe /project/rkessler/SN/SNDATA_ROOT/kcor/DES/20130322/kcor_DES.input FILTER_LAMSHIFT i 1 OUTFILE ~/shinton/sim/kcor_ishift.fits
+kcor.exe /project/rkessler/SN/SNDATA_ROOT/kcor/DES/20130322/kcor_DES.input FILTER_LAMSHIFT z 1 OUTFILE ~/shinton/sim/kcor_zshift.fits
+
