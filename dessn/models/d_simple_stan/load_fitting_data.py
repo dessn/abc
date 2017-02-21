@@ -12,25 +12,40 @@ from scipy.stats import norm
 
 def load_fit_snana_correction(n_sne):
     print("Getting SNANA dummy data")
-    supernovae = load_correction_supernova(correction_source="snana", shuffle=True)
-    redshifts = supernovae["redshifts"][:n_sne]
-    apparents = supernovae["apparents"][:n_sne]
-    stretches = supernovae["stretches"][:n_sne]
-    colours = supernovae["colours"][:n_sne]
-    masses = supernovae["masses"][:n_sne]
-    print("SHUFFLE: ", apparents.mean(), colours.mean(), stretches.mean())
+
+    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+    data_folder = this_dir + "/data/snana_passed"
+    supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder)]
+    supernovae = np.vstack(tuple(supernovae_files))
+    print("Shuffling data")
+    np.random.shuffle(supernovae)
+
+    supernovae = supernovae[:n_sne, :]
+
+
+    redshifts = supernovae[:, 1]
+    apparents = supernovae[:, 6]
+    stretches = supernovae[:, 7]
+    colours = supernovae[:, 8]
+
+    masses = np.ones(supernovae[:, 1].shape)
+
+    print("SHUFFLED: ", apparents.mean(), colours.mean(), stretches.mean())
+
     obs_mBx1c_cov = []
     obs_mBx1c = []
-    for mb, x1, c in zip(apparents, stretches, colours):
+    deta_dcalibs = []
+    for i, mb, x1, c in enumerate(zip(apparents, stretches, colours)):
         vector = np.array([mb, x1, c])
-        # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.2, 0.05]) ** 2
-        cov = np.diag(diag)
-        vector += np.random.multivariate_normal([0, 0, 0], cov)
+        cov = supernovae[i, 9:9+9].reshape((3, 3))
+        calib = supernovae[i, 9+9:].reshape((3, -1))
+        print(cov)
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
+        deta_dcalibs.append(calib)
 
     covs = np.array(obs_mBx1c_cov)
+    deta_dcalibs = np.array(deta_dcalibs)
 
     return {
         "n_sne": n_sne,
@@ -38,7 +53,7 @@ def load_fit_snana_correction(n_sne):
         "obs_mBx1c_cov": covs,
         "redshifts": redshifts,
         "mass": masses,
-        "deta_dcalib": np.zeros((n_sne, 3, 4))
+        "deta_dcalib": deta_dcalibs
     }
 
 
