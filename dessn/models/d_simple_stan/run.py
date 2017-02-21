@@ -41,20 +41,19 @@ def get_simulation_data(correction_source="snana", n=5000):
     }
 
 
-def get_extra_zs(correction_source="snana", n=101, buffer=0.1):
+def get_extra_zs(correction_source="snana", n=101, buffer=0.2):
     assert n % 2 == 1, "n needs to be odd"
     print("Getting extra redshifts for integration from %s" % correction_source)
-    supernovae = load_correction_supernova(correction_source=correction_source, only_passed=False)
+    supernovae = load_correction_supernova(correction_source=correction_source, only_passed=True)
 
     # Need to determine the max redshift to sample to
     zs = supernovae["redshifts"]
-    passed = supernovae["passed"]
 
     hist, bins = np.histogram(zs, bins=50, density=True)
     binc = 0.5 * (bins[1:] + bins[:-1])
 
-    max_zs = min(np.max(zs), np.max(zs[passed]) + buffer)
-    min_zs = max(0.05, np.min(zs[passed]))
+    max_zs = min(np.max(zs), np.max(zs) + buffer)
+    min_zs = max(0.05, np.min(zs))
 
     zs_sample = np.linspace(min_zs, max_zs, n)
 
@@ -132,7 +131,7 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
 
 def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, trim=False, trim_v=-12, shuffle=False):
     # Load supernova for correction
-    supernovae = load_correction_supernova(correction_source=correction_source, shuffle=shuffle)
+    supernovae = load_correction_supernova(correction_source=correction_source, shuffle=shuffle, only_passed=True)
     # Load premade cosmology dictionary to speed up dist_mod calculation
     d = get_cosmology_dictionary()
     # Get the weights

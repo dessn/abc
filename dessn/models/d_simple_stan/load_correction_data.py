@@ -22,7 +22,11 @@ def load_snana_failed():
     data_folder = this_dir + "/data/snana_failed"
     supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder)]
     supernovae = np.vstack(tuple(supernovae_files))
-    return supernovae
+    result = {
+        "redshifts": supernovae[:, 0],
+        "apparents": supernovae[:, 1]
+    }
+    return result
 
 
 def load_snana_correction(shuffle=True):
@@ -35,7 +39,7 @@ def load_snana_correction(shuffle=True):
         print("Shuffling data")
         np.random.shuffle(supernovae)
     result = {
-        # "masses": np.zeros(supernovae.shape[0]),
+        "masses": np.zeros(supernovae.shape[0]),
         "redshifts": supernovae[:, 1],
         "existing_prob": supernovae[:, 2],
         "apparents": supernovae[:, 3],

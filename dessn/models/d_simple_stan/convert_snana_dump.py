@@ -145,6 +145,6 @@ if __name__ == "__main__":
 
         fitted_data = np.array(final_results).astype(np.float32)
 
-        all_mbs = supernovae["S2mb"]
+        all_mbs = np.vstack((supernovae["Z"], supernovae["S2mb"])).T
         np.save(output_dir_passed + ("/%s.npy" % folder_num), fitted_data)
         np.save(output_dir_failed + ("/%s.npy" % folder_num), all_mbs.astype(np.float32))

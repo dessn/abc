@@ -36,7 +36,7 @@ data {
 
     // Calibration std
     vector[4] calib_std; // std of calibration uncertainty, so we can draw from regular normal
-    matrix[3,4] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
+    matrix[3,8] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];

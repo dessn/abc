@@ -35,11 +35,10 @@ def load_fit_snana_correction(n_sne):
     obs_mBx1c_cov = []
     obs_mBx1c = []
     deta_dcalibs = []
-    for i, mb, x1, c in enumerate(zip(apparents, stretches, colours)):
+    for i, (mb, x1, c) in enumerate(zip(apparents, stretches, colours)):
         vector = np.array([mb, x1, c])
         cov = supernovae[i, 9:9+9].reshape((3, 3))
         calib = supernovae[i, 9+9:].reshape((3, -1))
-        print(cov)
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
         deta_dcalibs.append(calib)

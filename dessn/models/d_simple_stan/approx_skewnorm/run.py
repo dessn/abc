@@ -7,10 +7,10 @@ from dessn.models.d_simple_stan.run import run, add_weight_to_chain
 
 
 def get_approximate_mb_correction(correction_source):
-    mB = load_correction_supernova(correction_source=correction_source, only_passed=False)
+    all_data = load_correction_supernova(correction_source=correction_source, only_passed=False)
     passed_data = load_correction_supernova(correction_source=correction_source, only_passed=True)
     data = passed_data["apparents"]
-
+    mB = all_data["apparents"]
     print("Fitting data profile")
 
     # Getting the efficiency pdf

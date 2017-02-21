@@ -23,6 +23,6 @@ def get_truths_labels_significance():
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),
         ("intrinsic_correlation", np.identity(3), r"$\rho$", False, None, None),
-        ("calibration", np.zeros(4), r"$\delta \mathcal{Z}_%d$", True, None, None)
+        ("calibration", np.zeros(8), r"$\delta \mathcal{Z}_%d$", True, None, None)
     ]
     return result
