@@ -122,29 +122,29 @@ if __name__ == "__main__":
 
             cov = np.array([[mbe * mbe, cmbx1, cmbc], [cmbx1, x1e * x1e, cov_x1_c], [cmbc, cov_x1_c, ce * ce]])
 
-            # if not is_pos_def(cov):
-            #     continue
+            if not is_pos_def(cov):
+                continue
 
-            offsets = np.zeros((3, 8))
+            # offsets = np.zeros((3, 8))
 
-            # offset_mb = []
-            # offset_x1 = []
-            # offset_c = []
-            # for mag in mags + waves:
-            #     magcids = mag['CID']
-            #     index = np.searchsorted(magcids, cid)
-            #     if index >= magcids.size or magcids[index] != cid:
-            #         offset_mb.append(np.nan)
-            #         offset_x1.append(np.nan)
-            #         offset_c.append(np.nan)
-            #     else:
-            #         offset_mb.append(mag['mB'][index] - mb)
-            #         offset_x1.append(mag['x1'][index] - x1)
-            #         offset_c.append(mag['c'][index] - c)
-            #
-            # if np.any(np.isnan(offset_mb)):
-            #     continue
-            # offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
+            offset_mb = []
+            offset_x1 = []
+            offset_c = []
+            for mag in mags + waves:
+                magcids = mag['CID']
+                index = np.searchsorted(magcids, cid)
+                if index >= magcids.size or magcids[index] != cid:
+                    offset_mb.append(np.nan)
+                    offset_x1.append(np.nan)
+                    offset_c.append(np.nan)
+                else:
+                    offset_mb.append(mag['mB'][index] - mb)
+                    offset_x1.append(mag['x1'][index] - x1)
+                    offset_c.append(mag['c'][index] - c)
+
+            if np.any(np.isnan(offset_mb)):
+                continue
+            offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
 
 
             # Get log probabilitiy
