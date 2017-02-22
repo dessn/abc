@@ -44,7 +44,8 @@ def get_simulation_data(correction_source="snana", n=5000):
 def get_extra_zs(correction_source="snana", n=101, buffer=0.2):
     assert n % 2 == 1, "n needs to be odd"
     print("Getting extra redshifts for integration from %s" % correction_source)
-    supernovae = load_correction_supernova(correction_source=correction_source, only_passed=True)
+    supernovae = load_correction_supernova(correction_source=correction_source, only_passed=False)
+    supernovae_passed = load_correction_supernova(correction_source=correction_source, only_passed=True)
 
     # Need to determine the max redshift to sample to
     zs = supernovae["redshifts"]
@@ -52,8 +53,8 @@ def get_extra_zs(correction_source="snana", n=101, buffer=0.2):
     hist, bins = np.histogram(zs, bins=50, density=True)
     binc = 0.5 * (bins[1:] + bins[:-1])
 
-    max_zs = min(np.max(zs), np.max(zs) + buffer)
-    min_zs = max(0.05, np.min(zs))
+    max_zs = min(np.max(zs), np.max(supernovae_passed["redshifts"]) + buffer)
+    min_zs = max(0.05, np.min(supernovae_passed["redshifts"]))
 
     zs_sample = np.linspace(min_zs, max_zs, n)
 
@@ -327,7 +328,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     else:
         w, n = 1000, 3000
     data = get_analysis_data(seed=n_cosmology, **data_args)
-
+    print("Got data for %d supernovae" % data["n_sne"])
     def init_wrapped():
         return init_fn(data["n_sne"])
 

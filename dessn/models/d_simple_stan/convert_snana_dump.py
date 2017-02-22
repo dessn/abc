@@ -153,10 +153,7 @@ if __name__ == "__main__":
             simmb = supernovae["S2mb"][index]
             simx1 = supernovae["S2x1"][index]
             simc = supernovae["S2c"][index]
-            # try:
-            #     assert np.isclose(mb, sim_mb + mag_smear, atol=1e-3)
-            # except AssertionError:
-            #     print(mb, sim_mb + mag_smear, sim_mb, mag_smear)
+
             existing_prob = norm.logpdf(mag_smear, 0, 0.1) + norm.logpdf(simx1, 0, 1) + norm.logpdf(simc, 0, 0.1)
 
             final_result = [cid, z, existing_prob, simmb + mag_smear, simx1, simc, mb, x1, c] \
