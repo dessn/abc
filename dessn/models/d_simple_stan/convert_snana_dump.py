@@ -94,7 +94,9 @@ if __name__ == "__main__":
         waves = [load_fitres(m) for m in wavelength_offset]
 
         final_results = []
-        for row in base_fits:
+        for i, row in enumerate(base_fits):
+            if i % 1000 == 0:
+                print("Up to row %d" % i)
             cid = row['CID']
             z = row['zHD']
 
@@ -107,6 +109,10 @@ if __name__ == "__main__":
             x1e = row["x1ERR"]
             ce = row["cERR"]
 
+            sim_mb = row["SIM_mB"]
+            sim_x1 = row["SIM_x1"]
+            sim_c = row["SIM_c"]
+
             cov_x1_c = row["COV_x1_c"]
             cov_x0_c = row["COV_c_x0"]
             cov_x1_x0 = row["COV_x1_x0"]
@@ -116,27 +122,30 @@ if __name__ == "__main__":
 
             cov = np.array([[mbe * mbe, cmbx1, cmbc], [cmbx1, x1e * x1e, cov_x1_c], [cmbc, cov_x1_c, ce * ce]])
 
-            if not is_pos_def(cov):
-                continue
+            # if not is_pos_def(cov):
+            #     continue
 
-            offset_mb = []
-            offset_x1 = []
-            offset_c = []
+            offsets = np.zeros((3, 8))
 
-            for mag in mags + waves:
-                magcids = mag['CID']
-                index = np.searchsorted(magcids, cid)
-                if index >= magcids.size or magcids[index] != cid:
-                    offset_mb.append(np.nan)
-                    offset_x1.append(np.nan)
-                    offset_c.append(np.nan)
-                else:
-                    offset_mb.append(mag['mB'][index] - mb)
-                    offset_x1.append(mag['x1'][index] - x1)
-                    offset_c.append(mag['c'][index] - c)
+            # offset_mb = []
+            # offset_x1 = []
+            # offset_c = []
+            # for mag in mags + waves:
+            #     magcids = mag['CID']
+            #     index = np.searchsorted(magcids, cid)
+            #     if index >= magcids.size or magcids[index] != cid:
+            #         offset_mb.append(np.nan)
+            #         offset_x1.append(np.nan)
+            #         offset_c.append(np.nan)
+            #     else:
+            #         offset_mb.append(mag['mB'][index] - mb)
+            #         offset_x1.append(mag['x1'][index] - x1)
+            #         offset_c.append(mag['c'][index] - c)
+            #
+            # if np.any(np.isnan(offset_mb)):
+            #     continue
+            # offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
 
-            if np.any(np.isnan(offset_mb)):
-                continue
 
             # Get log probabilitiy
             index = np.where(cid == supernovae['CID'])[0][-1]
@@ -144,9 +153,12 @@ if __name__ == "__main__":
             simmb = supernovae["S2mb"][index]
             simx1 = supernovae["S2x1"][index]
             simc = supernovae["S2c"][index]
+            # try:
+            #     assert np.isclose(mb, sim_mb + mag_smear, atol=1e-3)
+            # except AssertionError:
+            #     print(mb, sim_mb + mag_smear, sim_mb, mag_smear)
             existing_prob = norm.logpdf(mag_smear, 0, 0.1) + norm.logpdf(simx1, 0, 1) + norm.logpdf(simc, 0, 0.1)
 
-            offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
             final_result = [cid, z, existing_prob, simmb + mag_smear, simx1, simc, mb, x1, c] \
                            + cov.flatten().tolist() + offsets.flatten().tolist()
             final_results.append(final_result)

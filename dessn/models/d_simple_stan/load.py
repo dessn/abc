@@ -287,7 +287,6 @@ if __name__ == "__main__":
         except Exception as e:
             print(e)
             print("No files found in %s" % loc)
-    print(p)
     c.configure_general(linestyles=['-', '--', '-'], colours=["#1E88E5", "#555555", "#D32F2F"]) #4CAF50
     c.configure_bar(shade=[True, True, True])
     c.configure_contour(shade=[True, True, True])

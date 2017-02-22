@@ -1,6 +1,6 @@
 
 SIMLIB_FILE:  $DES_ROOT/simlibs/DES_DIFFIMG.SIMLIB
-SIMLIB_NREPEAT:  5  # generate 10 events per LIBID (for speed)
+SIMLIB_NREPEAT:  10  # generate 10 events per LIBID (for speed)
 
 # ----------------- host info ---------------
 HOSTLIB_FILE:    $DES_ROOT/simlibs/DES_SVA1GOLD_DEEP_TRAIN.HOSTLIB
@@ -26,10 +26,6 @@ GENMODEL:    SALT2.JLA-B14
 
 # GENMAG_SMEAR_MODELNAME:  G10
 GENMAG_SMEAR: 0.1
-# COVMAT_SCATTER_SQRT[0][0]: 0.1 ! mB : sqrt(COV) = uncertainty
-# COVMAT_SCATTER_SQRT[1][1]: 0.0 ! x1 : sqrt(COV) = uncertainty
-# COVMAT_SCATTER_SQRT[2][2]: 0.0 ! color : sqrt(COV) = uncertainty
-# COVMAT_SCATTER_REDUCED[0][2]: 0.00 ! rho(mB,c) = COV/[sig(mB)*sig(c)]
 
 
 GENFILTERS:  griz
