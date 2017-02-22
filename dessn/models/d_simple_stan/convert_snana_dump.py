@@ -50,6 +50,11 @@ def load_fitres(filename):
     data = drop_fields(data, "SIM_AV")
     return data
 
+
+def is_pos_def(x):
+    return np.all(np.linalg.eigvals(x) > 0)
+
+
 if __name__ == "__main__":
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
@@ -110,6 +115,9 @@ if __name__ == "__main__":
             cmbc = -5 * cov_x0_c / (2 * x0 * np.log(10))
 
             cov = np.array([[mbe * mbe, cmbx1, cmbc], [cmbx1, x1e * x1e, cov_x1_c], [cmbc, cov_x1_c, ce * ce]])
+
+            if not is_pos_def(cov):
+                continue
 
             offset_mb = []
             offset_x1 = []

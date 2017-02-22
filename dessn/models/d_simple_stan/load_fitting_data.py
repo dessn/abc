@@ -10,7 +10,7 @@ from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 from scipy.stats import norm
 
 
-def load_fit_snana_correction(n_sne):
+def load_fit_snana_correction(n_sne, include_sim_values=False):
     print("Getting SNANA dummy data")
 
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -22,11 +22,14 @@ def load_fit_snana_correction(n_sne):
 
     supernovae = supernovae[:n_sne, :]
 
-
     redshifts = supernovae[:, 1]
     apparents = supernovae[:, 6]
     stretches = supernovae[:, 7]
     colours = supernovae[:, 8]
+
+    sapparents = supernovae[:, 3]
+    sstretches = supernovae[:, 4]
+    scolours = supernovae[:, 5]
 
     masses = np.ones(supernovae[:, 1].shape)
 
@@ -34,19 +37,22 @@ def load_fit_snana_correction(n_sne):
 
     obs_mBx1c_cov = []
     obs_mBx1c = []
+    actuals = []
     deta_dcalibs = []
-    for i, (mb, x1, c) in enumerate(zip(apparents, stretches, colours)):
+    for i, (mb, x1, c, smb, sx1, sc) in enumerate(zip(apparents, stretches, colours, sapparents, sstretches, scolours)):
         vector = np.array([mb, x1, c])
+        act = np.array([smb, sx1, sc])
         cov = supernovae[i, 9:9+9].reshape((3, 3))
         calib = supernovae[i, 9+9:].reshape((3, -1))
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
         deta_dcalibs.append(calib)
-
+        actuals.append(act)
+    actuals = np.array(actuals)
     covs = np.array(obs_mBx1c_cov)
     deta_dcalibs = np.array(deta_dcalibs)
 
-    return {
+    result = {
         "n_sne": n_sne,
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": covs,
@@ -54,6 +60,10 @@ def load_fit_snana_correction(n_sne):
         "mass": masses,
         "deta_dcalib": deta_dcalibs
     }
+    if include_sim_values:
+        result["sim_mBx1c"] = actuals
+
+    return result
 
 
 def load_fit_snana_diff(n_sne):
