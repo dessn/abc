@@ -35,7 +35,7 @@ data {
 
 
     // Calibration std
-    vector[4] calib_std; // std of calibration uncertainty, so we can draw from regular normal
+    vector[8] calib_std; // std of calibration uncertainty, so we can draw from regular normal
     matrix[3,8] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
 }
 transformed data {
@@ -57,7 +57,7 @@ parameters {
     // Other effects
     // real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
     // real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
-    // vector[4] calibration;
+    vector[8] calibration;
 
     ///////////////// Latent Parameters
     vector[3] deviations [n_sne];
@@ -170,7 +170,7 @@ transformed parameters {
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
-        // model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
+        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3]; // + mass_correction * mass[i];
@@ -184,8 +184,8 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c | 0, 2.5)
-        + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4);
-        // + normal_lpdf(calibration | 0, 1)
+        + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
+        + normal_lpdf(calibration | 0, 1);
 
 }
 model {

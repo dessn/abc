@@ -281,7 +281,7 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, add_z
         "zsom": (1 + final_redshifts) ** 3,
         "redshift_indexes": final,
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
-        "calib_std": np.ones(4) * 0.01
+        "calib_std": np.array([0.5, 0.5, 0.5, 0.5, 0.2, 0.2, 0.2, 0.2])
     }
 
     if add_sim or add_zs:
@@ -312,7 +312,7 @@ def init_fn(n_sne):
             [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
-    randoms["calibration"] = (np.random.uniform(size=4) - 0.5) * 0.0001
+    randoms["calibration"] = (np.random.uniform(size=8) - 0.5) * 0.2
     return randoms
 
 
