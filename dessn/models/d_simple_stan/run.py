@@ -326,7 +326,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     if short:
         w, n = 500, 1000
     else:
-        w, n = 1000, 5000
+        w, n = 1000, 3000
     data = get_analysis_data(seed=n_cosmology, **data_args)
     print("Got data for %d supernovae" % data["n_sne"])
     def init_wrapped():
