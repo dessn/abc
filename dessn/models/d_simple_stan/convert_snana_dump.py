@@ -54,13 +54,15 @@ def load_fitres(filename):
 def is_pos_def(x):
     return np.all(np.linalg.eigvals(x) > 0)
 
-
-if __name__ == "__main__":
+def convert(base_folder, output_passed, output_failed):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
-    data_dir = os.path.abspath(dir_name + "/data/snana_base_correction_dumps")
-    output_dir_passed = os.path.abspath(dir_name + "/data/snana_passed")
-    output_dir_failed = os.path.abspath(dir_name + "/data/snana_failed")
+    data_dir = os.path.abspath(dir_name + "/data/" + base_folder)
+    output_dir_passed = os.path.abspath(dir_name + "/data/" + output_passed)
+    if output_failed is None:
+        output_dir_failed = None
+    else:
+        output_dir_failed = os.path.abspath(dir_name + "/data/" + output_failed)
 
     for folder in os.listdir(data_dir):
         print("Digesting folder ", folder)
@@ -70,7 +72,6 @@ if __name__ == "__main__":
         inner_files = list(os.listdir(folder))
         dump_file = [i for i in inner_files if i.endswith(".DUMP")][0]
         dump_file = folder + "/" + dump_file
-
 
         print("Reading %s" % dump_file)
         dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
@@ -146,7 +147,6 @@ if __name__ == "__main__":
                 continue
             offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
 
-
             # Get log probabilitiy
             index = np.where(cid == supernovae['CID'])[0][-1]
             mag_smear = supernovae["MAGSMEAR_COH"][index]
@@ -164,4 +164,8 @@ if __name__ == "__main__":
 
         all_mbs = np.vstack((supernovae["Z"], supernovae["S2mb"] + supernovae["MAGSMEAR_COH"])).T
         np.save(output_dir_passed + ("/%s.npy" % folder_num), fitted_data)
-        np.save(output_dir_failed + ("/%s.npy" % folder_num), all_mbs.astype(np.float32))
+        if output_dir_failed is not None:
+            np.save(output_dir_failed + ("/%s.npy" % folder_num), all_mbs.astype(np.float32))
+
+if __name__ == "__main__":
+    convert("snana_base_correction_dumps", "snana_passed", "snana_failed")

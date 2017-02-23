@@ -10,11 +10,11 @@ from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 from scipy.stats import norm
 
 
-def load_fit_snana_correction(n_sne, include_sim_values=False):
-    print("Getting SNANA dummy data")
+def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed"):
+    print("Getting SNANA dummy data from %s" % directory)
 
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    data_folder = this_dir + "/data/snana_passed"
+    data_folder = this_dir + "/data/" + directory
     supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder)]
     supernovae = np.vstack(tuple(supernovae_files))
     print("Shuffling data")
@@ -70,53 +70,7 @@ def load_fit_snana_correction(n_sne, include_sim_values=False):
 
 
 def load_fit_snana_diff(n_sne):
-    this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    data_file = this_dir + "/data/snana_diff_cosmology.npy"
-    data = np.load(data_file)
-    np.random.shuffle(data)
-
-    supernovae = {
-        "masses": np.ones(n_sne),
-        "redshifts": data[:n_sne, 0],
-        "apparents": data[:n_sne, 1],
-        "stretches": data[:n_sne, 2],
-        "colours": data[:n_sne, 3],
-        "smear": data[:n_sne, 4]
-    }
-
-    # Correct for the way snana does intrinsic dispersion
-    supernovae["apparents"] += supernovae["smear"]
-    supernovae["existing_prob"] = norm.logpdf(supernovae["colours"], 0, 0.1) \
-                                  + norm.logpdf(supernovae["stretches"], 0, 1) \
-                                  + norm.logpdf(supernovae["smear"], 0, 0.1)
-
-    redshifts = supernovae["redshifts"]
-    apparents = supernovae["apparents"]
-    stretches = supernovae["stretches"]
-    colours = supernovae["colours"]
-    masses = supernovae["masses"]
-
-    obs_mBx1c_cov = []
-    obs_mBx1c = []
-    for mb, x1, c in zip(apparents, stretches, colours):
-        vector = np.array([mb, x1, c])
-        # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.2, 0.05]) ** 2
-        cov = np.diag(diag)
-        vector += np.random.multivariate_normal([0, 0, 0], cov)
-        obs_mBx1c_cov.append(cov)
-        obs_mBx1c.append(vector)
-
-    covs = np.array(obs_mBx1c_cov)
-
-    return {
-        "n_sne": n_sne,
-        "obs_mBx1c": obs_mBx1c,
-        "obs_mBx1c_cov": covs,
-        "redshifts": redshifts,
-        "mass": masses,
-        "deta_dcalib": np.zeros((n_sne, 3, 4))
-    }
+    return load_fit_snana_correction(n_sne, directory="diff_passed")
 
 
 def get_fitres_data():
