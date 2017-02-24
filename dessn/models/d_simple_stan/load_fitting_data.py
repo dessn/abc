@@ -73,6 +73,10 @@ def load_fit_snana_diff(n_sne):
     return load_fit_snana_correction(n_sne, directory="diff_passed")
 
 
+def load_fit_snana_diff2(n_sne):
+    return load_fit_snana_correction(n_sne, directory="diff_passed2")
+
+
 def get_fitres_data():
     print("Getting data from Fitres file")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))

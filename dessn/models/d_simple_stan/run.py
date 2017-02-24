@@ -13,7 +13,7 @@ from scipy.misc import logsumexp
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
 from dessn.models.d_simple_stan.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
-    get_fitres_data, get_physical_data, get_snana_data, load_fit_snana_diff
+    get_fitres_data, get_physical_data, get_snana_data, load_fit_snana_diff, load_fit_snana_diff2
 from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 
 
@@ -196,6 +196,8 @@ def get_base_data(data_source, n):
         return load_fit_snana_correction(n)
     elif data_source == "snana_diff":
         return load_fit_snana_diff(n)
+    elif data_source == "snana_diff2":
+        return load_fit_snana_diff2(n)
     elif data_source == "snana":
         return get_snana_data()
     elif data_source == "fitres":
@@ -209,7 +211,7 @@ def get_base_data(data_source, n):
 def get_correction_data_from_data_source(data_source):
     if data_source == "sncosmo":
         return "sncosmo"
-    elif data_source in ["snana_dummy", "snana_diff", "snana", "fitres"]:
+    elif data_source in ["snana_dummy", "snana_diff", "snana_diff2", "snana", "fitres"]:
         return "snana"
     elif data_source == "simple":
         return None
@@ -281,7 +283,7 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, add_z
         "zsom": (1 + final_redshifts) ** 3,
         "redshift_indexes": final,
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
-        "calib_std": np.array([0.5, 0.5, 0.5, 0.5, 0.2, 0.2, 0.2, 0.2])
+        "calib_std": np.array([0.5, 0.5, 0.5, 0.5, 0.1, 0.1, 0.1, 0.1])
     }
 
     if add_sim or add_zs:
