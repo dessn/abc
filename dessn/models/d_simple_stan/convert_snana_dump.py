@@ -54,6 +54,7 @@ def load_fitres(filename):
 def is_pos_def(x):
     return np.all(np.linalg.eigvals(x) > 0)
 
+
 def convert(base_folder, output_passed, output_failed):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
@@ -77,7 +78,6 @@ def convert(base_folder, output_passed, output_failed):
         dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
         supernovae = dataframe.to_records()
 
-        supernovae = drop_fields(supernovae, "CUTMASK")
         supernovae = drop_fields(supernovae, "S2x0")
         supernovae = drop_fields(supernovae, "S2alpha")
         supernovae = drop_fields(supernovae, "S2beta")
@@ -93,7 +93,8 @@ def convert(base_folder, output_passed, output_failed):
         base_fits = load_fitres(base_fitres)
         mags = [load_fitres(m) for m in mag_offset]
         waves = [load_fitres(m) for m in wavelength_offset]
-
+        num_bad_calib = 0
+        num_bad_calib_index = np.zeros(len(mags) + len(waves))
         final_results = []
         for i, row in enumerate(base_fits):
             if i % 1000 == 0:
@@ -133,17 +134,18 @@ def convert(base_folder, output_passed, output_failed):
             offset_c = []
             for mag in mags + waves:
                 magcids = mag['CID']
-                index = np.searchsorted(magcids, cid)
-                if index >= magcids.size or magcids[index] != cid:
+                index = np.where(magcids == cid)[0]
+                if index.size == 0:
                     offset_mb.append(np.nan)
                     offset_x1.append(np.nan)
                     offset_c.append(np.nan)
                 else:
-                    offset_mb.append(mag['mB'][index] - mb)
-                    offset_x1.append(mag['x1'][index] - x1)
-                    offset_c.append(mag['c'][index] - c)
-
+                    offset_mb.append(mag['mB'][index[0]] - mb)
+                    offset_x1.append(mag['x1'][index[0]] - x1)
+                    offset_c.append(mag['c'][index[0]] - c)
             if np.any(np.isnan(offset_mb)):
+                num_bad_calib += 1
+                num_bad_calib_index += np.isnan(offset_mb)
                 continue
             offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
 
@@ -161,7 +163,9 @@ def convert(base_folder, output_passed, output_failed):
             final_results.append(final_result)
 
         fitted_data = np.array(final_results).astype(np.float32)
-
+        print("Truncation from %d dump -> %d dump passed -> %d fitres -> %d calibration (%d failed calib)" %
+              (supernovae["Z"].shape[0], np.unique(supernovae["CID"]).size, base_fits.shape[0], fitted_data.shape[0], num_bad_calib))
+        print(num_bad_calib_index)
         all_mbs = np.vstack((supernovae["Z"], supernovae["S2mb"] + supernovae["MAGSMEAR_COH"])).T
         np.save(output_dir_passed + ("/%s.npy" % folder_num), fitted_data)
         if output_dir_failed is not None:

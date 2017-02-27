@@ -1,4 +1,4 @@
-BATCH_INFO:  sbatch  /home/rkessler/SBATCH_sandyb.TEMPLATE 64
+BATCH_INFO:  sbatch  /home/rkessler/SBATCH_sandyb.TEMPLATE 96
 OUTDIR:  sam_data_diff
 
 VERSION:  SHINTON_SPEC_SALT2_DIFF
