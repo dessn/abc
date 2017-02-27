@@ -93,6 +93,11 @@ def convert(base_folder, output_passed, output_failed):
         base_fits = load_fitres(base_fitres)
         mags = [load_fitres(m) for m in mag_offset]
         waves = [load_fitres(m) for m in wavelength_offset]
+        mag_sort_indexes = [np.argsort(m['CID']) for m in mags]
+        waves_sort_indexes = [np.argsort(m['CID']) for m in waves]
+        magcidss = [m['CID'][s] for m, s in zip(mags, mag_sort_indexes)]
+        wavecids = [m['CID'][s] for m, s in zip(waves, waves_sort_indexes)]
+
         num_bad_calib = 0
         num_bad_calib_index = np.zeros(len(mags) + len(waves))
         final_results = []
@@ -132,17 +137,18 @@ def convert(base_folder, output_passed, output_failed):
             offset_mb = []
             offset_x1 = []
             offset_c = []
-            for mag in mags + waves:
-                magcids = mag['CID']
-                index = np.where(magcids == cid)[0]
-                if index.size == 0:
+            for mag, sorted_indexes, magcids in zip(mags + waves, mag_sort_indexes + waves_sort_indexes, magcidss + wavecids):
+
+                index = np.searchsorted(magcids, cid)
+                if index >= magcids.size or magcids[index] != cid:
                     offset_mb.append(np.nan)
                     offset_x1.append(np.nan)
                     offset_c.append(np.nan)
                 else:
-                    offset_mb.append(mag['mB'][index[0]] - mb)
-                    offset_x1.append(mag['x1'][index[0]] - x1)
-                    offset_c.append(mag['c'][index[0]] - c)
+                    offset_mb.append(mag['mB'][sorted_indexes[index]] - mb)
+                    offset_x1.append(mag['x1'][sorted_indexes[index]] - x1)
+                    offset_c.append(mag['c'][sorted_indexes[index]] - c)
+
             if np.any(np.isnan(offset_mb)):
                 num_bad_calib += 1
                 num_bad_calib_index += np.isnan(offset_mb)
