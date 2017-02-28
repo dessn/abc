@@ -10,13 +10,19 @@ from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 from scipy.stats import norm
 
 
-def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed"):
+def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed", zlim=0.4):
     print("Getting SNANA dummy data from %s" % directory)
 
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
     data_folder = this_dir + "/data/" + directory
     supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder)]
     supernovae = np.vstack(tuple(supernovae_files))
+
+    if zlim is not None:
+        redshifts = supernovae[:, 1]
+        mask = redshifts < zlim
+        supernovae = supernovae[mask, :]
+
     print("Shuffling data")
     np.random.shuffle(supernovae)
 

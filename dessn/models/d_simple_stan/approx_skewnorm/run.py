@@ -30,6 +30,7 @@ def get_approximate_mb_correction(correction_source):
     alpha, mean, std = skewnorm.fit(y)
 
     # import matplotlib.pyplot as plt
+    # print(mB.shape)
     # plt.plot(binc, ratio)
     # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std))
     # plt.hist(y, 100, histtype='step', normed=True)

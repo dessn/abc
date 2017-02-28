@@ -19,7 +19,7 @@ if __name__ == "__main__":
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
     chain["weight"] = ow
     c.add_chain(chain, posterior=posterior, name="Corrected")
-    c.configure(color_params="weight")
+    c.configure(color_params="weight", colors=["#a81515", "#111111"])
     c.plot(filename=dir_name + "/colour_diff.png", truth=t)
 
 

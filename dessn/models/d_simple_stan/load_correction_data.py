@@ -4,7 +4,7 @@ import os
 from scipy.stats import norm
 
 
-def load_correction_supernova(correction_source, only_passed=True, shuffle=True):
+def load_correction_supernova(correction_source, only_passed=True, shuffle=False, zlim=0.4):
     if correction_source == "snana":
         if only_passed:
             result = load_snana_correction(shuffle=shuffle)
@@ -12,7 +12,10 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=True)
             result = load_snana_failed()
     else:
         raise ValueError("Correction source %s not recognised" % correction_source)
-
+    if zlim is not None:
+        mask = result["redshifts"] < zlim
+        for key in list(result.keys()):
+            result[key] = result[key][mask]
     return result
 
 
