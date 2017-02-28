@@ -49,8 +49,8 @@ def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_
         vector = np.array([mb, x1, c])
         act = np.array([smb, sx1, sc])
         cov = supernovae[i, 9:9+9].reshape((3, 3))
-        # cov = np.diag(np.array([0.05, 0.2, 0.05])**2)
-        # vector = act + np.random.multivariate_normal([0, 0, 0], cov)
+        cov = np.diag(np.array([0.05, 0.2, 0.05])**2)
+        vector = act + np.random.multivariate_normal([0, 0, 0], cov)
         calib = supernovae[i, 9+9:].reshape((3, -1))
 
         obs_mBx1c_cov.append(cov)
