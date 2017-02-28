@@ -115,6 +115,16 @@ transformed parameters {
     // Other temp variables for corrections
     real mass_correction;
 
+
+    // Debug todo remove
+    matrix[3, 3] eye;
+    for (j in 1:3) {
+        for (i in 1:3) {
+            eye[i, j] = 0.0;
+        }
+        eye[j, j] = 1.0;
+    }
+
     sigma_MB = exp(log_sigma_MB);
     sigma_x1 = exp(log_sigma_x1);
     sigma_c = exp(log_sigma_c);
@@ -144,12 +154,14 @@ transformed parameters {
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
     sigmas[3] = sigma_c;
-    population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    // population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    population = diag_pre_multiply(sigmas, eye);
     full_sigma = population * population';
 
     // Calculate mean pop
     cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];
-    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * full_sigma[1][3] - alpha * beta * full_sigma[2][3]);
+    // cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * full_sigma[1][3] - alpha * beta * full_sigma[2][3]);
+    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2; // + 2 * (-alpha * full_sigma[1][2] + beta * full_sigma[1][3] - alpha * beta * full_sigma[2][3]);
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
@@ -160,7 +172,7 @@ transformed parameters {
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
-    weight = 0;
+
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
