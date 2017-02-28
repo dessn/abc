@@ -115,15 +115,6 @@ transformed parameters {
     // Other temp variables for corrections
     real mass_correction;
 
-    // Debug todo remove
-    matrix[3, 3] eye;
-    for (j in 1:3) {
-        for (i in 1:3) {
-            eye[i, j] = 0.0;
-        }
-        eye[j, j] = 1.0;
-    }
-
     sigma_MB = exp(log_sigma_MB);
     sigma_x1 = exp(log_sigma_x1);
     sigma_c = exp(log_sigma_c);
@@ -153,8 +144,7 @@ transformed parameters {
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
     sigmas[3] = sigma_c;
-    // population = diag_pre_multiply(sigmas, intrinsic_correlation);
-    population = diag_pre_multiply(sigmas, eye); // todo remove
+    population = diag_pre_multiply(sigmas, intrinsic_correlation);
     full_sigma = population * population';
 
     // Calculate mean pop
@@ -171,8 +161,6 @@ transformed parameters {
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
 
-    weight = 0; // todo remove
-
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
@@ -182,7 +170,7 @@ transformed parameters {
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
-        // model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
+        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3]; // + mass_correction * mass[i];
@@ -193,9 +181,9 @@ transformed parameters {
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
     }
     Posterior = sum(PointPosteriors) - weight
-        //+ cauchy_lpdf(sigma_MB | 0, 2.5)
-        //+ cauchy_lpdf(sigma_x1 | 0, 2.5)
-        //+ cauchy_lpdf(sigma_c  | 0, 2.5)
+        + cauchy_lpdf(sigma_MB | 0, 2.5)
+        + cauchy_lpdf(sigma_x1 | 0, 2.5)
+        + cauchy_lpdf(sigma_c  | 0, 2.5)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
         + normal_lpdf(calibration | 0, 1);
 
