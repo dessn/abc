@@ -10,7 +10,7 @@ from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 from scipy.stats import norm
 
 
-def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed", zlim=0.4):
+def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed", zlim=0.3):
     print("Getting SNANA dummy data from %s" % directory)
 
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))

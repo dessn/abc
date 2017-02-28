@@ -1,15 +1,11 @@
 r""" My attempt at a proper STAN model.
 
-**Note to Alex/Tam:** Currently have turned off mass and calibration to try and get the
-approximate correction working.
-
 
 I follow Rubin et al. (2015) with some changes.
 
     1. I do not model :math:`\alpha` and :math:`\beta` as functions of redshift, due to my limited dataset.
     2. I do not take outlier detection into account.
-    3. I do not take zero point covariance into account.
-    4. I incorporate intrinsic dispersion via SN population, not as an observational effect.
+    3. I incorporate intrinsic dispersion via SN population, not as an observational effect.
 
 Instead, selection effects are taken into account via the methodology discussed
 and verified in the model proofs section of this work. To continue, we should
@@ -590,15 +586,17 @@ We can see here that as our skew normal approaches a normal (:math:`\alpha \righ
     SN is exactly equal to the redshift of a detected SN. This approximation is accurate because the SN samples have,
     on average, enough SNe that the redshift distribution is reasonable sampled."
 
-    **Alex/Tam, looking for feedback:** Unfortunately, I must disagree that this approximation is valid, because
+    Unfortunately, I must disagree that this approximation is valid, because
     whilst the SN surveys *may* be able to reasonable sample the *observed* redshift distribution of SN, they
-    *do not* adequately sample the underlying redshift distribution. Now, the underlying redshift distribution
-    goes to a very high redshift, however we note that we would not have to integrate over all of it, because
-    above the observed redshift distribution the contribution to the integral quckly drops to zero. However,
+    *do not* adequately sample the underlying redshift distribution, which is important in my formulation.
+
+    Now, the underlying redshift distribution goes to a very high redshift,
+    however we note that we would not have to integrate over all of it, because
+    above the observed redshift distribution the contribution to the integral quickly drops to zero. However,
     sampling the high redshift tail is still necessary.
 
     It is of interest that the difference in methodology (between my integral and Rubin's
-    combinatorics/redshift approximation/geometric series leads to the following difference in bias corrections.
+    combinatorics/redshift approximation/geometric series) leads to the following difference in bias corrections.
 
     Note that I use capital W below, to denote a correction for the entire model, not a single supernova.
 
@@ -613,8 +611,7 @@ We can see here that as our skew normal approaches a normal (:math:`\alpha \righ
     numerator as Rubin states with :math:`\epsilon > 0` it didn't turn out to be important.
 
     To try and compare these different methods, I've also tried a similar exact redshift approximation
-    to reduce my integral down to a product, however it does not work well. That said, nothing I have
-    tried has worked well, so maybe it is, in fact, alright.
+    to reduce my integral down to a product, however it does not work well.
 
 
 After fitting the above posterior surface, we can remove the approximation correction
@@ -702,36 +699,9 @@ Did I mess up with how I create the data that Stan gets? Is there some pathology
     I'd need to run at least 20 realisations to be happier with the scatter, but we can see the biases
     dont look too bad in :math:`\Omega_m`.
 
-    **It is interesting to note that :math:`\alpha` and :math:`\beta` are roughly half of what I actually want.**
-    Perhaps somehow I am doing the correction twice. From fiddling with the code and running
-    some more fits, I know the values for alpha and beta are highly dependent on the mean population, ie
-    this line in Stan: ``cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];``. Removing
-    the alpha and beta parts gives the runaway beta that I've seen in the other models, but keeping them as
-    is gives alpha and beta too small.
 
-.. code::
 
-    \begin{table}
-        \centering
-        \caption{C:/Users/shint1/PycharmProjects/abc/dessn/models/d_simple_stan/approx_skewnorm}
-        \label{tab:model_params}
-        \begin{tabular}{cc}
-            \hline
-            Parameter & Corrected \\
-            \hline
-            $\Omega_m$ & $0.309^{+0.054}_{-0.058}$ \\
-            $\alpha$ & $0.073^{+0.054}_{-0.030}$ \\
-            $\beta$ & $1.72^{+0.45}_{-0.48}$ \\
-            $\langle M_B \rangle$ & $-19.364^{+0.034}_{-0.028}$ \\
-            $\langle x_1 \rangle$ & $-0.033^{+0.109}_{-0.076}$ \\
-            $\langle c \rangle$ & $\left( -0.5^{+6.1}_{-7.3} \right) \times 10^{-3}$ \\
-            $\sigma_{\rm m_B}$ & $0.190^{+0.045}_{-0.032}$ \\
-            $\sigma_{x_1}$ & $0.995^{+0.083}_{-0.034}$ \\
-            $\sigma_c$ & $\left( 101.6^{+5.3}_{-4.6} \right) \times 10^{-3}$ \\
-            ow & $-2068.7^{+9.0}_{-16.8}$ \\
-            \hline
-        \end{tabular}
-    \end{table}
+
 
 
 
@@ -781,6 +751,13 @@ Appendix 2 - Gaussian Processes
 
     Add documentation. Conclusion is it didn't work.
 
+    .. figure::     ../dessn/models/d_simple_stan/gp/zplot_snana_dummy.png
+        :align:     center
+        :width: 50%
+
+    .. figure::     ../dessn/models/d_simple_stan/gp/zwalk_snana_dummy.png
+        :align:     center
+        :width: 50%
 
 Appendix 2 - Nearest Point GP
 -----------------------------
@@ -788,4 +765,12 @@ Appendix 2 - Nearest Point GP
 .. warning::
 
     Add documentation. Conclusion is that is really didn't work.
+
+    .. figure::     ../dessn/models/d_simple_stan/gp_closest/zplot_snana_dummy.png
+        :align:     center
+        :width: 50%
+
+    .. figure::     ../dessn/models/d_simple_stan/gp_closest/zwalk_snana_dummy.png
+        :align:     center
+        :width: 50%
 """

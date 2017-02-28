@@ -4,7 +4,7 @@ import os
 from scipy.stats import norm
 
 
-def load_correction_supernova(correction_source, only_passed=True, shuffle=False, zlim=0.4):
+def load_correction_supernova(correction_source, only_passed=True, shuffle=False, zlim=0.3):
     if correction_source == "snana":
         if only_passed:
             result = load_snana_correction(shuffle=shuffle)

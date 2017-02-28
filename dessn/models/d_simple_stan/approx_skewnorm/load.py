@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # plot_quick(std, "approx", include_sep=False)
 
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(dir_name + "/stan_output_%s" % data_source,
-                                                                cut=False, merge=False)[0]
+                                                                cut=False, merge=True)
 
     c = ChainConsumer()
     c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
