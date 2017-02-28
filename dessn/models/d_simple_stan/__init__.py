@@ -723,7 +723,7 @@ Appendix 1 - MC inside Stan
 .. warning::
 
     Given the concerns with the importance sampling methods, I also decided to implement
-    the bias corrections within STAN itself - that is, have stan perform rough Monte-Carlo
+    the bias corrections within STAN itself - that is, have Stan perform rough Monte-Carlo
     integration to get the bias correction in explicitly. Inserting the relevant data and structures
     into STAN such that I can perform Monte Carlo integration in a BHM framework significantly
     slows down the fits, however I believed it would at least give good results.
@@ -737,7 +737,7 @@ Appendix 1 - MC inside Stan
     In addition to the odd contours, we can also see in the walk itself that we have
     sampling issues, with some walkers sampling some areas of posterior space more than others.
     Stan's lack of convergence here is a big issue, indicating that the surfaces adding MC integration
-    creates are intractable to stan.
+    creates are intractable to Stan.
 
     .. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_walk.png
         :align:     center
@@ -749,7 +749,15 @@ Appendix 2 - Gaussian Processes
 
 .. warning::
 
-    Add documentation. Conclusion is it didn't work.
+    As performing Monte Carlo integration inside Stan hit a dead end, I decided to investigate
+    if I could achieve an approximate solution by using Gaussian Processes. Unfortunately,
+    what we can see happneing in the plots below is that a single point of in the GP has a substantially
+    higher weight than the others (a presumed combination of stochastic randomness
+    and being in an unusual area of parameter space). However, this meant that any walker
+    randomly initialised near this point would be stuck to it. Even if this did not happen,
+    viewing the other walkers revealed issues with them preferring matter densities as high as
+    possible, which is obviously not what is wanted. It seems that without a huge number of points
+    (which Stan cannot do) our model is too high-dimensional that we cannot use a Gaussian Process.
 
     .. figure::     ../dessn/models/d_simple_stan/gp/zplot_snana_dummy.png
         :align:     center
@@ -764,7 +772,25 @@ Appendix 2 - Nearest Point GP
 
 .. warning::
 
-    Add documentation. Conclusion is that is really didn't work.
+    Building off a regular Gaussian Process, the high dimensionality of our model
+    may be causing difficulties due to the GP kernel - if we are averaging or blending
+    over too many points (too great a volume in parameter space), we would not expect
+    accurate results. To test if this was the issue, I increased the number of points
+    in the GP to a high value (in the thousands), and then modified the distance metric
+    used to calculate the kernel - raising it to a power and then normalising, such
+    that the distance to the closest point approached one, and the distance to all
+    other points approached infinity (or really a number much larger than one).
+
+    By doing this - instead of fitting the GP hyper parameters - I have essentially
+    created a smooth, infinitely-differentiable nearest-point-interpolator. But, looking at
+    the results below, apparently that is exactly what I don't want!
+
+    Whats is actually happening is that Stan uses a Hamiltonian Monte Carlo algorithm, which
+    takes into account the gradient of the posterior surface. The nearest-point GP setup I
+    am using has extreme gradients because the GP values quickly shift when you cross the equidistant
+    threshold between two points. These extreme gradients, and the convoluted and chaotic boundaries
+    given by the equidistant constraint on a thousand points in high dimensional volume, completely
+    breaks Stan's HMC algorithm.
 
     .. figure::     ../dessn/models/d_simple_stan/gp_closest/zplot_snana_dummy.png
         :align:     center
