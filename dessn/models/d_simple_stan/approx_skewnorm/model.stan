@@ -160,7 +160,7 @@ transformed parameters {
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
-
+    weight = 0;
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
@@ -181,9 +181,9 @@ transformed parameters {
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
     }
     Posterior = sum(PointPosteriors) - weight
-        //+ cauchy_lpdf(sigma_MB | 0, 2.5)
-        //+ cauchy_lpdf(sigma_x1 | 0, 2.5)
-        //+ cauchy_lpdf(sigma_c | 0, 2.5)
+        + cauchy_lpdf(sigma_MB | 0, 2.5)
+        + cauchy_lpdf(sigma_x1 | 0, 2.5)
+        + cauchy_lpdf(sigma_c  | 0, 2.5)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
         + normal_lpdf(calibration | 0, 1);
 
