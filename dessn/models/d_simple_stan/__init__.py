@@ -665,18 +665,9 @@ methods in appendices below which Stan does not converge on. ``simple`` is a mod
 without approximation bias correction, and ``simple_skew`` is making the underlying colour distribution
 skewed to see its effect.
 
-The main question I want to answer is why the ``approx_skewnorm`` model is not working. To clarify
-"not working", I am actually fairly happy that it seems to be working for the matter density
-correction, however :math:`\beta` fits around 1.75, which is not the best. I'll put a plot of the
-interim approximate surface below, ignore the truth values, they are for sncosmo and not snana. Want
-:math:`\Omega_m = 0.3, \alpha=0.14, \beta=3.1, \langle M_B \rangle = -19.36, \langle x_1 \rangle = 0, \langle c \rangle = 0, \sigma_{M_B}=0.1, \sigma_{x1} = 1, \sigma_c = 0.1`.
-
-
-
-So I ask myself, did I mess up
-the math? Did I mess up the implementation with Simpson's rule? Did I mess up somewhere else in Stan?
-Did I mess up with how I create the data that Stan gets? Is there some pathology I am missing?
-
+The primary model being pursed is the ``approx_skewnorm`` model. Currently the only outstanding
+issue with the model is underestimate the underlying supernova population's dispersion, which
+I am looking at now.
 
 
 .. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/snana_dummy.png
@@ -684,10 +675,8 @@ Did I mess up with how I create the data that Stan gets? Is there some pathology
     :width:     80%
 
     A rough fit to five realisation of 500 SNe for the SNANA dataset. I'm pretty happy with everything bar
-    :math:`\alpha` and :math:`\beta`. Showing only the approximate correction here, not the full
-    Monte-Carlo correction. Want
-    :math:`\Omega_m = 0.3, \alpha=0.14, \beta=3.1, \langle M_B \rangle = -19.36, \langle x_1 \rangle = 0, \langle c \rangle = 0, \sigma_{M_B}=0.1, \sigma_{x1} = 1, \sigma_c = 0.1`.
-
+    the population dispersion. You can see that both the dispersion :math:`\sigma_{m_B}` and :math:`\sigma_{x_1}`
+    are underestimated.
 
 
 .. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/zplot_approx_skewnorm_snana_dummy.png
@@ -696,8 +685,7 @@ Did I mess up with how I create the data that Stan gets? Is there some pathology
 
     A rough fit to five realisation of 500 SNe for the SNANA dataset, as above. However this time
     combining the chains and plotting the approximate correction in blue and the full correction in red.
-    I'd need to run at least 20 realisations to be happier with the scatter, but we can see the biases
-    dont look too bad in :math:`\Omega_m`.
+    Fortunately, we can see no visible bias when we look at our parameter of prime importance, :math:`\Omega_m`.
 
 
 
