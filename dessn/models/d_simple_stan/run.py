@@ -297,6 +297,10 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, add_z
     if extra_args is None:
         extra_args = {}
 
+    obs_data = np.array(data["obs_mBx1c"])
+    print("Observed data x1 dispersion is %f, colour dispersion is %f"
+          % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
+
     # If you want python2: data.update(update), return data
     return {**data, **update, **sim_data, **extra_args}
 

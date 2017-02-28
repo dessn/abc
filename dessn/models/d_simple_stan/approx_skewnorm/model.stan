@@ -115,6 +115,15 @@ transformed parameters {
     // Other temp variables for corrections
     real mass_correction;
 
+    // Debug todo remove
+    matrix[3, 3] eye;
+    for (j in 1:3) {
+        for (i in 1:3) {
+            eye[i, j] = 0.0;
+        }
+        eye[j, j] = 1.0;
+    }
+
     sigma_MB = exp(log_sigma_MB);
     sigma_x1 = exp(log_sigma_x1);
     sigma_c = exp(log_sigma_c);
@@ -144,7 +153,8 @@ transformed parameters {
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
     sigmas[3] = sigma_c;
-    population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    // population = diag_pre_multiply(sigmas, intrinsic_correlation);
+    population = diag_pre_multiply(sigmas, eye); // todo remove
     full_sigma = population * population';
 
     // Calculate mean pop
@@ -160,6 +170,8 @@ transformed parameters {
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
+
+    weight = 0; // todo remove
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
@@ -181,11 +193,11 @@ transformed parameters {
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
     }
     Posterior = sum(PointPosteriors) - weight
-        + cauchy_lpdf(sigma_MB | 0, 2.5)
-        + cauchy_lpdf(sigma_x1 | 0, 2.5)
-        + cauchy_lpdf(sigma_c  | 0, 2.5)
+        //+ cauchy_lpdf(sigma_MB | 0, 2.5)
+        //+ cauchy_lpdf(sigma_x1 | 0, 2.5)
+        //+ cauchy_lpdf(sigma_c  | 0, 2.5)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
-        + normal_lpdf(calibration | 0, 1);
+        + normal_lpdf(calibration | 0, 0.0001); // todo change back
 
 }
 model {
