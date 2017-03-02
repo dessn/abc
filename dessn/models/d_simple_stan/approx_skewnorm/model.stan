@@ -55,8 +55,8 @@ parameters {
     real <lower = 0, upper = 5> beta;
 
     // Other effects
-    // real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
-    // real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
+    real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
+    real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
     vector[8] calibration;
 
     ///////////////// Latent Parameters
@@ -164,7 +164,7 @@ transformed parameters {
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
-        // mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
+        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
@@ -173,7 +173,7 @@ transformed parameters {
         model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
 
         // Convert population into absolute magnitude
-        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3]; // + mass_correction * mass[i];
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 

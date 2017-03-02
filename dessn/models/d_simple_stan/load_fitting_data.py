@@ -38,7 +38,7 @@ def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_
     sstretches = supernovae[:, 4]
     scolours = supernovae[:, 5]
 
-    masses = np.ones(supernovae[:, 1].shape)
+    masses = np.zeros(supernovae[:, 1].shape)
 
     print("SHUFFLED: ", apparents.mean(), colours.mean(), stretches.mean())
 
