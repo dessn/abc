@@ -5,12 +5,13 @@ import os
 from astropy.cosmology import FlatwCDM
 import pandas as pd
 import pickle
-from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
+from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova, get_all_physical_data, \
+    get_physical_data
 from dessn.models.d_simple_stan.truth import get_truths_labels_significance
-from scipy.stats import norm
+from scipy.stats import norm, skewnorm
 
 
-def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed", zlim=0.4, shuffle=True):
+def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_passed", zlim=None, shuffle=True):
     print("Getting SNANA dummy data from %s" % directory)
 
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -68,7 +69,7 @@ def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": covs,
         "redshifts": redshifts,
-        "mass": masses,
+        "masses": masses,
         "deta_dcalib": deta_dcalibs
     }
     if include_sim_values:
@@ -125,7 +126,7 @@ def get_fitres_data():
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": covs,
         "redshifts": zs,
-        "mass": masses,
+        "masses": masses,
         "deta_dcalib": np.zeros((n_sne, 3, 4))
     }
 
@@ -144,61 +145,13 @@ def get_sncosmo_pickle_data(n_sne):
         "obs_mBx1c": [s["parameters"] for s in passed],
         "obs_mBx1c_cov": [s["covariance"] for s in passed],
         "redshifts": np.array([s["z"] for s in passed]),
-        "mass": np.array([s["m"] for s in passed]),
+        "masses": np.array([s["m"] for s in passed]),
         "deta_dcalib": [s["dp"] for s in passed]
     }
 
 
-def get_physical_data(n_sne):
-    print("Getting simple data")
-    vals = get_truths_labels_significance()
-    mapping = {k[0]: k[1] for k in vals}
-
-    obs_mBx1c = []
-    obs_mBx1c_cov = []
-    obs_mBx1c_cor = []
-    deta_dcalib = []
-
-    redshifts = np.linspace(0.05, 1.1, n_sne)
-    cosmology = FlatwCDM(70.0, mapping["Om"]) #, w0=mapping["w"])
-    dist_mod = cosmology.distmod(redshifts).value
-
-    redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
-    alpha = mapping["alpha"]
-    beta = mapping["beta"]
-    dscale = mapping["dscale"]
-    dratio = mapping["dratio"]
-    p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
-    means = np.array([mapping["mean_MB"], mapping["mean_x1"], mapping["mean_c"]])
-    sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
-    sigmas_mat = np.dot(sigmas[:, None], sigmas[None, :])
-    correlations = np.dot(mapping["intrinsic_correlation"], mapping["intrinsic_correlation"].T)
-    pop_cov = correlations * sigmas_mat
-    for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
-
-        # Generate the actual mB, x1 and c values
-        MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-        mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
-        mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
-        vector = np.array([mb, x1, c])
-        # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.3, 0.05]) ** 2
-        cov = np.diag(diag)
-        vector += np.random.multivariate_normal([0, 0, 0], cov)
-        cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
-        obs_mBx1c_cor.append(cor)
-        obs_mBx1c_cov.append(cov)
-        obs_mBx1c.append(vector)
-        deta_dcalib.append(np.ones((3, 4)))
-
-    return {
-        "n_sne": n_sne,
-        "obs_mBx1c": obs_mBx1c,
-        "obs_mBx1c_cov": obs_mBx1c_cov,
-        "deta_dcalib": deta_dcalib,
-        "redshifts": redshifts,
-        "mass": p_high_masses
-    }
+def get_fit_physical_data(n_sne):
+    return get_physical_data(n_sne)
 
 
 def get_snana_data():

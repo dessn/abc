@@ -13,7 +13,7 @@ from scipy.misc import logsumexp
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
 from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
 from dessn.models.d_simple_stan.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
-    get_fitres_data, get_physical_data, get_snana_data, load_fit_snana_diff, load_fit_snana_diff2
+    get_fitres_data, get_snana_data, load_fit_snana_diff, load_fit_snana_diff2, get_fit_physical_data
 from dessn.models.d_simple_stan.truth import get_truths_labels_significance
 
 
@@ -202,8 +202,8 @@ def get_base_data(data_source, n):
         return get_snana_data()
     elif data_source == "fitres":
         return get_fitres_data()
-    elif data_source == "simple":
-        return get_physical_data(n)
+    elif data_source in ["simple", "physical"]:
+        return get_fit_physical_data(n)
     else:
         raise ValueError("Data source %s not recognised" % data_source)
 
@@ -214,7 +214,7 @@ def get_correction_data_from_data_source(data_source):
     elif data_source in ["snana_dummy", "snana_diff", "snana_diff2", "snana", "fitres"]:
         return "snana"
     elif data_source == "simple":
-        return None
+        return "simple"
     else:
         raise ValueError("Data source %s not recognised" % data_source)
 

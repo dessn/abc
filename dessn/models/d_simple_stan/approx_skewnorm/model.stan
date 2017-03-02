@@ -13,7 +13,7 @@ data {
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
     // Input ancillary data
-    real <lower=0.0, upper = 1.0> mass [n_sne]; // Normalised mass estimate
+    real <lower=-1.0, upper = 1.0> masses [n_sne]; // Normalised mass estimate
     real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Precomputed function of redshift for speed
 
     // Helper data used for Simpsons rule.
@@ -173,7 +173,7 @@ transformed parameters {
         model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * (calib_std .* calibration);
 
         // Convert population into absolute magnitude
-        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * mass[i];
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * masses[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
