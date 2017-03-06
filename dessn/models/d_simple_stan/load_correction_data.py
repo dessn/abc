@@ -30,7 +30,6 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=False
 
 def get_physical_data_selection_efficiency(mbs):
     """ Takes an array of mBs, returns list of true or false for if it makes through cut"""
-    return np.ones(mbs.shape) == 1
     vals = np.random.uniform(size=mbs.size)
 
     pdfs = skewnorm.pdf(mbs, -10, 22.5, 5)

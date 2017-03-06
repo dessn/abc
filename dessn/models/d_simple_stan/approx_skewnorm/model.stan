@@ -160,7 +160,7 @@ transformed parameters {
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
-    weight = 0;
+
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
