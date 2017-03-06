@@ -7,10 +7,16 @@ from dessn.models.d_simple_stan.run import run, add_weight_to_chain
 
 
 def get_approximate_mb_correction(correction_source):
-    all_data = load_correction_supernova(correction_source=correction_source, only_passed=False)
-    passed_data = load_correction_supernova(correction_source=correction_source, only_passed=True)
-    data = passed_data["apparents"]
-    mB = all_data["apparents"]
+    if correction_source == "simple":
+        all_data = load_correction_supernova(correction_source=correction_source, only_passed=False)
+        mB = np.array(all_data["apparents"])
+        mask = all_data["passed"]
+        data = mB[mask]
+    else:
+        all_data = load_correction_supernova(correction_source=correction_source, only_passed=False)
+        passed_data = load_correction_supernova(correction_source=correction_source, only_passed=True)
+        data = passed_data["apparents"]
+        mB = all_data["apparents"]
     print("Fitting data profile")
 
     # Getting the efficiency pdf
@@ -31,7 +37,7 @@ def get_approximate_mb_correction(correction_source):
 
     # import matplotlib.pyplot as plt
     # print(mB.shape)
-    # plt.plot(binc, ratio)
+    # plt.plot(binc, ratio * skewnorm.pdf(mean, alpha, mean, std))
     # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std))
     # plt.hist(y, 100, histtype='step', normed=True)
     # plt.show()

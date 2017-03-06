@@ -18,7 +18,7 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=False
         if only_passed:
             result = get_physical_data(n_sne=10000)
         else:
-            result = get_all_physical_data(n_sne=50000)
+            result = get_all_physical_data_with_cut(n_sne=200000)
     else:
         raise ValueError("Correction source %s not recognised" % correction_source)
     if zlim is not None:
@@ -32,10 +32,10 @@ def get_physical_data_selection_efficiency(mbs):
     """ Takes an array of mBs, returns list of true or false for if it makes through cut"""
     vals = np.random.uniform(size=mbs.size)
 
-    pdfs = skewnorm.pdf(mbs, 0, 20.5, 3)
+    pdfs = skewnorm.pdf(mbs, -5, 21.5, 4)
     pdfs /= pdfs.max()
     mask = vals < pdfs
-    print("%d objects out of %d passed, %d percent" % (mask.sum(), (~mask).sum(), 100*(mask.sum() / mask.size)))
+    print("%d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100*(mask.sum() / mask.size)))
 
     # print(pdfs.mean(), vals.mean())
     # import matplotlib.pyplot as plt
@@ -49,10 +49,18 @@ def get_physical_data_selection_efficiency(mbs):
     return mask
 
 
-def get_physical_data(n_sne):
-    data = get_all_physical_data(7 * n_sne)
+def get_all_physical_data_with_cut(n_sne):
+    data = get_all_physical_data(n_sne)
     mbs = np.array(data["apparents"])
     mask = get_physical_data_selection_efficiency(mbs)
+    data["passed"] = mask
+    return data
+
+
+def get_physical_data(n_sne):
+    data = get_all_physical_data_with_cut(10 * n_sne)
+    mask = data["passed"]
+    del data["passed"]
     for key in list(data.keys()):
         if isinstance(data[key], list):
             data[key] = np.array(data[key])[mask][:n_sne]
