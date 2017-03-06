@@ -29,6 +29,8 @@ def get_approximate_mb_correction(correction_source):
     # Inverse transformation sampling to sample from this random pdf
     cdf = ratio.cumsum()
     cdf = cdf / cdf.max()
+    cdf[0] = 0
+    cdf[-1] = 1
     n = 100000
     u = np.random.random(size=n)
     y = interp1d(cdf, binc)(u)
