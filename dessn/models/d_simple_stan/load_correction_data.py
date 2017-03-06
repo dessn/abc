@@ -30,6 +30,7 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=False
 
 def get_physical_data_selection_efficiency(mbs):
     """ Takes an array of mBs, returns list of true or false for if it makes through cut"""
+    return np.ones(mbs.shape) == 1
     vals = np.random.uniform(size=mbs.size)
 
     pdfs = skewnorm.pdf(mbs, -10, 22.5, 5)
@@ -80,7 +81,8 @@ def get_all_physical_data(n_sne):
     beta = mapping["beta"]
     dscale = mapping["dscale"]
     dratio = mapping["dratio"]
-    p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
+    # p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
+    p_high_masses = np.zeros(shape=dist_mod.shape)
     means = np.array([mapping["mean_MB"], mapping["mean_x1"], mapping["mean_c"]])
     sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
     sigmas_mat = np.dot(sigmas[:, None], sigmas[None, :])
