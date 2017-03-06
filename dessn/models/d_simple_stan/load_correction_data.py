@@ -32,7 +32,7 @@ def get_physical_data_selection_efficiency(mbs):
     """ Takes an array of mBs, returns list of true or false for if it makes through cut"""
     vals = np.random.uniform(size=mbs.size)
 
-    pdfs = skewnorm.pdf(mbs, -5, 21.5, 4)
+    pdfs = skewnorm.pdf(mbs, -5, 22.5, 4)
     pdfs /= pdfs.max()
     mask = vals < pdfs
     print("%d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100*(mask.sum() / mask.size)))
