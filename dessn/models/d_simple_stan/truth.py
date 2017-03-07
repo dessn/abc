@@ -17,8 +17,6 @@ def get_truths_labels_significance():
         ("log_sigma_MB", np.log(0.1), r"$\log\sigma_{\rm m_B}$", True, -10, 1),
         ("log_sigma_x1", np.log(0.5), r"$\log\sigma_{x_1}$", True, -10, 1),
         ("log_sigma_c", np.log(0.1), r"$\log\sigma_c$", True, -10, 1),
-        ("alpha_MB", 0.0, r"$\alpha_{\rm m_B}$", True, -1, 1),
-        ("alpha_x1", 0.0, r"$\alpha_{x_1}$", True, -1, 1),
         ("alpha_c", 0.0, r"$\alpha_c$", True, -1, 1),
         ("dscale", 0.08, r"$\delta(0)$", False, -0.2, 0.2),
         ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$", False, 0.0, 1.0),

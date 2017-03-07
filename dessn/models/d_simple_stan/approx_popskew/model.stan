@@ -61,14 +61,12 @@ parameters {
 
     ///////////////// Latent Parameters
     vector[3] deviations [n_sne];
-    //real <lower = -21, upper = -18> true_mB[n_sne];
-    //real <lower = -8, upper = 8> true_x1[n_sne];
-    //real <lower = -1, upper = 2> true_c[n_sne];
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
     real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
+    real <lower = -5, upper = 5> alpha_c;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
     real <lower = -10, upper = 1> log_sigma_c;
@@ -115,6 +113,11 @@ transformed parameters {
     // Other temp variables for corrections
     real mass_correction;
 
+    // Correct for colour skewness
+    real delta_c;
+    real mean_c_skew;
+    real sigma_c_skew;
+
     sigma_MB = exp(log_sigma_MB);
     sigma_x1 = exp(log_sigma_x1);
     sigma_c = exp(log_sigma_c);
@@ -147,9 +150,14 @@ transformed parameters {
     population = diag_pre_multiply(sigmas, intrinsic_correlation);
     full_sigma = population * population';
 
+    // Colour skew adjustments
+    delta_c = sqrt(0.63661977236) * alpha_c / (sqrt(1 + alpha_c^2));
+    mean_c_skew = mean_c + sigma_c * delta_c;
+    sigma_c_skew = sqrt(sigma_c^2 * (1 - delta_c^2));
+
     // Calculate mean pop
-    cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_MBx1c[3];
-    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * full_sigma[1][3] - alpha * beta * full_sigma[2][3]);
+    cor_MB_mean = mean_MBx1c[1] - alpha*mean_MBx1c[2] + beta*mean_c_skew;
+    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c_skew)^2 + 2 * (-alpha * full_sigma[1][2] + beta * full_sigma[1][3] - alpha * beta * full_sigma[2][3]);
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
@@ -178,7 +186,9 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Track and update posterior
-        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
+        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
+            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population)
+            + normal_lcdf(alpha_c * (model_MBx1c[2] - mean_c) / sigma_c | 0, 1);
     }
     Posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)
