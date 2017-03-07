@@ -100,8 +100,11 @@ def get_all_physical_data(n_sne):
     probs = []
     for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
 
-        # Generate the actual mB, x1 and c values
-        MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+        # Skew the colour
+        while True:
+            MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+            if norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1) < np.random.random():
+                break
         probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov))
         mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
         mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
@@ -115,6 +118,11 @@ def get_all_physical_data(n_sne):
         obs_mBx1c_cov.append(cov)
         obs_mBx1c.append(vector)
         deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, 8)))
+
+    # import matplotlib.pyplot as plt
+    # plt.hist(np.array(obs_mBx1c)[:, 2], 50)
+    # plt.show()
+    # exit()
 
     return {
         "n_sne": n_sne,
