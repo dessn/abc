@@ -18,7 +18,7 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=False
         if only_passed:
             result = get_physical_data(n_sne=10000)
         else:
-            result = get_all_physical_data_with_cut(n_sne=60000)
+            result = get_all_physical_data_with_cut(n_sne=200000)
     else:
         raise ValueError("Correction source %s not recognised" % correction_source)
     if zlim is not None:
