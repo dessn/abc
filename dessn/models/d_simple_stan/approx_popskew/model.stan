@@ -66,7 +66,7 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     real <lower = -0.5, upper = 0.5> mean_x1;
     real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = -3, upper = 3> alpha_c;
+    real <lower = -4, upper = 4> alpha_c;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
     real <lower = -10, upper = 1> log_sigma_c;
@@ -157,10 +157,11 @@ transformed parameters {
 
     // Calculate mean pop
     cor_MB_mean = mean_MB - alpha*mean_x1 + beta*mean_c_skew;
-    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c_skew)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3] * sigma_c_skew / sigma_c) - alpha * beta * (full_sigma[2][3] * sigma_c_skew / sigma_c));
+    //cor_MB_mean = mean_MB - alpha*mean_x1 + beta*mean_c_skew;
+    //cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c_skew)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3] * sigma_c_skew / sigma_c) - alpha * beta * (full_sigma[2][3] * sigma_c_skew / sigma_c));
+    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3]) - alpha * beta * (full_sigma[2][3] ));
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
-    // print(mean_c, "  ", sigma_c, "  ", alpha_c, " | ", delta_c, "  ", mean_c_skew, "  ", sigma_c_skew, " | ", cor_MB_mean, "  ", cor_mb_width2, "  ", cor_sigma2, "  ", sqrt(cor_sigma2));
 
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
     // and we add in log_sum_exp
@@ -170,7 +171,10 @@ transformed parameters {
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
-    weight = 0;
+
+    // print(weight, " | ", mean_c, "  ", sigma_c, "  ", alpha_c, " | ", delta_c, "  ", mean_c_skew, "  ", sigma_c_skew, " | ", cor_MB_mean, "  ", cor_mb_width2, "  ", cor_sigma2, "  ", sqrt(cor_sigma2));
+
+
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
         // Calculate mass correction
@@ -190,7 +194,7 @@ transformed parameters {
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population)
-            + normal_lcdf(alpha_c * (model_MBx1c[i][2] - mean_c) / sigma_c | 0, 1);
+            + normal_lcdf(alpha_c * (model_MBx1c[i][3] - mean_c) / sigma_c | 0, 1);
     }
     Posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)

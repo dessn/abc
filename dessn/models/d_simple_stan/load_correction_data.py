@@ -18,7 +18,7 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=False
         if only_passed:
             result = get_physical_data(n_sne=10000)
         else:
-            result = get_all_physical_data_with_cut(n_sne=300000)
+            result = get_all_physical_data_with_cut(n_sne=60000)
     else:
         raise ValueError("Correction source %s not recognised" % correction_source)
     if zlim is not None:
@@ -103,7 +103,7 @@ def get_all_physical_data(n_sne):
         # Skew the colour
         while True:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-            if norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1) < np.random.random():
+            if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
                 break
         probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov))
         mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
