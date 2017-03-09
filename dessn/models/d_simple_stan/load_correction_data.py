@@ -16,7 +16,7 @@ def load_correction_supernova(correction_source, only_passed=True, shuffle=False
             result = load_snana_failed()
     elif correction_source == "simple":
         if only_passed:
-            result = get_physical_data(n_sne=10000)
+            result = get_physical_data(n_sne=50000)
         else:
             result = get_all_physical_data_with_cut(n_sne=200000)
     else:
@@ -98,14 +98,16 @@ def get_all_physical_data(n_sne):
     correlations = np.dot(mapping["intrinsic_correlation"], mapping["intrinsic_correlation"].T)
     pop_cov = correlations * sigmas_mat
     probs = []
+    skew_prob = 0
     for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
 
         # Skew the colour
         while True:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
             if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
+                skew_prob = norm.logcdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1)
                 break
-        probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov))
+        probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
         mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
         mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
         vector = np.array([mb, x1, c])
