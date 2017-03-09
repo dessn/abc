@@ -16,9 +16,8 @@ if __name__ == "__main__":
                                                                 cut=False, merge=True)
 
     c = ChainConsumer()
-    # c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
+    c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
     chain["weight"] = ow
-    print(ow, chain)
     c.add_chain(chain, posterior=posterior, name="Corrected")
     # c.configure(color_params="weight", colors=["#a81515", "#111111"])
     c.configure(color_params="weight")
