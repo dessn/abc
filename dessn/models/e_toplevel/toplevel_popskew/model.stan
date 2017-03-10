@@ -168,7 +168,7 @@ transformed parameters {
 
         cor_mB_mean[i] = cor_MB_mean + model_mu[i] - mass_correction * masses[i];
         weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
-        //weights[i] = 0;
+        weights[i] = 0;
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
