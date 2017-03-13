@@ -5,7 +5,7 @@ import inspect
 import numpy as np
 from chainconsumer import ChainConsumer
 
-from dessn.models.d_simple_stan.run import get_truths_labels_significance
+from dessn.models.e_toplevel.run import get_truths_labels_significance
 
 
 def get_chain(filename, name_map, replace=True):
@@ -113,6 +113,7 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None,
             latex = name_map[param]
             truth_val = truths[latex]
             shape = truth_val.shape
+            print(latex, shape)
             if not replace:
                 del chain[param]
             if len(shape) > 1 or latex not in chain: continue  # Dont do 2D parameters

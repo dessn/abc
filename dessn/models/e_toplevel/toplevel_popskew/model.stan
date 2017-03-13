@@ -22,6 +22,10 @@ data {
     real <lower=0> zspo[n_z]; // Precomputed (1+zs)
     int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
 
+    // Data for redshift nodes
+    int num_nodes; // Num redshift nodes
+    vector[num_nodes] node_weights [n_sne]; // Each supernova's node weight
+
     // Approximate correction in mB
     real mB_mean;
     real mB_width2;
@@ -57,9 +61,9 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    real <lower = -0.5, upper = 0.5> mean_x1;
-    real <lower = -0.2, upper = 0.2> mean_c;
-    real <lower = -4, upper = 4> alpha_c;
+    vector <lower = -0.5, upper = 0.5> [num_nodes] mean_x1s;
+    vector <lower = -0.2, upper = 0.2> [num_nodes] mean_cs;
+    vector <lower = -4, upper = 4> [num_nodes] alpha_cs;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
     real <lower = -10, upper = 1> log_sigma_c;
@@ -72,6 +76,11 @@ transformed parameters {
     real sigma_MB;
     real sigma_x1;
     real sigma_c;
+
+    // Pop at given redshift
+    real mean_x1 [n_sne];
+    real mean_c [n_sne];
+    real alpha_c [n_sne];
 
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
@@ -86,14 +95,14 @@ transformed parameters {
     // Modelling intrinsic dispersion
     matrix [3,3] population;
     matrix [3,3] full_sigma;
-    vector [3] mean_MBx1c;
+    vector [3] mean_MBx1c [n_sne];
     vector [3] sigmas;
 
     // Variables to calculate the bias correction
-    real cor_MB_mean;
-    real cor_mb_width2;
-    real cor_sigma2;
+    real cor_MB_mean [n_sne];
     real cor_mB_mean [n_sne];
+    real cor_sigma2;
+    real cor_mb_width2;
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
@@ -129,9 +138,6 @@ transformed parameters {
     // -------------End numerical integration---------------
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
-    mean_MBx1c[1] = mean_MB;
-    mean_MBx1c[2] = mean_x1;
-    mean_MBx1c[3] = mean_c;
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
     sigmas[3] = sigma_c;
@@ -139,19 +145,29 @@ transformed parameters {
     full_sigma = population * population';
 
     // Colour skew adjustments
-    delta_c = sqrt(0.63661977236) * alpha_c / (sqrt(1 + alpha_c^2));
-    mean_c_skew = mean_c + sigma_c * delta_c;
-    sigma_c_skew = sqrt(sigma_c^2 * (1 - delta_c^2));
+    // delta_c = sqrt(0.63661977236) * alpha_c / (sqrt(1 + alpha_c^2));
+    // mean_c_skew = mean_c + sigma_c * delta_c;
+    // sigma_c_skew = sqrt(sigma_c^2 * (1 - delta_c^2));
 
     // Calculate mean pop
-    //cor_MB_mean = mean_MB - alpha*mean_x1 + beta*mean_c_skew;
-    cor_MB_mean = mean_MB - alpha*mean_x1 + beta*mean_c;
+
+
     cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3]) - alpha * beta * (full_sigma[2][3] ));
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
+
+        // redshift dependent effects
+        mean_x1[i] = dot_product(mean_x1s, node_weights[i]);
+        mean_c[i] = dot_product(mean_cs, node_weights[i]);
+        alpha_c[i] = dot_product(alpha_cs, node_weights[i]);
+
+        mean_MBx1c[i][1] = mean_MB;
+        mean_MBx1c[i][2] = mean_x1[i];
+        mean_MBx1c[i][3] = mean_c[i];
+
         // Calculate mass correction
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
@@ -166,13 +182,13 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        cor_mB_mean[i] = cor_MB_mean + model_mu[i] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1[i] + beta * mean_c[i] - mass_correction * masses[i];
         weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population)
-            + normal_lcdf(alpha_c * (model_MBx1c[i][3] - mean_c) / sigma_c | 0, 1);
+            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population)
+            + normal_lcdf(alpha_c[i] * (model_MBx1c[i][3] - mean_c[i]) / sigma_c | 0, 1);
     }
     weight = sum(weights);
     Posterior = sum(PointPosteriors) - weight

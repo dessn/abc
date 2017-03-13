@@ -2,7 +2,7 @@ import os
 
 from chainconsumer import ChainConsumer
 
-from dessn.models.d_simple_stan.load import plot_quick, plot_debug, plot_separate, load_stan_from_folder
+from dessn.models.e_toplevel.load import plot_quick, plot_debug, plot_separate, load_stan_from_folder
 
 if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)

@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from dessn.models.d_simple_stan.approx_skewnorm.run import get_approximate_mb_correction
-from dessn.models.d_simple_stan.run import run, add_weight_to_chain
+from dessn.models.e_toplevel.run import run, add_weight_to_chain
 
 
 if __name__ == "__main__":
