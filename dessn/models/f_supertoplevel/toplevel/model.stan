@@ -121,13 +121,17 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        weights[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean, mB_width, mB_alpha);
+        // weights[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean, mB_width, mB_alpha);
+        weights[i] = 0;
 
         // Track and update posterior
-        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1) + normal_lpdf(model_MBx1c[i][1] | mean_MB, sigma_MB);
+        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
+         + normal_lpdf(model_MBx1c[i][1] | mean_MB, sigma_MB);
     }
     weight = sum(weights);
-    Posterior = sum(PointPosteriors) - weight + normal_lpdf(calibration | 0, 1);
+    Posterior = sum(PointPosteriors) - weight
+        + cauchy_lpdf(sigma_MB | 0, 2.5)
+        + normal_lpdf(calibration | 0, 1);
 
 }
 model {

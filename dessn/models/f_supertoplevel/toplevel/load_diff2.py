@@ -16,8 +16,7 @@ if __name__ == "__main__":
                                                                 cut=False, merge=True, mod_weight=False)
     t[r'$\Omega_m$'] = 0.4
     c = ChainConsumer()
-    c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    chain["weight"] = ow
+    chain["weight"] = w
     c.add_chain(chain, posterior=posterior, name="Corrected")
     c.configure(color_params="weight")
     c.plot(filename=dir_name + "/colour_diff2.png", truth=t)

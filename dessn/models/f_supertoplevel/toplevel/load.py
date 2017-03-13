@@ -16,8 +16,6 @@ if __name__ == "__main__":
                                                                 cut=False, merge=True, mod_weight=False)
     c = ChainConsumer()
     chain["weight"] = w
-    print(w.max(), w.min(), w.mean())
-    print(w)
     c.add_chain(chain, posterior=posterior, name="Corrected")
     c.configure(color_params="weight")
     c.plot(filename=dir_name + "/colour.png", truth=t)

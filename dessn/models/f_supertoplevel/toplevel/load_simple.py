@@ -16,7 +16,6 @@ if __name__ == "__main__":
                                                                 cut=False, merge=True, mod_weight=False)
 
     c = ChainConsumer()
-    # c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
     chain["weight"] = w
     c.add_chain(chain, posterior=posterior, name="Corrected")
     c.configure(color_params="weight")
