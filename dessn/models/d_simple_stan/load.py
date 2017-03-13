@@ -14,7 +14,8 @@ def get_chain(filename, name_map, replace=True):
         with open(filename, 'rb') as output:
             chain = pickle.load(output)
             if replace:
-                del chain["intrinsic_correlation"]
+                if "intrinsic_correlation" in list(chain.keys()):
+                    del chain["intrinsic_correlation"]
                 keys = list(chain.keys())
                 for key in keys:
                     if key in name_map:
@@ -35,7 +36,7 @@ def get_chain(filename, name_map, replace=True):
     return chain
 
 
-def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=3, trim=False, trim_v=-9):
+def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None, max_deviation=3, trim=False, trim_v=-9, mod_weight=True):
     vals = get_truths_labels_significance()
     full_params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if k[2] is not None]
     params = [[k[2]] if not isinstance(k[2], list) else k[2] for k in vals if
@@ -74,20 +75,21 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None,
         del chain["Posterior"]
         if "weight" in chain.keys():
             weights = chain["weight"]
-            if max_deviation:
-                weights -= weights.mean()
-                weights -= max_deviation * np.std(weights)
-                weights[weights > 0] = 0
-            else:
-                weights -= weights.max()
-            if trim:
-                mask = (weights > trim_v) | (np.random.uniform(size=weights.size) > 0.9)
-                print("Trim from %d to %d" % (mask.size, mask.sum()))
-                for k in chain.keys():
-                    chain[k] = chain[k][mask]
-                posterior = posterior[mask]
-                weights = weights[mask]
-            weights = np.exp(weights)
+            if mod_weight:
+                if max_deviation:
+                    weights -= weights.mean()
+                    weights -= max_deviation * np.std(weights)
+                    weights[weights > 0] = 0
+                else:
+                    weights -= weights.max()
+                if trim:
+                    mask = (weights > trim_v) | (np.random.uniform(size=weights.size) > 0.9)
+                    print("Trim from %d to %d" % (mask.size, mask.sum()))
+                    for k in chain.keys():
+                        chain[k] = chain[k][mask]
+                    posterior = posterior[mask]
+                    weights = weights[mask]
+                weights = np.exp(weights)
             del chain["weight"]
         else:
             weights = np.ones(posterior.shape)
