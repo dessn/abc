@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     c = ChainConsumer()
     # c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    chain["weight"] = w
+    # chain["weight"] = w
     c.add_chain(chain, posterior=posterior, name="Corrected")
     # c.configure(color_params="weight") # , colors=["#a81515", "#111111"])
     c.plot(filename=dir_name + "/colour.png", truth=t)
