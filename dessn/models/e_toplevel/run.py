@@ -193,9 +193,9 @@ def init_fn(n_sne):
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
     randoms["calibration"] = (np.random.uniform(size=8) - 0.5) * 0.2
-    randoms["mean_x1s"] = (np.random.uniform(size=4) - 0.5) * 0.2
-    randoms["mean_cs"] = (np.random.uniform(size=4) - 0.5) * 0.1
-    randoms["alpha_cs"] = (np.random.uniform(size=4) - 0.5) * 0.2
+    randoms["mean_x1"] = (np.random.uniform(size=4) - 0.5) * 0.2
+    randoms["mean_c"] = (np.random.uniform(size=4) - 0.5) * 0.1
+    randoms["alpha_c"] = (np.random.uniform(size=4) - 0.5) * 0.2
     return randoms
 
 
@@ -230,6 +230,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
     params = [p for p in params if p in fit.sim["pars_oi"]]
     dictionary = fit.extract(pars=params)
     for key in list(dictionary.keys()):
+        print(key, dictionary[key].shape)
         if key.find("log_") == 0:
             dictionary[key[4:]] = np.exp(dictionary[key])
             del dictionary[key]

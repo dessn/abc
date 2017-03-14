@@ -61,9 +61,9 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    vector <lower = -0.5, upper = 0.5> [num_nodes] mean_x1s;
-    vector <lower = -0.2, upper = 0.2> [num_nodes] mean_cs;
-    vector <lower = -4, upper = 4> [num_nodes] alpha_cs;
+    vector <lower = -0.5, upper = 0.5> [num_nodes] mean_x1;
+    vector <lower = -0.2, upper = 0.2> [num_nodes] mean_c;
+    vector <lower = -4, upper = 4> [num_nodes] alpha_c;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
     real <lower = -10, upper = 1> log_sigma_c;
@@ -78,9 +78,9 @@ transformed parameters {
     real sigma_c;
 
     // Pop at given redshift
-    real mean_x1 [n_sne];
-    real mean_c [n_sne];
-    real alpha_c [n_sne];
+    real mean_x1_sn [n_sne];
+    real mean_c_sn [n_sne];
+    real alpha_c_sn [n_sne];
 
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
@@ -160,13 +160,13 @@ transformed parameters {
     for (i in 1:n_sne) {
 
         // redshift dependent effects
-        mean_x1[i] = dot_product(mean_x1s, node_weights[i]);
-        mean_c[i] = dot_product(mean_cs, node_weights[i]);
-        alpha_c[i] = dot_product(alpha_cs, node_weights[i]);
+        mean_x1_sn[i] = dot_product(mean_x1, node_weights[i]);
+        mean_c_sn[i] = dot_product(mean_c, node_weights[i]);
+        alpha_c_sn[i] = dot_product(alpha_c, node_weights[i]);
 
         mean_MBx1c[i][1] = mean_MB;
-        mean_MBx1c[i][2] = mean_x1[i];
-        mean_MBx1c[i][3] = mean_c[i];
+        mean_MBx1c[i][2] = mean_x1_sn[i];
+        mean_MBx1c[i][3] = mean_c_sn[i];
 
         // Calculate mass correction
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
@@ -182,13 +182,13 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1[i] + beta * mean_c[i] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
         weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population)
-            + normal_lcdf(alpha_c[i] * (model_MBx1c[i][3] - mean_c[i]) / sigma_c | 0, 1);
+            + normal_lcdf(alpha_c_sn[i] * (model_MBx1c[i][3] - mean_c_sn[i]) / sigma_c | 0, 1);
     }
     weight = sum(weights);
     Posterior = sum(PointPosteriors) - weight
