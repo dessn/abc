@@ -13,11 +13,11 @@ if __name__ == "__main__":
     # plot_quick(std, "approx", include_sep=False)
 
     chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(dir_name + "/stan_output_%s" % data_source,
-                                                                cut=False, merge=True)
+                                                                cut=False, merge=True, mod_weight=False)
 
     c = ChainConsumer()
     # c.add_chain(chain, weights=w, posterior=posterior, name="Corrected")
-    chain["weight"] = ow
+    # chain["weight"] = ow
     c.add_chain(chain, posterior=posterior, name="Corrected")
     # c.configure(color_params="weight", colors=["#a81515", "#111111"])
     c.configure(color_params="weight")

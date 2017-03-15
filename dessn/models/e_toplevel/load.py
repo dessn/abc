@@ -109,14 +109,16 @@ def load_stan_from_folder(folder, replace=True, merge=True, cut=False, num=None,
         else:
             ow = np.ones(posterior.shape)
         print(chain.keys())
+        for key in chain.keys():
+            print(key, chain[key].shape)
         for param in is_array:
             latex = name_map[param]
             truth_val = truths[latex]
             shape = truth_val.shape
-            print(latex, shape)
             if not replace:
                 del chain[param]
             if len(shape) > 1 or latex not in chain: continue  # Dont do 2D parameters
+            print(latex, shape, chain[latex].shape)
             for i in range(shape[0]):
                 column = chain[latex][:, i]
                 chain[latex % i] = column
