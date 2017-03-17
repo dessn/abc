@@ -19,6 +19,6 @@ if __name__ == "__main__":
     chain["weight"] = w
     c.add_chain(chain, posterior=posterior, name="Corrected")
     c.configure(color_params="weight")
-    c.plot(filename=dir_name + "/colour_simple.png", truth=t)
+    c.plot(filename=dir_name + "/colour_simple.png", truth=t, parameters=5, figsize=1.3)
 
 
