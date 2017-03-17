@@ -92,7 +92,7 @@ def get_all_physical_data(n_sne):
     beta = mapping["beta"]
     dscale = mapping["dscale"]
     dratio = mapping["dratio"]
-    p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
+    # p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
     p_high_masses = np.zeros(shape=dist_mod.shape)
     means = np.array([mapping["mean_MB"], mapping["mean_x1"], mapping["mean_c"]])
     sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
@@ -104,20 +104,22 @@ def get_all_physical_data(n_sne):
     for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
 
         # Skew the colour
-        while True:
-            MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-            if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
-                skew_prob = norm.logcdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1)
-                break
+        MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+
+        # while True:
+        #     MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+        #     if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
+        #         skew_prob = norm.logcdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1)
+        #         break
         probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
-        mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
-        mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
+        # mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
+        mb = MB + mu - alpha * x1 + beta * c  # - mass_correction * p
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
         diag = np.array([0.05, 0.3, 0.05]) ** 2
         cov = np.diag(diag)
         sim_mBx1c.append(vector)
-        vector += np.random.multivariate_normal([0, 0, 0], cov)
+        # vector += np.random.multivariate_normal([0, 0, 0], cov)
         cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
         obs_mBx1c_cor.append(cor)
         obs_mBx1c_cov.append(cov)
