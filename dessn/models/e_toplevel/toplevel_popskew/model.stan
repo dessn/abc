@@ -196,6 +196,8 @@ transformed parameters {
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
         + normal_lpdf(alpha_c  | 0, 0.5)
+        + normal_lpdf(mean_x1  | 0, 1)
+        + normal_lpdf(mean_c  | 0, 0.2)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
         + normal_lpdf(calibration | 0, 1);
 
