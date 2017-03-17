@@ -116,10 +116,10 @@ def get_all_physical_data(n_sne):
         mb = MB + mu - alpha * x1 + beta * c  # - mass_correction * p
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
-        diag = np.array([0.05, 0.3, 0.05]) ** 2
+        diag = 0.1 * np.array([0.05, 0.3, 0.05]) ** 2
         cov = np.diag(diag)
         sim_mBx1c.append(vector)
-        # vector += np.random.multivariate_normal([0, 0, 0], cov)
+        vector += np.random.multivariate_normal([0, 0, 0], cov)
         cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
         obs_mBx1c_cor.append(cor)
         obs_mBx1c_cov.append(cov)

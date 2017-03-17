@@ -19,7 +19,7 @@ if __name__ == "__main__":
         "mB_width": mB_width,
         "mB_alpha": mB_alpha,
         "data_source": "simple",
-        "n": 500
+        "n": 250
     }
     print("Running %s" % file)
     run(data, stan_model, file)
