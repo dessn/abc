@@ -51,7 +51,7 @@ def get_physical_data_selection_efficiency(mbs):
 
 def get_all_physical_data_with_cut(n_sne):
     data = get_all_physical_data(n_sne)
-    mbs = np.array(data["apparents"])
+    mbs = np.array(data["sim_apparents"])
     mask = get_physical_data_selection_efficiency(mbs)
     data["passed"] = mask
     return data
@@ -77,6 +77,7 @@ def get_all_physical_data(n_sne):
     mapping = {k[0]: k[1] for k in vals}
 
     obs_mBx1c = []
+    sim_mBx1c = []
     obs_mBx1c_cov = []
     obs_mBx1c_cor = []
     deta_dcalib = []
@@ -114,6 +115,7 @@ def get_all_physical_data(n_sne):
         # Add intrinsic scatter to the mix
         diag = np.array([0.05, 0.3, 0.05]) ** 2
         cov = np.diag(diag)
+        sim_mBx1c.append(vector)
         vector += np.random.multivariate_normal([0, 0, 0], cov)
         cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
         obs_mBx1c_cor.append(cor)
@@ -134,6 +136,7 @@ def get_all_physical_data(n_sne):
         "redshifts": np.array(redshifts),
         "masses": p_high_masses,
         "existing_prob": probs,
+        "sim_apparents": [o[0] for o in sim_mBx1c],
         "apparents": [o[0] for o in obs_mBx1c],
         "stretches": [o[1] for o in obs_mBx1c],
         "colours": [o[2] for o in obs_mBx1c]
