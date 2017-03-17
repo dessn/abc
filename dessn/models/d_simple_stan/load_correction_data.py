@@ -45,7 +45,8 @@ def get_physical_data_selection_efficiency(mbs):
     # plt.plot(mbvals, skewnorm.pdf(mbvals, -10, 22.5, 5))
     # plt.show()
     # exit()
-
+    mask = np.ones(mask.shape, dtype=bool)
+    print("Setting mask to all true to test unbiased data.")
     return mask
 
 
