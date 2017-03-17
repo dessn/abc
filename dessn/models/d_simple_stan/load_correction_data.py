@@ -45,8 +45,8 @@ def get_physical_data_selection_efficiency(mbs):
     # plt.plot(mbvals, skewnorm.pdf(mbvals, -10, 22.5, 5))
     # plt.show()
     # exit()
-    mask = np.ones(mask.shape, dtype=bool)
-    print("Setting mask to all true to test unbiased data.")
+    # mask = np.ones(mask.shape, dtype=bool)
+    # print("Setting mask to all true to test unbiased data.")
     return mask
 
 
@@ -69,6 +69,19 @@ def get_physical_data(n_sne):
             data[key] = data[key][mask][:n_sne]
     data['n_sne'] = n_sne
     print("Simple data ", data['obs_mBx1c'].shape)
+
+    # redshifts = data["redshifts"]
+    # lowz = redshifts < 0.2
+    # medz = (redshifts > 0.2) & (redshifts < 0.5)
+    # highz = (redshifts > 0.5)
+    # cs = np.array([o[2] for o in data['obs_mBx1c']])
+    # import matplotlib.pyplot as plt
+    # plt.hist(cs[lowz],  25, histtype='step')
+    # plt.hist(cs[medz],  25, histtype='step')
+    # plt.hist(cs[highz], 25, histtype='step')
+    # plt.show()
+    # exit()
+
     return data
 
 
@@ -116,7 +129,7 @@ def get_all_physical_data(n_sne):
         mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
-        diag = 0.01 * np.array([0.05, 0.3, 0.05]) ** 2
+        diag = np.array([0.05, 0.3, 0.05]) ** 2
         cov = np.diag(diag)
         sim_mBx1c.append(vector)
         vector += np.random.multivariate_normal([0, 0, 0], cov)
@@ -136,7 +149,7 @@ def get_all_physical_data(n_sne):
         "obs_mBx1c": obs_mBx1c,
         "obs_mBx1c_cov": obs_mBx1c_cov,
         "deta_dcalib": deta_dcalib,
-        "redshifts": np.array(redshifts),
+        "redshifts": redshifts,
         "masses": p_high_masses,
         "existing_prob": probs,
         "sim_apparents": [o[0] for o in sim_mBx1c],
