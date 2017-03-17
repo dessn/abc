@@ -10,7 +10,7 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
     stan_model = os.path.dirname(file) + "/model.stan"
 
-    mB_mean, mB_width, mB_alpha = get_approximate_mb_correction("simple")
+    # mB_mean, mB_width, mB_alpha = get_approximate_mb_correction("simple")
     mB_mean, mB_width, mB_alpha = 22.5, 4, -5
     print("Mean, width and alpha of selection function are ", mB_mean, mB_width, mB_alpha)
 

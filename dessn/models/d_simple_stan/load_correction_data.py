@@ -76,9 +76,12 @@ def get_physical_data(n_sne):
     # highz = (redshifts > 0.5)
     # cs = np.array([o[2] for o in data['obs_mBx1c']])
     # import matplotlib.pyplot as plt
-    # plt.hist(cs[lowz],  25, histtype='step')
-    # plt.hist(cs[medz],  25, histtype='step')
-    # plt.hist(cs[highz], 25, histtype='step')
+    # print(np.mean(cs[lowz]), np.std(cs[lowz]))
+    # print(np.mean(cs[medz]), np.std(cs[medz]))
+    # print(np.mean(cs[highz]), np.std(cs[highz]))
+    # plt.hist(cs[lowz],  25, histtype='step', normed=True)
+    # plt.hist(cs[medz],  25, histtype='step', normed=True)
+    # plt.hist(cs[highz], 25, histtype='step', normed=True)
     # plt.show()
     # exit()
 
