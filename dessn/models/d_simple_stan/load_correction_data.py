@@ -104,16 +104,16 @@ def get_all_physical_data(n_sne):
     for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
 
         # Skew the colour
-        MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+        # MB, x1, c = np.random.multivariate_normal(means, pop_cov)
 
-        # while True:
-        #     MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-        #     if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
-        #         skew_prob = norm.logcdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1)
-        #         break
+        while True:
+            MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+            if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
+                skew_prob = norm.logcdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1)
+                break
         probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
-        # mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
-        mb = MB + mu - alpha * x1 + beta * c  # - mass_correction * p
+        mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
+        mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
         vector = np.array([mb, x1, c])
         # Add intrinsic scatter to the mix
         diag = 0.1 * np.array([0.05, 0.3, 0.05]) ** 2
