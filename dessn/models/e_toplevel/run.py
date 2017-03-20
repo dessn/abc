@@ -121,12 +121,16 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
     redshifts = data["redshifts"]
 
     num_nodes = 4
+
+    sorted_zs = np.sort(redshifts)
     indexes = np.arange(num_nodes)
-    nodes = np.linspace(redshifts.min(), redshifts.max(), num_nodes)
-    interps = interp1d(nodes, indexes, kind='linear')(redshifts)
+    nodes = np.linspace(sorted_zs[5], sorted_zs[-5], num_nodes)
+    interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
     node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
     node_weights *= (node_weights <= 1) & (node_weights >= 0)
     node_weights = np.abs(node_weights)
+    reweight = np.sum(node_weights, axis=1)
+    node_weights = (node_weights.T / reweight).T
 
     n_z = 2000
 
