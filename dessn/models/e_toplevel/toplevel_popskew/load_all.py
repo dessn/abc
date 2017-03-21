@@ -8,10 +8,11 @@ if __name__ == "__main__":
     dir_name = os.path.dirname(__file__)
     std = dir_name + "/stan_output"
 
-
     c = ChainConsumer()
+
     datas = ["snana_dummy", "snana_diff", "snana_diff2", "simple"]
     labels = [r"SNANA $\Omega_m=0.3$", r"SNANA $\Omega_m=0.2$", r"SNANA $\Omega_m=0.4$", "Simple model with mass"]
+
     for data_source, label in zip(datas, labels):
 
         chain, posterior, t, p, f, l, w, ow = load_stan_from_folder(dir_name + "/stan_output_%s" % data_source,
