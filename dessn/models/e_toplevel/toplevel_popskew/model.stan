@@ -183,8 +183,8 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i]; // - mass_correction * masses[i];
-        //weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
-        weights[i] = 0;
+        weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
+        // weights[i] = 0;
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
