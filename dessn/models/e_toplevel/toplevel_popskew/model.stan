@@ -101,8 +101,8 @@ transformed parameters {
     // Variables to calculate the bias correction
     real cor_MB_mean [n_sne];
     real cor_mB_mean [n_sne];
-    real cor_sigma2;
-    real cor_mb_width2;
+    real cor_sigma2  [n_sne];
+    real cor_mb_width2  [n_sne];
 
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
@@ -114,9 +114,9 @@ transformed parameters {
     real mass_correction;
 
     // Correct for colour skewness
-    real delta_c;
-    real mean_c_skew;
-    real sigma_c_skew;
+    real delta_c [n_sne];
+    real mean_c_skew [n_sne];
+    real sigma_c_skew [n_sne];
 
     sigma_MB = exp(log_sigma_MB);
     sigma_x1 = exp(log_sigma_x1);
@@ -144,16 +144,7 @@ transformed parameters {
     population = diag_pre_multiply(sigmas, intrinsic_correlation);
     full_sigma = population * population';
 
-    // Colour skew adjustments
-    // delta_c = sqrt(0.63661977236) * alpha_c / (sqrt(1 + alpha_c^2));
-    // mean_c_skew = mean_c + sigma_c * delta_c;
-    // sigma_c_skew = sqrt(sigma_c^2 * (1 - delta_c^2));
 
-    // Calculate mean pop
-
-
-    cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3]) - alpha * beta * (full_sigma[2][3] ));
-    cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
 
     // Now update the posterior using each supernova sample
@@ -182,10 +173,17 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * (mean_c_sn[i] - sigma_c * sqrt(0.63661977236) * alpha_c_sn[i] / (sqrt(1 + alpha_c_sn[i]^2))); // - mass_correction * masses[i];
-        // cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i]; // - mass_correction * masses[i];
-        weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
-        // weights[i] = 0;
+        // Colour skew adjustments
+        delta_c[i] = 0.79788456080286541 * alpha_c_sn[i] / (sqrt(1 + alpha_c_sn[i]^2));
+        mean_c_skew[i] = mean_c_sn[i] + sigma_c * delta_c[i];
+        sigma_c_skew[i] = sqrt(sigma_c^2 * (1 - delta_c[i]^2));
+
+        cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_skew[i]; // - mass_correction * masses[i];
+
+        cor_mb_width2[i] = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c_skew[i])^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3] * sigma_c_skew[i] / sigma_c) - alpha * beta * (full_sigma[2][3] * sigma_c_skew[i] / sigma_c ));
+        cor_sigma2[i] = ((cor_mb_width2[i] + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2)));
+
+        weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2[i])) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2[i]));
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
