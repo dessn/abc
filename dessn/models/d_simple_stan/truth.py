@@ -12,7 +12,7 @@ def get_truths_labels_significance():
         ("mean_x1", 0, r"$\langle x_1 \rangle$", True, -0.5, 0.5),
         ("mean_c", 0, r"$\langle c \rangle$", True, -0.2, 0.2),
         ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$", True, 0.05, 0.3),
-        ("sigma_x1", 0.5, r"$\sigma_{x_1}$", True, 0.1, 2.0),
+        ("sigma_x1", 1.0, r"$\sigma_{x_1}$", True, 0.1, 2.0),
         ("sigma_c", 0.1, r"$\sigma_c$", True, 0.05, 0.4),
         ("log_sigma_MB", np.log(0.1), r"$\log\sigma_{\rm m_B}$", True, -10, 1),
         ("log_sigma_x1", np.log(0.5), r"$\log\sigma_{x_1}$", True, -10, 1),

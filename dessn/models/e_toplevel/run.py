@@ -197,9 +197,9 @@ def init_fn(n_sne):
              np.random.random() * 0.1 + 0.7]]
     randoms["intrinsic_correlation"] = chol
     randoms["calibration"] = (np.random.uniform(size=8) - 0.5) * 0.2
-    randoms["mean_x1"] = (np.random.uniform(size=2) - 0.5) * 0.2
-    randoms["mean_c"] = (np.random.uniform(size=2) - 0.5) * 0.1
-    randoms["alpha_c"] = (np.random.uniform(size=2) - 0.5) * 0.2
+    randoms["mean_x1"] = (np.random.uniform(size=4) - 0.5) * 0.2
+    randoms["mean_c"] = (np.random.uniform(size=4) - 0.5) * 0.1
+    randoms["alpha_c"] = (np.random.uniform(size=4) - 0.5) * 0.2
     return randoms
 
 
