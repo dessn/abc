@@ -120,7 +120,7 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
     data["obs_mBx1c_cor"] = cors
     redshifts = data["redshifts"]
 
-    num_nodes = 2
+    num_nodes = 4
 
     sorted_zs = np.sort(redshifts)
     indexes = np.arange(num_nodes)

@@ -21,6 +21,6 @@ if __name__ == "__main__":
         c.add_chain(chain, posterior=posterior, name=label)
 
     c.configure(shade=True)
-    c.plot(filename=dir_name + "/colour_all.png", truth=t, parameters=9)
+    c.plot(filename=dir_name + "/colour_all.png", truth=t, parameters=7)
 
 
