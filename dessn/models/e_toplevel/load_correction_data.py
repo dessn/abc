@@ -110,7 +110,7 @@ def get_all_physical_data(n_sne):
     dratio = mapping["dratio"]
     # p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
     p_high_masses = np.zeros(shape=dist_mod.shape)
-    means = np.array([mapping["mean_MB"], mapping["mean_x1"], mapping["mean_c"]])
+    means = np.array([mapping["mean_MB"][0], mapping["mean_x1"][0], mapping["mean_c"][0]])
     sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
     sigmas_mat = np.dot(sigmas[:, None], sigmas[None, :])
     correlations = np.dot(mapping["intrinsic_correlation"], mapping["intrinsic_correlation"].T)
@@ -124,8 +124,8 @@ def get_all_physical_data(n_sne):
 
         while True:
             MB, x1, c = np.random.multivariate_normal(means, pop_cov)
-            if np.random.random() < norm.cdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1):
-                skew_prob = norm.logcdf(mapping["alpha_c"] * (c - mapping["mean_c"]) / mapping["sigma_c"], 0, 1)
+            if np.random.random() < norm.cdf(mapping["alpha_c"][0] * (c - mapping["mean_c"][0]) / mapping["sigma_c"], 0, 1):
+                skew_prob = norm.logcdf(mapping["alpha_c"][0] * (c - mapping["mean_c"][0]) / mapping["sigma_c"], 0, 1)
                 break
         probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
         mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
