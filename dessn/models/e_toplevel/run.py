@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 from scipy.stats import multivariate_normal, norm
 from scipy.misc import logsumexp
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
-from dessn.models.d_simple_stan.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
+from dessn.models.e_toplevel.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
     load_fit_snana_diff, load_fit_snana_diff2, get_snana_data, get_fitres_data, get_fit_physical_data
 from dessn.models.e_toplevel.load_correction_data import load_correction_supernova
 from dessn.models.e_toplevel.truth import get_truths_labels_significance
