@@ -11,11 +11,41 @@ from scipy.interpolate import interp1d
 from scipy.stats import multivariate_normal, norm
 from scipy.misc import logsumexp
 from dessn.models.d_simple_stan.get_cosmologies import get_cosmology_dictionary
-from dessn.models.d_simple_stan.load_correction_data import load_correction_supernova
 from dessn.models.d_simple_stan.load_fitting_data import get_sncosmo_pickle_data, load_fit_snana_correction, \
-    get_fitres_data, get_snana_data, load_fit_snana_diff, load_fit_snana_diff2, get_fit_physical_data
-from dessn.models.d_simple_stan.run import get_base_data, get_correction_data_from_data_source
+    load_fit_snana_diff, load_fit_snana_diff2, get_snana_data, get_fitres_data, get_fit_physical_data
+from dessn.models.e_toplevel.load_correction_data import load_correction_supernova
+from dessn.models.e_toplevel.run import get_base_data, get_correction_data_from_data_source
 from dessn.models.e_toplevel.truth import get_truths_labels_significance
+
+
+def get_base_data(data_source, n):
+    if data_source == "sncosmo":
+        return get_sncosmo_pickle_data(n)
+    elif data_source == "snana_dummy":
+        return load_fit_snana_correction(n)
+    elif data_source == "snana_diff":
+        return load_fit_snana_diff(n)
+    elif data_source == "snana_diff2":
+        return load_fit_snana_diff2(n)
+    elif data_source == "snana":
+        return get_snana_data()
+    elif data_source == "fitres":
+        return get_fitres_data()
+    elif data_source in ["simple", "physical"]:
+        return get_fit_physical_data(n)
+    else:
+        raise ValueError("Data source %s not recognised" % data_source)
+
+
+def get_correction_data_from_data_source(data_source):
+    if data_source == "sncosmo":
+        return "sncosmo"
+    elif data_source in ["snana_dummy", "snana_diff", "snana_diff2", "snana", "fitres"]:
+        return "snana"
+    elif data_source == "simple":
+        return "simple"
+    else:
+        raise ValueError("Data source %s not recognised" % data_source)
 
 
 def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
