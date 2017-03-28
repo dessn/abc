@@ -20,3 +20,7 @@ kcor.exe /project/rkessler/SN/SNDATA_ROOT/kcor/DES/20130322/kcor_DES.input FILTE
 For diff:
 
 snlc_sim.exe DIFF_DES_SALT2_SAM.input && cp /project/rkessler/SN/SNDATA_ROOT/SIM/SHINTON_SPEC_SALT2_DIFF/SHINTON_SPEC_SALT2_DIFF.DUMP . && split_and_fit.pl DIFF_SNFIT_DES_SAM.NML
+
+
+
+snlc_sim.exe DIFF_SKEWED_DES_SALT2_SAM.input && cp /project/rkessler/SN/SNDATA_ROOT/SIM/SHINTON_SPEC_SALT2_DIFF/SHINTON_SPEC_SALT2_DIFF_SKEWED.DUMP . && split_and_fit.pl DIFF_SKEWED_SNFIT_DES_SAM.NML
