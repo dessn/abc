@@ -110,7 +110,7 @@ def get_all_physical_data(n_sne):
     dratio = mapping["dratio"]
     # p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
     p_high_masses = np.zeros(shape=dist_mod.shape)
-    means = np.array([mapping["mean_MB"][0], mapping["mean_x1"][0], mapping["mean_c"][0]])
+    means = np.array([mapping["mean_MB"], mapping["mean_x1"][0], mapping["mean_c"][0]])
     sigmas = np.array([mapping["sigma_MB"], mapping["sigma_x1"], mapping["sigma_c"]])
     sigmas_mat = np.dot(sigmas[:, None], sigmas[None, :])
     correlations = np.dot(mapping["intrinsic_correlation"], mapping["intrinsic_correlation"].T)
