@@ -65,5 +65,5 @@ if __name__ == "__main__":
         "n": 500
     }
     print("Running %s" % file)
-    run(data, stan_model, file)
-    # run(data, stan_model, file, weight_function=add_weight_to_chain)
+    # run(data, stan_model, file)
+    run(data, stan_model, file, weight_function=add_weight_to_chain)

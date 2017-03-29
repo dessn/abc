@@ -94,10 +94,10 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
         chain_mean = np.array([chain_MB, chain_x1, chain_c])
 
         chain_prob = multivariate_normal.logpdf(mbx1cs, chain_mean, chain_pop_cov)
-        if "alpha_c" in chain_dictionary.keys():
-            alpha_c = chain_dictionary["alpha_c"][i]
-            skew_prob = norm.logcdf(alpha_c * (colours - chain_c) / chain_dictionary["sigma_c"][i], 0, 1)
-            chain_prob += skew_prob
+        # if "alpha_c" in chain_dictionary.keys():
+        #     alpha_c = chain_dictionary["alpha_c"][i]
+        #     skew_prob = norm.logcdf(alpha_c * (colours - chain_c) / chain_dictionary["sigma_c"][i], 0, 1)
+        #     chain_prob += skew_prob
         reweight = logsumexp(chain_prob - existing_prob)
         weight.append(reweight)
 
