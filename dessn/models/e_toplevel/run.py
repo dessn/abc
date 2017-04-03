@@ -47,7 +47,7 @@ def get_correction_data_from_data_source(data_source):
         raise ValueError("Data source %s not recognised" % data_source)
 
 
-def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
+def calculate_bias(chain_dictionary, supernovae, cosmologies, data, num=None):
     """ Calculates the correct per supernova bias for each step in chain_dictionary,
     using the supernovae sample and dist_mod interpolators found in cosmologies. """
     redshifts = supernovae["redshifts"]
@@ -56,6 +56,9 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
     colours = supernovae["colours"]
     existing_prob = supernovae["existing_prob"]
     masses = supernovae["masses"]
+
+    redshift_nodes = data["nodes"]
+
     if num is not None:
         redshifts = redshifts[:num]
         apparents = apparents[:num]
@@ -70,6 +73,12 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
         key = "%0.3f" % om
         mus = cosmologies[key](redshifts)
 
+        x1s = chain_dictionary["mean_x1"][i]
+        cs = chain_dictionary["mean_c"][i]
+
+        x1interp = interp1d(redshift_nodes, x1s, fill_value=(x1s[0], x1s[-1]), bounds_error=False)
+        cinterp = interp1d(redshift_nodes, cs, fill_value=(cs[0], cs[-1]), bounds_error=False)
+
         if "dscale" in chain_dictionary.keys() and "dratio" in chain_dictionary.keys():
             dscale = chain_dictionary["dscale"][i]
             dratio = chain_dictionary["dratio"][i]
@@ -79,10 +88,14 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
             mass_correction = 0
         mabs = apparents - mus + chain_dictionary["alpha"][i] * stretches - chain_dictionary["beta"][i] * colours + mass_correction * masses
 
-        mbx1cs = np.vstack((mabs, stretches, colours)).T
         chain_MB = chain_dictionary["mean_MB"][i]
-        chain_x1 = chain_dictionary["mean_x1"][i]
-        chain_c = chain_dictionary["mean_c"][i]
+        chain_x1 = np.mean(chain_dictionary["mean_x1"][i])
+        chain_c = np.mean(chain_dictionary["mean_c"][i])
+
+        mbx1cs = np.vstack((mabs, stretches, colours)).T
+        mbx1cs[:, 1] += x1interp(redshifts) - chain_x1
+        mbx1cs[:, 2] += cinterp(redshifts) - chain_c
+
         try:
             chain_sigmas = np.array([chain_dictionary["sigma_MB"][i], chain_dictionary["sigma_x1"][i], chain_dictionary["sigma_c"][i]])
         except KeyError:
@@ -105,13 +118,13 @@ def calculate_bias(chain_dictionary, supernovae, cosmologies, num=None):
     return weights
 
 
-def add_weight_to_chain(chain_dictionary, n_sne, correction_source, num=None, trim=False, trim_v=-12, shuffle=False):
+def add_weight_to_chain(chain_dictionary, n_sne, correction_source, data, num=None, trim=False, trim_v=-12, shuffle=False):
     # Load supernova for correction
     supernovae = load_correction_supernova(correction_source=correction_source, shuffle=shuffle, only_passed=True)
     # Load premade cosmology dictionary to speed up dist_mod calculation
     d = get_cosmology_dictionary()
     # Get the weights
-    weights = calculate_bias(chain_dictionary, supernovae, d, num=num)
+    weights = calculate_bias(chain_dictionary, supernovae, d, data, num=num)
     # Get the approximation correction used in stan
     existing = chain_dictionary["weight"]
     # Reweight the chain to match the difference from actual to approximation correction
@@ -198,7 +211,8 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
         "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
         "calib_std": np.array([0.5, 0.5, 0.5, 0.5, 0.1, 0.1, 0.1, 0.1]),
         "num_nodes": num_nodes,
-        "node_weights": node_weights
+        "node_weights": node_weights,
+        "nodes": nodes
     }
 
     if extra_args is None:
@@ -240,7 +254,7 @@ def run_single_input(data_args, stan_model, stan_dir, i, num_walks_per_cosmology
 
 def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 500, 1000
+        w, n = 100, 200
     else:
         w, n = 1000, 3000
     data = get_analysis_data(seed=n_cosmology, **data_args)
@@ -269,7 +283,7 @@ def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, we
             del dictionary[key]
     if weight_function is not None:
         correction_source = get_correction_data_from_data_source(data_args["data_source"])
-        weight_function(dictionary, n_sne, correction_source)
+        weight_function(dictionary, n_sne, correction_source, data)
     with open(t, 'wb') as output:
         pickle.dump(dictionary, output)
 
