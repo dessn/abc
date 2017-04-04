@@ -184,7 +184,7 @@ transformed parameters {
 
         cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i]; // - mass_correction * masses[i];
         weights[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2))
-            - skew_norm_lpdf(model_MBx1c[i][1] | mB_mean, sqrt(mB_width2), sqrt(mB_alpha2));
+            - skew_normal_lpdf(model_MBx1c[i][1] | mB_mean, sqrt(mB_width2), sqrt(mB_alpha2));
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
