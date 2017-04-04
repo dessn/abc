@@ -243,6 +243,7 @@ def init_fn(n_sne):
     randoms["mean_x1"] = (np.random.uniform(size=4) - 0.5) * 0.2
     randoms["mean_c"] = (np.random.uniform(size=4) - 0.5) * 0.1
     randoms["alpha_c"] = (np.random.uniform(size=4) - 0.5) * 0.2
+    print(randoms)
     return randoms
 
 
