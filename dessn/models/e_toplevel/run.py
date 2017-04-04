@@ -228,8 +228,8 @@ def get_analysis_data(data_source="snana_dummy", n=500, seed=0, add_sim=0, **ext
 
 def init_fn(n_sne):
     vals = get_truths_labels_significance()
-    randoms = {k[0]: uniform(k[4], k[5]) for k in vals}
-    for key in randoms:
+    randoms = {k[0]: uniform(k[4], k[5]) for k in vals if type(k[4]) == float and type(k[5]) == float}
+    for key in list(randoms.keys()):
         if key.find("sigma") == 0:
             randoms["log_%s" % key] = np.log(randoms[key])
 

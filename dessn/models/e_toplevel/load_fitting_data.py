@@ -89,7 +89,7 @@ def load_fit_snana_diff2(n_sne):
 def get_fitres_data():
     print("Getting data from Fitres file")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    fitres_file = os.path.abspath(this_dir + "/data/FITOPT000.FITRES")
+    fitres_file = os.path.abspath(this_dir + "../d_simple_stan/data/FITOPT000.FITRES")
     dataframe = pd.read_csv(fitres_file, sep='\s+', skiprows=5, comment="#")
     data = dataframe.to_records()
 
@@ -134,7 +134,7 @@ def get_fitres_data():
 def get_sncosmo_pickle_data(n_sne):
     print("Getting data from sncosmo supernovae pickle")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    pickle_file = os.path.abspath(this_dir + "/data/supernovae.pickle")
+    pickle_file = os.path.abspath(this_dir + "../d_simple_stan/data/supernovae.pickle")
     with open(pickle_file, 'rb') as pkl:
         supernovae = pickle.load(pkl)
     passed = [s for s in supernovae if s["pc"]]
@@ -157,7 +157,7 @@ def get_fit_physical_data(n_sne):
 def get_snana_data():
     print("Getting SNANA data from TEST_DATA_17677")
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    filename = this_dir + "/data/des_sim.pickle"
+    filename = this_dir + "../d_simple_stan/data/des_sim.pickle"
     print("Getting SNANA data")
     with open(filename, 'rb') as f:
         data = pickle.load(f)
