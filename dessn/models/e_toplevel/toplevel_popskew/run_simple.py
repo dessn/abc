@@ -55,6 +55,44 @@ if __name__ == "__main__":
     stan_model = os.path.dirname(file) + "/model.stan"
 
     mB_mean, mB_width, mB_alpha = get_approximate_mb_correction("simple")
+    # mB_mean, mB_width, mB_alpha = 22.5, 4, -5
+    #
+    # import matplotlib.pyplot as plt
+    # from astropy.cosmology import FlatLambdaCDM
+    # from scipy.stats import norm, skewnorm
+    # from scipy.integrate import simps
+    # zs = np.linspace(0.05, 1.2, 200)
+    # mus = FlatLambdaCDM(70, 0.3).distmod(zs).value
+    # mean = -19.365 + mus
+    # cor_mb_width2 = 0.1**2 + (0.14 * 1.0)**2 + (3.1 * 0.1)**2
+    # mB_width2 = mB_width**2
+    # mB_alpha2 = mB_alpha**2
+    # cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)**2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)))
+    # weights = norm.logpdf(mean, mB_mean, np.sqrt(mB_width2 + cor_mb_width2)) + norm.logcdf(mB_mean, mean, np.sqrt(cor_sigma2))
+    #
+    # mags = np.linspace(15, 25, 1000)
+    # p2 = skewnorm.pdf(mags, mB_alpha, mB_mean, mB_width)
+    # weights2 = []
+    # for m in mean:
+    #     p1 = norm.pdf(mags, m, np.sqrt(cor_mb_width2))
+    #     p3 = p1 * p2
+    #     weights2.append(simps(p3, mags))
+    #
+    # plt.plot(zs, 2*np.exp(weights))
+    # plt.plot(zs, weights2)
+    # plt.xlabel("z")
+    # plt.ylabel("weight")
+    # plt.show()
+    # plt.clf()
+    # plt.plot(mags, skewnorm.pdf(mags, mB_alpha, mB_mean, mB_width), 'k--')
+    # for m,z in zip(mean[::20], zs[::20]):
+    #     plt.plot(mags, norm.pdf(mags, m, np.sqrt(cor_mb_width2)), label="z=%0.2f"%z)
+    # plt.xlabel("m_B")
+    # plt.ylabel("pdf")
+    # plt.legend(loc=2)
+    # plt.show()
+    # exit()
+
     print("Mean, width and alpha of selection function are ", mB_mean, mB_width, mB_alpha)
 
     data = {
