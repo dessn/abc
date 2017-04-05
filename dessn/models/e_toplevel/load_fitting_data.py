@@ -78,6 +78,10 @@ def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_
     return result
 
 
+def load_fit_snana_skewed(n_sne):
+    return load_fit_snana_correction(n_sne, directory="diff_skewed")
+
+
 def load_fit_snana_diff(n_sne):
     return load_fit_snana_correction(n_sne, directory="diff_passed")
 
