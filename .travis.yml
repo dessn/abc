@@ -33,6 +33,6 @@ install:
     - pip install -r requirements.txt
     - ulimit -s unlimited
 
-after_success:
+script:
     - chmod u+x deploy.sh
     - ./deploy.sh
