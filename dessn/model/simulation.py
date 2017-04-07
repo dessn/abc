@@ -52,6 +52,14 @@ class Simulation(ABC):
             result[k] = result[k][mask]
         return result
 
+    def get_truth_values_dict(self):
+        vals = self.get_truth_values()
+        return {k[0]: k[1] for k in vals}
+
+    @abstractmethod
+    def get_name(self):
+        raise NotImplementedError()
+
     @abstractmethod
     def get_truth_values(self):
         raise NotImplementedError()
