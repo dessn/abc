@@ -1,0 +1,110 @@
+import numpy as np
+from astropy.cosmology import FlatwCDM
+from scipy.stats import norm, multivariate_normal, skewnorm
+
+from dessn.model.simulation import Simulation
+
+
+class SimpleSimulation(Simulation):
+
+    def get_truth_values(self, as_list=True):
+        val_list = [
+            ("Om", 0.3, r"$\Omega_m$"),
+            # ("w", -1.0, r"$w$", True, -1.5, -0.5),
+            ("alpha", 0.14, r"$\alpha$"),
+            ("beta", 3.1, r"$\beta$"),
+            ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
+            ("mean_x1", np.zeros(4), r"$\langle x_1^{%d} \rangle$"),
+            ("mean_c", np.zeros(4), r"$\langle c^{%d} \rangle$"),
+            ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$"),
+            ("sigma_x1", 1.0, r"$\sigma_{x_1}$"),
+            ("sigma_c", 0.1, r"$\sigma_c$"),
+            ("log_sigma_MB", np.log(0.1), r"$\log\sigma_{\rm m_B}$"),
+            ("log_sigma_x1", np.log(0.5), r"$\log\sigma_{x_1}$"),
+            ("log_sigma_c", np.log(0.1), r"$\log\sigma_c$"),
+            ("alpha_c", -5, r"$\alpha_c$"),
+            ("dscale", 0.08, r"$\delta(0)$"),
+            ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$"),
+            ("intrinsic_correlation", np.identity(3), r"$\rho$"),
+            ("calibration", np.zeros(8), r"$\delta \mathcal{Z}_%d$")
+        ]
+        return val_list if as_list else {k[0]: k[1] for k in val_list}
+
+    def get_all_supernova(self, n_sne):
+        truth = self.get_truth_values(as_list=False)
+        self.logger.info("Generating simple data for %d supernova, with skewness %d..." % (n_sne, truth["alpha_c"]))
+
+        cosmology = FlatwCDM(70.0, truth["Om"])
+
+        # Unwrap some values
+        alpha, beta, dscale, dratio = truth["alpha"], truth["beta"], truth["dscale"], truth["dratio"]
+        sim_mBx1c, obs_mBx1c_cov, obs_mBx1c_cor, obs_mBx1c, deta_dcalib = [], [], [], [], []
+        redshifts_all, redshift_pre_comp_all, p_high_masses_all, mask_all, mbs_all = [], [], [], [], []
+        # p_high_masses = np.random.uniform(low=-1.0, high=1.0, size=dist_mod.size)
+
+        # Assume constant population.
+        means = np.array([truth["mean_MB"], truth["mean_x1"][0], truth["mean_c"][0]])
+        sigmas = np.array([truth["sigma_MB"], truth["sigma_x1"], truth["sigma_c"]])
+        sigmas_mat = np.dot(sigmas[:, None], sigmas[None, :])
+        correlations = np.dot(truth["intrinsic_correlation"], truth["intrinsic_correlation"].T)
+        pop_cov = correlations * sigmas_mat
+        probs = []
+        skew_prob = 0
+
+        # Generate 1000 at a time
+        while True:
+            redshifts = (np.random.uniform(0, 1, 1000) ** 0.5)
+            dist_mod = cosmology.distmod(redshifts).value
+            redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
+            p_high_masses = np.zeros(shape=dist_mod.shape)
+
+            for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
+                while True:
+                    MB, x1, c = np.random.multivariate_normal(means, pop_cov)
+                    if np.random.random() < norm.cdf(truth["alpha_c"] * (c - truth["mean_c"][0]) / truth["sigma_c"], 0, 1):
+                        skew_prob = norm.logcdf(truth["alpha_c"] * (c - truth["mean_c"][0]) / truth["sigma_c"], 0, 1)
+                        break
+                probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
+                mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
+                mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
+                vector = np.array([mb, x1, c])
+                # Add intrinsic scatter to the mix
+                diag = np.array([0.03, 0.2, 0.02]) ** 2
+                cov = np.diag(diag)
+                sim_mBx1c.append(vector)
+                vector += np.random.multivariate_normal([0, 0, 0], cov)
+                cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
+                obs_mBx1c_cor.append(cor)
+                obs_mBx1c_cov.append(cov)
+                obs_mBx1c.append(vector)
+                deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, 8)))
+            redshifts_all += redshifts.tolist()
+            redshift_pre_comp_all += redshift_pre_comp.tolist()
+            p_high_masses_all += p_high_masses.tolist()
+
+            mbs = [o[0] for o in sim_mBx1c]
+            vals = np.random.uniform(size=mbs.size)
+            pdfs = skewnorm.pdf(mbs, -5, 22.5, 4)
+            pdfs /= pdfs.max()
+            mask = vals < pdfs
+            mbs_all += mbs.tolist()
+            mask_all += mask.tolist()
+
+            if np.array(mask_all).sum() >= n_sne:
+                break
+
+        indexes = np.array(mask_all).cumsum()
+        cut_index = np.where(indexes == n_sne)[0][0]
+        print("Generated %d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100 * (mask.sum() / mask.size)))
+
+        return {
+            "n_sne": n_sne,
+            "obs_mBx1c": obs_mBx1c[:cut_index],
+            "obs_mBx1c_cov": obs_mBx1c_cov[:cut_index],
+            "deta_dcalib": deta_dcalib[:cut_index],
+            "redshifts": redshifts_all[:cut_index],
+            "masses": p_high_masses_all[:cut_index],
+            "existing_prob": probs[:cut_index],
+            "sim_apparents": mbs_all[:cut_index],
+            "passed": mask_all[:cut_index]
+        }
