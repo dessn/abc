@@ -15,7 +15,7 @@ class Model(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_data(self, simulation):
+    def get_data(self, simulation, cosmology_index):
         raise NotImplementedError()
 
     @abstractmethod

@@ -11,6 +11,9 @@ class SimpleSimulation(Simulation):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
+        self.mb_alpha = -5
+        self.mb_mean = 22.5
+        self.mb_width = 4
 
     def get_name(self):
         return "simple"
@@ -90,7 +93,7 @@ class SimpleSimulation(Simulation):
 
             mbs = [o[0] for o in sim_mBx1c]
             vals = np.random.uniform(size=mbs.size)
-            pdfs = skewnorm.pdf(mbs, -5, 22.5, 4)
+            pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
             pdfs /= pdfs.max()
             mask = vals < pdfs
             mbs_all += mbs.tolist()
@@ -114,3 +117,6 @@ class SimpleSimulation(Simulation):
             "sim_apparents": mbs_all[:cut_index],
             "passed": mask_all[:cut_index]
         }
+
+    def get_approximate_correction(self):
+        return self.mb_mean, self.mb_width, self.mb_alpha

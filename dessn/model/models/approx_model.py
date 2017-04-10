@@ -1,0 +1,148 @@
+import numpy as np
+import inspect
+import os
+from numpy.random import uniform, normal
+from scipy.interpolate import interp1d
+
+from dessn.model.model import Model
+
+
+class ApproximateModel(Model):
+
+    def __init__(self, num_supernova):
+        file = os.path.abspath(inspect.stack()[0][1])
+        directory = os.path.pardir(file)
+        stan_file = directory + "/stan/approximate.stan"
+        super().__init__(stan_file)
+
+        self.num_redshift_nodes = 4
+        self.num_supernova = num_supernova
+
+    def get_parameters(self):
+        return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
+                "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
+                "calibration"]
+
+    def get_init(self):
+        randoms = {
+            "Om": uniform(0.05, 0.6),
+            "alpha": uniform(-0.1, 0.4),
+            "beta": uniform(0.1, 4.5),
+            "dscale": uniform(-0.2, 0.2),
+            "dratio": uniform(0, 1),
+            "mean_MB": uniform(-20, -18),
+            "mean_x1": uniform(-0.5, 0.5, size=self.num_redshift_nodes),
+            "mean_c": uniform(-0.2, 0.2, size=self.num_redshift_nodes),
+            "log_sigma_MB": uniform(-3, 1),
+            "log_sigma_x1": uniform(-3, 1),
+            "log_sigma_c": uniform(-3, 1),
+            "deviations": normal(scale=0.2, size=(self.num_supernova, 3)),
+            "calibration": uniform(-0.3, 0.3, size=8)
+        }
+        chol = [[1.0, 0.0, 0.0],
+                [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
+                [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
+                 np.random.random() * 0.1 + 0.7]]
+        randoms["intrinsic_correlation"] = chol
+        return randoms
+
+    def get_data(self, simulation, cosmology_index, add_zs=None):
+        np.random.seed(cosmology_index)
+
+        n_sne = self.num_supernova
+        data = simulation.get_passed_supernova(n_sne)
+
+        cors = []
+        for c in data["obs_mBx1c_cov"]:
+            d = np.sqrt(np.diag(c))
+            div = (d[:, None] * d[None, :])
+            cor = c / div
+            cors.append(cor)
+
+        data["obs_mBx1c_cor"] = cors
+
+        # Redshift shenanigans below used to create simpsons rule arrays
+        # and then extract the right redshfit indexes from them
+        redshifts = data["redshifts"]
+
+        n_z = 2000  # Defines how many points we get in simpsons rule
+
+        num_nodes = self.num_redshift_nodes
+
+        sorted_zs = np.sort(redshifts)
+        indexes = np.arange(num_nodes)
+        nodes = np.linspace(sorted_zs[5], sorted_zs[-5], num_nodes)
+        interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
+        node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
+        node_weights *= (node_weights <= 1) & (node_weights >= 0)
+        node_weights = np.abs(node_weights)
+        reweight = np.sum(node_weights, axis=1)
+        node_weights = (node_weights.T / reweight).T
+
+        if add_zs is not None:
+            sim_data = add_zs(simulation)
+            n_sim = sim_data["n_sim"]
+            sim_redshifts = sim_data["sim_redshifts"]
+            dz = max(redshifts.max(), sim_redshifts.max()) / n_z
+            zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
+        else:
+            sim_data = {}
+            dz = redshifts.max() / n_z
+            zs = sorted(redshifts.tolist())
+            n_sim = 0
+
+        added_zs = [0]
+        pz = 0
+        for z in zs:
+            est_point = int((z - pz) / dz)
+            if est_point % 2 == 0:
+                est_point += 1
+            est_point = max(3, est_point)
+            new_points = np.linspace(pz, z, est_point)[1:-1].tolist()
+            added_zs += new_points
+            pz = z
+
+        n_z = n_sne + n_sim + len(added_zs)
+        n_simps = int((n_z + 1) / 2)
+        to_sort = [(z, -1, -1) for z in added_zs] + [(z, i, -1) for i, z in enumerate(redshifts)]
+        if add_zs is not None:
+            to_sort += [(z, -1, i) for i, z in enumerate(sim_redshifts)]
+        to_sort.sort()
+        final_redshifts = np.array([z[0] for z in to_sort])
+        sorted_vals = [(z[1], i) for i, z in enumerate(to_sort) if z[1] != -1]
+        sorted_vals.sort()
+        final = [int(z[1] / 2 + 1) for z in sorted_vals]
+        # End redshift shenanigans
+
+        update = {
+            "n_z": n_z,
+            "n_simps": n_simps,
+            "zs": final_redshifts,
+            "zspo": 1 + final_redshifts,
+            "zsom": (1 + final_redshifts) ** 3,
+            "redshift_indexes": final,
+            "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
+            "calib_std": np.array([0.5, 0.5, 0.5, 0.5, 0.1, 0.1, 0.1, 0.1]),
+            "num_nodes": num_nodes,
+            "node_weights": node_weights,
+            "nodes": nodes
+        }
+
+        if add_zs is not None:
+            sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
+            sim_sorted_vals.sort()
+            sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
+            update["sim_redshift_indexes"] = sim_final
+            update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
+
+        obs_data = np.array(data["obs_mBx1c"])
+        print("Observed data x1 dispersion is %f, colour dispersion is %f"
+              % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
+
+        # Add in data for the approximate selection efficiency in mB
+        mean, std, alpha = simulation.get_approximate_correction()
+        update["mB_mean"] = mean
+        update["mB_width2"] = std**2
+        update["mB_alpha2"] = alpha**2
+
+        return {**data, **update, **sim_data}
