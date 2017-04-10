@@ -58,7 +58,7 @@ python $PROG $PARAMS %d'''
 
 
 def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
-                          num_walks=24, delete=False, partition="smp"):
+                          delete=False, partition="smp"):
 
     directory = os.path.dirname(os.path.abspath(filename))
     executable = os.path.basename(filename)
@@ -96,10 +96,10 @@ PROG=%s
 PARAMS=`expr ${SLURM_ARRAY_TASK_ID} - 1`
 cd $IDIR
 sleep $((RANDOM %% 10))
-srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS %d'''
+srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS'''
 
-    n = "%s/jobscript_%s.q" % (directory, executable[:executable.index(".py")])
-    t = template % (partition, name, num_tasks, num_cpu, output_dir, name, directory, executable, num_walks)
+    n = "%s/%s.q" % (directory, executable[:executable.index(".py")])
+    t = template % (partition, name, num_tasks, num_cpu, output_dir, name, directory, executable)
     if partition != "smp":
         t = t.replace("####", "#")
     with open(n, 'w') as f:

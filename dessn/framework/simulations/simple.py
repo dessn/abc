@@ -2,7 +2,7 @@ import numpy as np
 from astropy.cosmology import FlatwCDM
 from scipy.stats import norm, multivariate_normal, skewnorm
 
-from dessn.model.simulation import Simulation
+from dessn.framework.simulation import Simulation
 
 
 class SimpleSimulation(Simulation):
@@ -48,7 +48,7 @@ class SimpleSimulation(Simulation):
 
         # Unwrap some values
         alpha, beta, dscale, dratio = truth["alpha"], truth["beta"], truth["dscale"], truth["dratio"]
-        sim_mBx1c, obs_mBx1c_cov, obs_mBx1c_cor, obs_mBx1c, deta_dcalib = [], [], [], [], []
+        sim_mBx1c, obs_mBx1c_cov, obs_mBx1c, deta_dcalib = [], [], [], []
         redshifts_all, redshift_pre_comp_all, p_high_masses_all, mask_all, mbs_all = [], [], [], [], []
 
         # Assume constant population.
@@ -83,7 +83,6 @@ class SimpleSimulation(Simulation):
                 sim_mBx1c.append(vector)
                 vector += np.random.multivariate_normal([0, 0, 0], cov)
                 cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
-                obs_mBx1c_cor.append(cor)
                 obs_mBx1c_cov.append(cov)
                 obs_mBx1c.append(vector)
                 deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, 8)))
@@ -91,7 +90,7 @@ class SimpleSimulation(Simulation):
             redshift_pre_comp_all += redshift_pre_comp.tolist()
             p_high_masses_all += p_high_masses.tolist()
 
-            mbs = [o[0] for o in sim_mBx1c]
+            mbs = np.array([o[0] for o in sim_mBx1c])
             vals = np.random.uniform(size=mbs.size)
             pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
             pdfs /= pdfs.max()
@@ -103,19 +102,19 @@ class SimpleSimulation(Simulation):
                 break
 
         indexes = np.array(mask_all).cumsum()
-        cut_index = np.where(indexes == n_sne)[0][0]
+        cut_index = np.where(indexes == n_sne)[0][0] + 1
         print("Generated %d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100 * (mask.sum() / mask.size)))
 
         return {
             "n_sne": n_sne,
-            "obs_mBx1c": obs_mBx1c[:cut_index],
-            "obs_mBx1c_cov": obs_mBx1c_cov[:cut_index],
-            "deta_dcalib": deta_dcalib[:cut_index],
-            "redshifts": redshifts_all[:cut_index],
-            "masses": p_high_masses_all[:cut_index],
-            "existing_prob": probs[:cut_index],
-            "sim_apparents": mbs_all[:cut_index],
-            "passed": mask_all[:cut_index]
+            "obs_mBx1c": np.array(obs_mBx1c[:cut_index]),
+            "obs_mBx1c_cov": np.array(obs_mBx1c_cov[:cut_index]),
+            "deta_dcalib": np.array(deta_dcalib[:cut_index]),
+            "redshifts": np.array(redshifts_all[:cut_index]),
+            "masses": np.array(p_high_masses_all[:cut_index]),
+            "existing_prob": np.array(probs[:cut_index]),
+            "sim_apparents": np.array(mbs_all[:cut_index]),
+            "passed": np.array(mask_all[:cut_index])
         }
 
     def get_approximate_correction(self):

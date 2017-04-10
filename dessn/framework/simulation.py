@@ -49,7 +49,9 @@ class Simulation(ABC):
         result = self.get_all_supernova(n_sne)
         mask = result["passed"]
         for k in list(result.keys()):
-            result[k] = result[k][mask]
+            if isinstance(result[k], np.ndarray):
+                result[k] = result[k][mask]
+        del result["passed"]
         return result
 
     def get_truth_values_dict(self):

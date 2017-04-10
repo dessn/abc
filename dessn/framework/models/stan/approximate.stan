@@ -63,7 +63,6 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     vector <lower = -0.5, upper = 0.5> [num_nodes] mean_x1;
     vector <lower = -0.2, upper = 0.2> [num_nodes] mean_c;
-    vector <lower = -4, upper = 4> [num_nodes] alpha_c;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
     real <lower = -10, upper = 1> log_sigma_c;
@@ -83,7 +82,6 @@ transformed parameters {
     // Pop at given redshift
     real mean_x1_sn [n_sne];
     real mean_c_sn [n_sne];
-    real alpha_c_sn [n_sne];
 
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
@@ -150,17 +148,8 @@ transformed parameters {
     population = diag_pre_multiply(sigmas, intrinsic_correlation);
     full_sigma = population * population';
 
-    // Colour skew adjustments
-    // delta_c = sqrt(0.63661977236) * alpha_c / (sqrt(1 + alpha_c^2));
-    // mean_c_skew = mean_c + sigma_c * delta_c;
-    // sigma_c_skew = sqrt(sigma_c^2 * (1 - delta_c^2));
-
-    // Calculate mean pop
-
-
     cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3]) - alpha * beta * (full_sigma[2][3] ));
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
-
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
@@ -168,7 +157,6 @@ transformed parameters {
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1, node_weights[i]);
         mean_c_sn[i] = dot_product(mean_c, node_weights[i]);
-        alpha_c_sn[i] = dot_product(alpha_c, node_weights[i]);
 
         mean_MBx1c[i][1] = mean_MB;
         mean_MBx1c[i][2] = mean_x1_sn[i];
@@ -195,14 +183,12 @@ transformed parameters {
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population);
-            //+ normal_lcdf(alpha_c_sn[i] * (model_MBx1c[i][3] - mean_c_sn[i]) / sigma_c | 0, 1);
     }
     weight = sum(weights);
     Posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        + normal_lpdf(alpha_c  | 0, 0.5)
         + normal_lpdf(mean_x1  | 0, 1)
         + normal_lpdf(mean_c  | 0, 0.1)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)

@@ -4,14 +4,14 @@ import os
 from numpy.random import uniform, normal
 from scipy.interpolate import interp1d
 
-from dessn.model.model import Model
+from dessn.framework.model import Model
 
 
 class ApproximateModel(Model):
 
     def __init__(self, num_supernova):
         file = os.path.abspath(inspect.stack()[0][1])
-        directory = os.path.pardir(file)
+        directory = os.path.dirname(file)
         stan_file = directory + "/stan/approximate.stan"
         super().__init__(stan_file)
 
@@ -71,7 +71,7 @@ class ApproximateModel(Model):
 
         sorted_zs = np.sort(redshifts)
         indexes = np.arange(num_nodes)
-        nodes = np.linspace(sorted_zs[5], sorted_zs[-5], num_nodes)
+        nodes = np.linspace(sorted_zs[0], sorted_zs[-1], num_nodes)
         interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
         node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
         node_weights *= (node_weights <= 1) & (node_weights >= 0)

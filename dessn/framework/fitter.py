@@ -1,8 +1,12 @@
 import logging
 import os
 import pickle
+import socket
 
 import numpy as np
+import sys
+
+from dessn.utility.doJob import write_jobscript_slurm
 
 
 class Fitter(object):
@@ -11,6 +15,7 @@ class Fitter(object):
         self.simulations = []
         self.num_cosmologies = 15
         self.num_walkers = 5
+        self.num_cpu = self.num_cosmologies * self.num_walkers
         self.logger = logging.getLogger(__name__)
         self.temp_dir = temp_dir
         if not os.path.exists(temp_dir):
@@ -27,6 +32,12 @@ class Fitter(object):
     def set_num_cosmologies(self, num_cosmologies):
         self.num_cosmologies = num_cosmologies
         return self
+
+    def set_num_cpu(self, num_cpu=None):
+        if num_cpu is None:
+            self.num_cpu = self.num_cosmologies * self.num_walkers
+        else:
+            self.num_cpu = num_cpu
 
     def set_num_walkers(self, num_walkers):
         self.num_walkers = num_walkers
@@ -53,8 +64,6 @@ class Fitter(object):
 
         return model_index, sim_index, cosmo_index, walker_index
 
-    def run_fit_laptop(self):
-        self.run_fit(0, 0, 0, 0, num_cores=4)
 
     def run_fit(self, model_index, simulation_index, cosmo_index, walker_index, num_cores=1):
         model = self.models[model_index]
@@ -68,10 +77,10 @@ class Fitter(object):
             w, n = 300, 600
 
         import pystan
-
+        data = model.get_data(sim, cosmo_index)
         self.logger.info("Running Stan job, saving to %s" % out_file)
         sm = pystan.StanModel(file=model.get_stan_file(), model_name="Cosmology")
-        fit = sm.sampling(data=model.get_data(), iter=n, warmup=w, chains=num_cores, init=model.get_init)
+        fit = sm.sampling(data=data, iter=n, warmup=w, chains=num_cores, init=model.get_init)
         self.logger.info("Stan finished sampling")
 
         # Get parameters
@@ -91,19 +100,31 @@ class Fitter(object):
             pickle.dump(dictionary, output)
         self.logger.info("Saved chain to %s" % out_file)
 
-    def fit(self, index=None):
+    def is_laptop(self):
+        return "science" in socket.gethostname()
+
+    def fit(self, file):
+
         num_jobs = self.get_num_jobs()
         num_models = len(self.models)
         num_simulations = len(self.models)
         self.logger.info("With %d models, %d simulations, %d cosmologies and %d walkers, have %d jobs" %
                          (num_models, num_simulations, self.num_cosmologies, self.num_walkers, num_jobs))
 
-        if index is None:
+        if self.is_laptop():
             self.logger.info("Running Stan locally with 4 cores.")
+            self.run_fit(0, 0, 0, 0, num_cores=4)
         else:
-            mi, si, ci, wi = self.get_indexes_from_index(index)
-            self.logger.info("Running model %d, sim %d, cosmology %d, walker number %d" % (mi, si, ci, wi))
-
-
-        # Need to think about the interplay between a scheduling method and this class.
-        # How much responsibility should fitter take on?
+            if len(sys.argv) == 1:
+                h = socket.gethostname()
+                partition = "regular" if "edison" in h else "smp"
+                filename = write_jobscript_slurm(file, name=os.path.basename(file),
+                                                 num_tasks=self.get_num_jobs(), num_cpu=self.num_cpu,
+                                                 delete=True, partition=partition)
+                self.logger.info("Running batch job at %s" % filename)
+                os.system("sbatch %s" % filename)
+            else:
+                index = int(sys.argv[1])
+                mi, si, ci, wi = self.get_indexes_from_index(index)
+                self.logger.info("Running model %d, sim %d, cosmology %d, walker number %d" % (mi, si, ci, wi))
+                self.run_fit(mi, si, ci, wi)
