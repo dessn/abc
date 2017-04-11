@@ -11,10 +11,10 @@ from dessn.framework.model import Model
 
 class ApproximateModel(Model):
 
-    def __init__(self, num_supernova):
+    def __init__(self, num_supernova, file="approximate.stan"):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
-        stan_file = directory + "/stan/approximate.stan"
+        stan_file = directory + "/stan/" + file
         super().__init__(stan_file)
 
         self.num_redshift_nodes = 4
