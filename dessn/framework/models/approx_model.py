@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import numpy as np
 import inspect
 import os
@@ -22,6 +24,24 @@ class ApproximateModel(Model):
         return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
                 "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
                 "calibration"]
+
+    def get_labels(self):
+        mapping = OrderedDict([
+            ("Om", r"$\Omega_m$"),
+            ("w", r"$w$"),
+            ("alpha", r"$\alpha$"),
+            ("beta", r"$\beta$"),
+            ("mean_MB", r"$\langle M_B \rangle$"),
+            ("mean_x1", r"$\langle x_1^{%d} \rangle$"),
+            ("mean_c", r"$\langle c^{%d} \rangle$"),
+            ("sigma_MB", r"$\sigma_{\rm m_B}$"),
+            ("sigma_x1", r"$\sigma_{x_1}$"),
+            ("sigma_c", r"$\sigma_c$"),
+            ("dscale", r"$\delta(0)$"),
+            ("dratio", r"$\delta(\infty)/\delta(0)$"),
+            ("calibration", r"$\delta \mathcal{Z}_%d$")
+        ])
+        return mapping
 
     def get_init(self):
         randoms = {

@@ -27,3 +27,7 @@ class Model(ABC):
 
     def correct_chain(self, dictionary, simulation):
         return dictionary
+
+    @abstractmethod
+    def get_labels(self, parameters):
+        raise NotImplementedError()

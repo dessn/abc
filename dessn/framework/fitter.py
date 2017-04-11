@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import socket
+from collections import OrderedDict
 
 import numpy as np
 import sys
@@ -64,7 +65,6 @@ class Fitter(object):
 
         return model_index, sim_index, cosmo_index, walker_index
 
-
     def run_fit(self, model_index, simulation_index, cosmo_index, walker_index, num_cores=1):
         model = self.models[model_index]
         sim = self.simulations[simulation_index]
@@ -85,6 +85,8 @@ class Fitter(object):
 
         # Get parameters
         params = [p for p in model.get_parameters() if p in fit.sim["pars_oi"]]
+        params.append("weight")
+        params.append("target")
         dictionary = fit.extract(pars=params)
 
         # Turn log scale parameters into normal scale to see them easier
@@ -128,3 +130,64 @@ class Fitter(object):
                 mi, si, ci, wi = self.get_indexes_from_index(index)
                 self.logger.info("Running model %d, sim %d, cosmology %d, walker number %d" % (mi, si, ci, wi))
                 self.run_fit(mi, si, ci, wi)
+
+    def load_file(self, filename):
+        with open(filename, 'rb') as output:
+            chain = pickle.load(output)
+        self.logger.debug("Loaded pickle from %s" % filename)
+        return chain
+
+    def get_result_from_chain(self, chain, simulation_index, model_index):
+        truth = self.simulations[simulation_index].get_truth_values_dict()
+        mapping = self.models[model_index].get_labels()
+
+        weight = chain.get("weight")
+        old_weight = chain.get("old_weight")
+
+        parameters = list(mapping.keys())
+        truth = {mapping[k]: truth.get(k) for k in mapping if k in truth.keys()}
+        temp_list = []
+        for p in parameters:
+            vals = chain.get(p)
+            if vals is None:
+                continue
+            if len(vals.shape) > 1:
+                for i in range(vals.shape[1]):
+                    temp_list.append((mapping[p] % i, vals[:, i]))
+                    truth[mapping[p] % i] = truth[mapping[p]]
+            else:
+                temp_list.append((mapping[p], vals))
+
+        result = OrderedDict(temp_list)
+
+        return result, truth, weight, old_weight
+
+    def load(self, split_models=True, split_sims=True, split_cosmo=False):
+        files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
+        filenames = [self.temp_dir + "/" + f for f in files]
+        model_indexes = [int(f.split("_")[1]) for f in files]
+        sim_indexes = [int(f.split("_")[2]) for f in files]
+        cosmo_indexes = [int(f.split("_")[3]) for f in files]
+        chains = [self.load_file(f) for f in filenames]
+
+        results = []
+        prev_model, prev_sim, prev_cosmo = None, None, None
+        stacked = None
+        for c, mi, si, ci in zip(chains, model_indexes, sim_indexes, cosmo_indexes):
+            if (prev_cosmo != ci and split_cosmo) or (prev_model != mi and split_models) or (prev_sim != si and split_sims):
+                if stacked is not None:
+                    results.append(self.get_result_from_chain(stacked, si, mi))
+                stacked = None
+                prev_model = mi
+                prev_sim = si
+                prev_cosmo = ci
+            if stacked is None:
+                stacked = c
+            else:
+                for key in list(c.keys()):
+                    stacked[key] = np.concatenate((stacked[key], c[key]))
+        results.append(self.get_result_from_chain(stacked, si, mi))
+
+        if len(results) == 1:
+            return results[0]
+        return results
