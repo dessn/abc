@@ -3,7 +3,7 @@ import logging
 import socket
 from chainconsumer import ChainConsumer
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModel
+from dessn.framework.models.full_model import FullModel
 from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(200)
+    model = FullModel(200)
     # Turn off mass and skewness for easy test
     simulation = SimpleSimulation(alpha_c=0, dscale=0)
 
