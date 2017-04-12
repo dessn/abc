@@ -159,7 +159,8 @@ class Fitter(object):
             if len(vals.shape) > 1:
                 for i in range(vals.shape[1]):
                     temp_list.append((mapping[p] % i, vals[:, i]))
-                    truth[mapping[p] % i] = truth[mapping[p]]
+                    truth[mapping[p] % i] = truth[mapping[p]][i]
+                del truth[mapping[p]]
             else:
                 temp_list.append((mapping[p], vals))
 
