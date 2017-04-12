@@ -74,7 +74,7 @@ class Fitter(object):
         if num_cores == 1:
             w, n = 1000, 3000
         else:
-            w, n = 300, 600
+            w, n = 500, 1000
 
         import pystan
         data = model.get_data(sim, cosmo_index)
