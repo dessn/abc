@@ -22,6 +22,10 @@ data {
     real <lower=0> zspo[n_z]; // Precomputed (1+zs)
     int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
 
+    // Data for redshift nodes
+    int num_nodes; // Num redshift nodes
+    vector[num_nodes] node_weights [n_sne]; // Each supernova's node weight
+
     // Approximate correction in mB
     real mB_mean;
     real mB_width2;
@@ -32,6 +36,7 @@ data {
     real <lower=0> sim_redshifts[n_sim]; // The redshift values
     int sim_redshift_indexes[n_sim]; // Index of added redshifts (mapping zs -> redshifts)
     real sim_log_weight[n_sim]; // The weights to use for simpsons rule multipled by the probability P(z) for each redshift
+    vector[num_nodes] sim_node_weights [n_sim]; // Each supernova's node weight
 
 
     // Calibration std
@@ -64,8 +69,8 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    real <lower = -0.5, upper = 0.5> mean_x1;
-    real <lower = -0.2, upper = 0.2> mean_c;
+    vector <lower = -0.5, upper = 0.5> [num_nodes] mean_x1;
+    vector <lower = -0.2, upper = 0.2> [num_nodes] mean_c;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
     real <lower = -10, upper = 1> log_sigma_c;
@@ -74,6 +79,9 @@ parameters {
 }
 
 transformed parameters {
+    real mB_width;
+    real mB_alpha;
+
     // Back to real space
     real sigma_MB;
     real sigma_x1;
@@ -92,7 +100,7 @@ transformed parameters {
     // Modelling intrinsic dispersion
     matrix [3,3] population;
     matrix [3,3] full_sigma;
-    vector [3] mean_MBx1c;
+    vector [3] mean_MBx1c [n_sne];
     vector [3] sigmas;
 
     // Variables to calculate the bias correction
@@ -100,6 +108,8 @@ transformed parameters {
     real cor_MB_mean;
     real cor_mb_width2;
     real cor_mB_mean [n_sim];
+    real cor_x1_val [n_sim];
+    real cor_c_val [n_sim];
     real cor_mB_cor [n_sim];
     real cor_mB_cor_weighted [n_sim];
     real cor_sigma2;
@@ -107,7 +117,7 @@ transformed parameters {
     // Lets actually record the proper posterior values
     vector [n_sne] PointPosteriors;
     real weight;
-    real Posterior;
+    real posterior;
 
     // Other temp variables for corrections
     real mass_correction;
@@ -116,6 +126,9 @@ transformed parameters {
     real delta_c;
     real mean_c_skew;
     real sigma_c_skew;
+
+    mB_width = sqrt(mB_width2);
+    mB_alpha = sqrt(mB_alpha2);
 
     sigma_MB = exp(log_sigma_MB);
     sigma_x1 = exp(log_sigma_x1);
@@ -140,9 +153,6 @@ transformed parameters {
     // -------------End numerical integration---------------
 
     // Calculate intrinsic dispersion. At the moment, only considering dispersion in m_B
-    mean_MBx1c[1] = mean_MB;
-    mean_MBx1c[2] = mean_x1;
-    mean_MBx1c[3] = mean_c;
     sigmas[1] = sigma_MB;
     sigmas[2] = sigma_x1;
     sigmas[3] = sigma_c;
@@ -150,7 +160,6 @@ transformed parameters {
     full_sigma = population * population';
 
     // Calculate mean pop
-    cor_MB_mean = mean_MB - alpha*mean_x1 + beta*mean_c;
     cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3]) - alpha * beta * (full_sigma[2][3] ));
     cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
@@ -158,15 +167,22 @@ transformed parameters {
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
     // and we add in log_sum_exp
     for (i in 1:n_sim) {
-        cor_mB_mean[i] = cor_MB_mean + sim_model_mu[i];
+        cor_x1_val[i] = dot_product(mean_x1, sim_node_weights[i]);
+        cor_c_val[i] = dot_product(mean_c, sim_node_weights[i]);
+        cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i];
         cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
 
-
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
+
+        // redshift dependent effects
+        mean_MBx1c[i][1] = mean_MB;
+        mean_MBx1c[i][2] = dot_product(mean_x1, node_weights[i]);
+        mean_MBx1c[i][3] = dot_product(mean_c, node_weights[i]);
+
         // Calculate mass correction
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
@@ -183,9 +199,9 @@ transformed parameters {
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c, population);
+            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population);
     }
-    Posterior = sum(PointPosteriors) - weight
+    posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
@@ -194,5 +210,5 @@ transformed parameters {
 
 }
 model {
-    target += Posterior;
+    target += posterior;
 }

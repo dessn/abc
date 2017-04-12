@@ -85,8 +85,12 @@ class Fitter(object):
 
         # Get parameters
         params = [p for p in model.get_parameters() if p in fit.sim["pars_oi"]]
-        params.append("weight")
-        params.append("target")
+        if "weight" in fit.sim["pars_oi"]:
+            self.logger.debug("Found weight to save")
+            params.append("weight")
+        if "posterior" in fit.sim["pars_oi"]:
+            self.logger.debug("Found target to save")
+            params.append("posterior")
         dictionary = fit.extract(pars=params)
 
         # Turn log scale parameters into normal scale to see them easier
@@ -143,6 +147,7 @@ class Fitter(object):
 
         weight = chain.get("weight")
         old_weight = chain.get("old_weight")
+        posterior = chain.get("posterior")
 
         parameters = list(mapping.keys())
         truth = {mapping[k]: truth.get(k) for k in mapping if k in truth.keys()}
@@ -160,7 +165,7 @@ class Fitter(object):
 
         result = OrderedDict(temp_list)
 
-        return result, truth, weight, old_weight
+        return result, truth, weight, old_weight, posterior
 
     def load(self, split_models=True, split_sims=True, split_cosmo=False):
         files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])

@@ -6,13 +6,13 @@ from dessn.framework.models.approx_model import ApproximateModel
 
 class FullModel(ApproximateModel):
 
-    def __init__(self, num_supernova, file="full.stan"):
-        super().__init__(num_supernova, file=file)
+    def __init__(self, num_supernova, filename="full.stan"):
+        super().__init__(num_supernova, filename=filename)
 
     def get_extra_zs(self, simulation, n=201, buffer=0.2):
         assert n % 2 == 1, "n needs to be odd"
 
-        supernovae = simulation.get_all_supernova(20000)
+        supernovae = simulation.get_all_supernova(10000)
         redshift_passed = supernovae["redshifts"][supernovae["passed"]]
 
         # Need to determine the max redshift to sample to
@@ -38,7 +38,6 @@ class FullModel(ApproximateModel):
             "sim_redshifts": zs_sample,
             "sim_log_weight": np.log(probs * 2 * weights * np.diff(zs_sample)[0] / 3)
         }
-
 
     def get_data(self, simulation, cosmology_index, add_zs=None):
         return super().get_data(simulation, cosmology_index, add_zs=self.get_extra_zs)

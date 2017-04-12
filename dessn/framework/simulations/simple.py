@@ -60,9 +60,10 @@ class SimpleSimulation(Simulation):
         probs = []
         skew_prob = 0
 
+        nn = 1000
         # Generate 1000 at a time
         while True:
-            redshifts = (np.random.uniform(0, 1, 1000) ** 0.5)
+            redshifts = (np.random.uniform(0, 1, nn) ** 0.5)
             dist_mod = cosmology.distmod(redshifts).value
             redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
             p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
@@ -82,7 +83,6 @@ class SimpleSimulation(Simulation):
                 cov = np.diag(diag)
                 sim_mBx1c.append(vector)
                 vector += np.random.multivariate_normal([0, 0, 0], cov)
-                cor = cov / np.sqrt(np.diag(cov))[None, :] / np.sqrt(np.diag(cov))[:, None]
                 obs_mBx1c_cov.append(cov)
                 obs_mBx1c.append(vector)
                 deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, 8)))
@@ -90,7 +90,7 @@ class SimpleSimulation(Simulation):
             redshift_pre_comp_all += redshift_pre_comp.tolist()
             p_high_masses_all += p_high_masses.tolist()
 
-            mbs = np.array([o[0] for o in sim_mBx1c])
+            mbs = np.array([o[0] for o in sim_mBx1c[-nn:]])
             vals = np.random.uniform(size=mbs.size)
             pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
             pdfs /= pdfs.max()
@@ -98,6 +98,8 @@ class SimpleSimulation(Simulation):
             mbs_all += mbs.tolist()
             mask_all += mask.tolist()
 
+            self.logger.debug("Have %d passed out of required %d sne, generated %d"
+                              % (np.array(mask_all).sum(), n_sne, len(mask_all)))
             if np.array(mask_all).sum() >= n_sne:
                 break
 

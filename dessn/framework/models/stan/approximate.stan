@@ -109,7 +109,7 @@ transformed parameters {
     vector [n_sne] PointPosteriors;
     vector [n_sne] weights;
     real weight;
-    real Posterior;
+    real posterior;
 
     // Other temp variables for corrections
     real mass_correction;
@@ -185,7 +185,7 @@ transformed parameters {
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population);
     }
     weight = sum(weights);
-    Posterior = sum(PointPosteriors) - weight
+    posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
@@ -196,5 +196,5 @@ transformed parameters {
 
 }
 model {
-    target += Posterior;
+    target += posterior;
 }

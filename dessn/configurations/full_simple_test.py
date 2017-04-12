@@ -32,7 +32,7 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
-        chain, truth, weight, old_weight = fitter.load()
+        chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, weights=weight)
         c.plot(filename=plot_filename)

@@ -11,10 +11,10 @@ from dessn.framework.model import Model
 
 class ApproximateModel(Model):
 
-    def __init__(self, num_supernova, file="approximate.stan"):
+    def __init__(self, num_supernova, filename="approximate.stan"):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
-        stan_file = directory + "/stan/" + file
+        stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
 
         self.num_redshift_nodes = 4
@@ -154,6 +154,14 @@ class ApproximateModel(Model):
             sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
             update["sim_redshift_indexes"] = sim_final
             update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
+
+            interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(sim_redshifts)
+            sim_node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
+            sim_node_weights *= (sim_node_weights <= 1) & (sim_node_weights >= 0)
+            sim_node_weights = np.abs(sim_node_weights)
+            sim_reweight = np.sum(sim_node_weights, axis=1)
+            sim_node_weights = (sim_node_weights.T / sim_reweight).T
+            update["sim_node_weights"] = sim_node_weights
 
         obs_data = np.array(data["obs_mBx1c"])
         print("Observed data x1 dispersion is %f, colour dispersion is %f"
