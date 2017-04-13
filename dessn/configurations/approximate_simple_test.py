@@ -1,7 +1,6 @@
 import os
 import logging
 import socket
-from chainconsumer import ChainConsumer
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
 from dessn.framework.simulations.simple import SimpleSimulation
@@ -32,6 +31,7 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
+        from chainconsumer import ChainConsumer
         chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, weights=weight)
