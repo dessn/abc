@@ -20,7 +20,7 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(200)
+    model = ApproximateModel(500)
     # Turn off mass and skewness for easy test
     simulation = SimpleSimulation(alpha_c=0, dscale=0)
 
