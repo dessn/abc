@@ -14,7 +14,7 @@ class Fitter(object):
     def __init__(self, temp_dir):
         self.models = []
         self.simulations = []
-        self.num_cosmologies = 15
+        self.num_cosmologies = 30
         self.num_walkers = 5
         self.num_cpu = self.num_cosmologies * self.num_walkers
         self.logger = logging.getLogger(__name__)
