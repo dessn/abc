@@ -145,8 +145,8 @@ class Fitter(object):
         truth = self.simulations[simulation_index].get_truth_values_dict()
         mapping = self.models[model_index].get_labels()
 
-        weight = chain.get("weight")
-        old_weight = chain.get("old_weight")
+        stan_weight = chain.get("weight")
+        new_weight = chain.get("new_weight")
         posterior = chain.get("posterior")
 
         parameters = list(mapping.keys())
@@ -166,7 +166,7 @@ class Fitter(object):
 
         result = OrderedDict(temp_list)
 
-        return result, truth, weight, old_weight, posterior
+        return result, truth, new_weight, stan_weight, posterior
 
     def load(self, split_models=True, split_sims=True, split_cosmo=False):
         files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
