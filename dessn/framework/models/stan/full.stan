@@ -37,6 +37,8 @@ data {
     int sim_redshift_indexes[n_sim]; // Index of added redshifts (mapping zs -> redshifts)
     real sim_log_weight[n_sim]; // The weights to use for simpsons rule multipled by the probability P(z) for each redshift
     vector[num_nodes] sim_node_weights [n_sim]; // Each supernova's node weight
+    real <lower=1.0, upper = 1000.0> sim_redshift_pre_comp [n_sim]; // Precomputed function of redshift for speed for sim redshifts
+
 
 
     // Calibration std
@@ -167,9 +169,10 @@ transformed parameters {
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
     // and we add in log_sum_exp
     for (i in 1:n_sim) {
+        mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
         cor_x1_val[i] = dot_product(mean_x1, sim_node_weights[i]);
         cor_c_val[i] = dot_product(mean_c, sim_node_weights[i]);
-        cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i];
+        cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i] - mass_correction * 0.5;
         cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }

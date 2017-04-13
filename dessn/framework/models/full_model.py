@@ -36,7 +36,8 @@ class FullModel(ApproximateModel):
         return {
             "n_sim": n,
             "sim_redshifts": zs_sample,
-            "sim_log_weight": np.log(probs * 2 * weights * np.diff(zs_sample)[0] / 3)
+            "sim_log_weight": np.log(probs * 2 * weights * np.diff(zs_sample)[0] / 3),
+            "sim_redshift_pre_comp": 0.9 + np.power(10, 0.95 * zs_sample)
         }
 
     def get_data(self, simulation, cosmology_index, add_zs=None):
