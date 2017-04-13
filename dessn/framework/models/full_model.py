@@ -12,7 +12,7 @@ class FullModel(ApproximateModel):
     def get_extra_zs(self, simulation, n=201, buffer=0.2):
         assert n % 2 == 1, "n needs to be odd"
 
-        supernovae = simulation.get_all_supernova(20000)
+        supernovae = simulation.get_all_supernova(30000)
         redshift_passed = supernovae["redshifts"][supernovae["passed"]]
 
         # Need to determine the max redshift to sample to
