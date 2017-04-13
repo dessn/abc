@@ -89,7 +89,7 @@ class Fitter(object):
             self.logger.debug("Found weight to save")
             params.append("weight")
         if "posterior" in fit.sim["pars_oi"]:
-            self.logger.debug("Found target to save")
+            self.logger.debug("Found posterior to save")
             params.append("posterior")
         dictionary = fit.extract(pars=params)
 
