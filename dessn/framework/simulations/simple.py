@@ -7,13 +7,14 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, dscale=0.08, alpha_c=5):
+    def __init__(self, dscale=0.08, alpha_c=5, mass=True):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
         self.mb_alpha = -5
         self.mb_mean = 22.5
         self.mb_width = 4
+        self.mass_scale = 1.0 if mass else 0.0
 
     def get_name(self):
         return "simple"
@@ -66,7 +67,7 @@ class SimpleSimulation(Simulation):
             redshifts = (np.random.uniform(0, 1, nn) ** 0.5)
             dist_mod = cosmology.distmod(redshifts).value
             redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
-            p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size)
+            p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size) * self.mass_scale
 
             for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
                 while True:
