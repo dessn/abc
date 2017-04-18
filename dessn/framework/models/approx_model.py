@@ -72,14 +72,14 @@ class ApproximateModel(Model):
         n_sne = self.num_supernova
         data = simulation.get_passed_supernova(n_sne)
 
-        cors = []
-        for c in data["obs_mBx1c_cov"]:
-            d = np.sqrt(np.diag(c))
-            div = (d[:, None] * d[None, :])
-            cor = c / div
-            cors.append(cor)
-
-        data["obs_mBx1c_cor"] = cors
+        # cors = []
+        # for c in data["obs_mBx1c_cov"]:
+        #     d = np.sqrt(np.diag(c))
+        #     div = (d[:, None] * d[None, :])
+        #     cor = c / div
+        #     cors.append(cor)
+        #
+        # data["obs_mBx1c_cor"] = cors
 
         # Redshift shenanigans below used to create simpsons rule arrays
         # and then extract the right redshfit indexes from them
@@ -180,4 +180,6 @@ class ApproximateModel(Model):
         update["mB_width2"] = std**2
         update["mB_alpha2"] = alpha**2
 
-        return {**data, **update, **sim_data}
+        final_dict = {**data, **update, **sim_data}
+        print(final_dict)
+        return final_dict
