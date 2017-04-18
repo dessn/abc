@@ -36,8 +36,5 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
-        chain["oldw"] = old_weight
-        print(old_weight)
         c.add_chain(chain, weights=weight)
-        c.configure(color_params="oldw")
         c.plot(filename=plot_filename, truth=truth)
