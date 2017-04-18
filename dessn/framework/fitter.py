@@ -156,9 +156,14 @@ class Fitter(object):
             vals = chain.get(p)
             if vals is None:
                 continue
-            if len(vals.shape) > 1:
-                for i in range(vals.shape[1]):
-                    temp_list.append((mapping[p] % i, vals[:, i]))
+            label = mapping.get(p)
+            if r"%d" in label:
+                num_d = 1 if len(vals.shape) < 2 else vals.shape[1]
+                for i in range(num_d):
+                    if len(vals.shape) < 2:
+                        temp_list.append((mapping[p] % i, vals))
+                    else:
+                        temp_list.append((mapping[p] % i, vals[:, i]))
                     truth[mapping[p] % i] = truth[mapping[p]][i]
                 del truth[mapping[p]]
             else:

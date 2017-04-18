@@ -19,9 +19,11 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = FullModel(500)
+    num_nodes = 1
+
+    model = FullModel(500, num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
-    simulation = SimpleSimulation(alpha_c=0, mass=False)
+    simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0, num_nodes=num_nodes)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

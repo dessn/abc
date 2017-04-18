@@ -11,13 +11,13 @@ from dessn.framework.model import Model
 
 class ApproximateModel(Model):
 
-    def __init__(self, num_supernova, filename="approximate.stan"):
+    def __init__(self, num_supernova, filename="approximate.stan", num_nodes=4):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
 
-        self.num_redshift_nodes = 4
+        self.num_redshift_nodes = num_nodes
         self.num_supernova = num_supernova
 
     def get_parameters(self):
@@ -89,15 +89,19 @@ class ApproximateModel(Model):
 
         num_nodes = self.num_redshift_nodes
 
-        sorted_zs = np.sort(redshifts)
-        indexes = np.arange(num_nodes)
-        nodes = np.linspace(sorted_zs[0], sorted_zs[-1], num_nodes)
-        interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
-        node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
-        node_weights *= (node_weights <= 1) & (node_weights >= 0)
-        node_weights = np.abs(node_weights)
-        reweight = np.sum(node_weights, axis=1)
-        node_weights = (node_weights.T / reweight).T
+        if num_nodes == 1:
+            node_weights = np.array([[1]] * n_sne)
+            nodes = [0.0]
+        else:
+            sorted_zs = np.sort(redshifts)
+            indexes = np.arange(num_nodes)
+            nodes = np.linspace(sorted_zs[0], sorted_zs[-1], num_nodes)
+            interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
+            node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
+            node_weights *= (node_weights <= 1) & (node_weights >= 0)
+            node_weights = np.abs(node_weights)
+            reweight = np.sum(node_weights, axis=1)
+            node_weights = (node_weights.T / reweight).T
 
         if add_zs is not None:
             sim_data = add_zs(simulation)
@@ -155,13 +159,16 @@ class ApproximateModel(Model):
             update["sim_redshift_indexes"] = sim_final
             update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
 
-            interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(sim_redshifts)
-            sim_node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
-            sim_node_weights *= (sim_node_weights <= 1) & (sim_node_weights >= 0)
-            sim_node_weights = np.abs(sim_node_weights)
-            sim_reweight = np.sum(sim_node_weights, axis=1)
-            sim_node_weights = (sim_node_weights.T / sim_reweight).T
-            update["sim_node_weights"] = sim_node_weights
+            if num_nodes == 1:
+                update["sim_node_weights"] = np.array([[1]] * sim_redshifts.size)
+            else:
+                interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(sim_redshifts)
+                sim_node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
+                sim_node_weights *= (sim_node_weights <= 1) & (sim_node_weights >= 0)
+                sim_node_weights = np.abs(sim_node_weights)
+                sim_reweight = np.sum(sim_node_weights, axis=1)
+                sim_node_weights = (sim_node_weights.T / sim_reweight).T
+                update["sim_node_weights"] = sim_node_weights
 
         obs_data = np.array(data["obs_mBx1c"])
         print("Observed data x1 dispersion is %f, colour dispersion is %f"

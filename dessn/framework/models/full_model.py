@@ -6,8 +6,8 @@ from dessn.framework.models.approx_model import ApproximateModel
 
 class FullModel(ApproximateModel):
 
-    def __init__(self, num_supernova, filename="full.stan"):
-        super().__init__(num_supernova, filename=filename)
+    def __init__(self, num_supernova, filename="full.stan", num_nodes=4):
+        super().__init__(num_supernova, filename=filename, num_nodes=num_nodes)
 
     def get_extra_zs(self, simulation, n=201, buffer=0.2):
         assert n % 2 == 1, "n needs to be odd"

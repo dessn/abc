@@ -7,7 +7,7 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, dscale=0.08, alpha_c=5, mass=True):
+    def __init__(self, dscale=0.08, alpha_c=5, mass=True, num_nodes=4):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
@@ -15,6 +15,7 @@ class SimpleSimulation(Simulation):
         self.mb_mean = 22.5
         self.mb_width = 4
         self.mass_scale = 1.0 if mass else 0.0
+        self.num_nodes = num_nodes
 
     def get_name(self):
         return "simple"
@@ -26,8 +27,8 @@ class SimpleSimulation(Simulation):
             ("alpha", 0.14, r"$\alpha$"),
             ("beta", 3.1, r"$\beta$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
-            ("mean_x1", np.zeros(4), r"$\langle x_1^{%d} \rangle$"),
-            ("mean_c", np.zeros(4), r"$\langle c^{%d} \rangle$"),
+            ("mean_x1", np.zeros(self.num_nodes), r"$\langle x_1^{%d} \rangle$"),
+            ("mean_c", np.zeros(self.num_nodes), r"$\langle c^{%d} \rangle$"),
             ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$"),
             ("sigma_x1", 1.0, r"$\sigma_{x_1}$"),
             ("sigma_c", 0.1, r"$\sigma_c$"),
