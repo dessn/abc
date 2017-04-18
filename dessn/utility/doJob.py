@@ -66,7 +66,7 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
         name = executable[:-3]
     output_dir = directory + os.sep + "out_files"
     if delete and os.path.exists(output_dir):
-        logging.debug("Deleting ", output_dir)
+        logging.debug("Deleting %s" % output_dir)
         shutil.rmtree(output_dir)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
