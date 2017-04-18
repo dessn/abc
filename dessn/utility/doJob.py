@@ -1,6 +1,6 @@
 import os
 import shutil
-
+import logging
 
 def write_jobscript(filename, name=None, queue="low.q", num_tasks=24, num_cpu=24,
                     num_walks=24, outdir="out_files", delete=False):
@@ -66,7 +66,7 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
         name = executable[:-3]
     output_dir = directory + os.sep + "out_files"
     if delete and os.path.exists(output_dir):
-        print("Deleting ", output_dir)
+        logging.debug("Deleting ", output_dir)
         shutil.rmtree(output_dir)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -104,5 +104,5 @@ srun -N 1 -n 1 -c 1 $executable $PROG $PARAMS'''
         t = t.replace("####", "#")
     with open(n, 'w') as f:
         f.write(t)
-    print("SLURM Jobscript at %s" % n)
+    logging.info("SLURM Jobscript at %s" % n)
     return n
