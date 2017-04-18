@@ -127,7 +127,7 @@ class Fitter(object):
                 h = socket.gethostname()
                 partition = "regular" if "edison" in h else "smp"
                 if os.path.exists(self.temp_dir):
-                    self.logger.info("Deleting ", self.temp_dir)
+                    self.logger.info("Deleting %s" % self.temp_dir)
                     shutil.rmtree(self.temp_dir)
                 filename = write_jobscript_slurm(file, name=os.path.basename(file),
                                                  num_tasks=self.get_num_jobs(), num_cpu=self.num_cpu,
