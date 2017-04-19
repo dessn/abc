@@ -34,7 +34,7 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        chain, truth, weight, old_weight, posterior = fitter.load(max_deviation=2.0)
+        chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, name="Stan")
         c.add_chain(chain, weights=weight, name="Corrected")
