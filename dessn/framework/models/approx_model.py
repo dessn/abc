@@ -64,6 +64,7 @@ class ApproximateModel(Model):
                 [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
                  np.random.random() * 0.1 + 0.7]]
         randoms["intrinsic_correlation"] = chol
+        self.logger.info("Initial starting point is: %s" % randoms)
         return randoms
 
     def get_data(self, simulation, cosmology_index, add_zs=None):
