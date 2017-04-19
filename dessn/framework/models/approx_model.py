@@ -23,7 +23,7 @@ class ApproximateModel(Model):
     def get_parameters(self):
         return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
                 "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
-                "calibration"]
+                "calibration", "intrinsic_correlation"]
 
     def get_labels(self):
         mapping = OrderedDict([
@@ -45,7 +45,7 @@ class ApproximateModel(Model):
 
     def get_init(self):
         randoms = {
-            "Om": uniform(0.05, 0.6),
+            "Om": uniform(0.1, 0.6),
             "alpha": uniform(-0.1, 0.4),
             "beta": uniform(0.1, 4.5),
             "dscale": uniform(-0.2, 0.2),
@@ -93,15 +93,8 @@ class ApproximateModel(Model):
             node_weights = np.array([[1]] * n_sne)
             nodes = [0.0]
         else:
-            sorted_zs = np.sort(redshifts)
-            indexes = np.arange(num_nodes)
-            nodes = np.linspace(sorted_zs[0], sorted_zs[-1], num_nodes)
-            interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
-            node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
-            node_weights *= (node_weights <= 1) & (node_weights >= 0)
-            node_weights = np.abs(node_weights)
-            reweight = np.sum(node_weights, axis=1)
-            node_weights = (node_weights.T / reweight).T
+            nodes = np.linspace(redshifts.min(), redshifts.max(), num_nodes)
+            node_weights = self.get_node_weights(nodes, redshifts)
 
         if add_zs is not None:
             sim_data = add_zs(simulation)
@@ -162,13 +155,7 @@ class ApproximateModel(Model):
             if num_nodes == 1:
                 update["sim_node_weights"] = np.array([[1]] * sim_redshifts.size)
             else:
-                interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(sim_redshifts)
-                sim_node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
-                sim_node_weights *= (sim_node_weights <= 1) & (sim_node_weights >= 0)
-                sim_node_weights = np.abs(sim_node_weights)
-                sim_reweight = np.sum(sim_node_weights, axis=1)
-                sim_node_weights = (sim_node_weights.T / sim_reweight).T
-                update["sim_node_weights"] = sim_node_weights
+                update["sim_node_weights"] = self.get_node_weights(nodes, sim_redshifts)
 
         obs_data = np.array(data["obs_mBx1c"])
         print("Observed data x1 dispersion is %f, colour dispersion is %f"
@@ -181,5 +168,18 @@ class ApproximateModel(Model):
         update["mB_alpha2"] = alpha**2
 
         final_dict = {**data, **update, **sim_data}
-        print(final_dict)
         return final_dict
+
+    def get_node_weights(self, nodes, redshifts):
+        indexes = np.arange(nodes.size)
+        interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
+        node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
+        node_weights *= (node_weights <= 1) & (node_weights >= 0)
+        node_weights = np.abs(node_weights)
+        reweight = np.sum(node_weights, axis=1)
+        node_weights = (node_weights.T / reweight).T
+        return node_weights
+
+    def correct_chain(self, dictionary, simulation, data):
+        del dictionary["intrinsic_correlation"]
+        return dictionary

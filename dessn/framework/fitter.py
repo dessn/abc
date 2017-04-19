@@ -17,7 +17,7 @@ class Fitter(object):
         self.models = []
         self.simulations = []
         self.num_cosmologies = 30
-        self.num_walkers = 5
+        self.num_walkers = 10
         self.num_cpu = self.num_cosmologies * self.num_walkers
         self.logger = logging.getLogger(__name__)
         self.temp_dir = temp_dir
@@ -74,7 +74,7 @@ class Fitter(object):
         out_file = self.temp_dir + "/stan_%d_%d_%d_%d.pkl" % (model_index, simulation_index, cosmo_index, walker_index)
 
         if num_cores == 1:
-            w, n = 1000, 3000
+            w, n = 1000, 5000
         else:
             w, n = 500, 1000
 
@@ -102,7 +102,7 @@ class Fitter(object):
                 del dictionary[key]
 
         # Correct the chains if there is a weight function
-        dictionary = model.correct_chain(dictionary, sim)
+        dictionary = model.correct_chain(dictionary, sim, data)
 
         with open(out_file, 'wb') as output:
             pickle.dump(dictionary, output)
@@ -146,22 +146,33 @@ class Fitter(object):
         self.logger.debug("Loaded pickle from %s" % filename)
         return chain
 
-    def get_result_from_chain(self, chain, simulation_index, model_index):
+    def get_result_from_chain(self, chain, simulation_index, model_index, convert_names=True, max_deviation=3.0):
         truth = self.simulations[simulation_index].get_truth_values_dict()
         mapping = self.models[model_index].get_labels()
 
         stan_weight = chain.get("weight")
+        if stan_weight is not None:
+            stan_weight -= np.mean(stan_weight)
+            stan_weight = np.exp(stan_weight)
+
         new_weight = chain.get("new_weight")
+        if new_weight is not None:
+            new_weight -= max_deviation * np.std(new_weight)
+            new_weight[new_weight > 0] = 0
+            new_weight = np.exp(new_weight)
+
         posterior = chain.get("posterior")
 
         parameters = list(mapping.keys())
-        truth = {mapping[k]: truth.get(k) for k in mapping if k in truth.keys()}
+        if convert_names:
+            truth = {mapping[k]: truth.get(k) for k in mapping if k in truth.keys()}
+
         temp_list = []
         for p in parameters:
             vals = chain.get(p)
             if vals is None:
                 continue
-            label = mapping.get(p)
+            label = mapping.get(p) if convert_names else p
             if r"%d" in label:
                 num_d = 1 if len(vals.shape) < 2 else vals.shape[1]
                 for i in range(num_d):
@@ -172,13 +183,16 @@ class Fitter(object):
                     truth[mapping[p] % i] = truth[mapping[p]][i]
                 del truth[mapping[p]]
             else:
-                temp_list.append((mapping[p], vals))
+                if convert_names:
+                    temp_list.append((mapping[p], vals))
+                else:
+                    temp_list.append((p, vals))
 
         result = OrderedDict(temp_list)
 
         return result, truth, new_weight, stan_weight, posterior
 
-    def load(self, split_models=True, split_sims=True, split_cosmo=False):
+    def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=3.0):
         files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
         filenames = [self.temp_dir + "/" + f for f in files]
         model_indexes = [int(f.split("_")[1]) for f in files]
@@ -192,7 +206,7 @@ class Fitter(object):
         for c, mi, si, ci in zip(chains, model_indexes, sim_indexes, cosmo_indexes):
             if (prev_cosmo != ci and split_cosmo) or (prev_model != mi and split_models) or (prev_sim != si and split_sims):
                 if stacked is not None:
-                    results.append(self.get_result_from_chain(stacked, si, mi))
+                    results.append(self.get_result_from_chain(stacked, si, mi, convert_names=convert_names, max_deviation=max_deviation))
                 stacked = None
                 prev_model = mi
                 prev_sim = si
@@ -202,7 +216,7 @@ class Fitter(object):
             else:
                 for key in list(c.keys()):
                     stacked[key] = np.concatenate((stacked[key], c[key]))
-        results.append(self.get_result_from_chain(stacked, si, mi))
+        results.append(self.get_result_from_chain(stacked, si, mi, convert_names=convert_names, max_deviation=max_deviation))
 
         if len(results) == 1:
             return results[0]

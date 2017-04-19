@@ -52,6 +52,7 @@ class SimpleSimulation(Simulation):
         alpha, beta, dscale, dratio = truth["alpha"], truth["beta"], truth["dscale"], truth["dratio"]
         sim_mBx1c, obs_mBx1c_cov, obs_mBx1c, deta_dcalib = [], [], [], []
         redshifts_all, redshift_pre_comp_all, p_high_masses_all, mask_all, mbs_all = [], [], [], [], []
+        sim_x1s_all, sim_cs_all = [], []
 
         # Assume constant population.
         means = np.array([truth["mean_MB"], truth["mean_x1"][0], truth["mean_c"][0]])
@@ -60,7 +61,6 @@ class SimpleSimulation(Simulation):
         correlations = np.dot(truth["intrinsic_correlation"], truth["intrinsic_correlation"].T)
         pop_cov = correlations * sigmas_mat
         probs = []
-        skew_prob = 0
 
         nn = 1000
         # Generate 1000 at a time
@@ -93,11 +93,15 @@ class SimpleSimulation(Simulation):
             p_high_masses_all += p_high_masses.tolist()
 
             mbs = np.array([o[0] for o in sim_mBx1c[-nn:]])
+            sim_x1 = np.array([o[1] for o in sim_mBx1c[-nn:]])
+            sim_c = np.array([o[2] for o in sim_mBx1c[-nn:]])
             vals = np.random.uniform(size=mbs.size)
             pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
             pdfs /= pdfs.max()
             mask = vals < pdfs
             mbs_all += mbs.tolist()
+            sim_x1s_all += sim_x1.tolist()
+            sim_cs_all += sim_c.tolist()
             mask_all += mask.tolist()
 
             self.logger.debug("Have %d passed out of required %d sne, generated %d"
@@ -118,6 +122,8 @@ class SimpleSimulation(Simulation):
             "masses": np.array(p_high_masses_all[:cut_index]),
             "existing_prob": np.array(probs[:cut_index]),
             "sim_apparents": np.array(mbs_all[:cut_index]),
+            "sim_stretches": np.array(sim_x1s_all[:cut_index]),
+            "sim_colours": np.array(sim_cs_all[:cut_index]),
             "passed": np.array(mask_all[:cut_index])
         }
 

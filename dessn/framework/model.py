@@ -25,7 +25,7 @@ class Model(ABC):
     def get_stan_file(self):
         return self.filename
 
-    def correct_chain(self, dictionary, simulation):
+    def correct_chain(self, dictionary, simulation, data):
         return dictionary
 
     @abstractmethod
