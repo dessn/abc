@@ -71,7 +71,7 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -21, upper = -18> mean_MB;
-    vector <lower = -0.5, upper = 0.5> [num_nodes] mean_x1;
+    vector <lower = -1.0, upper = 1.0> [num_nodes] mean_x1;
     vector <lower = -0.2, upper = 0.2> [num_nodes] mean_c;
     real <lower = -10, upper = 1> log_sigma_MB;
     real <lower = -10, upper = 1> log_sigma_x1;
