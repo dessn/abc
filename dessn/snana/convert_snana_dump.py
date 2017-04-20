@@ -81,6 +81,9 @@ def convert(base_folder):
         supernovae = drop_fields(supernovae, "S2beta")
         supernovae = drop_fields(supernovae, "VARNAMES:")
         supernovae = drop_fields(supernovae, "index")
+
+        supernovae_passed = np.zeros(supernovae["Z"].shape)
+        supernovae_cids = supernovae["CID"]
         print("Dump has fields ", supernovae.dtype)
 
         fitres_files = sorted([folder + "/" + i for i in inner_files if i.endswith(".FITRES")])
@@ -99,6 +102,7 @@ def convert(base_folder):
         num_bad_calib = 0
         num_bad_calib_index = np.zeros(len(mags) + len(waves))
         final_results = []
+        passed_cids = []
         for i, row in enumerate(base_fits):
             if i % 1000 == 0:
                 print("Up to row %d" % i)
@@ -165,17 +169,22 @@ def convert(base_folder):
             final_result = [cid, z, existing_prob, simmb + mag_smear, simx1, simc, mb, x1, c] \
                            + cov.flatten().tolist() + offsets.flatten().tolist()
             final_results.append(final_result)
+            passed_cids.append(cid)
+
+        passed_cids = np.array(passed_cids)
+        supernovae_passed = np.array([cid in passed_cids for cid in supernovae_cids])
 
         fitted_data = np.array(final_results).astype(np.float32)
         print("Truncation from %d dump -> %d dump passed -> %d fitres -> %d calibration (%d failed calib)" %
               (supernovae["Z"].shape[0], np.unique(supernovae["CID"]).size, base_fits.shape[0], fitted_data.shape[0], num_bad_calib))
         print(num_bad_calib_index)
-        all_mbs = np.vstack((supernovae["Z"], supernovae["S2mb"] + supernovae["MAGSMEAR_COH"])).T
+        print(supernovae["Z"].shape, supernovae_passed.shape)
+        all_mbs = np.vstack((supernovae["Z"], supernovae["S2mb"] + supernovae["MAGSMEAR_COH"], supernovae_passed)).T
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
 if __name__ == "__main__":
-    convert("gauss0p3")
     convert("gauss0p2")
     convert("gauss0p4")
     convert("skewed0p3")
+    convert("gauss0p3")
