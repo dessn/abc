@@ -102,7 +102,7 @@ def convert(base_folder):
         num_bad_calib = 0
         num_bad_calib_index = np.zeros(len(mags) + len(waves))
         final_results = []
-        passed_cids = []
+        passed_indexes = []
         for i, row in enumerate(base_fits):
             if i % 1000 == 0:
                 print("Up to row %d" % i)
@@ -169,10 +169,11 @@ def convert(base_folder):
             final_result = [cid, z, existing_prob, simmb + mag_smear, simx1, simc, mb, x1, c] \
                            + cov.flatten().tolist() + offsets.flatten().tolist()
             final_results.append(final_result)
-            passed_cids.append(cid)
+            passed_indexes.append(cid)
 
-        passed_cids = np.array(passed_cids)
-        supernovae_passed = np.array([cid in passed_cids for cid in supernovae_cids])
+        supernovae_passed = np.zeros(supernovae["Z"].size, dtype=bool)
+        supernovae_passed[passed_indexes] = True
+        print("%d supernova passed out of %d" % (supernovae_passed.sum(), supernovae_passed.size))
 
         fitted_data = np.array(final_results).astype(np.float32)
         print("Truncation from %d dump -> %d dump passed -> %d fitres -> %d calibration (%d failed calib)" %
