@@ -134,8 +134,6 @@ def convert(base_folder):
             if not is_pos_def(cov):
                 continue
 
-            # offsets = np.zeros((3, 8))
-
             offset_mb = []
             offset_x1 = []
             offset_c = []

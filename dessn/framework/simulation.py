@@ -13,7 +13,7 @@ class Simulation(ABC):
     def get_approximate_correction(self):
         """ Characterises the simulations selection efficiency in apparent magnitude space as a skew normal. """
         data = self.get_all_supernova(100000)
-
+        print(data["passed"].sum(), data["passed"].size)
         mB_all = data["sim_apparents"]
         mB_passed = mB_all[data["passed"]]
 
@@ -34,6 +34,7 @@ class Simulation(ABC):
         y = interp1d(cdf, binc)(u)
 
         alpha, mean, std = skewnorm.fit(y)
+        self.logger.info("Fitted efficiency to have mean %0.2f, std %0.2f and alpha %0.2f" % (mean, std, alpha))
 
         # import matplotlib.pyplot as plt
         # print(mB.shape)
@@ -45,8 +46,8 @@ class Simulation(ABC):
 
         return mean, std, alpha
 
-    def get_passed_supernova(self, n_sne):
-        result = self.get_all_supernova(n_sne)
+    def get_passed_supernova(self, n_sne, simulation=True, cosmology_index=0):
+        result = self.get_all_supernova(n_sne, cosmology_index=cosmology_index)
         mask = result["passed"]
         for k in list(result.keys()):
             if isinstance(result[k], np.ndarray):
@@ -67,5 +68,5 @@ class Simulation(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_supernova(self, n_sne):
+    def get_all_supernova(self, n_sne, cosmology_index=0):
         raise NotImplementedError()

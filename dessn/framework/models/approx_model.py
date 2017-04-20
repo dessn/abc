@@ -68,19 +68,9 @@ class ApproximateModel(Model):
         return randoms
 
     def get_data(self, simulation, cosmology_index, add_zs=None):
-        np.random.seed(cosmology_index)
 
         n_sne = self.num_supernova
-        data = simulation.get_passed_supernova(n_sne)
-
-        # cors = []
-        # for c in data["obs_mBx1c_cov"]:
-        #     d = np.sqrt(np.diag(c))
-        #     div = (d[:, None] * d[None, :])
-        #     cor = c / div
-        #     cors.append(cor)
-        #
-        # data["obs_mBx1c_cor"] = cors
+        data = simulation.get_passed_supernova(n_sne, simulation=False, cosmology_index=cosmology_index)
 
         # Redshift shenanigans below used to create simpsons rule arrays
         # and then extract the right redshfit indexes from them

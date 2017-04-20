@@ -42,10 +42,11 @@ class SimpleSimulation(Simulation):
             ("calibration", np.zeros(8), r"$\delta \mathcal{Z}_%d$")
         ]
 
-    def get_all_supernova(self, n_sne):
+    def get_all_supernova(self, n_sne, cosmology_index=0):
         truth = self.get_truth_values_dict()
         self.logger.info("Generating simple data for %d supernova, with skewness %d..." % (n_sne, truth["alpha_c"]))
-
+        np.random.seed(cosmology_index)
+        self.logger.info("Generating for cosmology index %d" % cosmology_index)
         cosmology = FlatwCDM(70.0, truth["Om"])
 
         # Unwrap some values

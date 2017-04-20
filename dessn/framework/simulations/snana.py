@@ -1,12 +1,16 @@
 import numpy as np
-
+import os
+import inspect
 from dessn.framework.simulation import Simulation
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, simulation_name, num_nodes=4):
+    def __init__(self, real_data_name, simulation_name=None, num_nodes=4):
         super().__init__()
+        self.real_data_name = real_data_name
         self.simulation_name = simulation_name
+        if self.simulation_name is None:
+            self.simulation_name = self.real_data_name
         self.num_nodes = num_nodes
 
     def get_name(self):
@@ -33,3 +37,90 @@ class SNANASimulation(Simulation):
             ("intrinsic_correlation", np.identity(3), r"$\rho$"),
             ("calibration", np.zeros(8), r"$\delta \mathcal{Z}_%d$")
         ]
+
+    def get_passed_from_name(self, name, n_sne, cosmology_index=0):
+        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+        data_folder = this_dir + "/snana_data/%s" % name
+        self.logger.info("Getting SNANA data from %s" % name)
+
+        supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "passed" in f]
+        supernovae = np.vstack(tuple(supernovae_files))
+
+        np.random.seed(cosmology_index)
+        if cosmology_index:
+            print("Shuffling data for cosmology index %d" % cosmology_index)
+            np.random.shuffle(supernovae)
+
+        supernovae = supernovae[:n_sne, :]
+
+        redshifts = supernovae[:, 1]
+        apparents = supernovae[:, 6]
+        stretches = supernovae[:, 7]
+        colours = supernovae[:, 8]
+        s_ap = supernovae[:, 3]
+        s_st = supernovae[:, 4]
+        s_co = supernovae[:, 5]
+        masses = np.zeros(supernovae[:, 1].shape)
+
+        obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
+        for i, (mb, x1, c, smb, sx1, sc) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co)):
+            vector = np.array([mb, x1, c])
+            cov = supernovae[i, 9:9 + 9].reshape((3, 3))
+            calib = supernovae[i, 9 + 9:].reshape((3, -1))
+            obs_mBx1c_cov.append(cov)
+            obs_mBx1c.append(vector)
+            deta_dcalibs.append(calib)
+        covs = np.array(obs_mBx1c_cov)
+        deta_dcalibs = np.array(deta_dcalibs)
+
+        result = {
+            "n_sne": n_sne,
+            "obs_mBx1c": obs_mBx1c,
+            "obs_mBx1c_cov": covs,
+            "deta_dcalib": deta_dcalibs,
+            "redshifts": redshifts,
+            "masses": masses,
+            "existing_prob": [],
+            "sim_apparents": s_ap,
+            "sim_stretches": s_st,
+            "sim_colours": s_co
+        }
+        return result
+
+    def get_all_supernova(self, n_sne, cosmology_index=0):
+        name = self.simulation_name
+        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+        data_folder = this_dir + "/snana_data/%s" % name
+        self.logger.info("Getting SNANA data from %s" % name)
+
+        supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "all" in f]
+        supernovae = np.vstack(tuple(supernovae_files))
+        return {
+            "redshifts": supernovae[:, 0],
+            "sim_apparents": supernovae[:, 1],
+            "passed": supernovae[:, 2].astype(bool)
+        }
+
+    def get_passed_supernova(self, n_sne, simulation=True, cosmology_index=0):
+        name = self.simulation_name if simulation else self.real_data_name
+        return self.get_passed_from_name(name, n_sne=n_sne, cosmology_index=cosmology_index)
+
+
+class SNANASimulationGauss0p3(SNANASimulation):
+    def __init__(self, num_nodes=4):
+        super().__init__("gauss0p3", num_nodes=num_nodes)
+
+
+class SNANASimulationGauss0p2(SNANASimulation):
+    def __init__(self, num_nodes=4):
+        super().__init__("gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes)
+
+
+class SNANASimulationGauss0p4(SNANASimulation):
+    def __init__(self, num_nodes=4):
+        super().__init__("gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes)
+
+
+class SNANASimulationSkewed0p3(SNANASimulation):
+    def __init__(self, num_nodes=4):
+        super().__init__("skewed0p3", simulation_name="gauss0p3", num_nodes=num_nodes)
