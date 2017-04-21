@@ -30,11 +30,11 @@ if __name__ == "__main__":
     c = ChainConsumer()
 
     chain, truth, weight, old_weight, posterior = fitter1.load()
-    c.add_chain(chain, weights=weight, name="Approximate")
+    c.add_chain(chain, weights=weight, posterior=posterior, name="Approximate")
 
     chain, truth, weight, old_weight, posterior = fitter2.load()
-    c.add_chain(chain, name="Stan")
-    c.add_chain(chain, weights=weight, name="Corrected")
+    c.add_chain(chain, posterior=posterior, name="Stan")
+    c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
 
     c.configure(shade=True)
 
