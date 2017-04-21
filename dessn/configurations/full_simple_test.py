@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.full_model import FullModel
+from dessn.framework.models.full_model import FullModelWithCorrection
 from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     num_nodes = 4
 
-    model = FullModel(500, num_nodes=num_nodes)
+    model = FullModelWithCorrection(500, num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
     simulation = SimpleSimulation(alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes)
 
