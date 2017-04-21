@@ -149,8 +149,7 @@ class ApproximateModel(Model):
                 update["sim_node_weights"] = self.get_node_weights(nodes, sim_redshifts)
 
         obs_data = np.array(data["obs_mBx1c"])
-        print("Observed data x1 dispersion is %f, colour dispersion is %f"
-              % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
+        self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
 
         # Add in data for the approximate selection efficiency in mB
         mean, std, alpha = simulation.get_approximate_correction()
