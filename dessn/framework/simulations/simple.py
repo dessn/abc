@@ -112,7 +112,7 @@ class SimpleSimulation(Simulation):
 
         indexes = np.array(mask_all).cumsum()
         cut_index = np.where(indexes == n_sne)[0][0] + 1
-        print("Generated %d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100 * (mask.sum() / mask.size)))
+        self.logger.debug("Generated %d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100 * (mask.sum() / mask.size)))
 
         return {
             "n_sne": n_sne,
