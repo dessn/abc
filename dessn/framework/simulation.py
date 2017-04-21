@@ -37,7 +37,6 @@ class Simulation(ABC):
         self.logger.info("Fitted efficiency to have mean %0.2f, std %0.2f and alpha %0.2f" % (mean, std, alpha))
 
         # import matplotlib.pyplot as plt
-        # print(mB.shape)
         # plt.plot(binc, ratio * skewnorm.pdf(mean, alpha, mean, std))
         # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std))
         # plt.hist(y, 100, histtype='step', normed=True)
