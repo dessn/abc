@@ -33,6 +33,9 @@ if __name__ == "__main__":
     else:
         from chainconsumer import ChainConsumer
         chain, truth, weight, old_weight, posterior = fitter.load()
+        import numpy as np
+        print(old_weight.mean(), np.std(old_weight))
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior)
-        c.plot(filename=plot_filename, truth=truth)
+        c.plot_walks(filename=plot_filename.replace(".png", "_walks.png"))
+        # c.plot(filename=plot_filename, truth=truth)

@@ -255,7 +255,7 @@ def run_single_input(data_args, stan_model, stan_dir, i, num_walks_per_cosmology
 
 def run_single(data_args, stan_model, stan_dir, n_cosmology, n_run, chains=1, weight_function=None, short=False):
     if short:
-        w, n = 100, 200
+        w, n = 500, 1000
     else:
         w, n = 1000, 3000
     data = get_analysis_data(seed=n_cosmology, **data_args)

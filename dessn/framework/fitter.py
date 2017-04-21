@@ -151,9 +151,8 @@ class Fitter(object):
         mapping = self.models[model_index].get_labels()
 
         stan_weight = chain.get("weight")
-        if stan_weight is not None:
-            stan_weight -= np.mean(stan_weight)
-            stan_weight = np.exp(stan_weight)
+        # if stan_weight is not None:
+        #     stan_weight -= np.mean(stan_weight)
 
         new_weight = chain.get("new_weight")
         if new_weight is not None:
