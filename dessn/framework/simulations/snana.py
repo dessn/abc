@@ -72,7 +72,7 @@ class SNANASimulation(Simulation):
             deta_dcalibs.append(calib)
         covs = np.array(obs_mBx1c_cov)
         deta_dcalibs = np.array(deta_dcalibs)
-
+        obs_mBx1c = np.array(obs_mBx1c)
         result = {
             "n_sne": n_sne,
             "obs_mBx1c": obs_mBx1c,
