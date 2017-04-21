@@ -167,7 +167,7 @@ def convert(base_folder):
             final_result = [cid, z, existing_prob, simmb + mag_smear, simx1, simc, mb, x1, c] \
                            + cov.flatten().tolist() + offsets.flatten().tolist()
             final_results.append(final_result)
-            passed_indexes.append(cid)
+            passed_indexes.append(index)
 
         supernovae_passed = np.zeros(supernovae["Z"].size, dtype=bool)
         supernovae_passed[passed_indexes] = True
@@ -176,9 +176,10 @@ def convert(base_folder):
         fitted_data = np.array(final_results).astype(np.float32)
         print("Truncation from %d dump -> %d dump passed -> %d fitres -> %d calibration (%d failed calib)" %
               (supernovae["Z"].shape[0], np.unique(supernovae["CID"]).size, base_fits.shape[0], fitted_data.shape[0], num_bad_calib))
-        print(num_bad_calib_index)
-        print(supernovae["Z"].shape, supernovae_passed.shape)
-        all_mbs = np.vstack((supernovae["Z"], supernovae["S2mb"] + supernovae["MAGSMEAR_COH"], supernovae_passed)).T
+        print("Calib fails per filter", num_bad_calib_index)
+        supernovae_apparents = supernovae["S2mb"] + supernovae["MAGSMEAR_COH"]
+
+        all_mbs = np.vstack((supernovae["Z"], supernovae_apparents, supernovae_passed)).T
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
