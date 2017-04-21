@@ -48,7 +48,7 @@ class SNANASimulation(Simulation):
 
         np.random.seed(cosmology_index)
         if cosmology_index:
-            print("Shuffling data for cosmology index %d" % cosmology_index)
+            self.logger.debug("Shuffling data for cosmology index %d" % cosmology_index)
             np.random.shuffle(supernovae)
 
         supernovae = supernovae[:n_sne, :]
@@ -57,6 +57,7 @@ class SNANASimulation(Simulation):
         apparents = supernovae[:, 6]
         stretches = supernovae[:, 7]
         colours = supernovae[:, 8]
+        existing_prob = supernovae[:, 2]
         s_ap = supernovae[:, 3]
         s_st = supernovae[:, 4]
         s_co = supernovae[:, 5]
@@ -80,7 +81,7 @@ class SNANASimulation(Simulation):
             "deta_dcalib": deta_dcalibs,
             "redshifts": redshifts,
             "masses": masses,
-            "existing_prob": [],
+            "existing_prob": existing_prob,
             "sim_apparents": s_ap,
             "sim_stretches": s_st,
             "sim_colours": s_co
