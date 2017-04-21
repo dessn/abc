@@ -15,7 +15,7 @@ def load_fit_snana_correction(n_sne, include_sim_values=False, directory="snana_
     print("Getting SNANA dummy data from %s" % directory)
 
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    data_folder = this_dir + "/data/" + directory
+    data_folder = this_dir + "/../d_simple_stan/data/" + directory
     supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder)]
     supernovae = np.vstack(tuple(supernovae_files))
 
