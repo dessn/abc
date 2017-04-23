@@ -173,7 +173,7 @@ transformed parameters {
         cor_x1_val[i] = dot_product(mean_x1, sim_node_weights[i]);
         cor_c_val[i] = dot_product(mean_c, sim_node_weights[i]);
         cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i] - mass_correction * 0.5;
-        cor_mB_cor[i] = normal_lpdf(cor_mB_mean[i] | mB_mean, sqrt(mB_width2 + cor_mb_width2)) + normal_lccdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
+        cor_mB_cor[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lccdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
