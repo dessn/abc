@@ -78,9 +78,9 @@ class Fitter(object):
         else:
             w, n = 500, 1000
 
-        import pystan
         data = model.get_data(sim, cosmo_index)
         self.logger.info("Running Stan job, saving to %s" % out_file)
+        import pystan
         sm = pystan.StanModel(file=model.get_stan_file(), model_name="Cosmology")
         fit = sm.sampling(data=data, iter=n, warmup=w, chains=num_cores, init=model.get_init)
         self.logger.info("Stan finished sampling")

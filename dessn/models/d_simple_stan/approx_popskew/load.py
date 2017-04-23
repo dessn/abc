@@ -5,7 +5,7 @@ from chainconsumer import ChainConsumer
 from dessn.models.d_simple_stan.load import plot_quick, plot_debug, plot_separate, load_stan_from_folder
 
 if __name__ == "__main__":
-    dir_name = os.path.dirname(__file__)
+    dir_name = os.path.dirname(__file__) or "."
     std = dir_name + "/stan_output"
     data_source = "snana_dummy"
     # plot_separate(std + "_" + data_source, data_source, weights=False)
@@ -20,6 +20,6 @@ if __name__ == "__main__":
     chain["weight"] = ow
     c.add_chain(chain, posterior=posterior, name="Corrected")
     c.configure(color_params="weight", colors=["#a81515", "#111111"])
-    c.plot(filename=dir_name + "/colour.png", truth=t)
+    c.plot(filename=dir_name + "/colourzzzzz2.png", truth=t)
 
 
