@@ -30,6 +30,7 @@ data {
     real mB_mean;
     real mB_width2;
     real mB_alpha2;
+    real mean_mass;
 
     // Redshift grid to do integral
     int<lower=0> n_sim; // Number of added redshift points
@@ -172,7 +173,7 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[i] + dratio);
         cor_x1_val[i] = dot_product(mean_x1, sim_node_weights[i]);
         cor_c_val[i] = dot_product(mean_c, sim_node_weights[i]);
-        cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i] - mass_correction * 0.5;
+        cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i] - mass_correction * mean_mass;
         cor_mB_cor[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lccdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
@@ -209,6 +210,8 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
+        + normal_lpdf(mean_x1  | 0, 1)
+        + normal_lpdf(mean_c  | 0, 0.1)
         + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
         + normal_lpdf(calibration | 0, 1);
 

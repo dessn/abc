@@ -75,6 +75,7 @@ class ApproximateModel(Model):
         # Redshift shenanigans below used to create simpsons rule arrays
         # and then extract the right redshfit indexes from them
         redshifts = data["redshifts"]
+        masses = data["masses"]
 
         n_z = 2000  # Defines how many points we get in simpsons rule
 
@@ -156,6 +157,11 @@ class ApproximateModel(Model):
         update["mB_mean"] = mean
         update["mB_width2"] = std**2
         update["mB_alpha2"] = alpha**2
+
+        if np.all(masses == 0):
+            update["mean_weight"] = 0
+        else:
+            update["mean_weight"] = 0.5
 
         final_dict = {**data, **update, **sim_data}
         return final_dict
