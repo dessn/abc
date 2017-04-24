@@ -159,9 +159,9 @@ class ApproximateModel(Model):
         update["mB_alpha2"] = alpha**2
 
         if np.all(masses == 0):
-            update["mean_weight"] = 0
+            update["mean_mass"] = 0
         else:
-            update["mean_weight"] = 0.5
+            update["mean_mass"] = 0.5
 
         final_dict = {**data, **update, **sim_data}
         return final_dict
