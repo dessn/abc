@@ -191,7 +191,7 @@ class Fitter(object):
 
         return result, truth, new_weight, stan_weight, posterior
 
-    def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=3.0):
+    def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=2.0):
         files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
         filenames = [self.temp_dir + "/" + f for f in files]
         model_indexes = [int(f.split("_")[1]) for f in files]
