@@ -1,9 +1,8 @@
-#Bayesian Supernova Cosmology framework
+# Bayesian Supernova Cosmology framework
 
-####*For the DES Supernova Working Group*
+#### *For the DES Supernova Working Group*
 
 [![Build Status](https://travis-ci.org/dessn/sn-bhm.svg?style=flat&branch=master)](https://travis-ci.org/dessn/sn-bhm)
-[![Coverage Status](https://coveralls.io/repos/github/dessn/sn-bhm/badge.svg?branch=master)](https://coveralls.io/github/dessn/sn-bhm?branch=master)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/dessn/abc/blob/master/LICENSE)
 
 ## Manually building documentation
