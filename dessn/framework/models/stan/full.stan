@@ -203,8 +203,8 @@ transformed parameters {
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population);
-            //+ skew_normal_lpdf(model_mBx1c[i][1] | mB_mean, mB_width, mB_alpha);
+            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population)
+            + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean, mB_width, mB_alpha);
     }
     posterior = sum(PointPosteriors) - weight
         + cauchy_lpdf(sigma_MB | 0, 2.5)
