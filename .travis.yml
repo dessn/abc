@@ -34,9 +34,5 @@ install:
     - ulimit -s unlimited
 
 script:
-    - python setup.py test -a "--cov dessn -v"
-
-after_success:
-    - coveralls
     - chmod u+x deploy.sh
     - ./deploy.sh
