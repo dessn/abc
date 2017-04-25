@@ -26,6 +26,7 @@ if __name__ == "__main__":
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
+    fitter.set_num_walkers(6)
     fitter.set_simulations(*simulations)
 
     h = socket.gethostname()
