@@ -71,7 +71,7 @@ class ApproximateModel(Model):
 
         n_sne = self.num_supernova
         data = simulation.get_passed_supernova(n_sne, simulation=False, cosmology_index=cosmology_index)
-
+        self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
         # and then extract the right redshfit indexes from them
         redshifts = data["redshifts"]
@@ -85,7 +85,8 @@ class ApproximateModel(Model):
             node_weights = np.array([[1]] * n_sne)
             nodes = [0.0]
         else:
-            nodes = np.linspace(redshifts.min(), redshifts.max(), num_nodes)
+            zs = np.sort(redshifts)
+            nodes = np.linspace(zs[2], zs[-5], num_nodes)
             node_weights = self.get_node_weights(nodes, redshifts)
 
         if add_zs is not None:
@@ -170,7 +171,9 @@ class ApproximateModel(Model):
         indexes = np.arange(nodes.size)
         interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)
         node_weights = np.array([1 - np.abs(v - indexes) for v in interps])
+        end_mask = np.all(node_weights < 0, axis=1)
         node_weights *= (node_weights <= 1) & (node_weights >= 0)
+        node_weights[end_mask, -1] = 1.0
         node_weights = np.abs(node_weights)
         reweight = np.sum(node_weights, axis=1)
         node_weights = (node_weights.T / reweight).T

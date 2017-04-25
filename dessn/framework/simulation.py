@@ -13,6 +13,7 @@ class Simulation(ABC):
     def get_approximate_correction(self):
         """ Characterises the simulations selection efficiency in apparent magnitude space as a skew normal. """
         data = self.get_all_supernova(100000)
+        self.logger.info("Got data to compute selection function")
         mB_all = data["sim_apparents"]
         mB_passed = mB_all[data["passed"]]
 

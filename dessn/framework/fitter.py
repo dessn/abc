@@ -115,7 +115,7 @@ class Fitter(object):
 
         num_jobs = self.get_num_jobs()
         num_models = len(self.models)
-        num_simulations = len(self.models)
+        num_simulations = len(self.simulations)
         self.logger.info("With %d models, %d simulations, %d cosmologies and %d walkers, have %d jobs" %
                          (num_models, num_simulations, self.num_cosmologies, self.num_walkers, num_jobs))
 
