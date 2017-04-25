@@ -20,13 +20,13 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = FullModelWithCorrection(200)
+    model = FullModelWithCorrection(500)
     # Turn off mass and skewness for easy test
     simulations = [SNANASimulationSkewed0p3(), SNANASimulationGauss0p2(), SNANASimulationGauss0p3(), SNANASimulationGauss0p4()]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
-    fitter.set_simulations(simulations[-1])
+    fitter.set_simulations(*simulations)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
