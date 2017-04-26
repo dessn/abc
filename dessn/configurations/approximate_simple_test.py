@@ -32,7 +32,7 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        chain, truth, weight, old_weight, posterior = fitter.load()
+        m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior)
         c.plot(filename=plot_filename, truth=truth)

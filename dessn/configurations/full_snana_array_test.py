@@ -26,9 +26,8 @@ if __name__ == "__main__":
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
-    fitter.set_num_walkers(6)
-    # fitter.set_simulations(*simulations)
-    fitter.set_simulations(simulations[0])
+    fitter.set_num_walkers(5)
+    fitter.set_simulations(*simulations)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
@@ -37,7 +36,7 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         results = fitter.load()
         c = ChainConsumer()
-        for i, (chain, truth, weight, old_weight, posterior) in enumerate(results):
+        for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(results):
             # c.add_chain(chain, posterior=posterior, name="Stan")
             c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
 

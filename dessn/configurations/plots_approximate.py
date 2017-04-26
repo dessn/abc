@@ -29,10 +29,10 @@ if __name__ == "__main__":
 
     c = ChainConsumer()
 
-    chain, truth, weight, old_weight, posterior = fitter1.load()
+    m, s, chain, truth, weight, old_weight, posterior = fitter1.load()
     c.add_chain(chain, weights=weight, posterior=posterior, name="Simple")
 
-    chain, truth, weight, old_weight, posterior = fitter2.load()
+    m, s, chain, truth, weight, old_weight, posterior = fitter2.load()
     c.add_chain(chain, weights=weight, posterior=posterior, name="SNANA")
 
     c.configure(shade=True)
