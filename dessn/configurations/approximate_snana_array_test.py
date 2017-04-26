@@ -3,7 +3,7 @@ import logging
 import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
-from dessn.framework.simulations.snana import SNANASimulationSkewed0p3, SNANASimulationGauss0p2, \
+from dessn.framework.simulations.snana import SNANASimulationSkewed0p2, SNANASimulationGauss0p2, \
     SNANASimulationGauss0p3, SNANASimulationGauss0p4
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModel(500)
-    simulations = [SNANASimulationSkewed0p3(), SNANASimulationGauss0p2(), SNANASimulationGauss0p3(), SNANASimulationGauss0p4()]
+    simulations = [SNANASimulationSkewed0p2(), SNANASimulationGauss0p2(), SNANASimulationGauss0p3(), SNANASimulationGauss0p4()]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -32,15 +32,18 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
+        val = r"$\Omega_m$"
+        nval = r"$\Delta \Omega_m$"
+
         from chainconsumer import ChainConsumer
         results = fitter.load()
         c = ChainConsumer()
         for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(results):
-            # c.add_chain(chain, posterior=posterior, name="Stan")
             name = "%s_%s" % (m.get_name(), s.get_name())
+            chain[nval] = chain[val] - truth[val]
+            truth[nval] = 0.0
             c.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_"))
 
-        parameters = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
-                      '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$',
-                      '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$']
+        parameters = [nval, '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
+                      '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$']
         c.plot(filename=plot_filename, truth=truth, parameters=parameters)

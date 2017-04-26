@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.simulations.snana import SNANASimulationSkewed0p3
+from dessn.framework.simulations.snana import SNANASimulationSkewed0p2
 from dessn.framework.models.approx_model import ApproximateModel
 
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModel(500)
-    simulation = SNANASimulationSkewed0p3()
+    simulation = SNANASimulationSkewed0p2()
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

@@ -3,7 +3,7 @@ import logging
 import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.full_model import FullModelWithCorrection
-from dessn.framework.simulations.snana import SNANASimulationSkewed0p3
+from dessn.framework.simulations.snana import SNANASimulationSkewed0p2
 
 
 if __name__ == "__main__":
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     model = FullModelWithCorrection(500)
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationSkewed0p3()
+    simulation = SNANASimulationSkewed0p2()
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
