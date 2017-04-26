@@ -47,4 +47,5 @@ if __name__ == "__main__":
 
         parameters = [nval, '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
                       '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$']
+        print(c.get_latex_table(parameters=parameters))
         c.plot(filename=plot_filename, truth=truth, parameters=parameters)
