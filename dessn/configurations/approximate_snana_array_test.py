@@ -25,7 +25,8 @@ if __name__ == "__main__":
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
-    fitter.set_simulations(*simulations)
+    fitter.set_simulations(simulations[0])
+    # fitter.set_simulations(*simulations)
     fitter.set_num_walkers(6)
 
     h = socket.gethostname()
@@ -33,8 +34,13 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        chain, truth, weight, old_weight, posterior = fitter.load()
+        results = fitter.load()
         c = ChainConsumer()
-        c.add_chain(chain, posterior=posterior, name="Stan")
-        c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
-        c.plot(filename=plot_filename, truth=truth)
+        for i, (chain, truth, weight, old_weight, posterior) in enumerate(results):
+            # c.add_chain(chain, posterior=posterior, name="Stan")
+            c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
+
+        parameters = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
+                      '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$',
+                      '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$']
+        c.plot(filename=plot_filename, truth=truth, parameters=parameters)
