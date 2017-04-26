@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     model = ApproximateModel(500)
     # Turn off mass and skewness for easy test
-    simulation = SimpleSimulation(alpha_c=0, mass=True, dscale=0.08)
+    simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.08)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
