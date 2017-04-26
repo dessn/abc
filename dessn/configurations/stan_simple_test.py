@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModel
+from dessn.framework.models.full_model import FullModel
 from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
@@ -19,8 +19,11 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(500)
-    simulation = SimpleSimulation(alpha_c=0, mass=True, dscale=0.08)
+    num_nodes = 4
+
+    model = FullModel(500, num_nodes=num_nodes)
+    # Turn off mass and skewness for easy test
+    simulation = SimpleSimulation(alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -33,5 +36,5 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior)
+        c.add_chain(chain, weights=weight, posterior=posterior, name="Stan")
         c.plot(filename=plot_filename, truth=truth)
