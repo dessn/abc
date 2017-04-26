@@ -14,7 +14,7 @@ class SNANASimulation(Simulation):
         self.num_nodes = num_nodes
 
     def get_name(self):
-        return "snana_%s" % self.simulation_name
+        return "snana_%s" % self.real_data_name
 
     def get_truth_values(self):
         return [

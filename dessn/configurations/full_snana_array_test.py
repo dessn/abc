@@ -38,7 +38,8 @@ if __name__ == "__main__":
         c = ChainConsumer()
         for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(results):
             # c.add_chain(chain, posterior=posterior, name="Stan")
-            c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
+            name = "%s_%s" % (m.get_name(), s.get_name())
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_"))
 
         parameters = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
                       '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$',

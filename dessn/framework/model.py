@@ -15,6 +15,10 @@ class Model(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def get_name(self):
+        raise NotImplementedError()
+
+    @abstractmethod
     def get_data(self, simulation, cosmology_index):
         raise NotImplementedError()
 

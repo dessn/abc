@@ -188,7 +188,6 @@ class Fitter(object):
                     temp_list.append((p, vals))
 
         result = OrderedDict(temp_list)
-
         return self.models[model_index], self.simulations[simulation_index], result, truth, new_weight, stan_weight, posterior
 
     def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=2.0):
@@ -200,12 +199,12 @@ class Fitter(object):
         chains = [self.load_file(f) for f in filenames]
 
         results = []
-        prev_model, prev_sim, prev_cosmo = None, None, None
+        prev_model, prev_sim, prev_cosmo = 0, 0, 0
         stacked = None
         for c, mi, si, ci in zip(chains, model_indexes, sim_indexes, cosmo_indexes):
             if (prev_cosmo != ci and split_cosmo) or (prev_model != mi and split_models) or (prev_sim != si and split_sims):
                 if stacked is not None:
-                    results.append(self.get_result_from_chain(stacked, si, mi, convert_names=convert_names, max_deviation=max_deviation))
+                    results.append(self.get_result_from_chain(stacked, prev_sim, prev_model, convert_names=convert_names, max_deviation=max_deviation))
                 stacked = None
                 prev_model = mi
                 prev_sim = si

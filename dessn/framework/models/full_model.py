@@ -43,11 +43,18 @@ class FullModel(ApproximateModel):
             "sim_redshift_pre_comp": 0.9 + np.power(10, 0.95 * zs_sample)
         }
 
+    def get_name(self):
+        return "FullMC"
+
     def get_data(self, simulation, cosmology_index, add_zs=None):
         return super().get_data(simulation, cosmology_index, add_zs=self.get_extra_zs)
 
 
 class FullModelWithCorrection(FullModel):
+
+    def get_name(self):
+        return "Full"
+
     def correct_chain(self, chain_dictionary, simulation, data):
         self.logger.info("Starting full corrections")
         self.logger.info("Getting supernovae")

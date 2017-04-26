@@ -67,6 +67,9 @@ class ApproximateModel(Model):
         self.logger.info("Initial starting point is: %s" % randoms)
         return randoms
 
+    def get_name(self):
+        return "Approx"
+
     def get_data(self, simulation, cosmology_index, add_zs=None):
 
         n_sne = self.num_supernova
