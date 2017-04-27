@@ -12,7 +12,7 @@ class FullModel(ApproximateModel):
     def __init__(self, num_supernova, filename="full.stan", num_nodes=4):
         super().__init__(num_supernova, filename=filename, num_nodes=num_nodes)
 
-    def get_extra_zs(self, simulation, n=201, buffer=0.3):
+    def get_extra_zs(self, simulation, n=201, buffer=0.2):
         assert n % 2 == 1, "n needs to be odd"
 
         supernovae = simulation.get_all_supernova(20000)
@@ -24,8 +24,9 @@ class FullModel(ApproximateModel):
         hist, bins = np.histogram(zs, bins=50, density=True)
         binc = 0.5 * (bins[1:] + bins[:-1])
 
-        max_zs = np.max(redshift_passed) + buffer
-        min_zs = 0.05
+        max_zs = min(np.max(zs), np.max(redshift_passed) + buffer)
+        min_zs = max(0.05, np.min(redshift_passed))
+
 
         zs_sample = np.linspace(min_zs, max_zs, n)
 
