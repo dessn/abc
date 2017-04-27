@@ -177,8 +177,8 @@ transformed parameters {
         cor_mB_cor[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
-    weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
-
+    //weight = n_sne * log_sum_exp(cor_mB_cor_weighted);
+    weight = 0;
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
 

@@ -37,4 +37,4 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Stan")
-        c.plot(filename=plot_filename, truth=truth)
+        c.plot(filename=plot_filename, truth=truth, parameters=9)
