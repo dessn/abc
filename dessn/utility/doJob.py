@@ -2,6 +2,7 @@ import os
 import shutil
 import logging
 
+
 def write_jobscript(filename, name=None, queue="low.q", num_tasks=24, num_cpu=24,
                     num_walks=24, outdir="out_files", delete=False):
 
@@ -77,8 +78,8 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
 #SBATCH --array=1-%d%%%d
 #SBATCH -n 1
 #SBATCH --ntasks=1
-#SBATCH --mem=8G
-#SBATCH -t 04:00:00
+#SBATCH --mem=4G
+#SBATCH -t 02:00:00
 #SBATCH -o %s/%s.o%%j
 ####SBATCH -L project
 ####SBATCH --qos=premium
