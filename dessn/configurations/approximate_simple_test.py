@@ -20,7 +20,7 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     num_nodes = 1
-    model = ApproximateModel(500, num_nodes=num_nodes)
+    model = ApproximateModel(300, num_nodes=num_nodes)
     simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0, num_nodes=num_nodes)
 
     fitter = Fitter(dir_name)
