@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    num_nodes = 1
+    num_nodes = 4
     model = ApproximateModel(300, num_nodes=num_nodes)
     simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0, num_nodes=num_nodes)
 
