@@ -19,8 +19,9 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(500)
-    simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0)
+    num_nodes = 1
+    model = ApproximateModel(500, num_nodes=num_nodes)
+    simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0, num_nodes=num_nodes)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -36,4 +37,4 @@ if __name__ == "__main__":
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior)
         c.configure(color_params="w")
-        c.plot(filename=plot_filename, truth=truth)
+        c.plot(filename=plot_filename, truth=truth, parameters=9)
