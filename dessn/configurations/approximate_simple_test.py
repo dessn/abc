@@ -20,7 +20,7 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModel(500)
-    simulation = SimpleSimulation(alpha_c=0, mass=True, dscale=0.08)
+    simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -32,6 +32,8 @@ if __name__ == "__main__":
     else:
         from chainconsumer import ChainConsumer
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
+        chain["w"] = old_weight
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior)
+        c.configure(color_params="w")
         c.plot(filename=plot_filename, truth=truth)
