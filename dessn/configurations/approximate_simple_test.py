@@ -37,4 +37,4 @@ if __name__ == "__main__":
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior)
         c.configure(color_params="w")
-        c.plot(filename=plot_filename, truth=truth, parameters=15)
+        c.plot(filename=plot_filename, truth=truth, parameters=9)
