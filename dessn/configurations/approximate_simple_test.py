@@ -35,6 +35,7 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         chain["w"] = old_weight
         c = ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior)
+        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(color_params="w")
+        print(c.get_latex_table(transpose=True))
         c.plot(filename=plot_filename, truth=truth, parameters=9)
