@@ -149,7 +149,7 @@ transformed parameters {
     full_sigma = population * population';
 
     cor_mb_width2 = sigma_MB^2 + (alpha * sigma_x1)^2 + (beta * sigma_c)^2 + 2 * (-alpha * full_sigma[1][2] + beta * (full_sigma[1][3]) - alpha * beta * (full_sigma[2][3] ));
-    //cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
+    cor_sigma2 = ((cor_mb_width2 + mB_width2) / mB_width2)^2 * ((mB_width2 / mB_alpha2) + ((mB_width2 * cor_mb_width2) / (cor_mb_width2 + mB_width2)));
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
@@ -177,7 +177,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
-        weights[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2));// + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
+        weights[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(cor_mB_mean[i] | mB_mean, sqrt(cor_sigma2));
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
