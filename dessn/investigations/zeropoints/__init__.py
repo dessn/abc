@@ -29,7 +29,7 @@ which has dispersion in magnitude, stretch and colour, we produce the following
 plot.
 
 
-.. figure::     ../dessn/models/d_simple_stan/output/sensitivity.png
+.. figure::     ../dessn/investigations/zeropoints/output/sensitivity.png
     :align:     center
     :width:     60%
 
