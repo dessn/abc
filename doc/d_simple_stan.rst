@@ -5,4 +5,4 @@
 Simple STAN model
 =================
 
-.. automodule:: dessn.models.d_simple_stan
+.. automodule:: dessn.framework.models

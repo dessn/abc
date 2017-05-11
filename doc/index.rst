@@ -32,9 +32,6 @@ The general project structure is as follows:
 .. toctree::
     :maxdepth: 2
 
-    examples_sep
-    chain
-    core
     proofs_sep
     investigations_sep
     implementations_sep
