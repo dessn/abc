@@ -36,10 +36,11 @@ if __name__ == "__main__":
         import numpy as np
         print(old_weight.mean(), np.std(old_weight))
         c = ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior)
+        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx SNANA")
         # c.plot_walks(filename=plot_filename.replace(".png", "_walks.png"))
         parameters = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
                       '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$',
                       '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$']
-        c.plot(filename=plot_filename, truth=truth, parameters=parameters)
+        print(c.get_latex_table(transpose=True, parameters=parameters))
+        # c.plot(filename=plot_filename, truth=truth, parameters=parameters)
         # c.plot(filename=plot_filename, truth=truth)
