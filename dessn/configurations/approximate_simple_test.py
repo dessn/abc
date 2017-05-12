@@ -38,4 +38,4 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(color_params="w")
         print(c.get_latex_table(transpose=True))
-        c.plot(filename=plot_filename, truth=truth, parameters=9)
+        c.plot(filename=plot_filename, truth=truth, parameters=15)
