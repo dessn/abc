@@ -71,10 +71,13 @@ class FullModelWithCorrection(FullModel):
         existing_prob = supernovae["existing_prob"]
         masses = supernovae["masses"]
 
-        nodes = data["nodes"]
+        nodes = np.array(data["nodes"])
 
         self.logger.info("Getting node weights")
-        node_weights = self.get_node_weights(nodes, redshifts)
+        if nodes.size > 1:
+            node_weights = self.get_node_weights(nodes, redshifts)
+        else:
+            node_weights = np.ones(redshifts.size)
 
         using_log = "log_sigma_MB" in list(chain_dictionary.keys())
 
