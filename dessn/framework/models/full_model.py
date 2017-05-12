@@ -27,7 +27,6 @@ class FullModel(ApproximateModel):
         max_zs = min(np.max(zs), np.max(redshift_passed) + buffer)
         min_zs = max(0.05, np.min(redshift_passed))
 
-
         zs_sample = np.linspace(min_zs, max_zs, n)
 
         probs = interp1d(binc, hist, assume_sorted=True, bounds_error=False, fill_value="extrapolate")(zs_sample)
