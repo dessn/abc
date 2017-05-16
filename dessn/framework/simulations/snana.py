@@ -5,10 +5,11 @@ from dessn.framework.simulation import Simulation
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, real_data_name, simulation_name=None, num_nodes=4):
+    def __init__(self, real_data_name, simulation_name=None, num_nodes=4, use_sim=False):
         super().__init__()
         self.real_data_name = real_data_name
         self.simulation_name = simulation_name
+        self.use_sim = use_sim
         if self.simulation_name is None:
             self.simulation_name = self.real_data_name
         self.num_nodes = num_nodes
@@ -42,6 +43,8 @@ class SNANASimulation(Simulation):
         this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
         data_folder = this_dir + "/snana_data/%s" % name
         self.logger.info("Getting SNANA data from %s" % name)
+        if self.use_sim:
+            self.logger.warn("Simulation using simulated values, not 'observed'")
 
         supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "passed" in f]
         supernovae = np.vstack(tuple(supernovae_files))
@@ -65,8 +68,12 @@ class SNANASimulation(Simulation):
 
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
         for i, (mb, x1, c, smb, sx1, sc) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co)):
-            vector = np.array([mb, x1, c])
-            cov = supernovae[i, 9:9 + 9].reshape((3, 3))
+            if self.use_sim:
+                cov = np.diag(np.array([0.02, 0.1, 0.02]) ** 2)
+                vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)
+            else:
+                vector = np.array([mb, x1, c])
+                cov = supernovae[i, 9:9 + 9].reshape((3, 3))
             calib = supernovae[i, 9 + 9:].reshape((3, -1))
             obs_mBx1c_cov.append(cov)
             obs_mBx1c.append(vector)
@@ -108,13 +115,13 @@ class SNANASimulation(Simulation):
 
 
 class SNANASimulationGauss0p3(SNANASimulation):
-    def __init__(self, num_nodes=4):
-        super().__init__("gauss0p3", num_nodes=num_nodes)
+    def __init__(self, num_nodes=4, use_sim=False):
+        super().__init__("gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
 
 class SNANASimulationGauss0p2(SNANASimulation):
-    def __init__(self, num_nodes=4):
-        super().__init__("gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes)
+    def __init__(self, num_nodes=4, use_sim=False):
+        super().__init__("gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
     def get_truth_values(self):
         t = super().get_truth_values()
@@ -123,8 +130,8 @@ class SNANASimulationGauss0p2(SNANASimulation):
 
 
 class SNANASimulationGauss0p4(SNANASimulation):
-    def __init__(self, num_nodes=4):
-        super().__init__("gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes)
+    def __init__(self, num_nodes=4, use_sim=False):
+        super().__init__("gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
     def get_truth_values(self):
         t = super().get_truth_values()
@@ -133,8 +140,8 @@ class SNANASimulationGauss0p4(SNANASimulation):
 
 
 class SNANASimulationSkewed0p2(SNANASimulation):
-    def __init__(self, num_nodes=4):
-        super().__init__("skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes)
+    def __init__(self, num_nodes=4, use_sim=False):
+        super().__init__("skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
     def get_truth_values(self):
         t = super().get_truth_values()

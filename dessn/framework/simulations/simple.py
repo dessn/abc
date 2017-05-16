@@ -11,9 +11,9 @@ class SimpleSimulation(Simulation):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
-        self.mb_alpha = -5
-        self.mb_mean = 22.5
-        self.mb_width = 4
+        self.mb_alpha = 4
+        self.mb_mean = 20.0
+        self.mb_width = 3
         self.mass_scale = 1.0 if mass else 0.0
         self.num_nodes = num_nodes
 
