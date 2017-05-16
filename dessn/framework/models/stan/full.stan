@@ -30,6 +30,7 @@ data {
     real mB_mean;
     real mB_width2;
     real mB_alpha2;
+    real mB_sgn_alpha;
     real mean_mass;
 
     // Redshift grid to do integral
@@ -174,7 +175,7 @@ transformed parameters {
         cor_x1_val[i] = dot_product(mean_x1, sim_node_weights[i]);
         cor_c_val[i] = dot_product(mean_c, sim_node_weights[i]);
         cor_mB_mean[i] = mean_MB - alpha* cor_x1_val[i] + beta*cor_c_val[i] + sim_model_mu[i] - mass_correction * mean_mass;
-        cor_mB_cor[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(mB_mean | cor_mB_mean[i], sqrt(cor_sigma2));
+        cor_mB_cor[i] = normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(mB_sgn_alpha * (cor_mB_mean[i] - mB_mean) | 0, sqrt(cor_sigma2));
         cor_mB_cor_weighted[i] = cor_mB_cor[i] + sim_log_weight[i];
     }
     weight = n_sne * log_sum_exp(cor_mB_cor_weighted);

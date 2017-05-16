@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     num_nodes = 1
 
-    model = ApproximateModelWithCorrection(200, num_nodes=num_nodes)
+    model = ApproximateModelWithCorrection(500, num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
     simulation = SimpleSimulation(alpha_c=0, mass=False, dscale=0.0, num_nodes=num_nodes)
 

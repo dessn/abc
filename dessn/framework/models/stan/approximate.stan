@@ -30,6 +30,7 @@ data {
     real mB_mean;
     real mB_width2;
     real mB_alpha2;
+    real mB_sgn_alpha;
 
     // Calibration std
     vector[8] calib_std; // std of calibration uncertainty, so we can draw from regular normal
@@ -177,7 +178,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         cor_mB_mean[i] = mean_MB  + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
-        weights[i] = log_sum_exp(-10, normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(mB_mean | cor_mB_mean[i], sqrt(cor_sigma2)));
+        weights[i] = log_sum_exp(-10, normal_lpdf(mB_mean | cor_mB_mean[i], sqrt(mB_width2 + cor_mb_width2)) + normal_lcdf(mB_sgn_alpha * (cor_mB_mean[i] - mB_mean) | 0, sqrt(cor_sigma2)));
 
         // Track and update posterior
         PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)

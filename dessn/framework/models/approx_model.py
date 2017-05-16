@@ -163,6 +163,7 @@ class ApproximateModel(Model):
         update["mB_mean"] = mean
         update["mB_width2"] = std**2
         update["mB_alpha2"] = alpha**2
+        update["mB_sgn_alpha"] = np.sign(alpha)
 
         if np.all(masses == 0):
             update["mean_mass"] = 0
