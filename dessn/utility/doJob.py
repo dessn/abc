@@ -78,7 +78,7 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
 #SBATCH --array=1-%d%%%d
 #SBATCH -n 1
 #SBATCH --ntasks=1
-#SBATCH --mem=4G
+#SBATCH --mem=8G
 #SBATCH -t 02:00:00
 #SBATCH -o %s/%s.o%%j
 ####SBATCH -L project
