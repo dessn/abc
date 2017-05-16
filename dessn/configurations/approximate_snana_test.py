@@ -42,5 +42,5 @@ if __name__ == "__main__":
                       '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$',
                       '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$']
         print(c.get_latex_table(transpose=True, parameters=parameters))
-        # c.plot(filename=plot_filename, truth=truth, parameters=parameters)
+        c.plot(filename=plot_filename, truth=truth, parameters=parameters)
         # c.plot(filename=plot_filename, truth=truth)
