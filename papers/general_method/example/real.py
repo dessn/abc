@@ -67,15 +67,14 @@ def get_stuff(i):
     chain1 = sampler.chain[:, 100:, :].reshape((-1, ndim))
     chain2 = sampler2.chain[:, 100:, :].reshape((-1, ndim))
     weights = np.array([reweight(*row) for row in chain2])
+    weights -= weights.max()
+    weights = np.exp(weights)
     return (chain1, chain2, weights)
 
 res = Parallel(n_jobs=4, backend="threading")(delayed(get_stuff)(i) for i in range(32))
 all_samples = np.vstack([r[0] for r in res])
 all_sampels_corrected = np.vstack([r[1] for r in res])
 weights = np.array([r[2] for r in res]).flatten()
-print(weights.shape)
-weights -= weights.max()
-weights = np.exp(weights)
 print(weights.max(), weights.min(), weights.mean())
 
 from chainconsumer import ChainConsumer
