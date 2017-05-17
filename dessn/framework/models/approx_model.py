@@ -165,10 +165,7 @@ class ApproximateModel(Model):
         update["mB_alpha2"] = alpha**2
         update["mB_sgn_alpha"] = np.sign(alpha)
 
-        if np.all(masses == 0):
-            update["mean_mass"] = 0
-        else:
-            update["mean_mass"] = 0.5
+        update["mean_mass"] = np.mean(masses)
 
         final_dict = {**data, **update, **sim_data}
         return final_dict

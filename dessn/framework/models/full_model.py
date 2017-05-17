@@ -69,7 +69,10 @@ class FullModelWithCorrection(FullModel):
         stretches = supernovae["sim_stretches"]
         colours = supernovae["sim_colours"]
         existing_prob = supernovae["existing_prob"]
+
+        # Dont have masses, so just use mean mass
         masses = supernovae["masses"]
+        mean_mass = data["mean_mass"]
 
         nodes = np.array(data["nodes"])
 
@@ -100,7 +103,7 @@ class FullModelWithCorrection(FullModel):
             else:
                 mass_correction = 0
             mabs = apparents - mus + chain_dictionary["alpha"][i] * stretches \
-                   - chain_dictionary["beta"][i] * colours + mass_correction * masses
+                   - chain_dictionary["beta"][i] * colours + mass_correction * mean_mass
 
             chain_MB = chain_dictionary["mean_MB"][i]
             chain_x1s = chain_dictionary["mean_x1"][i]

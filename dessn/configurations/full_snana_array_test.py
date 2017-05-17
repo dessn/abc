@@ -46,7 +46,13 @@ if __name__ == "__main__":
             name = "%s_%s" % (m.get_name(), s.get_name())
             chain[nval] = chain[val] - truth[val]
             truth[nval] = 0.0
+
             c.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_"))
+
+            cc = ChainConsumer()
+            cc.add_chain(chain, posterior=posterior, name=name.replace("_", "\_"))
+            cc.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_") + "stan")
+            cc.plot(filename=plot_filename.replace(".png", "%s.png" % name), truth=truth, parameters=9)
 
         parameters = [nval, '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
                       '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$']
