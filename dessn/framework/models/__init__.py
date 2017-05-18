@@ -118,7 +118,7 @@ shown under the Population header as :math:`\gamma`.
 
 Furthermore, in the interests of simplicity, let us examine only a single supernova for the time being. As I don't
 yet take calibration into account, the supernova are independent. Let us denote the unnormalised likelihood for a single
-supernova as :math:`P (D_i|\theta).
+supernova as :math:`P (D_i|\theta)`.
 
 .. math::
     :label: d
