@@ -434,10 +434,7 @@ account the number of supernova we have:
         With 300 data points, the difference in weights between those two points would be
         :math:`(1.01/0.99)^{300} \approx 404`. This difference in weights is potentially beyond
         the ability to re-weight an existing chain of results, and so the weights may need to
-        be implemented directly inside the posterior evaluated by the fitting algorithm. We note
-        that the 7th proof, :ref:`efficiency7`, shows undesired noise in the
-        contours when looking at different values of :math:`\sigma`, and the ratio difference there
-        for 2000 data points is only 81 (so 404 would be several times worse).
+        be implemented directly inside the posterior evaluated by the fitting algorithm.
 
         An example of importance sampling an uncorrected posterior surface is shown below.
 
