@@ -87,14 +87,12 @@ I present a rigorous treatment for truncated or biased datasets by combining Bay
 
 \section{Introduction}
 
-Find some treatment of biased or truncated data before. Maybe \citet{Gull1989bayesian}.
+Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. As such, this work provides a simple treatment of truncated data in a common Bayesian technique. Section \ref{sec:perfect} discusses the ever-elusive case of perfect data without truncation to provide a common basis for Sections \ref{sec:imperfect} and \ref{sec:real}, which respectively cover analytically correctable data truncation and analytically intractable models. Section \ref{sec:tricks} details numeric 
 
-Gibbs sampling with truncated data \citep{Gelfand1992}
 
-Truncated data example \citep{grogger1991models} \citep{o1995truncated}
 
 \section{The perfect world}
-
+\label{sec:perfect}
 In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum. Let us create a mock model in this perfect world. Let us observe a series of iid events $\vec{x}$, which is known perfectly and drawn from a normal distribution such that 
 \begin{align}
 \vec{x} \sim \mathcal{N}(\mu,\sigma)
@@ -115,7 +113,7 @@ Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our 
 
 
 \section{The Imperfect World}
-
+\label{sec:imperfect}
 In a slightly imperfect world we may have to deal with something like truncated data. For an example, consider the previous model, but with an instrumentation deficiency such that we can only observe events above a certain threshold, such that $x > \alpha$, assigning a value $\alpha=85$ for convenience. If we don't take this truncation into account, we will recovered biased parameter estimates, as shown in Figure \ref{fig:imperfect}. However, we can correct for this truncation. If restate our likelihood to take into account some selection effect $S$, our likelihood for a single event can be stated as
 \begin{align}
 \mathcal{L} &= P(x | \theta, S)\\
@@ -139,7 +137,7 @@ if $\mu > \alpha$. We can add this correction to our model, and note that we now
 \end{figure}
 
 \section{The Real World}
-
+\label{sec:real}
 Unfortunately it is a rare scenario when dealing with nature and all her faults for us to have an analytic selection function. Let alone a function encapsulated by a single parameter. A more realistic scenario involves a selection efficiency which cannot be conveniently described by an analytic function. Instead, we would have a high dimensional non-analytic function. And its probably stochastic too, just to throw another wrench in the works. Provided a method of forward modelling or simulating observations, the solution is Monte Carlo integration combined with an analytic approximate correction.
 
 So let us extend our toy model. We observe not just $x \sim \mathcal{N}(\mu, \sigma)$, but also another independent variable, $y \sim \mathcal{N}(\mu_y, \sigma_y)$. Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$.  Our likelihood for such a toy model becomes
@@ -172,6 +170,8 @@ Further tricks can be used to increase the efficiency with which the samples are
 	\label{fig:real}
 \end{figure}
 
+\section{Numerical Tricks}
+\label{sec:tricks}
 Alternatively, if evaluating the probability that an event is observed is numerically expensive, it is easy to pregenerate a set of events and reuse them for all weights - provided that the number of events used when calculating the weights is sufficient to make the statistical error of Monte Carlo integration insignificant when compared to the constraining power of your dataset. This method is however only efficient when prior knowledge of parameter values is known to allow a reasonable initial draw of events.
 
 
