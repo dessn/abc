@@ -71,7 +71,7 @@ def get_stuff(i):
     weights = np.exp(weights)
     return (chain1, chain2, weights)
 
-res = Parallel(n_jobs=4, backend="threading")(delayed(get_stuff)(i) for i in range(32))
+res = Parallel(n_jobs=4, backend="threading")(delayed(get_stuff)(i) for i in range(100))
 all_samples = np.vstack([r[0] for r in res])
 all_sampels_corrected = np.vstack([r[1] for r in res])
 weights = np.array([r[2] for r in res]).flatten()
@@ -79,8 +79,8 @@ print(weights.max(), weights.min(), weights.mean())
 
 from chainconsumer import ChainConsumer
 c = ChainConsumer()
-c.add_chain(all_samples, parameters=[r"$\mu_x$", r"$\sigma_x$", r"$\mu_y$"], name="Biased")
+c.add_chain(all_samples, parameters=[r"$\mu$", r"$\sigma$", r"$\mu_y$"], name="Biased")
 c.add_chain(all_sampels_corrected, name="Approximate")
 c.add_chain(all_sampels_corrected, weights=weights, name="Corrected")
-c.configure(flip=False, sigmas=[0,1,2], colors=["#D32F2F", "#4CAF50", "#333333"], linestyles=["-", "--", ":"], shade_alpha=0.2, shade=True)
+c.configure(flip=False, sigmas=[0,1,2], colors=["#D32F2F", "#4CAF50", "#222222"], linestyles=[":", "--", "-"], shade_alpha=0.2, shade=True)
 c.plot(filename="real2.pdf", figsize="column", truth=[100, 10], extents=[[90, 110],[6,15]], parameters=2)
