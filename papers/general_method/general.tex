@@ -79,7 +79,7 @@ $^{2}$ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)
 
 
 \begin{abstract}
-I present a rigorous treatment for truncated or biased datasets by combining Bayesian analysis methods with Monte Carlo simulations.
+Truncated datasets are a pervasive problem in modern science. In this paper I present a simple overview of a Bayesian consideration of truncation, giving a solution to analytically tractable models. Additionally, truncation which cannot be analytically corrected is shown to be correctable easily via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations for implementation.
 \end{abstract}
 
 
@@ -87,7 +87,7 @@ I present a rigorous treatment for truncated or biased datasets by combining Bay
 
 \section{Introduction}
 
-Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. As such, this work provides a simple treatment of truncated data in a common Bayesian technique. Section \ref{sec:perfect} discusses the ever-elusive case of perfect data without truncation to provide a common basis for Sections \ref{sec:imperfect} and \ref{sec:real}, which respectively cover analytically correctable data truncation and analytically intractable models. Section \ref{sec:tricks} details numeric 
+Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. As such, this work provides a simple treatment of truncated data in a common Bayesian technique. Section \ref{sec:perfect} discusses the ever-elusive case of perfect data without truncation to provide a common basis for Sections \ref{sec:imperfect} and \ref{sec:real}, which respectively cover analytically correctable data truncation and analytically intractable models. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
 
 
 
@@ -160,7 +160,7 @@ $\mathcal{L}_1$ can thus be fitted with a traditional sampler without numeric di
 \begin{align}
 \mathcal{L}_2 = \frac{ w n }{\sum_{i=1}^{n} \mathcal{H}(x + \beta y - \alpha) \mathcal{N}(X_i|\mu, \sigma) \mathcal{N}(Y_i|\mu_y, \sigma_y)}
 \end{align}
-Further tricks can be used to increase the efficiency with which the samples are reweighted. Firstly, the overarching analytic model often provides functions which can be drawn from efficiently. In the case of our example, by drawing the random numbers $X$ and $Y$ respectively from the normal distributions $\mathcal{N}(\mu,\sigma)$ and $\mathcal{N}(\mu_y,\sigma_y)$ (ie traditional importance sampling) we need only evaluate the step function for our data points. This is demonstrated in Figure \ref{fig:real}.
+
 
 \begin{figure}
 	\begin{center}
@@ -169,10 +169,15 @@ Further tricks can be used to increase the efficiency with which the samples are
 	\caption{A systematic test of our more complicated model, done by stacking the output chains from fitting 100 independent realisations of our 100 data points, subject to our thresholding. The likelihood $\mathcal{L}_1$ was evaluated with the fitting algorithm emcee, and reweighted using Monte Carlo integration of a hundred thousand possible events as per $\mathcal{L}_2$. The truncated data with no correction is shown as `Biased' in dotted red, the `Approximate` only correction ($\mathcal{L}_1$) shown in dashed green, and the final reweighted chain shown in solid black as `Corrected'.}
 	\label{fig:real}
 \end{figure}
+Thus we end up with a corrected posterior surface as shown in Figure \ref{fig:real}.
+
 
 \section{Numerical Tricks}
 \label{sec:tricks}
-Alternatively, if evaluating the probability that an event is observed is numerically expensive, it is easy to pregenerate a set of events and reuse them for all weights - provided that the number of events used when calculating the weights is sufficient to make the statistical error of Monte Carlo integration insignificant when compared to the constraining power of your dataset. This method is however only efficient when prior knowledge of parameter values is known to allow a reasonable initial draw of events.
+Further tricks can be used to increase the efficiency with which the samples are reweighted. Firstly, the overarching analytic model often provides functions which can be drawn from efficiently. In the case of our example, by drawing the random numbers $X$ and $Y$ respectively from the normal distributions $\mathcal{N}(\mu,\sigma)$ and $\mathcal{N}(\mu_y,\sigma_y)$ (ie traditional importance sampling) we need only evaluate the step function for our data points.
+
+
+If evaluating the probability that an event is observed is numerically expensive (i.e. not a step function), it is easy to pregenerate a set of events and reuse them for all weights - provided that the number of events used when calculating the weights is sufficient to make the statistical error of Monte Carlo integration insignificant when compared to the constraining power of your dataset. This method is however only efficient when prior knowledge of parameter values is known to allow a reasonable initial draw of events. Without this prior information, samples need to span the entire posterior volume, which is numerically intractable even for low dimensional models.
 
 
 
@@ -183,7 +188,7 @@ Alternatively, if evaluating the probability that an event is observed is numeri
 
 
 
-Still da bes
+Reword the abstract or similar
 
 
 \section*{Acknowledgments}
