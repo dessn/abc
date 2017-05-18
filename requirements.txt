@@ -2,7 +2,7 @@ astropy
 corner
 numpy
 matplotlib
-sphinx
+sphinx<=1.5.5
 numpydoc
 sphinx_rtd_theme
 scipy
