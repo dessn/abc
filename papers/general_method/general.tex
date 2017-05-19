@@ -79,7 +79,7 @@ $^{2}$ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)
 
 
 \begin{abstract}
-{\red Add example. Make abstract less boring} Truncated datasets are a pervasive problem in modern science. In this paper I present a simple overview of a Bayesian consideration of truncation, giving a solution to analytically tractable models. Additionally, truncation which cannot be analytically corrected is shown to be correctable easily via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations for implementation.
+Lifetimes are strictly positive. Fainter objects are harder to see with a telescope than brighter ones. We cut our data to remove background noise.  Truncated or biased datasets are inescapable in modern physics. In this paper, I present a simple overview of a Bayesian consideration of truncation, giving a solution to both analytically tractable and intractable models. This can be accomplished via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations and optimisations for implementation.
 \end{abstract}
 
 
@@ -121,10 +121,10 @@ Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our 
 
 \section{The Imperfect World: Analytic Truncation}
 \label{sec:imperfect}
-In a slightly imperfect world we may have to deal with something like truncated data. For an example, consider the previous model, but with an instrumentation deficiency such that we can only observe events above a certain threshold, such that $x > \alpha$, assigning a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates, as shown in Figure \ref{fig:imperfect}. However, we can correct for this truncation. If we restate our likelihood to take into account some selection effect $S$, our likelihood can be colloquially stated as the probability of observation given our model parameters \textit{and} our selection effects. Mathematically for a single event this can be stated as
+In a slightly imperfect world we may have to deal with something like truncated data. For an example, consider the previous model, but with an instrumentation deficiency such that we can only observe events above a certain threshold, such that $x > \alpha$. I assign a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates, as shown in Figure \ref{fig:imperfect}. However, we can correct for this truncation. If we restate our likelihood as the probability of observation given our model parameters \textit{and} our selection effects $S$, we have
 \begin{align}
 \mathcal{L} &= P(x | \theta, S)\\
-&= \frac{P(S|x,\theta) P(x|\theta)}{P(S|\theta)}
+&= \frac{P(S|x,\theta) P(x|\theta)}{P(S|\theta)}.
 \end{align}
 Introducing an integral over all possible data to make $P(S|\theta)$ physical,
 \begin{align}
