@@ -27,6 +27,6 @@ all_samples = np.vstack(all_samples)
 from chainconsumer import ChainConsumer
 c = ChainConsumer()
 c.add_chain(all_samples, parameters=[r"$\mu$", r"$\sigma$"])
-c.configure(flip=False, sigmas=[0,1,2])
+c.configure(flip=False, sigmas=[0,1,2], summary=False)
 c.plot(filename="perfect.pdf", figsize="column", truth=[100,10])
 
