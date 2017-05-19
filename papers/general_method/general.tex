@@ -79,7 +79,7 @@ $^{2}$ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)
 
 
 \begin{abstract}
-Truncated datasets are a pervasive problem in modern science. In this paper I present a simple overview of a Bayesian consideration of truncation, giving a solution to analytically tractable models. Additionally, truncation which cannot be analytically corrected is shown to be correctable easily via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations for implementation.
+{\red Add example. Make abstract less boring} Truncated datasets are a pervasive problem in modern science. In this paper I present a simple overview of a Bayesian consideration of truncation, giving a solution to analytically tractable models. Additionally, truncation which cannot be analytically corrected is shown to be correctable easily via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations for implementation.
 \end{abstract}
 
 
@@ -87,19 +87,26 @@ Truncated datasets are a pervasive problem in modern science. In this paper I pr
 
 \section{Introduction}
 
-Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. As such, this work provides a simple treatment of truncated data in a common Bayesian technique. Section \ref{sec:perfect} discusses the ever-elusive case of perfect data without truncation to provide a common basis for Sections \ref{sec:imperfect} and \ref{sec:real}, which respectively cover analytically correctable data truncation and analytically intractable models. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
+Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. This work provides a simple treatment of truncated data in a common Bayesian technique. Section \ref{sec:perfect} discusses the ever-elusive case of perfect data without truncation to provide a common basis for Sections \ref{sec:imperfect} and \ref{sec:real}, which respectively cover analytically correctable data truncation and analytically intractable models. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
 
 
 
-\section{The perfect world}
+\section{The perfect world: No Truncation}
 \label{sec:perfect}
-In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum. Let us create a mock model in this perfect world. Let us observe a series of iid events $\vec{x}$, which is known perfectly and drawn from a normal distribution such that 
+In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum. Let us create a mock model in this perfect world. Let us observe a series of independent and identically distributed events $\vec{x}$, which are drawn from a normal distribution such that 
 \begin{align}
-\vec{x} \sim \mathcal{N}(\mu,\sigma)
+\vec{x} \sim \mathcal{N}(\mu,\sigma).
 \end{align}
-If, having collected our observations of $\vec{x}$, we wanted to constrain $\mu$ and $\sigma$, this would be a simple task of modelling the posterior surface. Taking uniform priors on both parameters we simply wish to map the surface
+If, having collected our observations $\vec{x}$, we wanted to constrain $\mu$ and $\sigma$, this would be a simple task of modelling the posterior surface. Taking uniform priors on both parameters we simply wish to map the surface
 \begin{align}
-P(\mu,\sigma| \vec{x}) &\propto P(\vec{x} | \mu, \sigma) P(\mu, \sigma) \\
+P(\theta | {\rm data}) \propto P({\rm data} | \theta) P(\theta),
+\end{align}
+where our model parameters $\theta = \lbrace \mu, \sigma \rbrace$ and our data is given by $\vec{x}$.
+\begin{align}
+P(\mu,\sigma| \vec{x}) &\propto P(\vec{x} | \mu, \sigma) P(\mu, \sigma)
+\end{align}
+With uniform priors, $P(\mu,\sigma) = {\rm constant}$, and can be absorbed into the constant of proportionality. Expanding our observation vector, the posterior surface is given by
+\begin{align}
 P(\mu,\sigma| \vec{x}) &\propto \prod_{i=1}^N \mathcal{N}(x_i | \mu, \sigma).
 \end{align}
 Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our input parameters easily, as shown in Figure \ref{fig:perfect}.
@@ -107,47 +114,50 @@ Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our 
 	\begin{center}
 		\includegraphics[width=\columnwidth]{example/perfect.pdf}
 	\end{center}
-	\caption{A systematic test of our perfect model, done by stacking the output chains from fitting 100 independent realisations of our 100 data points. Posterior surface mapped out using emcee.}
+	\caption{A systematic test of our perfect model, done by stacking the output chains from fitting 100 independent realisations of our 100 data points. Any systematic offset in our model would be revealed by a shift in the stacked results away from the true parameter values.}
 	\label{fig:perfect}
 \end{figure}
 
 
-\section{The Imperfect World}
+\section{The Imperfect World: Analytic Truncation}
 \label{sec:imperfect}
-In a slightly imperfect world we may have to deal with something like truncated data. For an example, consider the previous model, but with an instrumentation deficiency such that we can only observe events above a certain threshold, such that $x > \alpha$, assigning a value $\alpha=85$ for convenience. If we don't take this truncation into account, we will recovered biased parameter estimates, as shown in Figure \ref{fig:imperfect}. However, we can correct for this truncation. If restate our likelihood to take into account some selection effect $S$, our likelihood for a single event can be stated as
+In a slightly imperfect world we may have to deal with something like truncated data. For an example, consider the previous model, but with an instrumentation deficiency such that we can only observe events above a certain threshold, such that $x > \alpha$, assigning a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates, as shown in Figure \ref{fig:imperfect}. However, we can correct for this truncation. If we restate our likelihood to take into account some selection effect $S$, our likelihood can be colloquially stated as the probability of observation given our model parameters \textit{and} our selection effects. Mathematically for a single event this can be stated as
 \begin{align}
 \mathcal{L} &= P(x | \theta, S)\\
-&= \frac{P(S|x,\theta) P(x|\theta)}{P(S|\theta)} \\
-&= \frac{P(S|x,\theta) P(x|\theta)}{\int P(S, D|\theta)\, dD} \\
-&= \frac{P(S|x,\theta) P(x|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD},
+&= \frac{P(S|x,\theta) P(x|\theta)}{P(S|\theta)}
 \end{align}
-where $D$ is a potential observable. In our example, the selection efficiency is a step function, having observed $x$, $P(S|x,\theta) = 1$. To substitute in our normal model,
+Introducing an integral over all possible data to make $P(S|\theta)$ physical,
+\begin{align}
+&= \frac{P(S|x,\theta) P(x|\theta)}{\int P(S, D|\theta)\, dD} \\
+&= \frac{P(S|x,\theta) P(x|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}.
+\end{align}
+In our example, the selection efficiency is the step function $P(S|x,\theta) = \mathcal{H}(x - \alpha)$. Having successfully observed $x$, it follows that $x > \alpha$ and so $P(S|x,\theta) = 1$. To substitute in our normal model,
 \begin{align}
 \mathcal{L} &= \frac{ \mathcal{N}(x|\mu, \sigma)}{\int_{-\infty}^\infty \mathcal{H}(D - \alpha) \mathcal{N}(D|\mu, \sigma)\, dD} \\
 &= \frac{ \mathcal{N}(x|\mu, \sigma)}{\int_{\alpha}^\infty \mathcal{N}(D|\mu, \sigma)\, dD} \\
 &= \frac{ \mathcal{N}(x|\mu, \sigma)}{\frac{1}{2} {\rm erfc}\left[ \frac{\alpha - \mu}{\sqrt{2}\sigma} \right]}, 
 \end{align}
-if $\mu > \alpha$. We can add this correction to our model, and note that we now recover unbiased parameter estimates, also shown in Figure \ref{fig:imperfect}.
+where in the last line I have evaluated the integral in the case $\mu > \alpha$. We can add this correction to our model, and note that we now recover unbiased parameter estimates, also shown in Figure \ref{fig:imperfect}.
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{example/imperfect.pdf}
 	\end{center}
-	\caption{A systematic test of our imperfect model, done by stacking the output chains from fitting 100 independent realisations of our 100 data points, subject to our thresholding.}
+	\caption{A systematic test of our imperfect model, done by stacking the output chains from fitting 100 independent realisations of our 100 data points, subject to our thresholding. The bias shown in the red `Biased' contour can be corrected to via the techniques shown in Section \ref{sec:imperfect} to recover unbiased surfaces.}
 	\label{fig:imperfect}
 \end{figure}
 
-\section{The Real World}
+\section{The Real World: Intractable Truncation}
 \label{sec:real}
-Unfortunately it is a rare scenario when dealing with nature and all her faults for us to have an analytic selection function. Let alone a function encapsulated by a single parameter. A more realistic scenario involves a selection efficiency which cannot be conveniently described by an analytic function. Instead, we would have a high dimensional non-analytic function. And its probably stochastic too, just to throw another wrench in the works. Provided a method of forward modelling or simulating observations, the solution is Monte Carlo integration combined with an analytic approximate correction.
+Unfortunately it is a rare scenario when dealing with nature and all her faults for us to have an analytic selection function, let alone a function encapsulated by a single parameter. A more realistic scenario involves a selection efficiency instead would take the form of non-analytic function of many model parameters. And the function would probably be stochastic too, just to throw another wrench in the works. Provided a method of forward modelling or simulating observations, the solution is to combine an analytic approximate correction with Monte Carlo integration.
 
-So let us extend our toy model. We observe not just $x \sim \mathcal{N}(\mu, \sigma)$, but also another independent variable, $y \sim \mathcal{N}(\mu_y, \sigma_y)$. Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$.  Our likelihood for such a toy model becomes
+So let us modify our imperfect toy model. Instead of observing just one variable, $x$, we also observe a new independent variable, $y$, which is drawn from its own distribution $y \sim \mathcal{N}(\mu_y, \sigma_y)$. Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$.  Our likelihood for such a toy model becomes now the combination of probabilities for observing both $x$ and $y$, with the denominator becoming an integral over all possible $X$ and $Y$ observations.
 \begin{align}
 \mathcal{L} &= \frac{ \mathcal{N}(x|\mu, \sigma) \mathcal{N}(y|\mu_y, \sigma_y)}
 {\iint_{-\infty}^\infty \mathcal{H}(x + \beta y - \alpha) \mathcal{N}(X|\mu, \sigma) \mathcal{N}(Y|\mu_y, \sigma_y)\, dX dY}
 \end{align}
-Assume that we cannot solve these integral analytically, and must resort to numeric solutions. These often clash with sampling methods, especially for high dimensional integrals. Inserting Monte Carlo integration into fitting algorithms can drastically slow them down, and such as Hamiltonian MCMC that require continuous surfaces can easily fail on surfaces that, via Monte Carlo integration, fluctuate. Even by fixing the samples used in MC integration (thereby giving a continuous surface), the complexity of the surface derivatives will pose almost insurmountable problems for any algorithms that utilise surface gradients. One solution is to find an approximate, analytic correction we can utilise in our fitting algorithm which seeks to shift the region of parameter space sampled by the sampler closer to the correct area.
+Assume that we cannot solve this integral analytically, and must resort to numeric solutions. These often clash with sampling methods, especially for high dimensional integrals. Inserting Monte Carlo integration into fitting algorithms can drastically slow them down, and algorithms such as Hamiltonian MCMC that require continuous surfaces can easily fail on surfaces that fluctuate from Monte Carlo integration. Even by fixing the samples used in MC integration (thereby giving a continuous surface), the complexity of the surface derivatives will pose almost insurmountable problems for any algorithms that utilise surface gradients. One solution is to find an approximate, analytic correction we can utilise in our fitting algorithm which seeks to shift the region of parameter space sampled by the sampler closer to the correct area.
 
-In our example, if $\beta \ll 1$, such that the majority of selection effect is encapsulated by $x$ and not $y$, our approximate correction can take the form found in the previous example. Having true values of $\mu = 100$, $\sigma = 10$, $\mu_y = 30$, $\sigma_y = 5$, and a known $\beta = 0.2$, we can give a concrete example. Assuming some prior, imperfect knowledge of $mu_y$  we estimate that the average contribution from $\beta y$ is around $4$ (which is close to the correct value of $6$), and from this our analytic correction to our likelihood is
+In our example, if $\beta \ll 1$, such that the majority of selection effect is encapsulated by $x$ and not $y$, our approximate correction can take the form found in the previous example. Having true values of $\mu = 100$, $\sigma = 10$, $\mu_y = 30$, $\sigma_y = 5$, and a known $\beta = 0.2$, we can give a concrete example. Assuming some prior, imperfect knowledge of $\mu_y$  we estimate that the average contribution from $\beta y$ is around $4$ (which is close to the correct value of $6$), and from this our analytic correction to our likelihood is
 \begin{align}
 w = \frac{1}{2} {\rm erfc}\left[ \frac{\alpha - \mu - 4}{\sqrt{2}\sigma} \right]
 \end{align}
