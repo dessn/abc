@@ -1,18 +1,6 @@
 r""" My attempt at a proper STAN model.
 
 
-I follow Rubin et al. (2015) with some changes.
-
-    1. I do not model :math:`\alpha` and :math:`\beta` as functions of redshift, due to my limited dataset.
-    2. I do not take outlier detection into account.
-    3. I incorporate intrinsic dispersion via SN population, not as an observational effect.
-
-Instead, selection effects are taken into account via the methodology discussed
-and verified in the model proofs section of this work. To continue, we should
-first formalise the model itself.
-
-----------
-
 Parameters
 ----------
 
@@ -27,13 +15,14 @@ Parameters
 
     * :math:`\langle M_B \rangle`: mean absolute magnitude of supernova
     * :math:`\sigma_{M_B}`: standard deviation of absolute magnitudes
-    * :math:`\langle c \rangle`: mean colour
+    * :math:`\langle c_i \rangle`: mean colour, as a function of redshift
     * :math:`\sigma_c`: standard deviation of  colour
-    * :math:`\langle x_1 \rangle`: mean scale
+    * :math:`\langle x_{i1} \rangle`: mean scale, as a function of redshift
     * :math:`\sigma_{x_1}`: standard deviation of scale
     * :math:`\rho`: correlation (matrix) between absolute magnitude, colour and stretch
 
 **Marginalised parameters**:
+
     * :math:`\delta(0)` and :math:`\delta(\infty)`: The magnitude-mass relationship
     * :math:`\delta \mathcal{Z}_b`: Zeropoint uncertainty for each of the *g,r,i,z* bands.
 
@@ -67,43 +56,18 @@ For simplicity, we adopt the commonly used notation that :math:`\eta\equiv \lbra
 .. math::
     :label: a
 
-    P(\theta|D) &= \frac{ \mathcal{L}(D|\theta) P(\theta) }{\int \mathcal{L}(D|\theta^\prime) P(\theta^\prime)  \,d\theta^\prime}  \\[10pt]
-                &\propto \mathcal{L}(D|\theta) P(\theta) \\
+    P(\theta|D) &\propto \mathcal{L}(D|\theta, S) P(\theta) \\
 
 with
 
 .. math::
     :label: b
 
-    \mathcal{L}(D|\theta) &= \frac{ P(D|\theta)}{\int  P(D^\prime|\theta) \ dD^\prime}, \\
+    \mathcal{L}(D|\theta, S) &= \frac{P(S | D, \theta) P(D|\theta)}{\int P(S|R, \theta) P(R|\theta) \ dR}, \\
 
-where :math:`D^\prime` represents all possible experimental outcomes. It is important to note that this is where
-our selection effects kick in: :math:`D^\prime` is the subset of all possible data that satisfies our
-selection effect, as only data that passes our cuts can be an experimental outcome that could
-appear in the likelihood. We can formally model this inside the integral by denoting our selection function
-as :math:`S(R)` that returns :math:`0` if the data :math:`R` does not pass the cut, and :math:`1` if the input data does
-pass the cut, such that
+where :math:`R` represents all possible data. To simplify notation in the future
+I define :math:`w \equiv \int P(S|R, \theta) P(R|\theta) \ dR`.
 
-.. math::
-    :label: c
-
-    \int d D^\prime\  f(D^\prime) = \int d R\  S(R) f(R),\\
-
-where :math:`R` represents all possible data - not just all possible experimental outcomes.
-To put everything back together, we thus have
-
-.. math::
-    :label: cg
-
-    P(\theta|D) &\propto \frac{P(D|\theta) P(\theta)}{\int  S(R) P(R|\theta) \ dR  } \\[10pt]
-    &= \frac{P(D|\theta) P(\theta)}{w  }
-
-where in the last line to make the notation easier I define :math:`w \equiv \int  S(R) P(R|\theta) \ dR`.
-
-An equivalent way of writing this down is rephrase the probability of attaining an experimental outcome
-as the product of an event occurring given :math:`\theta` multiplied by the conditional probability
-of our experiment observing the event, given that it did occur. I simply write out :math:`S(R)` instead
-of writing it as a conditional probability to reduce the number of subscripts in the notation.
 
 ----------
 
@@ -116,8 +80,8 @@ differently. For simplicity, let us denote the population parameters
 :math:`\lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle, \sigma_{M_B}, \sigma_{x_1}, \sigma_c, \rho \rbrace`
 shown under the Population header as :math:`\gamma`.
 
-Furthermore, in the interests of simplicity, let us examine only a single supernova for the time being. As I don't
-yet take calibration into account, the supernova are independent. Let us denote the unnormalised likelihood for a single
+Furthermore, in the interests of simplicity, let us examine only a single supernova for the time being. 
+Let us denote the unnormalised likelihood for a single
 supernova as :math:`P (D_i|\theta)`.
 
 .. math::
@@ -134,7 +98,8 @@ zero point uncertainty from photometry (currently just set to 0.01 mag normal un
 and other parameters with flat priors. The prior
 distributions on redshift and host mass do not matter in this likelihood (without bias corrections),
 as we assume redshift and mass are precisely known.
-So now we can focus on the likelihood's numerator, which is
+So now we can focus on the likelihood, and introduce latent variables :math:`\eta` to represent the true values
+from which the observations are drawn from.
 
 .. math::
     :label: e
@@ -299,7 +264,7 @@ compute the bias correction as
     :label: mmm
 
     w &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
-    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
+    \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   P(S|m_B, x_1, c, z, m) \\
     &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
     \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
     \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z|\theta) \\
@@ -311,14 +276,14 @@ compute the bias correction as
         :label: m
 
         w &= \iiint d\hat{\eta} \iiint d\eta \int dM_B\  \int d\hat{z} \int \hat{m} \int dz \int dm \,
-        P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) S(m_B, x_1, c, z, m) \\[10pt]
+        P(\hat{\eta},\eta, \hat{z},z, \hat{m},m, M_B|\theta) P(S|m_B, x_1, c, z, m)  \\[10pt]
         &= \idotsint d\hat{\eta} \, d\eta \, d\hat{z} \, dz\, d\hat{m}\, dm\, dM_B\
-        \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
+        \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   P(S|m_B, x_1, c, z, m)  \\
         &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
         \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
         \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)\delta(\hat{z} - z) \delta(\hat{m}-m) P(z|\theta) \\[10pt]
         &= \idotsint d\hat{\eta} \, d\eta \, dz\, dm\, dM_B\
-        \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   S(m_B, x_1, c, z, m) \\
+        \mathcal{N}\left( \hat{\eta} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta}}{\partial\mathcal{Z}} | \eta, C \right)\   P(S|m_B, x_1, c, z, m) \\
         &\quad\quad\quad  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right)\
         \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace |
         \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) P(z|\theta)  \\
@@ -345,7 +310,7 @@ except with some extra integral signs that marginalise over all possible experim
     :label: o
 
     w &= \idotsint d\eta\, dz \, dm \, dM_B\
-    S(m_B, x_1, c, z, m) \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) P(z|\theta) \\
+    P(S|m_B, x_1, c, z, m)  \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) P(M_B, x_1, c | \gamma) P(z|\theta) \\
 
 Addressing each component individually:
 
@@ -353,7 +318,7 @@ Addressing each component individually:
     :label: p
 
     P(M_B, x_1, c|\gamma) &= \mathcal{N}\left( \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \\
-    S(m_B, x_1, c, z, m) &= \text{If the supernova (light curves and summary stats) pass the cut} \\
+    P(S|m_B, x_1, c, z, m)  &= \text{Probability of selection given actual underlying supernova values} \\
     \delta\left(M_B - \left[ m_B - \mu + \alpha x_1 - \beta c + k(z) m\right]\right) &= \text{Transformation function} \\
     P(z|\theta)   &= \text{Redshift distribution of supernova} \\
 
@@ -374,7 +339,7 @@ account the number of supernova we have:
 .. note::
     :class: green
 
-    **Technical aside**: Calculating :math:`S(m_B, x_1, c, z, m)`
+    **Technical aside**: Calculating :math:`P(S|m_B, x_1, c, z, m) `
     is not an analytic task. It has complications not just in the distance modulus being the
     result of an integral, but also that the colour and stretch correction factors make
     extra use of supernova specific values. The way to efficiently determine the efficiency
@@ -426,38 +391,9 @@ account the number of supernova we have:
     re-weighting (bias correction) to shift the posterior maximum to the correct location. Because
     of this, we will need to implement an approximate bias correction in Stan.
 
-    .. admonition:: Show/Hide discussion
-        :class: toggle note math
-
-        To provide a concrete example, suppose our weight (:math:`w`) is 0.99 in one section
-        of the parameter space, and 1.01 in another section (normalised to some arbitrary point).
-        With 300 data points, the difference in weights between those two points would be
-        :math:`(1.01/0.99)^{300} \approx 404`. This difference in weights is potentially beyond
-        the ability to re-weight an existing chain of results, and so the weights may need to
-        be implemented directly inside the posterior evaluated by the fitting algorithm.
-
-        An example of importance sampling an uncorrected posterior surface is shown below.
-
-        .. figure::     ../dessn/models/d_simple_stan/output/plot_simple_single_weight.png
-            :align:     center
-            :width: 70%
-
-            In blue we have the posterior surface for a likelihood that does not have any
-            bias correction, and the red shows the same posterior after I have applied the
-            :math:`w^{-N}` bias correction. Normalised to one, the mean weight of points
-            after resampling is :math:`0.0002`, with the minimum weighted point weighted
-            at :math:`2.7\times 10^{-13}`. The staggeringly low weights attributed
-            is an artifact of the concerns stated above. The only good news I can see in this
-            posterior is that there *does* seem to be a shift in :math:`\langle c \rangle` towards
-            the correct value.
-
-        If we focus on :math:`\langle c \rangle` for a second, we can see that the correct
-        value falls roughly :math:`3\sigma` away from the sampled mean, and so this raises the
-        question; *Is the issue simply that we have too few samples in the correct region of
-        parameter space? Is that why our weights are on average so low?*
 
 To recap, we have a full bias correction that can be computed using Monte-Carlo integration. However,
-Monte-Carlo integration cannot be put inside the Stan framework, and having no bias corretion
+Monte-Carlo integration cannot be put inside the Stan framework, and having no bias correction
 at all in the Stan framework means that our sampling efficiency drops to close to zero, which makes
 it very difficult to adequately sample the posterior adequately. As such, we need an approximate
 bias correction which *can* go inside Stan to improve our efficiency.
