@@ -555,74 +555,48 @@ difference between the approximate weight and the actual weight.
 Final Model
 -----------
 
-To lay out all the math in one go, the blue section represents the model fitted using STAN, and the red math
-represents are post-fit weight corrections to correctly take into account bias.
+From the mathematics laid out before, I test three models. 
 
-.. math::
-    :label: finall
+For the first model, as the hostmass distribution and redshift
+distribution are not well known, I keep mass and redshift as top level model parameters.
+With this, I adopt the assumption of the redshift distribution being well sampled, and apply only the
+approximate correction. As such, this will allow me to get a reference for the other two models.
 
-    \definecolor{blue}{RGB}{18,110,213}
-    \definecolor{red}{RGB}{230,0,29}
-    P(\theta|D) &\propto \color{red} \left[ \frac{
-     \int dz \,
-    \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
-    \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2} \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 +      \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
-    P(z|\theta)  }
-    {\sum_{\rm passed} \frac{\mathcal{N}\left(
-    \lbrace M_B, x_1, c \rbrace | \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right)}{\mathcal{N}_{\rm sim}}
-    \left( \mathcal{N}_{\rm sim} dm_B\,d x_1\, d_c \right)\, dz\, dm  }\right]^N \\
-    &\quad\quad\quad \color{blue} \idotsint d\vec{\eta} \,d\vec{M_B}\  \rm{Cauchy}(\sigma_{M_B}|0,2.5) \rm{Cauchy}(\sigma_{x_1}|0,2.5) \rm{Cauchy}(\sigma_{c}|0,2.5) \rm{LKJ}(\rho|4) \\
-    &\quad\quad\quad \color{blue} \prod_{i=1}^N \Bigg[ \mathcal{N}\left(  \hat{\eta_i} + \delta\mathcal{Z}_b \frac{\partial\hat{\eta_i}}{\partial\mathcal{Z}}  | \eta_i, C_i \right)
-    \delta\left(M_{Bi} - \left[ m_{Bi} - \mu_i + \alpha x_{1i} - \beta c_i + k(z_i) m_i \right]\right)  \\
-    &\quad\quad\quad\quad\quad \color{blue}  \mathcal{N}\left( \lbrace M_{Bi}, x_{1i}, c_i \rbrace |
-    \lbrace \langle M_B \rangle, \langle x_1 \rangle, \langle c \rangle \rbrace, V \right) \delta(z_i-\hat{z_i})
-    \delta(m_i - \hat{m_i}) \Bigg] \\
-    &\quad\quad\quad\quad\quad \color{blue}  \left[
-    \int dz \,
-    \mathcal{N} \left( \frac{ m_{B,{\rm eff}} - m_B^*(z) }{ \sqrt{ \sigma_{{\rm eff}}^2 + \sigma_{m_B}^{*2} }} \right)
-    \Phi\left( \frac{m_B^*(z) - m_{B,{\rm eff}} }{ \frac{\sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2}{\sigma_{{\rm eff}}^2}
-    \sqrt{ \left( \frac{ \sigma_{{\rm eff}} }{ \alpha_{\rm eff} }  \right)^2 + \frac{  \sigma_{m_B}^{*2} \sigma_{{\rm eff}}^2  }{ \sigma_{m_B}^{*2} +  \sigma_{{\rm eff}}^2 }        } }  \right)
-    P(z|\theta)
-    \right]^{-N}\\
+The second and third models have mass and redshift coming from a parent population. The two models
+are when applying the full Monte-Carlo correction and when not (keeping it only the approximate 
+correction).
 
+To test the models, I have multiple datasets I test them on. The `simple` dataset is one constructed
+by hand with simple draws and a perfect selection effect. The SNANA datasets use SNANA and thus
+have proper selection effects which are not perfectly skew normal. There are multiple realisations
+of :math:`\Omega_m`, and a simulation which introduces a skewed colour distribution (bifurcated gaussian 
+population).
 
-If you want to investigate the folders I have under dessn/models/d_simpe_stan/*, the model described
-by the above equation is the ``approx_skewnorm`` folder, and gives matter density too low. The
-``approx_skewnorm_rubin`` is using the same approximate correction by evaluating it at each
-supernova (the exact and equal redshift approximation). ``approx`` uses the simple CDF approximation
-(not the skewnorm) with a fixed CDF with. ``approx_dynamic`` then has the width of the CDF
-determined properly, but adding that freedom makes :math:`\alpha` and :math:`\beta` balloon out.
-``approx_mass`` is approx with mass corrections in, tested only with sncosmo and not snana to make
-sure the mass didnt do anything too crazy. ``gp``, ``gp_closest`` and ``stan_mc`` are the three
-methods in appendices below which Stan does not converge on. ``simple`` is a model
-without approximation bias correction, and ``simple_skew`` is making the underlying colour distribution
-skewed to see its effect.
-
-The primary model being pursed is the ``approx_skewnorm`` model. Currently the only outstanding
-issue with the model is underestimate the underlying supernova population's dispersion, which
-I am looking at now.
-
-
-.. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/snana_dummy.png
+.. figure::     ../dessn/configurations/plots/approximate_simple_test.png
     :align:     center
-    :width:     80%
+    :width:     100%
 
-    A rough fit to five realisation of 500 SNe for the SNANA dataset. I'm pretty happy with everything bar
-    the population dispersion. You can see that both the dispersion :math:`\sigma_{m_B}` and :math:`\sigma_{x_1}`
-    are underestimated.
+    Approx simple test, looks good.
 
-
-.. figure::     ../dessn/models/d_simple_stan/approx_skewnorm/zplot_approx_skewnorm_snana_dummy.png
+.. figure::     ../dessn/configurations/plots/full_simple_test.png
     :align:     center
-    :width:     80%
+    :width:     100%
 
-    A rough fit to five realisation of 500 SNe for the SNANA dataset, as above. However this time
-    combining the chains and plotting the approximate correction in blue and the full correction in red.
-    Fortunately, we can see no visible bias when we look at our parameter of prime importance, :math:`\Omega_m`.
+    Full simple test, concerns over :math:`\Omega_m` when applying the full correction.
 
+.. figure::     ../dessn/configurations/plots/approximate_snana_array_test.png
+    :align:     center
+    :width:     100%
 
+    Approximate SNANA tests. Looks good. The underestimation of :math:`\sigma` is from SNANA adding
+    extra uncertainty, and the outlier :math:`\sigma_c` from the skewed test is because the bifurcated
+    gaussian has width 0.1 and 0.05, so 0.75 is the correct value for that dataset.
 
+.. figure::     ../dessn/configurations/plots/full_snana_array_test.png
+    :align:     center
+    :width:     100%
 
+    Full SNANA tests. Looks good, as above.
 
 
 
@@ -649,20 +623,11 @@ Appendix 1 - MC inside Stan
     into STAN such that I can perform Monte Carlo integration in a BHM framework significantly
     slows down the fits, however I believed it would at least give good results.
 
-    .. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_single.png
-        :align:     center
-        :width: 50%
-
-        As you can see, I was wrong.
-
-    In addition to the odd contours, we can also see in the walk itself that we have
+    In addition to the odd contours, we I also see in the walk itself that we have
     sampling issues, with some walkers sampling some areas of posterior space more than others.
     Stan's lack of convergence here is a big issue, indicating that the surfaces adding MC integration
     creates are intractable to Stan.
 
-    .. figure::     ../dessn/models/d_simple_stan/output/plot_stan_mc_walk.png
-        :align:     center
-        :width: 50%
 
 
 Appendix 2 - Gaussian Processes
@@ -680,13 +645,7 @@ Appendix 2 - Gaussian Processes
     possible, which is obviously not what is wanted. It seems that without a huge number of points
     (which Stan cannot do) our model is too high-dimensional that we cannot use a Gaussian Process.
 
-    .. figure::     ../dessn/models/d_simple_stan/gp/zplot_snana_dummy.png
-        :align:     center
-        :width: 50%
 
-    .. figure::     ../dessn/models/d_simple_stan/gp/zwalk_snana_dummy.png
-        :align:     center
-        :width: 50%
 
 Appendix 2 - Nearest Point GP
 -----------------------------
@@ -713,11 +672,4 @@ Appendix 2 - Nearest Point GP
     given by the equidistant constraint on a thousand points in high dimensional volume, completely
     breaks Stan's HMC algorithm.
 
-    .. figure::     ../dessn/models/d_simple_stan/gp_closest/zplot_snana_dummy.png
-        :align:     center
-        :width: 50%
-
-    .. figure::     ../dessn/models/d_simple_stan/gp_closest/zwalk_snana_dummy.png
-        :align:     center
-        :width: 50%
 """
