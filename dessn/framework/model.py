@@ -11,7 +11,7 @@ class Model(ABC):
         self.logger.info("Model created with stan file %s" % self.filename)
 
     @abstractmethod
-    def get_init(self):
+    def get_init(self, **kwargs):
         raise NotImplementedError()
 
     @abstractmethod
@@ -33,5 +33,10 @@ class Model(ABC):
         return dictionary
 
     @abstractmethod
-    def get_labels(self, parameters):
+    def get_labels(self):
         raise NotImplementedError()
+
+    def get_init_wrapped(self, **kwargs):
+        def init():
+            return self.get_init(**kwargs)
+        return init

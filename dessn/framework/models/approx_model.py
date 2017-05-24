@@ -13,14 +13,12 @@ from dessn.utility.get_cosmologies import get_cosmology_dictionary
 
 class ApproximateModel(Model):
 
-    def __init__(self, num_supernova, filename="approximate.stan", num_nodes=4):
+    def __init__(self, filename="approximate.stan", num_nodes=4):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
-
         self.num_redshift_nodes = num_nodes
-        self.num_supernova = num_supernova
 
     def get_parameters(self):
         return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -45,7 +43,7 @@ class ApproximateModel(Model):
         ])
         return mapping
 
-    def get_init(self):
+    def get_init(self, **kwargs):
         randoms = {
             "Om": uniform(0.1, 0.6),
             "alpha": uniform(-0.1, 0.4),
@@ -72,40 +70,75 @@ class ApproximateModel(Model):
     def get_name(self):
         return "Approx"
 
-    def get_data(self, simulation, cosmology_index, add_zs=None):
+    def get_data(self, simulations, cosmology_index, add_zs=None):
+        if not type(simulations) == list:
+            simulation = [simulations]
 
-        n_sne = self.num_supernova
-        data = simulation.get_passed_supernova(n_sne, simulation=False, cosmology_index=cosmology_index)
+        n_snes = [sim.num_supernova for sim in simulations]
+        data_list = [s.get_passed_supernova(s.n_sne, simulation=False, cosmology_index=cosmology_index) for s in simulation]
+
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
-        # and then extract the right redshfit indexes from them
-        redshifts = data["redshifts"]
-        masses = data["masses"]
+        # and then extract the right redshift indexes from them
 
         n_z = 2000  # Defines how many points we get in simpsons rule
-
         num_nodes = self.num_redshift_nodes
 
-        if num_nodes == 1:
-            node_weights = np.array([[1]] * n_sne)
-            nodes = [0.0]
-        else:
-            zs = np.sort(redshifts)
-            nodes = np.linspace(zs[2], zs[-5], num_nodes)
-            node_weights = self.get_node_weights(nodes, redshifts)
+        nodes_list = []
+        node_weights_list = []
+        sim_data_list = []
+        num_calibs = []
+        mean_masses = []
+        for data, n_sne in zip(data_list, n_snes):
+            num_calibs.append(data["deta_dcalib"].shape[1])
+            redshifts = data["redshifts"]
+            masses = data["masses"]
+            mean_masses.append(np.mean(masses))
 
-        if add_zs is not None:
-            sim_data = add_zs(simulation)
-            n_sim = sim_data["n_sim"]
-            sim_redshifts = sim_data["sim_redshifts"]
-            dz = max(redshifts.max(), sim_redshifts.max()) / n_z
-            zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
-        else:
-            sim_data = {}
-            dz = redshifts.max() / n_z
-            zs = sorted(redshifts.tolist())
-            n_sim = 0
+            if num_nodes == 1:
+                node_weights = np.array([[1]] * n_sne)
+                nodes = [0.0]
+            else:
+                zs = np.sort(redshifts)
+                nodes = np.linspace(zs[2], zs[-5], num_nodes)
+                node_weights = self.get_node_weights(nodes, redshifts)
 
+            nodes_list.append(nodes)
+            node_weights_list.append(node_weights)
+
+            if add_zs is not None:
+                sim_data = add_zs(simulation)
+            else:
+                sim_data = {}
+
+            sim_data_list.append(sim_data)
+
+        node_weights = np.concatenate(node_weights_list)
+        num_calib = np.sum(num_calibs)
+
+        # data_list is a list of dictionaries, aiming for a dictionary with lists
+        data_dict = {}
+        for key in data_list[0].keys():
+            if key == "deta_dcalib":  # Changing shape of deta_dcalib makes this different
+                offset = 0
+                vals = []
+                for data in data_list:
+                    nsne = data["n_sne"]
+                    blank = np.zeros((nsne, 3, num_calib))
+                    n = data["deta_dcalib"].shape[1]
+                    blank[:, , offset:offset+n] = data["deta_dcalib"]
+                    offset += n
+                    vals.append(blank)
+                data_dict[key] = np.array(vals)
+            else:
+                data_dict[key] = np.concatenate([d[key] for d in data_list])
+
+        data_dict["n_sne"] = np.sum(data_dict["n_sne"])
+
+        sim_redshifts = np.array([sim["sim_redshifts"] for sim in sim_data_list if "sim_redshifts" in sim.keys()])
+        redshifts = np.array([z for data in data_list for z in data["redshifts"]])
+        zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
+        dz = zs[-1] / n_z
         added_zs = [0]
         pz = 0
         for z in zs:
@@ -117,7 +150,7 @@ class ApproximateModel(Model):
             added_zs += new_points
             pz = z
 
-        n_z = n_sne + n_sim + len(added_zs)
+        n_z = len(zs) + len(added_zs)
         n_simps = int((n_z + 1) / 2)
         to_sort = [(z, -1, -1) for z in added_zs] + [(z, i, -1) for i, z in enumerate(redshifts)]
         if add_zs is not None:
@@ -137,10 +170,10 @@ class ApproximateModel(Model):
             "zsom": (1 + final_redshifts) ** 3,
             "redshift_indexes": final,
             "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
-            "calib_std": np.array([0.5, 0.5, 0.5, 0.5, 0.1, 0.1, 0.1, 0.1]),
+            "calib_std": np.ones(data_dict["deta_dcalib"].shape[1]),
             "num_nodes": num_nodes,
             "node_weights": node_weights,
-            "nodes": nodes
+            "nodes": nodes_list
         }
 
         if add_zs is not None:
@@ -149,25 +182,70 @@ class ApproximateModel(Model):
             sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
             update["sim_redshift_indexes"] = sim_final
             update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
+            sim_node_weights = []
+            for sim_data, nodes in zip(sim_data_list, nodes_list):
+                if num_nodes == 1:
+                    sim_node_weights += [[1]] * sim_data["sim_redshifts"].size
+                else:
+                    sim_node_weights = self.get_node_weights(nodes, sim_data["sim_redshifts"])
+            update["sim_node_weights"] = np.array(sim_node_weights)
 
-            if num_nodes == 1:
-                update["sim_node_weights"] = np.array([[1]] * sim_redshifts.size)
-            else:
-                update["sim_node_weights"] = self.get_node_weights(nodes, sim_redshifts)
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
+            # TODO: Turn sim data from list of dict to dict of list like data_list
 
-        obs_data = np.array(data["obs_mBx1c"])
+        obs_data = np.array(data_dict["obs_mBx1c"])
         self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
 
         # Add in data for the approximate selection efficiency in mB
-        mean, std, alpha = simulation.get_approximate_correction()
-        update["mB_mean"] = mean
-        update["mB_width2"] = std**2
-        update["mB_alpha2"] = alpha**2
-        update["mB_sgn_alpha"] = np.sign(alpha)
+        means, stds, alphas = [], [], []
+        for sim in simulation:
+            mean, std, alpha = sim.get_approximate_correction()
+            means.append(mean)
+            stds.append(std)
+            alphas.append(alpha)
+        update["mB_mean"] = means
+        update["mB_width"] = stds
+        update["mB_alpha"] = alphas
+        update["mB_sgn_alpha"] = np.sign(alphas)
 
-        update["mean_mass"] = np.mean(masses)
+        update["mean_mass"] = mean_masses
 
-        final_dict = {**data, **update, **sim_data}
+        final_dict = {**data_dict, **update, **sim_data}
         return final_dict
 
     def get_node_weights(self, nodes, redshifts):

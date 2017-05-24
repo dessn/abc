@@ -7,7 +7,7 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, dscale=0.08, alpha_c=5, mass=True, num_nodes=4):
+    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
@@ -16,6 +16,7 @@ class SimpleSimulation(Simulation):
         self.mb_width = 3
         self.mass_scale = 1.0 if mass else 0.0
         self.num_nodes = num_nodes
+        self.num_supernova = num_supernova
 
     def get_name(self):
         return "simple"

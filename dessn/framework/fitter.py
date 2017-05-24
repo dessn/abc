@@ -82,7 +82,7 @@ class Fitter(object):
         self.logger.info("Running Stan job, saving to %s" % out_file)
         import pystan
         sm = pystan.StanModel(file=model.get_stan_file(), model_name="Cosmology")
-        fit = sm.sampling(data=data, iter=n, warmup=w, chains=num_cores, init=model.get_init)
+        fit = sm.sampling(data=data, iter=n, warmup=w, chains=num_cores, init=model.get_init(**data))
         self.logger.info("Stan finished sampling")
 
         # Get parameters

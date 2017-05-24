@@ -20,8 +20,8 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     num_nodes = 4
-    model = ApproximateModel(500, num_nodes=num_nodes)
-    simulation = SimpleSimulation(alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes)
+    model = ApproximateModel(num_nodes=num_nodes)
+    simulation = SimpleSimulation(500, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
