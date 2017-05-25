@@ -84,7 +84,7 @@ $^{3}$Lawrence Berkeley National Labs
 
 
 \begin{abstract}
-Fainter objects are harder to see with a telescope than brighter ones. Lifetimes are strictly positive. We cut our data to remove background noise.  Truncated or biased datasets are inescapable in modern physics. In this paper, we present a simple overview of a Bayesian consideration of truncation, giving a solution to both analytically tractable and intractable models. This can be accomplished via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations and optimisations for implementation.
+Lifetimes are strictly positive. We cut our data to remove background noise.  Astronomical observations suffer from Malmquist bias - our samples are preferentially biased toward those sources that are more likely to be observationally detected. These sample selections should be accounted for. In this paper we present a simple overview of a Bayesian consideration of sample selection, giving a solution to both analytically tractable and intractable models. This can be accomplished via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations and optimisations for implementation.
 \end{abstract}
 
 
@@ -98,7 +98,7 @@ Fainter objects are harder to see with a telescope than brighter ones. Lifetimes
 
 Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques in a similar fashion to this work \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. 
 
-This work provides a simple treatment of truncated data in a common Bayesian technique. Section \ref{sec:perfect} discusses the ever-elusive case of perfect data without truncation to provide a common basis for Sections \ref{sec:imperfect} and \ref{sec:real}, which respectively cover analytically correctable data truncation and analytically intractable models. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
+This work provides a simple treatment of truncated data in a common Bayesian technique. The general theory for considering selection effects is discussed in Section \ref{sec:theory}. Section \ref{sec:examples} provides three examples of increasing complexity with sample selection. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
 
 
 
@@ -106,6 +106,7 @@ This work provides a simple treatment of truncated data in a common Bayesian tec
 
 
 \section{Theory}
+\label{sec:theory}
 
 When formulating and fitting a model using a constraining dataset, we wish to resolve the posterior surface defined by
 \begin{align}
@@ -114,7 +115,7 @@ P(\theta | {\rm data}) \propto P({\rm data} | \theta) P(\theta).
 Of primary interest to us is the likelihood of observing the data given our parametrised model, $\mathcal{L} \equiv P({\rm data} | \theta)$. When dealing with experiments which have selection efficiency, our likelihood necessarily includes that efficiency, for we want to describe the probability that our observations were both drawn from the underlying theoretical model \textit{and} that those observations, given they happened, were subsequently successfully observed.  To make this extra conditional explicit, we can write our likelihood as
 with selection effect $S$:
 \begin{align}
-\mathcal{L} &= P({\rm data} | \theta, S).
+\mathcal{L} &= P({\rm data} | \theta, S). \label{eq:like}
 \end{align}
 As we wish to describe our selection efficiency generally as a function dependent on both our data and our model, we can reformulate to
 \begin{align}
@@ -125,17 +126,21 @@ Introducing an integral over all possible data to make $P(S|\theta)$ physical,
 \mathcal{L}&= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
 &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:main}
 \end{align}
-where the integral in the denominator has the same dimensionality is the experimental data. \textbf{Equation \ref{eq:main} is the generalised likelihood of experiments with sample selection.} 
+where the integral in the denominator has the same dimensionality is the experimental data. \textbf{Equation \ref{eq:main} is the generalised likelihood of experiments with sample selection.}
 
 
 
 
+\section{Sample Selection}
+\label{sec:examples}
 
-
-
-\section{The perfect world: No Truncation}
+ In this section we present sample selections of increasing complexity. Each sample selection is accompanied by an illustrative example inspired by Type Ia supernova cosmology, where we characterize the properties of a standard or standardizable candle.
+ 
+ 
+\subsection{Complete Selection}
 \label{sec:perfect}
-In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum. Let us create a mock model in this perfect world. Let us observe a series of independent and identically distributed events $\vec{x}$, which are drawn from a normal distribution such that 
+In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum. We thus begin by considering an ideal situation where the sample is complete.  All events are included in the sample such that per object, $P(S | {\rm data}, \theta)=1$.  Trivially this expression is independent of $\theta$, and our likelihood from equation \eqref{eq:main} reduces down to equation \eqref{eq:like}. As a concrete example of this case, let us consider a model for a population of objects whose brightnesses form a normal distribution with average $\mu$ and standard deviation $\sigma$.
+Let us also assume that our experiment produces data $x$, measurements of the brightnesses with negligible measurement uncertainty, which we can formally state as
 \begin{align}
 \vec{x} \sim \mathcal{N}(\mu,\sigma).
 \end{align}
@@ -169,11 +174,12 @@ Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our 
 
 
 
-\section{The Imperfect World: Analytic Truncation}
+\subsection{Analytic Truncation}
 \label{sec:imperfect}
-In a slightly imperfect world we may have to deal with truncated data. For an example, consider the previous model, but with an instrumentation deficiency such that we can only observe events above a certain threshold, such that $x > \alpha$. We assign a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates, as shown in Figure \ref{fig:imperfect}. However, we can correct for this truncation using equation \eqref{eq:main}.
 
-In our example, our data is one dimensional (as we only observe one variable, $x$) and the selection efficiency is the step function $P(S|x,\theta) = \mathcal{H}(x - \alpha)$. Having successfully observed $x_i$, it follows that $x_i > \alpha$ and so $P(S|x_i,\theta) = 1$. To substitute in our normal model,
+We now consider a case with selection bias and has an analytic expression for the likelihood.  This illustrative case is useful for the reader as the influence of selection bias is simple and intuitive. The case we consider is identical to the one in the previous section, \textit{except} that only the subset of objects brighter than a threshold $\alpha$ can be observed.
+
+With this sample selection, all events satisfy $x > \alpha$, giving $P(S|x,\theta) = \mathcal{H}(x - \alpha)$. We assign a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates. However, we can correct for this truncation using equation \eqref{eq:main}, as the integral in the denominator has an analytic solution. Having successfully observed $x_i$, it follows that $x_i > \alpha$ and so $P(S|x_i,\theta) = 1$. To substitute in our normal model,
 \begin{align}
 \mathcal{L}_i &= \frac{P(S|x_i,\theta) P(x_i|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD} \\
 &= \frac{ \mathcal{N}(x_i|\mu, \sigma)}{\int_{-\infty}^\infty \mathcal{H}(D - \alpha) \mathcal{N}(D|\mu, \sigma)\, dD} \\
@@ -188,7 +194,7 @@ However, as our selection efficiency correction is observationally independent i
 \begin{align}
 \mathcal{L} &= 2 \left( {\rm erfc}\left[ \frac{\alpha - \mu}{\sqrt{2}\sigma} \right] \right)^{-N}\prod_{i=1}^N  \mathcal{N}(x|\mu, \sigma), 
 \end{align}
-We can add this correction to our model, and note that we now recover unbiased parameter estimates, also shown in Figure \ref{fig:imperfect}.
+We can add this correction to our model, and note that we now recover unbiased parameter estimates. This is demonstrated in Figure \ref{fig:imperfect}, which shows the posterior surfaces for when you take sample selection into account and when you do not.
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{example/imperfect.pdf}
@@ -208,11 +214,11 @@ We can add this correction to our model, and note that we now recover unbiased p
 
 
 
-\section{The Real World: Analytically Intractable Truncation}
+\subsection{Analytically Intractable Truncation}
 \label{sec:real}
 Unfortunately it is a rare scenario when dealing with nature and all her faults for us to have an analytic selection function, let alone a function encapsulated by a single parameter. A more realistic scenario involves a selection efficiency instead would take the form of non-analytic function of many model parameters. And the function would probably be stochastic too, just to throw another wrench in the works. Provided a method of forward modelling or simulating observations, the solution is to combine an analytic approximate correction with Monte Carlo integration.
 
-So let us modify our imperfect toy model. Instead of observing just one variable, $x$, we also observe a new independent variable, $y$, which is drawn from its own distribution $y \sim \mathcal{N}(\mu_y, \sigma_y)$. Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$, giving $P(S|x,y,\theta) = \mathcal{H}(x + \beta y - \alpha)$.  Our likelihood for such a toy model becomes now the combination of probabilities for observing both $x$ and $y$, with the denominator becoming an integral over all possible $X$ and $Y$ observations subject to our selection effects.
+So let us modify our imperfect toy model from the previous section. Instead of observing just one variable, $x$, we also observe a new independent variable, $y$, which is drawn from its own distribution $y \sim \mathcal{N}(\mu_y, \sigma_y)$. Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$, giving $P(S|x,y,\theta) = \mathcal{H}(x + \beta y - \alpha)$.  Our likelihood for such a toy model becomes now the combination of probabilities for observing both $x$ and $y$, with the denominator becoming an integral over all possible $X$ and $Y$ observations subject to our selection effects.
 \begin{align}
 \mathcal{L}_i &= \frac{ \mathcal{N}(x_i|\mu, \sigma) \mathcal{N}(y_i|\mu_y, \sigma_y)}
 {\iint_{-\infty}^\infty \mathcal{H}(X + \beta Y - \alpha) \mathcal{N}(X|\mu, \sigma) \mathcal{N}(Y|\mu_y, \sigma_y)\, dX dY}
@@ -302,9 +308,9 @@ Data truncation is a pervasive issue in many scientific domains. For simple case
 
 
 
-%\section*{Acknowledgments}
+\section*{Acknowledgments}
 
-%We gratefully acknowledge the input of the many researchers that were consulted during the creation of this paper.
+We gratefully acknowledge the input of the many researchers that were consulted during the creation of this paper.
 
 \bibliography{bibliography}
 
