@@ -182,6 +182,11 @@ class ApproximateModel(Model):
             sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
             update["sim_redshift_indexes"] = sim_final
             update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
+
+            sim_dict = {}
+            for key in sim_data_list[0].keys():
+                sim_dict[key] = np.concatenate([d[key] for d in data_list])
+
             sim_node_weights = []
             for sim_data, nodes in zip(sim_data_list, nodes_list):
                 if num_nodes == 1:
@@ -189,44 +194,6 @@ class ApproximateModel(Model):
                 else:
                     sim_node_weights = self.get_node_weights(nodes, sim_data["sim_redshifts"])
             update["sim_node_weights"] = np.array(sim_node_weights)
-
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
-            # TODO: Turn sim data from list of dict to dict of list like data_list
 
         obs_data = np.array(data_dict["obs_mBx1c"])
         self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
@@ -245,7 +212,7 @@ class ApproximateModel(Model):
 
         update["mean_mass"] = mean_masses
 
-        final_dict = {**data_dict, **update, **sim_data}
+        final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
 
     def get_node_weights(self, nodes, redshifts):
