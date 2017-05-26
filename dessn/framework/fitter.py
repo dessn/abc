@@ -147,7 +147,14 @@ class Fitter(object):
         return chain
 
     def get_result_from_chain(self, chain, simulation_index, model_index, convert_names=True, max_deviation=3.0):
-        truth = self.simulations[simulation_index].get_truth_values_dict()
+        sims = self.simulations[simulation_index]
+        if not type(sims) == list:
+            sims = [sims]
+        truth_list = [s.get_truth_values_dict() for s in sims]
+        truth = {k: [t[k] for t in truth_list] for k in truth_list[0].keys()}
+        for k in truth:
+            if isinstance(truth[k][0], np.ndarray):
+                truth[k] = np.array(truth[k]).flatten()
         mapping = self.models[model_index].get_labels()
 
         stan_weight = chain.get("weight")
@@ -173,15 +180,19 @@ class Fitter(object):
                 continue
             label = mapping.get(p) if convert_names else p
             if r"%d" in label:
+                if len(vals.shape) > 2:
+                    vals = vals.reshape((vals.shape[0], -1))
                 num_d = 1 if len(vals.shape) < 2 else vals.shape[1]
                 for i in range(num_d):
                     if len(vals.shape) < 2:
                         temp_list.append((mapping[p] % i, vals))
                     else:
                         temp_list.append((mapping[p] % i, vals[:, i]))
+                    print(mapping[p], truth[mapping[p]])
                     truth[mapping[p] % i] = truth[mapping[p]][i]
                 del truth[mapping[p]]
             else:
+                truth[mapping[p]] = truth[mapping[p]][0]
                 if convert_names:
                     temp_list.append((mapping[p], vals))
                 else:

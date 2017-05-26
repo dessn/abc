@@ -34,9 +34,9 @@ class ApproximateModel(Model):
             ("mean_MB", r"$\langle M_B \rangle$"),
             ("mean_x1", r"$\langle x_1^{%d} \rangle$"),
             ("mean_c", r"$\langle c^{%d} \rangle$"),
-            ("sigma_MB", r"$\sigma_{\rm m_B}$"),
-            ("sigma_x1", r"$\sigma_{x_1}$"),
-            ("sigma_c", r"$\sigma_c$"),
+            ("sigma_MB", r"$\sigma_{\rm m_B}^{%d}$"),
+            ("sigma_x1", r"$\sigma_{x_1}^{%d}$"),
+            ("sigma_c", r"$\sigma_{c}^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
             ("calibration", r"$\delta \mathcal{Z}_%d$")
@@ -98,7 +98,7 @@ class ApproximateModel(Model):
             redshifts = data["redshifts"]
             masses = data["masses"]
             mean_masses.append(np.mean(masses))
-            survey_map += [i] * redshifts.size
+            survey_map += [i + 1] * redshifts.size  # +1 for Stan being 1 indexed
 
             if num_nodes == 1:
                 node_weights = np.array([[1]] * n_sne)

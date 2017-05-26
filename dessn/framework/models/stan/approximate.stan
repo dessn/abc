@@ -49,14 +49,14 @@ transformed data {
     }
     for (i in 1:n_surveys) {
         mB_width2[i] = mB_width[i]^2;
-        mB_alpha2[i] = mB_alpha2[i]^2;
+        mB_alpha2[i] = mB_alpha[i]^2;
     }
 }
 
 parameters {
     ///////////////// Underlying parameters
     // Cosmology
-    real <lower = 0.1, upper = 0.99> Om;
+    real <lower = 0.05, upper = 0.99> Om;
     // real <lower = -2, upper = -0.4> w;
     // Supernova model
     real <lower = -0.2, upper = 0.5> alpha;
@@ -116,7 +116,8 @@ transformed parameters {
     real cor_mb_norm_width2 [n_surveys];
 
     // Lets actually record the proper posterior values
-    vector [n_sne] PointPosteriors;
+    vector [n_sne] point_posteriors;
+    vector [n_surveys] survey_posteriors;
     vector [n_sne] weights;
     real weight;
     real posterior;
@@ -191,22 +192,21 @@ transformed parameters {
         weights[i] = log_sum_exp(-10, normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width2[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]]) | 0, cor_sigma[survey_map[i]]));
 
         // Track and update posterior
-        PointPosteriors[i] = normal_lpdf(deviations[i] | 0, 1)
+        point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
             + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
     }
     weight = sum(weights);
-    posterior = sum(PointPosteriors) - weight
+    for (i in 1:n_surveys) {
+        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
+            + normal_lpdf(mean_c[i]  | 0, 0.1)
+            + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
+    }
+    posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        //+ normal_lpdf(mean_x1  | 0, 1)
-        //+ normal_lpdf(mean_c  | 0, 0.1)
         + normal_lpdf(calibration | 0, 1);
-     for (i in 1:n_surveys) {
-        posterior = posterior + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
-     }
-
 }
 model {
     target += posterior;
