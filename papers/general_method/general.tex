@@ -55,7 +55,7 @@
 
 
 %\shortauthors{}
-\title[Correcting for data truncation in Bayesian analyses]{Correcting for data truncation in Bayesian analyses}
+\title[Correcting for sample selection in Bayesian analyses]{Correcting for sample selection in Bayesian analyses}
 
 \author[S. R. Hinton et al.]{Samuel R. Hinton,$^{1,2}$\thanks{E-mail: \href{samuelreay@gmail.com}}
 	Alex Kim,$^{3}$
@@ -96,9 +96,9 @@ Lifetimes are strictly positive. We cut our data to remove background noise.  As
 
 \section{Introduction}
 
-Truncated data is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that truncate our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of truncated data and analysis techniques in a similar fashion to this work \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. 
+Sample selection is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that modify our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of sample selection and analysis techniques in a similar fashion to this work \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. 
 
-This work provides a simple treatment of truncated data in a common Bayesian technique. The general theory for considering selection effects is discussed in Section \ref{sec:theory}. Section \ref{sec:examples} provides three examples of increasing complexity with sample selection. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
+This work provides a simple treatment of sample selection in a common Bayesian technique. The general theory for considering selection effects is discussed in Section \ref{sec:theory}. Section \ref{sec:examples} provides three examples of increasing complexity with sample selection. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
 
 
 
@@ -174,7 +174,7 @@ Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our 
 
 
 
-\subsection{Analytic Truncation}
+\subsection{Analytic Sample Selection}
 \label{sec:imperfect}
 
 We now consider a case with selection bias and has an analytic expression for the likelihood.  This illustrative case is useful for the reader as the influence of selection bias is simple and intuitive. The case we consider is identical to the one in the previous section, \textit{except} that only the subset of objects brighter than a threshold $\alpha$ can be observed.
@@ -214,7 +214,7 @@ We can add this correction to our model, and note that we now recover unbiased p
 
 
 
-\subsection{Analytically Intractable Truncation}
+\subsection{Analytically Intractable Sample Selection}
 \label{sec:real}
 Unfortunately it is a rare scenario when dealing with nature and all her faults for us to have an analytic selection function, let alone a function encapsulated by a single parameter. A more realistic scenario involves a selection efficiency instead would take the form of non-analytic function of many model parameters. And the function would probably be stochastic too, just to throw another wrench in the works. Provided a method of forward modelling or simulating observations, the solution is to combine an analytic approximate correction with Monte Carlo integration.
 
@@ -304,7 +304,7 @@ Following from the previous section, as our reweighting $\mathcal{L}_2$ is raise
 \label{sec:conclusion}
 
 
-Data truncation is a pervasive issue in many scientific domains. For simple cases of data truncation which can be encapsulated with analytic functions, it is possible to analytically correct likelihood surfaces by introducing selection efficiency into the likelihood formulation. When analytic corrections fail to provide an adequate description of selection effects, Monte Carlo integration can be used on top of analytic approximations to further correct the likelihood surface, provided the experiment can be effectively simulated. 
+Sample selection is a pervasive issue in many scientific domains. For simple cases of sample selection which can be encapsulated with analytic functions, it is possible to analytically correct likelihood surfaces by introducing selection efficiency into the likelihood formulation. When analytic corrections fail to provide an adequate description of selection effects, Monte Carlo integration can be used on top of analytic approximations to further correct the likelihood surface, provided the experiment can be effectively simulated. 
 
 
 
