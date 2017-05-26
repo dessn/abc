@@ -44,6 +44,9 @@ class ApproximateModel(Model):
         return mapping
 
     def get_init(self, **kwargs):
+        deta_dcalib = kwargs["deta_dcalib"]
+        num_supernova = kwargs["n_sne"]
+        num_surveys = kwargs["n_surveys"]
         randoms = {
             "Om": uniform(0.1, 0.6),
             "alpha": uniform(-0.1, 0.4),
@@ -51,18 +54,18 @@ class ApproximateModel(Model):
             "dscale": uniform(-0.2, 0.2),
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-20, -18),
-            "mean_x1": uniform(-0.5, 0.5, size=self.num_redshift_nodes),
-            "mean_c": uniform(-0.2, 0.2, size=self.num_redshift_nodes),
-            "log_sigma_MB": uniform(-3, 1),
-            "log_sigma_x1": uniform(-3, 1),
-            "log_sigma_c": uniform(-3, 1),
-            "deviations": normal(scale=0.2, size=(self.num_supernova, 3)),
-            "calibration": uniform(-0.3, 0.3, size=8)
+            "mean_x1": uniform(-0.5, 0.5, size=(num_surveys, self.num_redshift_nodes)),
+            "mean_c": uniform(-0.2, 0.2, size=(num_surveys, self.num_redshift_nodes)),
+            "log_sigma_MB": uniform(-3, 1, size=(num_surveys,)),
+            "log_sigma_x1": uniform(-3, 1, size=(num_surveys,)),
+            "log_sigma_c": uniform(-3, 1, size=(num_surveys,)),
+            "deviations": normal(scale=0.2, size=(num_supernova, 3)),
+            "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }
-        chol = [[1.0, 0.0, 0.0],
+        chol = [[[1.0, 0.0, 0.0],
                 [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
                 [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
-                 np.random.random() * 0.1 + 0.7]]
+                 np.random.random() * 0.1 + 0.7]] for i in range(num_surveys)]
         randoms["intrinsic_correlation"] = chol
         self.logger.info("Initial starting point is: %s" % randoms)
         return randoms
@@ -72,10 +75,10 @@ class ApproximateModel(Model):
 
     def get_data(self, simulations, cosmology_index, add_zs=None):
         if not type(simulations) == list:
-            simulation = [simulations]
+            simulations = [simulations]
 
         n_snes = [sim.num_supernova for sim in simulations]
-        data_list = [s.get_passed_supernova(s.n_sne, simulation=False, cosmology_index=cosmology_index) for s in simulation]
+        data_list = [s.get_passed_supernova(s.num_supernova, simulation=False, cosmology_index=cosmology_index) for s in simulations]
 
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
@@ -89,11 +92,13 @@ class ApproximateModel(Model):
         sim_data_list = []
         num_calibs = []
         mean_masses = []
-        for data, n_sne in zip(data_list, n_snes):
+        survey_map = []
+        for i, (data, n_sne, sim) in enumerate(zip(data_list, n_snes, simulations)):
             num_calibs.append(data["deta_dcalib"].shape[1])
             redshifts = data["redshifts"]
             masses = data["masses"]
             mean_masses.append(np.mean(masses))
+            survey_map += [i] * redshifts.size
 
             if num_nodes == 1:
                 node_weights = np.array([[1]] * n_sne)
@@ -107,7 +112,7 @@ class ApproximateModel(Model):
             node_weights_list.append(node_weights)
 
             if add_zs is not None:
-                sim_data = add_zs(simulation)
+                sim_data = add_zs(sim)
             else:
                 sim_data = {}
 
@@ -118,22 +123,27 @@ class ApproximateModel(Model):
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
-        for key in data_list[0].keys():
-            if key == "deta_dcalib":  # Changing shape of deta_dcalib makes this different
-                offset = 0
-                vals = []
-                for data in data_list:
-                    nsne = data["n_sne"]
-                    blank = np.zeros((nsne, 3, num_calib))
-                    n = data["deta_dcalib"].shape[1]
-                    blank[:, , offset:offset+n] = data["deta_dcalib"]
-                    offset += n
-                    vals.append(blank)
-                data_dict[key] = np.array(vals)
-            else:
-                data_dict[key] = np.concatenate([d[key] for d in data_list])
+        if len(data_list) == 1:
+            data_dict = data_list[0]
+        else:
+            for key in data_list[0].keys():
+                if key == "deta_dcalib":  # Changing shape of deta_dcalib makes this different
+                    offset = 0
+                    vals = []
+                    for data in data_list:
+                        nsne = data["n_sne"]
+                        blank = np.zeros((nsne, 3, num_calib))
+                        n = data["deta_dcalib"].shape[1]
+                        blank[:, :, offset:offset+n] = data["deta_dcalib"]
+                        offset += n
+                        vals.append(blank)
+                    data_dict[key] = np.array(vals)
+                else:
+                    print(key)
+                    print([d[key] for d in data_list])
+                    data_dict[key] = np.concatenate([d[key] for d in data_list])
 
-        data_dict["n_sne"] = np.sum(data_dict["n_sne"])
+            data_dict["n_sne"] = np.sum(data_dict["n_sne"])
 
         sim_redshifts = np.array([sim["sim_redshifts"] for sim in sim_data_list if "sim_redshifts" in sim.keys()])
         redshifts = np.array([z for data in data_list for z in data["redshifts"]])
@@ -161,21 +171,25 @@ class ApproximateModel(Model):
         sorted_vals.sort()
         final = [int(z[1] / 2 + 1) for z in sorted_vals]
         # End redshift shenanigans
-
+        n_calib = data_dict["deta_dcalib"].shape[2]
         update = {
             "n_z": n_z,
+            "n_calib": n_calib,
+            "n_surveys": len(data_list),
+            "survey_map": survey_map,
             "n_simps": n_simps,
             "zs": final_redshifts,
             "zspo": 1 + final_redshifts,
             "zsom": (1 + final_redshifts) ** 3,
             "redshift_indexes": final,
             "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
-            "calib_std": np.ones(data_dict["deta_dcalib"].shape[1]),
+            "calib_std": np.ones(n_calib),
             "num_nodes": num_nodes,
             "node_weights": node_weights,
             "nodes": nodes_list
         }
 
+        sim_dict = {}
         if add_zs is not None:
             sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
             sim_sorted_vals.sort()
@@ -183,9 +197,11 @@ class ApproximateModel(Model):
             update["sim_redshift_indexes"] = sim_final
             update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
 
-            sim_dict = {}
-            for key in sim_data_list[0].keys():
-                sim_dict[key] = np.concatenate([d[key] for d in data_list])
+            if len(sim_data_list) == 1:
+                sim_dict = sim_data_list[0]
+            else:
+                for key in sim_data_list[0].keys():
+                    sim_dict[key] = np.concatenate([d[key] for d in data_list])
 
             sim_node_weights = []
             for sim_data, nodes in zip(sim_data_list, nodes_list):
@@ -200,7 +216,7 @@ class ApproximateModel(Model):
 
         # Add in data for the approximate selection efficiency in mB
         means, stds, alphas = [], [], []
-        for sim in simulation:
+        for sim in simulations:
             mean, std, alpha = sim.get_approximate_correction()
             means.append(mean)
             stds.append(std)

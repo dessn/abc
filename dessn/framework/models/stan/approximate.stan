@@ -41,11 +41,12 @@ data {
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
-    for (i in 1:n_sne) {
-        obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);a
-    }
     real mB_width2 [n_surveys];
     real mB_alpha2 [n_surveys];
+
+    for (i in 1:n_sne) {
+        obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
+    }
     for (i in 1:n_surveys) {
         mB_width2[i] = mB_width[i]^2;
         mB_alpha2[i] = mB_alpha2[i]^2;
@@ -73,10 +74,10 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     matrix <lower = -1.0, upper = 1.0> [n_surveys, num_nodes] mean_x1;
     matrix <lower = -0.2, upper = 0.2> [n_surveys, num_nodes] mean_c;
-    real <lower = -10, upper = 1> [n_surveys] log_sigma_MB;
-    real <lower = -10, upper = 1> [n_surveys] log_sigma_x1;
-    real <lower = -10, upper = 1> [n_surveys] log_sigma_c;
-    cholesky_factor_corr[3] [n_surveys] intrinsic_correlation;
+    real <lower = -10, upper = 1> log_sigma_MB [n_surveys];
+    real <lower = -10, upper = 1> log_sigma_x1 [n_surveys];
+    real <lower = -10, upper = 1> log_sigma_c [n_surveys];
+    cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
 }
 
@@ -110,7 +111,7 @@ transformed parameters {
     // Variables to calculate the bias correction
     real cor_MB_mean [n_sne];
     real cor_mB_mean [n_sne];
-    real cor_sigma2 [n_surveys];
+    real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
     real cor_mb_norm_width2 [n_surveys];
 
@@ -158,7 +159,7 @@ transformed parameters {
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
-        cor_mb_norm_width2[i] = sqrt(mB_width2[i] + cor_mb_width2[i])
+        cor_mb_norm_width2[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
     }
 
     // Now update the posterior using each supernova sample
@@ -199,10 +200,12 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        + normal_lpdf(mean_x1  | 0, 1)
-        + normal_lpdf(mean_c  | 0, 0.1)
-        + lkj_corr_cholesky_lpdf(intrinsic_correlation | 4)
+        //+ normal_lpdf(mean_x1  | 0, 1)
+        //+ normal_lpdf(mean_c  | 0, 0.1)
         + normal_lpdf(calibration | 0, 1);
+     for (i in 1:n_surveys) {
+        posterior = posterior + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
+     }
 
 }
 model {
