@@ -84,7 +84,7 @@ $^{3}$Lawrence Berkeley National Labs
 
 
 \begin{abstract}
-Lifetimes are strictly positive. We cut our data to remove background noise.  Astronomical observations suffer from Malmquist bias - our samples are preferentially biased toward those sources that are more likely to be observationally detected. These sample selections should be accounted for. In this paper we present a simple overview of a Bayesian consideration of sample selection, giving a solution to both analytically tractable and intractable models. This can be accomplished via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations and optimisations for implementation.
+Lifetimes are strictly positive. We cut our data to remove background noise.  Astronomical observations suffer from Malmquist bias - brighter objects are easier to see than faint ones. These sample selection effects should be accounted for. In this paper we present a simple overview of a Bayesian consideration of sample selection, giving a solution to both analytically tractable and intractable models. This can be accomplished via a combination of analytic approximations and Monte Carlo integration, in which dataset simulation is efficiently used to correct for issues in the observed dataset. Toy models are included, along with numerical considerations and optimisations for implementation.
 \end{abstract}
 
 
@@ -96,7 +96,7 @@ Lifetimes are strictly positive. We cut our data to remove background noise.  As
 
 \section{Introduction}
 
-Sample selection is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that modify our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with different fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of sample selection and analysis techniques in a similar fashion to this work \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. 
+Sample selection is a problem in many areas of scientific inquiry. It is one of the primary difficulties when performing supernovae cosmology analysis, as our telescopes have visual limits that modify our observed supernovae distribution from the actual underlying distribution. This bias, termed Malmquist bias, is source of much investigation \citep{Butkevich2005}. It is considered during analysis by either modifying the observed data to remove the expected bias \citep{BetouleKessler2014, ConleyGuySullivan2011}, or by incorporating the expected bias into the underlying model \citep{Rubin2015}. Truncated data is also commonly encountered in biological fields, where data such as mortality rates are left-truncated \citep{JANE1898}. Simplified and generalised examples have been investigated in numerous fashions \citep{woodroofe1985estimating, Gull1989bayesian, grogger1991models, o1995truncated} and with application to specific fitting algorithms \citep{Gelfand1992}. Whilst generalised resources exist that provide a comprehensive overview of sample selection and analysis techniques in a similar fashion to this work \citep{klein2005survival}, these sources are often opaque due to volume and mathematical complexity. 
 
 This work provides a simple treatment of sample selection in a common Bayesian technique. The general theory for considering selection effects is discussed in Section \ref{sec:theory}. Section \ref{sec:examples} provides three examples of increasing complexity with sample selection. Section \ref{sec:tricks} details numeric concerns and tricks to be aware of for effective implementation of Monte Carlo corrections applied to analytic approximations.
 
@@ -139,8 +139,9 @@ where the integral in the denominator has the same dimensionality is the experim
  
 \subsection{Complete Selection}
 \label{sec:perfect}
-In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum. We thus begin by considering an ideal situation where the sample is complete.  All events are included in the sample such that per object, $P(S | {\rm data}, \theta)=1$.  Trivially this expression is independent of $\theta$, and our likelihood from equation \eqref{eq:main} reduces down to equation \eqref{eq:like}. As a concrete example of this case, let us consider a model for a population of objects whose brightnesses form a normal distribution with average $\mu$ and standard deviation $\sigma$.
-Let us also assume that our experiment produces data $x$, measurements of the brightnesses with negligible measurement uncertainty, which we can formally state as
+In a perfect world, data is neither biased nor truncated. The data is perfect. Uncertainties are well quantified and normally distributed around true values. Presumably everything is also spherical and in a vacuum
+
+We thus begin by considering an ideal situation where the sample is complete.  All events are included in the sample such that $P(S | {\rm data}, \theta)=1$.  Trivially this expression is independent of $\theta$, and our likelihood from Equation \eqref{eq:main} reduces down to Equation \eqref{eq:like}. As a concrete example of this case, let us consider a model for a population of objects whose brightnesses form a normal distribution with average $\mu$ and standard deviation $\sigma$. Let us also assume that our experiment produces data $x$, which are independent measurements of unique objects' brightnesses (with negligible measurement uncertainty), which we can formally state as
 \begin{align}
 \vec{x} \sim \mathcal{N}(\mu,\sigma).
 \end{align}
@@ -173,20 +174,19 @@ Generating a hundred data points with $\mu=100,\ \sigma=10$, we can recover our 
 
 
 
-
 \subsection{Analytic Sample Selection}
 \label{sec:imperfect}
 
 We now consider a case with selection bias and has an analytic expression for the likelihood.  This illustrative case is useful for the reader as the influence of selection bias is simple and intuitive. The case we consider is identical to the one in the previous section, \textit{except} that only the subset of objects brighter than a threshold $\alpha$ can be observed.
 
-With this sample selection, all events satisfy $x > \alpha$, giving $P(S|x,\theta) = \mathcal{H}(x - \alpha)$. We assign a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates. However, we can correct for this truncation using equation \eqref{eq:main}, as the integral in the denominator has an analytic solution. Having successfully observed $x_i$, it follows that $x_i > \alpha$ and so $P(S|x_i,\theta) = 1$. To substitute in our normal model,
+With this sample selection, all events satisfy $x > \alpha$, giving $P(S|x,\theta) = \mathcal{H}(x - \alpha)$. We assign a value $\alpha=85$ for convenience. If we do not take this truncation into account, we will recover biased parameter estimates. However, we can correct for this truncation using Equation \eqref{eq:main}, as the integral in the denominator has an analytic solution. Having successfully observed $x_i$, it follows that $x_i > \alpha$ and so $P(S|x_i,\theta) = 1$. To substitute in our normal model,
 \begin{align}
 \mathcal{L}_i &= \frac{P(S|x_i,\theta) P(x_i|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD} \\
 &= \frac{ \mathcal{N}(x_i|\mu, \sigma)}{\int_{-\infty}^\infty \mathcal{H}(D - \alpha) \mathcal{N}(D|\mu, \sigma)\, dD} \\
 &= \frac{ \mathcal{N}(x_i|\mu, \sigma)}{\int_{\alpha}^\infty \mathcal{N}(D|\mu, \sigma)\, dD} \\
 &= \frac{ \mathcal{N}(x_i|\mu, \sigma)}{\frac{1}{2} {\rm erfc}\left[ \frac{\alpha - \mu}{\sqrt{2}\sigma} \right]}, 
 \end{align}
-where in the last line we have evaluated the integral in the case $\mu > \alpha$. Note that this is for a single observation, and so for a set of independent observations we need to introduce the product found in equation \eqref{eq:prod}. 
+where in the last line we have evaluated the integral in the case $\mu > \alpha$. Note that this is for a single observation, and so for a set of independent observations we need to introduce the product found in Equation \eqref{eq:prod}. 
 \begin{align}
 \mathcal{L} &= \prod_{i=1}^N \mathcal{L}_i =  \prod_{i=1}^N \frac{ \mathcal{N}(x|\mu, \sigma)}{\frac{1}{2} {\rm erfc}\left[ \frac{\alpha - \mu}{\sqrt{2}\sigma} \right]}, 
 \end{align}
@@ -218,9 +218,9 @@ We can add this correction to our model, and note that we now recover unbiased p
 \label{sec:real}
 Unfortunately it is a rare scenario when dealing with nature and all her faults for us to have an analytic selection function, let alone a function encapsulated by a single parameter. A more realistic scenario involves a selection efficiency instead would take the form of non-analytic function of many model parameters. And the function would probably be stochastic too, just to throw another wrench in the works. Provided a method of forward modelling or simulating observations, the solution is to combine an analytic approximate correction with Monte Carlo integration.
 
-In this subsection we introduce an example that presents computational challenges in the evaluation of the posterior, and which better reflects the model complexity in supernova cosmology analysis. The specific challenge is that the denominator in the equation for the likelihood equation \eqref{eq:main} is dependent on $\theta$ and does not have an analytic solution (i.e. has to be solved numerically). When using Monte Carlo sampling methods to probe the posterior with this kind of likelihood, the integral in the denominator must be calculated with each draw. We therefore present importance sampling as an approach that make these posteriors more computationally tractable.
+In this subsection we introduce an example that presents computational challenges in the evaluation of the posterior, and which better reflects the model complexity in supernova cosmology analysis. The specific challenge is that the denominator in Equation \eqref{eq:main} is dependent on $\theta$ and does not have an analytic solution (i.e. has to be solved numerically). When using Monte Carlo sampling methods to probe the posterior with this kind of likelihood, the integral in the denominator must be calculated with each draw. We therefore present importance sampling as an approach that make these posteriors more computationally tractable.
 
-Let us modify our imperfect toy model from the previous section. Instead of observing just one variable, $x$, we also observe a new independent variable, $y$, which is drawn from its own distribution $y \sim \mathcal{N}(\mu_y, \sigma_y)$, and has no measurement uncertainty (like $x$). Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$, giving $P(S|x,y,\theta) = \mathcal{H}(x + \beta y - \alpha)$.  Our likelihood for such a toy model becomes now the combination of probabilities for observing both $x$ and $y$, with the denominator becoming an integral over all possible $X$ and $Y$ observations subject to our selection effects.
+Let us modify our imperfect toy model from the previous section. Instead of observing just one variable, $x$, we also observe a new independent variable, $y$, which is drawn from its own distribution $y \sim \mathcal{N}(\mu_y, \sigma_y)$, and has no measurement uncertainty (like $x$). Our selection efficiency can now become a combination of $x$ and $y$, such that we only observe events that satisfy $x + \beta y > \alpha$, giving $P(S|x,y,\theta) = \mathcal{H}(x + \beta y - \alpha)$, giving a relationship reminiscent of the stretch and colour corrections for standardising supernovae.  Our likelihood for such a toy model becomes now the combination of probabilities for observing both $x$ and $y$, with the denominator becoming an integral over all possible $X$ and $Y$ observations subject to our selection effects.
 \begin{align}
 \mathcal{L}_i &= \frac{ \mathcal{N}(x_i|\mu, \sigma) \mathcal{N}(y_i|\mu_y, \sigma_y)}
 {\iint_{-\infty}^\infty \mathcal{H}(X + \beta Y - \alpha) \mathcal{N}(X|\mu, \sigma) \mathcal{N}(Y|\mu_y, \sigma_y)\, dX dY}
@@ -276,11 +276,11 @@ Thus we end up with a corrected posterior surface as shown in Figure \ref{fig:re
 
 
 
-\section{Numerical Tricks}
+\section{Numerical Techniques}
 \label{sec:tricks}
 
 \subsection{Importance Sampling}
-Further tricks can be used to increase the efficiency with which the samples are reweighted. Firstly, the overarching analytic model often provides functions which can be drawn from efficiently. In the case of our example, by drawing the random numbers $X$ and $Y$ respectively from the normal distributions $\mathcal{N}(\mu,\sigma)$ and $\mathcal{N}(\mu_y,\sigma_y)$ (ie traditional importance sampling) we need only evaluate the step function for our data points. That is, we replace
+Further tricks can be used to increase the efficiency with which the samples are reweighted. Firstly, the overarching analytic model often provides functions which can be drawn from efficiently. In the case of our example, by drawing the random numbers $X$ and $Y$ respectively from the normal distributions $\mathcal{N}(\mu,\sigma)$ and $\mathcal{N}(\mu_y,\sigma_y)$ (i.e. traditional importance sampling) we need only evaluate the step function for our data points. That is, we replace
 \begin{align}
 \int f(X) \mathcal{N}(X|\mu,\sigma)\, dX = \frac{1}{N} \sum_{i=1}^N f(X_i) \mathcal{N}(X_i | \mu, \sigma),
 \end{align}
@@ -291,15 +291,26 @@ where $X$ is drawn from a uniform distribution over all space, with
 where $X$ drawn from $\mathcal{N}(X_i | \mu, \sigma)$.
 
 \subsection{Precomputing selection}
-If evaluating the probability that an event is observed is numerically expensive (i.e. not a step function), it is easy to pregenerate a set of events and reuse them for all weights - provided that the number of events used when calculating the weights is sufficient to make the statistical error of Monte Carlo integration insignificant when compared to the constraining power of your dataset. This method is however only efficient when prior knowledge of parameter values is known to allow a reasonable initial draw of events. Without this prior information, samples need to span the entire posterior volume, which is numerically intractable even for low dimensional models. 
 
-Consider the imperfect example - where we observe $x$ drawn from an underlying normal distribution, but utilise the Monte Carlo integration technique from Section \ref{sec:real} and do not have an analytic approximation (i.e. we set $w_{\rm approx} =1$). We could estimate, given some prior knowledge, that variable $x \approx \mathcal{N}(\mu_{\rm guess}, \sigma_{\rm guess})$. We then drawn samples of $x$ from this distribution, recording the probability of each draw and then calculating whether our potential observation of $x$ would be observed in the experiment or not. That is, we assign $P(S|x,\theta) = P(S|x) = 1$ or $0$ given it passed cuts or not. We discard all events with $0$ weight (as they have $0$ weight), and only track those events which pass. Then, when calculating the sample reweighting after running chains, $\mathcal{L}_{i2}$ becomes
+The integral in the denominator of Equation \eqref{eq:main} must be recalculated for each set of $\theta$ parameter-values that are considered. A significant cost savings is possible when Monte Carlo integration is done, if the same Monte Carlo realizations are used for all sets of $\theta$. This is especially true if evaluating the sample selection $P(S|{\rm data}, \theta)$ is numerically expensive, but can only be used when the sample selection is independent of $\theta$, so that $P(S|{\rm data}, \theta) = P(S|{\rm data})$, and when there is some prior knowledge of $\theta$ such that we can estimate a reasonable $\theta_{\rm approx}$. Considering the integral from Equation \eqref{eq:main}, we have
 \begin{align}
-\mathcal{L}_{i2} \propto w_{\rm approx}  \left[\sum_{j=1}^{n} \frac{\mathcal{N}(X_j | \mu, \sigma)}{\mathcal{N}(X_j | \mu_{\rm guess}, \sigma_{\rm guess})} \right]^{-1},
-\end{align} 
-where you can see that we discard the constant $n$ from equation \eqref{eq:mc} as we only care about likelihood proportionality. Provided our parameter estimate is reasonably well informed, the computation benefit this precomputation provides is enormous for any nontrivial selection function. Not only do we now waste no time when calculating $\mathcal{L}_{i2}$ determining $P(S|{\rm data}, \theta)$, as we only save results that pass the cuts, we have no wasted evaluations of $\mathcal{N}(X_j | \mu, \sigma)$.
+&\int P(S|D, \theta) P(D|\theta) \, dD = \notag \\
+&\quad\quad\quad\int P(S|D) \frac{P(D|\theta)}{P(D|\theta_{\rm approx})} \left[ P(D|\theta_{\rm approx}) \,dD \right]
+\end{align}
+With the mathematics laid as so, it is easy to pregenerate a set of events $D_i$ drawn from distribution $ P(D|\theta_{\rm approx})$, evaluate $P(S|D_i)$, and reuse them for all samples. Formulated using Monte Carlo integration,
+\begin{align}
+&\int P(S|D, \theta) P(D|\theta) \, dD = \frac{1}{N} \sum_{i=1}^N \frac{P(S|D_i)}{P(D_i|\theta_{\rm approx})} P(D_i|\theta),
+\end{align}
+the only term that needs to be evaluated for each sample is $P(D_i|\theta)$, as all other terms have been pre-computed and stored. When using this technique, take care that the number of events used when calculating the weights is sufficient to make the statistical error of Monte Carlo integration insignificant when compared to the constraining power of your dataset.
 
-The astute reader may have picked up on one assumption - that selection efficiency of an observation is independent of model parameters $\theta$. For many experimental cases this should hold, however if it does not this method cannot be used to increase efficiency. Gridding or interpolating the parameter space is strongly not recommended due the required accuracy of $\mathcal{L}_{i2}$. Even a small error when raised to the power of $N$ can spiral out of control.
+
+Consider the imperfect example - where we observe $x$ drawn from an underlying normal distribution as was done in Section \ref{sec:imperfect}, but utilise the Monte Carlo integration technique from Section \ref{sec:real}. We work without an analytic approximation (i.e. we set $w_{\rm approx} =1$). We could estimate, given some prior knowledge, that variable $x \approx \mathcal{N}(\mu_{\rm approx}, \sigma_{\rm approx})$. In this example, it would be better to overestimate $\sigma_{\rm approx}$ rather than underestimate it, so that we still effectively sample the correct area of parameter space. We then drawn samples of $x$ from this distribution, recording the probability of each draw and then calculating whether our potential observation of $x$ would be observed in the experiment or not. That is, we assign $P(S|x,\theta) = P(S|x) = 1$ or $0$ given it passed cuts or not. We discard all events with $0$ weight (as they have $0$ weight), and only track those events which pass. Then, when calculating the sample reweighting after running chains, $\mathcal{L}_{i2}$ becomes
+\begin{align}
+\mathcal{L}_{i2} \propto w_{\rm approx}  \left[\sum_{j=1}^{n} \frac{\mathcal{N}(X_j | \mu, \sigma)}{\mathcal{N}(X_j | \mu_{\rm approx}, \sigma_{\rm approx})} \right]^{-1},
+\end{align} 
+where you can see that we discard the constant $n$ from Equation \eqref{eq:mc} as we only care about likelihood proportionality. Provided our parameter estimate is reasonably well informed, the computation benefit this precomputation provides is enormous for any nontrivial selection function. Not only do we now waste no time when calculating $\mathcal{L}_{i2}$ determining $P(S|{\rm data}, \theta)$, as we only save results that pass the cuts, we have no wasted evaluations of $\mathcal{N}(X_j | \mu, \sigma)$.
+
+As stated previously, this technique requires that selection efficiency of an observation is independent of model parameters $\theta$. For many experimental cases this may hold, however if it does not this method cannot be used to increase efficiency. Gridding or interpolating the parameter space is strongly not recommended due the required accuracy of $\mathcal{L}_{i2}$. Even a small error when raised to the power of $N$ can spiral out of control.
 
 \subsection{Log-space}
 
