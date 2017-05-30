@@ -20,9 +20,9 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = FullModelWithCorrection(500)
+    model = FullModelWithCorrection()
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationSkewed0p2()
+    simulation = SNANASimulationSkewed0p2(500)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

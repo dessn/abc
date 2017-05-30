@@ -76,7 +76,7 @@ class Fitter(object):
         if num_cores == 1:
             w, n = 1000, 5000
         else:
-            w, n = 500, 1000
+            w, n = 200, 400
 
         data = model.get_data(sim, cosmo_index)
         self.logger.info("Running Stan job, saving to %s" % out_file)

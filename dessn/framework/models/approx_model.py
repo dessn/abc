@@ -79,6 +79,7 @@ class ApproximateModel(Model):
 
         n_snes = [sim.num_supernova for sim in simulations]
         data_list = [s.get_passed_supernova(s.num_supernova, simulation=False, cosmology_index=cosmology_index) for s in simulations]
+        n_surveys = len(data_list)
 
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
@@ -125,6 +126,7 @@ class ApproximateModel(Model):
         data_dict = {}
         if len(data_list) == 1:
             data_dict = data_list[0]
+            data_dict["n_snes"] = [data_dict["n_sne"]]
         else:
             for key in data_list[0].keys():
                 if key == "deta_dcalib":  # Changing shape of deta_dcalib makes this different
@@ -139,13 +141,12 @@ class ApproximateModel(Model):
                         vals.append(blank)
                     data_dict[key] = np.array(vals)
                 else:
-                    print(key)
-                    print([d[key] for d in data_list])
                     data_dict[key] = np.concatenate([d[key] for d in data_list])
 
+            data_dict["n_snes"] = data_dict["n_sne"]
             data_dict["n_sne"] = np.sum(data_dict["n_sne"])
 
-        sim_redshifts = np.array([sim["sim_redshifts"] for sim in sim_data_list if "sim_redshifts" in sim.keys()])
+        sim_redshifts = np.array([sim["sim_redshifts"] for sim in sim_data_list if "sim_redshifts" in sim.keys()]).flatten()
         redshifts = np.array([z for data in data_list for z in data["redshifts"]])
         zs = sorted(redshifts.tolist() + sim_redshifts.tolist())
         dz = zs[-1] / n_z
@@ -175,7 +176,7 @@ class ApproximateModel(Model):
         update = {
             "n_z": n_z,
             "n_calib": n_calib,
-            "n_surveys": len(data_list),
+            "n_surveys": n_surveys,
             "survey_map": survey_map,
             "n_simps": n_simps,
             "zs": final_redshifts,
@@ -191,17 +192,15 @@ class ApproximateModel(Model):
 
         sim_dict = {}
         if add_zs is not None:
+            for key in sim_data_list[0].keys():
+                sim_dict[key] = [d[key] for d in sim_data_list]
+            sim_dict["n_sim"] = sim_dict["n_sim"][0]
+            n_sim = sim_dict["n_sim"]
             sim_sorted_vals = [(z[2], i) for i, z in enumerate(to_sort) if z[2] != -1]
             sim_sorted_vals.sort()
             sim_final = [int(z[1] / 2 + 1) for z in sim_sorted_vals]
-            update["sim_redshift_indexes"] = sim_final
-            update["sim_redshift_pre_comp"] = 0.9 + np.power(10, 0.95 * sim_redshifts)
-
-            if len(sim_data_list) == 1:
-                sim_dict = sim_data_list[0]
-            else:
-                for key in sim_data_list[0].keys():
-                    sim_dict[key] = np.concatenate([d[key] for d in data_list])
+            update["sim_redshift_indexes"] = np.array(sim_final).reshape((n_surveys, n_sim))
+            update["sim_redshift_pre_comp"] = (0.9 + np.power(10, 0.95 * sim_redshifts)).reshape((n_surveys, n_sim))
 
             sim_node_weights = []
             for sim_data, nodes in zip(sim_data_list, nodes_list):
@@ -209,7 +208,7 @@ class ApproximateModel(Model):
                     sim_node_weights += [[1]] * sim_data["sim_redshifts"].size
                 else:
                     sim_node_weights = self.get_node_weights(nodes, sim_data["sim_redshifts"])
-            update["sim_node_weights"] = np.array(sim_node_weights)
+            update["sim_node_weights"] = np.array(sim_node_weights).reshape((n_surveys, n_sim, num_nodes))
 
         obs_data = np.array(data_dict["obs_mBx1c"])
         self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))

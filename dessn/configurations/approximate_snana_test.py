@@ -19,9 +19,9 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(500)
+    model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationGauss0p3()
+    simulation = SNANASimulationGauss0p3(500)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx SNANA")
         # c.plot_walks(filename=plot_filename.replace(".png", "_walks.png"))
         parameters = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
-                      '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$',
+                      r"$\sigma_{\rm m_B}^{0}$", r'$\sigma_{x_1}^{0}$', r'$\sigma_{c}^{0}$',
                       '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$']
         print(c.get_latex_table(transpose=True, parameters=parameters))
         c.plot(filename=plot_filename, truth=truth, parameters=parameters)

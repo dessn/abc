@@ -15,9 +15,9 @@ if __name__ == "__main__":
     dir_name1 = os.path.dirname(os.path.abspath(__file__)) + "/output/approximate_simple_test"
     dir_name2 = os.path.dirname(os.path.abspath(__file__)) + "/output/approximate_snana_test"
 
-    model1 = FullModel(500)
-    model2 = ApproximateModel(500)
-    simulation = SimpleSimulation()
+    model1 = FullModel()
+    model2 = ApproximateModel()
+    simulation = SimpleSimulation(500)
 
     fitter1 = Fitter(dir_name1)
     fitter1.set_models(model1)

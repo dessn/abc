@@ -20,8 +20,8 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(500)
-    simulation = SNANASimulationSkewed0p2()
+    model = ApproximateModel()
+    simulation = SNANASimulationSkewed0p2(500)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

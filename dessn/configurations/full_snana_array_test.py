@@ -22,10 +22,10 @@ if __name__ == "__main__":
 
     num_nodes = 1
 
-    model = FullModelWithCorrection(500, num_nodes=num_nodes)
+    model = FullModelWithCorrection(num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
-    simulations = [SNANASimulationSkewed0p2(num_nodes=num_nodes), SNANASimulationGauss0p2(num_nodes=num_nodes),
-                   SNANASimulationGauss0p3(num_nodes=num_nodes), SNANASimulationGauss0p4(num_nodes=num_nodes)]
+    simulations = [SNANASimulationSkewed0p2(500, num_nodes=num_nodes), SNANASimulationGauss0p2(500, num_nodes=num_nodes),
+                   SNANASimulationGauss0p3(500, num_nodes=num_nodes), SNANASimulationGauss0p4(500, num_nodes=num_nodes)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

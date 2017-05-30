@@ -5,7 +5,7 @@ from dessn.framework.simulation import Simulation
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, real_data_name, simulation_name=None, num_nodes=4, use_sim=False):
+    def __init__(self, num_supernova, real_data_name, simulation_name=None, num_nodes=4, use_sim=False):
         super().__init__()
         self.real_data_name = real_data_name
         self.simulation_name = simulation_name
@@ -13,6 +13,7 @@ class SNANASimulation(Simulation):
         if self.simulation_name is None:
             self.simulation_name = self.real_data_name
         self.num_nodes = num_nodes
+        self.num_supernova = num_supernova
 
     def get_name(self):
         return "snana_%s" % self.real_data_name
@@ -115,13 +116,13 @@ class SNANASimulation(Simulation):
 
 
 class SNANASimulationGauss0p3(SNANASimulation):
-    def __init__(self, num_nodes=4, use_sim=False):
-        super().__init__("gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
 
 class SNANASimulationGauss0p2(SNANASimulation):
-    def __init__(self, num_nodes=4, use_sim=False):
-        super().__init__("gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
     def get_truth_values(self):
         t = super().get_truth_values()
@@ -130,8 +131,8 @@ class SNANASimulationGauss0p2(SNANASimulation):
 
 
 class SNANASimulationGauss0p4(SNANASimulation):
-    def __init__(self, num_nodes=4, use_sim=False):
-        super().__init__("gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
     def get_truth_values(self):
         t = super().get_truth_values()
@@ -140,8 +141,8 @@ class SNANASimulationGauss0p4(SNANASimulation):
 
 
 class SNANASimulationSkewed0p2(SNANASimulation):
-    def __init__(self, num_nodes=4, use_sim=False):
-        super().__init__("skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
 
     def get_truth_values(self):
         t = super().get_truth_values()
