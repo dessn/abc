@@ -95,7 +95,7 @@ class ApproximateModel(Model):
         mean_masses = []
         survey_map = []
         for i, (data, n_sne, sim) in enumerate(zip(data_list, n_snes, simulations)):
-            num_calibs.append(data["deta_dcalib"].shape[1])
+            num_calibs.append(data["deta_dcalib"].shape[2])
             redshifts = data["redshifts"]
             masses = data["masses"]
             mean_masses.append(np.mean(masses))
@@ -121,6 +121,7 @@ class ApproximateModel(Model):
 
         node_weights = np.concatenate(node_weights_list)
         num_calib = np.sum(num_calibs)
+        print("num calib %d" % num_calib)
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
@@ -135,13 +136,16 @@ class ApproximateModel(Model):
                     for data in data_list:
                         nsne = data["n_sne"]
                         blank = np.zeros((nsne, 3, num_calib))
-                        n = data["deta_dcalib"].shape[1]
+                        n = data["deta_dcalib"].shape[2]
                         blank[:, :, offset:offset+n] = data["deta_dcalib"]
                         offset += n
                         vals.append(blank)
-                    data_dict[key] = np.array(vals)
+                    data_dict[key] = np.vstack(vals)
                 else:
-                    data_dict[key] = np.concatenate([d[key] for d in data_list])
+                    if type(data_list[0][key]) in [int, float]:
+                        data_dict[key] = [d[key] for d in data_list]
+                    else:
+                        data_dict[key] = np.concatenate([d[key] for d in data_list])
 
             data_dict["n_snes"] = data_dict["n_sne"]
             data_dict["n_sne"] = np.sum(data_dict["n_sne"])

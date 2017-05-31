@@ -7,13 +7,25 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4):
+    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4, lowz=False):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
-        self.mb_alpha = -4
-        self.mb_mean = 20.0
-        self.mb_width = 3
+        self.lowz = lowz
+
+        if lowz:
+            self.mb_alpha = -4
+            self.mb_mean = 18.0
+            self.mb_width = 3
+            self.power = 0.75
+            self.max_z_gen = 0.2
+        else:
+            self.mb_alpha = -4
+            self.mb_mean = 20.0
+            self.mb_width = 5
+            self.power = 0.5
+            self.max_z_gen = 1.0
+
         self.mass_scale = 1.0 if mass else 0.0
         self.num_nodes = num_nodes
         self.num_supernova = num_supernova
@@ -67,7 +79,7 @@ class SimpleSimulation(Simulation):
         nn = 1000
         # Generate 1000 at a time
         while True:
-            redshifts = (np.random.uniform(0, 1, nn) ** 0.5)
+            redshifts = (np.random.uniform(0.02, self.max_z_gen, nn) ** self.power)
             dist_mod = cosmology.distmod(redshifts).value
             redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
             p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size) * self.mass_scale
@@ -113,7 +125,8 @@ class SimpleSimulation(Simulation):
 
         indexes = np.array(mask_all).cumsum()
         cut_index = np.where(indexes == n_sne)[0][0] + 1
-        self.logger.debug("Generated %d objects out of %d passed, %d percent" % (mask.sum(), mask.size, 100 * (mask.sum() / mask.size)))
+        mask_all = np.array(mask_all)
+        self.logger.debug("Generated %d objects out of %d passed, %d percent" % (mask_all.sum(), mask_all.size, 100 * (mask_all.sum() / mask_all.size)))
 
         return {
             "n_sne": n_sne,
