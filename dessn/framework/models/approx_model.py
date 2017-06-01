@@ -211,7 +211,7 @@ class ApproximateModel(Model):
                 if num_nodes == 1:
                     sim_node_weights += [[1]] * sim_data["sim_redshifts"].size
                 else:
-                    sim_node_weights = self.get_node_weights(nodes, sim_data["sim_redshifts"])
+                    sim_node_weights.append(self.get_node_weights(nodes, sim_data["sim_redshifts"]))
             update["sim_node_weights"] = np.array(sim_node_weights).reshape((n_surveys, n_sim, num_nodes))
 
         obs_data = np.array(data_dict["obs_mBx1c"])

@@ -23,7 +23,8 @@ if __name__ == "__main__":
 
     model = FullModelWithCorrection(num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationGauss0p3(500, num_nodes=num_nodes)
+    simulation = [SNANASimulationGauss0p3(250, num_nodes=num_nodes),
+                  SNANASimulationGauss0p3(250, num_nodes=num_nodes)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -38,4 +39,4 @@ if __name__ == "__main__":
         c = ChainConsumer()
         c.add_chain(chain, posterior=posterior, name="Stan")
         c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
-        c.plot(filename=plot_filename, truth=truth)
+        c.plot(filename=plot_filename, truth=truth, parameters=15)

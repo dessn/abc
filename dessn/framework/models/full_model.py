@@ -61,7 +61,7 @@ class FullModelWithCorrection(FullModel):
             simulation = [simulation]
 
         self.logger.info("Getting supernovae")
-        supernovaes = [sim.get_passed_supernova(n_sne=10000) for sim in simulation]
+        supernovaes = [sim.get_passed_supernova(n_sne=100000) for sim in simulation]
 
         self.logger.info("Getting cosmologies")
         cosmologies = get_cosmology_dictionary()

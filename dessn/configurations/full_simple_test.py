@@ -23,8 +23,8 @@ if __name__ == "__main__":
 
     model = FullModelWithCorrection(num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
-    simulation = SimpleSimulation(500, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes)
-
+    simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
+                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
@@ -38,4 +38,4 @@ if __name__ == "__main__":
         c = ChainConsumer()
         c.add_chain(chain, posterior=posterior, name="Stan")
         c.add_chain(chain, weights=weight, posterior=posterior, name="Corrected")
-        c.plot(filename=plot_filename, truth=truth)
+        c.plot(filename=plot_filename, truth=truth, parameters=16)
