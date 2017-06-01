@@ -146,7 +146,7 @@ class Fitter(object):
         self.logger.debug("Loaded pickle from %s" % filename)
         return chain
 
-    def get_result_from_chain(self, chain, simulation_index, model_index, convert_names=True, max_deviation=3.0):
+    def get_result_from_chain(self, chain, simulation_index, model_index, convert_names=True, max_deviation=2.5):
         sims = self.simulations[simulation_index]
         if not type(sims) == list:
             sims = [sims]
