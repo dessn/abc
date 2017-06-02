@@ -83,4 +83,4 @@ c.add_chain(all_samples, parameters=[r"$\mu$", r"$\sigma$", r"$\mu_y$"], name="B
 c.add_chain(all_sampels_corrected, name="Approximate")
 c.add_chain(all_sampels_corrected, weights=weights, name="Corrected")
 c.configure(flip=False, sigmas=[0,1,2], colors=["#D32F2F", "#4CAF50", "#222222"], linestyles=[":", "--", "-"], shade_alpha=0.2, shade=True)
-c.plot(filename="real2.pdf", figsize="column", truth=[100, 10], extents=[[90, 110],[6,15]], parameters=2)
+c.plot(filename="real2.pdf", figsize="column", truth=[100, 10], extents=[[90, 105],[6,15]], parameters=2)
