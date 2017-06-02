@@ -41,19 +41,15 @@ def reweight(mux, sigmax, muy):
     new_weight = mask.sum() * 1.0 / mask.size
     diff = np.log(original_weight) - np.log(new_weight)    
     return num * diff    
-    #return  -num * np.log(new_weight)    
 
-#val1 = 0.5 * erfc((alpha - mu - epsilon)/(s2 * sigma))
 x, y, mask = get_data(mux, sigmax, muy, n=100000)
-#val2 = mask.sum() * 1.0 / mask.size
-#print(val1, val2)
 import matplotlib.pyplot as plt
 plt.hist(x, 50, histtype='step', label="all")
 plt.hist(x[mask], 50, histtype='step', label="mask1")
 plt.legend()
 plt.show()
 
-def get_stuff(i):
+def run_realisation(i):
     np.random.seed(i)
     x, y, mask = get_data(mux, sigmax, muy)
     x = x[mask][:num]
@@ -71,7 +67,7 @@ def get_stuff(i):
     weights = np.exp(weights)
     return (chain1, chain2, weights)
 
-res = Parallel(n_jobs=4, backend="threading")(delayed(get_stuff)(i) for i in range(100))
+res = Parallel(n_jobs=4, backend="threading")(delayed(run_realisation)(i) for i in range(100))
 all_samples = np.vstack([r[0] for r in res])
 all_sampels_corrected = np.vstack([r[1] for r in res])
 weights = np.array([r[2] for r in res]).flatten()
