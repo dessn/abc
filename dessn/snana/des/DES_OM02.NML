@@ -1,16 +1,16 @@
-BATCH_INFO:  sbatch  /home/rkessler/SBATCH_sandyb.TEMPLATE 96
-OUTDIR:  sam_data
+BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 96
+OUTDIR:  SHINTON_DES_OM02
 
-VERSION:  SHINTON_SPEC_SALT2
+VERSION:  SHINTON_DES_OM02
 
 FITOPT:   MAGOBS_SHIFT_PRIMARY 'g 0.01'
 FITOPT:   MAGOBS_SHIFT_PRIMARY 'r 0.01'
 FITOPT:   MAGOBS_SHIFT_PRIMARY 'i 0.01'
 FITOPT:   MAGOBS_SHIFT_PRIMARY 'z 0.01'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_gshift.fits'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_rshift.fits'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_ishift.fits'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_zshift.fits'
+FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_gshift.fits'
+FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_rshift.fits'
+FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_ishift.fits'
+FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_zshift.fits'
 
 
   &SNLCINP
@@ -22,7 +22,7 @@ FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_zshift.fits'
      SNTABLE_LIST       = 'SNANA FITRES'
      
 
-     TEXTFILE_PREFIX  = 'SHINTON_SPEC_SALT2'
+     TEXTFILE_PREFIX  = 'SHINTON_DES_OM02'
      KCOR_FILE        = 'DES/kcor_DES_grizY.fits'
      USE_MINOS        = F
      NFIT_ITERATION   = 3

@@ -14,9 +14,9 @@ SOLID_ANGLE:  0.0082     # 27 sq deg
 
 EXPOSURE_TIME: 1
 
-#NGENTOT_LC:  10000
-NGEN_LC: 10000
-GENVERSION:  SHINTON_SPEC_SALT2_DIFF_SKEWED
+#NGENTOT_LC:  300
+NGEN_LC: 100000
+GENVERSION:  SHINTON_DES_BASE
 GENSOURCE:   RANDOM
 GENMODEL:    SALT2.JLA-B14
 # GENMODEL:    SALT2.JLA-B14_LAMOPEN
@@ -40,7 +40,7 @@ GENRANGE_TREST:  -40  100
 GENRANGE_REDSHIFT:  0.05  0.90
 GENSIGMA_REDSHIFT:  0.001
 
-RANSEED: 300       # random number seed
+RANSEED: 71       # random number seed
 
 # smear flags: 0=off, 1=on
 SMEARFLAG_FLUX:    1  # photo-stat smearing of signal, sky, etc ...
@@ -56,8 +56,8 @@ CUTWIN_NEPOCH:   5 -5.              # require 5 epochs (no S/N requirement)
 CUTWIN_SNRMAX:   3 griz 3 -20. 80.  # 3 filters with SNRAMX>3
 
 # cosmological params for lightcurve generation and redshift distribution
-OMEGA_MATTER:  0.2
-OMEGA_LAMBDA:  0.8
+OMEGA_MATTER:  0.3
+OMEGA_LAMBDA:  0.7
 W0_LAMBDA:    -1.00
 H0:           70.0
 
@@ -93,7 +93,7 @@ DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
 # using G10 High-z row
 
 GENPEAK_SALT2c:    0 # For initial values see http://iopscience.iop.org/article/10.3847/2041-8205/822/2/L35/pdf
-GENSIGMA_SALT2c:    0.1  0.05     # bifurcated sigmas
+GENSIGMA_SALT2c:    0.1  0.1     # bifurcated sigmas
 GENRANGE_SALT2c:   -0.300  0.300     # color range
 
 GENPEAK_SALT2x1:     0

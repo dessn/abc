@@ -1,0 +1,83 @@
+BATCH_INFO:  sbatch  ../SBATCH_sandyb_kicp.TEMPLATE  96
+
+
+SIMLIB_FILE:  $DES_ROOT/simlibs/CFA3_KEPLERCAM.SIMLIB
+SIMLIB_NREPEAT:  10  # ==> slightly faster
+
+USE_SIMLIB_REDSHIFT:  0
+USE_SIMLIB_PEAKMJD:   1
+NEWMJD_DIF: 0.002
+
+CLEARPROMPT:  0
+RANSEED:      28473   # random number seed
+FORMAT_MASK:  32        # 2=text  32=FITS
+
+CIDOFF:     0
+NGEN_LC: 100000
+GENVERSION: SHINTON_LOWZ_BASE
+GENSOURCE:  RANDOM
+GENMODEL:   SALT2.JLA-B14
+#GENMAG_SMEAR_MODELNAME:  G10
+GENMAG_SMEAR: 0.1
+
+KCOR_FILE:  SNLS/SNLS_C11/kcor_Keplercam_BD17.fits
+
+# selection criteria for generation
+GENFILTERS:        UBVri
+GENRANGE_PEAKMJD:  53200.0  54800.0
+GENSIGMA_SEARCH_PEAKMJD:  1.0       # sigma-smearing for  SEARCH_PEAKMJD
+
+GENRANGE_REDSHIFT:  0.009    0.099
+GENSIGMA_REDSHIFT:  0.000001
+DNDZ: POWERLAW  2.6E-5  2.2
+
+GENRANGE_TREST:   -20.0  60.0     # rest epoch relative to peak (days)
+
+OPT_MWEBV:      1
+GENSIGMA_MWEBV_RATIO: 0.16
+
+
+SMEARFLAG_FLUX:    1   # photo-stat smearing of signal, sky, etc ...
+SMEARFLAG_ZEROPT:  0   # smear zero-point with zptsig
+
+
+# ---------------------------
+GENPEAK_SALT2x1:     0
+GENRANGE_SALT2x1:   -4.0  +4.0     # x1 (stretch) range
+GENSIGMA_SALT2x1:    1.0   1.0     # bifurcated sigmas
+
+GENPEAK_SALT2c:     0
+GENRANGE_SALT2c:   -0.4   0.4     # color range
+GENSIGMA_SALT2c:    0.1   0.1     # bifurcated sigmas
+
+# SALT2 alpha and beta
+GENMEAN_SALT2ALPHA:   0.14
+GENMEAN_SALT2BETA:    3.1
+
+#SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_LOWZ_r-G10smear.DAT
+SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_COMBINED_LOWZ-r.DAT
+
+# -------------------------------
+APPLY_SEARCHEFF_OPT:  3  # use efficiency file above
+APPLY_CUTWIN_OPT:     0  # no cuts with simlib_nrepeat key
+CUTWIN_NEPOCH:   5 -5.              # require 5 epochs (no S/N requirement)
+CUTWIN_SNRMAX:   6 BVr 2 -20. 60.   # require 2 of griz with S/N > 6
+CUTWIN_TRESTMIN: -20  10
+CUTWIN_TRESTMAX:   9  40
+CUTWIN_MWEBV:      0 .20
+
+# -----------------------
+# cosmological params for lightcurve generation and redshift distribution
+OMEGA_MATTER:  0.3
+OMEGA_LAMBDA:  0.7
+W0_LAMBDA:    -1.00
+H0:            70.0
+
+HOSTLIB_FILE:     $DES_ROOT/simlibs/LOWZ.HOSTLIB
+HOSTLIB_STOREPAR: LOGMASS
+HOSTLIB_DZTOL: 0.03  0.0  0.
+
+# -----------------------
+
+SIMGEN_DUMPALL: 8 CID Z S2mb S2x0 S2x1 S2c MAGSMEAR_COH MU
+
