@@ -42,7 +42,7 @@ class SimpleSimulation(Simulation):
             ("beta", 3.1, r"$\beta$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
             ("outlier_MB", -21.365, r"$\langle M_B^2 \rangle$"),
-            ("outlier_dispersion", 0.1, r"$\sigma_{M_B}^2$"),
+            ("outlier_dispersion", 0.5, r"$\sigma_{M_B}^2$"),
             ("mean_x1", np.zeros(self.num_nodes), r"$\langle x_1^{%d} \rangle$"),
             ("mean_c", np.zeros(self.num_nodes), r"$\langle c^{%d} \rangle$"),
             ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$"),
@@ -79,6 +79,8 @@ class SimpleSimulation(Simulation):
         pop_cov = correlations * sigmas_mat
         probs = []
 
+        outlier_MB, outlier_dispersion = truth["outlier_MB"], truth["outlier_dispersion"]
+
         nn = 1000
         # Generate 1000 at a time
         while True:
@@ -95,7 +97,9 @@ class SimpleSimulation(Simulation):
                         break
                 probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
                 if not ia:
-                    MB -= 2
+                    MB += (means[0] - outlier_MB)
+                    MB += np.random.normal(loc=0, scale=np.sqrt(outlier_dispersion**2 - sigmas[0]**2))
+
                 mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
                 mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
                 vector = np.array([mb, x1, c])
