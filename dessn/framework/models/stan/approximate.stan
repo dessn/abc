@@ -13,6 +13,9 @@ data {
     vector[3] obs_mBx1c [n_sne]; // SALT2 fits
     matrix[3,3] obs_mBx1c_cov [n_sne]; // Covariance of SALT2 fits
 
+    // Contamination stuff
+    real<lower=0, upper=1> prob_ia [n_sne];
+
     // Input redshift data, assumed perfect redshift for spectroscopic sample
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
@@ -78,6 +81,9 @@ parameters {
     real <lower = -10, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -10, upper = 1> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
+
+    real <lower = -23, upper = -18> outlier_MB;
+    real <lower = 0, upper = 5> outlier_dispersion;
 
 }
 
@@ -193,8 +199,10 @@ transformed parameters {
 
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
-            + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
+            + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]])
+            + log_sum_exp(log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]),
+            log(1 - prob_ia[i]) + normal_lpdf(model_MBx1c[i][1] | outlier_MB, outlier_dispersion)
+            );
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {

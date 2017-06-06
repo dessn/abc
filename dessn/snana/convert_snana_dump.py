@@ -180,11 +180,14 @@ def convert(base_folder):
         supernovae_apparents = supernovae["S2mb"] + supernovae["MAGSMEAR_COH"]
 
         all_mbs = np.vstack((supernovae["Z"], supernovae_apparents, supernovae_passed)).T
+        if not os.path.exists(output_dir_passed):
+            os.makedirs(output_dir_passed)
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
 if __name__ == "__main__":
-    convert("gauss0p2")
-    convert("gauss0p4")
-    convert("skewed0p3")
-    convert("gauss0p3")
+    convert("lowz_gauss0p3")
+    # convert("gauss0p2")
+    # convert("gauss0p4")
+    # convert("skewed0p2")
+    # convert("gauss0p3")

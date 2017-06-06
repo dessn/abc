@@ -21,7 +21,7 @@ class ApproximateModel(Model):
         self.num_redshift_nodes = num_nodes
 
     def get_parameters(self):
-        return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
+        return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB", "outlier_MB", "outlier_dispersion",
                 "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
                 "calibration", "intrinsic_correlation"]
 
@@ -32,6 +32,8 @@ class ApproximateModel(Model):
             ("alpha", r"$\alpha$"),
             ("beta", r"$\beta$"),
             ("mean_MB", r"$\langle M_B \rangle$"),
+            ("outlier_MB", r"$\langle M_B^2 \rangle$"),
+            ("outlier_dispersion", r"$\sigma_{M_B}^2$"),
             ("mean_x1", r"$\langle x_1^{%d} \rangle$"),
             ("mean_c", r"$\langle c^{%d} \rangle$"),
             ("sigma_MB", r"$\sigma_{\rm m_B}^{%d}$"),
@@ -39,7 +41,7 @@ class ApproximateModel(Model):
             ("sigma_c", r"$\sigma_{c}^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
-            ("calibration", r"$\delta \mathcal{Z}_%d$")
+            ("calibration", r"$\delta \mathcal{Z}_{%d}$")
         ])
         return mapping
 
@@ -54,6 +56,8 @@ class ApproximateModel(Model):
             "dscale": uniform(-0.2, 0.2),
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-20, -18),
+            "outlier_MB": uniform(-22, -18),
+            "outlier_dispersion": uniform(1, 3),
             "mean_x1": uniform(-0.5, 0.5, size=(num_surveys, self.num_redshift_nodes)),
             "mean_c": uniform(-0.2, 0.2, size=(num_surveys, self.num_redshift_nodes)),
             "log_sigma_MB": uniform(-3, 1, size=(num_surveys,)),

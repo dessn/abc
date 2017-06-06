@@ -7,11 +7,12 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4, lowz=False):
+    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4, lowz=False, contamination=0.0):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
         self.lowz = lowz
+        self.contamination = contamination
 
         if lowz:
             self.mb_alpha = -4
@@ -40,6 +41,8 @@ class SimpleSimulation(Simulation):
             ("alpha", 0.14, r"$\alpha$"),
             ("beta", 3.1, r"$\beta$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
+            ("outlier_MB", -21.365, r"$\langle M_B^2 \rangle$"),
+            ("outlier_dispersion", 0.1, r"$\sigma_{M_B}^2$"),
             ("mean_x1", np.zeros(self.num_nodes), r"$\langle x_1^{%d} \rangle$"),
             ("mean_c", np.zeros(self.num_nodes), r"$\langle c^{%d} \rangle$"),
             ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$"),
@@ -65,7 +68,7 @@ class SimpleSimulation(Simulation):
         # Unwrap some values
         alpha, beta, dscale, dratio = truth["alpha"], truth["beta"], truth["dscale"], truth["dratio"]
         sim_mBx1c, obs_mBx1c_cov, obs_mBx1c, deta_dcalib = [], [], [], []
-        redshifts_all, redshift_pre_comp_all, p_high_masses_all, mask_all, mbs_all = [], [], [], [], []
+        redshifts_all, redshift_pre_comp_all, p_high_masses_all, mask_all, mbs_all, ias_all = [], [], [], [], [], []
         sim_x1s_all, sim_cs_all = [], []
 
         # Assume constant population.
@@ -83,14 +86,16 @@ class SimpleSimulation(Simulation):
             dist_mod = cosmology.distmod(redshifts).value
             redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
             p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size) * self.mass_scale
-
-            for zz, mu, p in zip(redshift_pre_comp, dist_mod, p_high_masses):
+            ias = np.random.random(nn) > self.contamination
+            for zz, mu, p, ia in zip(redshift_pre_comp, dist_mod, p_high_masses, ias):
                 while True:
                     MB, x1, c = np.random.multivariate_normal(means, pop_cov)
                     if np.random.random() < norm.cdf(truth["alpha_c"] * (c - truth["mean_c"][0]) / truth["sigma_c"], 0, 1):
                         skew_prob = norm.logcdf(truth["alpha_c"] * (c - truth["mean_c"][0]) / truth["sigma_c"], 0, 1)
                         break
                 probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
+                if not ia:
+                    MB -= 2
                 mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
                 mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
                 vector = np.array([mb, x1, c])
@@ -105,6 +110,7 @@ class SimpleSimulation(Simulation):
             redshifts_all += redshifts.tolist()
             redshift_pre_comp_all += redshift_pre_comp.tolist()
             p_high_masses_all += p_high_masses.tolist()
+            ias_all += ias.tolist()
 
             mbs = np.array([o[0] for o in sim_mBx1c[-nn:]])
             sim_x1 = np.array([o[1] for o in sim_mBx1c[-nn:]])
@@ -123,6 +129,7 @@ class SimpleSimulation(Simulation):
             if np.array(mask_all).sum() >= n_sne:
                 break
 
+        prob_ia = (1 - self.contamination) * np.ones(len(ias_all))
         indexes = np.array(mask_all).cumsum()
         cut_index = np.where(indexes == n_sne)[0][0] + 1
         mask_all = np.array(mask_all)
@@ -139,7 +146,8 @@ class SimpleSimulation(Simulation):
             "sim_apparents": np.array(mbs_all[:cut_index]),
             "sim_stretches": np.array(sim_x1s_all[:cut_index]),
             "sim_colours": np.array(sim_cs_all[:cut_index]),
-            "passed": np.array(mask_all[:cut_index])
+            "passed": np.array(mask_all[:cut_index]),
+            "prob_ia": prob_ia[:cut_index]
         }
 
     def get_approximate_correction(self):
