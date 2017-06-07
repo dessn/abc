@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     num_nodes = 4
     model = ApproximateModel(num_nodes=num_nodes)
-    simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, contamination=0.05),
-                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, contamination=0.06),
+                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True, contamination=0.03)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -36,15 +36,16 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(color_params="weights")
+        c.configure(color_params="weights", spacing=1.0)
 
-        parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$", r"$\langle M_B^2 \rangle$",
-                       r"$\sigma_{M_B}^2$", r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
+        parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
+                      r"$\langle M_{B, {\rm out}} \rangle$", r"$\sigma_{\rm out}^{0}$",
+                      r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.get_latex_table(transpose=True))
         c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
 
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
-        c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=6)
+        c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
         c.plotter.plot_walks(filename=plot_filename.replace(".png", "_walk.png"), truth=truth, parameters=parameters)

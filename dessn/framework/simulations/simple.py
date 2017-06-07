@@ -41,8 +41,8 @@ class SimpleSimulation(Simulation):
             ("alpha", 0.14, r"$\alpha$"),
             ("beta", 3.1, r"$\beta$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
-            ("outlier_MB", -21.365, r"$\langle M_B^2 \rangle$"),
-            ("outlier_dispersion", 0.5, r"$\sigma_{M_B}^2$"),
+            ("outlier_MB", -21, r"$\langle M_{B, {\rm out}} \rangle$"),
+            ("outlier_dispersion", np.array([1.0, 1.0, 0.3]), r"$\sigma_{\rm out}^{%d}$"),
             ("mean_x1", np.zeros(self.num_nodes), r"$\langle x_1^{%d} \rangle$"),
             ("mean_c", np.zeros(self.num_nodes), r"$\langle c^{%d} \rangle$"),
             ("sigma_MB", 0.1, r"$\sigma_{\rm m_B}$"),
@@ -98,7 +98,10 @@ class SimpleSimulation(Simulation):
                 probs.append(multivariate_normal.logpdf([MB, x1, c], mean=means, cov=pop_cov) + skew_prob)
                 if not ia:
                     MB += (means[0] - outlier_MB)
-                    MB += np.random.normal(loc=0, scale=np.sqrt(outlier_dispersion**2 - sigmas[0]**2))
+                    adjust = np.random.normal(loc=0, scale=np.sqrt(outlier_dispersion**2 - sigmas**2), size=3)
+                    MB += adjust[0]
+                    x1 += adjust[1]
+                    c += adjust[2]
 
                 mass_correction = dscale * (1.9 * (1 - dratio) / zz + dratio)
                 mb = MB + mu - alpha * x1 + beta * c - mass_correction * p

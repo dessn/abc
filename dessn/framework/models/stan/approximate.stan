@@ -82,8 +82,8 @@ parameters {
     real <lower = -10, upper = 1> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
-    real <lower = -23, upper = -18> outlier_MB;
-    real <lower = 0, upper = 5> outlier_dispersion;
+    real <lower = -23, upper = -20> outlier_MB;
+    real <lower = 0, upper = 5> outlier_dispersion [3];
 
 }
 
@@ -201,7 +201,9 @@ transformed parameters {
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]])
             + log_sum_exp(log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]),
-            log(1 - prob_ia[i]) + normal_lpdf(model_MBx1c[i][1] | outlier_MB, outlier_dispersion)
+            log(1 - prob_ia[i]) + normal_lpdf(model_MBx1c[i][1] | outlier_MB, outlier_dispersion[1])
+             + normal_lpdf(model_MBx1c[i][2] | mean_MBx1c[i][2], outlier_dispersion[2])
+             + normal_lpdf(model_MBx1c[i][3] | mean_MBx1c[i][3], outlier_dispersion[3])
             );
     }
     weight = sum(weights);
