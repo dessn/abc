@@ -44,11 +44,12 @@ if __name__ == "__main__":
             truth[nval] = 0.0
             c.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_"))
 
-            cc = ChainConsumer()
-            cc.add_chain(chain, posterior=posterior, name=name.replace("_", "\_"))
-            cc.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_") + "stan")
-            cc.plot(filename=plot_filename.replace(".png", "%s.png" % name), truth=truth, parameters=9)
+            #cc = ChainConsumer()
+            #cc.add_chain(chain, posterior=posterior, name=name.replace("_", "\_"))
+            #cc.add_chain(chain, weights=weight, posterior=posterior, name=name.replace("_", "\_") + "stan")
+            #cc.plotter.plot(filename=plot_filename.replace(".png", "%s.png" % name), truth=truth, parameters=9)
 
         parameters = [nval, '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
-                      '$\\sigma_{\\rm m_B}$', '$\\sigma_{x_1}$', '$\\sigma_c$']
-        c.plot(filename=plot_filename, truth=truth, parameters=parameters)
+                      '$\\sigma_{\\rm m_B}^{0}$', '$\\sigma_{x_1}^{0}$', '$\\sigma_{c}^{0}$']
+        # c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
+        c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)

@@ -57,7 +57,7 @@ class ApproximateModel(Model):
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-20, -18),
             "outlier_MB": uniform(-22, -20),
-            "outlier_dispersion": 0.1 + uniform(low=0.4, high=3.0, size=3),
+            "outlier_dispersion": 0.1 + uniform(low=0.1, high=1.0, size=3),
             "mean_x1": uniform(-0.5, 0.5, size=(num_surveys, self.num_redshift_nodes)),
             "mean_c": uniform(-0.2, 0.2, size=(num_surveys, self.num_redshift_nodes)),
             "log_sigma_MB": uniform(-3, 1, size=(num_surveys,)),
@@ -125,7 +125,6 @@ class ApproximateModel(Model):
 
         node_weights = np.concatenate(node_weights_list)
         num_calib = np.sum(num_calibs)
-        print("num calib %d" % num_calib)
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
