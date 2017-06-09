@@ -82,8 +82,8 @@ parameters {
     real <lower = -10, upper = 1> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
-    real <lower = -24, upper = -19.5> outlier_MB;
-    real <lower = 0.1, upper = 5> outlier_dispersion [3];
+    real <lower = 0, upper = 3> outlier_MB_delta;
+    real <lower = 0.4, upper = 3> outlier_dispersion [3];
 
 }
 
@@ -203,7 +203,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
-        cor_mB_mean_out[i] = outlier_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
+        cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
         weights[i] = log_sum_exp(
             log(prob_ia[i]) + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]]) | 0, cor_sigma[survey_map[i]]),
             log(1 - prob_ia[i])); //+ normal_lpdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]]) | 0, cor_sigma_out[survey_map[i]])
@@ -213,7 +213,7 @@ transformed parameters {
             + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]])
             + log_sum_exp(
                 log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]),
-                log(1 - prob_ia[i]) + normal_lpdf(model_MBx1c[i][1] | outlier_MB, outlier_dispersion[1])
+                log(1 - prob_ia[i]) + normal_lpdf(model_MBx1c[i][1] | mean_MB - outlier_MB_delta, outlier_dispersion[1])
                     + normal_lpdf(model_MBx1c[i][2] | mean_MBx1c[i][2], outlier_dispersion[2])
                     + normal_lpdf(model_MBx1c[i][3] | mean_MBx1c[i][3], outlier_dispersion[3])
             );

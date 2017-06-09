@@ -188,7 +188,6 @@ class Fitter(object):
                         temp_list.append((mapping[p] % i, vals))
                     else:
                         temp_list.append((mapping[p] % i, vals[:, i]))
-                    print(mapping[p], truth[mapping[p]])
                     truth[mapping[p] % i] = truth[mapping[p]][i]
                 del truth[mapping[p]]
             else:
