@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     num_nodes = 4
     model = ApproximateModel(num_nodes=num_nodes)
-    simulation = [SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
-                  SimpleSimulation(100, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
+                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         c.configure(color_params="weights", spacing=1.0)
 
         parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
-                      r"$\delta M_B$", r"$\sigma_{\rm out}^{0}$",
+                      #r"$\delta M_B$", r"$\sigma_{\rm out}^{0}$",
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
         c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
