@@ -14,7 +14,7 @@ data {
     matrix[3,3] obs_mBx1c_cov [n_sne]; // Covariance of SALT2 fits
 
     // Contamination stuff
-    real<lower=0, upper=1> prob_ia [n_sne];
+    // real<lower=0, upper=1> prob_ia [n_sne];
 
     // Input redshift data, assumed perfect redshift for spectroscopic sample
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
@@ -162,10 +162,9 @@ transformed parameters {
         // Calculate selection effect widths
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
+
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
-
     }
-
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
@@ -197,8 +196,8 @@ transformed parameters {
 
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]])
-            + log_sum_exp(0.001, multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]));
+            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
+            + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
