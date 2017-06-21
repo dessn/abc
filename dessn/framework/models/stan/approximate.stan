@@ -13,9 +13,6 @@ data {
     vector[3] obs_mBx1c [n_sne]; // SALT2 fits
     matrix[3,3] obs_mBx1c_cov [n_sne]; // Covariance of SALT2 fits
 
-    // Contamination stuff
-    // real<lower=0, upper=1> prob_ia [n_sne];
-
     // Input redshift data, assumed perfect redshift for spectroscopic sample
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
@@ -74,14 +71,13 @@ parameters {
     vector[3] deviations [n_sne];
 
     ///////////////// Population (Hyper) Parameters
-    real <lower = -20, upper = -18> mean_MB;
+    real <lower = -21, upper = -18> mean_MB;
     matrix <lower = -1.0, upper = 1.0> [n_surveys, num_nodes] mean_x1;
     matrix <lower = -0.2, upper = 0.2> [n_surveys, num_nodes] mean_c;
     real <lower = -10, upper = 1> log_sigma_MB [n_surveys];
     real <lower = -10, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -10, upper = 1> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-
 
 }
 
