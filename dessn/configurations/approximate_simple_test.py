@@ -36,7 +36,7 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(color_params="weights", spacing=1.0)
+        c.configure(spacing=1.0)
 
         parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
                       #r"$\delta M_B$", r"$\sigma_{\rm out}^{0}$",
@@ -48,4 +48,4 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
         c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
-        c.plotter.plot_walks(filename=plot_filename.replace(".png", "_walk.png"), truth=truth, parameters=parameters)
+        # c.plotter.plot_walks(filename=plot_filename.replace(".png", "_walk.png"), truth=truth, parameters=parameters)
