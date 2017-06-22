@@ -125,7 +125,7 @@ class SimpleSimulation(Simulation):
             sim_x1 = np.array([o[1] for o in sim_mBx1c[-nn:]])
             sim_c = np.array([o[2] for o in sim_mBx1c[-nn:]])
             vals = np.random.uniform(size=mbs.size)
-            if self.lowz and False:
+            if self.lowz:
                 pdfs = 1 - norm.cdf(mbs, self.mb_mean, self.mb_width)
                 pdfs /= pdfs.max()
             else:
