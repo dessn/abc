@@ -43,7 +43,7 @@ if __name__ == "__main__":
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
         c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
-
+        print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)

@@ -510,7 +510,7 @@ We can see here that as our skew normal approaches a normal (:math:`\alpha \righ
         :label: wstarshort2
 
         w_{\rm approx} &= 2 \int dz \,
-        \Phi^c\left( \frac{m_B^* - m_{B,{\rm eff}}}{\sqrt{ {\sigma_{m_B}^*}^2 +   \sigma_{{\rm survey}}^2}} \right)
+        \Phi^c\left( \frac{m_B^* - m_{B,{\rm eff}}}{\sqrt{ {\sigma_{m_B}^*}^2 + \sigma_{{\rm eff}}^2}} \right)
         P(z|\theta) \\[10pt]
 
     Now here we depart from Rubin (2015). Rubin (2015) formulate their likelihood in terms of a combinatorial

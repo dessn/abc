@@ -222,16 +222,28 @@ class ApproximateModel(Model):
         self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
 
         # Add in data for the approximate selection efficiency in mB
-        means, stds, alphas = [], [], []
+        means, stds, alphas, correction_skewnorms, norms, signs = [], [], [], [], [], []
         for sim in simulations:
-            mean, std, alpha = sim.get_approximate_correction()
+            mean, std, alpha, norm = sim.get_approximate_correction()
             means.append(mean)
             stds.append(std)
-            alphas.append(alpha)
+            correction_skewnorms.append(1 if alpha is not None else 0)
+            if alpha is not None:
+                alphas.append(alpha)
+                signs.append(np.sign(alpha))
+            else:
+                alphas.append(0.01)
+                signs.append(1)
+            if norm is not None:
+                norms.append(norm)
+            else:
+                norms.append(1)
         update["mB_mean"] = means
         update["mB_width"] = stds
         update["mB_alpha"] = alphas
-        update["mB_sgn_alpha"] = np.sign(alphas)
+        update["mB_sgn_alpha"] = signs
+        update["mB_norms"] = np.log(norms)
+        update["correction_skewnorm"] = correction_skewnorms
 
         update["mean_mass"] = mean_masses
 

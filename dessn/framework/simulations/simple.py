@@ -13,11 +13,12 @@ class SimpleSimulation(Simulation):
         self.dscale = dscale
         self.lowz = lowz
         self.min_prob_ia = min_prob_ia
+        self.lowz = lowz
 
         if lowz:
-            self.mb_alpha = -4
-            self.mb_mean = 18.0
-            self.mb_width = 3
+            self.mb_alpha = None
+            self.mb_mean = 18.5
+            self.mb_width = 1
             self.power = 0.75
             self.max_z_gen = 0.2
         else:
@@ -124,8 +125,12 @@ class SimpleSimulation(Simulation):
             sim_x1 = np.array([o[1] for o in sim_mBx1c[-nn:]])
             sim_c = np.array([o[2] for o in sim_mBx1c[-nn:]])
             vals = np.random.uniform(size=mbs.size)
-            pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
-            pdfs /= pdfs.max()
+            if self.lowz and False:
+                pdfs = 1 - norm.cdf(mbs, self.mb_mean, self.mb_width)
+                pdfs /= pdfs.max()
+            else:
+                pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
+                pdfs /= pdfs.max()
             mask = vals < pdfs
             mbs_all += mbs.tolist()
             sim_x1s_all += sim_x1.tolist()
@@ -158,4 +163,7 @@ class SimpleSimulation(Simulation):
         }
 
     def get_approximate_correction(self):
-        return self.mb_mean, self.mb_width, self.mb_alpha
+        if self.lowz:
+            return self.mb_mean, self.mb_width, None, None
+        else:
+            return self.mb_mean, self.mb_width, self.mb_alpha, 1.0
