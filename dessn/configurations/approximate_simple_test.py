@@ -21,14 +21,14 @@ if __name__ == "__main__":
 
     num_nodes = 4
     model = ApproximateModel(num_nodes=num_nodes)
-    simulation = [SimpleSimulation(100, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
-                  SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    simulation = [SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
+                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(100)
-    fitter.set_num_walkers(3)
+    fitter.set_num_cosmologies(300)
+    fitter.set_num_walkers(1)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
