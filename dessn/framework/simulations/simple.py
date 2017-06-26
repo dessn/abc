@@ -164,6 +164,8 @@ class SimpleSimulation(Simulation):
 
     def get_approximate_correction(self):
         if not self.skewnorm:
+            print("ccdf approx")
             return self.mb_mean, self.mb_width, None, None
         else:
+            print("skewnorm approx")
             return self.mb_mean, self.mb_width, self.mb_alpha, 1.0
