@@ -21,9 +21,9 @@ if __name__ == "__main__":
 
     num_nodes = 4
     model = ApproximateModel(num_nodes=num_nodes)
-    simulation = [SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
-                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
-
+    #simulation = [SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
+    #              SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    simulation = SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes)
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
