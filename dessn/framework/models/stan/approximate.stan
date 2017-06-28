@@ -65,7 +65,7 @@ parameters {
     real <lower = 0, upper = 5> beta;
 
     // Other effects
-    real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
+    real <lower = -0.2, upper = 0.4> dscale; // Scale of mass correction
     real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
     vector[n_calib] calibration;
 
@@ -192,7 +192,7 @@ transformed parameters {
 
         cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
         if (correction_skewnorm[survey_map[i]]) {
-            weights[i] = log_sum_exp(-10, log(2) + mB_norms[survey_map[i]] + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]]) / cor_sigma[survey_map[i]]| 0, 1));
+            weights[i] = log_sum_exp(-10, log(2) + mB_norms[survey_map[i]] + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]));
             numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
         } else {
             weights[i] = log_sum_exp(-10, normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]));
