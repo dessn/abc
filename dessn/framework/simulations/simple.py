@@ -22,7 +22,7 @@ class SimpleSimulation(Simulation):
             self.max_z_gen = 0.2
         else:
             self.skewnorm = True
-            self.mb_alpha = -4
+            self.mb_alpha = 0.001
             self.mb_mean = 21.0
             self.mb_width = 5
             self.power = 0.5
