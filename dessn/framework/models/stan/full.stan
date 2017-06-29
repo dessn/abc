@@ -37,6 +37,8 @@ data {
     real mB_alpha [n_surveys];
     real mB_sgn_alpha [n_surveys];
     real mean_mass [n_surveys];
+    real mB_norms [n_surveys];
+    int correction_skewnorm [n_surveys];
 
     // Redshift grid to do integral
     int<lower=0> n_sim; // Number of added redshift points
@@ -73,7 +75,7 @@ parameters {
     real <lower = 0, upper = 5> beta;
 
     // Other effects
-    real <lower = -0.2, upper = 0.2> dscale; // Scale of mass correction
+    real <lower = -0.2, upper = 0.4> dscale; // Scale of mass correction
     real <lower = 0, upper = 1> dratio; // Controls redshift dependence of correction
     vector[n_calib] calibration;
 
@@ -84,14 +86,15 @@ parameters {
     real <lower = -21, upper = -18> mean_MB;
     matrix <lower = -1.0, upper = 1.0> [n_surveys, num_nodes] mean_x1;
     matrix <lower = -0.2, upper = 0.2> [n_surveys, num_nodes] mean_c;
-    real <lower = -10, upper = 1> log_sigma_MB [n_surveys];
-    real <lower = -10, upper = 1> log_sigma_x1 [n_surveys];
-    real <lower = -10, upper = 1> log_sigma_c [n_surveys];
+    real <lower = -4, upper = 1> log_sigma_MB [n_surveys];
+    real <lower = -4, upper = 1> log_sigma_x1 [n_surveys];
+    real <lower = -4, upper = 1> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
 }
 
 transformed parameters {
+
     // Back to real space
     real sigma_MB [n_surveys];
     real sigma_x1 [n_surveys];
@@ -133,6 +136,7 @@ transformed parameters {
     vector [n_sne] point_posteriors;
     vector [n_surveys] survey_posteriors;
     vector [n_surveys] weights;
+    vector [n_sne] numerator_weight;
     real weight;
     real posterior;
 
@@ -185,13 +189,24 @@ transformed parameters {
     // Here I do another simpsons rule, but in log space. So each f(x) is in log space, the weights are log'd
     // and we add in log_sum_exp
     for (j in 1:n_surveys) {
-        for (i in 1:n_sim) {
-            mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[j][i] + dratio);
-            cor_x1_val[j,i] = dot_product(mean_x1[j], sim_node_weights[j,i]);
-            cor_c_val[j,i] = dot_product(mean_c[j], sim_node_weights[j,i]);
-            cor_mB_mean[j,i] = mean_MB - alpha*cor_x1_val[j,i] + beta*cor_c_val[j,i] + sim_model_mu[j,i] - mass_correction * mean_mass[j];
-            cor_mB_cor[j][i] = normal_lpdf(cor_mB_mean[j,i] | mB_mean[j], cor_mb_norm_width[j]) + normal_lcdf(mB_sgn_alpha[j] * (cor_mB_mean[j,i] - mB_mean[j]) | 0, cor_sigma[j]);
-            cor_mB_cor_weighted[j][i] = cor_mB_cor[j][i] + sim_log_weight[j,i];
+        if (correction_skewnorm[j]) {
+            for (i in 1:n_sim) {
+                mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[j][i] + dratio);
+                cor_x1_val[j,i] = dot_product(mean_x1[j], sim_node_weights[j,i]);
+                cor_c_val[j,i] = dot_product(mean_c[j], sim_node_weights[j,i]);
+                cor_mB_mean[j,i] = mean_MB - alpha*cor_x1_val[j,i] + beta*cor_c_val[j,i] + sim_model_mu[j,i] - mass_correction * mean_mass[j];
+                cor_mB_cor[j][i] = log(2) + mB_norms[j] + normal_lpdf(cor_mB_mean[j,i] | mB_mean[j], cor_mb_norm_width[j]) + normal_lcdf(mB_sgn_alpha[j] * (cor_mB_mean[j,i] - mB_mean[j]) | 0, cor_sigma[j]);
+                cor_mB_cor_weighted[j][i] = cor_mB_cor[j][i] + sim_log_weight[j,i];
+            }
+        } else {
+            for (i in 1:n_sim) {
+                mass_correction = dscale * (1.9 * (1 - dratio) / sim_redshift_pre_comp[j][i] + dratio);
+                cor_x1_val[j,i] = dot_product(mean_x1[j], sim_node_weights[j,i]);
+                cor_c_val[j,i] = dot_product(mean_c[j], sim_node_weights[j,i]);
+                cor_mB_mean[j,i] = mean_MB - alpha*cor_x1_val[j,i] + beta*cor_c_val[j,i] + sim_model_mu[j,i] - mass_correction * mean_mass[j];
+                cor_mB_cor[j][i] = normal_lccdf(cor_mB_mean[j,i] | mB_mean[j], cor_mb_norm_width[j]);
+                cor_mB_cor_weighted[j][i] = cor_mB_cor[j][i] + sim_log_weight[j,i];
+            }
         }
         weights[j] = n_snes[j] * log_sum_exp(cor_mB_cor_weighted[j]);
     }
@@ -222,10 +237,16 @@ transformed parameters {
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
+        if (correction_skewnorm[survey_map[i]]) {
+            numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
+        } else {
+            numerator_weight[i] = normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]);
+        }
+
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
-            + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
+            + numerator_weight[i];
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
