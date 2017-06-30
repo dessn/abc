@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 import logging
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.stats import skewnorm
+from scipy.stats import skewnorm, norm
+from scipy.ndimage.filters import gaussian_filter1d
 
 
 class Simulation(ABC):
@@ -24,26 +25,47 @@ class Simulation(ABC):
         hist_all[hist_all == 0] = 1
         ratio = hist_passed / hist_all
 
-        # Inverse transformation sampling to sample from this random pdf
-        cdf = ratio.cumsum()
-        cdf = cdf / cdf.max()
-        cdf[0] = 0
-        cdf[-1] = 1
-        n = 100000
-        u = np.random.random(size=n)
-        y = interp1d(cdf, binc)(u)
+        is_cdf = ratio[:5].mean() > 0.8
+        if is_cdf:
+            ratio_smooth = gaussian_filter1d(ratio, 2)
+            vals = [0.5 - 0.68/2, 0.5, 0.5 + 0.68/2]
+            mags = interp1d(ratio_smooth, binc)(vals)
+            mean = mags[1]
+            std = 0.53 * np.abs(mags[0] - mags[2])  # 0.53 not 0.5 because better to overestimate than under
+            alpha, norm = None, 1.0
+            self.logger.info("Fitted cdf efficiency to have mean %0.2f, std %0.2f" % (mean, std))
 
-        alpha, mean, std = skewnorm.fit(y)
-        self.logger.info("Fitted efficiency to have mean %0.2f, std %0.2f and alpha %0.2f" % (mean, std, alpha))
+            # import matplotlib.pyplot as plt
+            # plt.plot(binc, ratio, label="Ratio")
+            # plt.plot(binc, ratio_smooth, label="Ratio smoothed")
+            # plt.plot(binc, 1 - norm.cdf(binc, mean, std), label="PDF")
+            # plt.legend()
+            # plt.show()
+            # exit()
 
-        # import matplotlib.pyplot as plt
-        # plt.plot(binc, ratio * skewnorm.pdf(mean, alpha, mean, std))
-        # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std))
-        # plt.hist(y, 100, histtype='step', normed=True)
-        # plt.show()
-        # exit()
+        else:
+            # Inverse transformation sampling to sample from this random pdf
+            cdf = ratio.cumsum()
+            cdf = cdf / cdf.max()
+            cdf[0] = 0
+            cdf[-1] = 1
+            n = 100000
+            u = np.random.random(size=n)
+            y = interp1d(cdf, binc)(u)
 
-        return mean, std, alpha
+            alpha, mean, std = skewnorm.fit(y)
+            norm = ratio.max()
+            self.logger.info("Fitted skewnorm efficiency to have mean %0.2f, std %0.2f and alpha %0.2f" % (mean, std, alpha))
+
+            # import matplotlib.pyplot as plt
+            # plt.plot(binc, ratio, label="Ratio")
+            # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std), label="PDF")
+            # plt.hist(y, 100, histtype='step', normed=True, label="Sampled Hist")
+            # plt.legend()
+            # plt.show()
+            # exit()
+
+        return mean, std, alpha, norm
 
     def get_passed_supernova(self, n_sne, simulation=True, cosmology_index=0):
         result = self.get_all_supernova(n_sne, cosmology_index=cosmology_index)

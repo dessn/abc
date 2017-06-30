@@ -40,7 +40,6 @@ if __name__ == "__main__":
         c.configure(spacing=1.0)
 
         parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
-                      #r"$\delta M_B$", r"$\sigma_{\rm out}^{0}$",
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
         c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
@@ -49,4 +48,3 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
         c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
-        # c.plotter.plot_walks(filename=plot_filename.replace(".png", "_walk.png"), truth=truth, parameters=parameters)
