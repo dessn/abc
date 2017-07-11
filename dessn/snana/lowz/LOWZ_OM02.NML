@@ -1,0 +1,49 @@
+BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 96
+OUTDIR: SHINTON_LOWZ_OM02
+VERSION: SHINTON_LOWZ_OM02
+
+FITOPT:   MAGOBS_SHIFT_PRIMARY 'B 0.01'
+FITOPT:   MAGOBS_SHIFT_PRIMARY 'V 0.01'
+FITOPT:   MAGOBS_SHIFT_PRIMARY 'r 0.01'
+FITOPT:   MAGOBS_SHIFT_PRIMARY 'i 0.01'
+
+  &SNLCINP
+     VERSION_PHOTOMETRY = 'DS_ABCD_smearCOH_LOW-01'
+     ROOTFILE_OUT       = 'LOWZ.root'
+     KCOR_FILE          = 'SNLS/SNLS_C11/kcor_Keplercam_BD17.fits'
+
+     NFIT_ITERATION = 2
+     INTERP_OPT     = 1
+
+     H0_REF   = 70.0
+     OLAM_REF =  0.70
+     OMAT_REF =  0.30
+     W0_REF   = -1.00
+
+     SNCID_LIST    =  0
+     LDMP_SNFAIL   =  F
+
+     cutwin_Nepoch    =  2
+     cutwin_redshift  =  0.005, 0.4
+     cutwin_Trest     = -100.0,  300.0
+
+     cutwin_Nband_thresh = 1
+     ABORT_ON_NOEPOCHS = F
+  &END
+
+
+  &FITINP
+
+     FITMODEL_NAME  = 'SALT2.JLA-B14'
+     OPT_XTMW_ERR   = 1
+     OPT_COVAR      = 1
+
+     PRIOR_MJDSIG        = 20.
+     PRIOR_LUMIPAR_RANGE = -5.0, 5.0
+     PRIOR_LUMIPAR_SIGMA = 0.1
+
+     TREST_REJECT  = -15.0, 45.0
+     NGRID_PDF     = 0
+     FILTLIST_FIT = 'BVri'
+     FITWIN_PROB = -0.001, 1.1
+  &END
