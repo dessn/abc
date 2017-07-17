@@ -186,7 +186,8 @@ def convert(base_folder):
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
 if __name__ == "__main__":
-    convert("lowz_gauss0p2")
+    convert("lowz_gauss0p4")
+    # convert("lowz_gauss0p2")
     # convert("lowz_gauss0p3")
     # convert("gauss0p2")
     # convert("gauss0p4")

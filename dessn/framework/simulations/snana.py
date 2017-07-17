@@ -153,3 +153,23 @@ class SNANASimulationSkewed0p2(SNANASimulation):
 class SNANASimulationLowzGauss0p3(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False):
         super().__init__(num_supernova, "lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+
+
+class SNANASimulationLowzGauss0p2(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "lowz_gauss0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+
+    def get_truth_values(self):
+        t = super().get_truth_values()
+        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
+        return t
+
+
+class SNANASimulationLowzGauss0p4(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "lowz_gauss0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim)
+
+    def get_truth_values(self):
+        t = super().get_truth_values()
+        t[[r[0] for r in t].index("Om")] = ("Om", 0.4, r"$\Omega_m$")
+        return t
