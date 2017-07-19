@@ -88,19 +88,15 @@ def convert(base_folder):
 
         fitres_files = sorted([folder + "/" + i for i in inner_files if i.endswith(".FITRES")])
         base_fitres = fitres_files[0]
-        mag_offset = fitres_files[1:int(len(fitres_files) // 2) + 1]
-        wavelength_offset = fitres_files[int(len(fitres_files) // 2) + 1:]
+        sysematics_fitres = fitres_files[1:]
 
         base_fits = load_fitres(base_fitres)
-        mags = [load_fitres(m) for m in mag_offset]
-        waves = [load_fitres(m) for m in wavelength_offset]
-        mag_sort_indexes = [np.argsort(m['CID']) for m in mags]
-        waves_sort_indexes = [np.argsort(m['CID']) for m in waves]
-        magcidss = [m['CID'][s] for m, s in zip(mags, mag_sort_indexes)]
-        wavecids = [m['CID'][s] for m, s in zip(waves, waves_sort_indexes)]
+        sysematics = [load_fitres(m) for m in sysematics_fitres]
+        sysematics_sort_indexes = [np.argsort(m['CID']) for m in sysematics]
+        sysematics_idss = [m['CID'][s] for m, s in zip(sysematics, sysematics_sort_indexes)]
 
         num_bad_calib = 0
-        num_bad_calib_index = np.zeros(len(mags) + len(waves))
+        num_bad_calib_index = np.zeros(len(sysematics))
         final_results = []
         passed_indexes = []
         for i, row in enumerate(base_fits):
@@ -137,7 +133,7 @@ def convert(base_folder):
             offset_mb = []
             offset_x1 = []
             offset_c = []
-            for mag, sorted_indexes, magcids in zip(mags + waves, mag_sort_indexes + waves_sort_indexes, magcidss + wavecids):
+            for mag, sorted_indexes, magcids in zip(sysematics, sysematics_sort_indexes, sysematics_idss):
 
                 index = np.searchsorted(magcids, cid)
                 if index >= magcids.size or magcids[index] != cid:
@@ -186,10 +182,10 @@ def convert(base_folder):
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
 if __name__ == "__main__":
-    convert("lowz_skewed0p2")
+    # convert("lowz_skewed0p2")
     # convert("lowz_gauss0p4")
     # convert("lowz_gauss0p2")
-    # convert("lowz_gauss0p3")
+    convert("lowz_gauss0p3")
     # convert("gauss0p2")
     # convert("gauss0p4")
     # convert("skewed0p2")

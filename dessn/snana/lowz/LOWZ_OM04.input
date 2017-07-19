@@ -1,8 +1,10 @@
 BATCH_INFO:  sbatch  ../SBATCH_sandyb_kicp.TEMPLATE  96
 
 
-SIMLIB_FILE:  $DES_ROOT/simlibs/CFA3_KEPLERCAM.SIMLIB
-SIMLIB_NREPEAT:  10  # ==> slightly faster
+SIMLIB_FILE:     $DES_ROOT/simlibs/PS1_LOWZ_COMBINED.SIMLIB
+SIMLIB_NREPEAT:  50  # ==> slightly faster
+
+SOLID_ANGLE:  6.0    # roughly half the sky
 
 USE_SIMLIB_REDSHIFT:  0
 USE_SIMLIB_PEAKMJD:   1
@@ -13,32 +15,34 @@ RANSEED:      28347   # random number seed
 FORMAT_MASK:  32        # 2=text  32=FITS
 
 CIDOFF:     0
-NGEN_LC: 20000
-GENVERSION: SHINTON_LOWZ_OM04
+NGEN_LC: 10000
+GENVERSION: SHINTON_LOWZ_BASE
 GENSOURCE:  RANDOM
 GENMODEL:   SALT2.JLA-B14
 #GENMAG_SMEAR_MODELNAME:  G10
 GENMAG_SMEAR: 0.1
 
-KCOR_FILE:  SNLS/SNLS_C11/kcor_Keplercam_BD17.fits
+KCOR_FILE:  $DES_ROOT/kcor/LOWZ/kcor_PS1_LOWZ_COMBINED.fits
 
 # selection criteria for generation
-GENFILTERS:        UBVri
+GENFILTERS:   abcdefghijklmnopqrstuvwxyzABCDEFGHIJK
 GENRANGE_PEAKMJD:  53200.0  54800.0
 GENSIGMA_SEARCH_PEAKMJD:  1.0       # sigma-smearing for  SEARCH_PEAKMJD
 
 GENRANGE_REDSHIFT:  0.009    0.099
 GENSIGMA_REDSHIFT:  0.000001
+GENSIGMA_VPEC:      150  # peculiar velocity, km/sec
+
 DNDZ: POWERLAW  2.6E-5  2.2
 
 GENRANGE_TREST:   -20.0  60.0     # rest epoch relative to peak (days)
 
-OPT_MWEBV:      1
+OPT_MWEBV:      2
 GENSIGMA_MWEBV_RATIO: 0.16
 
 
 SMEARFLAG_FLUX:    1   # photo-stat smearing of signal, sky, etc ...
-SMEARFLAG_ZEROPT:  0   # smear zero-point with zptsig
+SMEARFLAG_ZEROPT:  1   # smear zero-point with zptsig
 
 
 # ---------------------------
@@ -54,14 +58,12 @@ GENSIGMA_SALT2c:    0.1   0.1     # bifurcated sigmas
 GENMEAN_SALT2ALPHA:   0.14
 GENMEAN_SALT2BETA:    3.1
 
-#SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_LOWZ_r-G10smear.DAT
-SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_COMBINED_LOWZ-r.DAT
+SEARCHEFF_SPEC_FILE:  $PS1_ROOT/LOWZ/SEARCHEFF_LOWZ.DAT
 
 # -------------------------------
 APPLY_SEARCHEFF_OPT:  3  # use efficiency file above
 APPLY_CUTWIN_OPT:     0  # no cuts with simlib_nrepeat key
 CUTWIN_NEPOCH:   5 -5.              # require 5 epochs (no S/N requirement)
-CUTWIN_SNRMAX:   6 BVr 2 -20. 60.   # require 2 of griz with S/N > 6
 CUTWIN_TRESTMIN: -20  10
 CUTWIN_TRESTMAX:   9  40
 CUTWIN_MWEBV:      0 .20

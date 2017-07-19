@@ -3,14 +3,47 @@ OUTDIR:  SHINTON_DES_OM02
 
 VERSION:  SHINTON_DES_OM02
 
-FITOPT:   MAGOBS_SHIFT_PRIMARY 'g 0.01'
-FITOPT:   MAGOBS_SHIFT_PRIMARY 'r 0.01'
-FITOPT:   MAGOBS_SHIFT_PRIMARY 'i 0.01'
-FITOPT:   MAGOBS_SHIFT_PRIMARY 'z 0.01'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_gshift.fits'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_rshift.fits'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_ishift.fits'
-FITOPT:   KCOR_FILE '/project/rkessler/shinton/sim/kcors/kcor_des_zshift.fits'
+
+# - - - - - - - - - - - - - - - - - - - - - -
+# GLOBAL UNCERTAINTIES FOR ALL SAMPLES
+
+# HST cal uncertainty of .0071*LAMBDA(um);
+FITOPT: [GLOBAL.HST_CALSPEC_CALIB] MAGOBS_SHIFT_ZP_PARAMS 0 0.00714 0
+
+# calibration for SALT2 training
+FITOPT: [GLOBAL.SALT2.sys0] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys0'
+FITOPT: [GLOBAL.SALT2.sys1] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys1'
+FITOPT: [GLOBAL.SALT2.sys2] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys2'
+FITOPT: [GLOBAL.SALT2.sys3] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys3'
+FITOPT: [GLOBAL.SALT2.sys4] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys4'
+FITOPT: [GLOBAL.SALT2.sys5] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys5'
+FITOPT: [GLOBAL.SALT2.sys6] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys6'
+FITOPT: [GLOBAL.SALT2.sys7] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys7'
+FITOPT: [GLOBAL.SALT2.sys8] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys8'
+FITOPT: [GLOBAL.SALT2.sys9] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys9'
+
+# Galactic Extinction
+FITOPT: [GLOBAL.MWEBV_SCALE]      MWEBV_SCALE 1.1
+FITOPT: [GLOBAL.SF2011-MWEBV]     OPT_MWEBV   3
+FITOPT: [GLOBAL.Fitz99ColorLaw]   OPT_MWCOLORLAW 99
+
+# - - - - - - - - - - - - - - - - - - - - - -
+
+
+# - - - - - - - - - - - - - - - - - - - - - -
+# DES CALIBRATION
+FITOPT: [LOCAL.DES_ZP_g_CALIB] MAGOBS_SHIFT_ZP 'g .01'
+FITOPT: [LOCAL.DES_ZP_r_CALIB] MAGOBS_SHIFT_ZP 'r .01'
+FITOPT: [LOCAL.DES_ZP_i_CALIB] MAGOBS_SHIFT_ZP 'i .01'
+FITOPT: [LOCAL.DES_ZP_z_CALIB] MAGOBS_SHIFT_ZP 'z .01'
+
+# shift mean wavelength by 10 Anstromgs
+FITOPT: [LOCAL.DES_lam10_g_CALIB] FILTLIST_LAMSHIFT g
+FITOPT: [LOCAL.DES_lam10_r_CALIB] FILTLIST_LAMSHIFT r
+FITOPT: [LOCAL.DES_lam10_i_CALIB] FILTLIST_LAMSHIFT i
+FITOPT: [LOCAL.DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
+
+# - - - - - - - - - - - - - - - - - - - - - -
 
 
   &SNLCINP
