@@ -154,7 +154,7 @@ class Fitter(object):
         truth = {k: [t[k] for t in truth_list] for k in truth_list[0].keys()}
         for k in truth:
             if isinstance(truth[k][0], np.ndarray):
-                truth[k] = np.array(truth[k]).flatten()
+                truth[k] = np.concatenate([a.flatten() for a in truth[k]])
         mapping = self.models[model_index].get_labels()
 
         stan_weight = chain.get("weight")

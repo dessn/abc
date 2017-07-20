@@ -78,7 +78,7 @@ class ApproximateModel(Model):
     def get_name(self):
         return "Approx"
 
-    def get_data(self, simulations, cosmology_index, add_zs=None):
+    def get_data(self, simulations, cosmology_index, add_zs=None, global_calib=14):
         if not type(simulations) == list:
             simulations = [simulations]
 
@@ -125,7 +125,7 @@ class ApproximateModel(Model):
             sim_data_list.append(sim_data)
 
         node_weights = np.concatenate(node_weights_list)
-        num_calib = np.sum(num_calibs)
+        num_calib = np.sum(num_calibs) - (global_calib * (len(num_calibs) - 1))
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
@@ -140,8 +140,9 @@ class ApproximateModel(Model):
                     for data in data_list:
                         nsne = data["n_sne"]
                         blank = np.zeros((nsne, 3, num_calib))
-                        n = data["deta_dcalib"].shape[2]
-                        blank[:, :, offset:offset+n] = data["deta_dcalib"]
+                        n = data["deta_dcalib"].shape[2] - global_calib
+                        blank[:, :, :global_calib] = data["deta_dcalib"][:, :, :global_calib]
+                        blank[:, :, offset:offset+n] = data["deta_dcalib"][:, :, global_calib:]
                         offset += n
                         vals.append(blank)
                     data_dict[key] = np.vstack(vals)
