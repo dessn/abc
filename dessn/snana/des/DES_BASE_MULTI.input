@@ -1,0 +1,16 @@
+# Example instruction file for DES.
+# Usage:
+#  sim_SNmix.pl  DES_BASE_MULTI.input
+#
+
+BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 50
+
+GENVERSION: SHINTON_DES_BASE_MULTI
+GENPREFIX:   SHINTON_DES_BASE_MULTI       # prefix of all data filenames
+
+# specify sim-input files for snlc_sim.exe
+SIMGEN_INFILE_Ia:       DES_BASE.input
+
+RANSEED_REPEAT: 50 71
+
+FORMAT_MASK: 48
