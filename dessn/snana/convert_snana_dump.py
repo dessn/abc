@@ -9,6 +9,8 @@ import pandas as pd
 import os
 from scipy.stats import norm
 import inspect
+import re
+import fnmatch
 
 from numpy.lib.recfunctions import drop_fields
 
@@ -55,11 +57,46 @@ def is_pos_def(x):
     return np.all(np.linalg.eigvals(x) > 0)
 
 
-def convert(base_folder):
+def get_scaling():
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    scale_file = dir_name + os.sep + "CREATE_COV.INPUT"
+    results = []
+    with open(scale_file) as f:
+        for line in f:
+            if line.startswith("ERRSCALE"):
+                comps = line.split()
+                results.append((comps[1], float(comps[3])))
+    return results
+
+
+def load_systematic_names(nml_file):
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    nml_file = dir_name + os.sep + nml_file
+    expression = re.compile("FITOPT.*\[(.*)\]")
+    with open(nml_file) as f:
+        results = expression.findall(f.read())
+    return results
+
+
+def convert(base_folder, nml_file):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     dump_dir = os.path.abspath(dir_name + "/../framework/simulations/snana_dump/" + base_folder)
     output_dir_passed = os.path.abspath(dir_name + "/../framework/simulations/snana_data/" + base_folder)
+
+    scaling = get_scaling()
+    systematic_names = load_systematic_names(nml_file)
+    systematics_scales = []
+    for name in systematic_names:
+        scale = 1.0
+        for n, s in scaling:
+            if fnmatch.fnmatch(name, n):
+                scale = s
+                break
+        systematics_scales.append(scale)
+    print("systemtatic scales are ", systematics_scales)
 
     print(dump_dir)
     print(os.listdir(dump_dir))
@@ -73,7 +110,8 @@ def convert(base_folder):
         dump_file = folder + "/" + dump_file
 
         print("Reading %s" % dump_file)
-        dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="#")
+        names = ["CID", "Z", "S2mb", "S2x0", "S2x1", "S2c", "MAGSMEAR_COH", "MU"]
+        dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="V", error_bad_lines=False, names=names)
         supernovae = dataframe.to_records()
 
         supernovae = drop_fields(supernovae, "S2x0")
@@ -87,6 +125,7 @@ def convert(base_folder):
         print("Dump has fields ", supernovae.dtype)
 
         fitres_files = sorted([folder + "/" + i for i in inner_files if i.endswith(".FITRES")])
+        print(fitres_files)
         base_fitres = fitres_files[0]
         sysematics_fitres = fitres_files[1:]
 
@@ -133,7 +172,8 @@ def convert(base_folder):
             offset_mb = []
             offset_x1 = []
             offset_c = []
-            for mag, sorted_indexes, magcids in zip(sysematics, sysematics_sort_indexes, sysematics_idss):
+            for mag, sorted_indexes, magcids, scale in \
+                    zip(sysematics, sysematics_sort_indexes, sysematics_idss, systematics_scales):
 
                 index = np.searchsorted(magcids, cid)
                 if index >= magcids.size or magcids[index] != cid:
@@ -141,9 +181,9 @@ def convert(base_folder):
                     offset_x1.append(np.nan)
                     offset_c.append(np.nan)
                 else:
-                    offset_mb.append(mag['mB'][sorted_indexes[index]] - mb)
-                    offset_x1.append(mag['x1'][sorted_indexes[index]] - x1)
-                    offset_c.append(mag['c'][sorted_indexes[index]] - c)
+                    offset_mb.append((mag['mB'][sorted_indexes[index]] - mb) * scale)
+                    offset_x1.append((mag['x1'][sorted_indexes[index]] - x1) * scale)
+                    offset_c.append((mag['c'][sorted_indexes[index]] - c) * scale)
 
             if np.any(np.isnan(offset_mb)):
                 num_bad_calib += 1
@@ -152,7 +192,9 @@ def convert(base_folder):
             offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
 
             # Get log probabilitiy
-            index = np.where(cid == supernovae['CID'])[0][-1]
+            index = np.where(cid == supernovae_cids)
+            # print("indexes ", supernovae_cids)
+            index = index[0][-1]
             mag_smear = supernovae["MAGSMEAR_COH"][index]
             simmb = supernovae["S2mb"][index]
             simx1 = supernovae["S2x1"][index]
@@ -185,8 +227,8 @@ if __name__ == "__main__":
     # convert("lowz_skewed0p2")
     # convert("lowz_gauss0p4")
     # convert("lowz_gauss0p2")
-    convert("lowz_gauss0p3")
+    convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
     # convert("gauss0p2")
     # convert("gauss0p4")
     # convert("skewed0p2")
-    # convert("gauss0p3")
+    # convert("gauss0p3", "des/DES_BASE.NML")
