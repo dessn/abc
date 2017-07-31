@@ -216,19 +216,15 @@ def convert(base_folder, nml_file):
               (supernovae["Z"].shape[0], np.unique(supernovae["CID"]).size, base_fits.shape[0], fitted_data.shape[0], num_bad_calib))
         print("Calib fails per filter", num_bad_calib_index)
         supernovae_apparents = supernovae["S2mb"] + supernovae["MAGSMEAR_COH"]
+        mask_nan = ~np.isnan(supernovae_apparents)
+        print("%d nans in apparents" % (~mask_nan).sum())
 
-        all_mbs = np.vstack((supernovae["Z"], supernovae_apparents, supernovae_passed)).T
+        all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan], supernovae_passed[mask_nan])).T
         if not os.path.exists(output_dir_passed):
             os.makedirs(output_dir_passed)
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
 if __name__ == "__main__":
-    # convert("lowz_skewed0p2")
-    # convert("lowz_gauss0p4")
-    # convert("lowz_gauss0p2")
-    convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
-    # convert("gauss0p2")
-    # convert("gauss0p4")
-    # convert("skewed0p2")
-    # convert("gauss0p3", "des/DES_BASE.NML")
+    # convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
+    convert("gauss0p3", "des/DES_BASE.NML")

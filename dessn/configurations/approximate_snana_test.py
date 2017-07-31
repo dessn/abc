@@ -23,6 +23,10 @@ if __name__ == "__main__":
     # Turn off mass and skewness for easy test
     simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
 
+    lowzs, dess = simulation
+    # print(lowzs.get_approximate_correction())
+    # print(dess.get_approximate_correction())
+
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)

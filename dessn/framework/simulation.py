@@ -35,17 +35,19 @@ class Simulation(ABC):
             alpha, normm = None, 1.0
             self.logger.info("Fitted cdf efficiency to have mean %0.2f, std %0.2f" % (mean, std))
 
-            # import matplotlib.pyplot as plt
-            # plt.plot(binc, ratio, label="Ratio")
-            # plt.plot(binc, ratio_smooth, label="Ratio smoothed")
-            # plt.plot(binc, 1 - norm.cdf(binc, mean, std), label="PDF")
-            # plt.legend()
-            # plt.show()
-            # exit()
+            import matplotlib.pyplot as plt
+            plt.plot(binc, ratio, label="Ratio")
+            plt.plot(binc, ratio_smooth, label="Ratio smoothed")
+            plt.plot(binc, 1 - norm.cdf(binc, mean, std), label="PDF")
+            plt.legend()
+            plt.show()
+            exit()
 
         else:
             # Inverse transformation sampling to sample from this random pdf
-            cdf = ratio.cumsum()
+            ratio_smooth = gaussian_filter1d(ratio, 2)
+
+            cdf = ratio_smooth.cumsum()
             cdf = cdf / cdf.max()
             cdf[0] = 0
             cdf[-1] = 1
@@ -57,13 +59,14 @@ class Simulation(ABC):
             normm = ratio.max()
             self.logger.info("Fitted skewnorm efficiency to have mean %0.2f, std %0.2f and alpha %0.2f" % (mean, std, alpha))
 
-            # import matplotlib.pyplot as plt
-            # plt.plot(binc, ratio, label="Ratio")
-            # plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std), label="PDF")
-            # plt.hist(y, 100, histtype='step', normed=True, label="Sampled Hist")
-            # plt.legend()
-            # plt.show()
-            # exit()
+            import matplotlib.pyplot as plt
+            plt.plot(binc, ratio, label="Ratio")
+            plt.plot(binc, ratio_smooth, label="Ratio smoothed")
+            plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std), label="PDF")
+            plt.hist(y, 100, histtype='step', normed=True, label="Sampled Hist")
+            plt.legend()
+            plt.show()
+            exit()
 
         return mean, std, alpha, normm
 
