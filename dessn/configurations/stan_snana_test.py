@@ -3,7 +3,7 @@ import logging
 import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.full_model import FullModel
-from dessn.framework.simulations.snana import SNANASimulationGauss0p3
+from dessn.framework.simulations.snana import SNANASimulationGauss0p3, SNANASimulationLowzGauss0p3
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     model = FullModel(num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationGauss0p3(500, num_nodes=num_nodes)
+    simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
