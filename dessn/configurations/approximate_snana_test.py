@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
     simulation = SNANASimulationGauss0p3(500)
 
-    lowzs, dess = simulation
+    #lowzs, dess = simulation
     # print(lowzs.get_approximate_correction(plot=True))
     # print(dess.get_approximate_correction())
 
