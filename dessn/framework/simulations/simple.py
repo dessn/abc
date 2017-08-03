@@ -12,7 +12,7 @@ class SimpleSimulation(Simulation):
         self.alpha_c = alpha_c
         self.dscale = dscale
         self.min_prob_ia = min_prob_ia
-
+        self.num_calib = 20
         if lowz:
             self.skewnorm = False
             self.mb_alpha = None
@@ -56,7 +56,7 @@ class SimpleSimulation(Simulation):
             ("dscale", self.dscale, r"$\delta(0)$"),
             ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$"),
             ("intrinsic_correlation", np.identity(3), r"$\rho$"),
-            ("calibration", np.zeros(8), r"$\delta \mathcal{Z}_%d$")
+            ("calibration", np.zeros(self.num_calib), r"$\delta \mathcal{Z}_%d$")
         ]
 
     def get_all_supernova(self, n_sne, cosmology_index=0):
@@ -115,7 +115,7 @@ class SimpleSimulation(Simulation):
                 vector += np.random.multivariate_normal([0, 0, 0], cov)
                 obs_mBx1c_cov.append(cov)
                 obs_mBx1c.append(vector)
-                deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, 8)))
+                deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, self.num_calib)))
             redshifts_all += redshifts.tolist()
             redshift_pre_comp_all += redshift_pre_comp.tolist()
             p_high_masses_all += p_high_masses.tolist()
