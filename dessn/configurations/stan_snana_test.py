@@ -23,7 +23,8 @@ if __name__ == "__main__":
 
     model = FullModel(num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
+    # simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
+    simulation = SNANASimulationGauss0p3(500)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

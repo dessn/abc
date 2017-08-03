@@ -19,12 +19,11 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    num_nodes = 1
 
-    model = FullModelWithCorrection(num_nodes=num_nodes)
+    model = FullModelWithCorrection()
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulationGauss0p3(250, num_nodes=num_nodes),
-                  SNANASimulationGauss0p3(250, num_nodes=num_nodes)]
+    # simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
+    simulation = SNANASimulationGauss0p3(500)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
