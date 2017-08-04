@@ -19,14 +19,14 @@ class Simulation(ABC):
         mB_passed = mB_all[data["passed"]]
 
         # Bin data and get ratio
-        hist_all, bins = np.histogram(mB_all, bins=100)
+        hist_all, bins = np.histogram(mB_all, bins=200)
         hist_passed, _ = np.histogram(mB_passed, bins=bins)
         binc = 0.5 * (bins[:-1] + bins[1:])
         hist_all[hist_all == 0] = 1
         ratio = hist_passed / hist_all
         ratio_smooth = gaussian_filter1d(ratio, 2)
 
-        is_cdf = True or ratio[:5].mean() > 0.8
+        is_cdf = ratio[:5].mean() > 0.8
         if not is_cdf:
             # Inverse transformation sampling to sample from this random pdf
 
@@ -48,6 +48,7 @@ class Simulation(ABC):
 
                 if plot:
                     import matplotlib.pyplot as plt
+                    plt.hist(binc, 1.0 * hist_passed / hist_passed.max(), label="Passed")
                     plt.plot(binc, ratio, label="Ratio")
                     plt.plot(binc, ratio_smooth, label="Ratio smoothed")
                     plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std), label="PDF")
@@ -68,6 +69,7 @@ class Simulation(ABC):
 
             if plot:
                 import matplotlib.pyplot as plt
+                plt.plot(binc, 1.0 * hist_passed / hist_passed.max(), label="Passed")
                 plt.plot(binc, ratio, label="Ratio")
                 plt.plot(binc, ratio_smooth, label="Ratio smoothed")
                 plt.plot(binc, 1 - norm.cdf(binc, mean, std), label="PDF")
