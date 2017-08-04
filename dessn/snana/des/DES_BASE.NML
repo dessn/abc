@@ -46,13 +46,12 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 # - - - - - - - - - - - - - - - - - - - - - -
 
   &SNLCINP
-     VERSION_PHOTOMETRY    = 'DESALL_specType_forcePhoto_real_snana_fits'
-     FUDGE_HOSTNOISE_FILE  = '$SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT'
-
+     VERSION_PHOTOMETRY = 'RKDES_SPEC_DATA'
      PHOTFLAG_MSKREJ    = 1016, 0
      PRIVATE_DATA_PATH  = '$DES_ROOT/lcmerge'     
      SNTABLE_LIST       = 'SNANA FITRES'
      
+   FUDGE_HOSTNOISE_FILE = '$SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT'
 
      TEXTFILE_PREFIX  = 'SHINTON_DES_BASE'
      KCOR_FILE        = 'DES/kcor_DES_grizY.fits'
@@ -69,14 +68,17 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      SNTYPE_LIST = 1,0
      
      CUTWIN_MJD   = 56500, 57500
-     OPT_SETPKMJD = -1
+     OPT_SETPKMJD = 5
+
      OPT_MWEBV    = 2
+     RV_MWCOLORLAW  = 3.1
+     OPT_MWCOLORLAW = 99
 
      ABORT_ON_NOEPOCHS = F
      ABORT_ON_TRESTCUT = F  
 
      cutwin_Nepoch         =  4
-     cutwin_redshift       =  0.0, 1.2
+     cutwin_redshift       =  0.0, 1.8
      cutwin_redshift_err   =  0.0, 0.01
 
      cutwin_Trest     = -20.0,   60.0
@@ -96,7 +98,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 
  &FITINP
      FILTLIST_FIT   = 'griz'
-     FITMODEL_NAME  = 'SALT2.Guy10_UV2IR'
+     FITMODEL_NAME  = 'SALT2.JLA-B14_LAMOPEN'
 
      PRIOR_SHAPE_RANGE = -5.0, +4.0
      PRIOR_MJDSIG      =  10.
