@@ -31,14 +31,14 @@ GENSIGMA_SEARCH_PEAKMJD:  1.0       # sigma-smearing for  SEARCH_PEAKMJD
 
 GENRANGE_REDSHIFT:  0.009    0.099
 GENSIGMA_REDSHIFT:  0.000001
-GENSIGMA_VPEC:      150  # peculiar velocity, km/sec
+# GENSIGMA_VPEC:      150  # peculiar velocity, km/sec
 
 DNDZ: POWERLAW  2.6E-5  2.2
 
 GENRANGE_TREST:   -20.0  60.0     # rest epoch relative to peak (days)
 
 OPT_MWEBV:      2
-GENSIGMA_MWEBV_RATIO: 0.16
+# GENSIGMA_MWEBV_RATIO: 0.16
 
 
 SMEARFLAG_FLUX:    1   # photo-stat smearing of signal, sky, etc ...
@@ -66,7 +66,7 @@ APPLY_CUTWIN_OPT:     0  # no cuts with simlib_nrepeat key
 CUTWIN_NEPOCH:   5 -5.              # require 5 epochs (no S/N requirement)
 CUTWIN_TRESTMIN: -20  10
 CUTWIN_TRESTMAX:   9  40
-CUTWIN_MWEBV:      0 .20
+CUTWIN_MWEBV:      0 0.20
 
 # -----------------------
 # cosmological params for lightcurve generation and redshift distribution
