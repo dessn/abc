@@ -14,10 +14,10 @@ class SimpleSimulation(Simulation):
         self.min_prob_ia = min_prob_ia
         self.num_calib = 20
         if lowz:
-            self.skewnorm = False
-            self.mb_alpha = None
-            self.mb_mean = 18.5
-            self.mb_width = 1
+            self.skewnorm = True
+            self.mb_alpha = 5.87
+            self.mb_mean = 13.72
+            self.mb_width = 1.35
             self.power = 0.75
             self.max_z_gen = 0.2
         else:
