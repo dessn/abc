@@ -19,7 +19,7 @@ class Simulation(ABC):
         mB_passed = mB_all[data["passed"]]
 
         # Bin data and get ratio
-        hist_all, bins = np.histogram(mB_all, bins=200)
+        hist_all, bins = np.histogram(mB_all, bins=100)
         hist_passed, _ = np.histogram(mB_passed, bins=bins)
         binc = 0.5 * (bins[:-1] + bins[1:])
         hist_all[hist_all == 0] = 1
@@ -40,7 +40,10 @@ class Simulation(ABC):
 
             alpha, mean, std = skewnorm.fit(y)
 
-            if np.abs(alpha) > 5:
+            if mean < 15:
+                mean -= 0.3
+
+            if np.abs(alpha) > 10:
                 is_cdf = True
             else:
                 normm = ratio.max()
@@ -48,7 +51,7 @@ class Simulation(ABC):
 
                 if plot:
                     import matplotlib.pyplot as plt
-                    plt.hist(binc, 1.0 * hist_passed / hist_passed.max(), label="Passed")
+                    plt.plot(binc, 1.0 * hist_passed / hist_passed.max(), label="Passed")
                     plt.plot(binc, ratio, label="Ratio")
                     plt.plot(binc, ratio_smooth, label="Ratio smoothed")
                     plt.plot(binc, skewnorm.pdf(binc, alpha, mean, std), label="PDF")
