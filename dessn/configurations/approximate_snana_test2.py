@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
+    simulation = [SNANASimulationLowzGauss0p3(200, manual_selection=[16.3, 1]), SNANASimulationGauss0p3(300)]
     # simulation = SNANASimulationGauss0p3(500)
 
     # lowzs, dess = simulation
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(300)
+    fitter.set_num_cosmologies(100)
     fitter.set_num_walkers(1)
 
     h = socket.gethostname()

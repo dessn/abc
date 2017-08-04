@@ -152,8 +152,15 @@ class SNANASimulationSkewed0p2(SNANASimulation):
 
 
 class SNANASimulationLowzGauss0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        self.manual_selection = manual_selection
         super().__init__(num_supernova, "lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58)
+
+    def get_approximate_correction(self, plot=False):
+        if self.manual_selection is None:
+            return super().get_approximate_correction(plot=plot)
+        else:
+            return self.manual_selection[0], self.manual_selection[1], None, 1.0
 
 
 class SNANASimulationLowzGauss0p2(SNANASimulation):

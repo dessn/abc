@@ -40,8 +40,8 @@ class Simulation(ABC):
 
             alpha, mean, std = skewnorm.fit(y)
 
-            if mean < 15:
-                mean += 0.3
+            # if mean < 15:
+            #     mean += 0.3
 
             if np.abs(alpha) > 10:
                 is_cdf = True
