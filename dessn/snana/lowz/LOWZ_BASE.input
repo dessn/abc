@@ -38,8 +38,6 @@ DNDZ: POWERLAW  2.6E-5  2.2
 GENRANGE_TREST:   -20.0  60.0     # rest epoch relative to peak (days)
 
 OPT_MWEBV:      2
-# GENSIGMA_MWEBV_RATIO: 0.16
-
 
 SMEARFLAG_FLUX:    1   # photo-stat smearing of signal, sky, etc ...
 SMEARFLAG_ZEROPT:  1   # smear zero-point with zptsig
