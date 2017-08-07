@@ -227,4 +227,4 @@ def convert(base_folder, nml_file):
 
 if __name__ == "__main__":
     convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
-    # convert("gauss0p3", "des/DES_BASE.NML")
+    convert("gauss0p3", "des/DES_BASE.NML")
