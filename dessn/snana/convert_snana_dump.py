@@ -226,5 +226,5 @@ def convert(base_folder, nml_file):
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
 
 if __name__ == "__main__":
-    convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
+    # convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
     convert("gauss0p3", "des/DES_BASE.NML")
