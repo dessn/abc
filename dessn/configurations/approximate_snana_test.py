@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
-    # simulation = SNANASimulationGauss0p3(500)
+    # simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
+    simulation = SNANASimulationGauss0p3(500)
 
     # lowzs, dess = simulation
     # print(lowzs.get_approximate_correction(plot=True))
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
+        # c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
         print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
