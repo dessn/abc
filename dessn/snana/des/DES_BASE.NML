@@ -46,7 +46,9 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 # - - - - - - - - - - - - - - - - - - - - - -
 
   &SNLCINP
-     VERSION_PHOTOMETRY    = 'DESALL_specType_forcePhoto_real_snana_fits'
+     !VERSION_PHOTOMETRY    = 'DESALL_specType_forcePhoto_real_snana_fits'
+     VERSION_PHOTOMETRY = 'RKDES_SPEC_DATA'
+
      FUDGE_HOSTNOISE_FILE  = '$SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT'
 
      PHOTFLAG_MSKREJ    = 1016, 0
