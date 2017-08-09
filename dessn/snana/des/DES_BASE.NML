@@ -46,12 +46,13 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 # - - - - - - - - - - - - - - - - - - - - - -
 
   &SNLCINP
-     VERSION_PHOTOMETRY = 'RKDES_SPEC_DATA'
+     VERSION_PHOTOMETRY    = 'DESALL_specType_forcePhoto_real_snana_fits'
+     FUDGE_HOSTNOISE_FILE  = '$SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT'
+
      PHOTFLAG_MSKREJ    = 1016, 0
      PRIVATE_DATA_PATH  = '$DES_ROOT/lcmerge'     
      SNTABLE_LIST       = 'SNANA FITRES'
-     
-     FUDGE_HOSTNOISE_FILE = '$SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT'
+
 
      TEXTFILE_PREFIX  = 'SHINTON_DES_BASE'
      KCOR_FILE        = 'DES/kcor_DES_grizY.fits'
@@ -69,7 +70,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      
      CUTWIN_MJD   = 56500, 57500
      OPT_SETPKMJD = 5
-
+     OPT_MWEBV    = 2
 
      ABORT_ON_NOEPOCHS = F
      ABORT_ON_TRESTCUT = F  
@@ -89,8 +90,6 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      CUTWIN_NFILT_SNRMAX2 = 3.0, 99.
 
      cutwin_Nband_thresh = 1
-
-     OPT_MWEBV    = 2
 
   &END
 
