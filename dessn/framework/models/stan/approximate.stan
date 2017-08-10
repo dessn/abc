@@ -62,7 +62,7 @@ parameters {
     // real <lower = -2, upper = -0.4> w;
     // Supernova model
     real <lower = -0.2, upper = 0.5> alpha;
-    real <lower = 0, upper = 5> beta;
+    real <lower = -1, upper = 5> beta;
 
     // Other effects
     real <lower = -0.2, upper = 0.4> dscale; // Scale of mass correction
