@@ -13,7 +13,7 @@ FUDGEOPT_FLUXERR:  1  # anomalous flux scatter
 
 SOLID_ANGLE:  0.0082     # 27 sq deg
 
-NGENTOT_LC:  20000
+NGENTOT_LC:  10000
 #NGEN_LC: 10000
 GENVERSION:  SHINTON_DES_IDEAL
 GENSOURCE:   RANDOM
@@ -91,11 +91,11 @@ DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
 # using G10 High-z row
 
 GENPEAK_SALT2c:    0 # For initial values see http://iopscience.iop.org/article/10.3847/2041-8205/822/2/L35/pdf
-GENSIGMA_SALT2c:    0.001  0.001     # bifurcated sigmas
+GENSIGMA_SALT2c:    0.01  0.01     # bifurcated sigmas
 GENRANGE_SALT2c:   -0.300  0.300     # color range
 
 GENPEAK_SALT2x1:     0
-GENSIGMA_SALT2x1:    0.01   0.01     # bifurcated sigmas
+GENSIGMA_SALT2x1:    0.1   0.1     # bifurcated sigmas
 GENRANGE_SALT2x1:   -5.0     5.0       # x1 (stretch) range
 
 
@@ -104,14 +104,14 @@ GENRANGE_SALT2x1:   -5.0     5.0       # x1 (stretch) range
 # is zero for 1D biasCor, so that command-line override sets
 # GENSIGMA>0 for biasCor,
 
-GENMEAN_SALT2ALPHA:   0.14
+GENMEAN_SALT2ALPHA:   0.0
 GENSIGMA_SALT2ALPHA:  0.0  0.0   # override to 1E8 for 5D biasCor sample
-GENRANGE_SALT2ALPHA:  0.10 0.18  # grid for biasCor sample
+GENRANGE_SALT2ALPHA:  -0.10 0.10  # grid for biasCor sample
 GENGRID_SALT2ALPHA:   2
 
-GENMEAN_SALT2BETA:   3.1
+GENMEAN_SALT2BETA:   0.0
 GENSIGMA_SALT2BETA:  0.0  0.0  # override to 1E8 for 5D biasCor sample
-GENRANGE_SALT2BETA:  2.7  3.5  # grid for COH & G10 0biasCor samples
+GENRANGE_SALT2BETA:  -0.5 0.5  # grid for COH & G10 0biasCor samples
 GENGRID_SALT2BETA:   2
 
 # ----------------------

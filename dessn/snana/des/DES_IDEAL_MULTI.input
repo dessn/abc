@@ -1,7 +1,8 @@
 # Example instruction file for DES.
 # Usage:
 #  sim_SNmix.pl  DES_IDEAL_MULTI.input
-#
+#  cp /project/rkessler/SN/SNDATA_ROOT/SIM/SHINTON_DES_IDEAL_MULTI/SHINTON_DES_IDEAL_MULTI.DUMP .
+
 
 BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 40
 
