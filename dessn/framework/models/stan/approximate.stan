@@ -77,8 +77,8 @@ parameters {
     matrix <lower = -1.0, upper = 1.0> [n_surveys, num_nodes] mean_x1;
     matrix <lower = -0.2, upper = 0.2> [n_surveys, num_nodes] mean_c;
     real <lower = -4, upper = 1> log_sigma_MB [n_surveys];
-    real <lower = -4, upper = 1> log_sigma_x1 [n_surveys];
-    real <lower = -4, upper = 1> log_sigma_c [n_surveys];
+    real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
+    real <lower = -8, upper = 1> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
 }
