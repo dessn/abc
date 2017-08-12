@@ -126,7 +126,7 @@ class ApproximateModel(Model):
             sim_data_list.append(sim_data)
 
         node_weights = np.concatenate(node_weights_list)
-        num_calib = np.sum(num_calibs) - (self.global_calib * (len(num_calibs) - 1))
+        num_calib = np.sum(num_calibs) - (self.global_calibration * (len(num_calibs) - 1))
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
