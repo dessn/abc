@@ -74,7 +74,7 @@ def load_systematic_names(nml_file):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     nml_file = dir_name + os.sep + nml_file
-    expression = re.compile("FITOPT.*\[(.*)\]")
+    expression = re.compile("^\s*[^#]ITOPT.*\[(.*)\]")
     with open(nml_file) as f:
         results = expression.findall(f.read())
     return results
@@ -119,6 +119,15 @@ def convert(base_folder, nml_file):
         supernovae = drop_fields(supernovae, "S2beta")
         supernovae = drop_fields(supernovae, "VARNAMES:")
         supernovae = drop_fields(supernovae, "index")
+
+        mmbs = supernovae["Z"]
+        unique, counts = np.unique(mmbs, return_counts=True)
+        print(mmbs[0])
+        print(mmbs.shape)
+        print(unique.shape)
+        print(counts.max())
+        print(np.median(counts))
+        print(counts[:100])
 
         supernovae_passed = np.zeros(supernovae["Z"].shape)
         supernovae_cids = supernovae["CID"]
@@ -227,4 +236,5 @@ def convert(base_folder, nml_file):
 
 if __name__ == "__main__":
     # convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
-    convert("gauss0p3", "des/DES_BASE.NML")
+    # convert("gauss0p3", "des/DES_BASE.NML")
+    convert("ideal0p3", "des/DES_IDEAL.NML")

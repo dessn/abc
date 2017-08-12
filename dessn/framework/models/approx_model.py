@@ -13,12 +13,13 @@ from dessn.utility.get_cosmologies import get_cosmology_dictionary
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4):
+    def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=14):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
         self.num_redshift_nodes = num_nodes
+        self.global_calibration = global_calibration
 
     def get_parameters(self):
         return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -78,7 +79,7 @@ class ApproximateModel(Model):
     def get_name(self):
         return "Approx"
 
-    def get_data(self, simulations, cosmology_index, add_zs=None, global_calib=14):
+    def get_data(self, simulations, cosmology_index, add_zs=None):
         if not type(simulations) == list:
             simulations = [simulations]
 
@@ -125,7 +126,7 @@ class ApproximateModel(Model):
             sim_data_list.append(sim_data)
 
         node_weights = np.concatenate(node_weights_list)
-        num_calib = np.sum(num_calibs) - (global_calib * (len(num_calibs) - 1))
+        num_calib = np.sum(num_calibs) - (self.global_calib * (len(num_calibs) - 1))
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}

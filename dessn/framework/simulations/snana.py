@@ -121,6 +121,11 @@ class SNANASimulationGauss0p3(SNANASimulation):
         super().__init__(num_supernova, "gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22)
 
 
+class SNANASimulationIdeal0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1)
+
+
 class SNANASimulationGauss0p2(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False):
         super().__init__(num_supernova, "gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22)

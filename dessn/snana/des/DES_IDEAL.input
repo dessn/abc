@@ -4,14 +4,16 @@ SIMLIB_FILE:  $DES_ROOT/simlibs/DES_DIFFIMG.SIMLIB
 SIMLIB_NREPEAT:  10  # generate 10 events per LIBID (for speed)
 
 # ----------------- host info ---------------
-HOSTLIB_FILE:    $DES_ROOT/simlibs/DES_SVA1GOLD_DEEP_TRAIN.HOSTLIB
-HOSTNOISE_FILE:  $SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT
-HOSTLIB_GENRANGE_NSIGZ: -3. +3.  # not yet implemented
-HOSTLIB_MSKOPT:     258           # 2=noise, 256=vbose
-HOSTLIB_STOREPAR:   Mi_abs
-FUDGEOPT_FLUXERR:  1  # anomalous flux scatter
+# HOSTLIB_FILE:    $DES_ROOT/simlibs/DES_SVA1GOLD_DEEP_TRAIN.HOSTLIB
+# HOSTNOISE_FILE:  $SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT
+# HOSTLIB_GENRANGE_NSIGZ: -3. +3.  # not yet implemented
+# HOSTLIB_MSKOPT:     258           # 2=noise, 256=vbose
+# HOSTLIB_STOREPAR:   Mi_abs
+# FUDGEOPT_FLUXERR:  1  # anomalous flux scatter
 
 SOLID_ANGLE:  0.0082     # 27 sq deg
+
+EXPOSURE_TIME: 10
 
 NGENTOT_LC:  10000
 #NGEN_LC: 10000

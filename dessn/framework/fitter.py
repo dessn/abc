@@ -74,7 +74,7 @@ class Fitter(object):
         out_file = self.temp_dir + "/stan_%d_%d_%d_%d.pkl" % (model_index, simulation_index, cosmo_index, walker_index)
 
         if num_cores == 1:
-            w, n = 1000, 5000
+            w, n = 1000, 3000
         else:
             w, n = 500, 1000
 
