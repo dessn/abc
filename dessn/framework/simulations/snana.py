@@ -56,6 +56,8 @@ class SNANASimulation(Simulation):
             self.logger.debug("Shuffling data for cosmology index %d" % cosmology_index)
             np.random.shuffle(supernovae)
 
+        supernovae = supernovae[supernovae[:, 1] < 0.5]
+
         supernovae = supernovae[:n_sne, :]
 
         redshifts = supernovae[:, 1]
