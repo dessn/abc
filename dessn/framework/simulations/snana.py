@@ -56,7 +56,7 @@ class SNANASimulation(Simulation):
             self.logger.debug("Shuffling data for cosmology index %d" % cosmology_index)
             np.random.shuffle(supernovae)
 
-        supernovae = supernovae[supernovae[:, 1] < 0.5]
+        # supernovae = supernovae[supernovae[:, 1] < 0.5]
 
         supernovae = supernovae[:n_sne, :]
 
@@ -126,6 +126,11 @@ class SNANASimulationGauss0p3(SNANASimulation):
 class SNANASimulationIdeal0p3(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False):
         super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1)
+
+
+class SNANASimulationIdealNoBias0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+        super().__init__(num_supernova, "ideal_nobias_0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1)
 
 
 class SNANASimulationGauss0p2(SNANASimulation):
