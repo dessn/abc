@@ -111,7 +111,7 @@ def convert(base_folder, nml_file):
 
         print("Reading %s" % dump_file)
         names = ["CID", "Z", "S2mb", "S2x0", "S2x1", "S2c", "MAGSMEAR_COH", "MU"]
-        dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=1, comment="V", error_bad_lines=False, names=names)
+        dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=0, comment="V", error_bad_lines=False, names=names)
         supernovae = dataframe.to_records()
 
         supernovae = drop_fields(supernovae, "S2x0")
@@ -238,3 +238,4 @@ if __name__ == "__main__":
     # convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
     # convert("gauss0p3", "des/DES_BASE.NML")
     convert("ideal0p3", "des/DES_IDEAL.NML")
+    convert("ideal_nobias_0p3", "des/DES_IDEAL_NO_BIAS.NML")
