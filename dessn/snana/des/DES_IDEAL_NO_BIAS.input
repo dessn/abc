@@ -1,7 +1,7 @@
 
 
 SIMLIB_FILE:  $DES_ROOT/simlibs/DES_DIFFIMG.SIMLIB
-SIMLIB_NREPEAT:  10  # generate 10 events per LIBID (for speed)
+SIMLIB_NREPEAT:  2  # generate 10 events per LIBID (for speed)
 
 # ----------------- host info ---------------
 # HOSTLIB_FILE:    $DES_ROOT/simlibs/DES_SVA1GOLD_DEEP_TRAIN.HOSTLIB
@@ -46,8 +46,8 @@ RANSEED: 71       # random number seed
 SMEARFLAG_FLUX:    1  # photo-stat smearing of signal, sky, etc ...
 SMEARFLAG_ZEROPT:  1  # smear zero-point with zptsig
 
-APPLY_SEARCHEFF_OPT:  3
-SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_DES.TXT
+APPLY_SEARCHEFF_OPT:  1
+# SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_DES.TXT
 
 NEWMJD_DIF: 0.4
 
