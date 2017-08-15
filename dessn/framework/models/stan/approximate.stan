@@ -194,15 +194,17 @@ transformed parameters {
         if (correction_skewnorm[survey_map[i]]) {
             weights[i] = log_sum_exp(-10, log(2) + mB_norms[survey_map[i]] + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]));
             numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
+            //print("skewnorm  ", weights[i], "  ", numerator_weight[i]);
         } else {
             weights[i] = log_sum_exp(-10, normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]));
             numerator_weight[i] = normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]);
+            //print("cdf  ", weights[i], "  ", numerator_weight[i]);
         }
 
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
-            + numerator_weight[i];
+            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]);
+            //+ numerator_weight[i];
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
