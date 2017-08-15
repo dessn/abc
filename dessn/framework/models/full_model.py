@@ -9,8 +9,8 @@ from dessn.utility.get_cosmologies import get_cosmology_dictionary
 
 class FullModel(ApproximateModel):
 
-    def __init__(self, filename="full.stan", num_nodes=4):
-        super().__init__(filename=filename, num_nodes=num_nodes)
+    def __init__(self, filename="full.stan", num_nodes=4, global_calibration=14):
+        super().__init__(filename=filename, num_nodes=num_nodes, global_calibration=global_calibration)
 
     def get_extra_zs(self, simulation, n=201, buffer=0.2):
         assert n % 2 == 1, "n needs to be odd"
