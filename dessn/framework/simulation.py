@@ -26,7 +26,7 @@ class Simulation(ABC):
         ratio = hist_passed / hist_all
         ratio_smooth = gaussian_filter1d(ratio, 2)
 
-        is_cdf = ratio[:5].mean() > 0.8
+        is_cdf = (ratio_smooth[:5] / ratio_smooth.max()).mean() > 0.6
         if not is_cdf:
             # Inverse transformation sampling to sample from this random pdf
 
@@ -61,10 +61,13 @@ class Simulation(ABC):
                     exit()
 
         if is_cdf:
-            ratio_smooth[:ratio_smooth.argmax()] = ratio_smooth.max()
-            ratio_smooth /= ratio_smooth.max()
+            cut = 15
+            ratio_smooth2 = ratio_smooth[cut:]
+            binc2 = binc[cut:]
+            ratio_smooth2[:ratio_smooth2.argmax()] = ratio_smooth2.max()
+            ratio_smooth2 /= ratio_smooth2.max()
             vals = [0.5 - 0.68/2, 0.5, 0.5 + 0.68/2]
-            mags = interp1d(ratio_smooth, binc)(vals)
+            mags = interp1d(ratio_smooth2, binc2)(vals)
             mean = mags[1]
             std = 0.51 * np.abs(mags[0] - mags[2])  # 0.51 not 0.5 because better to overestimate than under
             alpha, normm = None, 1.0
@@ -74,7 +77,7 @@ class Simulation(ABC):
                 import matplotlib.pyplot as plt
                 plt.plot(binc, 1.0 * hist_passed / hist_passed.max(), label="Passed")
                 plt.plot(binc, ratio, label="Ratio")
-                plt.plot(binc, ratio_smooth, label="Ratio smoothed")
+                plt.plot(binc2, ratio_smooth2, label="Ratio smoothed")
                 plt.plot(binc, 1 - norm.cdf(binc, mean, std), label="PDF")
                 plt.legend()
                 plt.show()
