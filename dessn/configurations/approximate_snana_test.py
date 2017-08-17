@@ -22,7 +22,7 @@ if __name__ == "__main__":
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
     # simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
-    simulation = SNANASimulationGauss0p3(500, use_sim=True)
+    simulation = SNANASimulationGauss0p3(500)
 
     # lowzs, dess = simulation
     # print(lowzs.get_approximate_correction(plot=True))
