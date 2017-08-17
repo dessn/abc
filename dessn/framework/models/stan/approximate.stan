@@ -204,7 +204,7 @@ transformed parameters {
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]);
-            //+ numerator_weight[i];
+            + numerator_weight[i];
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
