@@ -20,10 +20,11 @@ if __name__ == "__main__":
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    model = ApproximateModel(global_calibration=1)
+    num_nodes = 1
+    model = ApproximateModel(global_calibration=1, num_nodes=num_nodes)
     # Turn off mass and skewness for easy test
     # simulation = [SNANASimulationLowzGauss0p3(200), SNANASimulationGauss0p3(300)]
-    simulation = SNANASimulationIdeal0p3(500)
+    simulation = SNANASimulationIdeal0p3(500, num_nodes=num_nodes)
 
     # lowzs, dess = simulation
     # print(lowzs.get_approximate_correction(plot=True))
