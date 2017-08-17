@@ -26,7 +26,7 @@ class Simulation(ABC):
         ratio = hist_passed / hist_all
         ratio_smooth = gaussian_filter1d(ratio, 2)
 
-        is_cdf = (ratio_smooth[:5] / ratio_smooth.max()).mean() > 0.6
+        is_cdf = (ratio_smooth[5:15] / ratio_smooth.max()).mean() > 0.6
         if not is_cdf:
             # Inverse transformation sampling to sample from this random pdf
 
