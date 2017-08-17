@@ -216,6 +216,8 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
+        + normal_lpdf(alpha | 0, 0.01)
+        + normal_lpdf(beta | 0, 0.01)
         + normal_lpdf(calibration | 0, 1);
 }
 model {

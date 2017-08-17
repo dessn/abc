@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
+        print("CORRECTION IS ", simulation.get_approximate_correction())
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
