@@ -228,7 +228,8 @@ def convert(base_folder, nml_file):
         mask_nan = ~np.isnan(supernovae_apparents)
         print("%d nans in apparents" % (~mask_nan).sum())
 
-        all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan], supernovae_passed[mask_nan])).T
+        all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan],
+                             supernovae_passed[mask_nan], supernovae["S2c"][mask_nan], supernovae["S2x1"][mask_nan])).T
         if not os.path.exists(output_dir_passed):
             os.makedirs(output_dir_passed)
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
@@ -236,6 +237,6 @@ def convert(base_folder, nml_file):
 
 if __name__ == "__main__":
     # convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
-    convert("gauss0p3", "des/DES_BASE.NML")
-    # convert("ideal0p3", "des/DES_IDEAL.NML")
+    # convert("gauss0p3", "des/DES_BASE.NML")
+    convert("ideal0p3", "des/DES_IDEAL.NML")
     # convert("ideal_nobias_0p3", "des/DES_IDEAL_NO_BIAS.NML")

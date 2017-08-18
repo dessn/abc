@@ -107,11 +107,15 @@ class SNANASimulation(Simulation):
 
         supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "all" in f]
         supernovae = np.vstack(tuple(supernovae_files))
-        return {
+        res = {
             "redshifts": supernovae[:, 0],
             "sim_apparents": supernovae[:, 1],
             "passed": supernovae[:, 2].astype(bool)
         }
+        if supernovae.shape[1] > 3:
+            res["sim_colors"] = supernovae[:, 3]
+            res["sim_stretches"] = supernovae[:, 4]
+        return res
 
     def get_passed_supernova(self, n_sne, simulation=True, cosmology_index=0):
         name = self.simulation_name if simulation else self.real_data_name
