@@ -131,11 +131,6 @@ class SNANASimulationIdeal0p3(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False):
         super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1)
 
-    def get_approximate_correction(self, plot=False):
-        mean, sigma, alpha, norm = super().get_approximate_correction(plot=plot)
-        sigma = 0.5
-        return mean, sigma, alpha, norm
-
 
 class SNANASimulationIdealNoBias0p3(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False):

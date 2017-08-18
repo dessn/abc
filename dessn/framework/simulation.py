@@ -69,7 +69,7 @@ class Simulation(ABC):
             vals = [0.5 - 0.68/2, 0.5, 0.5 + 0.68/2]
             mags = interp1d(ratio_smooth2, binc2)(vals)
             mean = mags[1]
-            std = 0.51 * np.abs(mags[0] - mags[2])  # 0.51 not 0.5 because better to overestimate than under
+            std = 0.45 * np.abs(mags[0] - mags[2])
             alpha, normm = None, 1.0
             self.logger.info("Fitted cdf efficiency to have mean %0.2f, std %0.2f" % (mean, std))
 
