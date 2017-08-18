@@ -1,5 +1,5 @@
 import numpy as np
-from simulations.snana import SNANASimulationGauss0p3, SNANASimulationIdeal0p3
+from simulations.snana import SNANASimulationGauss0p3, SNANASimulationIdeal0p3, SNANASimulationIdealNoBias0p3
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
@@ -77,4 +77,5 @@ def inspect_bias(simulation):
     plt.show()
 
 if __name__ == "__main__":
-    inspect_bias(SNANASimulationIdeal0p3(-1))
+    # inspect_bias(SNANASimulationIdeal0p3(-1))
+    inspect_bias(SNANASimulationIdealNoBias0p3(-1))
