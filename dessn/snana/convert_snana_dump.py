@@ -74,7 +74,7 @@ def load_systematic_names(nml_file):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     nml_file = dir_name + os.sep + nml_file
-    expression = re.compile("^\s*[^#]ITOPT.*\[(.*)\]")
+    expression = re.compile("[^#]ITOPT.*\[(.*)\]")
     with open(nml_file) as f:
         results = expression.findall(f.read())
     return results
