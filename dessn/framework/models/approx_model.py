@@ -141,9 +141,9 @@ class ApproximateModel(Model):
                     for data in data_list:
                         nsne = data["n_sne"]
                         blank = np.zeros((nsne, 3, num_calib))
-                        n = data["deta_dcalib"].shape[2] - global_calib
-                        blank[:, :, :global_calib] = data["deta_dcalib"][:, :, :global_calib]
-                        blank[:, :, offset:offset+n] = data["deta_dcalib"][:, :, global_calib:]
+                        n = data["deta_dcalib"].shape[2] - self.global_calibration
+                        blank[:, :, :self.global_calibration] = data["deta_dcalib"][:, :, :self.global_calibration]
+                        blank[:, :, offset:offset+n] = data["deta_dcalib"][:, :, self.global_calibration:]
                         offset += n
                         vals.append(blank)
                     data_dict[key] = np.vstack(vals)

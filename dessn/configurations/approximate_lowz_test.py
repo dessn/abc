@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # lowzs, dess = simulation
     # print(lowzs.get_approximate_correction(plot=True))
-    print("CORRECTION IS ", simulation.get_approximate_correction())
+    # print("CORRECTION IS ", simulation.get_approximate_correction())
     # exit()
 
     fitter = Fitter(dir_name)
