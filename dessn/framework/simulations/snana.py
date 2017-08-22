@@ -182,7 +182,7 @@ class SNANASimulationLowzGauss0p3(SNANASimulation):
         if self.manual_selection is None:
             return super().get_approximate_correction(plot=plot)
         else:
-            return self.manual_selection[0], self.manual_selection[1], None, 1.0
+            return self.manual_selection[0], self.manual_selection[1], self.manual_selection[2], self.manual_selection[3]
 
 
 class SNANASimulationLowzGauss0p2(SNANASimulation):
