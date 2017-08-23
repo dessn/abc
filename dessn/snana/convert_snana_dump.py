@@ -81,7 +81,7 @@ def load_systematic_names(nml_file):
     return results
 
 
-def convert(base_folder, nml_file):
+def convert(base_folder, nml_file, include_c_x1=False):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     dump_dir = os.path.abspath(dir_name + "/../framework/simulations/snana_dump/" + base_folder)
@@ -229,8 +229,13 @@ def convert(base_folder, nml_file):
         mask_nan = ~np.isnan(supernovae_apparents)
         print("%d nans in apparents" % (~mask_nan).sum())
 
-        all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan],
-                             supernovae_passed[mask_nan], supernovae["S2c"][mask_nan], supernovae["S2x1"][mask_nan])).T
+        if include_c_x1:
+            all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan], supernovae_passed[mask_nan],
+                                 supernovae["S2c"][mask_nan], supernovae["S2x1"][mask_nan])).T
+
+        else:
+            all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan], supernovae_passed[mask_nan])).T
+
         if not os.path.exists(output_dir_passed):
             os.makedirs(output_dir_passed)
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
