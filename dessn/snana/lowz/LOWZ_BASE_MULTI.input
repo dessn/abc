@@ -1,7 +1,8 @@
 # Example instruction file for DES.
 # Usage:
 #  sim_SNmix.pl  LOWZ_BASE_MULTI.input
-#
+#  cp /project/rkessler/SN/SNDATA_ROOT/SIM/SHINTON_LOWZ_BASE_MULTI/SHINTON_LOWZ_BASE_MULTI.DUMP.gz . && gunzip *.gz && grep -e '^SN' SHINTON_LOWZ_BASE_MULTI.DUMP > SHINTON_LOWZ_BASE_MULTI2.DUMP
+#  split_and_fit.pl LOWZ_BASE.NML
 
 BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 40
 

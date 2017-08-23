@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulationLowzGauss0p3(200, manual_selection=[13.72+0.5, 1.353, 5.835, 0.280]),
+    simulation = [SNANASimulationLowzGauss0p3(200, manual_selection=[13.72+1, 1.353, 5.835, 0.280]),
                   SNANASimulationGauss0p3(300, manual_selection=[22.12, 0.544, None, 1.0])]
 
     # lowzs, dess = simulation
