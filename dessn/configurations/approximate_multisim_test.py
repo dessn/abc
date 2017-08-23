@@ -21,13 +21,12 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [#SNANASimulationLowzGauss0p3(20, manual_selection=[13.72+0.5, 1.353, 5.835, 0.280]),
-                  SNANASimulationGauss0p3(500)]
-    # simulation = SNANASimulationGauss0p3(500)
+    # simulation = [SNANASimulationLowzGauss0p3(20, manual_selection=[13.72+0.5, 1.353, 5.835, 0.280]), SNANASimulationGauss0p3(500)]
+    simulation = SNANASimulationGauss0p3(500)
 
     # lowzs, dess = simulation
     # print(lowzs.get_approximate_correction(plot=True))
-    # print("CORRECTION IS ", simulation.get_approximate_correction())
+    # print("CORRECTION IS ", simulation[0].get_approximate_correction())
     # exit()
 
     fitter = Fitter(dir_name)
