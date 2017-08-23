@@ -4,7 +4,8 @@ from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
 
 from simulations.simple import SimpleSimulation
-from simulations.snana import SNANASimulationGauss0p3, SNANASimulationIdeal0p3, SNANASimulationIdealNoBias0p3
+from simulations.snana import SNANASimulationGauss0p3, SNANASimulationIdeal0p3, SNANASimulationIdealNoBias0p3, \
+    SNANASimulationLowzGauss0p3
 
 
 def verify_simulation(simulation, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365):
@@ -94,4 +95,5 @@ def verify_simulation2(data, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365, use
 if __name__ == "__main__":
     # verify_simulation(SNANASimulationIdeal0p3(-1), alpha=0, beta=0)
     # verify_simulation(SNANASimulationIdealNoBias0p3(-1), alpha=0, beta=0)
-    verify_simulation(SNANASimulationGauss0p3(-1), alpha=0.14, beta=3.1)
+    # verify_simulation(SNANASimulationGauss0p3(-1), alpha=0.14, beta=3.1)
+    verify_simulation(SNANASimulationLowzGauss0p3(-1), alpha=0.14, beta=3.1)

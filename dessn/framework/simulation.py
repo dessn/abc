@@ -11,7 +11,7 @@ class Simulation(ABC):
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def get_approximate_correction(self, plot=False):
+    def get_approximate_correction(self, plot=False, manual=None):
         """ Characterises the simulations selection efficiency in apparent magnitude space as a skew normal. """
         data = self.get_all_supernova(100000)
         self.logger.info("Got data to compute selection function")
@@ -26,7 +26,10 @@ class Simulation(ABC):
         ratio = hist_passed / hist_all
         ratio_smooth = gaussian_filter1d(ratio, 2)
 
-        is_cdf = (ratio_smooth[5:15] / ratio_smooth.max()).mean() > 0.6
+        if manual is not None:
+            is_cdf = manual[2] is None
+        else:
+            is_cdf = (ratio_smooth[5:15] / ratio_smooth.max()).mean() > 0.6
         if not is_cdf:
             # Inverse transformation sampling to sample from this random pdf
 
@@ -38,10 +41,10 @@ class Simulation(ABC):
             u = np.random.random(size=n)
             y = interp1d(cdf, binc)(u)
 
-            alpha, mean, std = skewnorm.fit(y)
-
-            # if mean < 15:
-            #     mean += 0.3
+            if manual is None:
+                alpha, mean, std = skewnorm.fit(y)
+            else:
+                mean, std, alpha, normm = manual
 
             if np.abs(alpha) > 10:
                 is_cdf = True
@@ -68,9 +71,13 @@ class Simulation(ABC):
             ratio_smooth2 /= ratio_smooth2.max()
             vals = [0.5 - 0.68/2, 0.5, 0.5 + 0.68/2]
             mags = interp1d(ratio_smooth2, binc2)(vals)
-            mean = mags[1]
-            std = 0.40 * np.abs(mags[0] - mags[2])
-            alpha, normm = None, 1.0
+
+            if manual is None:
+                mean = mags[1]
+                std = 0.40 * np.abs(mags[0] - mags[2])
+                alpha, normm = None, 1.0
+            else:
+                mean, std, alpha, normm = manual
             self.logger.info("Fitted cdf efficiency to have mean %0.2f, std %0.2f" % (mean, std))
 
             if plot:
