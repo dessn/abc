@@ -16,10 +16,12 @@ def verify_simulation(simulation, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365
     bin_count = 100
     name = simulation.__class__.__name__
     print(data_all.keys())
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 7))
+    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
     axes = axes.flatten()
 
-    fig.suptitle(name)
+    cor = simulation.get_approximate_correction()
+
+    fig.suptitle("%s   %0.3f %0.3f %s" % (name, cor[0], cor[1], cor[2:]), y=0.997)
 
     ax = axes[0]
     mask = data_all["passed"]
@@ -95,5 +97,5 @@ def verify_simulation2(data, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365, use
 if __name__ == "__main__":
     # verify_simulation(SNANASimulationIdeal0p3(-1), alpha=0, beta=0)
     # verify_simulation(SNANASimulationIdealNoBias0p3(-1), alpha=0, beta=0)
-    # verify_simulation(SNANASimulationGauss0p3(-1), alpha=0.14, beta=3.1)
-    verify_simulation(SNANASimulationLowzGauss0p3(-1), alpha=0.14, beta=3.1)
+    verify_simulation(SNANASimulationGauss0p3(-1), alpha=0.14, beta=3.1)
+    # verify_simulation(SNANASimulationLowzGauss0p3(-1), alpha=0.14, beta=3.1)

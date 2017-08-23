@@ -5,7 +5,8 @@ from dessn.framework.simulation import Simulation
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, real_data_name, simulation_name=None, num_nodes=4, use_sim=False, num_calib=4):
+    def __init__(self, num_supernova, real_data_name, simulation_name=None, num_nodes=4,
+                 use_sim=False, num_calib=4, manual_selection=None):
         super().__init__()
         self.real_data_name = real_data_name
         self.simulation_name = simulation_name
@@ -15,6 +16,7 @@ class SNANASimulation(Simulation):
         self.num_nodes = num_nodes
         self.num_supernova = num_supernova
         self.num_calib = num_calib
+        self.manual_selection = manual_selection
 
     def get_name(self):
         return "snana_%s" % self.real_data_name
@@ -121,63 +123,6 @@ class SNANASimulation(Simulation):
         name = self.simulation_name if simulation else self.real_data_name
         return self.get_passed_from_name(name, n_sne=n_sne, cosmology_index=cosmology_index)
 
-
-class SNANASimulationGauss0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22)
-
-
-class SNANASimulationIdeal0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1)
-
-
-class SNANASimulationIdealNoBias0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "ideal_nobias_0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1)
-
-    def get_approximate_correction(self, plot=False):
-        if plot:
-            return super().get_approximate_correction(plot=plot)
-        else:
-            return 28, 1, None, 1.0
-
-
-class SNANASimulationGauss0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationGauss0p4(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.4, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationSkewed0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationLowzGauss0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        self.manual_selection = manual_selection
-        super().__init__(num_supernova, "lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58)
-
     def get_approximate_correction(self, plot=False):
         if self.manual_selection is None:
             return super().get_approximate_correction(plot=plot)
@@ -187,9 +132,65 @@ class SNANASimulationLowzGauss0p3(SNANASimulation):
             return self.manual_selection[0], self.manual_selection[1], self.manual_selection[2], self.manual_selection[3]
 
 
+class SNANASimulationGauss0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
+
+
+class SNANASimulationIdeal0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1, manual_selection=manual_selection)
+
+
+class SNANASimulationIdealNoBias0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "ideal_nobias_0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1, manual_selection=manual_selection)
+
+    def get_approximate_correction(self, plot=False):
+        if plot:
+            return super().get_approximate_correction(plot=plot)
+        else:
+            return 28, 1, None, 1.0
+
+
+class SNANASimulationGauss0p2(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
+
+    def get_truth_values(self):
+        t = super().get_truth_values()
+        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
+        return t
+
+
+class SNANASimulationGauss0p4(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
+
+    def get_truth_values(self):
+        t = super().get_truth_values()
+        t[[r[0] for r in t].index("Om")] = ("Om", 0.4, r"$\Omega_m$")
+        return t
+
+
+class SNANASimulationSkewed0p2(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
+
+    def get_truth_values(self):
+        t = super().get_truth_values()
+        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
+        return t
+
+
+class SNANASimulationLowzGauss0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
+
+
 class SNANASimulationLowzGauss0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "lowz_gauss0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58)
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "lowz_gauss0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
 
     def get_truth_values(self):
         t = super().get_truth_values()
@@ -198,8 +199,8 @@ class SNANASimulationLowzGauss0p2(SNANASimulation):
 
 
 class SNANASimulationLowzGauss0p4(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
-        super().__init__(num_supernova, "lowz_gauss0p4", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58)
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "lowz_gauss0p4", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
 
     def get_truth_values(self):
         t = super().get_truth_values()
@@ -208,9 +209,9 @@ class SNANASimulationLowzGauss0p4(SNANASimulation):
 
 
 class SNANASimulationLowzSkewed0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
         super().__init__(num_supernova, "lowz_skewed0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes,
-                         use_sim=use_sim, num_calib=58)
+                         use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
 
     def get_truth_values(self):
         t = super().get_truth_values()
