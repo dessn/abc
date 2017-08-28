@@ -17,6 +17,7 @@ data {
     real <lower=0> redshifts[n_sne]; // The redshift for each SN.
 
     // Input ancillary data
+    real <lower=0.0, upper = 1.0> prob_ia [n_sne]; // Prob of type ia
     real <lower=-1.0, upper = 1.0> masses [n_sne]; // Normalised mass estimate
     real <lower=1.0, upper = 1000.0> redshift_pre_comp [n_sne]; // Precomputed function of redshift for speed
 
@@ -40,11 +41,17 @@ data {
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
+
+    real <lower = 0, upper = 3> outlier_MB_delta;
+    matrix[3, 3] outlier_dispersion;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
     real mB_width2 [n_surveys];
     real mB_alpha2 [n_surveys];
+    matrix[3, 3] outlier_population;
+
+    outlier_population = outlier_dispersion * outlier_dispersion';
 
     for (i in 1:n_sne) {
         obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
@@ -108,6 +115,7 @@ transformed parameters {
     matrix [3,3] population [n_surveys];
     matrix [3,3] full_sigma [n_surveys];
     vector [3] mean_MBx1c [n_sne];
+    vector [3] mean_MBx1c_out [n_sne];
     vector [3] sigmas [n_surveys];
 
     // Variables to calculate the bias correction
@@ -115,6 +123,11 @@ transformed parameters {
     real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
     real cor_mb_norm_width [n_surveys];
+
+    real cor_mB_mean_out [n_sne];
+    real cor_sigma_out [n_surveys];
+    real cor_mb_width2_out;
+    real cor_mb_norm_width_out [n_surveys];
 
     // Lets actually record the proper posterior values
     vector [n_sne] point_posteriors;
@@ -143,6 +156,8 @@ transformed parameters {
     // -------------End numerical integration---------------
 
     // Calculate intrinsic dispersion and selection effects for each survey
+    cor_mb_width2_out = outlier_population[1,1]^2 + (alpha * outlier_population[2,2])^2 + (beta * outlier_population[3,3])^2;
+
     for (i in 1:n_surveys) {
         // Move from log space back to real space
         sigma_MB[i] = exp(log_sigma_MB[i]);
@@ -163,6 +178,9 @@ transformed parameters {
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
+
+        cor_sigma_out[i] = sqrt(((cor_mb_width2_out + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2_out) / (cor_mb_width2_out + mB_width2[i]))));
+        cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
     }
 
     // Now update the posterior using each supernova sample
@@ -175,6 +193,10 @@ transformed parameters {
         mean_MBx1c[i][1] = mean_MB;
         mean_MBx1c[i][2] = mean_x1_sn[i];
         mean_MBx1c[i][3] = mean_c_sn[i];
+
+        mean_MBx1c_out[i][1] = mean_MB - outlier_MB_delta;
+        mean_MBx1c_out[i][2] = mean_x1_sn[i];
+        mean_MBx1c_out[i][3] = mean_c_sn[i];
 
         // Calculate mass correction
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
@@ -191,19 +213,27 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
+        cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
+
         if (correction_skewnorm[survey_map[i]]) {
-            weights[i] = log_sum_exp(-10, log(2) + mB_norms[survey_map[i]] + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]));
+            weights[i] = log_sum_exp(
+                log(prob_ia[i]) + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]),
+                log(1 - prob_ia[i]) + normal_lpdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean_out[i] - mB_mean[survey_map[i]])| 0, cor_sigma_out[survey_map[i]])
+            );
             numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
-            //print("skewnorm  ", weights[i], "  ", numerator_weight[i]);
         } else {
-            weights[i] = log_sum_exp(-10, normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]));
+            weights[i] = log_sum_exp(
+                log(prob_ia[i]) + normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]),
+                log(1 - prob_ia[i]) + normal_lccdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]])
+            );
             numerator_weight[i] = log_sum_exp(-10, normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
-            //print("cdf  ", weights[i], "  ", numerator_weight[i]);
         }
 
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
+            + log_sum_exp(
+                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]),
+                log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
     }
     weight = sum(weights);

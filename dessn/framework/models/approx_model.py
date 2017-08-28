@@ -197,7 +197,9 @@ class ApproximateModel(Model):
             "calib_std": np.ones(n_calib),
             "num_nodes": num_nodes,
             "node_weights": node_weights,
-            "nodes": nodes_list
+            "nodes": nodes_list,
+            "outlier_MB_delta": 0.0,
+            "outlier_dispersion": np.linalg.cholesky(np.eye(3))
         }
 
         sim_dict = {}
