@@ -62,9 +62,9 @@ class ApproximateModel(Model):
             #"outlier_dispersion": 0.5 + uniform(low=0.1, high=1.0, size=3),
             "mean_x1": uniform(-0.5, 0.5, size=(num_surveys, self.num_redshift_nodes)),
             "mean_c": uniform(-0.2, 0.2, size=(num_surveys, self.num_redshift_nodes)),
-            "log_sigma_MB": uniform(-3, 1, size=(num_surveys,)),
+            "log_sigma_MB": uniform(-3, -0.5, size=(num_surveys,)),
             "log_sigma_x1": uniform(-3, 1, size=(num_surveys,)),
-            "log_sigma_c": uniform(-3, 1, size=(num_surveys,)),
+            "log_sigma_c": uniform(-3, 0, size=(num_surveys,)),
             "deviations": normal(scale=0.2, size=(num_supernova, 3)),
             "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }

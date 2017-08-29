@@ -68,8 +68,8 @@ parameters {
     real <lower = 0.05, upper = 0.99> Om;
     // real <lower = -2, upper = -0.4> w;
     // Supernova model
-    real <lower = -0.2, upper = 0.5> alpha;
-    real <lower = -1, upper = 5> beta;
+    real <lower = -0.1, upper = 0.5> alpha;
+    real <lower = 0, upper = 5> beta;
 
     // Other effects
     real <lower = -0.2, upper = 0.4> dscale; // Scale of mass correction
@@ -80,12 +80,12 @@ parameters {
     vector[3] deviations [n_sne];
 
     ///////////////// Population (Hyper) Parameters
-    real <lower = -21, upper = -18> mean_MB;
+    real <lower = -20.5, upper = -18.5> mean_MB;
     matrix <lower = -1.0, upper = 1.0> [n_surveys, num_nodes] mean_x1;
     matrix <lower = -0.2, upper = 0.2> [n_surveys, num_nodes] mean_c;
-    real <lower = -4, upper = 1> log_sigma_MB [n_surveys];
+    real <lower = -4, upper = -0.5> log_sigma_MB [n_surveys];
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
-    real <lower = -8, upper = 1> log_sigma_c [n_surveys];
+    real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
 }
