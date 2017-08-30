@@ -15,8 +15,8 @@ import fnmatch
 from numpy.lib.recfunctions import drop_fields
 
 
-def load_fitres(filename):
-    dataframe = pd.read_csv(filename, sep='\s+', skiprows=6, comment="#")
+def load_fitres(filename, skiprows=6):
+    dataframe = pd.read_csv(filename, sep='\s+', skiprows=skiprows, comment="#")
     data = dataframe.to_records()
     data = drop_fields(data, "index")
     data = drop_fields(data, "VARNAMES:")
