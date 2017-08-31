@@ -21,12 +21,16 @@ class Fitter(object):
         self.num_cpu = self.num_cosmologies * self.num_walkers
         self.logger = logging.getLogger(__name__)
         self.temp_dir = temp_dir
+        self.max_steps = 3000
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
 
     def set_models(self, *models):
         self.models = models
         return self
+
+    def set_max_steps(self, max_steps):
+        self.max_steps = max_steps
 
     def set_simulations(self, *simulations):
         self.simulations = simulations
@@ -74,7 +78,7 @@ class Fitter(object):
         out_file = self.temp_dir + "/stan_%d_%d_%d_%d.pkl" % (model_index, simulation_index, cosmo_index, walker_index)
 
         if num_cores == 1:
-            w, n = 1000, 3000
+            w, n = 1000, self.max_steps
         else:
             w, n = 500, 1000
 
