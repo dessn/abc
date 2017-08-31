@@ -1,7 +1,7 @@
 import os
 import inspect
 import numpy as np
-from dessn.snana.convert_snana_dump import load_fitres
+from dessn.snana.convert_snana_dump import load_fitres, is_pos_def
 
 
 def digest_folder(folder):
@@ -34,7 +34,8 @@ def digest_folder(folder):
         cmbc = -5 * cov_x0_c / (2 * x0 * np.log(10))
 
         cov = np.array([[mbe * mbe, cmbx1, cmbc], [cmbx1, x1e * x1e, cov_x1_c], [cmbc, cov_x1_c, ce * ce]])
-
+        if np.any(np.isnan(cov)) or not is_pos_def(cov):
+            continue
         existing_prob = 0
         finals.append([cid, z, existing_prob, sim_mb, sim_x1, sim_c, mb, x1, c] + cov.flatten().tolist())
     finals = np.array(finals)
@@ -65,4 +66,4 @@ def digest_sys(base_folder):
 
 if __name__ == "__main__":
     digest_sys("des")
-    # digest_sys("lowz")
+    digest_sys("lowz")
