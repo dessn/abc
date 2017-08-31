@@ -175,27 +175,30 @@ class Fitter(object):
 
         temp_list = []
         for p in parameters:
-            vals = chain.get(p)
-            if vals is None:
-                continue
-            label = mapping.get(p) if convert_names else p
-            if r"%d" in label:
-                if len(vals.shape) > 2:
-                    vals = vals.reshape((vals.shape[0], -1))
-                num_d = 1 if len(vals.shape) < 2 else vals.shape[1]
-                for i in range(num_d):
-                    if len(vals.shape) < 2:
-                        temp_list.append((mapping[p] % i, vals))
-                    else:
-                        temp_list.append((mapping[p] % i, vals[:, i]))
-                    truth[mapping[p] % i] = truth[mapping[p]][i]
-                del truth[mapping[p]]
-            else:
-                truth[mapping[p]] = truth[mapping[p]][0]
-                if convert_names:
-                    temp_list.append((mapping[p], vals))
+            try:
+                vals = chain.get(p)
+                if vals is None:
+                    continue
+                label = mapping.get(p) if convert_names else p
+                if r"%d" in label:
+                    if len(vals.shape) > 2:
+                        vals = vals.reshape((vals.shape[0], -1))
+                    num_d = 1 if len(vals.shape) < 2 else vals.shape[1]
+                    for i in range(num_d):
+                        if len(vals.shape) < 2:
+                            temp_list.append((mapping[p] % i, vals))
+                        else:
+                            temp_list.append((mapping[p] % i, vals[:, i]))
+                        truth[mapping[p] % i] = truth[mapping[p]][i]
+                    del truth[mapping[p]]
                 else:
-                    temp_list.append((p, vals))
+                    truth[mapping[p]] = truth[mapping[p]][0]
+                    if convert_names:
+                        temp_list.append((mapping[p], vals))
+                    else:
+                        temp_list.append((p, vals))
+            except KeyError:
+                self.logger.warning("Key error on %s" % p)
 
         result = OrderedDict(temp_list)
         return self.models[model_index], self.simulations[simulation_index], result, truth, new_weight, stan_weight, posterior

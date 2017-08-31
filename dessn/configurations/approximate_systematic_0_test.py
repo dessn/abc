@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     model = ApproximateModel(global_calibration=0)
     # Turn off mass and skewness for easy test
-    simulation = [SNANASysSimulation(100, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
+    simulation = [#NANASysSimulation(100, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=0, sim="des", manual_selection=[22.12, 0.544, None, 1.0])]
 
     fitter = Fitter(dir_name)
