@@ -15,7 +15,7 @@ if __name__ == "__main__":
     simulation = [SNANASysSimulation(100, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=0, sim="des", manual_selection=[22.12, 0.544, None, 1.0])]
 
-    filenames = ["approximate_systematic_%d_test" % i for i in range(5)]
+    filenames = ["approximate_systematic_%d_test" % i for i in range(7)]
     names = ["Stat only", "ZP offset .02 mag gaus", "filter lam shift 20A gaus",
              "10\\% gaus error in biasCor flux errors", "idem, but with incorrect reported fluxErr",
              "MWEBV scale from 20\\% gaus error", "MW RV shift from 0.2 gaus error"]
@@ -36,7 +36,7 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
     ls = ["-"] + ["-"] * (len(dir_names) - 1)
-    colors = ['k', 'b', 'r', 'g', 'purple', 'y']
+    colors = ['k', 'b', 'r', 'g', 'purple', 'y', 'lb']
     alphas = [0.3] + [0.0] * (len(dir_names) - 1)
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
