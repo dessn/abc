@@ -16,11 +16,14 @@ if __name__ == "__main__":
                   SNANASysSimulation(250, sys_index=0, sim="des", manual_selection=[22.12, 0.544, None, 1.0])]
 
     filenames = ["approximate_systematic_%d_test" % i for i in range(5)]
+    names = ["Stat only", "ZP offset .02 mag gaus", "filter lam shift 20A gaus",
+             "10\\% gaus error in biasCor flux errors", "idem, but with incorrect reported fluxErr",
+             "MWEBV scale from 20\\% gaus error", "MW RV shift from 0.2 gaus error"]
     dir_names = [os.path.dirname(os.path.abspath(__file__)) + "/output/" + f for f in filenames]
 
     c = ChainConsumer()
 
-    for dir_name, filename in zip(dir_names, filenames):
+    for dir_name, filename, name in zip(dir_names, filenames, names):
         print(dir_name)
         fitter = Fitter(dir_name)
         fitter.set_models(model)
@@ -30,10 +33,10 @@ if __name__ == "__main__":
         fitter.set_max_steps(5000)
 
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
-        c.add_chain(chain, weights=weight, posterior=posterior, name=filename.replace("_", " "))
+        c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
     ls = ["-"] + ["-"] * (len(dir_names) - 1)
-    colors = ['k', 'b', 'r', 'g', 'purple']
+    colors = ['k', 'b', 'r', 'g', 'purple', 'y']
     alphas = [0.3] + [0.0] * (len(dir_names) - 1)
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
