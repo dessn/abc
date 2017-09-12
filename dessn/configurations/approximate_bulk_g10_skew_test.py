@@ -22,13 +22,13 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1", manual_selection=[22.12, 0.544, None, 1.0])]
+    simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
+                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1", manual_selection=[22.12, 0.544, None, 1.0], num_calib=22)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(20)
+    fitter.set_num_cosmologies(30)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(5000)
 

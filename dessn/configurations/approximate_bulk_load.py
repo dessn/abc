@@ -14,14 +14,14 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
 
     model = ApproximateModel()
-    simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[22.12, 0.544, None, 1.0])]
+    simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
+                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[22.12, 0.544, None, 1.0], num_calib=22)]
 
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
 
     expression = re.compile("approximate_bulk_(.*)_test.py")
-    matches = [re.match(expression, f) for f in os.listdir(dir_name)]
+    matches = [re.match(expression, f) for f in sorted(os.listdir(dir_name))]
     names = [m.group(1).replace("_", " ") for m in matches if m is not None]
     filenames = [m.string[:-3] for m in matches if m is not None]
 
@@ -43,9 +43,9 @@ if __name__ == "__main__":
         except UnboundLocalError:
             print("%s not get generated" % name)
 
-    ls = ["-"] + ["-"] * (len(dir_names) - 1)
-    colors = ['k', 'b', 'r', 'g', 'purple', 'y', 'lb']
-    alphas = [0.3] + [0.0] * (len(dir_names) - 1)
+    ls = ["-", ":"] * 3
+    colors = ['b', 'b', 'r', 'r', 'g', 'g']
+    alphas = 0.1
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
     c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)

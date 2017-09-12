@@ -1,0 +1,6 @@
+python approximate_bulk_c11_gauss_test.py
+python approximate_bulk_g10_gauss_test.py
+python approximate_bulk_smear_gauss_test.py
+python approximate_bulk_c11_skew_test.py
+python approximate_bulk_g10_skew_test.py
+python approximate_bulk_smear_skew_test.py
