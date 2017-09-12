@@ -13,7 +13,7 @@ if __name__ == "__main__":
     plot_filename = plot_dir + os.path.basename(__file__)[:-3] + ".png"
     file = os.path.abspath(__file__)
 
-    model = ApproximateModel(global_calibration=0)
+    model = ApproximateModel()
     simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[22.12, 0.544, None, 1.0])]
 
