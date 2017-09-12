@@ -235,8 +235,8 @@ transformed parameters {
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
                 log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
-                + normal_lcdf(alpha_c[survey_map[i]] * (mean_MBx1c[i][3] - mean_c_sn[i]) / sigma_c[survey_map[i]])
-                + normal_lcdf(alpha_x1[survey_map[i]] * (mean_MBx1c[i][2] - mean_x1_sn[i]) / sigma_x1[survey_map[i]]),
+                + normal_lcdf(alpha_c[survey_map[i]] * (mean_MBx1c[i][3] - mean_c_sn[i]) / sigma_c[survey_map[i]] | 0 , 1)
+                + normal_lcdf(alpha_x1[survey_map[i]] * (mean_MBx1c[i][2] - mean_x1_sn[i]) / sigma_x1[survey_map[i]] | 0 , 1),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
     }
