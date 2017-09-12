@@ -31,6 +31,7 @@ class SNANABulkSimulation(Simulation):
             ("log_sigma_x1", np.log(0.5), r"$\log\sigma_{x_1}$"),
             ("log_sigma_c", np.log(0.1), r"$\log\sigma_c$"),
             ("alpha_c", 0, r"$\alpha_c$"),
+            ("alpha_x1", 0, r"$\alpha_c$"),
             ("dscale", 0, r"$\delta(0)$"),
             ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$"),
             ("intrinsic_correlation", np.identity(3), r"$\rho$"),
