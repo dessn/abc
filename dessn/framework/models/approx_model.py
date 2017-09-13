@@ -23,7 +23,8 @@ class ApproximateModel(Model):
 
     def get_parameters(self):
         return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
-                #"outlier_MB_delta", "outlier_dispersion", "alpha_c", "alpha_x1",
+                #"outlier_MB_delta", "outlier_dispersion"
+                "alpha_c", "alpha_x1",
                 "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
                 "calibration", "intrinsic_correlation"]
 
@@ -32,6 +33,8 @@ class ApproximateModel(Model):
             ("Om", r"$\Omega_m$"),
             ("w", r"$w$"),
             ("alpha", r"$\alpha$"),
+            ("alpha_c", r"$\alpha_c^{%d}$"),
+            ("alpha_x1", r"$\alpha_{x_1}^{%d}$"),
             ("beta", r"$\beta$"),
             ("mean_MB", r"$\langle M_B \rangle$"),
             #("outlier_MB_delta", r"$\delta M_B$"),
