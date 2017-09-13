@@ -48,7 +48,7 @@ if __name__ == "__main__":
     alphas = 0.1
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
-    #c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
+    c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
-    c.plotter.plot(filename=plot_filename, parameters=10)
+    c.plotter.plot(filename=plot_filename, parameters=params)
 
