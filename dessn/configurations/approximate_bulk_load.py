@@ -50,5 +50,7 @@ if __name__ == "__main__":
                 colors=colors, shade_alpha=alphas, shade=True)
     c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
-    c.plotter.plot(filename=plot_filename, parameters=params)
+    c.plotter.plot(filename=plot_filename, parameters=params, truth=truth)
+    with open(plot_filename.replace(".png", ".txt"), 'w') as f:
+        f.write(c.analysis.get_latex_table(parameters=params))
 
