@@ -87,6 +87,9 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
+    real <lower = -5, upper = 5> alpha_c [n_surveys];
+    real <lower = -5, upper = 5> alpha_x1 [n_surveys];
+
 
 }
 
@@ -128,6 +131,10 @@ transformed parameters {
     real cor_sigma_out [n_surveys];
     real cor_mb_width2_out;
     real cor_mb_norm_width_out [n_surveys];
+
+    // SKEWNESS
+    row_vector[3] offsets [n_surveys];
+    vector[3] shapes [n_surveys];
 
     // Lets actually record the proper posterior values
     vector [n_sne] point_posteriors;
@@ -181,6 +188,12 @@ transformed parameters {
 
         cor_sigma_out[i] = sqrt(((cor_mb_width2_out + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2_out) / (cor_mb_width2_out + mB_width2[i]))));
         cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
+
+        shapes[i][1] = 0;
+        shapes[i][2] = alpha_c[i];
+        shapes[i][3] = alpha_x1[i];
+        offsets[i] = shapes[i]' * diag_matrix(inv(sigmas[i]));
+
     }
 
     // Now update the posterior using each supernova sample
@@ -228,11 +241,11 @@ transformed parameters {
             );
             numerator_weight[i] = log_sum_exp(-10, normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
         }
-
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
-                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]]),
+                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
+                + normal_lcdf(offsets[survey_map[i]] * (model_MBx1c[i] - mean_MBx1c[i]) | 0, 1),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
     }
@@ -240,6 +253,8 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
+            + normal_lpdf(alpha_c[i]  | 0, 1)
+            + normal_lpdf(alpha_x1[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)

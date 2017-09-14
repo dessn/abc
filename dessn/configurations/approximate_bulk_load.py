@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     expression = re.compile("approximate_bulk_(.*)_test.py")
     matches = [re.match(expression, f) for f in sorted(os.listdir(dir_name))]
-    names = [m.group(1).replace("_", " ") for m in matches if m is not None]
+    names = [m.group(1).replace("_", " ").title() for m in matches if m is not None]
     filenames = [m.string[:-3] for m in matches if m is not None]
 
     dir_names = [os.path.dirname(os.path.abspath(__file__)) + "/output/" + f for f in filenames]
@@ -48,9 +48,10 @@ if __name__ == "__main__":
     alphas = 0.1
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
-    c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
+    # c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
-    c.plotter.plot(filename=plot_filename, parameters=params, truth=truth)
+    c.plotter.plot(filename=plot_filename, parameters=params, truth=truth, figsize=1.5)
+    c.plotter.plot(filename=plot_filename.replace(".png", ".pdf"), parameters=params, truth=truth, figsize=1.5)
     with open(plot_filename.replace(".png", ".txt"), 'w') as f:
         f.write(c.analysis.get_latex_table(parameters=params))
 
