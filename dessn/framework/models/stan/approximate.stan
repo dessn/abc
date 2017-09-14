@@ -133,7 +133,6 @@ transformed parameters {
     real cor_mb_norm_width_out [n_surveys];
 
     // SKEWNESS
-    row_vector[3] offsets [n_surveys];
     vector[3] shapes [n_surveys];
 
     // Lets actually record the proper posterior values
@@ -190,9 +189,8 @@ transformed parameters {
         cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
 
         shapes[i][1] = 0;
-        shapes[i][2] = alpha_c[i];
-        shapes[i][3] = alpha_x1[i];
-        offsets[i] = shapes[i]' * diag_matrix(inv(sigmas[i]));
+        shapes[i][2] = alpha_x1[i] / sigma_x1[i];
+        shapes[i][3] = alpha_c[i] / sigma_c[i];
 
     }
 
@@ -245,7 +243,7 @@ transformed parameters {
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
                 log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
-                + normal_lcdf(offsets[survey_map[i]] * (model_MBx1c[i] - mean_MBx1c[i]) | 0, 1),
+                + normal_lcdf(dot_product(shapes[survey_map[i]], (model_MBx1c[i] - mean_MBx1c[i])) | 0, 1),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
     }
