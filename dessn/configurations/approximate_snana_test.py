@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationGauss0p3(500)
+    simulation = SNANASimulationGauss0p3(500, manual_selection=[22.12, 0.544, None, 1.0])
     print("CORRECTION IS ", simulation.get_approximate_correction())
     # exit()
 
@@ -30,6 +30,7 @@ if __name__ == "__main__":
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(300)
     fitter.set_num_walkers(1)
+    fitter.set_max_steps(3000)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
@@ -44,9 +45,11 @@ if __name__ == "__main__":
         parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
-        # c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
+        c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
         print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
         c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
+        with open(plot_filename.replace(".png", ".txt"), 'w') as f:
+            f.write(c.analysis.get_latex_table(parameters=parameters))
