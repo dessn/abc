@@ -66,10 +66,12 @@ parameters {
     ///////////////// Underlying parameters
     // Cosmology
     real <lower = 0.05, upper = 0.99> Om;
-    // real <lower = -2, upper = -0.4> w;
+    real <lower = -2, upper = -0.4> w;
     // Supernova model
     real <lower = -0.1, upper = 0.5> alpha;
+    real <lower = -0.2, upper = 0.2> alpha_z;
     real <lower = 0, upper = 5> beta;
+    real <lower = -2, upper = 2> beta_z;
 
     // Other effects
     real <lower = -0.2, upper = 0.4> dscale; // Scale of mass correction
@@ -118,14 +120,16 @@ transformed parameters {
     matrix [3,3] population [n_surveys];
     matrix [3,3] full_sigma [n_surveys];
     vector [3] mean_MBx1c [n_sne];
+    real alphas [n_sne];
+    real betas [n_sne];
     vector [3] mean_MBx1c_out [n_sne];
     vector [3] sigmas [n_surveys];
 
     // Variables to calculate the bias correction
     real cor_mB_mean [n_sne];
-    real cor_sigma [n_surveys];
-    real cor_mb_width2 [n_surveys];
-    real cor_mb_norm_width [n_surveys];
+    real cor_sigma [n_sne];
+    real cor_mb_width2 [n_sne];
+    real cor_mb_norm_width [n_sne];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -147,10 +151,10 @@ transformed parameters {
     real mass_correction;
 
     // -------------Begin numerical integration-----------------
-    //real expon;
-    //expon = 3 * (1 + w);
+    real expon;
+    expon = 3 * (1 + w);
     for (i in 1:n_z) {
-        Hinv[i] = 1./sqrt( Om * zsom[i] + (1. - Om)); // * pow(zspo[i], expon)) ;
+        Hinv[i] = 1./sqrt( Om * zsom[i] + (1. - Om) * pow(zspo[i], expon));
     }
     cum_simps[1] = 0.;
     for (i in 2:n_simps) {
@@ -179,12 +183,6 @@ transformed parameters {
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
-        // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
-        cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
-
-        cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
-
         cor_sigma_out[i] = sqrt(((cor_mb_width2_out + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2_out) / (cor_mb_width2_out + mB_width2[i]))));
         cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
 
@@ -196,6 +194,8 @@ transformed parameters {
 
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
+        alphas[i] = alpha + alpha_z * redshifts[i];
+        betas[i] = beta + beta_z * redshifts[i];
 
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
@@ -219,16 +219,22 @@ transformed parameters {
         model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
 
         // Convert population into absolute magnitude
-        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha*model_mBx1c[i][2] - beta*model_mBx1c[i][3] + mass_correction * masses[i];
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alphas[i] * model_mBx1c[i][2] - betas[i] * model_mBx1c[i][3] + mass_correction * masses[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * mean_c_sn[i] - mass_correction * masses[i];
+        // Width of population
+        cor_mb_width2[i] = sigma_MB[survey_map[i]]^2 + (alphas[i] * sigma_x1[survey_map[i]])^2 + (betas[i] * sigma_c[survey_map[i]])^2 + 2 * (-alphas[i] * full_sigma[survey_map[i]][1][2] + betas[i] * (full_sigma[survey_map[i]][1][3]) - alphas[i] * betas[i] * (full_sigma[survey_map[i]][2][3] ));
+        cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[survey_map[i]]) / mB_width2[survey_map[i]])^2 * ((mB_width2[survey_map[i]] / mB_alpha2[survey_map[i]]) + ((mB_width2[survey_map[i]] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[survey_map[i]]))));
+        cor_mb_norm_width[i] = sqrt(mB_width2[survey_map[i]] + cor_mb_width2[i]);
+
+        // Mean of population
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
             weights[i] = log_sum_exp(
-                log(prob_ia[i]) + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]),
+                log(prob_ia[i]) + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[i]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]),
                 log(1 - prob_ia[i]) + normal_lpdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean_out[i] - mB_mean[survey_map[i]])| 0, cor_sigma_out[survey_map[i]])
             );
             numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
@@ -259,7 +265,9 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        + normal_lpdf(calibration | 0, 1);
+        + normal_lpdf(calibration | 0, 1)
+        + normal_lpdf(alpha_z | 0, 0.1)
+        + normal_lpdf(beta_z | 0, 1);
 }
 model {
     target += posterior;

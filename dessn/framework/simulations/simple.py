@@ -38,9 +38,11 @@ class SimpleSimulation(Simulation):
     def get_truth_values(self):
         return [
             ("Om", 0.3, r"$\Omega_m$"),
-            # ("w", -1.0, r"$w$", True, -1.5, -0.5),
+            ("w", -1.0, r"$w$", True, -1.5, -0.5),
             ("alpha", 0.14, r"$\alpha$"),
+            ("alpha_z", 0, r"$\alpha$"),
             ("beta", 3.1, r"$\beta$"),
+            ("beta_z", 0, r"$\beta$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
             ("outlier_MB_delta", 2, r"$\delta M_B$"),
             ("outlier_dispersion", np.array([1.0, 1.0, 0.7]), r"$\sigma_{\rm out}^{%d}$"),

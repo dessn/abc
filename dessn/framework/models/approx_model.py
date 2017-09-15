@@ -22,9 +22,9 @@ class ApproximateModel(Model):
         self.global_calibration = global_calibration
 
     def get_parameters(self):
-        return ["Om", "alpha", "beta", "dscale", "dratio", "mean_MB",
+        return ["Om", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
                 #"outlier_MB_delta", "outlier_dispersion"
-                "alpha_c", "alpha_x1",
+                "alpha_c", "alpha_x1", "alpha_z", "beta_z"
                 "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
                 "calibration", "intrinsic_correlation"]
 
@@ -33,9 +33,11 @@ class ApproximateModel(Model):
             ("Om", r"$\Omega_m$"),
             ("w", r"$w$"),
             ("alpha", r"$\alpha$"),
+            ("alpha_z", r"$\alpha_z$"),
             ("alpha_c", r"$\alpha_c^{%d}$"),
             ("alpha_x1", r"$\alpha_{x_1}^{%d}$"),
             ("beta", r"$\beta$"),
+            ("beta_z", r"$\beta_z$"),
             ("mean_MB", r"$\langle M_B \rangle$"),
             #("outlier_MB_delta", r"$\delta M_B$"),
             #("outlier_dispersion", r"$\sigma_{\rm out}^{%d}$"),
@@ -56,8 +58,11 @@ class ApproximateModel(Model):
         num_surveys = kwargs["n_surveys"]
         randoms = {
             "Om": uniform(0.1, 0.6),
+            "w": uniform(-1.5, -0.5),
             "alpha": uniform(-0.1, 0.4),
+            "alpha_z": uniform(-0.1, 0.1),
             "beta": uniform(0.1, 4.5),
+            "beta_z": uniform(-0.1, 0.1),
             "dscale": uniform(-0.2, 0.2),
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-20, -18.5),

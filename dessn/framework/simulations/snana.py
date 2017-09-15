@@ -24,9 +24,11 @@ class SNANASimulation(Simulation):
     def get_truth_values(self):
         return [
             ("Om", 0.3, r"$\Omega_m$"),
-            # ("w", -1.0, r"$w$", True, -1.5, -0.5),
+            ("w", -1.0, r"$w$", True, -1.5, -0.5),
             ("alpha", 0.14, r"$\alpha$"),
+            ("alpha_z", 0.0, r"$\alpha_z$"),
             ("beta", 3.1, r"$\beta$"),
+            ("beta_z", 0.0, r"$\beta_z$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$"),
             ("mean_x1", np.zeros(self.num_nodes), r"$\langle x_1^{%d} \rangle$"),
             ("mean_c", np.zeros(self.num_nodes), r"$\langle c^{%d} \rangle$"),
