@@ -91,6 +91,8 @@ class Fitter(object):
 
         # Get parameters
         params = [p for p in model.get_parameters() if p in fit.sim["pars_oi"]]
+        print("SAVING parameters:")
+        print(params)
         if "weight" in fit.sim["pars_oi"]:
             self.logger.debug("Found weight to save")
             params.append("weight")
@@ -193,8 +195,10 @@ class Fitter(object):
                             temp_list.append((mapping[p] % i, vals))
                         else:
                             temp_list.append((mapping[p] % i, vals[:, i]))
-                        truth[mapping[p] % i] = truth[mapping[p]][i]
-                    del truth[mapping[p]]
+                        if truth.get(mapping[p]) is not None:
+                            truth[mapping[p] % i] = truth[mapping[p]][i]
+                    if truth.get(mapping[p]) is not None:
+                        del truth[mapping[p]]
                 else:
                     truth[mapping[p]] = truth[mapping[p]][0]
                     if convert_names:
