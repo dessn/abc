@@ -257,18 +257,18 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            + normal_lpdf(alpha_c[i]  | 0, 1)
-            + normal_lpdf(alpha_x1[i] | 0, 1)
+            + normal_lpdf(alpha_c[i]  | 0, 0.01) // VARYING
+            + normal_lpdf(alpha_x1[i] | 0, 0.01) // VARYING
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
-        + normal_lpdf(w | -1, 0.01)
+        + normal_lpdf(w | -1, 0.01) // VARYING
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
         + normal_lpdf(calibration | 0, 1)
-        + normal_lpdf(alpha_z | 0, 0.1)
-        + normal_lpdf(beta_z | 0, 1);
+        + normal_lpdf(alpha_z | 0, 0.001) // VARYING
+        + normal_lpdf(beta_z | 0, 0.001); // VARYING
 }
 model {
     target += posterior;

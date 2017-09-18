@@ -12,7 +12,7 @@ class SimpleSimulation(Simulation):
         self.alpha_c = alpha_c
         self.dscale = dscale
         self.min_prob_ia = min_prob_ia
-        self.num_calib = 20
+        self.num_calib = 1
         if lowz:
             self.skewnorm = True
             self.mb_alpha = 5.87
