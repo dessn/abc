@@ -39,7 +39,7 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(spacing=1.0)
 
-        parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
+        parameters = [r"$\Omega_m$", r"$w$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
         c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
