@@ -1,0 +1,178 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Basic setup. Most papers should leave these options alone.
+\documentclass[a4paper,fleqn,usenatbib]{mnras}
+
+% MNRAS is set in Times font. If you don't have this installed (most LaTeX
+% installations will be fine) or prefer the old Computer Modern fonts, comment
+% out the following line
+\usepackage{newtxtext,newtxmath}
+% Depending on your LaTeX fonts installation, you might get better results with one of these:
+%\usepackage{mathptmx}
+%\usepackage{txfonts}
+
+% Use vector fonts, so it zooms properly in on-screen viewing software
+% Don't change these lines unless you know what you are doing
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+
+
+%%%%% AUTHORS - PLACE YOUR OWN PACKAGES HERE %%%%%
+
+% Only include extra packages if you really need them. Common packages are:
+\usepackage{graphicx}	% Including figure files
+\usepackage{amsmath}	% Advanced maths commands
+\usepackage{amssymb}	% Extra maths symbols
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%% AUTHORS - PLACE YOUR OWN COMMANDS HERE %%%%%
+
+% Please keep new commands to a minimum, and use \newcommand not \def to avoid
+% overwriting existing commands. Example:
+%\newcommand{\pcm}{\,cm$^{-2}$}	% per cm-squared
+\newcommand{\name}{SN-BHM}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%
+
+% Title of the paper, and the short title which is used in the headers.
+% Keep the title short and informative.
+\title[\name]{\name: A hierarchical Bayesian model for Supernova Cosmology}
+
+% The list of authors, and the short list which is used in the headers.
+% If you need two or more lines of authors, add an extra line using \newauthor
+\author[S. R. Hinton et al.]{
+	Samuel R. Hinton,$^{1,2}$\thanks{E-mail: samuelreay@gmail.com}
+	Alex G. Kim,$^{3}$
+	Tamara M. Davis$^{1,2}$
+	\\
+	% List of institutions
+	$^{1}$School of Mathematics and Physics, The University of Queensland, Brisbane, QLD 4072, Australia\\
+	$^{2}$ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)\\
+	$^{3}$Physics Division, Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA
+}
+
+% These dates will be filled out by the publisher
+\date{Accepted XXX. Received YYY; in original form ZZZ}
+
+% Enter the current year, for the copyright statements etc.
+\pubyear{2017}
+
+% Don't change these lines
+\begin{document}
+\label{firstpage}
+\pagerange{\pageref{firstpage}--\pageref{lastpage}}
+\maketitle
+
+
+
+
+
+
+
+
+
+
+
+% Abstract of the paper
+\begin{abstract}
+Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+\end{abstract}
+
+% Select between one and six entries from the list of approved keywords.
+% Don't make up new ones.
+\begin{keywords}
+keyword1 -- keyword2 -- keyword3
+\end{keywords}
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%% BODY OF PAPER %%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+Introduce significance of SN historically, and the quest to remain competitive with BAO and other probes, we have to reduce systematic uncert whilst larger surveys reduce stat. 
+
+Review old methods
+
+Review current methods
+
+Potential places for improvement
+
+\section{Our Method}
+
+General comments about the method (BHM), Stan
+
+Mapping population of observables on a population of underlying SN, where the map function encodes
+cosmology. Difficulty is creating an underlying SN population that is flexible enough to not introduce bias whilst still being physically motivated. 
+
+
+Observables -> Transformation function (latent, mass, cosmology, systematics) -> Underlying pop (and outlier)
+
+\section{Simple Model Validation}
+
+Simple
+
+\section{SNANA Validation}
+
+Multisim and bulk
+
+\section{Systematic Strength Test}
+
+Checking that random systematic permutations are less significant than stat
+
+\section{Extension for Photometric SN}
+
+Better outlier pop
+
+
+\section{Conclusions}
+
+
+
+\section*{Acknowledgements}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%
+
+% The best way to enter references is to use BibTeX:
+
+\bibliographystyle{mnras}
+\bibliography{bib.bib}
+
+
+
+
+%%%%%%%%%%%%%%%%% APPENDICES %%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+\section{Some extra material}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Don't change these lines
+\bsp	% typesetting comment
+\label{lastpage}
+\end{document}
+
+% End of mnras_template.tex
