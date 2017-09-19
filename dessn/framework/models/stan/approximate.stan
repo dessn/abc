@@ -69,9 +69,9 @@ parameters {
     real <lower = -2, upper = -0.4> w;
     // Supernova model
     real <lower = -0.1, upper = 0.5> alpha;
-    real <lower = -0.2, upper = 0.2> delta_alpha;
+    //real <lower = -0.2, upper = 0.2> delta_alpha;
     real <lower = 0, upper = 5> beta;
-    real <lower = -2, upper = 2> delta_beta;
+    //real <lower = -2, upper = 2> delta_beta;
 
     // Other effects
     real <lower = -0.2, upper = 0.4> dscale; // Scale of mass correction
@@ -184,7 +184,8 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + 2 * (delta_alpha * sigma_x1[i]^2)^2 + (beta * sigma_c[i])^2 + 2 * (delta_beta * sigma_c[i]^2)^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
+        // cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + 2 * (delta_alpha * sigma_x1[i]^2)^2 + (beta * sigma_c[i])^2 + 2 * (delta_beta * sigma_c[i]^2)^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
@@ -209,8 +210,11 @@ transformed parameters {
         mean_MBx1c[i][2] = mean_x1_sn[i];
         mean_MBx1c[i][3] = mean_c_sn[i];
 
-        alphas[i] = alpha + delta_alpha * mean_MBx1c[i][2];
-        betas[i] = beta + delta_beta * mean_MBx1c[i][3];
+        // alphas[i] = alpha + delta_alpha * mean_MBx1c[i][2]; // Switching from alpha(z) to alpha(x1) to test impact
+        // betas[i] = beta + delta_beta * mean_MBx1c[i][3];
+        alphas[i] = alpha; // Keeping this nomenclature alive so I can make alpha/beta change easily in the future
+        betas[i] = beta;
+
 
         mean_MBx1c_out[i][1] = mean_MB - outlier_MB_delta;
         mean_MBx1c_out[i][2] = mean_x1_sn[i];
@@ -268,9 +272,7 @@ transformed parameters {
         + normal_lpdf(w | -1, 0.01) // VARYING
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        + normal_lpdf(calibration | 0, 1)
-        + normal_lpdf(delta_alpha | 0, 0.001) // VARYING
-        + normal_lpdf(delta_beta | 0, 0.005); // VARYING
+        + normal_lpdf(calibration | 0, 1);
 }
 model {
     target += posterior;
