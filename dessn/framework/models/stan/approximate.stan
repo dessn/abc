@@ -269,8 +269,8 @@ transformed parameters {
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
         + normal_lpdf(calibration | 0, 1)
-        + normal_lpdf(delta_alpha | 0, 0.1) // VARYING
-        + normal_lpdf(delta_beta | 0, 0.5); // VARYING
+        + normal_lpdf(delta_alpha | 0, 0.001) // VARYING
+        + normal_lpdf(delta_beta | 0, 0.005); // VARYING
 }
 model {
     target += posterior;
