@@ -7,8 +7,8 @@ from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    dir_name = os.path.dirname(os.path.abspath(__file__)) + "/output/" + os.path.basename(__file__)[:-3]
     plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/%s/" % os.path.basename(__file__)[:-3]
+    dir_name = plot_dir + "output/"
     plot_filename = plot_dir + os.path.basename(__file__)[:-3]
 
     file = os.path.abspath(__file__)
@@ -16,9 +16,6 @@ if __name__ == "__main__":
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-
-    if not os.path.exists(plot_dir):
-        os.makedirs(plot_dir)
 
     num_nodes = 4
     model = ApproximateModel(num_nodes=num_nodes, global_calibration=1)
