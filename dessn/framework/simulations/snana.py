@@ -24,6 +24,7 @@ class SNANASimulation(Simulation):
     def get_truth_values(self):
         return [
             ("Om", 0.3, r"$\Omega_m$"),
+            ("Ol", 0.7, r"$\Omega_\Lambda$"),
             ("w", -1.0, r"$w$", True, -1.5, -0.5),
             ("alpha", 0.14, r"$\alpha$"),
             ("alpha_z", 0.0, r"$\alpha_z$"),

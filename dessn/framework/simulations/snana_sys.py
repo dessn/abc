@@ -16,7 +16,8 @@ class SNANASysSimulation(Simulation):
     def get_truth_values(self):
         return [
             ("Om", 0.3, r"$\Omega_m$"),
-            # ("w", -1.0, r"$w$", True, -1.5, -0.5),
+            ("Ol", 0.7, r"$\Omega_\Lambda$"),
+            ("w", -1.0, r"$w$"),
             ("alpha", 0.14, r"$\alpha$"),
             ("beta", 3.1, r"$\beta$"),
             ("mean_MB", -19.365, r"$\langle M_B \rangle$")

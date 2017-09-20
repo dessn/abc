@@ -200,7 +200,10 @@ class Fitter(object):
                     if truth.get(mapping[p]) is not None:
                         del truth[mapping[p]]
                 else:
-                    truth[mapping[p]] = truth[mapping[p]][0]
+                    try:
+                        truth[mapping[p]] = truth[mapping[p]][0]
+                    except KeyError:
+                        pass
                     if convert_names:
                         temp_list.append((mapping[p], vals))
                     else:

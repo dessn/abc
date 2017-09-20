@@ -24,9 +24,10 @@ class ApproximateModel(Model):
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
+                "sigma_MB", "sigma_x1", "sigma_c", "alpha_c", "alpha_x1",
                 #"outlier_MB_delta", "outlier_dispersion"
-                "alpha_c", "alpha_x1", "delta_alpha", "delta_beta",
-                "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
+                "delta_alpha", "delta_beta",
+                "mean_x1", "mean_c",
                 "calibration", "intrinsic_correlation"]
 
     def get_labels(self):

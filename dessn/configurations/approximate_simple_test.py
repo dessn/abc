@@ -50,8 +50,8 @@ if __name__ == "__main__":
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
-        c.plotter.plot_distributions(filename=plot_filename + "_dist.png", truth=truth, col_wrap=4)
-        c.plotter.plot_distributions(filename=plot_filename + "_dist.pdf", truth=truth, col_wrap=4)
+        c.plotter.plot_distributions(filename=plot_filename + "_dist.png", truth=truth, col_wrap=6)
+        c.plotter.plot_distributions(filename=plot_filename + "_dist.pdf", truth=truth, col_wrap=6)
 
         print("Saving Parameter values")
         with open(plot_filename + "_all_params.txt", 'w') as f:

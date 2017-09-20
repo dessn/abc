@@ -38,6 +38,7 @@ class SimpleSimulation(Simulation):
     def get_truth_values(self):
         return [
             ("Om", 0.3, r"$\Omega_m$"),
+            ("Ol", 0.7, r"$\Omega_\Lambda$"),
             ("w", -1.0, r"$w$", True, -1.5, -0.5),
             ("alpha", 0.14, r"$\alpha$"),
             ("delta_alpha", 0, r"$\delta_\alpha$"),
