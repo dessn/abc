@@ -23,7 +23,7 @@ class ApproximateModel(Model):
         self.systematics_scale = systematics_scale
 
     def get_parameters(self):
-        return ["Om", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
+        return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
                 #"outlier_MB_delta", "outlier_dispersion"
                 "alpha_c", "alpha_x1", "delta_alpha", "delta_beta",
                 "mean_x1", "mean_c", "sigma_MB", "sigma_x1", "sigma_c",
@@ -32,6 +32,7 @@ class ApproximateModel(Model):
     def get_labels(self):
         mapping = OrderedDict([
             ("Om", r"$\Omega_m$"),
+            ("Ol", r"$\Omega_\Lambda$"),
             ("w", r"$w$"),
             ("alpha", r"$\alpha$"),
             ("delta_alpha", r"$\delta_\alpha$"),
@@ -59,6 +60,7 @@ class ApproximateModel(Model):
         num_surveys = kwargs["n_surveys"]
         randoms = {
             "Om": uniform(0.1, 0.6),
+            "Ol": uniform(0.1, 0.9),
             "w": uniform(-1.5, -0.5),
             "alpha": uniform(-0.1, 0.4),
             "delta_alpha": uniform(-0.1, 0.1),
@@ -376,3 +378,8 @@ class ApproximateModelWithCorrection(ApproximateModel):
         chain_dictionary["new_weight"] = reweight
         del chain_dictionary["intrinsic_correlation"]
         return chain_dictionary
+
+
+class ApproximateModelOl(ApproximateModel):
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
+        super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale)
