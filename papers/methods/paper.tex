@@ -107,6 +107,12 @@ Almost two decades have passed since the discovery of the accelerating universe 
 In attempts to tease out the nature of dark energy, currently running and planned surveys are once again ramping up their statistical power. The Dark Energy Survey \citep[DES,][]{Bernstein2012, Abbott2016} will be observing thousands of Type Ia supernova, attaining both spectroscopic and photometric confirmation. The Large Synoptic Survey Telescope \citep[LSST,][]{Ivezic2008, LSSTScienceCollaboration2009} will produce scores of thousands of photometrically classified supernovae. Such increased statistical power demands a similarly increased fidelity and flexibility in modelling the supernovae for cosmological purposes, as systematic uncertainty will prove to be the limiting factor in our analyses.
 
 As such, staggering effort is being put into developing more sophisticated supernovae analyses. \citet{Scolnic2016} and \citet{Kessler2017} explore sophisticated simulation corrections to traditional analyses. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with only the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian Models abound \citep{Mandel2009, March2011, March2014a, Rubin2015, Shariff2016, Roberts2017}, however often face difficulties finding sufficient analytic approximations for complicated effects such as Malmquist bias.
+
+
+In this paper, we lay out a new hierarchical model that extends on past work. In Section \ref{sec:method} we outline our methodology and apply it to simulated datasets. Forecasts for the impending DES three year spectroscopic supernova survey are contain in Section \ref{sec:des}. Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies.
+
+
+
 \rule{\linewidth}{1pt}
 
 
@@ -123,6 +129,7 @@ Review current methods
 Potential places for improvement
 
 \section{Our Method}
+\label{sec:method}
 
 General comments about the method (BHM), Stan
 
@@ -139,16 +146,9 @@ Observables -> Transformation function (latent, mass, cosmology, systematics) ->
 Minimal outliers
 
 \section{Application to DES}
+\label{sec:des}
 
 \subsection{Simulating DES SN data}
-
-\subsection{Results on simulated data (ie projections)}
-
-\subsubsection{Spectroscopic Sample}
-
-\subsubsection{Photometric sample}
-
-\subsection{Comparison with bells and whistles fixed}
 
 \subsection{Model validation}
 
@@ -158,12 +158,23 @@ multisim
 
 bulk
 
+
+\subsection{Results on simulated data (ie projections)}
+
+\subsubsection{Spectroscopic Sample}
+
+\subsubsection{Photometric sample}
+
+\subsection{Comparison with bells and whistles fixed}
+
+
 \section{Systematics Strength Test}
+\label{sec:sys}
 
 systematics test
 
 \section{Interesting Implementation Details}
-
+\label{sec:details}
 Anything interesting.
 
 Also talk about non-analytic correction factors (and their failure - mc integration, GP, NNGP)
