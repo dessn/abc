@@ -206,6 +206,7 @@ class ApproximateModel(Model):
             "zs": final_redshifts,
             "zspo": 1 + final_redshifts,
             "zsom": (1 + final_redshifts) ** 3,
+            "zsok": (1 + final_redshifts) ** 2,
             "redshift_indexes": final,
             "redshift_pre_comp": 0.9 + np.power(10, 0.95 * redshifts),
             "calib_std": np.ones(n_calib),
@@ -383,4 +384,9 @@ class ApproximateModelWithCorrection(ApproximateModel):
 
 class ApproximateModelOl(ApproximateModel):
     def __init__(self, filename="approximate_ol.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
+        super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale)
+
+
+class ApproximateModelFixedW(ApproximateModel):
+    def __init__(self, filename="approximate_fixedw.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
         super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale)

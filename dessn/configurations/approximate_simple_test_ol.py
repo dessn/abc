@@ -38,7 +38,7 @@ if __name__ == "__main__":
         print("Plotting posteriors")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(spacing=1.0, diagonal_tick_labels=False)
+        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
         parameters = [r"$\Omega_m$", r"$\Omega_\Lambda$"]
         print(c.analysis.get_latex_table(transpose=True))
         with open(plot_filename + "_cosmo_params.txt", 'w') as f:
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
+        c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
         c.plotter.plot_distributions(filename=plot_filename + "_dist.png", truth=truth, col_wrap=6)
         c.plotter.plot_distributions(filename=plot_filename + "_dist.pdf", truth=truth, col_wrap=6)
 
@@ -59,4 +59,5 @@ if __name__ == "__main__":
 
         print("Plotting big triangle. This might take a while")
         c.plotter.plot(filename=plot_filename + "_big.png", truth=truth, parameters=10)
+        c.plotter.plot_walks(filename=plot_filename + "_walk.png", truth=truth, parameters=3)
 

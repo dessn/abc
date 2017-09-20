@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModelFixedW
+from dessn.framework.models.approx_model import ApproximateModel
 from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     num_nodes = 4
-    model = ApproximateModelFixedW(num_nodes=num_nodes, global_calibration=1)
+    model = ApproximateModel(num_nodes=num_nodes, global_calibration=1)
     simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
                   SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
     fitter = Fitter(dir_name)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(spacing=1.0, diagonal_tick_labels=False)
-        parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$"]
+        parameters = [r"$\Omega_m$", r"$w$"]
         print(c.analysis.get_latex_table(transpose=True))
         with open(plot_filename + "_cosmo_params.txt", 'w') as f:
             f.write(c.analysis.get_latex_table(parameters=parameters))
