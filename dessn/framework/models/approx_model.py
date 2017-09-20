@@ -13,13 +13,14 @@ from dessn.utility.get_cosmologies import get_cosmology_dictionary
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=14):
+    def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
         self.num_redshift_nodes = num_nodes
         self.global_calibration = global_calibration
+        self.systematics_scale = systematics_scale
 
     def get_parameters(self):
         return ["Om", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -209,7 +210,8 @@ class ApproximateModel(Model):
             "node_weights": node_weights,
             "nodes": nodes_list,
             "outlier_MB_delta": 0.0,
-            "outlier_dispersion": np.linalg.cholesky(np.eye(3))
+            "outlier_dispersion": np.linalg.cholesky(np.eye(3)),
+            "systematics_scale": self.systematics_scale
         }
 
         sim_dict = {}

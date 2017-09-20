@@ -44,6 +44,8 @@ data {
 
     real <lower = 0, upper = 3> outlier_MB_delta;
     matrix[3, 3] outlier_dispersion;
+
+    real systematics_scale; // Use this to dynamically turn systematics on or off
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -269,10 +271,10 @@ transformed parameters {
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
-        + normal_lpdf(w | -1, 0.01) // VARYING
+        // + normal_lpdf(w | -1, 0.01) // VARYING
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        + normal_lpdf(calibration | 0, 1);
+        + normal_lpdf(calibration | 0, systematics_scale);
 }
 model {
     target += posterior;
