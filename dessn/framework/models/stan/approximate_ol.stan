@@ -24,6 +24,7 @@ data {
     // Helper data used for Simpsons rule.
     real <lower=0> zs[n_z]; // List of redshifts to manually integrate over.
     real <lower=0> zsom[n_z]; // Precomputed (1+zs)^3
+    real <lower=0> zsok[n_z]; // Precomputed (1+zs)^2
     real <lower=0> zspo[n_z]; // Precomputed (1+zs)
     int redshift_indexes[n_sne]; // Index of supernova redshifts (mapping zs -> redshifts)
 
