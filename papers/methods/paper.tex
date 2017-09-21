@@ -102,26 +102,32 @@ keyword1 -- keyword2 -- keyword3
 
 \section{Introduction}
 
-Almost two decades have passed since the discovery of the accelerating universe \citep{Riess1998, Perlmutter1999}. Since that time, of the number of observed Type Ia supernovae (SN Ia) have increased by more than an order of magnitude thanks to modern surveys at both low redshift \citep{Bailey2008, Freedman2009, Hicken2009,  Contreras2010, Conley2011}, and higher redshift \citep{Astier2006, Wood-Vasey2007, Balland2009, Amanullah2010}. Cosmological analysis of these supernovae samples \citep{Kowalski2008, Conley2011, Suzuki2012, Betoule2014, Rest2014} have been combined with complimentary probes of large scale structure \citep{Alam2017} and the CMB \citep{Hinshaw2013, PlanckCollaboration2013}, and yet, despite these prodigious efforts, the nature of dark energy remains an unsolved mystery.
+Almost two decades have passed since the discovery of the accelerating universe \citep{Riess1998, Perlmutter1999}. Since that time, of the number of observed Type Ia supernovae (SN Ia) have increased by more than an order of magnitude thanks to modern surveys at both low redshift \citep{Bailey2008, Freedman2009, Hicken2009,  Contreras2010, Conley2011}, and higher redshift \citep{Astier2006, Wood-Vasey2007, Balland2009, Amanullah2010}. Cosmological analysis of these supernova samples \citep{Kowalski2008, Conley2011, Suzuki2012, Betoule2014, Rest2014} have been combined with complimentary probes of large scale structure \citep{Alam2017} and the CMB \citep{Hinshaw2013, PlanckCollaboration2013}, and yet, despite these prodigious efforts, the nature of dark energy remains an unsolved mystery.
 
 In attempts to tease out the nature of dark energy, currently running and planned surveys are once again ramping up their statistical power. The Dark Energy Survey \citep[DES,][]{Bernstein2012, Abbott2016} will be observing thousands of Type Ia supernova, attaining both spectroscopic and photometric confirmation. The Large Synoptic Survey Telescope \citep[LSST,][]{Ivezic2008, LSSTScienceCollaboration2009} will produce scores of thousands of photometrically classified supernovae. Such increased statistical power demands a similarly increased fidelity and flexibility in modelling the supernovae for cosmological purposes, as systematic uncertainty will prove to be the limiting factor in our analyses.
 
 As such, staggering effort is being put into developing more sophisticated supernovae analyses. \citet{Scolnic2016} and \citet{Kessler2017} explore sophisticated simulation corrections to traditional analyses. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with only the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian Models abound \citep{Mandel2009, March2011, March2014a, Rubin2015, Shariff2016, Roberts2017}, however often face difficulties finding sufficient analytic approximations for complicated effects such as Malmquist bias.
 
 
-In this paper, we lay out a new hierarchical model that extends on past work. In Section \ref{sec:method} we outline our methodology and apply it to simulated datasets. Forecasts for the impending DES three year spectroscopic supernova survey are contain in Section \ref{sec:des}. Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies.
+In this paper, we lay out a new hierarchical model that extends on past work. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology and apply it to simulated datasets. Forecasts for the impending DES three year spectroscopic supernova survey are contain in Section \ref{sec:des}. Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies.
 
 
+
+
+
+
+\section{Review}
+\label{sec:review}
+
+Whilst supernova observations take the form of time-series photometric measurements of brightness in many photometric bands, most analyses do not work from these measurements of apparent magnitude and colour. Instead, most techniques fit these observations of magnitude (along with redshift) to a supernova model, with the most widely used being that of the empirical SALT2 model \citep{Guy2007, Guy2010}. This model is trained separately before fitting the supernovae light curves for the cosmology selected supernova sample \citep{Guy2010, Mosher2014}. The resulting output from the model is, for each supernova, a characterised amplitude $x_0$ (which can be converted into apparent magnitude $m_B$), a stretch term $x_1$ and colour term $c$, along with a covariance matrix describing the uncertainty on these summary statistics. As such, the product at the end is a (redshift dependent) population of $m_B$, $x_1$ and $c$.
+
+The underlying actual supernova population is not as clear cut, and indeed accurately characterising this population, its evolution over redshift and effects from environment is one of the challenges of supernova cosmology. However, given some modelled underlying population that lives in the redshift dependent space $M_B$, $x_1$ and $c$, the introduction of cosmology into the model is simple -- it is encoded in the functional map between those two populations, from apparent magnitude space to absolute magnitude. Specifically, for any given supernova our functional map may take the traditional form:
+\begin{equation}
+M_B = m_B + \alpha x_1 - \beta c - \mu(z) + \text{corrections},
+\end{equation}
+where $\alpha$ is the stretch correction \citep{Phillips1993}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader and bluer supernovae are brighter. The $\text{corrections}$ term at the end often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010,Sullivan2010,Rigault2013,Uddin2017}. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and an input redshift.
 
 \rule{\linewidth}{1pt}
-
-
-
-
-Introduce significance of SN historically, and the quest to remain
-competitive with BAO and other probes, we have to reduce systematic 
-uncert whilst larger surveys reduce stat.
-
 Review old methods
 
 Review current methods
