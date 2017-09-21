@@ -31,6 +31,14 @@
 % overwriting existing commands. Example:
 %\newcommand{\pcm}{\,cm$^{-2}$}	% per cm-squared
 \newcommand{\name}{SN-BHM}
+\newcommand{\myemail}{samuelreay@gmail.com}
+\newcommand\abs[1]{\left|#1\right|}
+\newcommand {\etal} {\emph{~et~al.} }
+
+\newcommand{\green}{\color{green}}
+\newcommand{\blue}{\color{blue}}
+\newcommand{\red}{\color{red}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%
@@ -116,10 +124,12 @@ In this paper, we lay out a new hierarchical model that extends on past work. Se
 
 
 
+
+
 \section{Review}
 \label{sec:review}
 
-Whilst supernova observations take the form of time-series photometric measurements of brightness in many photometric bands, most analyses do not work from these measurements of apparent magnitude and colour. Instead, most techniques fit these observations of magnitude (along with redshift) to a supernova model, with the most widely used being that of the empirical SALT2 model \citep{Guy2007, Guy2010}. This model is trained separately before fitting the supernovae light curves for the cosmology selected supernova sample \citep{Guy2010, Mosher2014}. The resulting output from the model is, for each supernova, a characterised amplitude $x_0$ (which can be converted into apparent magnitude $m_B$), a stretch term $x_1$ and colour term $c$, along with a covariance matrix describing the uncertainty on these summary statistics. As such, the product at the end is a (redshift dependent) population of $m_B$, $x_1$ and $c$.
+Whilst supernova observations take the form of time-series photometric measurements of brightness in many photometric bands, most analyses do not work from these measurements of apparent magnitude and colour. Instead, most techniques fit these observations of magnitude (along with redshift) to a supernova model, with the most widely used being that of the empirical SALT2 model \citep{Guy2007, Guy2010}. This model is trained separately before fitting the supernovae light curves for the cosmology selected supernova sample \citep{Guy2010, Mosher2014}. The resulting output from the model is, for each supernova, a characterised amplitude $x_0$ (which can be converted into apparent magnitude $m_B = -2.5\log(x_0)$), a stretch term $x_1$ and colour term $c$, along with a covariance matrix describing the uncertainty on these summary statistics. As such, the product at the end is a (redshift dependent) population of $m_B$, $x_1$ and $c$.
 
 The underlying actual supernova population is not as clear cut, and indeed accurately characterising this population, its evolution over redshift and effects from environment is one of the challenges of supernova cosmology. However, given some modelled underlying population that lives in the redshift dependent space $M_B$, $x_1$ and $c$, the introduction of cosmology into the model is simple -- it is encoded in the functional map between those two populations, from apparent magnitude space to absolute magnitude. Specifically, for any given supernova our functional map may take the traditional form:
 \begin{equation}
@@ -127,12 +137,24 @@ M_B = m_B + \alpha x_1 - \beta c - \mu(z) + \text{corrections},
 \end{equation}
 where $\alpha$ is the stretch correction \citep{Phillips1993}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader and bluer supernovae are brighter. The $\text{corrections}$ term at the end often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010,Sullivan2010,Rigault2013,Uddin2017}. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and an input redshift.
 
+{\red Do I need to put more here?}
+
+\
+
 \rule{\linewidth}{1pt}
-Review old methods
+Review old methods {\green done}
 
-Review current methods
+Review current methods {\red not done}
 
-Potential places for improvement
+Potential places for improvement {\red not done}
+
+
+
+
+
+
+
+
 
 \section{Our Method}
 \label{sec:method}
