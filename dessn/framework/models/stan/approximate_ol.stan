@@ -230,7 +230,7 @@ transformed parameters {
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
-        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
+        //model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alphas[i] * model_mBx1c[i][2] - betas[i] * model_mBx1c[i][3] + mass_correction * masses[i];
@@ -246,13 +246,13 @@ transformed parameters {
                 log(prob_ia[i]) + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]),
                 log(1 - prob_ia[i]) + normal_lpdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean_out[i] - mB_mean[survey_map[i]])| 0, cor_sigma_out[survey_map[i]])
             );
-            numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
+            numerator_weight[i] = 0;//skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
         } else {
             weights[i] = log_sum_exp(
                 log(prob_ia[i]) + normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]),
                 log(1 - prob_ia[i]) + normal_lccdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]])
             );
-            numerator_weight[i] = log_sum_exp(-10, normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
+            numerator_weight[i] = 0;//log_sum_exp(-10, normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
         }
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
@@ -264,10 +264,10 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 0.01)
-            + normal_lpdf(mean_c[i]  | 0, 0.01)
-            + normal_lpdf(alpha_c[i]  | 0, 0.01)
-            + normal_lpdf(alpha_x1[i] | 0, 0.01)
+        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 0.001)
+            + normal_lpdf(mean_c[i]  | 0, 0.001)
+            + normal_lpdf(alpha_c[i]  | 0, 0.001)
+            + normal_lpdf(alpha_x1[i] | 0, 0.001)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
