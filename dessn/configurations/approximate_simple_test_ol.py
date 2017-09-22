@@ -26,7 +26,7 @@ if __name__ == "__main__":
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(225)
     fitter.set_num_walkers(1)
-    fitter.set_max_steps(5000)
+    fitter.set_max_steps(3000)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
