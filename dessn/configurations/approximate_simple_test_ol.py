@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
     num_nodes = 4
     model = ApproximateModelOl(num_nodes=num_nodes, global_calibration=1)
-    simulation = [SimpleSimulation(5000, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
-                  SimpleSimulation(1000, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    simulation = [SimpleSimulation(2000, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
+                  SimpleSimulation(500, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
