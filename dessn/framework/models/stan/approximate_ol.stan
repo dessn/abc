@@ -230,7 +230,7 @@ transformed parameters {
         model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
-        //model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
+        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
 
         // Convert population into absolute magnitude
         model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alphas[i] * model_mBx1c[i][2] - betas[i] * model_mBx1c[i][3] + mass_correction * masses[i];
@@ -264,17 +264,17 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 0.001)
-            + normal_lpdf(mean_c[i]  | 0, 0.001)
-            + normal_lpdf(alpha_c[i]  | 0, 0.001)
-            + normal_lpdf(alpha_x1[i] | 0, 0.001)
+        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
+            + normal_lpdf(mean_c[i]  | 0, 0.1)
+            + normal_lpdf(alpha_c[i]  | 0, 1)
+            + normal_lpdf(alpha_x1[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
-        + normal_lpdf(calibration | 0, 0.1 * systematics_scale);
+        + normal_lpdf(calibration | 0, systematics_scale);
 }
 model {
     target += posterior;
