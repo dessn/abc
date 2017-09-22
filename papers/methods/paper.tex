@@ -140,13 +140,17 @@ where $\alpha$ is the stretch correction \citep{Phillips1993}, and $\beta$ is th
 
 For traditional $\chi^2$ analyses such as that found in \citet{Kowalski2008, Conley2011, Betoule2014}, minimise the difference in distance modulus between the cosmologically predicted values $\mu_C$ and the observed distance modulus $\mu_{\rm obs}$, shown respectively below:
 \begin{align}
-\mu_C &= 5 \log\left[ \frac{(1+z)\chi}{10} \right]\\
-&=\\
+\mu_C &= 5 \log\left[ \frac{(1+z)r}{10} \right]\\
+r& =\frac{c}{H_0} \int_0^z \frac{dz'}{\sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}} \\
 \mu_{\rm obs} &= m_B + \alpha x_1 - \beta c - M_B
 \end{align}
+The minimising function is then given as
+\begin{equation}
+\chi^2 = (\mu_{\rm obs} - \mu_C)^\dagger C^{-1} (\mu_{\rm obs} - \mu_C)
+\end{equation}
+where $C^{-1}$ is an uncertainty matrix which combined the uncertainty from the SALT2 fits, intrinsic dispersion, calibration, dust, peculiar velocity and many other factors (see \citet{Betoule2014} for a review).
 
 
-{\red Do I need to put more here?}
 
 \
 
