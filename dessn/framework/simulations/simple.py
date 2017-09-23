@@ -18,8 +18,8 @@ class SimpleSimulation(Simulation):
             self.mb_alpha = 5.87
             self.mb_mean = 13.72
             self.mb_width = 1.35
-            self.power = 0.75
-            self.max_z_gen = 0.2
+            self.power = 1.0
+            self.max_z_gen = 0.1
         else:
             self.skewnorm = False
             self.mb_alpha = 4
@@ -88,7 +88,7 @@ class SimpleSimulation(Simulation):
         nn = 2000
         # Generate 1000 at a time
         while True:
-            redshifts = (np.random.uniform(0.02, self.max_z_gen, nn) ** self.power)
+            redshifts = (np.random.uniform(0.008, self.max_z_gen, nn) ** self.power)
             dist_mod = cosmology.distmod(redshifts).value
             redshift_pre_comp = 0.9 + np.power(10, 0.95 * redshifts)
             p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size) * self.mass_scale
