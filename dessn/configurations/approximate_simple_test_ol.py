@@ -21,11 +21,12 @@ if __name__ == "__main__":
     model = ApproximateModelOl(num_nodes=num_nodes, global_calibration=1)
     simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
                   SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(3)
-    fitter.set_num_walkers(30)
+    fitter.set_num_cosmologies(16)
+    fitter.set_num_walkers(10)
     fitter.set_max_steps(3000)
 
     h = socket.gethostname()
@@ -33,19 +34,21 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        m, s, chain, truth, weight, old_weight, posterior = fitter.load()
+        res = [fitter.load()]
+        # res = fitter.load(split_cosmo=True)
 
         print("Plotting posteriors")
         c = ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
+        for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(res):
+            c.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
+        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence", summary=False, plot_hists=False)
         parameters = [r"$\Omega_m$", r"$\Omega_\Lambda$"]
         print(c.analysis.get_latex_table(transpose=True))
         with open(plot_filename + "_cosmo_params.txt", 'w') as f:
             f.write(c.analysis.get_latex_table(parameters=parameters))
-        c.plotter.plot(filename=plot_filename + "_cosmo.png", truth=truth, parameters=parameters, figsize="column")
-        c.plotter.plot(filename=plot_filename + "_cosmo.pdf", truth=truth, parameters=parameters, figsize="column")
-
+        c.plotter.plot(filename=plot_filename + "_cosmo.png", truth=truth, parameters=parameters, figsize=(5, 7), extents=[[0.1, 0.95], [0.1, 1.5]])
+        c.plotter.plot(filename=plot_filename + "_cosmo.pdf", truth=truth, parameters=parameters, figsize=(5, 7), extents=[[0.1, 0.95], [0.1, 1.5]])
+        exit()
         print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")

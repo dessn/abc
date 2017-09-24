@@ -23,10 +23,10 @@ class SimpleSimulation(Simulation):
         else:
             self.skewnorm = False
             self.mb_alpha = 4
-            self.mb_mean = 22.14
-            self.mb_width = 0.65
-            self.power = 0.5
-            self.max_z_gen = 0.8
+            self.mb_mean = 23.14
+            self.mb_width = 0.5
+            self.power = 0.3
+            self.max_z_gen = 1.0
 
         self.mass_scale = 1.0 if mass else 0.0
         self.num_nodes = num_nodes
