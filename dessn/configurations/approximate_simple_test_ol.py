@@ -34,13 +34,11 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        res = [fitter.load()]
-        # res = fitter.load(split_cosmo=True)
+        m, s, chain, truth, weight, old_weight, posterior = fitter.load()
 
         print("Plotting posteriors")
         c = ChainConsumer()
-        for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            c.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
+        c.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence", summary=False, plot_hists=False)
         parameters = [r"$\Omega_m$", r"$\Omega_\Lambda$"]
         print(c.analysis.get_latex_table(transpose=True))
@@ -48,6 +46,13 @@ if __name__ == "__main__":
             f.write(c.analysis.get_latex_table(parameters=parameters))
         c.plotter.plot(filename=plot_filename + "_cosmo.png", truth=truth, parameters=parameters, figsize=(5, 7), extents=[[0.1, 0.95], [0.1, 1.5]])
         c.plotter.plot(filename=plot_filename + "_cosmo.pdf", truth=truth, parameters=parameters, figsize=(5, 7), extents=[[0.1, 0.95], [0.1, 1.5]])
+
+        print("Plotting summaries")
+        res = fitter.load(split_cosmo=True)
+        for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(res):
+            c.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
+        c.plotter.plot_summary(filename=plot_filename + "_summary.png", truth=truth, parameters=parameters, errorbar=True, extra_parameter_spacing=2.0)
+
         exit()
         print("Plotting distributions")
         c = ChainConsumer()
