@@ -3,7 +3,6 @@ import logging
 import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
-from dessn.framework.simulations.snana import SNANASimulationGauss0p3, SNANASimulationLowzGauss0p3
 from dessn.framework.simulations.snana_sys import SNANASysSimulation
 
 if __name__ == "__main__":
