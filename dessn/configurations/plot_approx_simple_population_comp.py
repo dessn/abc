@@ -13,10 +13,9 @@ if __name__ == "__main__":
     pfn = plot_dir + d + "/comparison.png"
     file = os.path.abspath(__file__)
 
-    num_nodes = 4
-    model = ApproximateModelOl(num_nodes=num_nodes, global_calibration=1)
-    simulation = [SimpleSimulation(700, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
-                  SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    model = ApproximateModelOl(global_calibration=1)
+    simulation = [SimpleSimulation(700, alpha_c=0, mass=True, dscale=0.08),
+                  SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, lowz=True)]
 
     dir_names = [plot_dir + d + "/with_pop", plot_dir + d + "/without_pop"]
     names = ["With Pop", "Without Pop"]

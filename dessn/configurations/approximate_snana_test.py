@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = SNANASimulationGauss0p3(500, manual_selection=[22.12, 0.544, None, 1.0])
+    simulation = SNANASimulationGauss0p3(1000, manual_selection=[22.12, 0.544, None, 1.0])
     print("CORRECTION IS ", simulation.get_approximate_correction())
     # exit()
 
