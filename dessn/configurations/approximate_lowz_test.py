@@ -7,8 +7,8 @@ from dessn.framework.simulations.snana import SNANASimulationGauss0p3, SNANASimu
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    dir_name = os.path.dirname(os.path.abspath(__file__)) + "/output/" + os.path.basename(__file__)[:-3]
-    plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/"
+    plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/%s/" % os.path.basename(__file__)[:-3]
+    dir_name = plot_dir + "output/"
     plot_filename = plot_dir + os.path.basename(__file__)[:-3] + ".png"
     file = os.path.abspath(__file__)
     print(dir_name)
@@ -16,18 +16,8 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    if not os.path.exists(plot_dir):
-        os.makedirs(plot_dir)
-
     model = ApproximateModel()
-    # Turn off mass and skewness for easy test
     simulation = SNANASimulationLowzGauss0p3(1000, manual_selection=[13.72+0.5, 1.353, 5.835, 0.280])
-    # simulation = SNANASimulationLowzGauss0p3(500, manual_selection=[15.4, 1, None, 0.6])
-    # simulation = SNANASimulationGauss0p3(500)
-
-    # print(simulation.get_approximate_correction(plot=True))
-    # print("CORRECTION IS ", simulation.get_approximate_correction())
-    # exit()
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
