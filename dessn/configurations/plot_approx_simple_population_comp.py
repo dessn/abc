@@ -34,5 +34,5 @@ if __name__ == "__main__":
     parameters = [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 
     c.plotter.plot(filename=[pfn, pfn.replace(".png", ".pdf")], parameters=parameters,
-                   figsize=(5, 7), extents=[[0.1, 0.95], [0.1, 1.5]])
+                   figsize="column")
 
