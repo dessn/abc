@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModelFixedW
+from dessn.framework.models.approx_model import ApproximateModel
 from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     num_nodes = 4
-    model = ApproximateModelFixedW(num_nodes=num_nodes, global_calibration=1)
+    model = ApproximateModel(num_nodes=num_nodes, global_calibration=1)
     simulation = [SimpleSimulation(700, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
                   SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
 

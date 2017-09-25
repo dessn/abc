@@ -3,7 +3,7 @@ import logging
 import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
-from dessn.framework.simulations.snana import SNANASimulationGauss0p3, SNANASimulationLowzGauss0p3
+from dessn.framework.simulations.snana import SNANASimulationGauss0p3
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
