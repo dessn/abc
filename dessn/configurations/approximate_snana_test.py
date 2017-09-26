@@ -17,8 +17,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     model = ApproximateModel()
-    simulation = SNANASimulationGauss0p3(500, manual_selection=[22.12, 0.544, None, 1.0])
-    print("CORRECTION IS ", simulation.get_approximate_correction())
+    simulation = SNANASimulationGauss0p3(1000, manual_selection=[22.12, 0.7, None, 1.0])
+    # print("CORRECTION IS ", simulation.get_approximate_correction(plot=True))
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
