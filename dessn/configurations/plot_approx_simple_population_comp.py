@@ -30,7 +30,8 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
-    c.configure(diagonal_tick_labels=False, plot_hists=False, colors=["b", "k"], linestyles=["-", "--"])
+    c.configure(diagonal_tick_labels=False, plot_hists=False, colors=["b", "k"],
+                linestyles=["-", "--"], shade_alpha=[0.7, 0.3])
     parameters = [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 
     c.plotter.plot(filename=[pfn, pfn.replace(".png", ".pdf")], parameters=parameters,
