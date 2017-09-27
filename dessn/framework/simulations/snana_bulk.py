@@ -1,5 +1,6 @@
 import inspect
 import os
+import pickle
 import numpy as np
 from dessn.framework.simulation import Simulation
 
@@ -43,6 +44,14 @@ class SNANABulkSimulation(Simulation):
     
     def get_name(self):
         return self.sim
+
+    def get_systematic_names(self):
+        file = os.path.abspath(inspect.stack()[0][1])
+        filename = os.path.dirname(file) + os.sep + self.folder + "sys_names.pkl"
+        print(filename)
+        with open(filename, 'rb') as f:
+            names = pickle.load(f)
+        return names
 
     def get_approximate_correction(self, plot=False, manual=None):
         if self.manual_selection is not None:

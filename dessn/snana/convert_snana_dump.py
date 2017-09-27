@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Sep 15 12:42:49 2016
-
-@author: shint1
-"""
 import numpy as np
 import pandas as pd
 import os
 from scipy.stats import norm
 import inspect
+import pickle
 import re
 import fnmatch
 
 from numpy.lib.recfunctions import drop_fields
+
+from dessn.snana.systematic_names import get_systematic_mapping
 
 
 def load_fitres(filename, skiprows=6):
@@ -89,6 +87,8 @@ def convert(base_folder, nml_file, include_c_x1=False):
 
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
+    sys_label_dict = get_systematic_mapping()
+    systematic_labels = [sys_label_dict[n] for n in systematic_names]
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
@@ -240,9 +240,11 @@ def convert(base_folder, nml_file, include_c_x1=False):
             os.makedirs(output_dir_passed)
         np.save(output_dir_passed + "/passed_%s.npy" % folder_num, fitted_data)
         np.save(output_dir_passed + "/all_%s.npy" % folder_num, all_mbs.astype(np.float32))
+        with open(output_dir_passed + "/sys_names.pkl", 'wb') as f:
+            pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
-    # convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
+    convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
     convert("gauss0p3", "des/DES_BASE.NML")
-    # convert("ideal0p3", "des/DES_IDEAL.NML")
-    # convert("ideal_nobias_0p3", "des/DES_IDEAL_NO_BIAS.NML")
+    convert("ideal0p3", "des/DES_IDEAL.NML")
+    convert("ideal_nobias_0p3", "des/DES_IDEAL_NO_BIAS.NML")

@@ -101,6 +101,9 @@ class Simulation(ABC):
         del result["passed"]
         return result
 
+    def get_systematic_labels(self):
+        return []
+
     def get_truth_values_dict(self):
         vals = self.get_truth_values()
         return {k[0]: k[1] for k in vals}

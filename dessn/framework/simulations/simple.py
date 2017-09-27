@@ -62,6 +62,9 @@ class SimpleSimulation(Simulation):
             ("calibration", np.zeros(self.num_calib), r"$\delta \mathcal{Z}_%d$")
         ]
 
+    def get_systematic_labels(self):
+        return [""]
+
     def get_all_supernova(self, n_sne, cosmology_index=0):
         truth = self.get_truth_values_dict()
         self.logger.info("Generating simple data for %d supernova, with skewness %d..." % (n_sne, truth["alpha_c"]))

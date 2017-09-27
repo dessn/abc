@@ -192,9 +192,9 @@ class Fitter(object):
                     num_d = 1 if len(vals.shape) < 2 else vals.shape[1]
                     for i in range(num_d):
                         if len(vals.shape) < 2:
-                            temp_list.append((mapping[p] % i, vals))
+                            temp_list.append([mapping[p] % i, vals])
                         else:
-                            temp_list.append((mapping[p] % i, vals[:, i]))
+                            temp_list.append([mapping[p] % i, vals[:, i]])
                         if truth.get(mapping[p]) is not None:
                             truth[mapping[p] % i] = truth[mapping[p]][i]
                     if truth.get(mapping[p]) is not None:
@@ -205,12 +205,18 @@ class Fitter(object):
                     except KeyError:
                         pass
                     if convert_names:
-                        temp_list.append((mapping[p], vals))
+                        temp_list.append([mapping[p], vals])
                     else:
-                        temp_list.append((p, vals))
+                        temp_list.append([p, vals])
             except KeyError:
                 self.logger.warning("Key error on %s" % p)
 
+        sys_labels = self.models[model_index].get_systematic_labels(self.simulations[simulation_index])
+        for i in range(len(temp_list)):
+            label, res = temp_list[i]
+            if "\delta \mathcal{Z}" in label:
+                n = int(label.split("\delta \mathcal{Z}_{")[1].split("}")[0])
+                temp_list[i][0] = sys_labels[n]
         result = OrderedDict(temp_list)
         return self.models[model_index], self.simulations[simulation_index], result, truth, new_weight, stan_weight, posterior
 

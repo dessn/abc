@@ -7,12 +7,14 @@ Created on Thu Sep 15 12:42:49 2016
 import numpy as np
 import pandas as pd
 import os
-from scipy.stats import norm
+import pickle
 import inspect
 import re
 import fnmatch
 
 from numpy.lib.recfunctions import drop_fields
+
+from dessn.snana.systematic_names import get_systematic_mapping
 
 
 def load_fitres(filename, skiprows=6):
@@ -89,6 +91,8 @@ def convert(base_folder, nml_file):
 
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
+    sys_label_dict = get_systematic_mapping()
+    systematic_labels = [sys_label_dict[n] for n in systematic_names]
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
@@ -180,6 +184,8 @@ def convert(base_folder, nml_file):
     if not os.path.exists(output_dir_passed):
         os.makedirs(output_dir_passed)
     np.save(output_dir_passed + "/passed.npy",  fitted_data)
+    with open(output_dir_passed + "/sys_names.pkl", 'wb') as f:
+        pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
     convert("SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")

@@ -270,6 +270,14 @@ class ApproximateModel(Model):
         final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
 
+    def get_systematic_labels(self, simulations):
+        label_list = [s.get_systematic_names() for s in simulations]
+        start = label_list[0][:self.global_calibration]
+        for l in label_list:
+            start += l[self.global_calibration:]
+        res = [r"$\delta [ %s ]$" % s for s in start]
+        return res
+
     def get_node_weights(self, nodes, redshifts):
         indexes = np.arange(nodes.size)
         interps = interp1d(nodes, indexes, kind='linear', fill_value="extrapolate")(redshifts)

@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import inspect
+import pickle
 from dessn.framework.simulation import Simulation
 
 
@@ -45,6 +46,13 @@ class SNANASimulation(Simulation):
             ("intrinsic_correlation", np.identity(3), r"$\rho$"),
             ("calibration", np.zeros(self.num_calib), r"$\delta \mathcal{Z}_%d$")
         ]
+
+    def get_systematic_names(self):
+        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+        filename = this_dir + "/snana_data/%s/sys_names.pkl" % self.real_data_name
+        with open(filename, 'rb') as f:
+            names = pickle.load(f)
+        return names
 
     def get_passed_from_name(self, name, n_sne, cosmology_index=0):
         this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
