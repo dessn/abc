@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         print("Plotting cosmology")
         c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth,
-                        parameters=parameters, figsize="column", chains="Combined", extents=extents)
+                        parameters=parameters, figsize=1.25, chains="Combined", extents=extents)
 
         print("Plotting summaries")
         c2.plotter.plot_summary(filename=pfn + "_summary.png", truth=truth, parameters=parameters,
