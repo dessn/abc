@@ -9,13 +9,15 @@ from dessn.framework.simulations.snana_bulk import SNANABulkSimulation
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/"
-    plot_filename = plot_dir + os.path.basename(__file__)[:-3] + ".png"
-    file = os.path.abspath(__file__)
+    plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/%s/" % os.path.basename(__file__)[:-3]
+    pfn = plot_dir + os.path.basename(__file__)[:-3]
+
+    if not os.path.exists(plot_dir):
+        os.makedirs(plot_dir)
 
     model = ApproximateModel()
     simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[22.12, 0.544, None, 1.0], num_calib=22)]
+                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[22.4, 0.7, None, 1.0], num_calib=22)]
 
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
@@ -25,7 +27,7 @@ if __name__ == "__main__":
     names = [m.group(1).replace("_", " ").title() for m in matches if m is not None]
     filenames = [m.string[:-3] for m in matches if m is not None]
 
-    dir_names = [os.path.dirname(os.path.abspath(__file__)) + "/output/" + f for f in filenames]
+    dir_names = [os.path.dirname(os.path.abspath(__file__)) + "/plots/%s/output" % f for f in filenames]
 
     c = ChainConsumer()
 
@@ -48,10 +50,9 @@ if __name__ == "__main__":
     alphas = 0.1
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
-    c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
+    c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
-    c.plotter.plot(filename=plot_filename, parameters=params, truth=truth, figsize=1.5)
-    c.plotter.plot(filename=plot_filename.replace(".png", ".pdf"), parameters=params, truth=truth, figsize=1.5)
-    with open(plot_filename.replace(".png", ".txt"), 'w') as f:
+    c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params, truth=truth, figsize=1.5)
+    with open(pfn + ".txt", 'w') as f:
         f.write(c.analysis.get_latex_table(parameters=params))
 
