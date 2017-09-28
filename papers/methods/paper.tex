@@ -34,7 +34,7 @@
 \newcommand{\myemail}{samuelreay@gmail.com}
 \newcommand\abs[1]{\left|#1\right|}
 \newcommand {\etal} {\emph{~et~al.} }
-
+\newcommand{\cov}{\mathcal{C}^{-1}}
 \newcommand{\green}{\color{green}}
 \newcommand{\blue}{\color{blue}}
 \newcommand{\red}{\color{red}}
@@ -126,6 +126,7 @@ In this paper, we lay out a new hierarchical model that extends on past work. Se
 
 
 
+
 \section{Review}
 \label{sec:review}
 
@@ -137,8 +138,9 @@ M_B = m_B + \alpha x_1 - \beta c - \mu(z) + \text{corrections},
 \end{equation}
 where $\alpha$ is the stretch correction \citep{Phillips1993}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader and bluer supernovae are brighter. The $\text{corrections}$ term at the end often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010, Lampeitl2010, Sullivan2010, Rigault2013, Uddin2017}. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and an input redshift.
 
+\subsection{Traditional Analyses}
 
-For traditional $\chi^2$ analyses such as that found in \citet{Kowalski2008, Conley2011, Betoule2014}, minimise the difference in distance modulus between the cosmologically predicted values $\mu_C$ and the observed distance modulus $\mu_{\rm obs}$, shown respectively below:
+Traditional $\chi^2$ analyses such as that found in \citet{Kowalski2008, Conley2011, Betoule2014}, minimise the difference in distance modulus between the cosmologically predicted values $\mu_C$ and the observed distance modulus $\mu_{\rm obs}$, shown respectively below:
 \begin{align}
 \mu_C &= 5 \log\left[ \frac{(1+z)r}{10} \right]\\
 r& =\frac{c}{H_0} \int_0^z \frac{dz'}{\sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}} \\
@@ -150,16 +152,21 @@ The minimising function is then given as
 \end{equation}
 where $C^{-1}$ is an uncertainty matrix which combined the uncertainty from the SALT2 fits, intrinsic dispersion, calibration, dust, peculiar velocity and many other factors (see \citet{Betoule2014} for a review). The benefit this analysis methodology provides is speed - for samples of hundreds of supernova, efficient matrix inversion algorithms allow the likelihood to be evaluated quickly. The speed comes with two costs. Firstly, formulating a $\chi^2$ likelihood requires a loss of model flexibility by building into the model assumptions of uncertainty Gaussianity. Secondly, the computational efficiency is dependent on inverting a covariance matrix with dimensionality linearly proportional to the number of supernovae. As this number increases, the cost of inversion rises quickly, and is not viable for samples with thousands of supernovae.
 
+Selection efficiency, such as the well known Malmquist bias \citep{MalmquistK.G.1922} is accounted for by correcting data. Simulations following survey observational strategies and geometry and used to calculate the expected bias in distance modulus, which is then added onto the observational data.
 
+\subsection{Approximate Bayesian Computation}
 
-\
+To try and escape the limitations of the traditional analysis methodology, several recent methods have adopted Approximate Bayesian Computation, where supernova samples are forward modelled in parameter space and compared to observed distributions. \citet{Weyant2013} provides an introduction into ABC methods for supernova cosmology in the context of the SDSS-II results \citep{Sako2014} and Flat $\Lambda$CDM cosmology, whilst \citet{Jennings2016} demonstrates their \textit{superABC} method on simulated first season Dark Energy Survey samples, described in \citet{Kessler2015}. In both examples, the supernova simulation package SNANA \citep{Kessler2009a} is used to forward model the data at each point in parameter space.
 
-\rule{\linewidth}{1pt}
-Review old methods {\green done}
+By building the systematic uncertainties and selection effects into the simulation package, there is vastly more freedom in how to treat and model those effects. Data does not need to be corrected, analytic approximations do not need to be applied, we are free to incorporate algorithms which simply cannot be expressed in a tractable likelihood. This freedom comes with a cost -- computation. The classical $\chi^2$ method's most computationally expensive step in a fit is matrix inversion. For ABC methods, we must instead simulate an entire supernova population in its entirety -- drawing from underlying supernova populations, modelling light curves, applying selection effects, fitting light curves and applying data cuts. This is an intensive process. Luckily, efficient sampling algorithms that have walkers which rely on the Markov properties of groups instead of individual walkers, such as Ensemble sampling \citep{Foreman-Mackey2013} allow easy parallelisation of parameter fits, such as used in the BAMBIS framework {\red CITE RACHEL}.
 
-Review current methods {\red not done}
+One final benefit of ABC methods is that they can move past the traditional treatment of supernovae with summary statistics ($m_B$, $x_1$ and $c$). \citet{Jennings2016} presents both a metric used to compare forward modelled summary statistic populations (denoted the `Tripp' metric) and a metric directly applicable to the observed supernova light curves themselves, however evaluation of systematic uncertainty was only performed using the Tripp metric.
 
-Potential places for improvement {\red not done}
+\subsection{Hierarchical Bayesian Models}
+
+Sitting comfortably between the traditional models simplicity and the complexity of forward modelling lies Hierarchical Bayesian Models. With the introduction of multiple layers in our model, we can add far more flexibility than a traditional analysis whilst still maintaining most of the computational benefits that come from having a tractable likelihood. \citet{Mandel2009} and \citet{Mandel2011} construct a hierarchical model which they apply to the light curve fitting for supernova. \citet{March2011, March2014, Karpenka2015} derive a hierarchical model and simplify it by analytically marginalising over nuisance parameters provide a model which offers increased flexibility with reduced uncertainty over the traditional method. The recent BAHAMAS model \citep{Shariff2016} builds off this and reanalyses the JLA dataset, whilst including extra freedom in the correction factors $\alpha$ and $\beta$, finding evidence for redshift dependence on $\beta$. \citet{Ma2016} also performed a reanalysis of the JLA dataset, finding significant difference in $\alpha$ and $\beta$ values from the original as well. Notably, these methods rely on data that is bias corrected, however the UNITY framework given by \citet{Rubin2015} incorporates selection efficiency analytically in the model, and is applied to the Union 2.1 dataset \citep{Suzuki2012}. The well known BEAMS (Bayesian estimation applied to multiple species) methodology from \citet{Kunz2007} has been extended and applied in several works \citep{Hlozek2012}, mostly lately to include redshift uncertainty for photometric redshift application \citep{Roberts2017}, as zBEAMS. 
+
+The flexibility afforded by a hierarchical model allows for investigations into different treatments of underlying populations, rates, redshift distributions, mass corrections and redshift evolution, each of will will be discussed further in the outline of our model below.
 
 
 
@@ -172,10 +179,26 @@ Potential places for improvement {\red not done}
 \section{Our Method}
 \label{sec:method}
 
-General comments about the method (BHM), Stan
+We construct our Bayesian Hierarchical Model with several goals in mind: creation of a redshift dependent correlated underlying supernova population, increased treatment of systematics, and analytic correction of selection effects. As this is closest to the UNITY method from \citet{Rubin2015}, we follow a similar model scaffold, and construct the model in Stan \citep{Carpenter2017, StanDevelopmentTeam2017} which uses automatic differentiation and the no-U-turn Sampler (NUTS), which is a variant of Hamiltonian Monte Carlo, to efficiently sample high dimensional parameter space.
 
-\subsection{General Description}
+At the most fundamental level, a supernova analysis is simply a mapping from an underlying population onto an observed population, where cosmology is encoded directly in the mapping function. The difficulty arises in adding sufficient, physically motivated flexibility in both of these populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model.
 
+\subsection{Observed and Latent Population}
+
+Like most of the BHM methods introduced previously, we work from the summary statistics as well, where each observed supernova has an apparent magnitude $\hat{m_B}$, stretch $\hat{x_1}$ and colour $\hat{c}$, with uncertainty $\cov$ on those values. Additionally, each supernova has an observed redshift $\hat{z}$ which we assume is precisely known as we are focused on the spectroscopically confirmed DES supernovae for this iteration of the method. Finally, each supernova also has a host galaxy mass associated with it $\hat{m}$.
+
+The first layer of the hierarchy represents the latent population of $m_B$, $x_1$ and $c$. This can be thought of as the `true' values for the supernova, and is normally distributed around the observed values such that 
+\begin{equation}
+P(m_B, x_1, c|\hat{m_B},\hat{x_1},\hat{c},\cov) = \mathcal{N}(\lbrace m_B, x_1, c \rbrace|\lbrace \hat{m_B},\hat{x_1},\hat{c} \rbrace, \cov)
+\end{equation}
+
+\subsection{Underlying Population}
+
+\subsection{Cosmological Map}
+
+
+
+\vspace{20mm}
 Mapping population of observables on a population of underlying SN, where the map function encodes
 cosmology. Difficulty is creating an underlying SN population that is flexible enough to not introduce bias whilst still being physically motivated. 
 
