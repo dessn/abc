@@ -50,9 +50,9 @@ if __name__ == "__main__":
     alphas = 0.1
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
-    c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
+    c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
     c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params, truth=truth, figsize=1.5)
     with open(pfn + ".txt", 'w') as f:
         f.write(c.analysis.get_latex_table(parameters=params))
-    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth=truth)
+    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth=truth, extra_parameter_spacing=1.0)

@@ -1,0 +1,12 @@
+\begin{table}
+    \centering
+    \caption{}
+    \label{tab:model_params}
+    \begin{tabular}{ccccc}
+        \hline
+		Model & $\Omega_m$ & $\alpha$ & $\beta$ & $\langle M_B \rangle$ \\ 
+		\hline
+		Combined & $0.311^{+0.062}_{-0.059}$ & $0.145\pm 0.020$ & $3.32\pm 0.16$ & $-19.345^{+0.023}_{-0.025}$ \\ 
+		\hline
+    \end{tabular}
+\end{table}
