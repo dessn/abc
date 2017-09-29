@@ -7,21 +7,19 @@ from dessn.framework.simulations.snana_sys import SNANASysSimulation
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    dir_name = os.path.dirname(os.path.abspath(__file__)) + "/output/" + os.path.basename(__file__)[:-3]
-    plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/"
-    plot_filename = plot_dir + os.path.basename(__file__)[:-3] + ".png"
+    plot_dir = os.path.dirname(os.path.abspath(__file__)) + "/plots/%s/" % os.path.basename(__file__)[:-3]
+    dir_name = plot_dir + "output/"
+    pfn = plot_dir + os.path.basename(__file__)[:-3]
+
     file = os.path.abspath(__file__)
     print(dir_name)
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    if not os.path.exists(plot_dir):
-        os.makedirs(plot_dir)
-
     model = ApproximateModel(global_calibration=0)
     # Turn off mass and skewness for easy test
-    simulation = [SNANASysSimulation(300, sys_index=3, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
+    simulation = [SNANASysSimulation(150, sys_index=3, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=3, sim="des", manual_selection=[22.4, 0.7, None, 1.0])]
 
     fitter = Fitter(dir_name)
