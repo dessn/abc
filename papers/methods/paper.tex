@@ -39,6 +39,14 @@
 \newcommand{\blue}{\color{blue}}
 \newcommand{\red}{\color{red}}
 
+\newcommand{\kmsmpc}{{\rm km}\,{\rm s}^{-1}\,{\rm Mpc}^{-1}}
+
+\defcitealias{Guy2010}{G10}
+\defcitealias{Chotard2011}{C11}
+\defcitealias{Rubin2015}{R15}	 
+\newcommand{\gten}{\citetalias{Guy2010}}
+\newcommand{\celeven}{\citetalias{Chotard2011}}
+\newcommand{\rubin}{\citetalias{Rubin2015}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%
@@ -114,7 +122,7 @@ Almost two decades have passed since the discovery of the accelerating universe 
 
 In attempts to tease out the nature of dark energy, currently running and planned surveys are once again ramping up their statistical power. The Dark Energy Survey \citep[DES,][]{Bernstein2012, Abbott2016} will be observing thousands of Type Ia supernova, attaining both spectroscopic and photometric confirmation. The Large Synoptic Survey Telescope \citep[LSST,][]{Ivezic2008, LSSTScienceCollaboration2009} will produce scores of thousands of photometrically classified supernovae. Such increased statistical power demands a similarly increased fidelity and flexibility in modelling the supernovae for cosmological purposes, as systematic uncertainty will prove to be the limiting factor in our analyses.
 
-As such, staggering effort is being put into developing more sophisticated supernovae analyses. \citet{Scolnic2016} and \citet{Kessler2017} explore sophisticated simulation corrections to traditional analyses. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with only the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian Models abound \citep{Mandel2009, March2011, March2014a, Rubin2015, Shariff2016, Roberts2017}, however often face difficulties finding sufficient analytic approximations for complicated effects such as Malmquist bias.
+As such, staggering effort is being put into developing more sophisticated supernovae analyses. \citet{Scolnic2016} and \citet{Kessler2017} explore sophisticated simulation corrections to traditional analyses. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with only the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian Models abound \citep{Mandel2009, March2011, March2014, Rubin2015, Shariff2016, Roberts2017}, however often face difficulties finding sufficient analytic approximations for complicated effects such as Malmquist bias.
 
 
 In this paper, we lay out a new hierarchical model that extends on past work. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology and apply it to simulated datasets. Forecasts for the impending DES three year spectroscopic supernova survey are contain in Section \ref{sec:des}. Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies.
@@ -136,7 +144,7 @@ The underlying actual supernova population is not as clear cut, and indeed accur
 \begin{equation}
 M_B = m_B + \alpha x_1 - \beta c - \mu(z) + \text{corrections},
 \end{equation}
-where $\alpha$ is the stretch correction \citep{Phillips1993}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader and bluer supernovae are brighter. The $\text{corrections}$ term at the end often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010, Lampeitl2010, Sullivan2010, Rigault2013, Uddin2017}. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and an input redshift.
+where $\alpha$ is the stretch correction \citep{Phillips1993}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader and bluer supernovae are brighter. The $\text{corrections}$ term at the end often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010, Lampeitl2010, Sullivan2010, DAndrea2011, Gupta2011, Johansson2013, Rigault2013, Uddin2017}. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and an input redshift.
 
 \subsection{Traditional Analyses}
 
@@ -164,7 +172,7 @@ One final benefit of ABC methods is that they can move past the traditional trea
 
 \subsection{Hierarchical Bayesian Models}
 
-Sitting comfortably between the traditional models simplicity and the complexity of forward modelling lies Hierarchical Bayesian Models. With the introduction of multiple layers in our model, we can add far more flexibility than a traditional analysis whilst still maintaining most of the computational benefits that come from having a tractable likelihood. \citet{Mandel2009} and \citet{Mandel2011} construct a hierarchical model which they apply to the light curve fitting for supernova. \citet{March2011, March2014, Karpenka2015} derive a hierarchical model and simplify it by analytically marginalising over nuisance parameters provide a model which offers increased flexibility with reduced uncertainty over the traditional method. The recent BAHAMAS model \citep{Shariff2016} builds off this and reanalyses the JLA dataset, whilst including extra freedom in the correction factors $\alpha$ and $\beta$, finding evidence for redshift dependence on $\beta$. \citet{Ma2016} also performed a reanalysis of the JLA dataset, finding significant difference in $\alpha$ and $\beta$ values from the original as well. Notably, these methods rely on data that is bias corrected, however the UNITY framework given by \citet{Rubin2015} incorporates selection efficiency analytically in the model, and is applied to the Union 2.1 dataset \citep{Suzuki2012}. The well known BEAMS (Bayesian estimation applied to multiple species) methodology from \citet{Kunz2007} has been extended and applied in several works \citep{Hlozek2012}, mostly lately to include redshift uncertainty for photometric redshift application \citep{Roberts2017}, as zBEAMS. 
+Sitting comfortably between the traditional models simplicity and the complexity of forward modelling lies Hierarchical Bayesian Models. With the introduction of multiple layers in our model, we can add far more flexibility than a traditional analysis whilst still maintaining most of the computational benefits that come from having a tractable likelihood. \citet{Mandel2009} and \citet{Mandel2011} construct a hierarchical model which they apply to the light curve fitting for supernova. \citet{March2011, March2014, Karpenka2015} derive a hierarchical model and simplify it by analytically marginalising over nuisance parameters provide a model which offers increased flexibility with reduced uncertainty over the traditional method. The recent BAHAMAS model \citep{Shariff2016} builds off this and reanalyses the JLA dataset, whilst including extra freedom in the correction factors $\alpha$ and $\beta$, finding evidence for redshift dependence on $\beta$. \citet{Ma2016} also performed a reanalysis of the JLA dataset, finding significant difference in $\alpha$ and $\beta$ values from the original as well. Notably, these methods rely on data that is bias corrected, however the UNITY framework given by \citet{Rubin2015} incorporates selection efficiency analytically in the model, and is applied to the Union 2.1 dataset \citep{Suzuki2012}. The well known BEAMS (Bayesian estimation applied to multiple species) methodology from \citet{Kunz2007} has been extended and applied in several works \citep{Hlozek2012}, mostly lately to include redshift uncertainty for photometric redshift application as zBEAMS \citep{Roberts2017}. 
 
 The flexibility afforded by a hierarchical model allows for investigations into different treatments of underlying populations, rates, redshift distributions, mass corrections and redshift evolution, each of will will be discussed further in the outline of our model below.
 
@@ -179,22 +187,58 @@ The flexibility afforded by a hierarchical model allows for investigations into 
 \section{Our Method}
 \label{sec:method}
 
-We construct our Bayesian Hierarchical Model with several goals in mind: creation of a redshift dependent correlated underlying supernova population, increased treatment of systematics, and analytic correction of selection effects. As this is closest to the UNITY method from \citet{Rubin2015}, we follow a similar model scaffold, and construct the model in Stan \citep{Carpenter2017, StanDevelopmentTeam2017} which uses automatic differentiation and the no-U-turn Sampler (NUTS), which is a variant of Hamiltonian Monte Carlo, to efficiently sample high dimensional parameter space.
+We construct our Bayesian Hierarchical Model with several goals in mind: creation of a redshift dependent correlated underlying supernova population, increased treatment of systematics, and analytic correction of selection effects. As this is closest to the UNITY method from \citet[][hereafter denoted \rubin]{Rubin2015}, we follow a similar model scaffold, and construct the model in Stan \citep{Carpenter2017, StanDevelopmentTeam2017} which uses automatic differentiation and the no-U-turn Sampler (NUTS), which is a variant of Hamiltonian Monte Carlo, to efficiently sample high dimensional parameter space.
 
 At the most fundamental level, a supernova analysis is simply a mapping from an underlying population onto an observed population, where cosmology is encoded directly in the mapping function. The difficulty arises in adding sufficient, physically motivated flexibility in both of these populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model.
 
 \subsection{Observed and Latent Population}
 
-Like most of the BHM methods introduced previously, we work from the summary statistics as well, where each observed supernova has an apparent magnitude $\hat{m_B}$, stretch $\hat{x_1}$ and colour $\hat{c}$, with uncertainty $\cov$ on those values. Additionally, each supernova has an observed redshift $\hat{z}$ which we assume is precisely known as we are focused on the spectroscopically confirmed DES supernovae for this iteration of the method. Finally, each supernova also has a host galaxy mass associated with it $\hat{m}$.
+Like most of the BHM methods introduced previously, we work from the summary statistics as well, where each observed supernova has an apparent magnitude $\hat{m_B}$, stretch $\hat{x_1}$ and colour $\hat{c}$, with uncertainty $\cov$ on those values. Additionally, each supernova has an observed redshift $\hat{z}$ and a host galaxy mass associated with it, $\hat{m}$. Given machine learning classifiers to type supernovae, we will also have a probability of being a Type Ia, $\hat{p}$.
 
 The first layer of the hierarchy represents the latent population of $m_B$, $x_1$ and $c$. This can be thought of as the `true' values for the supernova, and is normally distributed around the observed values such that 
 \begin{equation}
-P(m_B, x_1, c|\hat{m_B},\hat{x_1},\hat{c},\cov) = \mathcal{N}(\lbrace m_B, x_1, c \rbrace|\lbrace \hat{m_B},\hat{x_1},\hat{c} \rbrace, \cov)
+P(m_B, x_1, c|\hat{m_B},\hat{x_1},\hat{c},\cov) = \mathcal{N}(\lbrace m_B, x_1, c \rbrace|\lbrace \hat{m_B},\hat{x_1},\hat{c} \rbrace, \cov).
 \end{equation}
+As we are focused on the spectroscopically confirmed DES supernovae for this iteration of the method, we assume the observed redshift $\hat{z}$ is the true redshift $z$, and the similarly that the observed mass is the true mass $m$. Whilst the latter is not physically motivated like the redshift measurement, the relatively small contribution of the host galaxy mass to the model makes this an acceptable approximation.
 
 \subsection{Underlying Population}
 
-\subsection{Cosmological Map}
+The underlying supernova population is often treated with two components - a population distribution in colour and stretch, and intrinsic dispersion. Analytic models often treat the colour and stretch populations with a skew normal and normal, respectively, and have them as independent. Intrinsic dispersion is treated in a variety of manners in other models, from representing it simply as (Gaussian) scatter on the absolute magnitude of the supernova population, to correlated multivariate normal scatter on the combined magnitude, stretch and colour distribution. Additionally, redshift drift of populations' mean colour and stretch will introduce a cosmological bias in our fits unless the population possesses similar ability to change as a function of redshift. 
+
+We model the underlying population and intrinsic dispersion together as a redshift dependent multivariate skew normal for each survey. Following {\rubin} we allow the mean colour and stretch to vary over redshift, anchoring four equally spaced redshift nodes spanning the redshift range of each survey, linearly interpolating between the nodes. Both the colour and stretch means are modelled with normal priors. The correlation between the magnitude, stretch and colour populations is represented in a correlation matrix $\rho$, which is treated with an LKJ prior. Skewness is fixed to 0 for the absolute magnitude population, but left free for colour and stretch, with normal priors centered at 0 to draw the skewness to zero if not well constrained by the data. The decision to include skewness on the stretch distribution as well as the colour was motivated by \citet{Scolnic2016}, which found highly asymmetric underlying populations for both colour and stretch, regardless of survey or scatter model adopted.
+
+The width of the population, represented by the vector $\lbrace \sigma_{M_B}, \sigma_{x_1}, \sigma_c \rbrace$ is subject to Cauchy priors, however are sampled in log space for efficiency in sampling close to zero. 
+
+
+As such, the only constant between survey populations is the absolute magnitude $M_B$, with the skewness, redshift dependent means, width and correlations fit individual for each survey.
+
+On top of the Ia populations, as described above, we also include a simplistic outlier population that also follows {\rubin} (and therefore \citet{Kunz2007}) as a Gaussian mixture; where the mean of the population is fixed to the Ia population, but the population width is set to a width of $\sigma^{\rm outl} = 1$ in $M_B$, $x_1$ and $c$. With the spectroscopic DES sample, the contamination rate is expected to be far too low to actually fit contamination population, however in future works with photometric samples which will suffer from significantly more contamination it will be required that extra degrees of freedom are afforded the outlier population. Proof of concept simulation fits show that an acceptable parameterisation is to represent the typically brighter contaminant population as $\langle M_B^{\rm outl} \rangle = \langle M_B \rangle - \delta_{M_B}^{\rm outl}$, where $\delta_{M_B}^{\rm outl}$ is constrained to be positive, or even to be greater than a small positive number to reduce degeneracy between the two populations. For the purposes of the DES spectroscopic sample which will be dominated by confirmed Type Ia supernovae, $\delta_{M_B}^{\rm outl} =0$. We assume that supernova fall into either population as determined by their observed classification probability $\hat{p}$.
+
+
+\subsection{Population Map}
+
+\subsubsection{Cosmology}
+
+We formulate our model with three different cosmological parameterisations; Flat $\Lambda$CDM, Flat $w$CDM and standard $\Lambda$CDM. $\Omega_m$ is given the prior $\mathcal{U}(0.05, 0.99)$, $\Omega_\Lambda$ was treated with $\mathcal{U}(0, 1.5)$ and the equation of state $w$ was similarly set to a flat prior $\mathcal{U}(-0.4, -2.0)$. For calculating the distance modulus, we fix $H_0 = 70 \kmsmpc $. 
+
+\subsubsection{Standardisation Parameters}
+
+With increasingly large datasets and more nuanced analyses, the choice of how to handle $\alpha$ and $\beta$ becomes an important consideration when constructing a model. {\rubin} employs a broken linear relationship for both colour and stretch, where different values of $\alpha$ and $\beta$ are adopted depending on whether $x_1$ and $c$ are respectively positive or negative (although the cut could be placed at a location other than 0). \citet{Shariff2016} instead of employing a colour-dependent $\beta$, model $\beta$ as redshift dependent, testing two phenomenological models; $\beta(z) = \beta_0 + \beta_1 z$ and $\beta(z) = \beta_0 + \Delta \beta\left(0.5 + \arctan(100(z - z_t)) / \pi\right)$, where the later effects a rapid but smooth change in $\beta$ at a turnover redshift $z_t$.
+
+We tested two models against simulated supernova sets; $\beta(c) = \beta_0 + \beta_1 c$ and $\beta(z) = \beta_0 + \beta_1 z$. See Section \ref{sec:simdes} for details on simulation generation. We found for both models that non-zero values for $\beta$ are preferred (even with constant $\beta$ used in simulation) due to severe degeneracy with selection effects. This degeneracy resulted in a significant bias in cosmology, and so in our final model we continue to adopt the constant $\alpha$ and $\beta$ found in traditional analyses.
+
+\subsubsection{Host Galaxy Environment}
+
+It is now well known that host galaxy environment has a significant effect on supernova properties. The latest sample of over 1300 spectroscopically confirmed Type Ia supernova show $>5\sigma$ evidence for correlation between host mass and luminosity \citep{Uddin2017}. The traditional correction, as employed in analyses such as \citet{Suzuki2012} and \citet{Betoule2014} invoke a step function such that $\Delta M = 0.08 \mathcal{H}(log(M) - 10))$, where $\mathcal{H}$ is the Heaviside step function and $M$ is the galaxy mass in solar masses. The scale of this step function varies from analysis to analysis, with the 0.08 value shown previously sourced from \cite{Sullivan2010} and used in \citet{Betoule2014}. In this work we adopt the model used in {\rubin}, which follows the work from \citet{Rigault2013}, such that we introduce two parameters to incorporate a redshift-dependent host galaxy mass correction:
+\begin{equation}
+\Delta M = \delta(0) \left[ \frac{1.9\left(1 - \frac{\delta(0)}{\delta(\infty)}\right)  }{0.9 + 10^{0.95z}} + \frac{\delta(0)}{\delta(\infty)}\right]
+\end{equation}
+We also take flat priors on the parameterisation $\delta(0)$, $\delta(0)/\delta(\infty)$.
+
+
+\subsubsection{Selection Effects}
+
+\subsubsection{Systematics}
 
 
 
@@ -213,6 +257,10 @@ Minimal outliers
 \label{sec:des}
 
 \subsection{Simulating DES SN data}
+\label{sec:simdes}
+{\green BUT THE BELOW IN THE TESTING AREA}
+
+Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of two different scatter models. The first is the model from \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The second model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
 
 \subsection{Model validation}
 
