@@ -225,7 +225,7 @@ We formulate our model with three different cosmological parameterisations; Flat
 
 With increasingly large datasets and more nuanced analyses, the choice of how to handle $\alpha$ and $\beta$ becomes an important consideration when constructing a model. {\rubin} employs a broken linear relationship for both colour and stretch, where different values of $\alpha$ and $\beta$ are adopted depending on whether $x_1$ and $c$ are respectively positive or negative (although the cut could be placed at a location other than 0). \citet{Shariff2016} instead of employing a colour-dependent $\beta$, model $\beta$ as redshift dependent, testing two phenomenological models; $\beta(z) = \beta_0 + \beta_1 z$ and $\beta(z) = \beta_0 + \Delta \beta\left(0.5 + \arctan(100(z - z_t)) / \pi\right)$, where the later effects a rapid but smooth change in $\beta$ at a turnover redshift $z_t$.
 
-We tested two models against simulated supernova sets; $\beta(c) = \beta_0 + \beta_1 c$ and $\beta(z) = \beta_0 + \beta_1 z$. See Section \ref{sec:simdes} for details on simulation generation. We found for both models that non-zero values for $\beta$ are preferred (even with constant $\beta$ used in simulation) due to severe degeneracy with selection effects. This degeneracy resulted in a significant bias in cosmology, and so in our final model we continue to adopt the constant $\alpha$ and $\beta$ found in traditional analyses.
+We tested two models against simulated supernova sets; $\beta(c) = \beta_0 + \beta_1 c$ and $\beta(z) = \beta_0 + \beta_1 z$. See Section \ref{sec:simdes} for details on simulation generation. We found for both models that non-zero values for $\beta_1$ are preferred (even with constant $\beta$ used in simulation) due to severe degeneracy with selection effects. This degeneracy resulted in a significant bias in cosmology, and so in our final model we continue to adopt the constant $\alpha$ and $\beta$ found in traditional analyses.
 
 \subsubsection{Host Galaxy Environment}
 
@@ -235,10 +235,18 @@ It is now well known that host galaxy environment has a significant effect on su
 \end{equation}
 We also take flat priors on the parameterisation $\delta(0)$, $\delta(0)/\delta(\infty)$.
 
+\subsubsection{Systematics}
+
+The chief difficulty with including systematics in supernova analyses is that the generally occur during the observational pipeline, and have difficult to model effects on the output observations. As such, the normal treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{\partial \hat{m_B}}{\partial Z_i}$, $\frac{\partial \hat{x_1}}{\partial Z_i}$, $\frac{\partial \hat{c}}{\partial Z_i}$, where $Z_i$ represents the $i$th systematic.
+
+Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed original values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. But scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
+
+This method of adjusting the observed summary statistics is used throughout the traditional and BHM analyses, however it is normally constrained to band systematics. That is, each band for each survey has two systematics associated with it - the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, 10 SALT2 model systematic uncertainties, three dust systematics (scale, dust model, and transfer law) and also the systematic peculiar velocity uncertainty. This gives fourteen global systematics shared by all surveys, plus two systematics per band in each survey.
 
 \subsubsection{Selection Effects}
 
-\subsubsection{Systematics}
+Error function and skew normal
+
 
 
 
