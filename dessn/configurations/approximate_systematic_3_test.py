@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModel(global_calibration=0)
+    model = ApproximateModel(global_calibration=1)
     # Turn off mass and skewness for easy test
     simulation = [SNANASysSimulation(150, sys_index=3, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=3, sim="des", manual_selection=[22.4, 0.7, None, 1.0])]

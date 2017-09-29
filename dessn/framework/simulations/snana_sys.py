@@ -50,7 +50,7 @@ class SNANASysSimulation(Simulation):
             "n_sne": n_sne,
             "obs_mBx1c": data[:, 6:9],
             "obs_mBx1c_cov": np.array([row[9:].reshape((3, 3)) for row in data]),
-            "deta_dcalib": np.zeros((n_sne, 3, 0)),
+            "deta_dcalib": np.zeros((n_sne, 3, 1)),
             "redshifts": data[:, 1],
             "masses": np.zeros(n_sne),
             "existing_prob": data[:, 2],
