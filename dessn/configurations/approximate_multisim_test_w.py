@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     model = ApproximateModelW()
     simulation = [SNANASimulationLowzGauss0p3(300, manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
-                  SNANASimulationGauss0p3(250, manual_selection=[22.4, 0.7, None, 1.0])]
+                  SNANASimulationGauss0p3(250, manual_selection=[22.3, 0.7, None, 1.0])]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -73,4 +73,5 @@ if __name__ == "__main__":
         print("Plotting big triangle. This might take a while")
         c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
         c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
+        print("Plotting big summary. This might take an age")
         c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
