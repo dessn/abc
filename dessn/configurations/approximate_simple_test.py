@@ -61,8 +61,8 @@ if __name__ == "__main__":
                        figsize="column", chains="Combined")
 
         print("Plotting summaries")
-        c2.plotter.plot_summary(filename=pfn + "_summary.png", truth=truth, parameters=parameters, errorbar=True,
-                                extra_parameter_spacing=2.0)
+        c2.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
+                                extra_parameter_spacing=1.0)
 
         print("Plotting distributions")
         c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)

@@ -175,3 +175,6 @@ class SimpleSimulation(Simulation):
         else:
             print("skewnorm approx")
             return self.mb_mean, self.mb_width, self.mb_alpha, 1.0
+
+    def get_systematic_names(self):
+        return [r"{%d}" % i for i in range(self.num_calib)]
