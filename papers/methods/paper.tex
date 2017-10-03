@@ -125,7 +125,7 @@ In attempts to tease out the nature of dark energy, currently running and planne
 As such, staggering effort is being put into developing more sophisticated supernovae analyses. \citet{Scolnic2016} and \citet{Kessler2017} explore sophisticated simulation corrections to traditional analyses. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with only the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian Models abound \citep{Mandel2009, March2011, March2014, Rubin2015, Shariff2016, Roberts2017}, however often face difficulties finding sufficient analytic approximations for complicated effects such as Malmquist bias.
 
 
-In this paper, we lay out a new hierarchical model that extends on past work. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology and apply it to simulated datasets. Forecasts for the impending DES three year spectroscopic supernova survey are contain in Section \ref{sec:des}. Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies.
+In this paper, we lay out a new hierarchical model that extends on past work. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology. Model verification on simulated datasets is given in Section \ref{sec:verification}. Forecasts for the impending DES three year spectroscopic supernova survey are contain in Section \ref{sec:forecast}. Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies.
 
 
 
@@ -237,7 +237,7 @@ We also take flat priors on the parameterisation $\delta(0)$, $\delta(0)/\delta(
 
 \subsubsection{Systematics}
 
-The chief difficulty with including systematics in supernova analyses is that the generally occur during the observational pipeline, and have difficult to model effects on the output observations. As such, the normal treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{\partial \hat{m_B}}{\partial Z_i}$, $\frac{\partial \hat{x_1}}{\partial Z_i}$, $\frac{\partial \hat{c}}{\partial Z_i}$, where $Z_i$ represents the $i$th systematic.
+The chief difficulty with including systematics in supernova analyses is that the generally occur during the observational pipeline, and have difficult to model effects on the output observations. As such, the normal treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{\partial \hat{m_B}}{\partial Z_i}$, $\frac{\partial \hat{x_1}}{\partial Z_i}$, $\frac{\partial \hat{c}}{\partial Z_i}$, where $Z_i$ represents the $i$\textsuperscript{th} systematic.
 
 Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed original values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. But scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
 
@@ -245,24 +245,47 @@ This method of adjusting the observed summary statistics is used throughout the 
 
 \subsubsection{Selection Effects}
 
-Error function and skew normal
+Our treatment of selection effects is to incorporate selection efficiency into our model, rather than relying on simulation-driven data corrections. As such, we need to describe the probability that the events we observe are both drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are subsequently successfully observed.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
+\begin{align}
+\mathcal{L} &= P({\rm data} | \theta, S). \label{eq:like}
+\end{align}
+As the model so far described in previous sections describes $P(D|\theta)$, and we wish to formulate a function $P(S|{\rm data},\theta)$ that describes the chance of an event being successfully observed, we rearrange the likelihood in terms of those functions and find
+\begin{align}
+\mathcal{L} &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:main}
+\end{align}
+where the denominator represents an integral over all potential data. Full derivation of this can be found in Appendix \ref{app:selection}. As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by HMC. We therefore simplify the integral and approximate the selection effects in apparent magnitude and redshift space independently, such that the denominator, denoted now $w$ for simplicity, is given as
+\begin{align}
+w &= \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz. \label{eq:w1}
+\end{align}
+We apply two further approximations similar to those made in {\rubin} -- that the redshift distribution of the observed supernova reasonably well sample the $P(S|z)P(z|\theta)$ distribution, and that the survey colour and stretch populations can be treated as Gaussian for the purposes of this integral. The population $P(m_B | z, \theta)$ thus becomes $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
+\begin{align}
+m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \langle c(z) \rangle \\
+\sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2 \notag\\ 
+&\quad\quad + 2(\beta \sigma_{M_B,c} - \alpha \sigma{m_B,x_1} - \alpha \beta \sigma_{x_1,c})
+\end{align}
+What then remains is determining the functional form of $P(S|m_B)$. For the treatment of the DES, we find that the error function which smoothly transitions from some constant efficiency down to zero is sufficient. This similar result has been found by many past surveys \citep{Dilday2008, Barbary2010, Perrett2012, Graur2013, Rodney2014} {\red THESE CITATIONS EXACTLY MIRROR RUBIN2015, NOT SURE IF I SHOULD CHANGE THEM}. For our treatment of the low redshift surveys included {\red Introduce which lowz surveys earlier on} we simplify the model fitting and group all low redshift surveys together. This requires a more complicated selection function than the error function used for DES, however is reasonably well fit with a skew normal. The selection functions were fit to apparent magnitude efficiency ratios calculated from SNANA simulations. The DES survey is thus characterised by $\mu_{\rm DES} = 22.3$, $\sigma_{\rm DES} = 0.7$, with the combined low redshift surveys characterised by $\mu_{\rm LowZ} = 14.1$, $\sigma_{\rm LowZ} = 1.36$, $\alpha_{\rm LowZ} = 3.8$.
+
+
+With the well sampled approximation as specified previously, we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (DES) and skew normal selection (LowZ) functions respectively, this correction becomes
+\begin{align}
+w_{\rm DES} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm DES}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm DES}^2}}  \right) \\
+w_{\rm LowZ} &= \mathcal{N}\left( \frac{m_B^* - \mu_{\rm LowZ}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm LowZ}^2}}\right) \times \notag\\
+&\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm LowZ})(m_B^* - \mu_{\rm LowZ})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}{\sigma^2_{\rm LowZ}} \sqrt{\frac{\sigma^2_{\rm LowZ}}{\alpha^2_{\rm LowZ}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm LowZ}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}} }\right),
+\end{align}
+where $\Phi$ represents the normal CDF function, and $\Phi^c$ the complimentary CDF.
 
 
 
 
-\vspace{20mm}
-Mapping population of observables on a population of underlying SN, where the map function encodes
-cosmology. Difficulty is creating an underlying SN population that is flexible enough to not introduce bias whilst still being physically motivated. 
 
 
-Observables -> Transformation function (latent, mass, cosmology, systematics) -> Underlying pop (and outlier)
 
-\subsection{Applied to Spectroscopic Sample}
 
-Minimal outliers
+\section{Model Verification}
+\label{sec:verification}
 
-\section{Application to DES}
-\label{sec:des}
+\subsection{Applied to Toy Spectroscopic Data}
+\label{sec:toy}
 
 \subsection{Simulating DES SN data}
 \label{sec:simdes}
@@ -270,7 +293,8 @@ Minimal outliers
 
 Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of two different scatter models. The first is the model from \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The second model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
 
-\subsection{Model validation}
+\subsection{DES SN data validation}
+\label{sec:des}
 
 appoximate\_simple\_test.py
 
@@ -279,7 +303,8 @@ multisim
 bulk
 
 
-\subsection{Results on simulated data (ie projections)}
+\section{Forecasts}
+\label{sec:forecasts}
 
 \subsubsection{Spectroscopic Sample}
 
@@ -325,7 +350,8 @@ Also talk about non-analytic correction factors (and their failure - mc integrat
 
 \appendix
 
-\section{Papers}
+\section{Selection Effect Derivation}
+\label{app:selection}
 
 
 
