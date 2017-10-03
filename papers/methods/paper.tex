@@ -47,6 +47,8 @@
 \newcommand{\gten}{\citetalias{Guy2010}}
 \newcommand{\celeven}{\citetalias{Chotard2011}}
 \newcommand{\rubin}{\citetalias{Rubin2015}}
+
+\graphicspath{ {./figures/} }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%
@@ -284,23 +286,73 @@ where $\Phi$ represents the normal CDF function, and $\Phi^c$ the complimentary 
 \section{Model Verification}
 \label{sec:verification}
 
+In order to verify our model we run it through several tests. First, we validate on toy models, verifying that there is not significant cosmological bias in data sets more constraining than the DES spectroscopic sample. We then also generate 
+
 \subsection{Applied to Toy Spectroscopic Data}
 \label{sec:toy}
 
-\subsection{Simulating DES SN data}
+We generate simple toy data to validate the basic premise of the model. For both DES and LowZ data we draw from an underlying $M_B$, $x_1$, $c$ population and translate into apparent magnitude space using $\Omega_m = 0.3$, $\alpha= 0.14$ and $\beta = 3.1$. Masses are randomly drawn from the interval 0 to 1, and a mass correction with $\delta(0) = 0.08$ and $\delta(0)/\delta(\infty) =0.5$ included. Independent observational errors of $0.04$, $0.2$, $0.03$ on $m_B$, $x_1$ and $c$ (following the mean uncertainty for DES SNANA simulations) are added to create the observables. The results are then passed through the selection effects, where each supernova is only selected based on $P(S|m_B)$, using a skew normal function for the LowZ supernovae and error function for the DES-like supernovae. We draw from each survey simulation until we have 300 LowZ supernovae and 700 DES-like supernovae, representing a statistical sample of greater power than the estimated 250 supernovae for the DES spectroscopic analysis.
+
+The above represents one realisation of data. We test three models (Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM) with 300 realisations and find recovery of underlying cosmology without significant bias. Combined posterior surfaces of 22 realisations are shown in Figures \ref{fig:simple_om}, \ref{fig:simple_w}, \ref{fig:simple_ol}, with the statistical distribution of realisations for the Flat $\Lambda$CDM cosmology shown in Figure \ref{fig:simple_om_summary}. {\red Need a think about which plots to show or good way to merge them}
+
+
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_simple_test_cosmo.pdf}
+	\end{center}
+	\caption{Posterior surfaces for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}
+	\label{fig:simple_om}
+\end{figure}
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_simple_test_w_cosmo.pdf}
+	\end{center}
+	\caption{Posterior surfaces for 22 realisations of supernova data with the Flat $w$CDM model.}
+	\label{fig:simple_w}
+\end{figure}
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_simple_test_ol_cosmo.pdf}
+	\end{center}
+	\caption{Posterior surfaces for 22 realisations of supernova data with the $\Lambda$CDM model.}.
+	\label{fig:simple_ol}
+\end{figure}
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_simple_test_summary.pdf}
+	\end{center}
+	\caption{Parameter summaries for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}.
+	\label{fig:simple_om_summary}
+\end{figure}
+
+
+
+
+\subsection{DES SN data validation}
 \label{sec:simdes}
 {\green BUT THE BELOW IN THE TESTING AREA}
 
-Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of two different scatter models. The first is the model from \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The second model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
+Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of three different scatter models. The first is simplest model - coherent magnitude scatter. The second model is the \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The third model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
 
-\subsection{DES SN data validation}
-\label{sec:des}
+Simulations (using the SNANA package) follow the observational schedule and observing conditions for the DES and LowZ surveys. In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and now also include our full treatment of systematics. Additionally, we also simulate two different underlying population -- a Gaussian distribution in colour and stretch, and a highly skewed colour and stretch population using population values from \citet{Scolnic2016}. Both populations have been centered on 0, with the bifurcated Gaussian used for the skewed colour distribution having width $\sigma_c^+ = 0.101$, $\sigma_c^- = 0.043$ and the skewed stretch distribution having $\sigma_{x_1}^+ = 0.222$, $\sigma_{x_1}^- = 1.472$.
 
-appoximate\_simple\_test.py
+Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. Combined posterior surfaces for {\red 20} data realisations are shown in Figure \ref{fig:bulk_summary}. {\green Talk about the biases introduced}
 
-multisim
+{\red UPDATE THIS WHEN THE SIMS FINISH AND I CAN RERUN WITH MORE REALISATIONS}
 
-bulk
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_bulk_load_summary.pdf}
+	\end{center}
+	\caption{Parameter summaries for 20 realisations of supernova data with the Flat $\Lambda$CDM model.}.
+	\label{fig:bulk_summary}
+\end{figure}
+
+
+
+
+
+
 
 
 \section{Forecasts}

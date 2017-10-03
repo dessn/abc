@@ -55,4 +55,4 @@ if __name__ == "__main__":
     c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params, truth=truth, figsize=1.5)
     with open(pfn + ".txt", 'w') as f:
         f.write(c.analysis.get_latex_table(parameters=params))
-    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth=truth, extra_parameter_spacing=1.0)
+    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth=truth)
