@@ -3,3 +3,9 @@ sleep 1
 python approximate_multisim_test_w.py
 sleep 1
 python approximate_multisim_test_ol.py
+sleep 1
+python approximate_multisim_test_sysfixed.py
+sleep 1
+python approximate_multisim_test_w_sysfixed.py
+sleep 1
+python approximate_multisim_test_ol_sysfixed.py

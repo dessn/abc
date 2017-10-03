@@ -14,7 +14,7 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModel(global_calibration=0)
-    simulation = [SNANASysSimulation(300, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
+    simulation = [SNANASysSimulation(150, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=0, sim="des", manual_selection=[22.3, 0.7, None, 1.0])]
 
     filenames = ["approximate_systematic_%d_test" % i for i in range(7)]
@@ -41,5 +41,5 @@ if __name__ == "__main__":
     c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
     c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params)
-    c.plotter.plot_summary(filename=pfn + "_summary.png", parameters=params, errorbar=True, truth=truth)
+    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth=truth)
 
