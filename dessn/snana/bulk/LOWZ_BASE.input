@@ -15,7 +15,7 @@ RANSEED:      28473   # random number seed
 FORMAT_MASK:  32        # 2=text  32=FITS
 
 CIDOFF:     0
-NGENTOT_LC:  2000000
+NGENTOT_LC:  200000
 GENVERSION: SHINTON_LOWZ_BASE
 GENSOURCE:  RANDOM
 GENMODEL:   SALT2.JLA-B14
@@ -31,7 +31,7 @@ GENSIGMA_SEARCH_PEAKMJD:  1.0       # sigma-smearing for  SEARCH_PEAKMJD
 
 GENRANGE_REDSHIFT:  0.009    0.099
 GENSIGMA_REDSHIFT:  0.000001
-# GENSIGMA_VPEC:      150  # peculiar velocity, km/sec
+GENSIGMA_VPEC:      150  # peculiar velocity, km/sec
 
 DNDZ: POWERLAW  2.6E-5  2.2
 
