@@ -41,7 +41,7 @@ class SNANABulkSimulation(Simulation):
             ("intrinsic_correlation", np.identity(3), r"$\rho$"),
             ("calibration", np.zeros(self.num_calib), r"$\delta \mathcal{Z}_%d$")
         ]
-    
+
     def get_name(self):
         return self.sim
 
@@ -110,3 +110,45 @@ class SNANABulkSimulation(Simulation):
             "passed": np.ones(n_sne, dtype=np.bool)
         }
         return result
+
+
+class SNANACombinedBulk(Simulation):
+    def __init__(self, n_sne, sims, name, manual_selection=None, use_sim=False, num_nodes=4, num_calib=0):
+        super().__init__()
+        self.name = name
+        n_sim = int(n_sne / len(sims))
+        self.sim_names = sims
+        self.manual_selection = manual_selection
+        self.num_supernova = n_sne
+        self.use_sim = use_sim
+        self.num_nodes = num_nodes
+        self.num_calib = num_calib
+        self.sims = [SNANABulkSimulation(n_sim, s, manual_selection=manual_selection,
+                                         use_sim=use_sim, num_nodes=num_nodes, num_calib=num_calib) for s in sims]
+
+    def get_approximate_correction(self, plot=False, manual=None):
+        if self.manual_selection is not None:
+            return self.manual_selection
+        else:
+            raise ValueError("Bulk combined must specify manual selection")
+
+    def get_truth_values(self):
+        return self.sims[0].get_truth_values()
+
+    def get_name(self):
+        return self.name
+
+    def get_all_supernova(self, n_sne, cosmology_index=0):
+        n_sim = int(n_sne / len(self.sims))
+        results = [s.get_all_supernova(n_sim, cosmology_index=cosmology_index) for s in self.sims]
+
+        # Now merge together
+        n_tot = np.sum([r["n_sne"] for r in results])
+        final = results[0]
+        final["n_sne"] = int(n_tot)
+        for r in results[1:]:
+            for key in final.keys():
+                if key in ["n_sne"]:
+                    continue
+                final[key] = np.concatenate((final[key], r[key]))
+        return final
