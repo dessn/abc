@@ -271,7 +271,7 @@ What then remains is determining the functional form of $P(S|m_B)$. For the trea
 With the well sampled approximation as specified previously, we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (DES) and skew normal selection (LowZ) functions respectively, this correction becomes
 \begin{align}
 w_{\rm DES} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm DES}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm DES}^2}}  \right) \\
-w_{\rm LowZ} &= \mathcal{N}\left( \frac{m_B^* - \mu_{\rm LowZ}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm LowZ}^2}}\right) \times \notag\\
+w_{\rm LowZ} &= 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm LowZ}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm LowZ}^2}}\right) \times \notag\\
 &\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm LowZ})(m_B^* - \mu_{\rm LowZ})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}{\sigma^2_{\rm LowZ}} \sqrt{\frac{\sigma^2_{\rm LowZ}}{\alpha^2_{\rm LowZ}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm LowZ}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}} }\right),
 \end{align}
 where $\Phi$ represents the normal CDF function, and $\Phi^c$ the complimentary CDF.
@@ -314,14 +314,14 @@ The above represents one realisation of data. We test three models (Flat $\Lambd
 	\begin{center}
 		\includegraphics[width=\columnwidth]{approximate_simple_test_ol_cosmo.pdf}
 	\end{center}
-	\caption{Posterior surfaces for 22 realisations of supernova data with the $\Lambda$CDM model.}.
+	\caption{Posterior surfaces for 22 realisations of supernova data with the $\Lambda$CDM model.}
 	\label{fig:simple_ol}
 \end{figure}
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{approximate_simple_test_summary.pdf}
 	\end{center}
-	\caption{Parameter summaries for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}.
+	\caption{Parameter summaries for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}
 	\label{fig:simple_om_summary}
 \end{figure}
 
@@ -332,7 +332,7 @@ The above represents one realisation of data. We test three models (Flat $\Lambd
 \label{sec:simdes}
 {\green BUT THE BELOW IN THE TESTING AREA}
 
-Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of three different scatter models. The first is simplest model - coherent magnitude scatter. The second model is the \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The third model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
+Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of three different scatter models. The first is simplest model - coherent magnitude scatter, denoted `Smear' in the figures. The second model is the \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The third model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
 
 Simulations (using the SNANA package) follow the observational schedule and observing conditions for the DES and LowZ surveys. In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and now also include our full treatment of systematics. Additionally, we also simulate two different underlying population -- a Gaussian distribution in colour and stretch, and a highly skewed colour and stretch population using population values from \citet{Scolnic2016}. Both populations have been centered on 0, with the bifurcated Gaussian used for the skewed colour distribution having width $\sigma_c^+ = 0.101$, $\sigma_c^- = 0.043$ and the skewed stretch distribution having $\sigma_{x_1}^+ = 0.222$, $\sigma_{x_1}^- = 1.472$.
 
@@ -344,13 +344,13 @@ Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-l
 	\begin{center}
 		\includegraphics[width=\columnwidth]{approximate_bulk_load_summary.pdf}
 	\end{center}
-	\caption{Parameter summaries for 20 realisations of supernova data with the Flat $\Lambda$CDM model.}.
+	\caption{Parameter summaries for 20 realisations of supernova data with the Flat $\Lambda$CDM model. {\red Discuss any biases}}
 	\label{fig:bulk_summary}
 \end{figure}
 
 
 
-
+{\red More discussion here when I get more results}
 
 
 
@@ -358,24 +358,14 @@ Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-l
 \section{Forecasts}
 \label{sec:forecasts}
 
-\subsubsection{Spectroscopic Sample}
+{\red Put in multisim forecasts with systamtics both on and off}
 
-\subsubsection{Photometric sample}
-
-\subsection{Comparison with bells and whistles fixed}
 
 
 \section{Systematics Strength Test}
 \label{sec:sys}
 
 systematics test
-
-\section{Interesting Implementation Details}
-\label{sec:details}
-Anything interesting.
-
-Also talk about non-analytic correction factors (and their failure - mc integration, GP, NNGP)
-
 
 
 \section{Conclusions}
@@ -384,7 +374,7 @@ Also talk about non-analytic correction factors (and their failure - mc integrat
 
 \section*{Acknowledgements}
 
-
+Plots of posterior surfaces and parameter summaries were created with \verb|ChainConsumer| \citep{Hinton2016}.
 
 
 
