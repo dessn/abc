@@ -26,8 +26,8 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(20)
-    fitter.set_num_walkers(10)
+    fitter.set_num_cosmologies(100)
+    fitter.set_num_walkers(3)
     fitter.set_max_steps(3000)
 
     h = socket.gethostname()

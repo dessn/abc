@@ -3,7 +3,7 @@ import logging
 import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
-from dessn.framework.simulations.snana_bulk import SNANABulkSimulation
+from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
 
 
 if __name__ == "__main__":
@@ -20,14 +20,16 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(300, sim="SHINTON_LOWZ_MATRIX_SMEAR_SKEWC_SKEWX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SKEWC_SKEWX1", manual_selection=[22.3, 0.7, None, 1.0], num_calib=22)]
+    simulation = [SNANACombinedBulk(300, ["SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", "SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1"],
+                                    "CombinedLowZ", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
+                  SNANACombinedBulk(250, ["SHINTON_DES_MATRIX_G10_SYMC_SYMX1", "SHINTON_DES_MATRIX_C11_SYMC_SYMX1"],
+                                    "CombinedDES", manual_selection=[22.3, 0.7, None, 1.0], num_calib=22)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(20)
-    fitter.set_num_walkers(10)
+    fitter.set_num_cosmologies(100)
+    fitter.set_num_walkers(3)
     fitter.set_max_steps(3000)
 
     h = socket.gethostname()
@@ -48,3 +50,4 @@ if __name__ == "__main__":
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
         c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
+
