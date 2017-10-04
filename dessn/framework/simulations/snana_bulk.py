@@ -132,6 +132,9 @@ class SNANACombinedBulk(Simulation):
         else:
             raise ValueError("Bulk combined must specify manual selection")
 
+    def get_systematic_names(self):
+        return self.sims[0].get_systematic_names()
+
     def get_truth_values(self):
         return self.sims[0].get_truth_values()
 
