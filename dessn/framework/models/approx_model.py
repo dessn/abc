@@ -398,3 +398,8 @@ class ApproximateModelOl(ApproximateModel):
 class ApproximateModelW(ApproximateModel):
     def __init__(self, filename="approximate_w.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
         super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale)
+
+
+class ApproximateModelWOmPrior(ApproximateModel):
+    def __init__(self, filename="approximate_w_omprior.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
+        super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale)

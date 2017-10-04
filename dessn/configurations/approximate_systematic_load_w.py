@@ -17,7 +17,7 @@ if __name__ == "__main__":
     simulation = [SNANASysSimulation(150, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=0, sim="des", manual_selection=[22.3, 0.7, None, 1.0])]
 
-    filenames = ["approximate_systematic_%d_test" % i for i in range(7)]
+    filenames = ["approximate_systematic_%d_test_w" % i for i in range(7)]
     names = ["Stat only", "ZP offset .02 mag (Gauss)", r"Filter $\Lambda$ shift 20$\textup{\AA}$ gaus",
              "10\\% Gauss error in biasCor flux errors", "idem, but with incorrect reported fluxErr",
              "MWEBV scale from 20\\% Gauss error", "MW RV shift from 0.2 Gauss error"]
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                 colors=colors, shade_alpha=alphas, shade=True)
     print("Plotting distributions")
     # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
-    params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
+    params = ["$w$", '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
     print("Plotting plot")
     # c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params)
     print("Plotting summary")
