@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModel
+from dessn.framework.models.approx_model import ApproximateModelW
 from dessn.framework.simulations.snana_sys import SNANASysSimulation
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModel(global_calibration=1)
+    model = ApproximateModelW(global_calibration=1)
     # Turn off mass and skewness for easy test
     simulation = [SNANASysSimulation(150, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(250, sys_index=0, sim="des", manual_selection=[22.3, 0.7, None, 1.0])]
@@ -42,9 +42,9 @@ if __name__ == "__main__":
         parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$",
                       r"$\delta(0)$", r"$\delta(\infty)/\delta(0)$"]
         print(c.analysis.get_latex_table(transpose=True))
-        # c.plotter.plot(filename=plot_filename, truth=truth, parameters=parameters)
+        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters)
         print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
-        c.plotter.plot_distributions(filename=plot_filename.replace(".png", "_dist.png"), truth=truth, col_wrap=8)
+        c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)

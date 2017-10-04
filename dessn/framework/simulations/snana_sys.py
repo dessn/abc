@@ -28,11 +28,7 @@ class SNANASysSimulation(Simulation):
         return "%s_%d" % (self.sim, self.sys_index)
 
     def get_systematic_names(self):
-        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-        filename = this_dir + "/snana_data/%s/sys_names.pkl" % self.real_data_name
-        with open(filename, 'rb') as f:
-            names = pickle.load(f)
-        return names
+        return ["0"]
 
     def get_approximate_correction(self, plot=False, manual=None):
         if self.manual_selection is not None:
