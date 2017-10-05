@@ -42,10 +42,10 @@ if __name__ == "__main__":
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
                 colors=colors, shade_alpha=alphas, shade=True)
     print("Plotting distributions")
-    # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
+    c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
     params = ['$\\Omega_m$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
     print("Plotting plot")
-    # c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params)
+    c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params)
     print("Plotting summary")
     c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth="Stat only", extra_parameter_spacing=0.75)
 

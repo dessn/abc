@@ -21,13 +21,13 @@ if __name__ == "__main__":
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
     simulation = [SNANACombinedBulk(1000, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
-                                    "CombinedLowZ", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58)]
+                                    "CombinedLowZ", manual_selection=[13.7+0.0, 1.4, 3.8, 0.2], num_calib=58)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(15)
-    fitter.set_num_walkers(5)
+    fitter.set_num_cosmologies(100)
+    fitter.set_num_walkers(1)
     fitter.set_max_steps(3000)
 
     h = socket.gethostname()

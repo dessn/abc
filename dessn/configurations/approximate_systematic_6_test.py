@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModelW
+from dessn.framework.models.approx_model import ApproximateModel
 from dessn.framework.simulations.snana_sys import SNANASysSimulation
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(global_calibration=1)
+    model = ApproximateModel(global_calibration=1)
     # Turn off mass and skewness for easy test
     simulation = [SNANASysSimulation(500, sys_index=6, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
                   SNANASysSimulation(500, sys_index=6, sim="des", manual_selection=[22.3, 0.7, None, 1.0])]
