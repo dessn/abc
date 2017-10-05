@@ -1,0 +1,13 @@
+python approximate_systematic_0_test_w.py
+sleep 1
+python approximate_systematic_1_test_w.py
+sleep 1
+python approximate_systematic_2_test_w.py
+sleep 1
+python approximate_systematic_3_test_w.py
+sleep 1
+python approximate_systematic_4_test_w.py
+sleep 1
+python approximate_systematic_5_test_w.py
+sleep 1
+python approximate_systematic_6_test_w.py
