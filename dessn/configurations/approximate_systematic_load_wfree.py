@@ -3,6 +3,8 @@ import logging
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW
 from dessn.framework.simulations.snana_sys import SNANASysSimulation
+from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
+
 from chainconsumer import ChainConsumer
 
 if __name__ == "__main__":
@@ -14,8 +16,8 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModelW(global_calibration=0)
-    simulation = [SNANASysSimulation(500, sys_index=0, sim="lowz", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2]),
-                  SNANASysSimulation(500, sys_index=0, sim="des", manual_selection=[22.3, 0.7, None, 1.0])]
+    simulation = [SNANASysSimulation(500, sys_index=0, sim="lowz", manual_selection=lowz_sel()),
+                  SNANASysSimulation(500, sys_index=0, sim="des", manual_selection=des_sel())]
 
     filenames = ["approximate_systematic_%d_test_wfree" % i for i in range(7)]
     names = ["Stat only", "ZP offset .02 mag (Gauss)", r"Filter $\Lambda$ shift 20$\textup{\AA}$ gaus",

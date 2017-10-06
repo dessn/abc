@@ -4,6 +4,7 @@ import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
 from dessn.framework.simulations.snana_bulk import SNANABulkSimulation
+from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
 
 
 if __name__ == "__main__":
@@ -20,8 +21,8 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(300, sim="SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_G10_SYMC_SYMX1", manual_selection=[22.3, 0.7, None, 1.0], num_calib=22)]
+    simulation = [SNANABulkSimulation(300, sim="SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=58),
+                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_G10_SYMC_SYMX1", manual_selection=des_sel(), num_calib=22)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

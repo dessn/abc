@@ -4,7 +4,7 @@ import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
 from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
-
+from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -20,16 +20,16 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANACombinedBulk(500, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
-                                    "CombinedLowZ", manual_selection=[13.70+0.0, 1.4, 3.8, 0.2], num_calib=58),
-                  SNANACombinedBulk(500, ["SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1"],
-                                    "CombinedDES", manual_selection=[22.1+0.0, 0.7, None, 1.0], num_calib=22)]
+    simulation = [SNANACombinedBulk(300, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
+                                    "CombinedLowZ", manual_selection=lowz_sel(), num_calib=58),
+                  SNANACombinedBulk(250, ["SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1"],
+                                    "CombinedDES", manual_selection=des_sel(), num_calib=22)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(100)
-    fitter.set_num_walkers(1)
+    fitter.set_num_walkers(3)
     fitter.set_max_steps(3000)
 
     h = socket.gethostname()

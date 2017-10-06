@@ -6,6 +6,7 @@ from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel
 from chainconsumer import ChainConsumer
 from dessn.framework.simulations.snana_bulk import SNANABulkSimulation
+from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -16,8 +17,8 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModel()
-    simulation = [SNANABulkSimulation(100, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[13.70+0.5, 1.363, 3.8, 0.2], num_calib=58),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=[22.3, 0.7, None, 1.0], num_calib=22)]
+    simulation = [SNANABulkSimulation(300, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=58),
+                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=des_sel(), num_calib=22)]
 
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
