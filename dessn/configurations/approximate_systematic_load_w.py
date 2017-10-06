@@ -40,12 +40,13 @@ if __name__ == "__main__":
     colors = ['k', 'b', 'r', 'g', 'purple', 'o', 'lb']
     alphas = [0.3] + [0.0] * (len(dir_names) - 1)
     c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False, linestyles=ls,
-                colors=colors, shade_alpha=alphas, shade=True)
+                colors=colors, shade_alpha=alphas, shade=True, bar_shade=True)
     print("Plotting distributions")
     # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
     params = ["$w$", '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$']
     print("Plotting plot")
     # c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params)
     print("Plotting summary")
-    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=params, errorbar=True, truth="Stat only", extra_parameter_spacing=0.75)
+    c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=["$w$"],
+                           extents={"$w$": [-1.5, -0.5]}, truth="Stat only", extra_parameter_spacing=1.0)
 
