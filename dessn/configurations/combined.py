@@ -2,7 +2,7 @@ import os
 import logging
 import socket
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModel
+from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel, ApproximateModelOl
 from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
 from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
 
@@ -18,7 +18,10 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModel()
+    models = ApproximateModelW(), ApproximateModelW(systematics_scale=0.001), \
+             ApproximateModel(), ApproximateModel(systematics_scale=0.001), \
+             ApproximateModelOl(), ApproximateModelOl(systematics_scale=0.001)
+
     # Turn off mass and skewness for easy test
     simulation = [SNANACombinedBulk(300, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
                                     "CombinedLowZ", manual_selection=lowz_sel(), num_calib=58),
@@ -26,10 +29,10 @@ if __name__ == "__main__":
                                     "CombinedDES", manual_selection=des_sel(), num_calib=22)]
 
     fitter = Fitter(dir_name)
-    fitter.set_models(model)
+    fitter.set_models(*models)
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(100)
-    fitter.set_num_walkers(3)
+    fitter.set_num_walkers(1)
     fitter.set_max_steps(3000)
 
     h = socket.gethostname()
