@@ -43,10 +43,13 @@
 
 \defcitealias{Guy2010}{G10}
 \defcitealias{Chotard2011}{C11}
-\defcitealias{Rubin2015}{R15}	 
+\defcitealias{Rubin2015}{R15}	
+\defcitealias{Scolnic2016}{SK16}	 
 \newcommand{\gten}{\citetalias{Guy2010}}
 \newcommand{\celeven}{\citetalias{Chotard2011}}
 \newcommand{\rubin}{\citetalias{Rubin2015}}
+\newcommand{\sk}{\citetalias{Scolnic2016}}
+\newcommand{\angstrom}{\mbox{\normalfont\AA}}
 
 \graphicspath{ {./figures/} }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -238,7 +241,7 @@ It is now well known that host galaxy environment has a significant effect on su
 We also take flat priors on the parameterisation $\delta(0)$, $\delta(0)/\delta(\infty)$.
 
 \subsubsection{Systematics}
-
+\label{sec:systreat}
 The chief difficulty with including systematics in supernova analyses is that the generally occur during the observational pipeline, and have difficult to model effects on the output observations. As such, the normal treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{\partial \hat{m_B}}{\partial Z_i}$, $\frac{\partial \hat{x_1}}{\partial Z_i}$, $\frac{\partial \hat{c}}{\partial Z_i}$, where $Z_i$ represents the $i$\textsuperscript{th} systematic.
 
 Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed original values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. But scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
@@ -293,16 +296,16 @@ In order to verify our model we run it through several tests. First, we validate
 
 We generate simple toy data to validate the basic premise of the model. For both DES and LowZ data we draw from an underlying $M_B$, $x_1$, $c$ population and translate into apparent magnitude space using $\Omega_m = 0.3$, $\alpha= 0.14$ and $\beta = 3.1$. Masses are randomly drawn from the interval 0 to 1, and a mass correction with $\delta(0) = 0.08$ and $\delta(0)/\delta(\infty) =0.5$ included. Independent observational errors of $0.04$, $0.2$, $0.03$ on $m_B$, $x_1$ and $c$ (following the mean uncertainty for DES SNANA simulations) are added to create the observables. The results are then passed through the selection effects, where each supernova is only selected based on $P(S|m_B)$, using a skew normal function for the LowZ supernovae and error function for the DES-like supernovae. We draw from each survey simulation until we have 300 LowZ supernovae and 700 DES-like supernovae, representing a statistical sample of greater power than the estimated 250 supernovae for the DES spectroscopic analysis.
 
-The above represents one realisation of data. We test three models (Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM) with 300 realisations and find recovery of underlying cosmology without significant bias. Combined posterior surfaces of 22 realisations are shown in Figures \ref{fig:simple_om}, \ref{fig:simple_w}, \ref{fig:simple_ol}, with the statistical distribution of realisations for the Flat $\Lambda$CDM cosmology shown in Figure \ref{fig:simple_om_summary}. {\red Need a think about which plots to show or good way to merge them}
+The above represents one realisation of data. We test three models (Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM) with 300 realisations and find recovery of underlying cosmology without significant bias. Combined posterior surfaces of 22 realisations for Flat $wCDM$ fits are shown in Figure \ref{fig:simple_w}.
 
 
-\begin{figure}
-	\begin{center}
-		\includegraphics[width=\columnwidth]{approximate_simple_test_cosmo.pdf}
-	\end{center}
-	\caption{Posterior surfaces for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}
-	\label{fig:simple_om}
-\end{figure}
+%\begin{figure}
+%	\begin{center}
+%		\includegraphics[width=\columnwidth]{approximate_simple_test_cosmo.pdf}
+%	\end{center}
+%	\caption{Posterior surfaces for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}
+%	\label{fig:simple_om}
+%\end{figure}
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{approximate_simple_test_w_cosmo.pdf}
@@ -310,49 +313,118 @@ The above represents one realisation of data. We test three models (Flat $\Lambd
 	\caption{Posterior surfaces for 22 realisations of supernova data with the Flat $w$CDM model.}
 	\label{fig:simple_w}
 \end{figure}
-\begin{figure}
-	\begin{center}
-		\includegraphics[width=\columnwidth]{approximate_simple_test_ol_cosmo.pdf}
-	\end{center}
-	\caption{Posterior surfaces for 22 realisations of supernova data with the $\Lambda$CDM model.}
-	\label{fig:simple_ol}
-\end{figure}
-\begin{figure}
-	\begin{center}
-		\includegraphics[width=\columnwidth]{approximate_simple_test_summary.pdf}
-	\end{center}
-	\caption{Parameter summaries for 22 realisations of supernova data with the Flat $\Lambda$CDM model.}
-	\label{fig:simple_om_summary}
-\end{figure}
-
-
+%\begin{figure}
+%	\begin{center}
+%		\includegraphics[width=\columnwidth]{approximate_simple_test_ol_cosmo.pdf}
+%	\end{center}
+%	\caption{Posterior surfaces for 22 realisations of supernova data with the $\Lambda$CDM model.}
+%	\label{fig:simple_ol}
+%\end{figure}
 
 
 \subsection{DES SN data validation}
 \label{sec:simdes}
-{\green BUT THE BELOW IN THE TESTING AREA}
 
-Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of three different scatter models. The first is simplest model - coherent magnitude scatter, denoted `Smear' in the figures. The second model is the \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The third model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation.
 
-Simulations (using the SNANA package) follow the observational schedule and observing conditions for the DES and LowZ surveys. In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and now also include our full treatment of systematics. Additionally, we also simulate two different underlying population -- a Gaussian distribution in colour and stretch, and a highly skewed colour and stretch population using population values from \citet{Scolnic2016}. Both populations have been centered on 0, with the bifurcated Gaussian used for the skewed colour distribution having width $\sigma_c^+ = 0.101$, $\sigma_c^- = 0.043$ and the skewed stretch distribution having $\sigma_{x_1}^+ = 0.222$, $\sigma_{x_1}^- = 1.472$.
+Early analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population, but recent analyses require more a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of two different scatter models. The first model is the \citet[][hereafter denoted the {\gten} scatter model]{Guy2010}, which models intrinsic scatter with a 70\% contribution from coherent variation and 30\% from chromatic variation. The second model, denoted the {\celeven} model is sourced from \citet{Chotard2011} and has variation with 25\% contribution from coherent scatter and 75\% from chromatic variation. We also test a `Combined' smear model, which is simply to draw equal samples from the {\celeven} and {\gten} models. It is against this combined sample that we wish to rigorously validate our model.
 
-Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. Combined posterior surfaces for {\red 20} data realisations are shown in Figure \ref{fig:bulk_summary}. {\green Talk about the biases introduced}
+Simulations (using the SNANA package) follow the observational schedule and observing conditions for the DES and LowZ surveys. In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and now also include our full treatment of systematics. Additionally, we also simulate two different underlying population -- a Gaussian distribution in colour and stretch, and skewed colour and stretch populations using population values from \citet[][hereafter {\sk}]{Scolnic2016}.
 
-{\red UPDATE THIS WHEN THE SIMS FINISH AND I CAN RERUN WITH MORE REALISATIONS}
+\begin{table}
+	\centering
+	\caption{Tested population distributions, where the {\sk} LowZ distribution is formed as sum of two bifurcated Gaussians, with the mean and spread of each component given respectively.}
+	\label{tab:dist}
+	\begin{tabular}{l|llll}
+		\hline
+		Model & $\langle x_1 \rangle$ & $\sigma_{x_1}$ &  $\langle c \rangle$ & $\sigma_c$  \\
+		\hline
+		Gaussian LowZ &  $0.0$ & $1.0$ & $0.0$ & $0.1$ \\
+		Gaussian DES  &  $0.0$ & $1.0$ & $0.0$ & $0.1$  \\
+		{\sk} LowZ    &  $0.55$ \& $-1.5$ & $^{+0.45}_{-1.0}$ \& $^{+0.5}_{-0.5}$ & $-0.055$ & $^{+0.15}_{-0.023}$ \\
+		{\sk} DES     & $0.973$ & $^{+0.222}_{1.472}$ & $-0.054$  &  $^{+0.101}_{0.043}$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. Combined posterior surfaces for 150 data realisations are shown in Figure \ref{fig:bulk_summary}. Note that we have combined the posteriors for 150 realisations, and so we should expect the size of the uncertainty to be representative of one realisation, but the statistical spread of the final surface should be $\sqrt{150} \approx 12$ times less than a single realisation. Plot summaries for the fits are shown in Figure \ref{fig:bulk_summary}, and the parameter bounds are listed in Table \ref{tab:bulk_summary}. The results indicate changes in the underlying population can effect significant changes in the recovered standardisation parameters $\alpha$ and $\beta$, however do not appear to have a significant effect on recovered cosmology. Whilst the combined sample (on which the selection function was fit) shows no significant bias (as expected), the {\celeven} and {\gten} only models show opposite biases in $\Omega_m$. Cosmological bias is detected with $\approx 3.0\sigma$ significance for the {\celeven} model and $\approx 1.7\sigma$ significance for the {\gten} model, indicating that the population and selection effect treatment cannot capture all necessary information to encapsulate the magnitude and chromatic smearing of the supernovae population. However, for the sample size of the DES and LowZ supernova samples (of order 600 supernova), these effects are sub-dominant to the statistical uncertainty, representing at most a deviation of $<0.25\sigma$ and, accounting for statistical fluctuations up to $2\sigma$, a minimum bias of $0.08\sigma$ for the {\celeven} model.
+
+\begin{table}
+	\centering
+	\caption{Parameter summaries shown for 150 realisations of supernovae data, each comprising of 300 LowZ supernovae and 250 DES-like supernovae. Maximum likelihood statistics, with errors quoted to $1\sigma$ (68\% confidence) are reported.}
+	\label{tab:bulk_summary}
+	\begin{tabular}{ccccc}
+		\hline
+		Model & $\Omega_m$ & $\alpha$ & $\beta$  \\ 
+		\hline
+		C11 Gaussian & $0.316^{+0.062}_{-0.064}$ & $0.143^{+0.028}_{-0.027}$ & $2.97^{+0.20}_{-0.19}$  \\ 
+		C11 {\sk} & $0.316^{+0.063}_{-0.062}$ & $0.155\pm 0.024$ & $2.77^{+0.26}_{-0.27}$  \\ 
+		Combined Gaussian & $0.299^{+0.067}_{-0.060}$ & $0.144^{+0.030}_{-0.028}$ & $3.11^{+0.21}_{-0.22}$  \\ 
+		Combined {\sk} & $0.297^{+0.075}_{-0.064}$ & $0.150^{+0.026}_{-0.025}$ & $3.00^{+0.29}_{-0.31}$  \\ 
+		G10 Gaussian & $0.290^{+0.070}_{-0.060}$ & $0.145\pm 0.030$ & $3.27\pm 0.23$ \\ 
+		G10 {\sk} & $0.290^{+0.079}_{-0.073}$ & $0.147^{+0.026}_{-0.028}$ & $3.26^{+0.34}_{-0.33}$ \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+
 
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{approximate_bulk_load_summary.pdf}
 	\end{center}
-	\caption{Parameter summaries for 20 realisations of supernova data with the Flat $\Lambda$CDM model. {\red Discuss any biases}}
+	\caption{Graphical parameter summaries for 150 realisations of supernova data, following Table \ref{tab:bulk_summary}.}
 	\label{fig:bulk_summary}
+\end{figure}
+
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_bulk_load.pdf}
+	\end{center}
+	\caption{Posterior surfaces for 150 realisations of supernova data. Neither population nor scatter model has a significant effect on posterior surface location or shape. Population skewness has the primary effect of changing the degeneracy direction for the $\alpha$ -- $\beta$ contour, whilst the scatter models and skewness have noticeable effects on the value and uncertainty of the recovered parameter $\beta$.}
+	\label{fig:bulk_posterior}
 \end{figure}
 
 
 
-{\red More discussion here when I get more results}
 
 
+\section{Systematics Strength Test}
+\label{sec:sys}
+
+\subsection{Singular Permutations}
+
+To test the impact of various systematics, we generate an array of simulations in which we simulate a dataset with one of the systematic variables permuted. We inspect the effects of systematic shifts using two cosmological models - Flat $\Lambda$CDM and Flat $w$CDM. To make the effects of the systematics more easily seen, we increase our simulated sample size to 500 LowZ and 500 DES-like supernovae, and enforce a prior on $\Omega_m \sim \mathcal{N}(0.3, 0.01)$ on the Flat $w$CDM model. In these test we wish to inspect the shift in statistical uncertainty with simulated systematic effects, and so compare first to a series of simulations with no simulated systematic changes, and also disable our treatment of systematics as described in Section \ref{sec:systreat} for these tests. Our tests are broken down into groups, where systematics of different nature are treated separately. In each simulation, only one systemic is permuted. For a baseleine, our first set has no systematic shift, and so the uncertainty in the parameter summaries is given by statistical uncertainty only. We then test several variations:
+\begin{enumerate}
+	\item 0.02 Gaussian error on the zero point offsets in a randomly selected band.
+	\item $20 \angstrom $ Gaussian error on the filter wavelength.
+	\item 10\% Gaussian error in the bias corrected flux measurement (with correct flux uncertainty).
+	\item 10\% Gaussian error in the bias corrected flux measurement, but with incorrect flux error.
+	\item 20\% Gaussian error on the Milky Way E(B-V) dust correction scale.
+	\item 0.2 Gaussian error on the value of $R_V$ for calculating the extinction curve.
+\end{enumerate}
+
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_systematic_load_summary.pdf}
+	\end{center}
+	\caption{Investigating the impact of $\Omega_m$ by systematic permutations under Flat $\Lambda$CDM cosmology, validated using 200 realisations of data, with each dataset containing 500 LowZ supernovae and 500 DES-like supernovae.}
+	\label{fig:sys_om}
+\end{figure}
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{approximate_systematic_load_w_summary.pdf}
+	\end{center}
+	\caption{Investigating the impact of $w$ by systematic permutations under $w$CDM cosmology with the prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, validated using 200 realisations of data, with each dataset containing 500 LowZ supernovae and 500 DES-like supernovae.}
+	\label{fig:sys_w}
+\end{figure}
+
+We find that the most significant systematic are the zero points, as the 0.02 Gaussian error given to them resulted in significant changes to the shape of the marginalised posterior surface for both $\Omega_m$ and $w$, shifting them both to lower values and increasing uncertainty.
+
+{\red What are the actual size of the uncertainties of the systematics? Ie are zps really that badly known? Once I know, I can talk about if any of these are significant.}
+
+\subsection{Full Permutations}
+
+{\red When I have the final sims from Rick I can flesh this out}
 
 
 \section{Forecasts}
@@ -361,11 +433,6 @@ Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-l
 {\red Put in multisim forecasts with systamtics both on and off}
 
 
-
-\section{Systematics Strength Test}
-\label{sec:sys}
-
-systematics test
 
 
 \section{Conclusions}
