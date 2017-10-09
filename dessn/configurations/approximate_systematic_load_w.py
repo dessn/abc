@@ -24,8 +24,8 @@ if __name__ == "__main__":
              "10\\% Gauss error in biasCor flux errors", "idem, but with incorrect reported fluxErr",
              "MWEBV scale from 20\\% Gauss error", "MW RV shift from 0.2 Gauss error"]
     names = ["Stat only", "ZP offset", r"Filter $\lambda$ shift",
-             "biasCor flux errors", "idem + fluxErr",
-             "MW EBV scale error", "MW RV shift error"]
+             "Bias corrected flux error", "idem + uncertainty error",
+             "MW $E(B-V)$ scale error", "MW $R_V$ shift"]
     dir_names = [os.path.dirname(os.path.abspath(__file__)) + "/plots/%s/output/" % f for f in filenames]
 
     c = ChainConsumer()
@@ -50,5 +50,5 @@ if __name__ == "__main__":
     # c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=params)
     print("Plotting summary")
     c.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], parameters=["$w$"],
-                           extents={"$w$": [-1.5, -0.5]}, truth="Stat only", extra_parameter_spacing=1.0)
+                           extents={"$w$": [-1.5, -0.5]}, truth="Stat only", extra_parameter_spacing=1.5)
 
