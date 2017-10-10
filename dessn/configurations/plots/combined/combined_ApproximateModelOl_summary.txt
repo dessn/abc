@@ -1,0 +1,13 @@
+\begin{table}
+    \centering
+    \caption{}
+    \label{tab:model_params}
+    \begin{tabular}{ccc}
+        \hline
+		Model & $\Omega_m$ & $\Omega_\Lambda$ \\ 
+		\hline
+		Systematics & $\left( 57.4^{+581.7}_{-4.5} \right) \times 10^{-3}$ & $0.70^{+0.35}_{-0.18}$ \\ 
+		Statistics & $0.05^{+0.54}_{-0.00}$ & $0.66^{+0.34}_{-0.16}$ \\ 
+		\hline
+    \end{tabular}
+\end{table}

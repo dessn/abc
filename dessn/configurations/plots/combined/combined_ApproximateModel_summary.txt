@@ -1,0 +1,13 @@
+\begin{table}
+    \centering
+    \caption{}
+    \label{tab:model_params}
+    \begin{tabular}{cccc}
+        \hline
+		Model & $\Omega_m$ & $\alpha$ & $\beta$ \\ 
+		\hline
+		Systematics & $0.301^{+0.075}_{-0.062}$ & $0.151^{+0.025}_{-0.026}$ & $3.00^{+0.29}_{-0.30}$ \\ 
+		Statistics & $0.314^{+0.064}_{-0.060}$ & $0.152^{+0.025}_{-0.023}$ & $2.98\pm 0.30$ \\ 
+		\hline
+    \end{tabular}
+\end{table}

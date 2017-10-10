@@ -1,0 +1,13 @@
+\begin{table}
+    \centering
+    \caption{}
+    \label{tab:model_params}
+    \begin{tabular}{ccc}
+        \hline
+		Model & $\Omega_m$ & $w$ \\ 
+		\hline
+		Systematics & $0.419^{+0.088}_{-0.210}$ & $-0.78^{+0.16}_{-0.66}$ \\ 
+		Statistics & $0.405^{+0.084}_{-0.237}$ & $-0.76^{+0.18}_{-0.52}$ \\ 
+		\hline
+    \end{tabular}
+\end{table}

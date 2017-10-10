@@ -43,7 +43,7 @@ if __name__ == "__main__":
         results = fitter.load()
 
         classes = list(set([r[0].__class__.__name__ for r in results]))
-        for cls in classes:
+        for cls in ["ApproximateModelW"]: # classes:
             pfn = pfn1 + "_" + cls
             c = ChainConsumer()
             parameters = [r"$\Omega_m$"]
@@ -65,7 +65,9 @@ if __name__ == "__main__":
             print("Latex table for %s" % cls)
             c.configure(linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
             print(c.analysis.get_latex_table(transpose=True))
-            c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2)
+            with open(pfn + "_summary.txt", 'w') as f:
+                f.write(c.analysis.get_latex_table(parameters=parameters))
+            fig = c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2)
             print("Plotting distributions")
             # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
 
