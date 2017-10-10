@@ -43,7 +43,7 @@ if __name__ == "__main__":
         results = fitter.load()
 
         classes = list(set([r[0].__class__.__name__ for r in results]))
-        for cls in ["ApproximateModelW"]: # classes:
+        for cls in classes:
             pfn = pfn1 + "_" + cls
             c = ChainConsumer()
             parameters = [r"$\Omega_m$"]
