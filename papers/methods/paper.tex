@@ -346,7 +346,7 @@ Simulations (using the SNANA package) follow the observational schedule and obse
 	\end{tabular}
 \end{table}
 
-Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. Combined posterior surfaces for 150 data realisations are shown in Figure \ref{fig:bulk_summary}. Note that we have combined the posteriors for 150 realisations, and so we should expect the size of the uncertainty to be representative of one realisation, but the statistical spread of the final surface should be $\sqrt{150} \approx 12$ times less than a single realisation. Plot summaries for the fits are shown in Figure \ref{fig:bulk_summary}, and the parameter bounds are listed in Table \ref{tab:bulk_summary}. The results indicate changes in the underlying population can effect significant changes in the recovered standardisation parameters $\alpha$ and $\beta$, however do not appear to have a significant effect on recovered cosmology. Whilst the combined sample (on which the selection function was fit) shows no significant bias (as expected), the {\celeven} and {\gten} only models show opposite biases in $\Omega_m$. Cosmological bias is detected with $\approx 3.0\sigma$ significance for the {\celeven} model and $\approx 1.7\sigma$ significance for the {\gten} model, indicating that the population and selection effect treatment cannot capture all necessary information to encapsulate the magnitude and chromatic smearing of the supernovae population. However, for the sample size of the DES and LowZ supernova samples (of order 600 supernova), these effects are sub-dominant to the statistical uncertainty, representing at most a deviation of $<0.25\sigma$ and, accounting for statistical fluctuations up to $2\sigma$, a minimum bias of $0.08\sigma$ for the {\celeven} model.
+Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. Combined posterior surfaces for 150 data realisations are shown in Figure \ref{fig:bulk_summary}. Note that we have combined the posteriors for 150 realisations, and so we should expect the size of the uncertainty to be representative of one realisation, but the statistical spread of the final surface should be $\sqrt{150} \approx 12$ times less than a single realisation. Plot summaries for the fits are shown in Figure \ref{fig:bulk_summary}, and the parameter bounds are listed in Table \ref{tab:bulk_summary}. The results indicate changes in the underlying population can effect significant changes in the recovered standardisation parameters $\alpha$ and $\beta$, however do not appear to have a significant effect on recovered cosmology. Whilst the combined sample (on which the selection function was fit) shows no significant bias (as expected), the {\celeven} and {\gten} only models show opposite biases in $\Omega_m$. Cosmological bias is detected with $\approx 3.0\sigma$ significance for the {\celeven} model and $\approx 1.7\sigma$ significance for the {\gten} model, indicating that the population and selection effect treatment cannot capture all necessary information to encapsulate the magnitude and chromatic smearing of the supernovae population. However, for the sample size of the DES and LowZ supernova samples (of order 600 supernova), these effects are sub-dominant to the statistical uncertainty, representing at most a deviation of $0.25\sigma$ and, accounting for statistical fluctuations up to $2\sigma$, a minimum bias of $0.08\sigma$ for the {\celeven} model.
 
 \begin{table}
 	\centering
@@ -427,12 +427,29 @@ We find that the most significant systematic are the zero points, as the 0.02 Ga
 {\red When I have the final sims from Rick I can flesh this out}
 
 
-\section{Forecasts}
+\section{DES Forecasts}
 \label{sec:forecasts}
 
-{\red Put in multisim forecasts with systamtics both on and off}
+To forecast the results for the 3 year DES spectroscopic supernovae sample, we generate 100 realisations of datasets, each comprising 300 low redshift supernovae and 250 DES-like supernovae. We fit these through the three cosmological models - Flat $\Lambda$CDM, $\Lambda$CDM and $w$CDM, however focus mostly on the $w$CDM model as it is the primary scientific concern of the Dark Energy Survey. We run all three cosmological models with systematics enabled and disabled to explicitly show the uncertainty included from systematic contribution.
 
+{\red How to include flat lambdacdm - the plot is boring, just quote the results, or just quote uncertainty, should I round the uncertainty to make it symmetric? Cant do that for wCDM or LambdaCDM because theyre definitely not gaussian}
 
+{\red Talk about how these arent even competitive with JLA and we really need to combine data. Talk about how the photometric supernova dataset should be way better? Talk about statistics limited.}
+
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{combined_ApproximateModelW.pdf}
+	\end{center}
+	\caption{w.}
+	\label{fig:combined_w}
+\end{figure}
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=\columnwidth]{combined_ApproximateModelOl.pdf}
+	\end{center}
+	\caption{ole.}
+	\label{fig:combined_ol}
+\end{figure}
 
 
 \section{Conclusions}
