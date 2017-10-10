@@ -59,12 +59,13 @@ if __name__ == "__main__":
                 if m.__class__.__name__ != cls:
                     continue
                 actual_truth = truth  # So sorry about this scope violation
-                name = "Statistics" if m.systematics_scale < 0.1 else "With Systematics"
+                name = "Statistics" if m.systematics_scale < 0.1 else "Systematics"
                 c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
             print("Latex table for %s" % cls)
+            c.configure(linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
             print(c.analysis.get_latex_table(transpose=True))
-            c.plotter.plot(filename=pfn + ".png", truth=actual_truth, parameters=parameters)
+            c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2)
             print("Plotting distributions")
             # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
 
