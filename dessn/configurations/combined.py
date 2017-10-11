@@ -60,23 +60,24 @@ if __name__ == "__main__":
                 parameters.append("$w$")
 
                 # So, whatever results I found arent the same as normally used
-                # p_chain, p_params, p_weight, p_like = get_planck()
-                # c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
-                # c.configure(linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False)
-
+                p_chain, p_params, p_weight, p_like = get_planck()
+                c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
+                c.configure(linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False)
+                extents = {r"$\Omega_m$": [0.1, 0.6], "$w$": [-2, -0.5]}
             else:
                 if cls.endswith("Ol"):
                     parameters.append(r"$\Omega_\Lambda$")
                 else:
                     parameters.append(r"$\alpha$")
                     parameters.append(r"$\beta$")
+                c.configure(linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
+                extents = None
 
-            c.configure(linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
             print("Latex table for %s" % cls)
             print(c.analysis.get_latex_table(transpose=True))
             with open(pfn + "_summary.txt", 'w') as f:
                 f.write(c.analysis.get_latex_table(parameters=parameters))
-            fig = c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2)
+            fig = c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2, extents=extents)
             print("Plotting distributions")
             # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
 
