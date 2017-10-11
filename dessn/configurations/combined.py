@@ -42,6 +42,7 @@ if __name__ == "__main__":
     else:
         from chainconsumer import ChainConsumer
         results = fitter.load()
+        print("Data loaded")
 
         classes = list(set([r[0].__class__.__name__ for r in results]))
         for cls in ["ApproximateModelW"]:  # classes:

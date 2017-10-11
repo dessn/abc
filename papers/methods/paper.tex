@@ -249,7 +249,7 @@ Assuming that the gradients can be linearly extrapolated -- which is a reasonabl
 This method of adjusting the observed summary statistics is used throughout the traditional and BHM analyses, however it is normally constrained to band systematics. That is, each band for each survey has two systematics associated with it - the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, 10 SALT2 model systematic uncertainties, three dust systematics (scale, dust model, and transfer law) and also the systematic peculiar velocity uncertainty. This gives fourteen global systematics shared by all surveys, plus two systematics per band in each survey.
 
 \subsubsection{Selection Effects}
-
+\label{sec:selection}
 Our treatment of selection effects is to incorporate selection efficiency into our model, rather than relying on simulation-driven data corrections. As such, we need to describe the probability that the events we observe are both drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are subsequently successfully observed.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
 \begin{align}
 \mathcal{L} &= P({\rm data} | \theta, S). \label{eq:like}
@@ -273,9 +273,9 @@ What then remains is determining the functional form of $P(S|m_B)$. For the trea
 
 With the well sampled approximation as specified previously, we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (DES) and skew normal selection (LowZ) functions respectively, this correction becomes
 \begin{align}
-w_{\rm DES} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm DES}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm DES}^2}}  \right) \\
+w_{\rm DES} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm DES}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm DES}^2}}  \right) \label{eq:seldes}\\
 w_{\rm LowZ} &= 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm LowZ}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm LowZ}^2}}\right) \times \notag\\
-&\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm LowZ})(m_B^* - \mu_{\rm LowZ})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}{\sigma^2_{\rm LowZ}} \sqrt{\frac{\sigma^2_{\rm LowZ}}{\alpha^2_{\rm LowZ}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm LowZ}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}} }\right),
+&\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm LowZ})(m_B^* - \mu_{\rm LowZ})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}{\sigma^2_{\rm LowZ}} \sqrt{\frac{\sigma^2_{\rm LowZ}}{\alpha^2_{\rm LowZ}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm LowZ}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm LowZ}}} }\right), \label{eq:sellowz}
 \end{align}
 where $\Phi$ represents the normal CDF function, and $\Phi^c$ the complimentary CDF.
 
@@ -479,7 +479,53 @@ Plots of posterior surfaces and parameter summaries were created with \verb|Chai
 \section{Selection Effect Derivation}
 \label{app:selection}
 
+\subsection{General Selection Effects}
 
+When formulating and fitting a model using a constraining dataset, we wish to resolve the posterior surface defined by
+\begin{align}
+P(\theta | {\rm data}) \propto P({\rm data} | \theta) P(\theta),
+\end{align}
+which gives the probability of the model parameter values ($\theta$) given the data.  Prior knowledge of the allowed values of the model parameters is encapsulated in the prior probability $P(\theta)$. Of primary interest to us is the likelihood of observing the data given our parametrised model, $\mathcal{L} \equiv P({\rm data} | \theta)$. When dealing with experiments which have imperfect selection efficiency, our likelihood must take that efficiency into account.  We need to describe the probability that the events we observe are both drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are subsequently successfully observed.  To make this extra conditional explicit, we write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as:
+\begin{align}
+\mathcal{L} &= P({\rm data} | \theta, S). \label{eq:app_like}
+\end{align}
+A variety of selection criteria are possible, and in our method we use our data in combination with the proposed model to determine the probability of particular selection criteria.  That is, we characterise a function $P(S|{\rm data},\theta)$, which colloquially can be stated as \textit{the probability of a potential observation passing selection cuts, given our observations and the underlying model}. We can introduce this expression in a few lines due to symmetry of joint probabilities and utilising that $P(x,y,z) = P(x|y,z)P(y,z) = P(y|x, z)P(x, z)$:
+\begin{align}
+P({\rm data} | S , \theta) P(S, \theta) &= P(S | {\rm data}, \theta) P({\rm data}, \theta)\\
+P({\rm data} | S , \theta) &= \frac{ P(S | {\rm data}, \theta) P({\rm data}, \theta) }{ P(S, \theta) }\\
+&= \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta) P(\theta)}{ P(S | \theta)  P(\theta)}\\
+&= \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) }
+\end{align}
+which is equal to the likelihood $\mathcal{L}$. Introducing an integral over all possible events $D$, so we can evaluate $P(S|\theta)$, 
+\begin{align}
+\mathcal{L}&= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
+\mathcal{L} &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:app_main}
+\end{align}
+where we define the denominator as $w$ for simplicity in future derivations.
+
+\subsection{Supernova Selection Effects}
+
+We assume that our selection effects can be reasonably well encapsulated by independent functions of (actual) apparent magnitude and redshift, such that $P(S|{\rm data}, \theta) = P(S|z) P(S|m_B)$. Our denominator then becomes
+\begin{align}
+w &= \idotsint \, d\hat{z} \, d\hat{m_B} \, dz \, dm_B P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m_B}|m_B) P(z, m_B | \theta),
+\end{align}
+where for simplicity we have not written out all the integrals which do not interact with the selection effects explicitly. Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m_B} | m_B)$ is a Gaussian due to our Gaussian model of summary statistics $m_B$, $x_1$, $c$, and can be analytically integrated out, collapsing the integral over $\hat{m_B}$. Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
+\begin{align}
+w = \int \left[ \int P(S|m_B) P(m_B | z, \theta)\, dm_B \right] P(S|z)P(z|\theta)\, dz.
+\end{align}
+By assuming that the distribution $P(S|z)P(z|\theta)$ is well sampled by the observed supernovae redshifts, we can approximate the integral over redshift by evaluating
+\begin{align}
+\int P(S|m_B) P(m_B | z, \theta)\, dm_B
+\end{align}
+for each supernova in the dataset -- i.e. Monte Carlo integration with assumed perfect importance sampling.
+
+As stated in Section \ref{sec:selection}, the underlying population in apparent magnitude, when we discard skewness, can be represented as $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
+\begin{align}
+m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \langle c(z) \rangle \\
+\sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2 \notag\\ 
+&\quad\quad + 2(\beta \sigma_{M_B,c} - \alpha \sigma{m_B,x_1} - \alpha \beta \sigma_{x_1,c}).
+\end{align}
+Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral and reach equations \eqref{eq:seldes} and \eqref{eq:sellowz}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
