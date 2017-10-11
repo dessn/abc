@@ -13,9 +13,9 @@ def get_planck(restricted=True):
     chain = results[:, 2:]
     param_file = dir_name + "/planck.paramnames"
     with open(param_file) as f:
-        params = [l.split("\t")[1][:-1] for l in f]
+        params = ["$%s$" % l.split("\t")[1][:-1] for l in f]
     if restricted:
-        wanted_params = [r"\Omega_m", "w"]
+        wanted_params = [r"$\Omega_m$", "$w$"]
         chain = chain[:, [params.index(p) for p in wanted_params]]
         params = wanted_params
     return chain, params, weights, likelihood
@@ -23,8 +23,8 @@ def get_planck(restricted=True):
 if __name__ == "__main__":
     chain, params, weights, likelihood = get_planck()
 
-    om = chain[:, params.index(r"\Omega_m")]
-    w = chain[:, params.index(r"w")]
+    om = chain[:, params.index(r"$\Omega_m$")]
+    w = chain[:, params.index(r"$w$")]
 
     import matplotlib.pyplot as plt
     plt.hist2d(om, w, bins=100, weights=weights)

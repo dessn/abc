@@ -5,6 +5,7 @@ from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel, ApproximateModelOl
 from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
 from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
+from dessn.planck.planck import get_planck
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -43,17 +44,10 @@ if __name__ == "__main__":
         results = fitter.load()
 
         classes = list(set([r[0].__class__.__name__ for r in results]))
-        for cls in classes:
+        for cls in ["ApproximateModelW"]:  # classes:
             pfn = pfn1 + "_" + cls
             c = ChainConsumer()
             parameters = [r"$\Omega_m$"]
-            if cls.endswith("W"):
-                parameters.append("$w$")
-            elif cls.endswith("Ol"):
-                parameters.append(r"$\Omega_\Lambda$")
-            else:
-                parameters.append(r"$\alpha$")
-                parameters.append(r"$\beta$")
             for m, s, chain, truth, weight, old_weight, posterior in results:
                 print(m.__class__.__name__)
                 if m.__class__.__name__ != cls:
@@ -62,8 +56,23 @@ if __name__ == "__main__":
                 name = "Statistics" if m.systematics_scale < 0.1 else "Systematics"
                 c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
-            print("Latex table for %s" % cls)
+            if cls.endswith("W"):
+                parameters.append("$w$")
+
+                # So, whatever results I found arent the same as normally used
+                # p_chain, p_params, p_weight, p_like = get_planck()
+                # c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
+                # c.configure(linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False)
+
+            else:
+                if cls.endswith("Ol"):
+                    parameters.append(r"$\Omega_\Lambda$")
+                else:
+                    parameters.append(r"$\alpha$")
+                    parameters.append(r"$\beta$")
+
             c.configure(linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
+            print("Latex table for %s" % cls)
             print(c.analysis.get_latex_table(transpose=True))
             with open(pfn + "_summary.txt", 'w') as f:
                 f.write(c.analysis.get_latex_table(parameters=parameters))
