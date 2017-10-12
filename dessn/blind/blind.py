@@ -2,6 +2,8 @@ import numpy as np
 
 
 def get_indexes():
+    """ Decided to use indices not at the start, so if someone sees the array of 
+    ratios, its not obvious which ratios will be used. """
     return 10, 20, 30
 
 
