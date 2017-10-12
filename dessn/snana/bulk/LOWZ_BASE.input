@@ -31,7 +31,7 @@ GENSIGMA_SEARCH_PEAKMJD:  1.0       # sigma-smearing for  SEARCH_PEAKMJD
 
 GENRANGE_REDSHIFT:  0.009    0.099
 GENSIGMA_REDSHIFT:  0.000001
-GENSIGMA_VPEC:      150  # peculiar velocity, km/sec
+GENSIGMA_VPEC:      220  # peculiar velocity, km/sec
 
 DNDZ: POWERLAW  2.6E-5  2.2
 
