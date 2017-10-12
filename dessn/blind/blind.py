@@ -23,19 +23,19 @@ def get_blinding_ratios():
 def blind_om(oms):
     """ Returns a blinded array of oms """
     ratios = get_blinding_ratios()
-    return oms * ratios[10]
+    return np.array(oms) * ratios[10]
 
 
 def blind_w(ws):
     """ Returns a blinded array of w """
     ratios = get_blinding_ratios()
-    return ws * ratios[20]
+    return np.array(ws) * ratios[20]
 
 
 def blind_ol(ols):
     """ Returns a blinded array of ols """
     ratios = get_blinding_ratios()
-    return ols * ratios[30]
+    return np.array(ols) * ratios[30]
 
 if __name__ == "__main__":
     get_blinding_ratios()
