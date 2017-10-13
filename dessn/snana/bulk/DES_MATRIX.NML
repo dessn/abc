@@ -74,12 +74,12 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      ABORT_ON_NOEPOCHS = F
      ABORT_ON_TRESTCUT = F  
 
-     cutwin_Nepoch         =  4
-     cutwin_redshift       =  0.0, 1.8
+     CUTWIN_NEPOCH         =  5 -5.
+     cutwin_redshift       =  0.05, 0.9
      cutwin_redshift_err   =  0.0, 0.01
 
      cutwin_Trest     = -20.0,   60.0
-     cutwin_Trestmin  = -99.0,   -2.0
+     cutwin_Trestmin  = -18.0,   -2.0
      cutwin_Trestmax  =  10.0,  200.0
  
      CUTWIN_SNRMAX       =  5.0, 1.0E8
@@ -103,7 +103,6 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 
      FITWIN_SHAPE     =	-3.00, +3.00
      FITWIN_COLOR     = -0.30, +0.30
-     FITWIN_PROB      =  0.05,  1.01
      FITWIN_TREST     = -15.0, 45.0
      FITWIN_PROB      = -0.01,  1.01
   &END
