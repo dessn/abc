@@ -54,7 +54,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 
 
      TEXTFILE_PREFIX  = 'SHINTON_DES_IDEAL'
-     KCOR_FILE        = 'DES/kcor_DES_grizY.fits'
+     KCOR_FILE        = '$DES_ROOT/kcor/SpecIa_3yr/DES_Y3A2_noOOB.fits'
      USE_MINOS        = F
      NFIT_ITERATION   = 3
 

@@ -20,7 +20,7 @@ GENMODEL:    SALT2.JLA-B14_LAMOPEN
 
 
 GENFILTERS:  griz
-KCOR_FILE:   $DES_ROOT/kcor/20170711_Y3A2/DES_Y3A2_noOOB.fits
+KCOR_FILE:   $DES_ROOT/kcor/SpecIa_3yr/DES_Y3A2_noOOB.fits
 
 # selection criteria for generation
 GENRANGE_PEAKMJD: 56450.0  57450    # Y1+Y2+Y3
