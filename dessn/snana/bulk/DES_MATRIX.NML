@@ -83,10 +83,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      cutwin_Trestmax  =  10.0,  200.0
  
      CUTWIN_SNRMAX       =  5.0, 1.0E8
-     CUTWIN_NFILT_SNRMAX =  1.0, 99.
-
-     CUTWIN_SNRMAX2       = 5.0, 1.0E8
-     CUTWIN_NFILT_SNRMAX2 = 3.0, 99.
+     CUTWIN_NFILT_SNRMAX =  2.0, 99.
 
      cutwin_Nband_thresh = 1
 
