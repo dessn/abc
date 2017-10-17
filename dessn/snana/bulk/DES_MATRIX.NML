@@ -46,7 +46,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 # - - - - - - - - - - - - - - - - - - - - - -
 
   &SNLCINP
-     VERSION_PHOTOMETRY = 'RKDES_SPEC_DATA'
+     VERSION_PHOTOMETRY = 'DESALL_specType_SMP_real_snana_text'
 
      PHOTFLAG_MSKREJ    = 1016, 0
      PRIVATE_DATA_PATH  = '$DES_ROOT/lcmerge'     
