@@ -1,7 +1,7 @@
 
 
 SIMLIB_FILE:  $DES_ROOT/simlibs/DES_SMP.SIMLIB
-SIMLIB_NREPEAT:  5  # generate 10 events per LIBID (for speed)
+SIMLIB_NREPEAT:  20  # generate 10 events per LIBID (for speed)
 
 # ----------------- host info ---------------
 HOSTLIB_FILE:    $DES_ROOT/simlibs/DES_SVA1GOLD_DEEP_TRAIN.HOSTLIB
@@ -45,7 +45,7 @@ NEWMJD_DIF: 0.4
 
 APPLY_CUTWIN_OPT: 1
 CUTWIN_NEPOCH:   5 -5.              # require 5 epochs (no S/N requirement)
-CUTWIN_SNRMAX:   5 griz 2 -20. 80.  # 3 filters with SNRAMX>3
+CUTWIN_SNRMAX:   5 griz 2 -20. 80.  # 2 filters with SNRAMX>5
 
 # cosmological params for lightcurve generation and redshift distribution
 OMEGA_MATTER:  0.3

@@ -1,4 +1,4 @@
-BATCH_INFO:  sbatch  ../SBATCH_sandyb_kicp.TEMPLATE  96
+BATCH_INFO:  sbatch  ../SBATCH_sandyb_kicp.TEMPLATE  48
 
 
 SIMLIB_FILE:     $DES_ROOT/simlibs/PS1_LOWZ_COMBINED.SIMLIB

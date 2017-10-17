@@ -1,4 +1,4 @@
-BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 96
+BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 48
 OUTDIR:  SHINTON_DES_MATRIX
 VERSION:  SHINTON_DES_MATRIX_*
 
@@ -74,7 +74,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      ABORT_ON_NOEPOCHS = F
      ABORT_ON_TRESTCUT = F  
 
-     CUTWIN_NEPOCH         =  5 -5.
+     CUTWIN_NEPOCH         =  5
      cutwin_redshift       =  0.05, 0.9
      cutwin_redshift_err   =  0.0, 0.01
 
