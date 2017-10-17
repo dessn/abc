@@ -67,7 +67,7 @@ DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
 
 GENPEAK_SALT2c:    0 # For initial values see http://iopscience.iop.org/article/10.3847/2041-8205/822/2/L35/pdf
 GENSIGMA_SALT2c:    0.1  0.1     # bifurcated sigmas
-GENRANGE_SALT2c:   -0.300  0.300     # color range
+GENRANGE_SALT2c:   -0.400  0.400     # color range
 
 GENPEAK_SALT2x1:     0
 GENSIGMA_SALT2x1:    1.0   1.0     # bifurcated sigmas
