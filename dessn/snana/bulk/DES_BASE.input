@@ -30,7 +30,7 @@ GENRANGE_TREST:  -40  100
 GENRANGE_REDSHIFT:  0.05  0.90
 GENSIGMA_REDSHIFT:  0.001
 
-OPT_MWEBV: 2
+OPT_MWEBV: 3
 
 RANSEED: 71       # random number seed
 
@@ -62,16 +62,13 @@ DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
 
 
 # --------------------------
-# define SALT2 params from Scolnic et al 2016,
-# using G10 High-z row
-
-GENPEAK_SALT2c:    0 # For initial values see http://iopscience.iop.org/article/10.3847/2041-8205/822/2/L35/pdf
-GENSIGMA_SALT2c:    0.1  0.1     # bifurcated sigmas
-GENRANGE_SALT2c:   -0.300  0.300     # color range
-
+# POPULATION PARAMETERS OVERWRITTEN IN DES_MATRIX.input
+GENPEAK_SALT2c:    0
+GENSIGMA_SALT2c:    0.1  0.1
+GENRANGE_SALT2c:   -0.400  0.400
 GENPEAK_SALT2x1:     0
-GENSIGMA_SALT2x1:    1.0   1.0     # bifurcated sigmas
-GENRANGE_SALT2x1:   -5.0     5.0       # x1 (stretch) range
+GENSIGMA_SALT2x1:    1.0   1.0
+GENRANGE_SALT2x1:   -5.0     5.0
 
 
 # For alpha, beta, generate delta function for 1D biasCor.

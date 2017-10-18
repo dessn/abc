@@ -22,7 +22,7 @@ FITOPT: [SALT2.sys9] FITMODEL_NAME  '$PS1_ROOT/models/SALT2/SALT2.sys9'
 
 # Galactic Extinction
 FITOPT: [MWEBV_SCALE]      MWEBV_SCALE 1.1
-FITOPT: [SF2011-MWEBV]     OPT_MWEBV   3
+FITOPT: [SF2011-MWEBV]     OPT_MWEBV   2
 FITOPT: [Fitz99ColorLaw]   OPT_MWCOLORLAW 99
 
 # - - - - - - - - - - - - - - - - - - - - - -
@@ -119,7 +119,7 @@ FITOPT: [CFAO_lam10_FK_CALIB] FILTLIST_LAMSHIFT FK
 
      cutwin_Nband_thresh = 1
 
-     OPT_MWEBV    = 2
+     OPT_MWEBV    = 3
 
      FUDGE_MAG_ERROR = 'u 0.01 v 0.01 w 0.01 x 0.01 y 0.01 z 0.01 A 0.01'
 
