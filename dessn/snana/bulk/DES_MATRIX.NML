@@ -1,6 +1,7 @@
 BATCH_INFO:  sbatch  ../SBATCH_sandyb.TEMPLATE 48
 OUTDIR:  SHINTON_DES_MATRIX
 VERSION:  SHINTON_DES_MATRIX_*
+VERSION: DESALL_specType_SMP_real_snana_text
 
 
 # - - - - - - - - - - - - - - - - - - - - - -
