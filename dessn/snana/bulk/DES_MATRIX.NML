@@ -28,6 +28,9 @@ FITOPT: [MWEBV_SCALE]      MWEBV_SCALE 1.1
 FITOPT: [SF2011-MWEBV]     OPT_MWEBV   2
 FITOPT: [Fitz99ColorLaw]   OPT_MWCOLORLAW 99
 
+# Redshift bias
+FITOPT:  [REDSHIFT_BIAS] GENBIAS_REDSHIFT 0.0001
+
 # - - - - - - - - - - - - - - - - - - - - - -
 
 
