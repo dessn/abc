@@ -29,7 +29,7 @@ FITOPT: [SF2011-MWEBV]     OPT_MWEBV   2
 FITOPT: [Fitz99ColorLaw]   OPT_MWCOLORLAW 99
 
 # Redshift bias
-FITOPT:  [REDSHIFT_BIAS] GENBIAS_REDSHIFT 1.0E-4
+FITOPT:  [REDSHIFT_BIAS] REDSHIFT_FINAL_SHIFT  1.0E-4
 
 # - - - - - - - - - - - - - - - - - - - - - -
 
@@ -52,7 +52,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
   &SNLCINP
      VERSION_PHOTOMETRY = 'DESALL_specType_SMP_real_snana_text'
 
-     PHOTFLAG_MSKREJ    = 1016, 0
+     PHOTFLAG_MSKREJ    = 0, 0
      PRIVATE_DATA_PATH  = '$DES_ROOT/lcmerge'     
      SNTABLE_LIST       = 'SNANA FITRES'
 

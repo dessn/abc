@@ -58,6 +58,8 @@ GENMEAN_SALT2BETA:    3.1
 
 SEARCHEFF_SPEC_FILE:  $PS1_ROOT/LOWZ/SEARCHEFF_LOWZ.DAT
 
+SIMGEN_DUMPALL: 3 CID S2mb MAGSMEAR_COH
+
 # -------------------------------
 APPLY_SEARCHEFF_OPT:  3  # use efficiency file above
 APPLY_CUTWIN_OPT:     0  # no cuts with simlib_nrepeat key

@@ -1,7 +1,7 @@
 
 
 SIMLIB_FILE:  $DES_ROOT/simlibs/DES_SMP.SIMLIB
-SIMLIB_NREPEAT:  20  # generate 10 events per LIBID (for speed)
+SIMLIB_NREPEAT:  5  # generate 10 events per LIBID (for speed)
 
 # ----------------- host info ---------------
 HOSTLIB_FILE:    $DES_ROOT/simlibs/DES_SVA1GOLD_DEEP_TRAIN.HOSTLIB
@@ -40,6 +40,8 @@ SMEARFLAG_ZEROPT:  1  # smear zero-point with zptsig
 
 APPLY_SEARCHEFF_OPT:  3
 SEARCHEFF_SPEC_FILE:  $DES_ROOT/models/searcheff/SEARCHEFF_SPEC_DES_Moller_Oct17.TXT
+SEARCHEFF_PIPELINE_FILE: $SNDATA_ROOT/models/searcheff/SEARCHEFF_PIPELINE_DES.DAT
+SEARCHEFF_PIPELINE_LOGIC_FILE: $SNDATA_ROOT/models/searcheff/SEARCHEFF_PIPELINE_LOGIC.DAT
 
 NEWMJD_DIF: 0.4
 
@@ -59,6 +61,8 @@ FORMAT_MASK:  32  # 2=terse  8=BLIND  16=CIDRAN; 32=FITS
 
 DNDZ:  POWERLAW2  2.6E-5   1.5  0.0 1.0  # R0(1+z)^Beta Zmin-Zmax
 DNDZ:  POWERLAW2  7.35E-5  0.0  1.0 2.0
+
+SIMGEN_DUMPALL: 3 CID S2mb MAGSMEAR_COH
 
 
 # --------------------------
