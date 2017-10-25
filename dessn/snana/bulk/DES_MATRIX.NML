@@ -83,7 +83,7 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      cutwin_redshift_err   =  0.0, 0.01
 
      cutwin_Trest     = -20.0,   60.0
-     cutwin_Trestmin  = -18.0,   -2.0
+     cutwin_Trestmin  = -20.0,   -2.0
      cutwin_Trestmax  =  10.0,  200.0
  
      CUTWIN_SNRMAX       =  5.0, 1.0E8
