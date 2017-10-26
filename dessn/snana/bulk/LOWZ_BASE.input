@@ -2,7 +2,7 @@ BATCH_INFO:  sbatch  ../SBATCH_sandyb_kicp.TEMPLATE  48
 
 
 SIMLIB_FILE:     $DES_ROOT/simlibs/DES_LOWZ_COMBINED.SIMLIB
-SIMLIB_NREPEAT:  50  # ==> slightly faster
+SIMLIB_NREPEAT:  10  # ==> slightly faster
 
 SOLID_ANGLE:  6.0    # roughly half the sky
 
@@ -19,8 +19,6 @@ NGENTOT_LC:  200000
 GENVERSION: SHINTON_LOWZ_BASE
 GENSOURCE:  RANDOM
 GENMODEL:   SALT2.JLA-B14
-#GENMAG_SMEAR_MODELNAME:  G10
-GENMAG_SMEAR: 0.1
 
 KCOR_FILE:  $DES_ROOT/kcor/LOWZ/kcor_DES_LOWZ_COMBINED.fits
 
@@ -42,6 +40,7 @@ OPT_MWEBV:      3
 SMEARFLAG_FLUX:    1   # photo-stat smearing of signal, sky, etc ...
 SMEARFLAG_ZEROPT:  1   # smear zero-point with zptsig
 
+ZVARIATION_FILE: $DES_ROOT/simlibs/SIMGEN_LOWZ_ZVARIATION.PAR
 
 # ---------------------------
 GENPEAK_SALT2x1:     0
