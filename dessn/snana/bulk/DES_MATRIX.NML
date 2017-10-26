@@ -62,6 +62,8 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      USE_MINOS        = F
      NFIT_ITERATION   = 3
 
+     FUDGE_HOSTNOISE_FILE = '$SNDATA_ROOT/simlib/DES_Y1reproc2_SBNOISEMODEL.DAT'
+
      H0_REF   = 70.0
      OLAM_REF =  0.70
      OMAT_REF =  0.30
@@ -105,6 +107,5 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
      FITWIN_COLOR     = -0.30, +0.30
      FITWIN_PROB      =  0.01,  1.01
      FITWIN_TREST     = -15.0, 45.0
-     FITWIN_PROB      = -0.01,  1.01
   &END
 
