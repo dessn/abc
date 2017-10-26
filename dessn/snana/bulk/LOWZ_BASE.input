@@ -23,7 +23,7 @@ GENMODEL:   SALT2.JLA-B14
 KCOR_FILE:  $DES_ROOT/kcor/LOWZ/kcor_DES_LOWZ_COMBINED.fits
 
 # selection criteria for generation
-GENFILTERS:   abcdefghijklmnopqrstuvwxyzABCDEFGHIJK
+GENFILTERS:   abcdefghijklmnopqrstuvwxyzA
 GENRANGE_PEAKMJD:  53200.0  54800.0
 GENSIGMA_SEARCH_PEAKMJD:  1.0       # sigma-smearing for  SEARCH_PEAKMJD
 
@@ -36,6 +36,7 @@ DNDZ: POWERLAW  2.6E-5  2.2
 GENRANGE_TREST:   -20.0  60.0     # rest epoch relative to peak (days)
 
 OPT_MWEBV:      3
+OPT_MWCOLORLAW: 99
 
 SMEARFLAG_FLUX:    1   # photo-stat smearing of signal, sky, etc ...
 SMEARFLAG_ZEROPT:  1   # smear zero-point with zptsig
