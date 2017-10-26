@@ -114,6 +114,7 @@ FITOPT: [CFAO_lam10_FK_CALIB] FILTLIST_LAMSHIFT FK
      cutwin_Nepoch    =  2
      cutwin_redshift  =  0.001,   0.12
      cutwin_Trest     = -100.0,  300.0
+     cutwin_Trestmin  = -20.0,   10.0
 
      CUTWIN_SNRMAX       =  5.0, 1.0E8
      CUTWIN_NFILT_SNRMAX =  1.0, 99.
