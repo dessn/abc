@@ -4,7 +4,7 @@
 #SBATCH --account=pi-rkessler
 #SBATCH --job-name=REPLACE_NAME
 #SBATCH --output=REPLACE_LOGFILE
-#SBATCH --time=72:00:00
+#SBATCH --time=30:00:00
 #SBATCH --nodes=1
 #SBATCH --mem-per-cpu=REPLACE_MEM
 #SxxxxBATCH --exclusive

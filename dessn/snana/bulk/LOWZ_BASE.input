@@ -1,7 +1,7 @@
 BATCH_INFO:  sbatch  ../SBATCH_sandyb_kicp.TEMPLATE  48
 
 
-SIMLIB_FILE:     $DES_ROOT/simlibs/PS1_LOWZ_COMBINED.SIMLIB
+SIMLIB_FILE:     $DES_ROOT/simlibs/DES_LOWZ_COMBINED.SIMLIB
 SIMLIB_NREPEAT:  50  # ==> slightly faster
 
 SOLID_ANGLE:  6.0    # roughly half the sky
@@ -22,7 +22,7 @@ GENMODEL:   SALT2.JLA-B14
 #GENMAG_SMEAR_MODELNAME:  G10
 GENMAG_SMEAR: 0.1
 
-KCOR_FILE:  $DES_ROOT/kcor/LOWZ/kcor_PS1_LOWZ_COMBINED.fits
+KCOR_FILE:  $DES_ROOT/kcor/LOWZ/kcor_DES_LOWZ_COMBINED.fits
 
 # selection criteria for generation
 GENFILTERS:   abcdefghijklmnopqrstuvwxyzABCDEFGHIJK
