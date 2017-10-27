@@ -105,7 +105,8 @@ FITOPT: [DES_lam10_z_CALIB] FILTLIST_LAMSHIFT z
 
      FITWIN_SHAPE     =	-3.00, +3.00
      FITWIN_COLOR     = -0.30, +0.30
-     FITWIN_PROB      =  0.0001,  1.01
+     FITWIN_PROB      =  0.01,  1.01
      FITWIN_TREST     = -15.0, 45.0
+     DELCHI2_REJECT   = 10
   &END
 
