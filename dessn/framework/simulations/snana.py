@@ -122,13 +122,12 @@ class SNANASimulation(Simulation):
         supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "all" in f]
         supernovae = np.vstack(tuple(supernovae_files))
         res = {
-            "redshifts": supernovae[:, 0],
-            "sim_apparents": supernovae[:, 1],
-            "passed": supernovae[:, 2].astype(bool)
+            "sim_apparents": supernovae[:, 0],
+            "passed": supernovae[:, 1].astype(bool)
         }
         if supernovae.shape[1] > 3:
-            res["sim_colors"] = supernovae[:, 3]
-            res["sim_stretches"] = supernovae[:, 4]
+            res["sim_colors"] = supernovae[:, 2]
+            res["sim_stretches"] = supernovae[:, 3]
         return res
 
     def get_passed_supernova(self, n_sne, simulation=True, cosmology_index=0):
@@ -151,7 +150,7 @@ class SNANASimulationGauss0p3(SNANASimulation):
 
 class SNANASimulationIdeal0p3(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1, manual_selection=manual_selection)
+        super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
 
 
 class SNANASimulationIdealNoBias0p3(SNANASimulation):

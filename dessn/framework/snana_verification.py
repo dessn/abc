@@ -16,7 +16,7 @@ def verify_simulation(simulation, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365
     bin_count = 100
     name = simulation.__class__.__name__
     print(data_all.keys())
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
     axes = axes.flatten()
 
     cor = simulation.get_approximate_correction()
@@ -41,23 +41,23 @@ def verify_simulation(simulation, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365
     ax.set_ylabel("log10 N")
     ax.legend()
 
-    ax = axes[2]
-    mask = data_all["passed"]
-    all_mb, bins = np.histogram(data_all["redshifts"], bins=bin_count)
-    passed_mb, _ = np.histogram(data_all["redshifts"][mask], bins=bins)
-    ratio = passed_mb / (all_mb + 1)
-    bc = 0.5 * (bins[:-1] + bins[1:])
-    ax.plot(bc, ratio, label="Ratio passed")
-    ax.set_xlabel("z")
-    ax.set_ylabel("P")
-    ax.legend()
+    # ax = axes[2]
+    # mask = data_all["passed"]
+    # all_mb, bins = np.histogram(data_all["redshifts"], bins=bin_count)
+    # passed_mb, _ = np.histogram(data_all["redshifts"][mask], bins=bins)
+    # ratio = passed_mb / (all_mb + 1)
+    # bc = 0.5 * (bins[:-1] + bins[1:])
+    # ax.plot(bc, ratio, label="Ratio passed")
+    # ax.set_xlabel("z")
+    # ax.set_ylabel("P")
+    # ax.legend()
 
-    ax = axes[3]
-    ax.plot(bc, np.log10(all_mb), label="All z")
-    ax.plot(bc, np.log10(passed_mb), label="Passed z")
-    ax.set_xlabel("z")
-    ax.set_ylabel("log10 N")
-    ax.legend()
+    # ax = axes[3]
+    # ax.plot(bc, np.log10(all_mb), label="All z")
+    # ax.plot(bc, np.log10(passed_mb), label="Passed z")
+    # ax.set_xlabel("z")
+    # ax.set_ylabel("log10 N")
+    # ax.legend()
 
     fig.tight_layout()
     fig.savefig(name + ".png")
@@ -95,7 +95,7 @@ def verify_simulation2(data, alpha=0.14, beta=3.1, om=0.3, H=70, MB=-19.365, use
 
 
 if __name__ == "__main__":
-    # verify_simulation(SNANASimulationIdeal0p3(-1), alpha=0, beta=0)
+    verify_simulation(SNANASimulationIdeal0p3(-1), alpha=0, beta=0)
     # verify_simulation(SNANASimulationIdealNoBias0p3(-1), alpha=0, beta=0)
     # verify_simulation(SNANASimulationGauss0p3(-1), alpha=0.14, beta=3.1)
-    verify_simulation(SNANASimulationLowzGauss0p3(-1), alpha=0.14, beta=3.1)
+    # verify_simulation(SNANASimulationLowzGauss0p3(-1), alpha=0.14, beta=3.1)

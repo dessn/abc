@@ -107,30 +107,14 @@ def convert(base_folder, nml_file, include_c_x1=False):
         folder = os.path.abspath(dump_dir + "/" + folder)
 
         inner_files = list(os.listdir(folder))
-        dump_file = [i for i in inner_files if i.endswith(".DUMP")][0]
+        dump_file = [i for i in inner_files if i.endswith(".DUMP") or i.endswith(".DUMP2")][0]
         dump_file = folder + "/" + dump_file
 
         print("Reading %s" % dump_file)
-        names = ["CID", "Z", "S2mb", "S2x0", "S2x1", "S2c", "MAGSMEAR_COH", "MU"]
+        names = ["SN", "CID", "S2mb", "MAGSMEAR_COH"]
         dataframe = pd.read_csv(dump_file, sep='\s+', skiprows=0, comment="V", error_bad_lines=False, names=names)
         supernovae = dataframe.to_records()
 
-        supernovae = drop_fields(supernovae, "S2x0")
-        supernovae = drop_fields(supernovae, "S2alpha")
-        supernovae = drop_fields(supernovae, "S2beta")
-        supernovae = drop_fields(supernovae, "VARNAMES:")
-        supernovae = drop_fields(supernovae, "index")
-
-        mmbs = supernovae["Z"]
-        unique, counts = np.unique(mmbs, return_counts=True)
-        print(mmbs[0])
-        print(mmbs.shape)
-        print(unique.shape)
-        print(counts.max())
-        print(np.median(counts))
-        print(counts[:100])
-
-        supernovae_passed = np.zeros(supernovae["Z"].shape)
         supernovae_cids = supernovae["CID"]
         print("Dump has fields ", supernovae.dtype)
 
@@ -204,37 +188,43 @@ def convert(base_folder, nml_file, include_c_x1=False):
             # Get log probabilitiy
             index = np.where(cid == supernovae_cids)
             # print("indexes ", supernovae_cids)
+
+            if len(index) == 0 or len(index[0]) == 0:
+                print(cid)
+                continue
+
             index = index[0][-1]
             mag_smear = supernovae["MAGSMEAR_COH"][index]
             simmb = supernovae["S2mb"][index]
-            simx1 = supernovae["S2x1"][index]
-            simc = supernovae["S2c"][index]
-
-            existing_prob = norm.logpdf(mag_smear, 0, 0.1) + norm.logpdf(simx1, 0, 1) + norm.logpdf(simc, 0, 0.1)
-
+            # simx1 = supernovae["S2x1"][index]
+            # simc = supernovae["S2c"][index]
+            # existing_prob = norm.logpdf(mag_smear, 0, 0.1) + norm.logpdf(simx1, 0, 1) + norm.logpdf(simc, 0, 0.1)
+            simx1 = 0
+            simc = 0
+            existing_prob = 1.0
             final_result = [cid, z, existing_prob, simmb + mag_smear, simx1, simc, mb, x1, c] \
                            + cov.flatten().tolist() + offsets.flatten().tolist()
             final_results.append(final_result)
             passed_indexes.append(index)
 
-        supernovae_passed = np.zeros(supernovae["Z"].size, dtype=bool)
+        supernovae_passed = np.zeros(supernovae["S2mb"].size, dtype=bool)
         supernovae_passed[passed_indexes] = True
         print("%d supernova passed out of %d" % (supernovae_passed.sum(), supernovae_passed.size))
 
         fitted_data = np.array(final_results).astype(np.float32)
         print("Truncation from %d dump -> %d dump passed -> %d fitres -> %d calibration (%d failed calib)" %
-              (supernovae["Z"].shape[0], np.unique(supernovae["CID"]).size, base_fits.shape[0], fitted_data.shape[0], num_bad_calib))
+              (supernovae["S2mb"].shape[0], np.unique(supernovae["CID"]).size, base_fits.shape[0], fitted_data.shape[0], num_bad_calib))
         print("Calib fails per filter", num_bad_calib_index)
         supernovae_apparents = supernovae["S2mb"] + supernovae["MAGSMEAR_COH"]
         mask_nan = ~np.isnan(supernovae_apparents)
         print("%d nans in apparents" % (~mask_nan).sum())
 
         if include_c_x1:
-            all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan], supernovae_passed[mask_nan],
+            all_mbs = np.vstack((supernovae_apparents[mask_nan], supernovae_passed[mask_nan],
                                  supernovae["S2c"][mask_nan], supernovae["S2x1"][mask_nan])).T
 
         else:
-            all_mbs = np.vstack((supernovae["Z"][mask_nan], supernovae_apparents[mask_nan], supernovae_passed[mask_nan])).T
+            all_mbs = np.vstack((supernovae_apparents[mask_nan], supernovae_passed[mask_nan])).T
 
         if not os.path.exists(output_dir_passed):
             os.makedirs(output_dir_passed)
@@ -244,7 +234,5 @@ def convert(base_folder, nml_file, include_c_x1=False):
             pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
-    convert("lowz_gauss0p3", "lowz/LOWZ_BASE.NML")
-    convert("gauss0p3", "des/DES_BASE.NML")
-    convert("ideal0p3", "des/DES_IDEAL.NML")
-    convert("ideal_nobias_0p3", "des/DES_IDEAL_NO_BIAS.NML")
+    # convert("ideal0p3", "bulk/DES_MATRIX.NML")
+    convert("lowz_gauss0p3_withpecv", "bulk/LOWZ_MATRIX.NML")

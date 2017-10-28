@@ -5,6 +5,7 @@ from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel, ApproximateModelOl
 from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
 from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
+from dessn.general.degeneracy import Transformer
 from dessn.planck.planck import get_planck
 
 if __name__ == "__main__":

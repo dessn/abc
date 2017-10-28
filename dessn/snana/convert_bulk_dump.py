@@ -188,10 +188,10 @@ def convert(base_folder, nml_file):
         pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
-    # convert("SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
-    # convert("SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
-    # convert("SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
-    # convert("SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
+    convert("SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
+    convert("SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
+    convert("SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
+    convert("SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
     convert("SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1",    "bulk/DES_MATRIX.NML")
     convert("SHINTON_DES_MATRIX_C11_SYMC_SYMX1",      "bulk/DES_MATRIX.NML")
     convert("SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1",    "bulk/DES_MATRIX.NML")

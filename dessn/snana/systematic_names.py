@@ -16,6 +16,8 @@ def get_systematic_mapping():
         "MWEBV_SCALE": r"{\rm MWE}_{B-V}",
         "SF2011-MWEBV": r"{\rm MWE Model}",
         "Fitz99ColorLaw": r"{\rm MWE ColorLaw}",
+        "OD94ColorLaw": r"{\rm MWE ColorLaw}",
+        "REDSHIFT_BIAS": r"{\rm \delta z }",
         "DES_ZP_g_CALIB": r"\Delta g",
         "DES_ZP_r_CALIB": r"\Delta r",
         "DES_ZP_i_CALIB": r"\Delta i",
