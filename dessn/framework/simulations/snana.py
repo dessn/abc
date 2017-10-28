@@ -153,6 +153,11 @@ class SNANASimulationIdeal0p3(SNANASimulation):
         super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
 
 
+class SNANASimulationIdealLowZ0p3(SNANASimulation):
+    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
+        super().__init__(num_supernova, "lowz_gauss0p3_withpecv", num_nodes=num_nodes, use_sim=use_sim, num_calib=50, manual_selection=manual_selection)
+
+
 class SNANASimulationIdealNoBias0p3(SNANASimulation):
     def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
         super().__init__(num_supernova, "ideal_nobias_0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1, manual_selection=manual_selection)

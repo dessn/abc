@@ -235,4 +235,5 @@ def convert(base_folder, nml_file, include_c_x1=False):
 
 if __name__ == "__main__":
     # convert("ideal0p3", "bulk/DES_MATRIX.NML")
-    convert("lowz_gauss0p3_withpecv", "bulk/LOWZ_MATRIX.NML")
+    convert("lowz_gauss0p3", "bulk/LOWZ_MATRIX.NML")
+    # convert("lowz_gauss0p3_withpecv", "bulk/LOWZ_MATRIX.NML")
