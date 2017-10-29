@@ -13,7 +13,7 @@ from dessn.utility.get_cosmologies import get_cosmology_dictionary
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0):
+    def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=13, systematics_scale=1.0):
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename

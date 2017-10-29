@@ -17,8 +17,8 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModel()
-    simulation = [SNANABulkSimulation(300, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=58),
-                  SNANABulkSimulation(250, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=des_sel(), num_calib=22)]
+    simulation = [SNANABulkSimulation(177, sim="SHINTON_LOWZ_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=50),
+                  SNANABulkSimulation(222, sim="SHINTON_DES_MATRIX_SMEAR_SYMC_SYMX1", manual_selection=des_sel(), num_calib=21)]
 
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
