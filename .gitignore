@@ -20,6 +20,5 @@
 htmlcov/**
 *.pyc
 **/__pycache__/*
-*.pkl
 *.ppm
 **/.eggs
