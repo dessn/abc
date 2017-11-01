@@ -5,7 +5,6 @@ from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel, ApproximateModelOl
 from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
 from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
-from dessn.general.degeneracy import Transformer
 from dessn.planck.planck import get_planck
 
 if __name__ == "__main__":
@@ -62,10 +61,10 @@ if __name__ == "__main__":
                 parameters.append("$w$")
 
                 # So, whatever results I found arent the same as normally used
-                p_chain, p_params, p_weight, p_like = get_planck()
-                c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
-                c.configure(linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False)
-                extents = {r"$\Omega_m$": [0.1, 0.6], "$w$": [-2, -0.5]}
+                # p_chain, p_params, p_weight, p_like = get_planck()
+                # c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
+                # c.configure(linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False)
+                # extents = {r"$\Omega_m$": [0.1, 0.6], "$w$": [-2, -0.5]}
             else:
                 if cls.endswith("Ol"):
                     parameters.append(r"$\Omega_\Lambda$")
