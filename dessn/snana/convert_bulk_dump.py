@@ -11,6 +11,7 @@ import pickle
 import inspect
 import re
 import fnmatch
+import hashlib
 
 from numpy.lib.recfunctions import drop_fields
 
@@ -135,9 +136,9 @@ def convert(base_folder, nml_file):
         x1e = row["x1ERR"]
         ce = row["cERR"]
 
-        sim_mb = row["SIM_mB"]
-        sim_x1 = row["SIM_x1"]
-        sim_c = row["SIM_c"]
+        sim_mb = row["SIM_mB"] if "SIM_mB" in row else 0
+        sim_x1 = row["SIM_x1"] if "SIM_x1" in row else 0
+        sim_c = row["SIM_c"] if "SIM_c" in row else 0
 
         cov_x1_c = row["COV_x1_c"]
         cov_x0_c = row["COV_c_x0"]
@@ -175,6 +176,9 @@ def convert(base_folder, nml_file):
 
         existing_prob = 1
 
+        if isinstance(cid, str):
+            cid = int(hashlib.sha256(cid.encode('utf-8')).hexdigest(), 16) % 10**8
+
         final_result = [cid, z, existing_prob, sim_mb, sim_x1, sim_c, mb, x1, c] \
                        + cov.flatten().tolist() + offsets.flatten().tolist()
         final_results.append(final_result)
@@ -188,6 +192,8 @@ def convert(base_folder, nml_file):
         pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
+    convert("PS1_LOWZ_COMBINED_FITS",   "bulk/LOWZ_MATRIX.NML")
+    convert("DESALL_specType_SMP_real_snana_text",   "bulk/DES_MATRIX.NML")
     convert("SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
     convert("SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
     convert("SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
