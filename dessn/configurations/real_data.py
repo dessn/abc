@@ -1,9 +1,11 @@
 import os
 import logging
 import socket
+
+from dessn.blind.blind import blind_om, blind_w
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModel
-from dessn.framework.simulations.snana_bulk import SNANACombinedBulk
+from dessn.framework.models.approx_model import ApproximateModelW
+from dessn.framework.simulations.snana_bulk import SNANABulkSimulation
 from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
 
 
@@ -19,12 +21,12 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModel()
+    model = ApproximateModelW()
     # Turn off mass and skewness for easy test
-    simulation = [SNANACombinedBulk(152, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
-                                    "CombinedLowZ", manual_selection=lowz_sel(), num_calib=50),
-                  SNANACombinedBulk(208, ["SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1"],
-                                    "CombinedDES", manual_selection=des_sel(), num_calib=21)]
+    simulation = [SNANABulkSimulation(152, sim="PS1_LOWZ_COMBINED_FITS", manual_selection=lowz_sel(), num_calib=50),
+                  SNANABulkSimulation(208, sim="DESALL_specType_SMP_real_snana_text", manual_selection=des_sel(), num_calib=21)]
+
+    d = model.get_data(simulation, cosmology_index=0)
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
@@ -39,6 +41,9 @@ if __name__ == "__main__":
     else:
         from chainconsumer import ChainConsumer
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
+        chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
+        chain["$w$"] = blind_w(chain["$w$"])
+
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         c.configure(spacing=1.0)

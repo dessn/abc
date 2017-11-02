@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(177, sim="SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=50),
-                  SNANABulkSimulation(222, sim="SHINTON_DES_MATRIX_G10_SYMC_SYMX1", manual_selection=des_sel(), num_calib=21)]
+    simulation = [SNANABulkSimulation(152, sim="SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=50),
+                  SNANABulkSimulation(208, sim="SHINTON_DES_MATRIX_G10_SYMC_SYMX1", manual_selection=des_sel(), num_calib=21)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)

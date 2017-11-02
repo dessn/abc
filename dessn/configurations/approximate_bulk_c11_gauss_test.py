@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(177, sim="SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=50),
-                  SNANABulkSimulation(222, sim="SHINTON_DES_MATRIX_C11_SYMC_SYMX1", manual_selection=des_sel(), num_calib=21)]
+    simulation = [SNANABulkSimulation(152, sim="SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1", manual_selection=lowz_sel(), num_calib=50),
+                  SNANABulkSimulation(208, sim="SHINTON_DES_MATRIX_C11_SYMC_SYMX1", manual_selection=des_sel(), num_calib=21)]
 
     d = model.get_data(simulation, 0)
     print("Shape is", d["deta_dcalib"].shape)

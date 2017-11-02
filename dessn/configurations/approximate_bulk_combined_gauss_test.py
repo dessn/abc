@@ -21,9 +21,9 @@ if __name__ == "__main__":
 
     model = ApproximateModel()
     # Turn off mass and skewness for easy test
-    simulation = [SNANACombinedBulk(177, ["SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", "SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1"],
+    simulation = [SNANACombinedBulk(152, ["SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1", "SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1"],
                                     "CombinedLowZ", manual_selection=lowz_sel(), num_calib=50),
-                  SNANACombinedBulk(222, ["SHINTON_DES_MATRIX_G10_SYMC_SYMX1", "SHINTON_DES_MATRIX_C11_SYMC_SYMX1"],
+                  SNANACombinedBulk(208, ["SHINTON_DES_MATRIX_G10_SYMC_SYMX1", "SHINTON_DES_MATRIX_C11_SYMC_SYMX1"],
                                     "CombinedDES", manual_selection=des_sel(), num_calib=21)]
 
     fitter = Fitter(dir_name)
