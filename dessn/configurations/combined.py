@@ -78,7 +78,7 @@ if __name__ == "__main__":
             print(c.analysis.get_latex_table(transpose=True))
             with open(pfn + "_summary.txt", 'w') as f:
                 f.write(c.analysis.get_latex_table(parameters=parameters))
-            fig = c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2, extents=extents)
+            fig = c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], truth=actual_truth, parameters=parameters, figsize=2.2, extents=extents, watermark="Forecast")
             print("Plotting distributions")
             # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
 
