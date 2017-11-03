@@ -26,8 +26,6 @@ if __name__ == "__main__":
     simulation = [SNANABulkSimulation(152, sim="PS1_LOWZ_COMBINED_FITS", manual_selection=lowz_sel(), num_calib=50),
                   SNANABulkSimulation(208, sim="DESALL_specType_SMP_real_snana_text", manual_selection=des_sel(), num_calib=21)]
 
-    d = model.get_data(simulation, cosmology_index=0)
-
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(simulation)
@@ -46,11 +44,11 @@ if __name__ == "__main__":
 
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(spacing=1.0)
+        c.configure(spacing=1.0, diagonal_tick_labels=False)
 
-        parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
+        parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
         print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters)
+        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, watermark="Blinded", figsize=2.0)
         print("Plotting distributions")
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
