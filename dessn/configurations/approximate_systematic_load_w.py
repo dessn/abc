@@ -16,7 +16,7 @@ if __name__ == "__main__":
         os.makedirs(plot_dir)
 
     model = ApproximateModelW(global_calibration=0)
-    simulation = [SNANASysSimulation(500, sys_index=0, sim="lowz", manual_selection=lowz_sel()),
+    simulation = [SNANASysSimulation(300, sys_index=0, sim="lowz", manual_selection=lowz_sel()),
                   SNANASysSimulation(500, sys_index=0, sim="des", manual_selection=des_sel())]
 
     filenames = ["approximate_systematic_%d_test_w" % i for i in range(7)]
