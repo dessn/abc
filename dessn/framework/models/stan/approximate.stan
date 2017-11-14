@@ -59,7 +59,7 @@ transformed data {
         obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
     }
     for (i in 1:n_surveys) {
-        mb_cov_chol[i] = cholesky_decompose(mB_cov[i]);
+        mb_cov_chol[i] = cholesky_decompose(systematics_scale * mB_cov[i]);
     }
 }
 

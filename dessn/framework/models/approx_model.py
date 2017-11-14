@@ -28,7 +28,7 @@ class ApproximateModel(Model):
                 #"outlier_MB_delta", "outlier_dispersion"
                 "delta_alpha", "delta_beta",
                 "mean_x1", "mean_c",
-                "calibration", "intrinsic_correlation"]
+                "calibration", "deltas", "intrinsic_correlation"]
 
     def get_labels(self):
         mapping = OrderedDict([
@@ -51,7 +51,8 @@ class ApproximateModel(Model):
             ("sigma_c", r"$\sigma_{c}^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
-            ("calibration", r"$\delta \mathcal{Z}_{%d}$")
+            ("calibration", r"$\delta \mathcal{Z}_{%d}$"),
+            ("deltas", r"$\Delta_{%d}$")
         ])
         return mapping
 
@@ -80,7 +81,7 @@ class ApproximateModel(Model):
             "log_sigma_x1": uniform(-3, 1, size=(num_surveys,)),
             "log_sigma_c": uniform(-3, 0, size=(num_surveys,)),
             "deviations": normal(scale=0.2, size=(num_supernova, 3)),
-            "deltas": normal(scale=0.001, size=(num_surveys, 4)),
+            "deltas": normal(scale=0.0001, size=(num_surveys, 4)),
             "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }
         chol = [[[1.0, 0.0, 0.0],
