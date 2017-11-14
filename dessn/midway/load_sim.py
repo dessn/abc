@@ -191,7 +191,7 @@ def convert(base_folder, nml_file, dump_file=None):
         mb = supernovae["S2mb"] + supernovae["MAGSMEAR_COH"]
         efficiency = np.vstack((mb, passed)).T
         print(efficiency.shape)
-        np.save(output_dir_passed + "/all.npy", efficiency)
+        np.save(output_dir_passed + "/all.npy", efficiency.astype(np.float32))
 
     with open(output_dir_passed + "/sys_names.pkl", 'wb') as f:
         pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
