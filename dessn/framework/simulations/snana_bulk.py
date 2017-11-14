@@ -70,7 +70,7 @@ class SNANABulkSimulation(Simulation):
             np.random.shuffle(supernovae)
 
         supernovae = supernovae[:n_sne, :]
-
+        cids = supernovae[:, 0]
         redshifts = supernovae[:, 1]
         apparents = supernovae[:, 6]
         stretches = supernovae[:, 7]
@@ -96,6 +96,7 @@ class SNANABulkSimulation(Simulation):
         deta_dcalibs = np.array(deta_dcalibs)
         obs_mBx1c = np.array(obs_mBx1c)
         result = {
+            "cids": cids,
             "n_sne": n_sne,
             "obs_mBx1c": obs_mBx1c,
             "obs_mBx1c_cov": covs,

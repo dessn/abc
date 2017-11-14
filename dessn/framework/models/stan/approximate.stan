@@ -32,11 +32,12 @@ data {
     vector[num_nodes] node_weights [n_sne]; // Each supernova's node weight
 
     // Approximate correction in mB
-    real mB_mean [n_surveys];
-    real mB_width [n_surveys];
-    real mB_alpha [n_surveys];
+    real mB_mean_orig [n_surveys];
+    real mB_width_orig [n_surveys];
+    real mB_alpha_orig [n_surveys];
     real mB_sgn_alpha [n_surveys];
-    real mB_norms [n_surveys];
+    real mB_norm_orig [n_surveys];
+    matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
 
     // Calibration std
@@ -49,8 +50,7 @@ data {
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
-    real mB_width2 [n_surveys];
-    real mB_alpha2 [n_surveys];
+    matrix[4, 4] mb_cov_chol [n_surveys];
     matrix[3, 3] outlier_population;
 
     outlier_population = outlier_dispersion * outlier_dispersion';
@@ -59,8 +59,7 @@ transformed data {
         obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
     }
     for (i in 1:n_surveys) {
-        mB_width2[i] = mB_width[i]^2;
-        mB_alpha2[i] = mB_alpha[i]^2;
+        mb_cov_chol[i] = cholesky_decompose(mB_cov[i]);
     }
 }
 
@@ -81,6 +80,7 @@ parameters {
 
     ///////////////// Latent Parameters
     vector[3] deviations [n_sne];
+    vector[4] deltas [n_surveys];
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -20.5, upper = -18.5> mean_MB;
@@ -127,6 +127,13 @@ transformed parameters {
     vector [3] sigmas [n_surveys];
 
     // Variables to calculate the bias correction
+    real mB_mean [n_surveys];
+    real mB_width [n_surveys];
+    real mB_alpha [n_surveys];
+    real mB_norm [n_surveys];
+    real mB_width2 [n_surveys];
+    real mB_alpha2 [n_surveys];
+    row_vector[4] zeros;
     real cor_mB_mean [n_sne];
     real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
@@ -166,8 +173,17 @@ transformed parameters {
 
     // Calculate intrinsic dispersion and selection effects for each survey
     cor_mb_width2_out = outlier_population[1,1]^2 + (alpha * outlier_population[2,2])^2 + (beta * outlier_population[3,3])^2;
+    zeros = rep_row_vector(0, 4);
 
     for (i in 1:n_surveys) {
+        mB_mean[i] = mB_mean_orig[i] + deltas[i][1];
+        mB_width[i] = mB_width_orig[i] + deltas[i][2];
+        mB_alpha[i] = mB_alpha_orig[i] + deltas[i][3];
+        mB_norm[i] = log(mB_norm_orig[i] + deltas[i][4]);
+        mB_alpha2[i] = mB_alpha[i]^2;
+        mB_width2[i] = mB_width[i]^2;
+
+
         // Move from log space back to real space
         sigma_MB[i] = exp(log_sigma_MB[i]);
         sigma_x1[i] = exp(log_sigma_x1[i]);
@@ -264,6 +280,7 @@ transformed parameters {
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(alpha_c[i]  | 0, 1)
             + normal_lpdf(alpha_x1[i] | 0, 1)
+            + multi_normal_cholesky_lpdf(deltas[i] | zeros, mb_cov_chol[i])
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)

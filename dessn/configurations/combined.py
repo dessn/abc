@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 # So, whatever results I found arent the same as normally used
                 p_chain, p_params, p_weight, p_like = get_planck()
                 c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
-                c.configure(linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False, kde=[False, False, 1.0])
+                c.configure(plot_hists=False, sigma2d=False, linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False, kde=[False, False, 1.0])
                 extents = {r"$\Omega_m$": [0.1, 0.6], "$w$": [-2, -0.5]}
             else:
                 if cls.endswith("Ol"):
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 else:
                     parameters.append(r"$\alpha$")
                     parameters.append(r"$\beta$")
-                c.configure(linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
+                c.configure(sigma2d=False, linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0], diagonal_tick_labels=False)
                 extents = None
 
             print("Latex table for %s" % cls)

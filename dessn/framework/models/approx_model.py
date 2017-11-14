@@ -80,6 +80,7 @@ class ApproximateModel(Model):
             "log_sigma_x1": uniform(-3, 1, size=(num_surveys,)),
             "log_sigma_c": uniform(-3, 0, size=(num_surveys,)),
             "deviations": normal(scale=0.2, size=(num_supernova, 3)),
+            "deltas": normal(scale=0.001, size=(num_surveys, 4)),
             "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }
         chol = [[[1.0, 0.0, 0.0],
@@ -99,6 +100,7 @@ class ApproximateModel(Model):
 
         n_snes = [sim.num_supernova for sim in simulations]
         data_list = [s.get_passed_supernova(s.num_supernova, simulation=False, cosmology_index=cosmology_index) for s in simulations]
+        print(data_list[0].keys())
         n_surveys = len(data_list)
 
         self.logger.info("Got observational data")
@@ -242,12 +244,15 @@ class ApproximateModel(Model):
         self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
 
         # Add in data for the approximate selection efficiency in mB
-        means, stds, alphas, correction_skewnorms, norms, signs = [], [], [], [], [], []
+        means, stds, alphas, correction_skewnorms, norms, signs, covs = [], [], [], [], [], [], []
         for sim in simulations:
-            mean, std, alpha, norm = sim.get_approximate_correction()
+            res = sim.get_approximate_correction()
+            correction_skewnorm, vals, cov = res
+            mean, std, alpha, norm = vals.tolist()
             means.append(mean)
             stds.append(std)
-            correction_skewnorms.append(1 if alpha is not None else 0)
+            correction_skewnorms.append(1 if correction_skewnorm else 0)
+            covs.append(cov)
             if alpha is not None:
                 alphas.append(alpha)
                 signs.append(np.sign(alpha))
@@ -258,11 +263,12 @@ class ApproximateModel(Model):
                 norms.append(norm)
             else:
                 norms.append(1)
-        update["mB_mean"] = means
-        update["mB_width"] = stds
-        update["mB_alpha"] = alphas
+        update["mB_mean_orig"] = means
+        update["mB_width_orig"] = stds
+        update["mB_alpha_orig"] = alphas
+        update["mB_norm_orig"] = norms
         update["mB_sgn_alpha"] = signs
-        update["mB_norms"] = np.log(norms)
+        update["mB_cov"] = covs
         update["correction_skewnorm"] = correction_skewnorms
 
         update["mean_mass"] = mean_masses
