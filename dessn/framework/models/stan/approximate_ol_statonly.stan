@@ -183,7 +183,7 @@ transformed parameters {
         mB_mean[i] = mB_mean_orig[i]; // + deltas[i][1];
         mB_width[i] = mB_width_orig[i]; // + deltas[i][2];
         mB_alpha[i] = mB_alpha_orig[i]; // + deltas[i][3];
-        mB_norm[i] = log(mB_norm_orig[i]; // + deltas[i][4]);
+        mB_norm[i] = log(mB_norm_orig[i]); // + deltas[i][4]);
         mB_alpha2[i] = mB_alpha[i]^2;
         mB_width2[i] = mB_width[i]^2;
 
