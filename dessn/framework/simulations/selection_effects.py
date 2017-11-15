@@ -7,11 +7,13 @@ import os
 import inspect
 
 
-def des_sel():
+def des_sel(cov_scale=1.0):
     # return [22.1, 0.7, None, 1.0]  # Original selection effects
     # return [22.4, 0.7, None, 1.0]  # After SMP and cuts
     # return [22.5, 0.6, None, 1.0],   # New fitting algorithm
-    return get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy")
+    sn, mean, cov = get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy")
+    cov *= cov_scale
+    return sn, mean, cov
 
 
 def lowz_sel(cov_scale=1.0):
