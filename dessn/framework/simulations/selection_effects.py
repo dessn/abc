@@ -14,11 +14,13 @@ def des_sel():
     return get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy")
 
 
-def lowz_sel():
+def lowz_sel(cov_scale=1.0):
     # return [15.5, 1.0, None, 1.0]  # As a cdf
     # return [13.70, 1.4+0.25, 3.8, 0.2]  # Original selection effect
     # return [13.75, 1.45 + 0.0, 7.5, 0.3]  # Skew normal, but high skewness
-    return get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy")
+    sn, mean, cov = get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy")
+    cov *= cov_scale
+    return sn, mean, cov
 
 
 def get_ratio(dump_npy, cut_mag=19.75):
@@ -78,8 +80,15 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3)
         ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error)
 
-        mbs = np.linspace(binc[0], binc[-1], 100)
+        mbs = np.linspace(binc[0], binc[-1], 1000)
         cdf_eval = cdf(mbs, *vals)
+
+        for i in range(50):
+            rands = np.random.multivariate_normal([0,0,0,0], cov=cov)
+            vals2 = vals + rands
+            cdf_eval2 = cdf(mbs, *vals2)
+            plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
+
         ax.plot(mbs, cdf_eval, c='k')
         plt.show()
 
@@ -119,14 +128,21 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3)
         ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error)
 
-        mbs = np.linspace(binc[0], binc[-1], 100)
+        mbs = np.linspace(binc[0], binc[-1], 1000)
         cdf_eval = sknorm(mbs, *vals)
+
+        for i in range(50):
+            rands = np.random.multivariate_normal([0,0,0,0], cov=cov)
+            vals2 = vals + rands
+            cdf_eval2 = sknorm(mbs, *vals2)
+            plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
+
         ax.plot(mbs, cdf_eval, c='k')
         plt.show()
 
     return True, vals, cov
 
 if __name__ == "__main__":
-    get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy", plot=True)
-    # get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy", plot=True)
+    # get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy", plot=True)
+    get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy", plot=True)
     # get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_CD/all.npy", plot=True)

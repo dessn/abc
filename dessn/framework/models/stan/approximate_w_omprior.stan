@@ -258,16 +258,16 @@ transformed parameters {
 
         if (correction_skewnorm[survey_map[i]]) {
             weights[i] = log_sum_exp(
-                log(prob_ia[i]) + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]),
-                log(1 - prob_ia[i]) + normal_lpdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean_out[i] - mB_mean[survey_map[i]])| 0, cor_sigma_out[survey_map[i]])
+                log(prob_ia[i]) + mB_norm[survey_map[i]] + normal_lpdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean[i] - mB_mean[survey_map[i]])| 0, cor_sigma[survey_map[i]]),
+                log(1 - prob_ia[i]) + mB_norm[survey_map[i]] + normal_lpdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]]) + normal_lcdf(mB_sgn_alpha[survey_map[i]] * (cor_mB_mean_out[i] - mB_mean[survey_map[i]])| 0, cor_sigma_out[survey_map[i]])
             );
-            numerator_weight[i] = skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
+            numerator_weight[i] = mB_norm[survey_map[i]] + skew_normal_lpdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]], mB_alpha[survey_map[i]]);
         } else {
             weights[i] = log_sum_exp(
-                log(prob_ia[i]) + normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]),
-                log(1 - prob_ia[i]) + normal_lccdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]])
+                log(prob_ia[i]) + mB_norm[survey_map[i]] + normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]),
+                log(1 - prob_ia[i]) + mB_norm[survey_map[i]] + normal_lccdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]])
             );
-            numerator_weight[i] = log_sum_exp(-10, normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
+            numerator_weight[i] = log_sum_exp(-10,  mB_norm[survey_map[i]] + normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
         }
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)

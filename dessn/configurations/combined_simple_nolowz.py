@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Turn off mass and skewness for easy test
     simulation = [SNANACombinedBulk(152, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
-                                    "CombinedLowZ", manual_selection=lowz_sel(), num_calib=50),
+                                    "CombinedLowZ", manual_selection=lowz_sel(cov_scale=0.01), num_calib=50),
                   SNANACombinedBulk(208, ["SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1"],
                                     "CombinedDES", manual_selection=des_sel(), num_calib=21)]
 

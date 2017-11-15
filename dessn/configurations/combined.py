@@ -19,9 +19,9 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    models = ApproximateModelW(), ApproximateModelW(systematics_scale=0.001), \
-             ApproximateModel(), ApproximateModel(systematics_scale=0.001), \
-             ApproximateModelOl(), ApproximateModelOl(systematics_scale=0.001)
+    models = ApproximateModelW(), ApproximateModelW(systematics_scale=0.01), \
+             ApproximateModel(), ApproximateModel(systematics_scale=0.01), \
+             ApproximateModelOl(), ApproximateModelOl(systematics_scale=0.01)
 
     # Turn off mass and skewness for easy test
     simulation = [SNANACombinedBulk(152, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 # So, whatever results I found arent the same as normally used
                 p_chain, p_params, p_weight, p_like = get_planck()
                 c.add_chain(p_chain, parameters=p_params, weights=p_weight, name="Planck")
-                c.configure(plot_hists=False, sigma2d=False, linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False, kde=[False, False, 1.0])
+                c.configure(sigma2d=False, linestyles=["-", "--", ":"], colors=["b", "k", "o"], shade_alpha=[1.0, 0.0, 0.3], diagonal_tick_labels=False, kde=[False, False, 1.0]) # plot_hists=False,
                 extents = {r"$\Omega_m$": [0.1, 0.6], "$w$": [-2, -0.5]}
             else:
                 if cls.endswith("Ol"):

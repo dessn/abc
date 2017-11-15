@@ -81,7 +81,7 @@ class ApproximateModel(Model):
             "log_sigma_x1": uniform(-3, 1, size=(num_surveys,)),
             "log_sigma_c": uniform(-3, 0, size=(num_surveys,)),
             "deviations": normal(scale=0.2, size=(num_supernova, 3)),
-            "deltas": normal(scale=0.0001, size=(num_surveys, 4)),
+            "deltas": normal(scale=1e-8, size=(num_surveys, 4)),
             "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }
         chol = [[[1.0, 0.0, 0.0],
