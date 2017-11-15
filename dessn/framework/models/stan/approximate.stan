@@ -177,7 +177,7 @@ transformed parameters {
     zeros = rep_row_vector(0, 4);
 
     for (i in 1:n_surveys) {
-        shifts[i] = mb_cov_chol[i] * deltas[i]
+        shifts[i] = mb_cov_chol[i] * deltas[i];s
         mB_mean[i] = mB_mean_orig[i] + shifts[i][1];
         mB_width[i] = mB_width_orig[i] + shifts[i][2];
         mB_alpha[i] = mB_alpha_orig[i] + shifts[i][3];
