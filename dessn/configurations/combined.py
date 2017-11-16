@@ -20,8 +20,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = ApproximateModelW(), ApproximateModelW(statonly=True), \
-             ApproximateModel()#, ApproximateModel(statonly=True), \
-             #ApproximateModelOl(), ApproximateModelOl(statonly=True)
+             ApproximateModel(), ApproximateModel(statonly=True), \
+             ApproximateModelOl(), ApproximateModelOl(statonly=True)
 
     # Turn off mass and skewness for easy test
     simulation = [SNANACombinedBulk(152, ["SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1", "SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1"],
