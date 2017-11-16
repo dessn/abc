@@ -6,8 +6,8 @@
         \hline
 		Model & $\Omega_m$ & $\Omega_\Lambda$ \\ 
 		\hline
-		Systematics & $0.05^{+0.58}_{-0.00}$ & $0.69^{+0.34}_{-0.16}$ \\ 
-		Statistics & $\left( 61.9^{+529.2}_{-9.0} \right) \times 10^{-3}$ & $0.64^{+0.34}_{-0.13}$ \\ 
+		Systematics & $0.05^{+0.62}_{-0.00}$ & $0.73^{+0.33}_{-0.18}$ \\ 
+		Systematics & $0.05^{+0.56}_{-0.00}$ & $0.65^{+0.33}_{-0.16}$ \\ 
 		\hline
     \end{tabular}
 \end{table}
