@@ -3,6 +3,7 @@ import os
 import inspect
 import pickle
 from dessn.framework.simulation import Simulation
+from dessn.general.pecvelcor import get_sigma_mu_pecvel
 
 
 class SNANASimulation(Simulation):
@@ -82,15 +83,18 @@ class SNANASimulation(Simulation):
         s_st = supernovae[:, 4]
         s_co = supernovae[:, 5]
         masses = np.zeros(supernovae[:, 1].shape)
+        extra_uncert = get_sigma_mu_pecvel(redshifts)
+        print("Extra z uncert:\n\t%s\n\t%s" % (redshifts, extra_uncert))
 
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
-        for i, (mb, x1, c, smb, sx1, sc) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co)):
+        for i, (mb, x1, c, smb, sx1, sc, eu) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert)):
             if self.use_sim:
                 cov = np.diag(np.array([0.02, 0.1, 0.02]) ** 2)
                 vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)
             else:
                 vector = np.array([mb, x1, c])
                 cov = supernovae[i, 9:9 + 9].reshape((3, 3))
+            cov[0, 0] = np.sqrt(cov[0, 0]**2 + eu**2)
             calib = supernovae[i, 9 + 9:].reshape((3, -1))
             obs_mBx1c_cov.append(cov)
             obs_mBx1c.append(vector)
