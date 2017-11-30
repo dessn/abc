@@ -75,11 +75,10 @@ class SNANABulkSimulation(Simulation):
         apparents = supernovae[:, 6]
         stretches = supernovae[:, 7]
         colours = supernovae[:, 8]
-        existing_prob = supernovae[:, 2]
+        masses = supernovae[:, 2]
         s_ap = supernovae[:, 3]
         s_st = supernovae[:, 4]
         s_co = supernovae[:, 5]
-        masses = np.zeros(supernovae[:, 1].shape)
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
         for i, (mb, x1, c, smb, sx1, sc) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co)):
             if self.use_sim:
@@ -103,7 +102,6 @@ class SNANABulkSimulation(Simulation):
             "deta_dcalib": deta_dcalibs,
             "redshifts": redshifts,
             "masses": masses,
-            "existing_prob": existing_prob,
             "sim_apparents": s_ap,
             "sim_stretches": s_st,
             "sim_colours": s_co,

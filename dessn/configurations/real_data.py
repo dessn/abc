@@ -23,10 +23,11 @@ if __name__ == "__main__":
 
     model = ApproximateModelW()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(152, sim="PS1_LOWZ_COMBINED_FITS", manual_selection=lowz_sel(), num_calib=50),
-                  SNANABulkSimulation(208, sim="DESALL_specType_SMP_real_snana_text", manual_selection=des_sel(), num_calib=21)]
+    simulation = [SNANABulkSimulation(145, sim="DES3YR_LOWZ_COMBINED_FITS", manual_selection=lowz_sel(), num_calib=50),
+                  SNANABulkSimulation(204, sim="DES3YR_DES_COMBINED_FITS", manual_selection=des_sel(), num_calib=21)]
 
     fitter = Fitter(dir_name)
+
     fitter.set_models(model)
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(100)
@@ -41,6 +42,9 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
         chain["$w$"] = blind_w(chain["$w$"])
+
+        print(chain.keys())
+        exit()
 
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")

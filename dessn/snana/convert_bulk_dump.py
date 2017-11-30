@@ -12,7 +12,7 @@ import inspect
 import re
 import fnmatch
 import hashlib
-
+from scipy.stats import norm
 from numpy.lib.recfunctions import drop_fields
 
 from dessn.snana.systematic_names import get_systematic_mapping
@@ -32,8 +32,6 @@ def load_fitres(filename, skiprows=6):
     data = drop_fields(data, "zCMB")
     data = drop_fields(data, "VPEC")
     data = drop_fields(data, "VPEC_ERR")
-    data = drop_fields(data, "HOST_LOGMASS")
-    data = drop_fields(data, "HOST_LOGMASS_ERR")
     data = drop_fields(data, "SNRMAX1")
     data = drop_fields(data, "SNRMAX2")
     data = drop_fields(data, "SNRMAX3")
@@ -78,7 +76,7 @@ def load_systematic_names(nml_file):
     dir_name = os.path.dirname(file)
     nml_file = dir_name + os.sep + nml_file
     # expression = re.compile("^\s*[^#]ITOPT.*\[(.*)\]")
-    expression = re.compile("[^#]ITOPT.*\[(.*)\]")
+    expression = re.compile("[^#]ITOPT.*\[(.*)\](?!.*FITOPT000).")
     with open(nml_file) as f:
         results = expression.findall(f.read())
     return results
@@ -109,12 +107,11 @@ def convert(base_folder, nml_file):
     inner_files = list(os.listdir(dump_dir))
 
     fitres_files = sorted([dump_dir + "/" + i for i in inner_files if i.endswith(".FITRES")])
-    print(fitres_files)
     base_fitres = fitres_files[0]
     sysematics_fitres = fitres_files[1:]
 
-    base_fits = load_fitres(base_fitres)
-    sysematics = [load_fitres(m) for m in sysematics_fitres]
+    base_fits = load_fitres(base_fitres, skiprows=10)
+    sysematics = [load_fitres(m, skiprows=10) for m in sysematics_fitres]
     sysematics_sort_indexes = [np.argsort(m['CID']) for m in sysematics]
     sysematics_idss = [m['CID'][s] for m, s in zip(sysematics, sysematics_sort_indexes)]
 
@@ -131,6 +128,15 @@ def convert(base_folder, nml_file):
         x0 = row['x0']
         x1 = row['x1']
         c = row['c']
+
+        mass = row['HOST_LOGMASS']
+        mass_err = row['HOST_LOGMASS_ERR']
+        if mass < 0:
+            mass = 10
+            mass_err = 1.0
+        if mass_err < 0.01:
+            mass_err = 0.01
+        mass_prob = 1 - norm.cdf(10, mass, mass_err)
 
         mbe = row["mBERR"]
         x1e = row["x1ERR"]
@@ -174,12 +180,10 @@ def convert(base_folder, nml_file):
             continue
         offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
 
-        existing_prob = 1
-
         if isinstance(cid, str):
             cid = int(hashlib.sha256(cid.encode('utf-8')).hexdigest(), 16) % 10**8
 
-        final_result = [cid, z, existing_prob, sim_mb, sim_x1, sim_c, mb, x1, c] \
+        final_result = [cid, z, mass_prob, sim_mb, sim_x1, sim_c, mb, x1, c] \
                        + cov.flatten().tolist() + offsets.flatten().tolist()
         final_results.append(final_result)
 
@@ -192,15 +196,15 @@ def convert(base_folder, nml_file):
         pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
-    convert("PS1_LOWZ_COMBINED_FITS",   "bulk/LOWZ_MATRIX.NML")
-    convert("DESALL_specType_SMP_real_snana_text",   "bulk/DES_MATRIX.NML")
-    convert("SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
-    convert("SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
-    convert("SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
-    convert("SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
-    convert("SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1",    "bulk/DES_MATRIX.NML")
-    convert("SHINTON_DES_MATRIX_C11_SYMC_SYMX1",      "bulk/DES_MATRIX.NML")
-    convert("SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1",    "bulk/DES_MATRIX.NML")
-    convert("SHINTON_DES_MATRIX_G10_SYMC_SYMX1",      "bulk/DES_MATRIX.NML")
+    convert("DES3YR_LOWZ_COMBINED_FITS",   "bulk/DES3YR_LOWZ_COMBINED_FITS.NML")
+    convert("DES3YR_DES_COMBINED_FITS",   "bulk/DES3YR_DES_COMBINED_FITS.NML")
+    # convert("SHINTON_LOWZ_MATRIX_C11_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
+    # convert("SHINTON_LOWZ_MATRIX_C11_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
+    # convert("SHINTON_LOWZ_MATRIX_G10_SKEWC_SKEWX1",   "bulk/LOWZ_MATRIX.NML")
+    # convert("SHINTON_LOWZ_MATRIX_G10_SYMC_SYMX1",     "bulk/LOWZ_MATRIX.NML")
+    # convert("SHINTON_DES_MATRIX_C11_SKEWC_SKEWX1",    "bulk/DES_MATRIX.NML")
+    # convert("SHINTON_DES_MATRIX_C11_SYMC_SYMX1",      "bulk/DES_MATRIX.NML")
+    # convert("SHINTON_DES_MATRIX_G10_SKEWC_SKEWX1",    "bulk/DES_MATRIX.NML")
+    # convert("SHINTON_DES_MATRIX_G10_SYMC_SYMX1",      "bulk/DES_MATRIX.NML")
 
 

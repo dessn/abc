@@ -9,7 +9,7 @@ COVOPT: [CALIBRATION]   [+cal,=DEFAULT]
 COVOPT: [NOCALIBRATION] [-cal,+]
 
 # define syst-error scales
-ERRSCALE: SALT2.sys*         DEFAULT  0.3
+ERRSCALE: SALT2*         DEFAULT  0.3
 ERRSCALE: MWEBV_SCALE        DEFAULT  1
 ERRSCALE: Fitz99ColorLaw     DEFAULT  1
 ERRSCALE: OD94ColorLaw       DEFAULT  1

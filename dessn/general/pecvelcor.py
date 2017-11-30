@@ -24,13 +24,13 @@ For further details see: https://www.overleaf.com/read/bzpnwnmcqhfj
 
 def get_sigma_redshift_pecvel(sigma_lineartheory=150., sigma_shotnoise=125., sigma_missingdata=100.):
     '''Return the redshift uncertainty asociated with correcting redhift for
-	peculiar motion.
+    peculiar motion.
 
-	Keyword arguments:
-	sigma_lineartheory -- uncertainty from limits of linear theory (default 150.0)
-	sigma_shotnoise -- uncertainty from shotnoise in 2M++ (default 125.0)
-	sigma_missingdata -- uncertainty from missing data in 2M++ (default 100.0)
-	'''
+    Keyword arguments:
+    sigma_lineartheory -- uncertainty from limits of linear theory (default 150.0)
+    sigma_shotnoise -- uncertainty from shotnoise in 2M++ (default 125.0)
+    sigma_missingdata -- uncertainty from missing data in 2M++ (default 100.0)
+    '''
 
     assert isinstance(sigma_lineartheory, float), 'Expected float but found %s' % type(sigma_lineartheory)
     assert isinstance(sigma_shotnoise, float), 'Expected float but found %s' % type(sigma_lineartheory)
