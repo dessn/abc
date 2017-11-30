@@ -32,7 +32,6 @@ if __name__ == "__main__":
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(100)
     fitter.set_num_walkers(1)
-    fitter.set_max_steps(5000)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
@@ -42,9 +41,6 @@ if __name__ == "__main__":
         m, s, chain, truth, weight, old_weight, posterior = fitter.load()
         chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
         chain["$w$"] = blind_w(chain["$w$"])
-
-        print(chain.keys())
-        exit()
 
         c = ChainConsumer()
         c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
