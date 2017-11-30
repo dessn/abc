@@ -100,10 +100,20 @@ def load_dump_file(sim_dir):
     filename = "SIMGEN.DAT.gz" if os.path.exists(sim_dir + "/SIMGEN.DAT.gz") else "SIMGEN.DAT"
     compression = "gzip" if filename.endswith("gz") else None
     names = ["SN", "CID", "S2mb", "MAGSMEAR_COH"]
+    keep = ["CID", "S2mb", "MAGSMEAR_COH"]
+    dtypes = [int, float, float]
     dataframe = pd.read_csv(sim_dir + "/" + filename, compression=compression, sep='\s+',
                             skiprows=6, comment="V", error_bad_lines=False, names=names)
     logging.info("Loaded dump file from %s" % (sim_dir + "/" + filename))
-    return dataframe.to_records()
+    data = dataframe.to_records()
+    res = []
+    for row in data:
+        try:
+            r = [d(row[k]) for k, d in zip(keep, dtypes)]
+            res.append(tuple(r))
+        except Exception:
+            pass
+    return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64)])
 
 
 def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
@@ -125,17 +135,14 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
     sysematics_sort_indexes = [np.argsort(m['CID']) for m in sysematics]
     sysematics_idss = [m['CID'][s] for m, s in zip(sysematics, sysematics_sort_indexes)]
 
-    if load_dump:
-        supernovae = load_dump_file(sim_dir)
-        all_mags = supernovae["S2mb"] + supernovae["MAGSMEAR_COH"]
-        all_cids = supernovae["CID"]
-
     num_bad_calib = 0
     num_bad_calib_index = np.zeros(len(sysematics))
     final_results = []
     passed_cids = []
-    indexes = []
+    logging.debug("Have %d rows to process" % base_fits.shape)
     for i, row in enumerate(base_fits):
+        if i % 1000 == 0 and i > 0:
+            logging.debug("Up to row %d" % i)
         cid = row['CID']
         z = row['zHD']
 
@@ -204,24 +211,26 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
                        + cov.flatten().tolist() + offsets.flatten().tolist()
         final_results.append(final_result)
 
-        if load_dump:
-            index = np.where(cid == all_cids)
-            if len(index) == 0 or len(index[0]) == 0:
-                continue
-            index = index[0][-1]
-            indexes.append(index)
-
     fitted_data = np.array(final_results).astype(np.float32)
     np.save("%s/passed_%d.npy" % (output_dir, ind), fitted_data)
+    logging.info("Calib faliures: %d in total. Breakdown: %s" % (num_bad_calib, num_bad_calib_index))
 
     if load_dump:
-        supernovae_passed = np.zeros(all_mags.size, dtype=bool)
-        supernovae_passed[indexes] = True
+
+        supernovae = load_dump_file(sim_dir)
+        all_mags = supernovae["S2mb"].astype(np.float64) + supernovae["MAGSMEAR_COH"].astype(np.float64)
+        all_cids = supernovae["CID"].astype(np.int32)
+
+        cids_dict = dict([(c, True) for c in passed_cids])
+
+        supernovae_passed = np.array([c in cids_dict for c in all_cids])
         mask_nan = ~np.isnan(all_mags)
 
         all_data = np.vstack((all_mags[mask_nan], supernovae_passed[mask_nan])).T
+        if all_data.shape[0] > 5000000:
+            all_data = all_data[:5000000, :]
         np.save(output_dir + "/all_%s.npy" % ind, all_data.astype(np.float32))
-        print("%d nans in apparents" % (~mask_nan).sum())
+        logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
 
 def convert(base_folder, load_dump=False):
@@ -239,11 +248,13 @@ def convert(base_folder, load_dump=False):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    convert("DES3YR_LOWZ_COMBINED_FITS")
-    convert("DES3YR_DES_COMBINED_FITS")
-    convert("DES3Y_DES_NOMINAL")
-    convert("DES3Y_LOWZ_NOMINAL")
+    logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
+    # convert("DES3YR_LOWZ_COMBINED_FITS")
+    # convert("DES3YR_DES_COMBINED_FITS")
+    # convert("DES3Y_DES_NOMINAL")
+    # convert("DES3Y_LOWZ_NOMINAL")
+    # convert("DES3Y_DES_BHMEFF", load_dump=True)
+    convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
 
 
