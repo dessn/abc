@@ -60,10 +60,8 @@ def load_systematic_names(nml_file):
 def get_systematic_scales(nml_file):
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
-    print("1", len(systematic_names))
     sys_label_dict = get_systematic_mapping()
     systematic_labels = [sys_label_dict[n] for n in systematic_names]
-    print("2", len(systematic_labels))
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
@@ -230,9 +228,9 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
         supernovae_passed = np.array([c in cids_dict for c in all_cids])
         mask_nan = ~np.isnan(all_mags)
 
-        all_data = np.vstack((all_mags[mask_nan], supernovae_passed[mask_nan])).T
-        if all_data.shape[0] > 5000000:
-            all_data = all_data[:5000000, :]
+        all_data = all_mags[mask_nan] + 100 * supernovae_passed[mask_nan]
+        if all_data.size > 10000000:
+            all_data = all_data[:10000000]
         np.save(output_dir + "/all_%s.npy" % ind, all_data.astype(np.float32))
         logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
@@ -240,7 +238,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
 def convert(base_folder, load_dump=False):
 
     dump_dir, output_dir, nml_file = get_directories(base_folder)
-    print(nml_file)
+    logging.info("Found nml file %s" % nml_file)
     systematic_labels, systematics_scales = get_systematic_scales(nml_file)
     # Save the labels out
     with open(output_dir + "/sys_names.pkl", 'wb') as f:
@@ -253,12 +251,12 @@ def convert(base_folder, load_dump=False):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
-    convert("DES3YR_LOWZ_COMBINED_FITS")
-    convert("DES3YR_DES_COMBINED_FITS")
-    convert("DES3Y_DES_NOMINAL")
-    convert("DES3Y_LOWZ_NOMINAL")
-    # convert("DES3Y_DES_BHMEFF", load_dump=True)
-    # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
+    # convert("DES3YR_LOWZ_COMBINED_FITS")
+    # convert("DES3YR_DES_COMBINED_FITS")
+    # convert("DES3Y_DES_NOMINAL")
+    # convert("DES3Y_LOWZ_NOMINAL")
+    convert("DES3Y_DES_BHMEFF", load_dump=True)
+    convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
 
 
