@@ -22,9 +22,10 @@ def lowz_sel(cov_scale=1.0):
 def get_data(base):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
-    folder = np.load(dir_name + "/" + base)
-    supernovae_files = [np.load(folder + "/" + f) for f in os.listdir(folder) if f.startswith("all")]
-    supernovae = np.vstack(tuple(supernovae_files))
+    folder = dir_name + "/" + base
+    supernovae_files = [folder + "/" + f for f in os.listdir(folder) if f.startswith("all")]
+    supernovae_data = [np.load(f) for f in supernovae_files]
+    supernovae = np.vstack(tuple(supernovae_data))
     passed = supernovae > 100
     mags = supernovae - 100 * passed.astype(np.int)
     return mags, passed
@@ -147,6 +148,6 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
     return True, vals, cov
 
 if __name__ == "__main__":
-    get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy", plot=True)
-    get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy", plot=True)
+    get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF", plot=True)
+    get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10", plot=True)
     # get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_CD/all.npy", plot=True)
