@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     model = ApproximateModelW(prior=True)
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulation(-1, "DES3YR_LOWZ_COMBINED_FITS"),
-                  SNANASimulation(-1, "DES3YR_DES_COMBINED_FITS")]
+    simulation = [SNANASimulation(-1, "DES3Y_DES_NOMINAL"),
+                  SNANASimulation(-1, "DES3Y_LOWZ_NOMINAL")]
 
     fitter = Fitter(dir_name)
 
@@ -30,9 +30,9 @@ if __name__ == "__main__":
 
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(1)
+    fitter.set_num_cosmologies(10)
     fitter.set_max_steps(2000)
-    fitter.set_num_walkers(100)
+    fitter.set_num_walkers(30)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!

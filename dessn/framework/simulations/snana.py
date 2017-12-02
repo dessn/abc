@@ -13,7 +13,7 @@ class SNANASimulation(Simulation):
         self.simulation_name = sim_name
         self.global_calib = global_calib
         this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-        self.data_folder = this_dir + "/snana_data/%s" % self.simulation_name
+        self.data_folder = this_dir + "/snana_data/%s/" % self.simulation_name
         assert os.path.exists(self.data_folder), "Cannot find folder %s" % self.data_folder
         self.use_sim = use_sim
         self.num_nodes = num_nodes
@@ -86,7 +86,9 @@ class SNANASimulation(Simulation):
 
         if n_sne != -1:
             supernovae = supernovae[:n_sne, :]
-
+        else:
+            n_sne = supernovae.shape[0]
+            self.logger.info("All SN requested: found %d SN" % n_sne)
         cids = supernovae[:, 0]
         redshifts = supernovae[:, 1]
         masses = supernovae[:, 2]
@@ -127,7 +129,7 @@ class SNANASimulation(Simulation):
             "sim_stretches": s_st,
             "sim_colours": s_co,
             "prob_ia": np.ones(n_sne),
-            "passed": np.ones(n_sne, dtype=np.bool)
+            # "passed": np.ones(n_sne, dtype=np.bool)
         }
         return result
 

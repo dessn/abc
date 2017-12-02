@@ -100,7 +100,7 @@ class ApproximateModel(Model):
             simulations = [simulations]
 
         n_snes = [sim.num_supernova for sim in simulations]
-        data_list = [s.get_passed_supernova(s.num_supernova, simulation=False, cosmology_index=cosmology_index) for s in simulations]
+        data_list = [s.get_passed_supernova(s.num_supernova, cosmology_index=cosmology_index) for s in simulations]
         print(data_list[0].keys())
         n_surveys = len(data_list)
 
@@ -300,7 +300,6 @@ class ApproximateModel(Model):
     def correct_chain(self, dictionary, simulation, data):
         del dictionary["intrinsic_correlation"]
         return dictionary
-
 
 
 class ApproximateModelOl(ApproximateModel):
