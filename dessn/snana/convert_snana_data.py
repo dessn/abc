@@ -60,8 +60,10 @@ def load_systematic_names(nml_file):
 def get_systematic_scales(nml_file):
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
+    print("1", len(systematic_names))
     sys_label_dict = get_systematic_mapping()
     systematic_labels = [sys_label_dict[n] for n in systematic_names]
+    print("2", len(systematic_labels))
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
@@ -137,6 +139,8 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
 
     num_bad_calib = 0
     num_bad_calib_index = np.zeros(len(sysematics))
+    logging.debug("Have %d, %d, %d, %d systematics" %
+                  (len(sysematics), len(sysematics_sort_indexes), len(sysematics_idss), len(systematics_scales)))
     final_results = []
     passed_cids = []
     logging.debug("Have %d rows to process" % base_fits.shape)
@@ -249,12 +253,12 @@ def convert(base_folder, load_dump=False):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
-    # convert("DES3YR_LOWZ_COMBINED_FITS")
-    # convert("DES3YR_DES_COMBINED_FITS")
-    # convert("DES3Y_DES_NOMINAL")
-    # convert("DES3Y_LOWZ_NOMINAL")
+    convert("DES3YR_LOWZ_COMBINED_FITS")
+    convert("DES3YR_DES_COMBINED_FITS")
+    convert("DES3Y_DES_NOMINAL")
+    convert("DES3Y_LOWZ_NOMINAL")
     # convert("DES3Y_DES_BHMEFF", load_dump=True)
-    convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
+    # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
 
 
