@@ -8,24 +8,32 @@ import inspect
 
 
 def des_sel(cov_scale=1.0):
-    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10/all.npy")
+    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10")
     cov *= cov_scale
     return sn, mean, cov
 
 
 def lowz_sel(cov_scale=1.0):
-    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF/all.npy")
+    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF")
     cov *= cov_scale
     return sn, mean, cov
 
 
-def get_ratio(dump_npy, cut_mag=19.75):
+def get_data(base):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
-    data = np.load(dir_name + "/" + dump_npy)
+    folder = np.load(dir_name + "/" + base)
+    supernovae_files = [np.load(folder + "/" + f) for f in os.listdir(folder) if f.startswith("all")]
+    supernovae = np.vstack(tuple(supernovae_files))
+    passed = supernovae > 100
+    mags = supernovae - 100 * passed.astype(np.int)
+    return mags, passed
+
+
+def get_ratio(base_folder, cut_mag=19.75):
+    mB_all, passed = get_data(base_folder)
     print("Got data to compute selection function")
-    mB_all = data[:, 0]
-    mB_passed = mB_all[data[:, 1] > 0]
+    mB_passed = mB_all[passed]
 
     # Bin data and get ratio
     hist_all, bins = np.histogram(mB_all, bins=100)

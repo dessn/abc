@@ -70,7 +70,7 @@ def get_systematic_scales(nml_file):
                 scale = s
                 break
         systematics_scales.append(scale)
-    print("systemtatic scales are ", systematics_scales)
+    logging.debug("systemtatic scales are ", systematics_scales)
     return systematic_labels, systematics_scales
 
 
@@ -78,13 +78,11 @@ def get_directories(base_folder):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     dump_dir = os.path.abspath(dir_name + "/data_dump/" + base_folder)
-    output_dir = os.path.abspath(dir_name + "/../framework/simulations/snana_data/" + base_folder)
+    output_dir = os.path.abspath(dir_name + "/../framework/simulations/snana_data/") + "/"
     nml_file = dump_dir + "/" + base_folder + ".nml"
     if not os.path.exists(nml_file):
         logging.error("Cannot find the NML file at %s" % nml_file)
         exit(1)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
     return dump_dir, output_dir, nml_file
 
 
@@ -116,7 +114,7 @@ def load_dump_file(sim_dir):
     return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64)])
 
 
-def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
+def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False):
 
     ind = 0
     if "-0" in sim_dir:
@@ -197,7 +195,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
                 offset_mb.append((mag['mB'][sorted_indexes[index]] - mb) * scale)
                 offset_x1.append((mag['x1'][sorted_indexes[index]] - x1) * scale)
                 offset_c.append((mag['c'][sorted_indexes[index]] - c) * scale)
-        else:
+        if len(offset_mb) == 0:
             offset_mb.append(0)
             offset_x1.append(0)
             offset_c.append(0)
@@ -217,9 +215,16 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
                        + cov.flatten().tolist() + offsets.flatten().tolist()
         final_results.append(final_result)
 
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     fitted_data = np.array(final_results).astype(np.float32)
     np.save("%s/passed_%d.npy" % (output_dir, ind), fitted_data)
     logging.info("Calib faliures: %d in total. Breakdown: %s" % (num_bad_calib, num_bad_calib_index))
+
+    # Save the labels out
+    with open(output_dir + "/sys_names.pkl", 'wb') as f:
+        pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     if load_dump:
 
@@ -244,21 +249,23 @@ def convert(base_folder, load_dump=False):
     dump_dir, output_dir, nml_file = get_directories(base_folder)
     logging.info("Found nml file %s" % nml_file)
     systematic_labels, systematics_scales = get_systematic_scales(nml_file)
-    # Save the labels out
-    with open(output_dir + "/sys_names.pkl", 'wb') as f:
-        pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     sim_dirs = get_realisations(base_folder, dump_dir)
     for sim in sim_dirs:
-        digest_simulation(sim, systematics_scales, output_dir, load_dump=load_dump)
+        sim_name = os.path.basename(sim)
+        if "-0" in sim_name:
+            this_output_dir = output_dir + sim_name.split("-0")[0]
+        else:
+            this_output_dir = output_dir + sim_name
+        digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
-    # convert("DES3YR_LOWZ_COMBINED_FITS")
-    # convert("DES3YR_DES_COMBINED_FITS")
-    # convert("DES3Y_DES_NOMINAL")
-    # convert("DES3Y_LOWZ_NOMINAL")
+    convert("DES3YR_LOWZ_COMBINED_FITS")
+    convert("DES3YR_DES_COMBINED_FITS")
+    convert("DES3Y_DES_NOMINAL")
+    convert("DES3Y_LOWZ_NOMINAL")
     convert("DES3Y_DES_BHMEFF", load_dump=True)
     convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
