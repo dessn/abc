@@ -4,24 +4,35 @@ import inspect
 import pickle
 from dessn.framework.simulation import Simulation
 from dessn.general.pecvelcor import get_sigma_mu_pecvel
+from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, real_data_name, simulation_name=None, num_nodes=4,
-                 use_sim=False, num_calib=4, manual_selection=None):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13):
         super().__init__()
-        self.real_data_name = real_data_name
-        self.simulation_name = simulation_name
+        self.simulation_name = sim_name
+        self.global_calib = global_calib
+        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+        self.data_folder = this_dir + "/snana_data/%s" % self.simulation_name
+        assert os.path.exists(self.data_folder), "Cannot find folder %s" % self.data_folder
         self.use_sim = use_sim
-        if self.simulation_name is None:
-            self.simulation_name = self.real_data_name
         self.num_nodes = num_nodes
+        self.systematic_labels = self.get_systematic_names()
+        self.num_calib = len(self.systematic_labels)
         self.num_supernova = num_supernova
-        self.num_calib = num_calib
-        self.manual_selection = manual_selection
+
+        self.manual_selection = self.get_correction(cov_scale=cov_scale)
+
+    def get_correction(self, cov_scale=1.0):
+        if "des" in self.simulation_name.lower():
+            return des_sel(cov_scale=cov_scale)
+        elif "lowz" in self.simulation_name.lower():
+            return lowz_sel(cov_scale=cov_scale)
+        else:
+            raise ValueError("Cannot find des or lowz in your sim name, unsure which selection function to use!")
 
     def get_name(self):
-        return "snana_%s" % self.real_data_name
+        return self.simulation_name
 
     def get_truth_values(self):
         return [
@@ -50,39 +61,41 @@ class SNANASimulation(Simulation):
 
     def get_systematic_names(self):
         this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-        filename = this_dir + "/snana_data/%s/sys_names.pkl" % self.real_data_name
+        filename = this_dir + "/snana_data/%s/sys_names.pkl" % self.simulation_name
         with open(filename, 'rb') as f:
             names = pickle.load(f)
         return names
 
-    def get_passed_from_name(self, name, n_sne, cosmology_index=0):
-        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-        data_folder = this_dir + "/snana_data/%s" % name
-        self.logger.info("Getting SNANA data from %s" % name)
-        if self.use_sim:
-            self.logger.warn("Simulation using simulated values, not 'observed'")
+    def get_all_supernova(self, n_sne, cosmology_index=0):
+        self.logger.info("Getting SNANA data from %s" % self.data_folder)
 
-        supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "passed" in f]
+        supernovae_files = [np.load(self.data_folder + "/" + f) for f in os.listdir(self.data_folder) if f.startswith("all")]
         supernovae = np.vstack(tuple(supernovae_files))
+        passed = supernovae > 100
+        mags = supernovae - 100 * passed.astype(np.int)
+        res = {
+            "sim_apparents": mags,
+            "passed": passed
+        }
+        return res
 
-        np.random.seed(cosmology_index)
-        if cosmology_index:
-            self.logger.debug("Shuffling data for cosmology index %d" % cosmology_index)
-            np.random.shuffle(supernovae)
+    def get_passed_supernova(self, n_sne, cosmology_index=0):
+        filename = self.data_folder + "passed_%d.npy" % cosmology_index
+        assert os.path.exists(filename), "Cannot find file %s, do you have this realisations?" % filename
+        supernovae = np.load(filename)
 
-        # supernovae = supernovae[supernovae[:, 1] < 0.5]
+        if n_sne != -1:
+            supernovae = supernovae[:n_sne, :]
 
-        supernovae = supernovae[:n_sne, :]
         cids = supernovae[:, 0]
         redshifts = supernovae[:, 1]
-        apparents = supernovae[:, 6]
-        stretches = supernovae[:, 7]
-        colours = supernovae[:, 8]
-        existing_prob = supernovae[:, 2]
+        masses = supernovae[:, 2]
         s_ap = supernovae[:, 3]
         s_st = supernovae[:, 4]
         s_co = supernovae[:, 5]
-        masses = np.zeros(supernovae[:, 1].shape)
+        apparents = supernovae[:, 6]
+        stretches = supernovae[:, 7]
+        colours = supernovae[:, 8]
         extra_uncert = get_sigma_mu_pecvel(redshifts)
         print("Extra z uncert:\n\t%s\n\t%s" % (redshifts, extra_uncert))
 
@@ -110,131 +123,13 @@ class SNANASimulation(Simulation):
             "deta_dcalib": deta_dcalibs,
             "redshifts": redshifts,
             "masses": masses,
-            "existing_prob": existing_prob,
             "sim_apparents": s_ap,
             "sim_stretches": s_st,
             "sim_colours": s_co,
-            "prob_ia": np.ones(n_sne)
+            "prob_ia": np.ones(n_sne),
+            "passed": np.ones(n_sne, dtype=np.bool)
         }
         return result
 
-    def get_all_supernova(self, n_sne, cosmology_index=0):
-        name = self.simulation_name
-        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-        data_folder = this_dir + "/snana_data/%s" % name
-        self.logger.info("Getting SNANA data from %s" % name)
-
-        supernovae_files = [np.load(data_folder + "/" + f) for f in os.listdir(data_folder) if "all" in f]
-        supernovae = np.vstack(tuple(supernovae_files))
-        res = {
-            "sim_apparents": supernovae[:, 0],
-            "passed": supernovae[:, 1].astype(bool)
-        }
-        if supernovae.shape[1] > 3:
-            res["sim_colors"] = supernovae[:, 2]
-            res["sim_stretches"] = supernovae[:, 3]
-        return res
-
-    def get_passed_supernova(self, n_sne, simulation=True, cosmology_index=0):
-        name = self.simulation_name if simulation else self.real_data_name
-        return self.get_passed_from_name(name, n_sne=n_sne, cosmology_index=cosmology_index)
-
-    def get_approximate_correction(self, plot=False):
-        if self.manual_selection is None:
-            return super().get_approximate_correction(plot=plot)
-        else:
-            if plot:
-                super().get_approximate_correction(plot=plot, manual=self.manual_selection)
-            return self.manual_selection[0], self.manual_selection[1], self.manual_selection[2], self.manual_selection[3]
-
-
-class SNANASimulationGauss0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
-
-
-class SNANASimulationIdeal0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "ideal0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
-
-
-class SNANASimulationIdealLowZ0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "lowz_gauss0p3_withpecv", num_nodes=num_nodes, use_sim=use_sim, num_calib=50, manual_selection=manual_selection)
-
-
-class SNANASimulationIdealNoBias0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "ideal_nobias_0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=1, manual_selection=manual_selection)
-
-    def get_approximate_correction(self, plot=False):
-        if plot:
-            return super().get_approximate_correction(plot=plot)
-        else:
-            return 28, 1, None, 1.0
-
-
-class SNANASimulationGauss0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "gauss0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationGauss0p4(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "gauss0p4", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.4, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationSkewed0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "skewed0p2", simulation_name="gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=22, manual_selection=manual_selection)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationLowzGauss0p3(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
-
-
-class SNANASimulationLowzGauss0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "lowz_gauss0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationLowzGauss0p4(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "lowz_gauss0p4", simulation_name="lowz_gauss0p3", num_nodes=num_nodes, use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.4, r"$\Omega_m$")
-        return t
-
-
-class SNANASimulationLowzSkewed0p2(SNANASimulation):
-    def __init__(self, num_supernova, num_nodes=4, use_sim=False, manual_selection=None):
-        super().__init__(num_supernova, "lowz_skewed0p2", simulation_name="lowz_gauss0p3", num_nodes=num_nodes,
-                         use_sim=use_sim, num_calib=58, manual_selection=manual_selection)
-
-    def get_truth_values(self):
-        t = super().get_truth_values()
-        t[[r[0] for r in t].index("Om")] = ("Om", 0.2, r"$\Omega_m$")
-        return t
+    def get_approximate_correction(self):
+        return self.manual_selection

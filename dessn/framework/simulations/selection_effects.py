@@ -8,19 +8,13 @@ import inspect
 
 
 def des_sel(cov_scale=1.0):
-    # return [22.1, 0.7, None, 1.0]  # Original selection effects
-    # return [22.4, 0.7, None, 1.0]  # After SMP and cuts
-    # return [22.5, 0.6, None, 1.0],   # New fitting algorithm
-    sn, mean, cov = get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy")
+    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10/all.npy")
     cov *= cov_scale
     return sn, mean, cov
 
 
 def lowz_sel(cov_scale=1.0):
-    # return [15.5, 1.0, None, 1.0]  # As a cdf
-    # return [13.70, 1.4+0.25, 3.8, 0.2]  # Original selection effect
-    # return [13.75, 1.45 + 0.0, 7.5, 0.3]  # Skew normal, but high skewness
-    sn, mean, cov = get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy")
+    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF/all.npy")
     cov *= cov_scale
     return sn, mean, cov
 
@@ -145,6 +139,6 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
     return True, vals, cov
 
 if __name__ == "__main__":
-    # get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy", plot=True)
+    get_selection_effects_skewnorm("eff_data/DES3Y_LOWZ_EFF/all.npy", plot=True)
     get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_AMG10/all.npy", plot=True)
     # get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_CD/all.npy", plot=True)

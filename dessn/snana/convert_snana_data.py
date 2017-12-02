@@ -197,6 +197,10 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, load_dump=False):
                 offset_mb.append((mag['mB'][sorted_indexes[index]] - mb) * scale)
                 offset_x1.append((mag['x1'][sorted_indexes[index]] - x1) * scale)
                 offset_c.append((mag['c'][sorted_indexes[index]] - c) * scale)
+        else:
+            offset_mb.append(0)
+            offset_x1.append(0)
+            offset_c.append(0)
 
         if np.any(np.isnan(offset_mb)):
             num_bad_calib += 1

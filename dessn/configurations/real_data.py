@@ -5,8 +5,7 @@ import socket
 from dessn.blind.blind import blind_om, blind_w
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW
-from dessn.framework.simulations.snana_bulk import SNANABulkSimulation
-from dessn.framework.simulations.selection_effects import lowz_sel, des_sel
+from dessn.framework.simulations.snana import SNANASimulation
 
 
 if __name__ == "__main__":
@@ -23,15 +22,16 @@ if __name__ == "__main__":
 
     model = ApproximateModelW()
     # Turn off mass and skewness for easy test
-    simulation = [SNANABulkSimulation(145, sim="DES3YR_LOWZ_COMBINED_FITS", manual_selection=lowz_sel(), num_calib=50),
-                  SNANABulkSimulation(204, sim="DES3YR_DES_COMBINED_FITS", manual_selection=des_sel(), num_calib=21)]
+    simulation = [SNANASimulation(-1, "DES3YR_LOWZ_COMBINED_FITS"),
+                  SNANASimulation(-1, "DES3YR_DES_COMBINED_FITS")]
 
     fitter = Fitter(dir_name)
 
     fitter.set_models(model)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(100)
-    fitter.set_num_walkers(1)
+    fitter.set_num_cosmologies(1)
+    fitter.set_max_steps(2000)
+    fitter.set_num_walkers(100)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
