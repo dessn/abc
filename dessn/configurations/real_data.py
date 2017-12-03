@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=False)
+    model = ApproximateModelW(prior=True)
     # Turn off mass and skewness for easy test
     simulation = [SNANASimulation(-1, "DES3YR_LOWZ_COMBINED_FITS"),
                   SNANASimulation(-1, "DES3YR_DES_COMBINED_FITS")]
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     fitter.set_models(model)
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(1)
-    fitter.set_max_steps(3000)
+    fitter.set_max_steps(2000)
     fitter.set_num_walkers(100)
 
     h = socket.gethostname()
