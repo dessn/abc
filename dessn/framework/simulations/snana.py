@@ -109,7 +109,7 @@ class SNANASimulation(Simulation):
             else:
                 vector = np.array([mb, x1, c])
                 cov = supernovae[i, 9:9 + 9].reshape((3, 3))
-            # cov[0, 0] = np.sqrt(cov[0, 0]**2 + eu**2)
+            cov[0, 0] += eu**2
             calib = supernovae[i, 9 + 9:].reshape((3, -1))
             obs_mBx1c_cov.append(cov)
             obs_mBx1c.append(vector)
