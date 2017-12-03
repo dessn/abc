@@ -57,7 +57,10 @@ if __name__ == "__main__":
         c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
         c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
         with open(pfn + "_nusiance.txt", "w") as f:
-            f.write(c2.analysis.get_latex_table(transpose=True, parameters=[r"$\alpha$", r"$\beta$",
+            f.write(c2.analysis.get_latex_table(transpose=True, parameters=[r"$\Omega_m$", "$w$",
+                                                                            r"$\alpha$", r"$\beta$",
                                                                             r"$\sigma_{\rm m_B}^{0}$",
-                                                                            r"$\sigma_{\rm m_B}^{1}$"]))
+                                                                            r"$\sigma_{\rm m_B}^{1}$",
+                                                                            r"$\delta(0)$",
+                                                                            r"$\delta(\infty)/\delta(0)$"]))
 
