@@ -99,8 +99,6 @@ class SNANASimulation(Simulation):
         stretches = supernovae[:, 7]
         colours = supernovae[:, 8]
         extra_uncert = get_sigma_mu_pecvel(redshifts)
-        print("Extra z uncert:\n\t%s\n\t%s" % (redshifts, extra_uncert))
-
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
         for i, (mb, x1, c, smb, sx1, sc, eu) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert)):
             if self.use_sim:

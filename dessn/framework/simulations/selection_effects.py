@@ -74,7 +74,7 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - cdf(binc, *vals)) / ratio_error_adj) ** 2)
         red_chi2 = chi2 / (len(binc) - 3)
-        print(red_chi2, adj)
+        # print(red_chi2, adj)
 
     print(vals)
     print(cov)
