@@ -66,3 +66,20 @@ if __name__ == "__main__":
                                                                             r"$\delta(0)$",
                                                                             r"$\delta(\infty)/\delta(0)$"]))
 
+        res = fitter.load(split_cosmo=True)
+        mus, stds = [], []
+        import numpy as np
+        for m, s, chain, truth, weight, old_weight, posterior in res:
+            w = chain[r"$w$"]
+            mus.append(np.mean(w))
+            stds.append(np.var(w))
+        mus = np.array(mus)
+        stds = np.array(stds)
+        n = mus.size
+        wmean = np.mean(mus)
+        wmean_error_from_rms = np.std(mus) / np.sqrt(n)
+        wmean_error_on_error = wmean_error_from_rms / np.sqrt(2 * n)
+        print("-----------------------------------")
+        print(wmean)
+        print(wmean_error_from_rms)
+        print(wmean_error_on_error)
