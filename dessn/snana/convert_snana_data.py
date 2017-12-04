@@ -70,7 +70,7 @@ def get_systematic_scales(nml_file):
                 scale = s
                 break
         systematics_scales.append(scale)
-    logging.debug("systemtatic scales are ", systematics_scales)
+    logging.debug("systemtatic scales are %s" % systematics_scales)
     return systematic_labels, systematics_scales
 
 
@@ -123,8 +123,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
 
     inner_files = sorted(list(os.listdir(sim_dir)))
 
-    fitres_files = sorted(
-        [sim_dir + "/" + i for i in inner_files if i.endswith(".FITRES.gz") or i.endswith(".FITRES")])
+    fitres_files = sorted([sim_dir + "/" + i for i in inner_files if i.endswith(".FITRES.gz")])
     base_fitres = fitres_files[0]
     sysematics_fitres = fitres_files[1:]
 
@@ -262,12 +261,14 @@ def convert(base_folder, load_dump=False):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
-    convert("DES3YR_LOWZ_COMBINED_FITS")
-    convert("DES3YR_DES_COMBINED_FITS")
-    convert("DES3Y_DES_NOMINAL")
-    convert("DES3Y_LOWZ_NOMINAL")
-    convert("DES3Y_DES_BHMEFF", load_dump=True)
-    convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
+    # convert("DES3YR_LOWZ_COMBINED_FITS")
+    # convert("DES3YR_DES_COMBINED_FITS")
+    # convert("DES3Y_DES_NOMINAL")
+    # convert("DES3Y_LOWZ_NOMINAL")
+    # convert("DES3Y_DES_BULK")
+    convert("DES3Y_LOWZ_BULK")
+    # convert("DES3Y_DES_BHMEFF", load_dump=True)
+    # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
 
 
