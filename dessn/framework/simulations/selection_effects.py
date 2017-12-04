@@ -61,14 +61,14 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         model = (1 - norm.cdf(b, loc=mean, scale=sigma)) * n + 10 * alpha
         return model
 
-    threshold = 0.1
+    threshold = 0.02
     red_chi2 = 100
     adj = 0.0001
     while np.abs(red_chi2 - 1) > threshold:
         if red_chi2 > 1:
-            adj *= 1.1
+            adj *= 1.02
         else:
-            adj *= 0.9
+            adj *= 0.97
         ratio_error_adj = ratio_error + adj
         result = curve_fit(cdf, binc, ratio, p0=np.array([23.0, 1.0, 0.0, 0.5]), sigma=ratio_error_adj)
         vals, cov, *_ = result
