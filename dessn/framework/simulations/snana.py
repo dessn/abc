@@ -24,10 +24,10 @@ class SNANASimulation(Simulation):
         self.manual_selection = self.get_correction(cov_scale=cov_scale)
 
     def get_correction(self, cov_scale=1.0):
-        if "des" in self.simulation_name.lower():
+        if "_des" in self.simulation_name.lower():
             self.logger.info("Getting DES correction for sim %s" % self.simulation_name)
             return des_sel(cov_scale=cov_scale)
-        elif "lowz" in self.simulation_name.lower():
+        elif "_lowz" in self.simulation_name.lower():
             self.logger.info("Getting LOWZ correction for sim %s" % self.simulation_name)
             return lowz_sel(cov_scale=cov_scale)
         else:
