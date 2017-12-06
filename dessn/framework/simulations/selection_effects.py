@@ -122,7 +122,7 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - sknorm(binc, *vals)) / ratio_error_adj) ** 2)
         red_chi2 = chi2 / (len(binc) - 3)
-        print("red chi2 ", red_chi2, adj, chi2, vals)
+        # print("red chi2 ", red_chi2, adj, chi2, vals)
 
     print(vals)
     print(cov)
