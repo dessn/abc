@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=True, statonly=True)
+    model = ApproximateModelW(prior=True, statonly=True, global_calibration=1)
     # Turn off mass and skewness for easy test
 
     ndes = 600
