@@ -135,6 +135,7 @@ transformed parameters {
     real mB_width2 [n_surveys];
     real mB_alpha2 [n_surveys];
     row_vector[4] zeros;
+    vector[4] shifts [n_surveys];
     real cor_mB_mean [n_sne];
     real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
@@ -179,10 +180,11 @@ transformed parameters {
     zeros = rep_row_vector(0, 4);
 
     for (i in 1:n_surveys) {
-        mB_mean[i] = mB_mean_orig[i]; // + deltas[i][1];
-        mB_width[i] = mB_width_orig[i]; // + deltas[i][2];
-        mB_alpha[i] = mB_alpha_orig[i]; // + deltas[i][3];
-        mB_norm[i] = log(mB_norm_orig[i]); // + deltas[i][4]);
+        // shifts[i] = mb_cov_chol[i] * deltas[i];
+        mB_mean[i] = mB_mean_orig[i]; // + shifts[i][1];
+        mB_width[i] = mB_width_orig[i]; // + shifts[i][2];
+        mB_alpha[i] = mB_alpha_orig[i]; // + shifts[i][3];
+        mB_norm[i] = log(mB_norm_orig[i]); // + shifts[i][4]);
         mB_alpha2[i] = mB_alpha[i]^2;
         mB_width2[i] = mB_width[i]^2;
 
@@ -267,7 +269,7 @@ transformed parameters {
                 log(prob_ia[i]) + mB_norm[survey_map[i]] + normal_lccdf(cor_mB_mean[i] | mB_mean[survey_map[i]], cor_mb_norm_width[survey_map[i]]),
                 log(1 - prob_ia[i]) + mB_norm[survey_map[i]] + normal_lccdf(cor_mB_mean_out[i] | mB_mean[survey_map[i]], cor_mb_norm_width_out[survey_map[i]])
             );
-            numerator_weight[i] = log_sum_exp(-10,  mB_norm[survey_map[i]] + normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
+            numerator_weight[i] = log_sum_exp(-10, mB_norm[survey_map[i]] + normal_lccdf(model_mBx1c[i][1] | mB_mean[survey_map[i]], mB_width[survey_map[i]]));
         }
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
@@ -283,7 +285,7 @@ transformed parameters {
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(alpha_c[i]  | 0, 1)
             + normal_lpdf(alpha_x1[i] | 0, 1)
-            + multi_normal_cholesky_lpdf(deltas[i] | zeros, mb_cov_chol[i])
+            + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
