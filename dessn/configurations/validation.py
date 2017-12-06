@@ -44,23 +44,34 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        m, s, chain, truth, weight, old_weight, posterior = fitter.load()
-        chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
-        chain["$w$"] = blind_w(chain["$w$"])
+        import numpy as np
+        res = fitter.load(split_cosmo=True, split_sims=True)
 
-        c, c2 = ChainConsumer(), ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c2.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False, sigmas=[0, 1, 2], contour_labels="confidence")
-        c2.configure(statistics="mean")
+        ws = {}
+        for m, s, chain, truth, weight, old_weight, posterior in res:
+            key = s[0].simulation_name
+            if key not in ws:
+                ws[key] = []
+            ws[key].append(chain["$w$"].mean())
+        for key in ws.keys():
+            print(key, np.mean(ws[key]), np.std(ws[key]))
 
-        parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
-        print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, watermark="Blinded", figsize=1.5)
-        print("Plotting distributions")
-        c = ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
-        c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
+        # chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
+        # chain["$w$"] = blind_w(chain["$w$"])
+        #
+        # c, c2 = ChainConsumer(), ChainConsumer()
+        # c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
+        # c2.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
+        # c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False, sigmas=[0, 1, 2], contour_labels="confidence")
+        # c2.configure(statistics="mean")
+        #
+        # parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
+        # print(c.analysis.get_latex_table(transpose=True))
+        # c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, watermark="Blinded", figsize=1.5)
+        # print("Plotting distributions")
+        # c = ChainConsumer()
+        # c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
+        # c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
+        # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
 
 

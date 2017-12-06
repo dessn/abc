@@ -19,6 +19,8 @@ class SNANASimulation(Simulation):
         self.num_nodes = num_nodes
         self.systematic_labels = self.get_systematic_names()
         self.num_calib = len(self.systematic_labels)
+        if self.num_calib == 0:
+            self.num_calib = 1
         self.num_supernova = num_supernova
 
         self.manual_selection = self.get_correction(cov_scale=cov_scale)

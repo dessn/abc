@@ -279,6 +279,8 @@ class ApproximateModel(Model):
 
     def get_systematic_labels(self, simulations):
         label_list = [s.get_systematic_names() for s in simulations]
+        if len(label_list[0]) == 0:
+            label_list[0].append("Fake")
         start = label_list[0][:self.global_calibration]
         for l in label_list:
             start += l[self.global_calibration:]
