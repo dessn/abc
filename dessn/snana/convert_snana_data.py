@@ -266,7 +266,9 @@ if __name__ == "__main__":
     # convert("DES3Y_DES_NOMINAL")
     # convert("DES3Y_LOWZ_NOMINAL")
     # convert("DES3Y_DES_BULK")
-    convert("DES3Y_LOWZ_BULK")
+    # convert("DES3Y_LOWZ_BULK")
+    convert("DES3Y_LOWZ_VALIDATION")
+    convert("DES3Y_DES_VALIDATION")
     # convert("DES3Y_DES_BHMEFF", load_dump=True)
     # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
