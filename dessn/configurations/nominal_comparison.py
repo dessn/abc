@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    models = [ApproximateModelW()] # , ApproximateModelW(prior=True, statonly=True)]
+    models = [ApproximateModelW(), ApproximateModelW(statonly=True)]
     # Turn off mass and skewness for easy test
     simulation = [SNANASimulation(-1, "DES3Y_DES_NOMINAL"),
                   SNANASimulation(-1, "DES3Y_LOWZ_NOMINAL")]
