@@ -1,24 +1,23 @@
 import os
 import inspect
-import numpy as np
+import pickle
 from dessn.blind.blind import blind_om, blind_w
 
 
-def read(chainsfile,blind=True):
+def read(chain_file, blind=True):
+
     this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    chainsData = np.load(this_dir + "/" + chainsfile)
-    
-    samples = chainsData.samples
-    indices = chainsData.index
-    
-    omegam = samples[indices['omegam']]
-    w = samples[indices['w']]
+
+    with open(this_dir + "/" + chain_file, 'rb') as f:
+        chain_data = pickle.load(f, encoding='latin1')
+
+    samples = chain_data.samples
+    indices = chain_data.index
+    omegam = samples[:, indices['omegam']]
+    w = samples[:, indices['w']]
     if blind:
         omegam = blind_om(omegam)
         w = blind_w(w)
-    
-    return omegam, w
-    
-#chainsFile = '/scratch/midway/rkessler/djbrout/cosmomc/chains2/DB17_ALL_omw_alone.py_mcsamples'
-#omegam,w = read(chainsFile,blind=False)    
-#print omegam
+
+    norm_weight = 100000.0 * chain_data.weights / chain_data.weights.sum()
+    return omegam, w, norm_weight

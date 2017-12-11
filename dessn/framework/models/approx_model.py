@@ -13,7 +13,7 @@ class ApproximateModel(Model):
     def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=13, systematics_scale=1.0, statonly=False):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
-
+        self.statonly = statonly
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename

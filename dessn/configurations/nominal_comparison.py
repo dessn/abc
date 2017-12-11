@@ -1,6 +1,7 @@
 import os
 import logging
 import socket
+import numpy as np
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW
 from dessn.framework.simulations.snana import SNANASimulation
@@ -37,22 +38,25 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
-
-        bbc_chain1 = src.read("BBC_NOMINAL/NOMINAL_SIM_BBC5D_STATSYS", blind=False)
-        print(bbc_chain1)
-        exit()
-
         from chainconsumer import ChainConsumer
-        res = fitter.load()
-
         c = ChainConsumer()
-        for m, s, chain, truth, weight, old_weight, posterior in res:
-            name = "%s %s" % (m.__class__.__name__, s[0].simulation_name.replace("_", r"\_"))
-            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
-
-        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False, sigmas=[0, 1, 2], contour_labels="confidence")
-
         parameters = [r"$\Omega_m$", "$w$"]
 
+        loc = "BBC_NOMINAL/NOMINAL-%04d/DB17_V1_sn_omw_%d.py_mcsamples"
+        for j, name in enumerate(["BBC Stat+Syst", "BBC Stat"]):
+            bbc_chain1 = np.hstack(tuple([src.read(loc % (i + 1, j), blind=False) for i in range(10)])).T
+            c.add_chain(bbc_chain1[:, :2], parameters=parameters, weights=bbc_chain1[:, 2], name=name)
+
+        res = fitter.load()
+
+        for m, s, chain, truth, weight, old_weight, posterior in res:
+            name = "BHM Stat+Syst" if not m.statonly else "BHM Stat"
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        c1, c2 = 'lg', 'blue'
+        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, bins=0.7,
+                    plot_hists=False, sigmas=[0, 1, 2], colors=[c1, c1, c2, c2],
+                    linestyles=["-", "--", "-", "--"], shade_alpha=[0.2, 0, 0.2, 0], shade=True)
+
         print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, figsize=1.5)
+        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, figsize=1.5,
+                       extents={r"$\Omega_m$": [0.1, 0.65]})
