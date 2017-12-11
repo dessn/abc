@@ -2,9 +2,8 @@ import os
 import logging
 import socket
 
-from dessn.blind.blind import blind_om, blind_w
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModelW
+from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel
 from dessn.framework.simulations.snana import SNANASimulation
 
 
@@ -19,8 +18,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW()
-    # Turn off mass and skewness for easy test
+    models = [ApproximateModelW(prior=True), ApproximateModel()]
 
     ndes = 204
     nlowz = 137
@@ -35,7 +33,7 @@ if __name__ == "__main__":
     # data = model.get_data(simulations[0], 0)  # For testing
     # exit()
 
-    fitter.set_models(model)
+    fitter.set_models(*models)
     fitter.set_simulations(*simulations)
     fitter.set_num_cosmologies(25)
     fitter.set_max_steps(2000)
@@ -47,23 +45,18 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        m, s, chain, truth, weight, old_weight, posterior = fitter.load()
-        chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
-        chain["$w$"] = blind_w(chain["$w$"])
+        res = fitter.load()
 
-        c, c2 = ChainConsumer(), ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c2.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
+        c = ChainConsumer()
+        for m, s, chain, truth, weight, old_weight, posterior in res:
+            name = "%s %s" % (m.__class__.__name__, s[0].simulation_name.replace("_", r"\_"))
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False, sigmas=[0, 1, 2], contour_labels="confidence")
-        c2.configure(statistics="mean")
-
-        parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
+        parameters = [r"$\Omega_m$", "$w$"]
         print(c.analysis.get_latex_table(transpose=True))
         c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, watermark="Blinded", figsize=1.5)
         print("Plotting distributions")
-        c = ChainConsumer()
-        c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
-        c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
+        c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth)
 
 
