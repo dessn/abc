@@ -7,14 +7,18 @@ import os
 import inspect
 
 
-def des_sel(cov_scale=1.0):
+def des_sel(cov_scale=1.0, shift=None):
     sn, mean, cov = get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10")
+    if shift is not None:
+        mean += shift
     cov *= cov_scale
     return sn, mean, cov
 
 
-def lowz_sel(cov_scale=1.0):
+def lowz_sel(cov_scale=1.0, shift=None):
     sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF")
+    if shift is not None:
+        mean += shift
     cov *= cov_scale
     return sn, mean, cov
 
@@ -89,7 +93,7 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         cdf_eval = cdf(mbs, *vals)
 
         for i in range(50):
-            rands = np.random.multivariate_normal([0,0,0,0], cov=cov)
+            rands = np.random.multivariate_normal([0, 0, 0, 0], cov=cov)
             vals2 = vals + rands
             cdf_eval2 = cdf(mbs, *vals2)
             plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
@@ -137,7 +141,7 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         cdf_eval = sknorm(mbs, *vals)
 
         for i in range(50):
-            rands = np.random.multivariate_normal([0,0,0,0], cov=cov)
+            rands = np.random.multivariate_normal([0, 0, 0, 0], cov=cov)
             vals2 = vals + rands
             cdf_eval2 = sknorm(mbs, *vals2)
             plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
@@ -146,6 +150,7 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         plt.show()
 
     return True, vals, cov
+
 
 if __name__ == "__main__":
     get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF", plot=True)

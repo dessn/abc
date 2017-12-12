@@ -8,7 +8,7 @@ from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None):
         super().__init__()
         self.simulation_name = sim_name
         self.global_calib = global_calib
@@ -22,16 +22,17 @@ class SNANASimulation(Simulation):
         if self.num_calib == 0:
             self.num_calib = 1
         self.num_supernova = num_supernova
-
-        self.manual_selection = self.get_correction(cov_scale=cov_scale)
+        self.cov_scale = cov_scale
+        self.manual_selection = None
+        self.shift = shift
 
     def get_correction(self, cov_scale=1.0):
         if "_des" in self.simulation_name.lower():
             self.logger.info("Getting DES correction for sim %s" % self.simulation_name)
-            return des_sel(cov_scale=cov_scale)
+            return des_sel(cov_scale=cov_scale, shift=self.shift)
         elif "_lowz" in self.simulation_name.lower():
             self.logger.info("Getting LOWZ correction for sim %s" % self.simulation_name)
-            return lowz_sel(cov_scale=cov_scale)
+            return lowz_sel(cov_scale=cov_scale, shift=self.shift)
         else:
             raise ValueError("Cannot find des or lowz in your sim name, unsure which selection function to use!")
 
@@ -136,4 +137,6 @@ class SNANASimulation(Simulation):
         return result
 
     def get_approximate_correction(self):
+        if self.manual_selection is None:
+            self.manual_selection = self.get_correction(cov_scale=self.cov_scale)
         return self.manual_selection
