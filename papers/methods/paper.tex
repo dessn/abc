@@ -268,7 +268,11 @@ m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta
 \sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2 \notag\\ 
 &\quad\quad + 2(\beta \sigma_{M_B,c} - \alpha \sigma{m_B,x_1} - \alpha \beta \sigma_{x_1,c})
 \end{align}
-What then remains is determining the functional form of $P(S|m_B)$. For the treatment of the DES, we find that the error function which smoothly transitions from some constant efficiency down to zero is sufficient. This similar result has been found by many past surveys \citep{Dilday2008, Barbary2010, Perrett2012, Graur2013, Rodney2014} {\red THESE CITATIONS EXACTLY MIRROR RUBIN2015, NOT SURE IF I SHOULD CHANGE THEM}. For our treatment of the low redshift surveys included {\red Introduce which lowz surveys earlier on} we simplify the model fitting and group all low redshift surveys together. This requires a more complicated selection function than the error function used for DES, however is reasonably well fit with a skew normal. The selection functions were fit to apparent magnitude efficiency ratios calculated from SNANA simulations. The DES survey is thus characterised by $\mu_{\rm DES} = 22.3$, $\sigma_{\rm DES} = 0.7$, with the combined low redshift surveys characterised by $\mu_{\rm LowZ} = 14.1$, $\sigma_{\rm LowZ} = 1.36$, $\alpha_{\rm LowZ} = 3.8$.
+What then remains is determining the functional form of $P(S|m_B)$. For the treatment of the DES, we find that the error function which smoothly transitions from some constant efficiency down to zero is sufficient. This similar result has been found by many past surveys \citep{Dilday2008, Barbary2010, Perrett2012, Graur2013, Rodney2014} {\red THESE CITATIONS EXACTLY MIRROR RUBIN2015, NOT SURE IF I SHOULD CHANGE THEM}. For our treatment of the low redshift surveys included {\red Introduce which lowz surveys earlier on} we simplify the model fitting and group all low redshift surveys together. This requires a more complicated selection function than the error function used for DES, however is reasonably well fit with a skew normal.
+
+The selection functions were fit to apparent magnitude efficiency ratios calculated from SNANA simulations by calculating an efficiency ratio as a function of apparent magnitude. Uncertainty of the Malmquist bias (entering both through statistical uncertainty from finite sized simulations in the efficiency ratio and the discrepancy between the analytic approximation and non-analytic simulation results) is incorporated into the fitting for the analytic approximation. Uncertainty is uniformly added to the efficiency ratio until the reduced $\chi^2$ of the analytic fit reached $1$, allowing us to extract an uncertainty covariance matrix for our analytic fits.
+
+The DES survey is thus characterised by mean fit values $\mu_{\rm DES} = 22.3$, $\sigma_{\rm DES} = 0.7$, with the combined low redshift surveys characterised by $\mu_{\rm LowZ} = 14.1$, $\sigma_{\rm LowZ} = 1.36$, $\alpha_{\rm LowZ} = 3.8$. 
 
 
 With the well sampled approximation as specified previously, we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (DES) and skew normal selection (LowZ) functions respectively, this correction becomes
@@ -387,44 +391,45 @@ Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-l
 
 
 
+%
+%\section{Systematics Strength Test}
+%\label{sec:sys}
+%
+%\subsection{Singular Permutations}
+%
+%To test the impact of various systematics, we generate an array of simulations in which we simulate a dataset with one of the systematic variables permuted. We inspect the effects of systematic shifts using two cosmological models - Flat $\Lambda$CDM and Flat $w$CDM. To make the effects of the systematics more easily seen, we increase our simulated sample size to 500 LowZ and 500 DES-like supernovae, and enforce a prior on $\Omega_m \sim \mathcal{N}(0.3, 0.01)$ on the Flat $w$CDM model. In these test we wish to inspect the shift in statistical uncertainty with simulated systematic effects, and so compare first to a series of simulations with no simulated systematic changes, and also disable our treatment of systematics as described in Section \ref{sec:systreat} for these tests. Our tests are broken down into groups, where systematics of different nature are treated separately. In each simulation, only one systemic is permuted. For a baseleine, our first set has no systematic shift, and so the uncertainty in the parameter summaries is given by statistical uncertainty only. We then test several variations:
+%\begin{enumerate}
+%	\item 0.02 Gaussian error on the zero point offsets in a randomly selected band.
+%	\item $20 \angstrom $ Gaussian error on the filter wavelength.
+%	\item 10\% Gaussian error in the bias corrected flux measurement (with correct flux uncertainty).
+%	\item 10\% Gaussian error in the bias corrected flux measurement, but with incorrect flux error.
+%	\item 20\% Gaussian error on the Milky Way E(B-V) dust correction scale.
+%	\item 0.2 Gaussian error on the value of $R_V$ for calculating the extinction curve.
+%\end{enumerate}
+%
+%\begin{figure}
+%	\begin{center}
+%		\includegraphics[width=\columnwidth]{approximate_systematic_load_summary.pdf}
+%	\end{center}
+%	\caption{Investigating the impact of $\Omega_m$ by systematic permutations under Flat $\Lambda$CDM cosmology, validated using 200 realisations of data, with each dataset containing 500 LowZ supernovae and 500 DES-like supernovae.}
+%	\label{fig:sys_om}
+%\end{figure}
+%\begin{figure}
+%	\begin{center}
+%		\includegraphics[width=\columnwidth]{approximate_systematic_load_w_summary.pdf}
+%	\end{center}
+%	\caption{Investigating the impact of $w$ by systematic permutations under $w$CDM cosmology with the prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, validated using 200 realisations of data, with each dataset containing 500 LowZ supernovae and 500 DES-like supernovae.}
+%	\label{fig:sys_w}
+%\end{figure}
+%
+%We find that the most significant systematic are the zero points, as the 0.02 Gaussian error given to them resulted in significant changes to the shape of the marginalised posterior surface for both $\Omega_m$ and $w$, shifting them both to lower values and increasing uncertainty.
+%
+%{\red What are the actual size of the uncertainties of the systematics? Ie are zps really that badly known? Once I know, I can talk about if any of these are significant.}
+%
+%\subsection{Full Permutations}
+%
+%{\red When I have the final sims from Rick I can flesh this out}
 
-\section{Systematics Strength Test}
-\label{sec:sys}
-
-\subsection{Singular Permutations}
-
-To test the impact of various systematics, we generate an array of simulations in which we simulate a dataset with one of the systematic variables permuted. We inspect the effects of systematic shifts using two cosmological models - Flat $\Lambda$CDM and Flat $w$CDM. To make the effects of the systematics more easily seen, we increase our simulated sample size to 500 LowZ and 500 DES-like supernovae, and enforce a prior on $\Omega_m \sim \mathcal{N}(0.3, 0.01)$ on the Flat $w$CDM model. In these test we wish to inspect the shift in statistical uncertainty with simulated systematic effects, and so compare first to a series of simulations with no simulated systematic changes, and also disable our treatment of systematics as described in Section \ref{sec:systreat} for these tests. Our tests are broken down into groups, where systematics of different nature are treated separately. In each simulation, only one systemic is permuted. For a baseleine, our first set has no systematic shift, and so the uncertainty in the parameter summaries is given by statistical uncertainty only. We then test several variations:
-\begin{enumerate}
-	\item 0.02 Gaussian error on the zero point offsets in a randomly selected band.
-	\item $20 \angstrom $ Gaussian error on the filter wavelength.
-	\item 10\% Gaussian error in the bias corrected flux measurement (with correct flux uncertainty).
-	\item 10\% Gaussian error in the bias corrected flux measurement, but with incorrect flux error.
-	\item 20\% Gaussian error on the Milky Way E(B-V) dust correction scale.
-	\item 0.2 Gaussian error on the value of $R_V$ for calculating the extinction curve.
-\end{enumerate}
-
-\begin{figure}
-	\begin{center}
-		\includegraphics[width=\columnwidth]{approximate_systematic_load_summary.pdf}
-	\end{center}
-	\caption{Investigating the impact of $\Omega_m$ by systematic permutations under Flat $\Lambda$CDM cosmology, validated using 200 realisations of data, with each dataset containing 500 LowZ supernovae and 500 DES-like supernovae.}
-	\label{fig:sys_om}
-\end{figure}
-\begin{figure}
-	\begin{center}
-		\includegraphics[width=\columnwidth]{approximate_systematic_load_w_summary.pdf}
-	\end{center}
-	\caption{Investigating the impact of $w$ by systematic permutations under $w$CDM cosmology with the prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, validated using 200 realisations of data, with each dataset containing 500 LowZ supernovae and 500 DES-like supernovae.}
-	\label{fig:sys_w}
-\end{figure}
-
-We find that the most significant systematic are the zero points, as the 0.02 Gaussian error given to them resulted in significant changes to the shape of the marginalised posterior surface for both $\Omega_m$ and $w$, shifting them both to lower values and increasing uncertainty.
-
-{\red What are the actual size of the uncertainties of the systematics? Ie are zps really that badly known? Once I know, I can talk about if any of these are significant.}
-
-\subsection{Full Permutations}
-
-{\red When I have the final sims from Rick I can flesh this out}
 
 
 \section{DES Forecasts}
@@ -453,6 +458,8 @@ To forecast the results for the 3 year DES spectroscopic supernovae sample, we g
 
 
 \section{Conclusions}
+
+Conclude.
 
 
 
