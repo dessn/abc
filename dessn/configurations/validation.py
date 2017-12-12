@@ -27,6 +27,11 @@ if __name__ == "__main__":
     simulations = [
             [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
             [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST1")],
+            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST2"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST2")],
+            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST3"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST3")],
+            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST4"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST4")],
+            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST5"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST5")],
+            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST6"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST6")],
         ]
     fitter = Fitter(dir_name)
 
@@ -35,9 +40,9 @@ if __name__ == "__main__":
 
     fitter.set_models(model)
     fitter.set_simulations(*simulations)
-    fitter.set_num_cosmologies(20)
-    fitter.set_max_steps(2000)
-    fitter.set_num_walkers(10)
+    fitter.set_num_cosmologies(200)
+    fitter.set_max_steps(3000)
+    fitter.set_num_walkers(1)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
