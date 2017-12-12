@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     fitter.set_models(model)
     fitter.set_simulations(*simulations)
-    fitter.set_num_cosmologies(200)
+    fitter.set_num_cosmologies(100)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
 
