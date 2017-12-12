@@ -250,7 +250,6 @@ def convert(base_folder, load_dump=False):
     dump_dir, output_dir, nml_file = get_directories(base_folder)
     logging.info("Found nml file %s" % nml_file)
     systematic_labels, systematics_scales = get_systematic_scales(nml_file)
-
     sim_dirs = get_realisations(base_folder, dump_dir)
     for sim in sim_dirs:
         sim_name = os.path.basename(sim)
@@ -258,6 +257,8 @@ def convert(base_folder, load_dump=False):
             this_output_dir = output_dir + sim_name.split("-0")[0]
         else:
             this_output_dir = output_dir + sim_name
+        if base_folder.endswith("sys"):
+            this_output_dir += "sys"
         digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump)
 
 
