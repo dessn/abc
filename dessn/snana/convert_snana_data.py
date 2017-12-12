@@ -61,7 +61,7 @@ def get_systematic_scales(nml_file):
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
     sys_label_dict = get_systematic_mapping()
-    systematic_labels = [sys_label_dict[n] for n in systematic_names]
+    systematic_labels = [sys_label_dict.get(n, "?") for n in systematic_names]
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
@@ -87,6 +87,8 @@ def get_directories(base_folder):
 
 
 def get_realisations(base_folder, dump_dir):
+    if base_folder.endswith("sys"):
+        base_folder = base_folder[:-4]
     inner_files = sorted(list(os.listdir(dump_dir)))
     inner_paths = [dump_dir + "/" + f for f in inner_files]
     sim_dirs = [p for p, f in zip(inner_paths, inner_files) if os.path.isdir(p) and f.startswith(base_folder)]
@@ -267,8 +269,10 @@ if __name__ == "__main__":
     # convert("DES3Y_LOWZ_NOMINAL")
     # convert("DES3Y_DES_BULK")
     # convert("DES3Y_LOWZ_BULK")
-    convert("DES3Y_LOWZ_VALIDATION")
-    convert("DES3Y_DES_VALIDATION")
+    # convert("DES3Y_LOWZ_VALIDATION")
+    # convert("DES3Y_DES_VALIDATION")
+    convert("DES3Y_LOWZ_VALIDATIONsys")
+    convert("DES3Y_DES_VALIDATIONsys")
     # convert("DES3Y_DES_BHMEFF", load_dump=True)
     # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
