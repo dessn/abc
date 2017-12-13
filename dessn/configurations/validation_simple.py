@@ -30,9 +30,9 @@ if __name__ == "__main__":
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
         [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.25, 0, 0, 0])),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.25, 0, 0]))],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.0, 0, 0, 0])),
+        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.0, 0.1, 0, 0])),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.25, 0, 0]))],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.25, 0, 0, 0])),
+        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0., 0.1, 0, 0])),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.0, 0, 0]))],
     ]
     fitter = Fitter(dir_name)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     fitter.set_simulations(*simulations)
     fitter.set_num_cosmologies(200)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(2)
+    fitter.set_num_walkers(1)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
