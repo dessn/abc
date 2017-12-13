@@ -27,11 +27,11 @@ if __name__ == "__main__":
     simulations = [
             [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
             [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST1")],
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST2"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST2")],
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST3"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST3")],
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST4"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST4")],
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST5"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST5")],
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST6"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST6")],
+            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST2"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST2")],
+            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST3"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST3")],
+            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST4"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST4")],
+            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST5"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST5")],
+            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST6"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST6")],
         ]
     fitter = Fitter(dir_name)
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     fitter.set_models(model)
     fitter.set_simulations(*simulations)
-    fitter.set_num_cosmologies(100)
+    fitter.set_num_cosmologies(200)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
 
@@ -48,7 +48,6 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
-        from chainconsumer import ChainConsumer
         import numpy as np
         res = fitter.load(split_cosmo=True, split_sims=True)
 
@@ -67,6 +66,7 @@ if __name__ == "__main__":
             print("%35s %8.4f %8.4f %8.4f %8.4f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.std(vals[:, 0])/np.sqrt(100), np.mean(vals[:, 1])))
+            # from chainconsumer import ChainConsumer
 
             # chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
             # chain["$w$"] = blind_w(chain["$w$"])
