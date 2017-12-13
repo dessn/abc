@@ -21,18 +21,18 @@ if __name__ == "__main__":
     model = ApproximateModelW(prior=True, global_calibration=1)
     # Turn off mass and skewness for easy test
 
-    ndes = 600
-    nlowz = 300
+    ndes = 300
+    nlowz = 150
     import numpy as np
 
     simulations = [
         [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY"),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.15, 0, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.15, 0, 0]))],
+        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.25, 0, 0, 0])),
+         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.25, 0, 0]))],
         [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.0, 0, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.15, 0, 0]))],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.15, 0, 0, 0])),
+         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.25, 0, 0]))],
+        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.25, 0, 0, 0])),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.0, 0, 0]))],
     ]
     fitter = Fitter(dir_name)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     fitter.set_simulations(*simulations)
     fitter.set_num_cosmologies(200)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(1)
+    fitter.set_num_walkers(2)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
