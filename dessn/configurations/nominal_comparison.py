@@ -55,8 +55,12 @@ if __name__ == "__main__":
         c1, c2 = 'lg', 'blue'
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, bins=0.7,
                     plot_hists=False, sigmas=[0, 1, 2], colors=[c1, c1, c2, c2],
-                    linestyles=["-", "--", "-", "--"], shade_alpha=[0.2, 0, 0.2, 0], shade=True)
+                    linestyles=["-", "--", "-", "--"], shade_alpha=0.2, shade=True)
 
         print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, figsize=1.5,
-                       extents={r"$\Omega_m$": [0.1, 0.65]})
+        ns = c._names
+        extents = {r"$\Omega_m$": [0.1, 0.65], "$w$": [-1.9, -0.5]}
+        c.plotter.plot(filename=pfn + "Syst.png", truth=truth, parameters=parameters, figsize=1.5,
+                       extents=extents, chains=[n for n in ns if "Syst" in n])
+        c.plotter.plot(filename=pfn + "Stat.png", truth=truth, parameters=parameters, figsize=1.5,
+                       extents=extents, chains=[n for n in ns if "Syst" not in n])
