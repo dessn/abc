@@ -28,11 +28,11 @@ if __name__ == "__main__":
     simulations = [
         [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY"),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.05, 0, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.05, 0, 0]))],
+        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.15, 0, 0, 0])),
+         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.15, 0, 0]))],
         [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.0, 0, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.05, 0, 0]))],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.05, 0, 0, 0])),
+         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.15, 0, 0]))],
+        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.15, 0, 0, 0])),
          SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.0, 0, 0]))],
     ]
     fitter = Fitter(dir_name)
@@ -64,11 +64,13 @@ if __name__ == "__main__":
             # for key in ws.keys():
             #     vals = np.array(ws[key])
             # print(key, vals[:, 0])
-        for key in sorted(ws.keys()):
+        for i, key in enumerate(sorted(ws.keys())):
             vals = np.array(ws[key])
-            print("%35s %8.4f %8.4f %8.4f %8.4f"
-                  % (key, np.average(vals[:, 0], weights=1 / (vals[:, 1] ** 2)),
-                     np.std(vals[:, 0]), np.std(vals[:, 0]) / np.sqrt(100), np.mean(vals[:, 1])))
+            # print("%35s %8.4f %8.4f %8.4f %8.4f"
+            print("%d %8.4f %8.4f %8.4f %8.4f   %s"
+                  % (i, np.average(vals[:, 0], weights=1 / (vals[:, 1] ** 2)),
+                     np.std(vals[:, 0]), np.std(vals[:, 0]) / np.sqrt(100), np.mean(vals[:, 1]),
+                     key))
 
             # chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
             # chain["$w$"] = blind_w(chain["$w$"])
