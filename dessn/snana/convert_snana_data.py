@@ -37,7 +37,7 @@ def is_pos_def(x):
     return np.all(np.linalg.eigvals(x) > 0)
 
 
-def get_scaling():
+def get_scaling(override_to_unity=False):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     scale_file = dir_name + os.sep + "CREATE_COV.INPUT"
@@ -57,7 +57,7 @@ def load_systematic_names(nml_file):
     return results
 
 
-def get_systematic_scales(nml_file):
+def get_systematic_scales(nml_file, override=False):
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
     sys_label_dict = get_systematic_mapping()
@@ -65,10 +65,13 @@ def get_systematic_scales(nml_file):
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
-        for n, s in scaling:
-            if fnmatch.fnmatch(name, n):
-                scale = s
-                break
+        if not override:
+            for n, s in scaling:
+                if fnmatch.fnmatch(name, n):
+                    scale = s
+                    break
+        else:
+            logging.info("Override engaged. Setting scales to unity.")
         systematics_scales.append(scale)
     logging.debug("systemtatic scales are %s" % systematics_scales)
     return systematic_labels, systematics_scales
@@ -197,9 +200,9 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
                 offset_x1.append((mag['x1'][sorted_indexes[index]] - x1) * scale)
                 offset_c.append((mag['c'][sorted_indexes[index]] - c) * scale)
         if len(offset_mb) == 0:
-            offset_mb.append(0)
-            offset_x1.append(0)
-            offset_c.append(0)
+            offset_mb.append(0.0)
+            offset_x1.append(0.0)
+            offset_c.append(0.0)
 
         if np.any(np.isnan(offset_mb)):
             num_bad_calib += 1
@@ -245,11 +248,11 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
 
-def convert(base_folder, load_dump=False):
+def convert(base_folder, load_dump=False, override=False):
 
     dump_dir, output_dir, nml_file = get_directories(base_folder)
     logging.info("Found nml file %s" % nml_file)
-    systematic_labels, systematics_scales = get_systematic_scales(nml_file)
+    systematic_labels, systematics_scales = get_systematic_scales(nml_file, override=override)
     sim_dirs = get_realisations(base_folder, dump_dir)
     for sim in sim_dirs:
         sim_name = os.path.basename(sim)
@@ -272,8 +275,8 @@ if __name__ == "__main__":
     # convert("DES3Y_LOWZ_BULK")
     # convert("DES3Y_LOWZ_VALIDATION")
     # convert("DES3Y_DES_VALIDATION")
-    convert("DES3Y_LOWZ_VALIDATIONsys")
-    convert("DES3Y_DES_VALIDATIONsys")
+    convert("DES3Y_LOWZ_VALIDATIONsys", override=True)
+    convert("DES3Y_DES_VALIDATIONsys", override=True)
     # convert("DES3Y_DES_BHMEFF", load_dump=True)
     # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
