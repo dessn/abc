@@ -19,7 +19,7 @@ from scipy.stats import norm
 from dessn.snana.systematic_names import get_systematic_mapping
 
 
-def load_fitres(filename, skiprows=10):
+def load_fitres(filename, skiprows=6):
     if filename.endswith(".gz"):
         compression = "gzip"
     else:
@@ -34,10 +34,12 @@ def load_fitres(filename, skiprows=10):
 
 
 def is_pos_def(x):
+    if not np.all(np.isfinite(x)):
+        return False
     return np.all(np.linalg.eigvals(x) > 0)
 
 
-def get_scaling(override_to_unity=False):
+def get_scaling():
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     scale_file = dir_name + os.sep + "CREATE_COV.INPUT"
@@ -271,12 +273,12 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_COMBINED_FITS")
     # convert("DES3Y_DES_NOMINAL")
     # convert("DES3Y_LOWZ_NOMINAL")
-    # convert("DES3Y_DES_BULK")
-    # convert("DES3Y_LOWZ_BULK")
+    convert("DES3Y_DES_BULK")
+    convert("DES3Y_LOWZ_BULK")
     # convert("DES3Y_LOWZ_VALIDATION")
     # convert("DES3Y_DES_VALIDATION")
-    convert("DES3Y_LOWZ_VALIDATIONsys", override=True)
-    convert("DES3Y_DES_VALIDATIONsys", override=True)
+    # convert("DES3Y_LOWZ_VALIDATIONsys", override=True)
+    # convert("DES3Y_DES_VALIDATIONsys", override=True)
     # convert("DES3Y_DES_BHMEFF", load_dump=True)
     # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
 
