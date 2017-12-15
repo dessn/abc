@@ -35,9 +35,9 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    fitter.set_num_cosmologies(25)
-    fitter.set_max_steps(2000)
-    fitter.set_num_walkers(5)
+    fitter.set_num_cosmologies(100)
+    fitter.set_max_steps(3000)
+    fitter.set_num_walkers(2)
     fitter.set_num_cpu(300)
 
     h = socket.gethostname()
@@ -47,16 +47,32 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         res = fitter.load()
 
-        c = ChainConsumer()
-        for m, s, chain, truth, weight, old_weight, posterior in res:
-            name = "%s %s" % (m.__class__.__name__, s[0].simulation_name.replace("_", r"\_"))
-            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        c1, c2 = ChainConsumer(), ChainConsumer()
 
-        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False, sigmas=[0, 1, 2], contour_labels="confidence")
-        parameters = [r"$\Omega_m$", "$w$"]
-        print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, watermark="Blinded", figsize=1.5)
-        print("Plotting distributions")
-        c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth)
+        for m, s, chain, truth, weight, old_weight, posterior in res:
+            name = s[0].simulation_name.replace("DES3Y_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
+            name = "A"
+            if isinstance(m, ApproximateModelW):
+                print("C2")
+                c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            else:
+                print("C1")
+                c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            break
+
+        # c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+        print(c2._chains)
+        import numpy as np
+        print(np.any(np.isnan(c2._chains[0])))
+        # c2.plotter.plot(filename=pfn + "3.png", parameters=3, figsize=1.5)
+        fig = c2.plotter.plot(parameters=3, figsize=1.5)
+        fig.savefig(pfn + "sigh.png", transparent=True, pad_inches=0.05, bbox_inches="tight")
+        # fig.savefig(f, bbox_inches="tight", dpi=dpi, transparent=True, pad_inches=0.05)
+
+        # c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, figsize=1.5, errorbar=True)
+        # c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], figsize=1.5, errorbar=True)
+        # print("Plotting distributions")
+        # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth)
 
 
