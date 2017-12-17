@@ -7,5 +7,5 @@
    Scatter from no mag shift: 0.0742
    Uncertainty from stat fit: 0.1170
 
-   Scatter from simulating mag shift 0.02: 0.1599
+   Scatter from mag shifts:  0.1599
    Uncertainty from sys fit: 0.1708

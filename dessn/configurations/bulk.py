@@ -80,19 +80,22 @@ if __name__ == "__main__":
                 wdict[name].append(chain)
         import numpy as np
         with open(pfn + "_comp.txt", 'w') as f:
+            f.write("%10s %5s(%5s) %5s %5s\n" % ("Key", "<w>", "<werr>", "std<w>", "bias"))
             for key in sorted(wdict.keys()):
                 ws = [cc["$w$"] for cc in wdict[key]]
                 means = [np.mean(w) for w in ws]
                 stds = [np.std(w) for w in ws]
-                mean_mean = np.mean(means)
+                # mean_mean = np.mean(means)
+                mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
                 mean_std = np.mean(stds)
-                f.write("%10s %0.4f(%0.4f) %0.4f\n" % (key, mean_mean, mean_std, np.std(means)))
-
-        print("Saving Parameter values")
-        with open(pfn + "_all_params1.txt", 'w') as f:
-            f.write(c1.analysis.get_latex_table(transpose=True))
-        with open(pfn + "_all_params2.txt", 'w') as f:
-            f.write(c2.analysis.get_latex_table(transpose=True))
-        c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, truth=[0.3], figsize=1.5, errorbar=True)
-        c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
+                bias = (mean_mean + 1) / mean_std
+                f.write("%10s %0.4f(%0.4f) %0.4f %0.4f\n" % (key, mean_mean, mean_std, np.std(means), bias))
+        #
+        # print("Saving Parameter values")
+        # with open(pfn + "_all_params1.txt", 'w') as f:
+        #     f.write(c1.analysis.get_latex_table(transpose=True))
+        # with open(pfn + "_all_params2.txt", 'w') as f:
+        #     f.write(c2.analysis.get_latex_table(transpose=True))
+        # c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, truth=[0.3], figsize=1.5, errorbar=True)
+        # c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
 
