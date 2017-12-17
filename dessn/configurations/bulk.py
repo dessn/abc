@@ -45,33 +45,43 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        res = fitter.load()
+        res = fitter.load(split_models=True, split_sims=True)
+        res2 = fitter.load(split_models=True, split_sims=False)
 
-        c1, c2 = ChainConsumer(), ChainConsumer()
+        c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
 
         for m, s, chain, truth, weight, old_weight, posterior in res:
             name = s[0].simulation_name.replace("DES3Y_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-            name = "A"
             if isinstance(m, ApproximateModelW):
                 print("C2")
                 c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
             else:
                 print("C1")
                 c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-            break
+        for m, s, chain, truth, weight, old_weight, posterior in res2:
+            name = "All"
+            if isinstance(m, ApproximateModelW):
+                print("C2")
+                c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            else:
+                print("C1")
+                c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
-        # c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
-        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
-        print(c2._chains)
-        import numpy as np
-        print(np.any(np.isnan(c2._chains[0])))
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+
+        print("Saving Parameter values")
+        with open(pfn + "_all_params1.txt", 'w') as f:
+            f.write(c1.analysis.get_latex_table(transpose=True))
+        with open(pfn + "_all_params2.txt", 'w') as f:
+            f.write(c2.analysis.get_latex_table(transpose=True))
         # c2.plotter.plot(filename=pfn + "3.png", parameters=3, figsize=1.5)
-        fig = c2.plotter.plot(parameters=3, figsize=1.5)
-        fig.savefig(pfn + "sigh.png", transparent=True, pad_inches=0.05, bbox_inches="tight")
+        # fig = c2.plotter.plot(parameters=3, figsize=1.5)
+        # fig.savefig(pfn + "sigh.png", transparent=True, pad_inches=0.05, bbox_inches="tight")
         # fig.savefig(f, bbox_inches="tight", dpi=dpi, transparent=True, pad_inches=0.05)
 
-        # c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, figsize=1.5, errorbar=True)
-        # c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], figsize=1.5, errorbar=True)
+        c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, truth=[0.3], figsize=1.5, errorbar=True)
+        c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         # print("Plotting distributions")
         # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth)
 
