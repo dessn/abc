@@ -70,19 +70,29 @@ if __name__ == "__main__":
         c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
+        res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
+        wdict = {}
+        for m, s, chain, truth, weight, old_weight, posterior in res3:
+            if isinstance(m, ApproximateModelW):
+                name = s[0].simulation_name.replace("DES3Y_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
+                if wdict.get(name) is None:
+                    wdict[name] = []
+                wdict[name].append(chain)
+        import numpy as np
+        with open(pfn + "_comp.txt", 'w') as f:
+            for key in sorted(wdict.keys()):
+                ws = [cc["$w$"] for cc in wdict[key]]
+                means = [np.mean(w) for w in ws]
+                stds = [np.std(w) for w in ws]
+                mean_mean = np.mean(means)
+                mean_std = np.mean(stds)
+                f.write("%10s %0.4f(%0.4f) %0.4f\n" % (key, mean_mean, mean_std, np.std(means)))
+
         print("Saving Parameter values")
         with open(pfn + "_all_params1.txt", 'w') as f:
             f.write(c1.analysis.get_latex_table(transpose=True))
         with open(pfn + "_all_params2.txt", 'w') as f:
             f.write(c2.analysis.get_latex_table(transpose=True))
-        # c2.plotter.plot(filename=pfn + "3.png", parameters=3, figsize=1.5)
-        # fig = c2.plotter.plot(parameters=3, figsize=1.5)
-        # fig.savefig(pfn + "sigh.png", transparent=True, pad_inches=0.05, bbox_inches="tight")
-        # fig.savefig(f, bbox_inches="tight", dpi=dpi, transparent=True, pad_inches=0.05)
-
         c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, truth=[0.3], figsize=1.5, errorbar=True)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
-        # print("Plotting distributions")
-        # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth)
-
 
