@@ -2,6 +2,8 @@ import os
 import logging
 import socket
 
+from chainconsumer import ChainConsumer
+
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW
 from dessn.framework.simulations.snana import SNANASimulation
@@ -19,22 +21,19 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     model = ApproximateModelW(prior=True, global_calibration=0)
-    # Turn off mass and skewness for easy test
 
     ndes = 600
     nlowz = 300
     simulations = [
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLYsys"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLYsys")]
+            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLYsys"),
+             SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLYsys")]
         ]
     fitter = Fitter(dir_name)
-
-    # data = model.get_data(simulations[0], 0)  # For testing
-    # exit()
 
     fitter.set_models(model)
     fitter.set_simulations(*simulations)
     fitter.set_num_cosmologies(200)
-    fitter.set_max_steps(2000)
+    fitter.set_max_steps(3000)
     fitter.set_num_walkers(2)
 
     h = socket.gethostname()
@@ -43,6 +42,7 @@ if __name__ == "__main__":
     else:
         import numpy as np
         res = fitter.load(split_cosmo=True, split_sims=True)
+        res2 = [fitter.load()]
 
         ws = {}
         for m, s, chain, truth, weight, old_weight, posterior in res:
@@ -51,13 +51,13 @@ if __name__ == "__main__":
                 ws[key] = []
             ws[key].append([chain["$w$"].mean(), np.std(chain["$w$"])])
 
-        # for key in ws.keys():
-        #     vals = np.array(ws[key])
-            # print(key, vals[:, 0])
         for key in sorted(ws.keys()):
             vals = np.array(ws[key])
             print("%35s %8.4f %8.4f %8.4f %8.4f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.std(vals[:, 0])/np.sqrt(100), np.mean(vals[:, 1])))
 
-
+        c = ChainConsumer()
+        for m, s, chain, truth, weight, old_weight, posterior in res2:
+            c.add_chain(chain, weights=weight, posterior=posterior)
+        c.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], parameters=4)

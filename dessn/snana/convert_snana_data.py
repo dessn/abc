@@ -20,11 +20,18 @@ from dessn.snana.systematic_names import get_systematic_mapping
 
 
 def load_fitres(filename, skiprows=6):
+    logging.debug("Loading %s" % filename)
     if filename.endswith(".gz"):
         compression = "gzip"
     else:
         compression = None
-    dataframe = pd.read_csv(filename, sep='\s+', compression=compression, skiprows=skiprows, comment="#")
+    try:
+        dataframe = pd.read_csv(filename, sep='\s+', compression=compression, skiprows=skiprows, comment="#")
+        if len(dataframe.columns) == 2:
+            raise ValueError("Stupid file format")
+    except ValueError:
+        logging.debug("Trying to 10 skip")
+        dataframe = pd.read_csv(filename, sep='\s+', compression=compression, skiprows=10, comment="#")
     columns = ['CID', 'zHD', 'HOST_LOGMASS', 'HOST_LOGMASS_ERR', 'x1',
                'x1ERR', 'c', 'cERR', 'mB', 'mBERR', 'x0', 'x0ERR',
                'COV_x1_c', 'COV_x1_x0', 'COV_c_x0', 'SIM_mB', 'SIM_x1', 'SIM_c']
@@ -133,6 +140,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
     fitres_files = sorted([sim_dir + "/" + i for i in inner_files if i.endswith(".FITRES.gz")])
     base_fitres = fitres_files[0]
     sysematics_fitres = fitres_files[1:]
+    logging.info("Have %d fitres files for systematics" % len(sysematics_fitres))
 
     base_fits = load_fitres(base_fitres)
     sysematics = [load_fitres(m) for m in sysematics_fitres]
@@ -211,7 +219,6 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
             num_bad_calib_index += np.isnan(offset_mb)
             continue
         offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
-
         passed_cids.append(cid)
 
         if isinstance(cid, str):

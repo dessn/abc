@@ -88,7 +88,7 @@ class SNANASimulation(Simulation):
         filename = self.data_folder + "passed_%d.npy" % cosmology_index
         assert os.path.exists(filename), "Cannot find file %s, do you have this realisations?" % filename
         supernovae = np.load(filename)
-
+        print("%s SN in %s" % (supernovae.shape, filename))
         if n_sne != -1:
             supernovae = supernovae[:n_sne, :]
         else:

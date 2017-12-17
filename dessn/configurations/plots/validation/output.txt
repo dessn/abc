@@ -1,0 +1,11 @@
+    DES3Y_DES_VALIDATION_STAT+SYST1  -0.9588   0.1599   0.0160   0.1229
+      DES3Y_DES_VALIDATION_STATONLY  -0.9637   0.0742   0.0074   0.1170
+   DES3Y_DES_VALIDATION_STATONLYsys  -1.3199   0.1410   0.0141   0.1708
+
+                                      mean     std(means)        mean(err)
+
+   Scatter from no mag shift: 0.0742
+   Uncertainty from stat fit: 0.1170
+
+   Scatter from simulating mag shift 0.02: 0.1599
+   Uncertainty from sys fit: 0.1708
