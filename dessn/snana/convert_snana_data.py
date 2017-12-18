@@ -20,7 +20,7 @@ from dessn.snana.systematic_names import get_systematic_mapping
 
 
 def load_fitres(filename, skiprows=6):
-    logging.debug("Loading %s" % filename)
+    # logging.debug("Loading %s" % filename)
     if filename.endswith(".gz"):
         compression = "gzip"
     else:
