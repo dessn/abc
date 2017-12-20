@@ -290,8 +290,8 @@ if __name__ == "__main__":
     # convert("DES3YR_LOWZ_BULK")
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
-    # convert("DES3YR_LOWZ_VALIDATION")
-    convert("DES3YR_DES_VALIDATION")
+    convert("DES3YR_LOWZ_VALIDATION")
+    # convert("DES3YR_DES_VALIDATION")
     # convert("DES3YR_LOWZ_VALIDATIONsys", override=True)
     # convert("DES3YR_DES_VALIDATIONsys", override=True)
 

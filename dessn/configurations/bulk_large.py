@@ -43,36 +43,36 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        res = fitter.load(split_models=True, split_sims=True)
-        res2 = fitter.load(split_models=True, split_sims=False)
+        # res = fitter.load(split_models=True, split_sims=True)
+        # res2 = fitter.load(split_models=True, split_sims=False)
 
         c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
 
-        for m, s, chain, truth, weight, old_weight, posterior in res:
-            name = s[0].simulation_name.replace("DES3Y_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-            if isinstance(m, ApproximateModelW):
-                print("C2")
-                c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
-            else:
-                print("C1")
-                c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        for m, s, chain, truth, weight, old_weight, posterior in res2:
-            name = "All"
-            if isinstance(m, ApproximateModelW):
-                print("C2")
-                c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
-            else:
-                print("C1")
-                c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        # for m, s, chain, truth, weight, old_weight, posterior in res:
+        #     name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
+        #     if isinstance(m, ApproximateModelW):
+        #         print("C2")
+        #         c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        #     else:
+        #         print("C1")
+        #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        # for m, s, chain, truth, weight, old_weight, posterior in res2:
+        #     name = "All"
+        #     if isinstance(m, ApproximateModelW):
+        #         print("C2")
+        #         c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        #     else:
+        #         print("C1")
+        #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+        # c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
         res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
         wdict = {}
         for m, s, chain, truth, weight, old_weight, posterior in res3:
             if isinstance(m, ApproximateModelW):
-                name = s[0].simulation_name.replace("DES3Y_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
+                name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
                 if wdict.get(name) is None:
                     wdict[name] = []
                 wdict[name].append(chain)
@@ -81,6 +81,7 @@ if __name__ == "__main__":
             f.write("%10s %5s(%5s) %5s %5s\n" % ("Key", "<w>", "<werr>", "std<w>", "bias"))
             for key in sorted(wdict.keys()):
                 ws = [cc["$w$"] for cc in wdict[key]]
+                print(len(ws))
                 means = [np.mean(w) for w in ws]
                 stds = [np.std(w) for w in ws]
                 # mean_mean = np.mean(means)
