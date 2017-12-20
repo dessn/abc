@@ -48,32 +48,17 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        # m, s, chain, truth, weight, old_weight, posterior = fitter.load()
-        # chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
-        # chain["$w$"] = blind_w(chain["$w$"])
-        #
-        # c, c2 = ChainConsumer(), ChainConsumer()
-        # c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        # c2.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        # c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False, sigmas=[0, 1, 2], contour_labels="confidence")
-        # c2.configure(statistics="mean")
-        #
-        # parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
-        # print(c.analysis.get_latex_table(transpose=True))
-        # c.plotter.plot(filename=pfn + ".png", truth=truth, parameters=parameters, watermark="Blinded", figsize=1.5)
-        # print("Plotting distributions")
-        # c = ChainConsumer()
-        # c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
-        # c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
-        # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
-        #
-        # with open(pfn + "_nusiance.txt", "w") as f:
-        #     f.write(c2.analysis.get_latex_table(transpose=True, parameters=[r"$\Omega_m$", "$w$",
-        #                                                                     r"$\alpha$", r"$\beta$",
-        #                                                                     r"$\sigma_{\rm m_B}^{0}$",
-        #                                                                     r"$\sigma_{\rm m_B}^{1}$",
-        #                                                                     r"$\delta(0)$",
-        #                                                                     r"$\delta(\infty)/\delta(0)$"]))
+        res = fitter.load()
+        c = ChainConsumer()
+        for m, s, chain, truth, weight, old_weight, posterior in res:
+            name = "Stat + Syst" if not m.statonly else "Stat"
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+
+        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
+                    sigmas=[0, 1, 2], linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0])
+        parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
+        print(c.analysis.get_latex_table(transpose=True))
+        c.plotter.plot(filename=pfn + ".png", parameters=parameters, figsize=1.5)
 
         res = fitter.load(split_cosmo=True)
         import numpy as np
@@ -99,4 +84,4 @@ if __name__ == "__main__":
             std_std = np.std(stds)
             print("%s %8.3f %8.3f %8.3f %8.3f %8.3f" % (p, wmean, wmean_error_from_rms, wmean_error_on_error, std, std_std))
             print("%s %6.3f %6.3f %6.3f" % (p, getweightedAvg(mus, stds), getRMSErr(mus), getweightedAvgErr(stds)))
-            print(mus)
+            # print(mus)
