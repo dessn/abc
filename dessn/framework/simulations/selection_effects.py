@@ -8,7 +8,7 @@ import inspect
 
 
 def des_sel(cov_scale=1.0, shift=None):
-    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10")
+    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10")
     if shift is not None:
         mean += shift
     cov *= cov_scale
@@ -16,7 +16,7 @@ def des_sel(cov_scale=1.0, shift=None):
 
 
 def lowz_sel(cov_scale=1.0, shift=None):
-    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF")
+    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF")
     if shift is not None:
         mean += shift
     cov *= cov_scale
@@ -153,6 +153,6 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
 
 
 if __name__ == "__main__":
-    get_selection_effects_skewnorm("snana_data/DES3Y_LOWZ_BHMEFF", plot=True)
-    get_selection_effects_cdf("snana_data/DES3Y_DES_BHMEFF_AMG10", plot=True)
+    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF", plot=True)
+    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
     # get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_CD/all.npy", plot=True)
