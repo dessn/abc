@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     models = [ApproximateModelW(), ApproximateModelW(statonly=True)]
     # Turn off mass and skewness for easy test
-    simulation = [SNANASimulation(-1, "DES3Y_DES_NOMINAL"),
-                  SNANASimulation(-1, "DES3Y_LOWZ_NOMINAL")]
+    simulation = [SNANASimulation(-1, "DES3YR_DES_NOMINAL"),
+                  SNANASimulation(-1, "DES3YR_LOWZ_NOMINAL")]
 
     fitter = Fitter(dir_name)
 

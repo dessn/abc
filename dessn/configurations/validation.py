@@ -25,8 +25,8 @@ if __name__ == "__main__":
     ndes = 600
     nlowz = 300
     simulations = [
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
-            [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST1")],
+            [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STATONLY")],
+            [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STAT+SYST1")],
             # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST2"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST2")],
             # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST3"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST3")],
             # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST4"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST4")],
