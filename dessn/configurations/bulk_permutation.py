@@ -18,22 +18,28 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=True, global_calibration=1)
+    model = ApproximateModelW(prior=True)
     # Turn off mass and skewness for easy test
 
-    ndes = 300
-    nlowz = 150
+    ndes = 204
+    nlowz = 137
     import numpy as np
 
     simulations = [
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY"),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY")],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.25, 0, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.25, 0, 0]))],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0.0, 0.1, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.25, 0, 0]))],
-        [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STATONLY", shift=np.array([0., 0.1, 0, 0])),
-         SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STATONLY", shift=np.array([0.0, 0.0, 0, 0]))],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"),
+         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.2, 0, 0, 0])),
+         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.0, 0, 0]))],
+
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.2, 0, 0, 0])),
+         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0]))],
+
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0])),
+         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0]))],
+
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0., 0.2, 0, 0])),
+         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.0, 0, 0]))],
     ]
     fitter = Fitter(dir_name)
 
@@ -42,7 +48,7 @@ if __name__ == "__main__":
 
     fitter.set_models(model)
     fitter.set_simulations(*simulations)
-    fitter.set_num_cosmologies(200)
+    fitter.set_num_cosmologies(100)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
 

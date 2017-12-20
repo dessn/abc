@@ -19,7 +19,7 @@ from scipy.stats import norm
 from dessn.snana.systematic_names import get_systematic_mapping
 
 
-def load_fitres(filename, skiprows=11):
+def load_fitres(filename, skiprows=6):
     # logging.debug("Loading %s" % filename)
     if filename.endswith(".gz"):
         compression = "gzip"
@@ -263,7 +263,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
 
-def convert(base_folder, load_dump=False, override=False, skip=6):
+def convert(base_folder, load_dump=False, override=False, skip=11):
 
     dump_dir, output_dir, nml_file = get_directories(base_folder)
     logging.info("Found nml file %s" % nml_file)
@@ -286,14 +286,12 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_COMBINED_FITS")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    # convert("DES3YR_DES_BULK")
-    # convert("DES3YR_LOWZ_BULK")
+    # convert("DES3YR_DES_BULK", skip=6)
+    # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
-    convert("DES3YR_LOWZ_VALIDATION")
-    # convert("DES3YR_DES_VALIDATION")
-    # convert("DES3YR_LOWZ_VALIDATIONsys", override=True)
-    # convert("DES3YR_DES_VALIDATIONsys", override=True)
+    convert("DES3YR_LOWZ_VALIDATION", skip=6)
+    # convert("DES3YR_DES_VALIDATION", skip=6)
 
 
 

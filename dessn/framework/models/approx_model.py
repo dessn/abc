@@ -4,13 +4,14 @@ import inspect
 import os
 from numpy.random import uniform, normal
 from scipy.interpolate import interp1d
+from collections import Counter
 
 from dessn.framework.model import Model
 
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, global_calibration=13, systematics_scale=1.0, statonly=False):
+    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -19,7 +20,6 @@ class ApproximateModel(Model):
         stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
         self.num_redshift_nodes = num_nodes
-        self.global_calibration = global_calibration
         self.systematics_scale = systematics_scale
 
     def get_parameters(self):
@@ -96,6 +96,7 @@ class ApproximateModel(Model):
         return "Approx"
 
     def get_data(self, simulations, cosmology_index, add_zs=None):
+
         if not type(simulations) == list:
             simulations = [simulations]
 
@@ -103,6 +104,8 @@ class ApproximateModel(Model):
         data_list = [s.get_passed_supernova(s.num_supernova, cosmology_index=cosmology_index) for s in simulations]
         print(data_list[0].keys())
         n_surveys = len(data_list)
+
+        global_calibration = self.get_num_global_from_sims(simulations)
 
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
@@ -143,7 +146,7 @@ class ApproximateModel(Model):
             sim_data_list.append(sim_data)
 
         node_weights = np.concatenate(node_weights_list)
-        num_calib = np.sum(num_calibs) - (self.global_calibration * (len(num_calibs) - 1))
+        num_calib = np.sum(num_calibs) - (global_calibration * (len(num_calibs) - 1))
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
@@ -158,9 +161,9 @@ class ApproximateModel(Model):
                     for data in data_list:
                         nsne = data["n_sne"]
                         blank = np.zeros((nsne, 3, num_calib))
-                        n = data["deta_dcalib"].shape[2] - self.global_calibration
-                        blank[:, :, :self.global_calibration] = data["deta_dcalib"][:, :, :self.global_calibration]
-                        blank[:, :, offset:offset+n] = data["deta_dcalib"][:, :, self.global_calibration:]
+                        n = data["deta_dcalib"].shape[2] - global_calibration
+                        blank[:, :, :global_calibration] = data["deta_dcalib"][:, :, :global_calibration]
+                        blank[:, :, offset:offset+n] = data["deta_dcalib"][:, :, global_calibration:]
                         offset += n
                         vals.append(blank)
                     data_dict[key] = np.vstack(vals)
@@ -277,13 +280,23 @@ class ApproximateModel(Model):
         final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
 
+    def get_num_global_from_sims(self, simulations):
+        num_sims = len(simulations)
+        all_labels = [l for s in simulations for l in s.get_systematic_names()]
+        counted = Counter(all_labels)
+        global_labels = [key for key in counted.keys() if counted[key] == num_sims]
+        print("%d global systematics" % len(global_labels))
+        print(global_labels)
+        return len(global_labels)
+
     def get_systematic_labels(self, simulations):
         label_list = [s.get_systematic_names() for s in simulations]
         if len(label_list[0]) == 0:
             label_list[0].append("Fake")
-        start = label_list[0][:self.global_calibration]
+        global_calibration = self.get_num_global_from_sims(simulations)
+        start = label_list[0][:global_calibration]
         for l in label_list:
-            start += l[self.global_calibration:]
+            start += l[global_calibration:]
         res = [r"$\delta [ %s ]$" % s for s in start]
         return res
 
@@ -305,14 +318,14 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0, statonly=False):
-        super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale, statonly=statonly)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False):
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly)
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, global_calibration=14, systematics_scale=1.0, statonly=False, prior=False):
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
-        super().__init__(filename, num_nodes=num_nodes, global_calibration=global_calibration, systematics_scale=systematics_scale, statonly=statonly)
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly)
 
 
