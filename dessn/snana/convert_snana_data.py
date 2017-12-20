@@ -19,7 +19,7 @@ from scipy.stats import norm
 from dessn.snana.systematic_names import get_systematic_mapping
 
 
-def load_fitres(filename, skiprows=6):
+def load_fitres(filename, skiprows=11):
     # logging.debug("Loading %s" % filename)
     if filename.endswith(".gz"):
         compression = "gzip"
@@ -27,11 +27,9 @@ def load_fitres(filename, skiprows=6):
         compression = None
     try:
         dataframe = pd.read_csv(filename, sep='\s+', compression=compression, skiprows=skiprows, comment="#")
-        if len(dataframe.columns) == 2:
-            raise ValueError("Stupid file format")
     except ValueError:
-        logging.debug("Trying to 10 skip")
-        dataframe = pd.read_csv(filename, sep='\s+', compression=compression, skiprows=10, comment="#")
+        logging.error("Filename %s failed to load" % filename)
+        return None
     columns = ['CID', 'zHD', 'HOST_LOGMASS', 'HOST_LOGMASS_ERR', 'x1',
                'x1ERR', 'c', 'cERR', 'mB', 'mBERR', 'x0', 'x0ERR',
                'COV_x1_c', 'COV_x1_x0', 'COV_c_x0', 'SIM_mB', 'SIM_x1', 'SIM_c']
@@ -70,7 +68,7 @@ def get_systematic_scales(nml_file, override=False):
     scaling = get_scaling()
     systematic_names = load_systematic_names(nml_file)
     sys_label_dict = get_systematic_mapping()
-    systematic_labels = [sys_label_dict.get(n, "?") for n in systematic_names]
+    systematic_labels = [sys_label_dict.get(n, n) for n in systematic_names]
     systematics_scales = []
     for name in systematic_names:
         scale = 1.0
@@ -115,7 +113,7 @@ def load_dump_file(sim_dir):
     keep = ["CID", "S2mb", "MAGSMEAR_COH"]
     dtypes = [int, float, float]
     dataframe = pd.read_csv(sim_dir + "/" + filename, compression=compression, sep='\s+',
-                            skiprows=6, comment="V", error_bad_lines=False, names=names)
+                            skiprows=1, comment="V", error_bad_lines=False, names=names)
     logging.info("Loaded dump file from %s" % (sim_dir + "/" + filename))
     data = dataframe.to_records()
     res = []
@@ -128,7 +126,7 @@ def load_dump_file(sim_dir):
     return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64)])
 
 
-def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False):
+def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False, skip=6):
 
     ind = 0
     if "-0" in sim_dir:
@@ -142,15 +140,17 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
     sysematics_fitres = fitres_files[1:]
     logging.info("Have %d fitres files for systematics" % len(sysematics_fitres))
 
-    base_fits = load_fitres(base_fitres)
-    sysematics = [load_fitres(m) for m in sysematics_fitres]
-    sysematics_sort_indexes = [np.argsort(m['CID']) for m in sysematics]
-    sysematics_idss = [m['CID'][s] for m, s in zip(sysematics, sysematics_sort_indexes)]
+    base_fits = load_fitres(base_fitres, skiprows=skip)
+    sysematics = [load_fitres(m, skiprows=skip) for m in sysematics_fitres]
 
+    sysematics_sort_indexes = [None if m is None else np.argsort(m['CID']) for m in sysematics]
+    sysematics_idss = [None if m is None else m['CID'][s] for m, s in zip(sysematics, sysematics_sort_indexes)]
+    systematic_labels_save = [s for sc, s in zip(systematics_scales, systematic_labels) if sc != 0]
     num_bad_calib = 0
-    num_bad_calib_index = np.zeros(len(sysematics))
+    num_bad_calib_index = np.zeros(len(systematic_labels_save))
     logging.debug("Have %d, %d, %d, %d systematics" %
                   (len(sysematics), len(sysematics_sort_indexes), len(sysematics_idss), len(systematics_scales)))
+
     final_results = []
     passed_cids = []
     logging.debug("Have %d rows to process" % base_fits.shape)
@@ -199,7 +199,13 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         offset_c = []
         for mag, sorted_indexes, magcids, scale in \
                 zip(sysematics, sysematics_sort_indexes, sysematics_idss, systematics_scales):
-
+            if scale == 0:
+                continue
+            if mag is None:
+                offset_mb.append(0.0)
+                offset_x1.append(0.0)
+                offset_c.append(0.0)
+                continue
             index = np.searchsorted(magcids, cid)
             if index >= magcids.size or magcids[index] != cid:
                 offset_mb.append(np.nan)
@@ -237,7 +243,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
 
     # Save the labels out
     with open(output_dir + "/sys_names.pkl", 'wb') as f:
-        pickle.dump(systematic_labels, f, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(systematic_labels_save, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     if load_dump:
 
@@ -257,7 +263,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
 
-def convert(base_folder, load_dump=False, override=False):
+def convert(base_folder, load_dump=False, override=False, skip=6):
 
     dump_dir, output_dir, nml_file = get_directories(base_folder)
     logging.info("Found nml file %s" % nml_file)
@@ -271,23 +277,23 @@ def convert(base_folder, load_dump=False, override=False):
             this_output_dir = output_dir + sim_name
         if base_folder.endswith("sys"):
             this_output_dir += "sys"
-        digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump)
+        digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump, skip=skip)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
     # convert("DES3YR_LOWZ_COMBINED_FITS")
     # convert("DES3YR_DES_COMBINED_FITS")
-    # convert("DES3Y_DES_NOMINAL")
-    # convert("DES3Y_LOWZ_NOMINAL")
-    convert("DES3Y_DES_BULK")
-    convert("DES3Y_LOWZ_BULK")
-    # convert("DES3Y_LOWZ_VALIDATION")
-    # convert("DES3Y_DES_VALIDATION")
-    # convert("DES3Y_LOWZ_VALIDATIONsys", override=True)
-    # convert("DES3Y_DES_VALIDATIONsys", override=True)
-    # convert("DES3Y_DES_BHMEFF", load_dump=True)
-    # convert("DES3Y_LOWZ_BHMEFF", load_dump=True)
+    # convert("DES3YR_DES_NOMINAL")
+    # convert("DES3YR_LOWZ_NOMINAL")
+    # convert("DES3YR_DES_BULK")
+    # convert("DES3YR_LOWZ_BULK")
+    # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
+    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
+    # convert("DES3YR_LOWZ_VALIDATION")
+    # convert("DES3YR_DES_VALIDATION")
+    # convert("DES3YR_LOWZ_VALIDATIONsys", override=True)
+    # convert("DES3YR_DES_VALIDATIONsys", override=True)
 
 
 
