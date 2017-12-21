@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = [ApproximateModelW(prior=True, statonly=True), ApproximateModelW(prior=True)]
+    models = [ApproximateModelW(prior=True, statonly=True), ApproximateModelW(prior=True)]
     # Turn off mass and skewness for easy test
 
     ndes = 600
@@ -30,10 +30,10 @@ if __name__ == "__main__":
     ]
     fitter = Fitter(dir_name)
 
-    # data = model.get_data(simulations[0], 0)  # For testing
+    # data = model[1].get_data(simulations[0], 0)  # For testing
     # exit()
 
-    fitter.set_models(model)
+    fitter.set_models(*models)
     fitter.set_simulations(*simulations)
     fitter.set_num_cosmologies(200)
     fitter.set_max_steps(3000)
