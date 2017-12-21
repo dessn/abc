@@ -9,8 +9,9 @@ import inspect
 
 def des_sel(cov_scale=1.0, shift=None):
     sn, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10")
-    if shift is not None:
-        mean += shift
+    if shift is None:
+        shift = np.array([0.0, 0.2, 0.0, 0.0])
+    mean += shift
     cov *= cov_scale
     return sn, mean, cov
 

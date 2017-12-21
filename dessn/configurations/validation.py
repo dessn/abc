@@ -19,20 +19,15 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=True, statonly=True, global_calibration=1)
+    model = [ApproximateModelW(prior=True, statonly=True), ApproximateModelW(prior=True)]
     # Turn off mass and skewness for easy test
 
     ndes = 600
     nlowz = 300
     simulations = [
             [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STATONLY")],
-            [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STAT+SYST1")],
-            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST2"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST2")],
-            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST3"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST3")],
-            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST4"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST4")],
-            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST5"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST5")],
-            # [SNANASimulation(ndes, "DES3Y_DES_VALIDATION_STAT+SYST6"), SNANASimulation(nlowz, "DES3Y_LOWZ_VALIDATION_STAT+SYST6")],
-        ]
+            [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STAT+SYST1")]
+    ]
     fitter = Fitter(dir_name)
 
     # data = model.get_data(simulations[0], 0)  # For testing

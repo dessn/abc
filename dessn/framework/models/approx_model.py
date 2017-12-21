@@ -285,8 +285,6 @@ class ApproximateModel(Model):
         all_labels = [l for s in simulations for l in s.get_systematic_names()]
         counted = Counter(all_labels)
         global_labels = [key for key in counted.keys() if counted[key] == num_sims]
-        print("%d global systematics" % len(global_labels))
-        print(global_labels)
         return len(global_labels)
 
     def get_systematic_labels(self, simulations):
