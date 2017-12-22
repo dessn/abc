@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     h = socket.gethostname()
     import sys
-    if h != "smp-hk5pn72" and sys.argv[1] != "A":  # The hostname of my laptop. Only will work for me, ha!
+    if h != "smp-hk5pn72" and (len(sys.argv) == 1 or sys.argv[1] != "A"):  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
         parameters = [r"$\Omega_m$", r"$w$"]
