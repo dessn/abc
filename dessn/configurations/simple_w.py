@@ -56,7 +56,7 @@ if __name__ == "__main__":
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, statistics="mean")
 
         import numpy as np
-        ws = [chain.chain[:, chain.index("$w$")] for chain in c2.chains]
+        ws = [chain.chain[:, chain.parameters.index("$w$")] for chain in c2.chains]
         means = [np.mean(w) for w in ws]
         stds = [np.std(w) for w in ws]
         mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
