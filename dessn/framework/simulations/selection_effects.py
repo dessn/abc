@@ -163,8 +163,8 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
 
 
 if __name__ == "__main__":
-    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
-    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
+    # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
+    # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
-    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=19.7)
+    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=18)
