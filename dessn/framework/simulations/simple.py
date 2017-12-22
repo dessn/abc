@@ -63,7 +63,7 @@ class SimpleSimulation(Simulation):
         ]
 
     def get_systematic_labels(self):
-        return [""]
+        return [""] * self.num_calib
 
     def get_all_supernova(self, n_sne, cosmology_index=0):
         truth = self.get_truth_values_dict()
@@ -121,7 +121,7 @@ class SimpleSimulation(Simulation):
                 vector += np.random.multivariate_normal([0, 0, 0], cov)
                 obs_mBx1c_cov.append(cov)
                 obs_mBx1c.append(vector)
-                deta_dcalib.append(np.random.normal(0, 3e-3, size=(3, self.num_calib)))
+                deta_dcalib.append(np.zeros((3, self.num_calib)))
             redshifts_all += redshifts.tolist()
             redshift_pre_comp_all += redshift_pre_comp.tolist()
             p_high_masses_all += p_high_masses.tolist()
@@ -171,10 +171,10 @@ class SimpleSimulation(Simulation):
     def get_approximate_correction(self):
         if not self.skewnorm:
             print("ccdf approx")
-            return False, [self.mb_mean, self.mb_width, 0, 1], 0.0001 * np.eye(4)
+            return False, np.array([self.mb_mean, self.mb_width, 0, 1]), 0.0001 * np.eye(4)
         else:
             print("skewnorm approx")
-            return True, [self.mb_mean, self.mb_width, self.mb_alpha, 1.0], 0.0001 * np.eye(4)
+            return True, np.array([self.mb_mean, self.mb_width, self.mb_alpha, 1.0]), 0.0001 * np.eye(4)
 
     def get_systematic_names(self):
         return [r"{%d}" % i for i in range(self.num_calib)]

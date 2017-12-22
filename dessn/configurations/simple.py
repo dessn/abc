@@ -18,9 +18,9 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     num_nodes = 4
-    models = [ApproximateModel(num_nodes=num_nodes, global_calibration=1),
-              ApproximateModelOl(num_nodes=num_nodes, global_calibration=1),
-              ApproximateModelW(num_nodes=num_nodes, global_calibration=1)]
+    models = [ApproximateModel(num_nodes=num_nodes),
+              ApproximateModelOl(num_nodes=num_nodes),
+              ApproximateModelW(num_nodes=num_nodes)]
     simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
                   SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
 

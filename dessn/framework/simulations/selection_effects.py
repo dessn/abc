@@ -69,12 +69,15 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
     threshold = 0.02
     red_chi2 = 100
     adj = 0.0001
+    adj = 1
     while np.abs(red_chi2 - 1) > threshold:
         if red_chi2 > 1:
-            adj *= 1.02
+            adj *= 1.01
         else:
-            adj *= 0.97
-        ratio_error_adj = ratio_error + adj
+            adj *= 0.98
+        # ratio_error_adj = ratio_error + adj
+        ratio_error_adj = 0.001 + ratio_error * adj
+        # print(ratio_error_adj)
         result = curve_fit(cdf, binc, ratio, p0=np.array([23.0, 1.0, 0.0, 0.5]), sigma=ratio_error_adj)
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - cdf(binc, *vals)) / ratio_error_adj) ** 2)
@@ -87,8 +90,8 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
 
     if plot:
         fig, ax = plt.subplots(1, 1)
-        ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3)
-        ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error)
+        ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3, label="Bin(err)")
+        ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error, label="Bin(err) (smoothed)")
 
         mbs = np.linspace(binc[0], binc[-1], 1000)
         cdf_eval = cdf(mbs, *vals)
@@ -97,9 +100,15 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
             rands = np.random.multivariate_normal([0, 0, 0, 0], cov=cov)
             vals2 = vals + rands
             cdf_eval2 = cdf(mbs, *vals2)
-            plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
-
-        ax.plot(mbs, cdf_eval, c='k')
+            opts = {}
+            if i == 0:
+                opts["label"] = "uncert"
+            plt.plot(mbs, cdf_eval2, c='k', alpha=0.05, **opts)
+        plt.ylabel("Probability")
+        plt.xlabel(r"$m_B + \alpha x_1 + \beta c$")
+        plt.legend()
+        ax.plot(mbs, cdf_eval, c='k', label="Fitting efficiency")
+        plt.title(os.path.basename(dump_npy))
         plt.show()
 
     return False, vals, cov
@@ -147,13 +156,15 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
             cdf_eval2 = sknorm(mbs, *vals2)
             plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
 
-        ax.plot(mbs, cdf_eval, c='k')
+        ax.plot(mbs, cdf_eval, c='k', label="Fitting efficiency")
         plt.show()
 
     return True, vals, cov
 
 
 if __name__ == "__main__":
-    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF", plot=True)
-    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
-    # get_selection_effects_cdf("eff_data/DES3Y_DES_EFF_CD/all.npy", plot=True)
+    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
+    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=19.7)

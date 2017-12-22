@@ -152,7 +152,7 @@ class Fitter(object):
         self.logger.debug("Loaded pickle from %s" % filename)
         return chain
 
-    def get_result_from_chain(self, chain, simulation_index, model_index, convert_names=True, max_deviation=2.5):
+    def get_result_from_chain(self, chain, simulation_index, model_index, cosmo_index, convert_names=True, max_deviation=2.5):
         sims = self.simulations[simulation_index]
         if not type(sims) == list:
             sims = [sims]
@@ -218,7 +218,7 @@ class Fitter(object):
                 n = int(label.split("\delta \mathcal{Z}_{")[1].split("}")[0])
                 temp_list[i][0] = sys_labels[n]
         result = OrderedDict(temp_list)
-        return self.models[model_index], self.simulations[simulation_index], result, truth, new_weight, stan_weight, posterior
+        return self.models[model_index], self.simulations[simulation_index], cosmo_index, result, truth, new_weight, stan_weight, posterior
 
     def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=2.5):
         files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
@@ -234,7 +234,7 @@ class Fitter(object):
         for c, mi, si, ci in zip(chains, model_indexes, sim_indexes, cosmo_indexes):
             if (prev_cosmo != ci and split_cosmo) or (prev_model != mi and split_models) or (prev_sim != si and split_sims):
                 if stacked is not None:
-                    results.append(self.get_result_from_chain(stacked, prev_sim, prev_model, convert_names=convert_names, max_deviation=max_deviation))
+                    results.append(self.get_result_from_chain(stacked, prev_sim, prev_model, prev_cosmo, convert_names=convert_names, max_deviation=max_deviation))
                 stacked = None
                 prev_model = mi
                 prev_sim = si
@@ -244,7 +244,7 @@ class Fitter(object):
             else:
                 for key in list(c.keys()):
                     stacked[key] = np.concatenate((stacked[key], c[key]))
-        results.append(self.get_result_from_chain(stacked, si, mi, convert_names=convert_names, max_deviation=max_deviation))
+        results.append(self.get_result_from_chain(stacked, si, mi, ci, convert_names=convert_names, max_deviation=max_deviation))
 
         if len(results) == 1:
             return results[0]
