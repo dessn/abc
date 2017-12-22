@@ -62,7 +62,11 @@ if __name__ == "__main__":
         mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
         mean_std = np.mean(stds)
         bias = (mean_mean + 1) / mean_std
-        print("%10s %0.4f(%0.4f) %0.4f %0.4f\n" % ("Simple", mean_mean, mean_std, np.std(means), bias))
+
+        save = "%10s %0.4f(%0.4f) %0.4f %0.4f\n" % ("Simple", mean_mean, mean_std, np.std(means), bias)
+        print(save)
+        with open(pfn + "_test.txt", "w") as f:
+            f.write(save)
 
         # print("Saving table")
         # print(c1.analysis.get_latex_table(transpose=True))
@@ -87,4 +91,4 @@ if __name__ == "__main__":
         print("Plotting big triangle. This might take a while")
         c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
-        c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
+        # c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
