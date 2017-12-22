@@ -87,7 +87,7 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
 ##SBATCH --tasks-per-node=24
 
 IDIR=%s
-conda deactivate sam35
+conda deactivate
 conda activate sam35
 echo $PATH
 echo "Activated python"
