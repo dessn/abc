@@ -87,10 +87,12 @@ def write_jobscript_slurm(filename, name=None, num_tasks=24, num_cpu=24,
 ##SBATCH --tasks-per-node=24
 
 IDIR=%s
-export PATH=$HOME/miniconda/bin:$PATH
-conda activate sam35
-echo "Activated python"
 echo $PATH
+export PATH=$HOME/miniconda/bin:$PATH
+echo $PATH
+conda activate sam35
+echo $PATH
+echo "Activated python"
 executable=$(which python)
 echo $executable
 
