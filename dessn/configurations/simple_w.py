@@ -36,8 +36,7 @@ if __name__ == "__main__":
     import sys
     if h != "smp-hk5pn72" and sys.argv[1] != "A":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
-    if h == "smp-hk5pn72" or sys.argv[1] == "0" or sys.argv[1] == "A":
-
+    else:
         parameters = [r"$\Omega_m$", r"$w$"]
 
         from chainconsumer import ChainConsumer
