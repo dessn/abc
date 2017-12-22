@@ -41,12 +41,12 @@ if __name__ == "__main__":
 
         from chainconsumer import ChainConsumer
         c1, c2 = ChainConsumer(), ChainConsumer()
-        # m, s, ci, chain, truth, weight, old_weight, posterior = fitter.load()
+        m, s, ci, chain, truth, weight, old_weight, posterior = fitter.load()
         #
         # print("Adding data")
-        # c1.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        # c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        # c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
+        c1.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
+        c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
 
         print("Adding individual realisations")
         res = fitter.load(split_cosmo=True)
@@ -70,21 +70,21 @@ if __name__ == "__main__":
         #     f.write(c1.analysis.get_latex_table(parameters=parameters))
         #
         # print("Plotting cosmology")
-        # c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
-        #                figsize="column", chains="Combined")
-        #
-        # print("Plotting summaries")
-        # c2.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
-        #                         extra_parameter_spacing=1.0)
-        #
-        # print("Plotting distributions")
-        # c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
-        #
-        # print("Saving Parameter values")
-        # with open(pfn + "_all_params.txt", 'w') as f:
-        #     f.write(c1.analysis.get_latex_table(transpose=True))
-        #
-        # print("Plotting big triangle. This might take a while")
-        # c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
+        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
+                       figsize="column", chains="Combined")
+
+        print("Plotting summaries")
+        c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
+                                extra_parameter_spacing=1.0)
+
+        print("Plotting distributions")
+        c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
+
+        print("Saving Parameter values")
+        with open(pfn + "_all_params.txt", 'w') as f:
+            f.write(c1.analysis.get_latex_table(transpose=True))
+
+        print("Plotting big triangle. This might take a while")
+        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
-        # c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
+        c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
