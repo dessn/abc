@@ -33,9 +33,11 @@ if __name__ == "__main__":
     fitter.set_max_steps(2000)
 
     h = socket.gethostname()
-    if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
+    import sys
+    if h != "smp-hk5pn72" and sys.argv[1] != "A":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
-    else:
+    if h == "smp-hk5pn72" or sys.argv[1] == "0" or sys.argv[1] == "A":
+
         parameters = [r"$\Omega_m$", r"$w$"]
 
         from chainconsumer import ChainConsumer
