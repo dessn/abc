@@ -59,7 +59,8 @@ class SimpleSimulation(Simulation):
             ("dscale", self.dscale, r"$\delta(0)$"),
             ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$"),
             ("intrinsic_correlation", np.identity(3), r"$\rho$"),
-            ("calibration", np.zeros(self.num_calib), r"$\delta \mathcal{Z}_%d$")
+            ("calibration", np.zeros(self.num_calib), r"$\delta \mathcal{Z}_%d$"),
+            ("deltas", np.zeros(4), r"$\Delta_{%d}$")
         ]
 
     def get_systematic_labels(self):

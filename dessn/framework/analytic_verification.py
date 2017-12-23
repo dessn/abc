@@ -42,12 +42,12 @@ else:
     cor_mb_width2 = pop_sigma ** 2
     mB_sgn_alpha = np.sign(mb_alpha)
     cor_sigma = np.sqrt(((cor_mb_width2 + mb_width2) / mb_width2) ** 2 * (
-    (mb_width2 / mb_alpha2) + ((mb_width2 * cor_mb_width2) / (cor_mb_width2 + mb_width2))));
-    cor_mb_norm_width = np.sqrt(mb_width2 + cor_mb_width2);
+    (mb_width2 / mb_alpha2) + ((mb_width2 * cor_mb_width2) / (cor_mb_width2 + mb_width2))))
+    cor_mb_norm_width = np.sqrt(mb_width2 + cor_mb_width2)
 
     analytic = np.exp(
         np.log(2) + norm.logpdf(pop_mu, mb_mean, cor_mb_norm_width) + norm.logcdf(mB_sgn_alpha * (pop_mu - mb_mean), 0,
-                                                                                  cor_sigma));
+                                                                                  cor_sigma))
 
     print("Numeric  ", numeric)
     print("Analytic ", analytic)

@@ -52,6 +52,9 @@ transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
     matrix[4, 4] mb_cov_chol [n_surveys];
     matrix[3, 3] outlier_population;
+    real konst;
+
+    konst = sqrt(2 / 3.141592653589793);
 
     outlier_population = outlier_dispersion * outlier_dispersion';
 
@@ -103,10 +106,12 @@ transformed parameters {
     real sigma_MB [n_surveys];
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
+    real adjust_c_mean [n_surveys];
 
     // Pop at given redshift
     real mean_x1_sn [n_sne];
     real mean_c_sn [n_sne];
+    real mean_c_sn_adj [n_sne];
 
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
@@ -217,6 +222,8 @@ transformed parameters {
         shapes[i][2] = alpha_x1[i] / sigma_x1[i];
         shapes[i][3] = alpha_c[i] / sigma_c[i];
 
+        adjust_c_mean[i] = (sigma_c[i] * konst * alpha_c[i]) / sqrt(1 + alpha_c[i]^2);
+
     }
 
     // Now update the posterior using each supernova sample
@@ -225,6 +232,8 @@ transformed parameters {
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
         mean_c_sn[i] = dot_product(mean_c[survey_map[i]], node_weights[i]);
+        mean_c_sn_adj[i] = mean_c_sn[i] + adjust_c_mean[survey_map[i]]; // Adjust mean for skewness when taking normal approximation
+
 
         mean_MBx1c[i][1] = mean_MB;
         mean_MBx1c[i][2] = mean_x1_sn[i];
@@ -255,7 +264,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn_adj[i] - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {

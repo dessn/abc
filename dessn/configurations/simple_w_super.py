@@ -74,7 +74,7 @@ if __name__ == "__main__":
         # with open(pfn + "_cosmo_params.txt", 'w') as f:
         #     f.write(c1.analysis.get_latex_table(parameters=parameters))
         #
-        # print("Plotting cosmology")
+        print("Plotting cosmology")
         c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
                        figsize="column", chains="Combined")
 
