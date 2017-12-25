@@ -222,7 +222,7 @@ transformed parameters {
         shapes[i][2] = alpha_x1[i] / sigma_x1[i];
         shapes[i][3] = alpha_c[i] / sigma_c[i];
 
-        adjust_c_mean[i] = 0.1 * (sigma_c[i] * konst * alpha_c[i]) / sqrt(1 + alpha_c[i]^2);
+        adjust_c_mean[i] = 0.5 * (sigma_c[i] * konst * alpha_c[i]) / sqrt(1 + alpha_c[i]^2) / beta;
 
     }
 
