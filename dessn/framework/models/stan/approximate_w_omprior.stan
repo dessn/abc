@@ -106,6 +106,8 @@ transformed parameters {
     real sigma_MB [n_surveys];
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
+    real delta_c [n_surveys];
+    real adjusted_sigma_c [n_surveys];
     real adjust_c_mean [n_surveys];
 
     // Pop at given redshift
@@ -204,13 +206,17 @@ transformed parameters {
         sigmas[i][2] = sigma_x1[i];
         sigmas[i][3] = sigma_c[i];
 
+        delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        adjust_c_mean[i] = 0.5 * sigma_c[i] * konst * delta_c[i];
+        adjusted_sigma_c[i] = sigma_c[i] * sqrt(1 - 2 * delta_c[i] / pi);
+
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
         // Calculate selection effect widths
         // cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + 2 * (delta_alpha * sigma_x1[i]^2)^2 + (beta * sigma_c[i])^2 + 2 * (delta_beta * sigma_c[i]^2)^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * adjusted_sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
@@ -222,7 +228,6 @@ transformed parameters {
         shapes[i][2] = alpha_x1[i] / sigma_x1[i];
         shapes[i][3] = alpha_c[i] / sigma_c[i];
 
-        adjust_c_mean[i] = 0.5 * (sigma_c[i] * konst * alpha_c[i]) / sqrt(1 + alpha_c[i]^2) / beta;
 
     }
 
