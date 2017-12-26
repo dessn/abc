@@ -208,7 +208,7 @@ transformed parameters {
 
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         adjust_c_mean[i] = 0.5 * sigma_c[i] * konst * delta_c[i];
-        adjusted_sigma_c[i] = sigma_c[i] * sqrt(1 - 2 * delta_c[i] / pi());
+        adjusted_sigma_c[i] = sigma_c[i] * (1 + (1 - sqrt(1 - 2 * delta_c[i] / pi())) * 0.5);
 
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
