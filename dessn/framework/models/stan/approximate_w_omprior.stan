@@ -207,8 +207,8 @@ transformed parameters {
         sigmas[i][3] = sigma_c[i];
 
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
-        adjust_c_mean[i] = 0;//0.5 * sigma_c[i] * konst * delta_c[i];
-        adjusted_sigma_c[i] = sigma_c[i];// * (1 + (1 - sqrt(1 - 2 * delta_c[i] / pi())) * 0.5);
+        adjust_c_mean[i] = sigma_c[i] * konst * delta_c[i];
+        adjusted_sigma_c[i] = sigma_c[i] * sqrt(1 - 2 * delta_c[i] / pi());
 
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
@@ -297,8 +297,8 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            + normal_lpdf(alpha_c[i]  | 0, 0.01)
-            + normal_lpdf(alpha_x1[i] | 0, 0.01)
+            + normal_lpdf(alpha_c[i]  | 0, 0.5)
+            + normal_lpdf(alpha_x1[i] | 0, 0.5)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
