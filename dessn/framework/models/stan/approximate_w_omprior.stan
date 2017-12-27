@@ -228,6 +228,7 @@ transformed parameters {
         shapes[i][2] = alpha_x1[i] / sigma_x1[i];
         shapes[i][3] = alpha_c[i] / sigma_c[i];
 
+        print(i, "  ", delta_c[i], "  ", adjust_c_mean[i], "  ", adjusted_sigma_c[i],  "  ", cor_mb_width2[i], "  ", cor_sigma[i]);
 
     }
 
