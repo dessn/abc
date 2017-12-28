@@ -17,7 +17,7 @@ def des_sel(cov_scale=1.0, shift=None):
 
 
 def lowz_sel(cov_scale=1.0, shift=None):
-    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF")
+    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10")
     if shift is not None:
         mean += shift
     cov *= cov_scale
