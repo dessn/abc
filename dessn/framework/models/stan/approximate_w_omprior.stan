@@ -105,6 +105,7 @@ transformed parameters {
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
     real alpha_c [n_surveys];
+    real delta_c [n_surveys];
     real sigma_c_ratio [n_surveys];
     real adjust_c_mean [n_surveys];
 
