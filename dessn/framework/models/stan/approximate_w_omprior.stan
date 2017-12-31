@@ -94,7 +94,7 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    real <lower = -1.57079, upper = 1.57079> skew_c [n_surveys];
+    real <lower = -1.4, upper = 1.4> skew_c [n_surveys];
 
 }
 
@@ -208,7 +208,7 @@ transformed parameters {
         alpha_c[i] = tan(skew_c[i]);
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         //alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        adjust_c_mean[i] = sigma_c[i] * konst * delta_c[i];
+        adjust_c_mean[i] = konst * delta_c[i] * 0.1; // *  sigma_c[i]
         sigma_c_ratio[i] = sqrt(1 - 2 * delta_c[i] / pi());
 
         // Turn this into population matrix
