@@ -73,7 +73,7 @@ class ApproximateModel(Model):
             "mean_MB": uniform(-19.5, -19.2),
             "alpha_c": uniform(0, 0.05, size=(num_surveys,)),
             "delta_c": uniform(0, 0.05, size=(num_surveys,)),
-            "skew_c": uniform(-0.05, 0.05, size=(num_surveys,)),
+            "skew_c": uniform(0, 0.05, size=(num_surveys,)),
             # "alpha_x1": uniform(0, 0.05, size=(num_surveys,)),
             #"outlier_MB_delta": uniform(0.1, 2),
             #"outlier_dispersion": 0.5 + uniform(low=0.1, high=1.0, size=3),
