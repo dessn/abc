@@ -19,9 +19,13 @@ if __name__ == "__main__":
 
     models = [
         ApproximateModelW(prior=True, frac_mean=1.0, frac_sigma=1.0),
+        ApproximateModelW(prior=True, frac_mean=1.0, frac_sigma=0.0),
+        ApproximateModelW(prior=True, frac_mean=0.0, frac_sigma=1.0),
         ApproximateModelW(prior=True, frac_mean=0.0, frac_sigma=0.0),
         ApproximateModelW(prior=True, frac_mean=0.5, frac_sigma=0.5),
-        ApproximateModelW(prior=True, frac_mean=0.3, frac_sigma=0.5)
+        ApproximateModelW(prior=True, frac_mean=0.5, frac_sigma=0.0),
+        ApproximateModelW(prior=True, frac_mean=0.3, frac_sigma=0.5),
+        ApproximateModelW(prior=True, frac_mean=0.3, frac_sigma=0.0)
     ]
     simulation = [SimpleSimulation(300, alpha_c=2, mass=True, dscale=0.08),
                   SimpleSimulation(200, alpha_c=4, mass=True, dscale=0.08, lowz=True)]
@@ -55,7 +59,7 @@ if __name__ == "__main__":
             name = "%0.1f %0.1f" % (m.frac_mean, m.frac_sigma)
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
             # c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3)
 
         # print("Adding individual realisations")
         # res = fitter.load(split_cosmo=True)
