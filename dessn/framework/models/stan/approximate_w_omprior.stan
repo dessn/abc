@@ -94,8 +94,8 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    // real <lower = 0, upper = 1.4> skew_c [n_surveys];
-    real <lower = 0, upper = 6.5> alpha_c [n_surveys];
+    real <lower = 0, upper = 1.4> skew_c [n_surveys];
+    //real <lower = 0, upper = 1.4> alpha_c [n_surveys];
 
 }
 
@@ -105,7 +105,7 @@ transformed parameters {
     real sigma_MB [n_surveys];
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
-    //real alpha_c [n_surveys];
+    real alpha_c [n_surveys];
     real delta_c [n_surveys];
     real sigma_c_ratio [n_surveys];
     real adjust_c_mean [n_surveys];
@@ -206,10 +206,10 @@ transformed parameters {
         sigmas[i][2] = sigma_x1[i];
         sigmas[i][3] = sigma_c[i];
 
-        //alpha_c[i] = tan(skew_c[i]);
+        alpha_c[i] = tan(skew_c[i]);
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         //alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        adjust_c_mean[i] = 0.5 * konst * delta_c[i] * 0.1; // *  sigma_c[i]
+        adjust_c_mean[i] = 0.25 * konst * delta_c[i] * 0.1; // *  sigma_c[i]
         sigma_c_ratio[i] = 0.5 * (1 + sqrt(1 - 2 * delta_c[i] / pi()));
 
         // Turn this into population matrix
@@ -298,7 +298,6 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
-            + normal_lpdf(alpha_c[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
