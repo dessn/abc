@@ -64,7 +64,7 @@ if __name__ == "__main__":
         mean_std = np.mean(stds)
         bias = (mean_mean + 1) / mean_std
 
-        save = "%10s %0.4f(%0.4f) %0.4f %0.4f\n" % ("Simple", mean_mean, mean_std, np.std(means), bias)
+        save = "%10s %0.4f(%0.4f) %0.4f %0.4f (abs(w+1) %0.4f)\n" % ("Simple", mean_mean, mean_std, np.std(means), bias, np.abs(mean_mean + 1))
         print(save)
         with open(pfn + "_test.txt", "w") as f:
             f.write(save)
