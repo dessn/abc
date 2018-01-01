@@ -47,45 +47,46 @@ if __name__ == "__main__":
 
         from chainconsumer import ChainConsumer
         c1, c2 = ChainConsumer(), ChainConsumer()
-        m, s, ci, chain, truth, weight, old_weight, posterior = fitter.load()
+        print("Loading data")
+        res = fitter.load()
+
+        print("Adding chains")
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+            name = "%0.1f %0.1f" % (m.frac_mean, m.frac_sigma)
+            c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            # c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
+
+        # print("Adding individual realisations")
+        # res = fitter.load(split_cosmo=True)
+        # for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
+        #     c2.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
         #
-        # print("Adding data")
-        c1.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
-
-        print("Adding individual realisations")
-        res = fitter.load(split_cosmo=True)
-        for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            c2.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
-
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, statistics="mean")
-
-        import numpy as np
-        ws = [chain.chain[:, chain.parameters.index("$w$")] for chain in c2.chains]
-        means = [np.mean(w) for w in ws]
-        stds = [np.std(w) for w in ws]
-        mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
-        mean_std = np.mean(stds)
-        bias = (mean_mean + 1) / mean_std
-
-        save = "%10s %0.4f(%0.4f) %0.4f %0.4f\n" % ("Simple", mean_mean, mean_std, np.std(means), bias)
-        print(save)
-        with open(pfn + "_test.txt", "w") as f:
-            f.write(save)
+        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, statistics="mean")
+        #
+        # import numpy as np
+        # ws = [chain.chain[:, chain.parameters.index("$w$")] for chain in c2.chains]
+        # means = [np.mean(w) for w in ws]
+        # stds = [np.std(w) for w in ws]
+        # mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
+        # mean_std = np.mean(stds)
+        # bias = (mean_mean + 1) / mean_std
+        #
+        # save = "%10s %0.4f(%0.4f) %0.4f %0.4f\n" % ("Simple", mean_mean, mean_std, np.std(means), bias)
+        # print(save)
+        # with open(pfn + "_test.txt", "w") as f:
+        #     f.write(save)
 
         # print("Saving table")
         # print(c1.analysis.get_latex_table(transpose=True))
         # with open(pfn + "_cosmo_params.txt", 'w') as f:
         #     f.write(c1.analysis.get_latex_table(parameters=parameters))
         #
-        # print("Plotting cosmology")
-        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
-                       figsize="column", chains="Combined")
+        print("Plotting cosmology")
+        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters, figsize="column")
 
         print("Plotting summaries")
-        c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
-                                extra_parameter_spacing=1.0)
+        c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True, extra_parameter_spacing=1.0)
 
         print("Plotting distributions")
         c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
