@@ -39,6 +39,8 @@ data {
     real mB_norm_orig [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
+    real frac_mean;
+    real frac_sigma;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -94,8 +96,8 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    //real <lower = 0, upper = 1.4> skew_c [n_surveys];
-    real <lower = 0, upper = 6.5> alpha_c [n_surveys];
+    real <lower = 0, upper = 1.4> skew_c [n_surveys];
+    //real <lower = 0, upper = 6.5> alpha_c [n_surveys];
 
 }
 
@@ -105,7 +107,7 @@ transformed parameters {
     real sigma_MB [n_surveys];
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
-    //real alpha_c [n_surveys];
+    real alpha_c [n_surveys];
     real delta_c [n_surveys];
     real sigma_c_ratio [n_surveys];
     real adjust_c_mean [n_surveys];
@@ -206,11 +208,11 @@ transformed parameters {
         sigmas[i][2] = sigma_x1[i];
         sigmas[i][3] = sigma_c[i];
 
-        //alpha_c[i] = tan(skew_c[i]);
+        alpha_c[i] = tan(skew_c[i]);
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         //alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        adjust_c_mean[i] = 0.3 * konst * delta_c[i] * 0.1; // *  sigma_c[i]
-        sigma_c_ratio[i] = 0.5 * (1 + sqrt(1 - 2 * delta_c[i] / pi()));
+        adjust_c_mean[i] = frac_mean * konst * delta_c[i] * 0.1; // *  sigma_c[i]
+        sigma_c_ratio[i] = 1.0 + frac_sigma * (sqrt(1 - 2 * delta_c[i] / pi()) - 1);
 
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);

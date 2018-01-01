@@ -11,7 +11,7 @@ from dessn.framework.model import Model
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False):
+    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_mean=1.0, frac_sigma=1.0):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -21,6 +21,8 @@ class ApproximateModel(Model):
         super().__init__(stan_file)
         self.num_redshift_nodes = num_nodes
         self.systematics_scale = systematics_scale
+        self.frac_mean = frac_mean
+        self.frac_sigma = frac_sigma
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -276,6 +278,8 @@ class ApproximateModel(Model):
         update["mB_sgn_alpha"] = signs
         update["mB_cov"] = covs
         update["correction_skewnorm"] = correction_skewnorms
+        update["frac_mean"] = self.frac_mean
+        update["frac_sigma"] = self.frac_sigma
 
         update["mean_mass"] = mean_masses
 
@@ -318,14 +322,14 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False):
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_mean=1.0, frac_sigma=1.0):
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_mean=frac_mean, frac_sigma=frac_sigma)
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False):
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False, frac_mean=1.0, frac_sigma=1.0):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly)
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_mean=frac_mean, frac_sigma=frac_sigma)
 
 
