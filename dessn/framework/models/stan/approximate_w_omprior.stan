@@ -97,7 +97,7 @@ parameters {
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     //real <lower = 0, upper = 1.44> skew_c [n_surveys];
-    real <lower = 0, upper = 7.5> alpha_c [n_surveys];
+    real <lower = 1, upper = 7.5> alpha_c [n_surveys];
 
 }
 
@@ -299,7 +299,7 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            //+ normal_lpdf(alpha_c[i] | 0, 3)
+            + normal_lpdf(alpha_c[i] | 0, 3)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
