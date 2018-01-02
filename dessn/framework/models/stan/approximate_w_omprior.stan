@@ -97,7 +97,7 @@ parameters {
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     //real <lower = 0, upper = 1.44> skew_c [n_surveys];
-    real <lower = 1, upper = 7.5> alpha_c [n_surveys];
+    real <lower = 1, upper = 5> alpha_c [n_surveys];
 
 }
 
@@ -213,7 +213,7 @@ transformed parameters {
         delta_c[i] = 0.8944; // if alpha=2
         //alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         adjust_c_mean[i] = frac_mean * konst * delta_c[i] * 0.1; // *  sigma_c[i]
-        sigma_c_ratio[i] = 1.0 + frac_sigma * (sqrt(1 - 2 * delta_c[i] / pi()) - 1);
+        sigma_c_ratio[i] = 1.0 + frac_sigma * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1);
 
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
