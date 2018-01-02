@@ -18,8 +18,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     model = ApproximateModelW(prior=True)
-    simulation = [SimpleSimulation(300, alpha_c=2, mass=True, dscale=0.08),
-                  SimpleSimulation(200, alpha_c=4, mass=True, dscale=0.08, lowz=True)]
+    simulation = [SimpleSimulation(300, alpha_c=4, mass=True, dscale=0.08),
+                  SimpleSimulation(200, alpha_c=6, mass=True, dscale=0.08, lowz=True)]
 
     # print(model.get_data(simulation, 0))
     # exit()

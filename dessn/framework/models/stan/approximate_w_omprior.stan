@@ -209,7 +209,8 @@ transformed parameters {
         sigmas[i][3] = sigma_c[i];
 
         //alpha_c[i] = tan(skew_c[i]);
-        delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        delta_c[i] = 0.8944; // if alpha=2
         //alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         adjust_c_mean[i] = frac_mean * konst * delta_c[i] * 0.1; // *  sigma_c[i]
         sigma_c_ratio[i] = 1.0 + frac_sigma * (sqrt(1 - 2 * delta_c[i] / pi()) - 1);
