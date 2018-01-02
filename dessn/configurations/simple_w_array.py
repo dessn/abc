@@ -18,10 +18,11 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, frac_mean=0.0, frac_sigma=0.0),
-        # ApproximateModelW(prior=True, frac_mean=0.3, frac_sigma=0.3),
-        ApproximateModelW(prior=True, frac_mean=0.5, frac_sigma=0.5),
-        ApproximateModelW(prior=True, frac_mean=1.0, frac_sigma=1.0),
+        ApproximateModelW(prior=True, frac_mean=0.00, frac_sigma=0.00),
+        ApproximateModelW(prior=True, frac_mean=0.25, frac_sigma=0.25),
+        ApproximateModelW(prior=True, frac_mean=0.50, frac_sigma=0.50),
+        ApproximateModelW(prior=True, frac_mean=0.25, frac_sigma=0.00),
+        ApproximateModelW(prior=True, frac_mean=0.50, frac_sigma=0.00),
     ]
     simulation = [SimpleSimulation(600, alpha_c=4, mass=True, dscale=0.08),
                   SimpleSimulation(400, alpha_c=6, mass=True, dscale=0.08, lowz=True)]
