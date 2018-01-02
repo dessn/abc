@@ -73,7 +73,7 @@ class ApproximateModel(Model):
             "dscale": uniform(0, 0.2),
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-19.5, -19.2),
-            "alpha_c": uniform(0, 0.05, size=(num_surveys,)),
+            "alpha_c": uniform(2, 6, size=(num_surveys,)),
             "delta_c": uniform(0, 0.05, size=(num_surveys,)),
             "skew_c": uniform(0, 0.05, size=(num_surveys,)),
             # "alpha_x1": uniform(0, 0.05, size=(num_surveys,)),
