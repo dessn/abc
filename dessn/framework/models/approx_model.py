@@ -12,7 +12,7 @@ from dessn.framework.models.skewness_fix import get_shift_scale
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_mean=1.0):
+    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_mean=-1.0):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -324,12 +324,12 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_mean=1.0):
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_mean=-1.0):
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_mean=frac_mean)
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False, frac_mean=1.0):
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False, frac_mean=-1.0):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_mean=frac_mean)

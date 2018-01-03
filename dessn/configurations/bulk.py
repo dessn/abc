@@ -18,7 +18,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    models = [ApproximateModelW(prior=True)]#, ApproximateModel()]
+    models = [ApproximateModelW(prior=True),ApproximateModelW(prior=True, frac_mean=1.0)]#, ApproximateModel()]
 
     ndes = 204
     nlowz = 137
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         ]
     fitter = Fitter(dir_name)
 
-    # data = models[0].get_data(simulations[0], 0)  # For testing
+    # data = models[0].get_data(simulations[0], 0, plot=True)  # For testing
     # exit()
 
     fitter.set_models(*models)
