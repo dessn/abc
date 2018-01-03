@@ -17,7 +17,11 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=True)
+    model = [
+        ApproximateModelW(prior=True, frac_mean=-1.0),
+        ApproximateModelW(prior=True, frac_mean=0),
+        ApproximateModelW(prior=True, frac_mean=1.0),
+    ]
     simulations = [
         [SimpleSimulation(1000, alpha_c=2), SimpleSimulation(1000, alpha_c=3, lowz=True)],
         [SimpleSimulation(1000, alpha_c=0), SimpleSimulation(1000, alpha_c=0, lowz=True)]
@@ -49,6 +53,7 @@ if __name__ == "__main__":
         print("Adding data")
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             name = "Gauss" if s[0].alpha_c == 0 else "Skewed"
+            name = "%s %0.1f" % (name, m.frac_mean)
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
             # c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
         c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, summary=True)
