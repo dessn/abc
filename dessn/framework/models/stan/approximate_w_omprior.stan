@@ -93,7 +93,7 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    real <lower = 1, upper = 5> alpha_c [n_surveys];
+    real <lower = 0, upper = 5> alpha_c [n_surveys];
 
 
 }
@@ -289,7 +289,7 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
-    posterior = sum(point_posteriors) - weight + sum(alpha_corrections) + sum(survey_posteriors)
+    posterior = sum(point_posteriors) - weight - sum(alpha_corrections) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)

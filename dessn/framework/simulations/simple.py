@@ -18,9 +18,9 @@ class SimpleSimulation(Simulation):
             self.mb_alpha = 5.87
             self.mb_mean = 13.72
             self.mb_width = 1.35
-            self.power = 0.3,
-            self.max_z_gen = 0.0015
-            self.min_z_gen = 0.00001
+            self.power = 0.5,
+            self.max_z_gen = 0.01
+            self.min_z_gen = 0.0004
         else:
             self.skewnorm = False
             self.mb_alpha = 4

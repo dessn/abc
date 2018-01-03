@@ -62,7 +62,7 @@ def get_shift_scale(redshifts, correction_skewnorm, vals, plot=False):
     if plot:
         alphas = np.logspace(0, 0.6, 5)
     else:
-        alphas = np.array([1, 5])
+        alphas = np.array([0, 5])
 
     for alpha in alphas:
         bias_actual = np.array([get_approx_efficiency(dm, alpha, vals, correction_skewnorm) for dm in dist_mod])
@@ -78,9 +78,8 @@ def get_shift_scale(redshifts, correction_skewnorm, vals, plot=False):
     fn = alphas / np.sqrt(1 + alphas ** 2)
     scale = (b[-1] - b[0]) / (fn.max() - fn.min())
 
-    func = scale * fn
-
     if plot:
+        func = scale * fn
         import matplotlib.pyplot as plt
         for a, x in zip(alphas, b):
             print(a, x)
@@ -90,6 +89,7 @@ def get_shift_scale(redshifts, correction_skewnorm, vals, plot=False):
         plt.plot(alphas, func)
         plt.show()
 
+    print(scale)
     return scale
 
 
