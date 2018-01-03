@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
     models = [
         ApproximateModelW(prior=True, frac_mean=0.00),
-        ApproximateModelW(prior=True, frac_mean=0.50),
-        ApproximateModelW(prior=True, frac_mean=1.00),
+        # ApproximateModelW(prior=True, frac_mean=0.50),
+        # ApproximateModelW(prior=True, frac_mean=1.00),
         ApproximateModelW(prior=True, frac_mean=-0.5),
         ApproximateModelW(prior=True, frac_mean=-1.0)
     ]
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(simulation)
-    ncosmo = 20
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
         print("Adding chains")
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            name = "%0.1f %0.1f" % (m.frac_mean, m.frac_sigma)
+            name = "%0.1f" % (m.frac_mean)
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
             # c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
         c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3)
