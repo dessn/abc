@@ -19,7 +19,9 @@ if __name__ == "__main__":
 
     model = [
         ApproximateModelW(prior=True, frac_mean=-1.0),
+        ApproximateModelW(prior=True, frac_mean=-0.5),
         ApproximateModelW(prior=True, frac_mean=0),
+        ApproximateModelW(prior=True, frac_mean=0.5),
         ApproximateModelW(prior=True, frac_mean=1.0),
     ]
     simulations = [
