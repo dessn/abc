@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = [
+    models = [
         ApproximateModelW(prior=True, frac_mean=-1.0),
         ApproximateModelW(prior=True, frac_mean=-0.5),
         ApproximateModelW(prior=True, frac_mean=0),
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # exit()
 
     fitter = Fitter(dir_name)
-    fitter.set_models(model)
+    fitter.set_models(*models)
     fitter.set_simulations(*simulations)
     ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
