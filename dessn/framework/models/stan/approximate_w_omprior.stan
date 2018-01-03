@@ -39,8 +39,6 @@ data {
     real mB_norm_orig [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
-    real frac_mean;
-    real frac_sigma;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -54,9 +52,6 @@ transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
     matrix[4, 4] mb_cov_chol [n_surveys];
     matrix[3, 3] outlier_population;
-    real konst;
-
-    konst = sqrt(2 / 3.141592653589793);
 
     outlier_population = outlier_dispersion * outlier_dispersion';
 
@@ -96,8 +91,9 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    //real <lower = 0, upper = 1.44> skew_c [n_surveys];
     real <lower = 1, upper = 5> alpha_c [n_surveys];
+    real <lower = -5, upper = 5> alpha_x1 [n_surveys];
+
 
 }
 
@@ -107,15 +103,10 @@ transformed parameters {
     real sigma_MB [n_surveys];
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
-    //real alpha_c [n_surveys];
-    real delta_c [n_surveys];
-    real sigma_c_ratio [n_surveys];
-    real adjust_c_mean [n_surveys];
 
     // Pop at given redshift
     real mean_x1_sn [n_sne];
     real mean_c_sn [n_sne];
-    real mean_c_sn_adj [n_sne];
 
     // Our SALT2 model
     vector [3] model_MBx1c [n_sne];
@@ -208,20 +199,12 @@ transformed parameters {
         sigmas[i][2] = sigma_x1[i];
         sigmas[i][3] = sigma_c[i];
 
-        //alpha_c[i] = tan(skew_c[i]);
-        //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
-        delta_c[i] = 0.707106; // if alpha==1
-        //alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        adjust_c_mean[i] = frac_mean * konst * delta_c[i] * 0.1; // *  sigma_c[i]
-        sigma_c_ratio[i] = 1.0 + frac_sigma * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1);
-
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
         // Calculate selection effect widths
-        // cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + 2 * (delta_alpha * sigma_x1[i]^2)^2 + (beta * sigma_c[i])^2 + 2 * (delta_beta * sigma_c[i]^2)^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (3.1 * sigma_c_ratio[i] * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + 3.1 * sigma_c_ratio[i] * (full_sigma[i][1][3]) - alpha * 3.1 * sigma_c_ratio[i] * (full_sigma[i][2][3] ));
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * full_sigma[i][2][3]);
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
@@ -230,8 +213,9 @@ transformed parameters {
         cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
 
         shapes[i][1] = 0;
-        shapes[i][2] = 0;
+        shapes[i][2] = alpha_x1[i] / sigma_x1[i];
         shapes[i][3] = alpha_c[i] / sigma_c[i];
+
     }
 
     // Now update the posterior using each supernova sample
@@ -240,8 +224,6 @@ transformed parameters {
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
         mean_c_sn[i] = dot_product(mean_c[survey_map[i]], node_weights[i]);
-        mean_c_sn_adj[i] = mean_c_sn[i] + adjust_c_mean[survey_map[i]]; // Adjust mean for skewness when taking normal approximation
-
 
         mean_MBx1c[i][1] = mean_MB;
         mean_MBx1c[i][2] = mean_x1_sn[i];
@@ -272,7 +254,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn_adj[i] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
@@ -300,7 +282,8 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            + normal_lpdf(alpha_c[i] | 0, 3)
+            + normal_lpdf(alpha_c[i]  | 0, 1)
+            + normal_lpdf(alpha_x1[i] | 0, 1)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }

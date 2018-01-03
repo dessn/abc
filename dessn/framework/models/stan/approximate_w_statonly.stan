@@ -91,7 +91,7 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    real <lower = -5, upper = 5> alpha_c [n_surveys];
+    real <lower = 1, upper = 5> alpha_c [n_surveys];
     real <lower = -5, upper = 5> alpha_x1 [n_surveys];
 
 
@@ -204,8 +204,7 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         // Calculate selection effect widths
-        // cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + 2 * (delta_alpha * sigma_x1[i]^2)^2 + (beta * sigma_c[i])^2 + 2 * (delta_beta * sigma_c[i]^2)^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * (full_sigma[i][2][3] ));
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * full_sigma[i][2][3]);
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
