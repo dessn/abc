@@ -37,6 +37,8 @@ data {
     real mB_alpha_orig [n_surveys];
     real mB_sgn_alpha [n_surveys];
     real mB_norm_orig [n_surveys];
+    real frac_mean [n_surveys];
+    real shift_scale [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
 
@@ -279,6 +281,7 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
+        weight += frac_mean[i] * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(alpha_c[i]  | 0, 3)
