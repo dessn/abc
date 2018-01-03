@@ -282,7 +282,7 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        alpha_corrections[i] = frac_mean[i] * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        alpha_corrections[i] = frac_mean * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(alpha_c[i]  | 0, 3)
