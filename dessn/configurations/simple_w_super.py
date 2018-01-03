@@ -29,7 +29,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(model)
     fitter.set_simulations(*simulations)
-    ncosmo = 500
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
@@ -44,32 +44,34 @@ if __name__ == "__main__":
 
         from chainconsumer import ChainConsumer
         c1, c2 = ChainConsumer(), ChainConsumer()
-        m, s, ci, chain, truth, weight, old_weight, posterior = fitter.load()
+        res = fitter.load()
+
+        print("Adding data")
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+            name = "Gauss" if s[0].alpha_c == 0 else "Skewed"
+            c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            # c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, summary=True)
+
+        # print("Adding individual realisations")
+        # res = fitter.load(split_cosmo=True)
+        # for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
+        #     c2.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
         #
-        # print("Adding data")
-        c1.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
+        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, statistics="mean")
 
-        print("Adding individual realisations")
-        res = fitter.load(split_cosmo=True)
-        for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            c2.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
-
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, statistics="mean")
-
-        import numpy as np
-        ws = [chain.chain[:, chain.parameters.index("$w$")] for chain in c2.chains]
-        means = [np.mean(w) for w in ws]
-        stds = [np.std(w) for w in ws]
-        mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
-        mean_std = np.mean(stds)
-        bias = (mean_mean + 1) / mean_std
-
-        save = "%10s %0.4f(%0.4f) %0.4f %0.4f (abs(w+1) %0.4f)\n" % ("Simple", mean_mean, mean_std, np.std(means), bias, np.abs(mean_mean + 1))
-        print(save)
-        with open(pfn + "_test.txt", "w") as f:
-            f.write(save)
+        # import numpy as np
+        # ws = [chain.chain[:, chain.parameters.index("$w$")] for chain in c2.chains]
+        # means = [np.mean(w) for w in ws]
+        # stds = [np.std(w) for w in ws]
+        # mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
+        # mean_std = np.mean(stds)
+        # bias = (mean_mean + 1) / mean_std
+        #
+        # save = "%10s %0.4f(%0.4f) %0.4f %0.4f (abs(w+1) %0.4f)\n" % ("Simple", mean_mean, mean_std, np.std(means), bias, np.abs(mean_mean + 1))
+        # print(save)
+        # with open(pfn + "_test.txt", "w") as f:
+        #     f.write(save)
 
         # print("Saving table")
         # print(c1.analysis.get_latex_table(transpose=True))
@@ -78,7 +80,7 @@ if __name__ == "__main__":
         #
         print("Plotting cosmology")
         c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
-                       figsize="column", chains="Combined")
+                        figsize="column")
 
         print("Plotting summaries")
         c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
@@ -92,6 +94,6 @@ if __name__ == "__main__":
             f.write(c1.analysis.get_latex_table(transpose=True))
 
         print("Plotting big triangle. This might take a while")
-        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
+        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=7)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
         # c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)

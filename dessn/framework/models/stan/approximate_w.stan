@@ -92,7 +92,6 @@ parameters {
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 1, upper = 5> alpha_c [n_surveys];
-    real <lower = -5, upper = 5> alpha_x1 [n_surveys];
 
 
 }
@@ -213,7 +212,7 @@ transformed parameters {
         cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
 
         shapes[i][1] = 0;
-        shapes[i][2] = alpha_x1[i] / sigma_x1[i];
+        shapes[i][2] = 0;
         shapes[i][3] = alpha_c[i] / sigma_c[i];
 
     }
@@ -282,8 +281,7 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            + normal_lpdf(alpha_c[i]  | 0, 1)
-            + normal_lpdf(alpha_x1[i] | 0, 1)
+            + normal_lpdf(alpha_c[i]  | 0, 3)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
