@@ -37,7 +37,7 @@ data {
     real mB_alpha_orig [n_surveys];
     real mB_sgn_alpha [n_surveys];
     real mB_norm_orig [n_surveys];
-    real frac_mean [n_surveys];
+    real frac_mean;
     real shift_scales [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
