@@ -141,6 +141,7 @@ transformed parameters {
     real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
     real cor_mb_norm_width [n_surveys];
+    real alpha_corrections [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -281,14 +282,14 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        weight += frac_mean[i] * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        alpha_corrections[i] = frac_mean[i] * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(alpha_c[i]  | 0, 3)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
-    posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
+    posterior = sum(point_posteriors) - weight + sum(alpha_corrections) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
