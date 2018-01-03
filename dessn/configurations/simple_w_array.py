@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
     models = [
         ApproximateModelW(prior=True, frac_mean=0.00),
-        # ApproximateModelW(prior=True, frac_mean=0.50),
-        # ApproximateModelW(prior=True, frac_mean=1.00),
+        ApproximateModelW(prior=True, frac_mean=0.50),
+        ApproximateModelW(prior=True, frac_mean=1.00),
         # ApproximateModelW(prior=True, frac_mean=-0.5),
         # ApproximateModelW(prior=True, frac_mean=-1.0)
     ]
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         c1, c2 = ChainConsumer(), ChainConsumer()
         print("Loading data")
-        res = fitter.load()
+        res = fitter.load(squeeze=False)
 
         print("Adding chains")
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:

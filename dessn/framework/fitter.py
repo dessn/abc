@@ -220,7 +220,7 @@ class Fitter(object):
         result = OrderedDict(temp_list)
         return self.models[model_index], self.simulations[simulation_index], cosmo_index, result, truth, new_weight, stan_weight, posterior
 
-    def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=2.5):
+    def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=2.5, squeeze=True):
         files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
         filenames = [self.temp_dir + "/" + f for f in files]
         model_indexes = [int(f.split("_")[1]) for f in files]
@@ -246,6 +246,6 @@ class Fitter(object):
                     stacked[key] = np.concatenate((stacked[key], c[key]))
         results.append(self.get_result_from_chain(stacked, si, mi, ci, convert_names=convert_names, max_deviation=max_deviation))
 
-        if len(results) == 1:
+        if squeeze and len(results) == 1:
             return results[0]
         return results
