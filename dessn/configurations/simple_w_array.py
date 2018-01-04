@@ -21,8 +21,8 @@ if __name__ == "__main__":
         ApproximateModelW(prior=True, frac_mean=0.00),
         ApproximateModelW(prior=True, frac_mean=0.50),
         ApproximateModelW(prior=True, frac_mean=1.00),
-        # ApproximateModelW(prior=True, frac_mean=-0.5),
-        # ApproximateModelW(prior=True, frac_mean=-1.0)
+        ApproximateModelW(prior=True, frac_mean=-0.5),
+        ApproximateModelW(prior=True, frac_mean=-1.0)
     ]
     simulation = [SimpleSimulation(600, alpha_c=2, mass=True, dscale=0.08),
                   SimpleSimulation(400, alpha_c=3, mass=True, dscale=0.08, lowz=True)]
