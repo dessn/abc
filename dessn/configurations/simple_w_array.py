@@ -18,23 +18,28 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, frac_mean=0.00),
+        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=0.0),
+        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=1.0),
+        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=-1.0),
+        # ApproximateModelW(prior=True, frac_mean=0.00),
         # ApproximateModelW(prior=True, frac_mean=0.50),
         # ApproximateModelW(prior=True, frac_mean=1.00),
         # ApproximateModelW(prior=True, frac_mean=-0.5),
         # ApproximateModelW(prior=True, frac_mean=-1.0)
     ]
-    simulation = [SimpleSimulation(300, alpha_c=0),
-                  SimpleSimulation(200, alpha_c=0)]
+    simulations = [
+        [SimpleSimulation(300, alpha_c=0), SimpleSimulation(200, alpha_c=0, lowz=True)],
+        [SimpleSimulation(300, alpha_c=2), SimpleSimulation(200, alpha_c=3, lowz=True)]
+    ]
 
-    # models[0].get_data(simulation, 0)
-    # print(models[0].get_data(simulation, 0))
+    # models[0].get_data(simulations[1], 0, plot=True)
+    # print(models[0].get_data(simulations[0], 0))
     # exit()
 
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
-    fitter.set_simulations(simulation)
-    ncosmo = 100
+    fitter.set_simulations(*simulations)
+    ncosmo = 20
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)

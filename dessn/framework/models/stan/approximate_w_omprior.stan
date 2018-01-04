@@ -37,7 +37,8 @@ data {
     real mB_alpha_orig [n_surveys];
     real mB_sgn_alpha [n_surveys];
     real mB_norm_orig [n_surveys];
-    real frac_mean;
+    real frac_shift;
+    real frac_alpha;
     real shift_scales [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
@@ -49,6 +50,7 @@ data {
     matrix[3, 3] outlier_dispersion;
 
     real systematics_scale; // Use this to dynamically turn systematics on or off
+    int apply_efficiency;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -142,6 +144,9 @@ transformed parameters {
     real cor_mb_width2 [n_surveys];
     real cor_mb_norm_width [n_surveys];
     real alpha_corrections [n_surveys];
+    real mean_c_adjust [n_surveys];
+    real sigma_c_adjust [n_surveys];
+    real delta_c [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -204,6 +209,10 @@ transformed parameters {
         // Turn this into population matrix
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
+
+        delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        mean_c_adjust[i] = sigma_c[i] * delta_c[i] * sqrt(2 / pi());
+        sigma_c_adjust[i] = sqrt(1 - 2 * delta_c[i]^2 / pi());
 
         // Calculate selection effect widths
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * full_sigma[i][2][3]);
@@ -289,7 +298,7 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
-    posterior = sum(point_posteriors) + sum(survey_posteriors) - weight - sum(alpha_corrections)
+    posterior = sum(point_posteriors) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
@@ -297,5 +306,9 @@ transformed parameters {
         + normal_lpdf(calibration | 0, systematics_scale);
 }
 model {
-    target += posterior;
+    if (apply_efficiency) {
+        target += posterior - weight - sum(alpha_corrections);
+    } else {
+        target += posterior;
+    }
 }
