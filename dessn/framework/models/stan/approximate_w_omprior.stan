@@ -211,8 +211,8 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
-        mean_c_adjust[i] = sigma_c[i] * delta_c[i] * sqrt(2 / pi());
-        sigma_c_adjust[i] = sqrt(1 - 2 * delta_c[i]^2 / pi());
+        mean_c_adjust[i] = frac_shift * sigma_c[i] * delta_c[i] * sqrt(2 / pi());
+        sigma_c_adjust[i] = 1 + (frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
 
         // Calculate selection effect widths
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * full_sigma[i][2][3]);
@@ -291,7 +291,7 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        alpha_corrections[i] = frac_mean * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        alpha_corrections[i] = frac_alpha * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(alpha_c[i]  | 0, 3)
