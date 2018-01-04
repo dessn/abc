@@ -7,12 +7,13 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4, lowz=False, min_prob_ia=1.0):
+    def __init__(self, num_supernova, dscale=0.08, alpha_c=5, mass=True, num_nodes=4, lowz=False, min_prob_ia=1.0, disable_selection=False):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
         self.min_prob_ia = min_prob_ia
         self.num_calib = 1
+        self.disable_selection = disable_selection
         if lowz:
             self.skewnorm = True
             self.mb_alpha = 5.87
@@ -134,12 +135,15 @@ class SimpleSimulation(Simulation):
             sim_x1 = np.array([o[1] for o in sim_mBx1c[-nn:]])
             sim_c = np.array([o[2] for o in sim_mBx1c[-nn:]])
             vals = np.random.uniform(size=mbs.size)
-            if not self.skewnorm:
-                pdfs = 1 - norm.cdf(mbs, self.mb_mean, self.mb_width)
-                pdfs /= pdfs.max()
+            if disable_selection:
+                pdfs = np.ones(mbs.shape)
             else:
-                pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
-                pdfs /= pdfs.max()
+                if not self.skewnorm:
+                    pdfs = 1 - norm.cdf(mbs, self.mb_mean, self.mb_width)
+                    pdfs /= pdfs.max()
+                else:
+                    pdfs = skewnorm.pdf(mbs, self.mb_alpha, self.mb_mean, self.mb_width)
+                    pdfs /= pdfs.max()
             mask = vals < pdfs
             mbs_all += mbs.tolist()
             sim_x1s_all += sim_x1.tolist()
