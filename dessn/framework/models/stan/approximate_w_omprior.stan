@@ -211,7 +211,7 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.03; //  * sigma_c[i]
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.08; //  * sigma_c[i]
         sigma_c_adjust[i] = 1 + (frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
 
         // Calculate selection effect widths
@@ -300,6 +300,7 @@ transformed parameters {
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
+        + normal_lpdf(beta | 3.1, 0.01)
         + cauchy_lpdf(sigma_MB | 0, 2.5)
         + cauchy_lpdf(sigma_x1 | 0, 2.5)
         + cauchy_lpdf(sigma_c  | 0, 2.5)
