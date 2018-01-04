@@ -211,7 +211,7 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
-        mean_c_adjust[i] = frac_shift * sigma_c[i] * delta_c[i] * sqrt(2 / pi());
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.1; //  * sigma_c[i]
         sigma_c_adjust[i] = 1 + (frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
 
         // Calculate selection effect widths

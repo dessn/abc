@@ -59,15 +59,20 @@ if __name__ == "__main__":
 
         print("Adding chains")
         ls = []
-        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+        cs = ["r", "g", "b", "p", "o", "m"]
+        for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
             name = "%s %0.1f %0.1f" % (name_skew, m.frac_shift, m.frac_alpha)
+
             if name_skew == "Gauss":
                 ls.append("--")
+                cs[i] = "k"
             else:
                 ls.append("-")
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3, linestyles=ls)
+
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3,
+                     linestyles=ls, colors=cs)
 
         print("Plotting cosmology")
         c1.plotter.plot(filename=pfn + "_cosmo.png", truth=truth, parameters=parameters, figsize="column")

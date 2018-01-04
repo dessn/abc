@@ -178,10 +178,10 @@ class SimpleSimulation(Simulation):
     def get_approximate_correction(self):
         if not self.skewnorm:
             print("ccdf approx")
-            return False, np.array([self.mb_mean, self.mb_width, 0, 1]), 0.0001 * np.eye(4)
+            return False, np.array([self.mb_mean, self.mb_width, 0, 1]), 0.00001 * np.eye(4)
         else:
             print("skewnorm approx")
-            return True, np.array([self.mb_mean, self.mb_width, self.mb_alpha, 1.0]), 0.0001 * np.eye(4)
+            return True, np.array([self.mb_mean, self.mb_width, self.mb_alpha, 1.0]), 0.00001 * np.eye(4)
 
     def get_systematic_names(self):
         return [r"{%d}" % i for i in range(self.num_calib)]
