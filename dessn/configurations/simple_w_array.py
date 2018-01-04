@@ -58,51 +58,23 @@ if __name__ == "__main__":
         res = fitter.load(squeeze=False)
 
         print("Adding chains")
+        ls = []
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            name = "%0.1f" % (m.frac_mean)
+            name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
+            name = "%s %0.1f %0.1f" % (name_skew, m.frac_shift, m.frac_alpha)
+            if name_skew == "Gauss":
+                ls.append("--")
+            else:
+                ls.append("-")
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-            # c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3)
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3, linestyles=ls)
 
-        # print("Adding individual realisations")
-        # res = fitter.load(split_cosmo=True)
-        # for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
-        #     c2.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
-        #
-        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, statistics="mean")
-        #
-        # import numpy as np
-        # ws = [chain.chain[:, chain.parameters.index("$w$")] for chain in c2.chains]
-        # means = [np.mean(w) for w in ws]
-        # stds = [np.std(w) for w in ws]
-        # mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
-        # mean_std = np.mean(stds)
-        # bias = (mean_mean + 1) / mean_std
-        #
-        # save = "%10s %0.4f(%0.4f) %0.4f %0.4f\n" % ("Simple", mean_mean, mean_std, np.std(means), bias)
-        # print(save)
-        # with open(pfn + "_test.txt", "w") as f:
-        #     f.write(save)
-
-        # print("Saving table")
-        # print(c1.analysis.get_latex_table(transpose=True))
-        # with open(pfn + "_cosmo_params.txt", 'w') as f:
-        #     f.write(c1.analysis.get_latex_table(parameters=parameters))
-        #
         print("Plotting cosmology")
-        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters, figsize="column")
-
-        print("Plotting summaries")
-        c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True, extra_parameter_spacing=1.0)
+        c1.plotter.plot(filename=pfn + "_cosmo.png", truth=truth, parameters=parameters, figsize="column")
 
         print("Plotting distributions")
-        c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
-
-        print("Saving Parameter values")
-        with open(pfn + "_all_params.txt", 'w') as f:
-            f.write(c1.analysis.get_latex_table(transpose=True))
+        c1.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=6)
 
         print("Plotting big triangle. This might take a while")
-        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
-        # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
-        # c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
+        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=7)
+        c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
