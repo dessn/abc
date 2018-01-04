@@ -20,7 +20,7 @@ if __name__ == "__main__":
     models = [
         ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=0.0),
         ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=1.0),
-        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=-1.0),
+        # ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=-1.0),
         # ApproximateModelW(prior=True, frac_mean=0.00),
         # ApproximateModelW(prior=True, frac_mean=0.50),
         # ApproximateModelW(prior=True, frac_mean=1.00),
