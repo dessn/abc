@@ -215,7 +215,7 @@ transformed parameters {
         //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.1; //  * sigma_c[i]
-        sigma_c_adjust[i] = 1 + (frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
+        sigma_c_adjust[i] = 1 + ((frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1)) * 3.1 / beta);
 
         // Calculate selection effect widths
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * beta * sigma_c_adjust[i] * full_sigma[i][2][3]);
