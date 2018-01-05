@@ -32,8 +32,8 @@ if __name__ == "__main__":
         # ApproximateModelW(prior=True, frac_mean=-1.0)
     ]
     simulations = [
-        [SimpleSimulation(600, alpha_c=0), SimpleSimulation(400, alpha_c=0, lowz=True)],
-        [SimpleSimulation(600, alpha_c=2), SimpleSimulation(400, alpha_c=3, lowz=True)]
+        [SimpleSimulation(300, alpha_c=0), SimpleSimulation(200, alpha_c=0, lowz=True)],
+        [SimpleSimulation(300, alpha_c=2), SimpleSimulation(200, alpha_c=3, lowz=True)]
     ]
 
     # models[1].get_data(simulations[1], 0, plot=True)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 100
+    ncosmo = 20
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
