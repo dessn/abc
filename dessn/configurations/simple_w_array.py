@@ -20,8 +20,11 @@ if __name__ == "__main__":
     models = [
         ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=0.0),
         ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=0.5),
+        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=1.0),
+        ApproximateModelW(prior=True, frac_alpha=1.0, frac_shift=0.0),
         ApproximateModelW(prior=True, frac_alpha=1.0, frac_shift=0.5),
         ApproximateModelW(prior=True, frac_alpha=1.0, frac_shift=1.0),
+        ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0),
         ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.5),
         ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=1.0),
         # ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=-1.0),
@@ -43,7 +46,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 12
+    ncosmo = 10
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
