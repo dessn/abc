@@ -38,6 +38,7 @@ data {
     real mB_sgn_alpha [n_surveys];
     real mB_norm_orig [n_surveys];
     real frac_shift;
+    real frac_shift2;
     real frac_alpha;
     real shift_scales [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
@@ -215,10 +216,10 @@ transformed parameters {
         //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.1; //  * sigma_c[i]
-        sigma_c_adjust[i] = 1 + ((frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1)) * 3.1 / beta);
+        sigma_c_adjust[i] = 1 + (frac_shift2 * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
 
         // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * full_sigma[i][2][3]);
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * beta * sigma_c_adjust[i] * full_sigma[i][2][3]);
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);

@@ -12,7 +12,8 @@ from dessn.framework.models.skewness_fix import get_shift_scale
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_alpha=0.0, apply_efficiency=True):
+    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_shift2=None,
+                 frac_alpha=0.0, apply_efficiency=True):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -24,6 +25,10 @@ class ApproximateModel(Model):
         self.systematics_scale = systematics_scale
         self.frac_alpha = frac_alpha
         self.frac_shift = frac_shift
+        if frac_shift2 is None:
+            self.frac_shift2 = self.frac_shift
+        else:
+            self.frac_shift2 = frac_shift2
         self.apply_efficiency = 1 if apply_efficiency else 0
 
     def get_parameters(self):
@@ -259,7 +264,7 @@ class ApproximateModel(Model):
         for sim, dataa in zip(simulations, data_list):
             res = sim.get_approximate_correction()
             correction_skewnorm, vals, cov = res
-            shift_scale.append(get_shift_scale(dataa["redshifts"], correction_skewnorm, vals, self.frac_shift, plot=plot))
+            shift_scale.append(get_shift_scale(dataa["redshifts"], correction_skewnorm, vals, self.frac_shift, self.frac_shift2, plot=plot))
             mean, std, alpha, norm = vals.tolist()
             means.append(mean)
             stds.append(std)
@@ -284,6 +289,7 @@ class ApproximateModel(Model):
         update["correction_skewnorm"] = correction_skewnorms
         update["shift_scales"] = shift_scale
         update["frac_shift"] = self.frac_shift
+        update["frac_shift2"] = self.frac_shift2
         update["frac_alpha"] = self.frac_alpha
 
         update["mean_mass"] = mean_masses
@@ -328,14 +334,14 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_alpha=0.0):
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_alpha=frac_alpha, frac_shift=frac_shift)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None):
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2)
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False, frac_shift=0.0, frac_alpha=0.0):
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_alpha=frac_alpha, frac_shift=frac_shift)
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2)
 
 

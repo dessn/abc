@@ -21,14 +21,14 @@ def get_selection_skewnorm(mbs, vals):
     return normv * skewnorm.pdf(mbs, alpha, mean, sigma)
 
 
-def get_approx_efficiency(dist_mod, alpha, vals, correction_skewnorm, alpha_shift, frac_shift):
+def get_approx_efficiency(dist_mod, alpha, vals, correction_skewnorm, alpha_shift, frac_shift, frac_shift2):
     n = 40000
     MBs = np.random.normal(loc=-19.365, scale=0.1, size=n)
     x1s = np.random.normal(loc=0, scale=1.0, size=n)
 
     delta = alpha_shift / np.sqrt(1 + alpha_shift**2)
     mean_shift = frac_shift * 0.1 * delta * np.sqrt(2 / np.pi)
-    sigma_shift = 0.1 * np.sqrt(1 - 2 * delta * delta / np.pi)
+    sigma_shift = 0.1 * (1 + frac_shift2 * (np.sqrt(1 - 2 * delta * delta / np.pi) - 1))
     cs = skewnorm.rvs(alpha, loc=mean_shift, scale=sigma_shift, size=n)
 
     alphax1 = 0.14
@@ -56,7 +56,7 @@ def get_approx_efficiency(dist_mod, alpha, vals, correction_skewnorm, alpha_shif
     return area2 / area1
 
 
-def get_shift_scale(redshifts, correction_skewnorm, vals, frac_shift, plot=False):
+def get_shift_scale(redshifts, correction_skewnorm, vals, frac_shift, frac_shift2, plot=False):
     print("Getting shift scale", correction_skewnorm, vals, redshifts.mean())
     cosmo = wCDM(70, 0.3, 0.7)
 
@@ -69,8 +69,8 @@ def get_shift_scale(redshifts, correction_skewnorm, vals, frac_shift, plot=False
         alphas = np.array([0, 5])
 
     for alpha in alphas:
-        bias_actual = np.array([get_approx_efficiency(dm, alpha, vals, correction_skewnorm, 0, 0) for dm in dist_mod])
-        bias_computed = np.array([get_approx_efficiency(dm, 0, vals, correction_skewnorm, alpha, frac_shift) for dm in dist_mod])
+        bias_actual = np.array([get_approx_efficiency(dm, alpha, vals, correction_skewnorm, 0, 0, 0) for dm in dist_mod])
+        bias_computed = np.array([get_approx_efficiency(dm, 0, vals, correction_skewnorm, alpha, frac_shift, frac_shift2) for dm in dist_mod])
 
         bias_diff = np.log(bias_actual) - np.log(bias_computed)
         total_bias = np.sum(bias_diff)

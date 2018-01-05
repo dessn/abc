@@ -18,21 +18,20 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=0.0),
-        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=0.5),
-        ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=1.0),
-        # ApproximateModelW(prior=True, frac_alpha=1.0, frac_shift=0.0),
-        # ApproximateModelW(prior=True, frac_alpha=1.0, frac_shift=0.5),
-        # ApproximateModelW(prior=True, frac_alpha=1.0, frac_shift=1.0),
-        ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0),
-        ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.5),
-        ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=1.0),
+        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.0, frac_shift2=0.0),
+        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.5, frac_shift2=0.5),
+        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0),
+        ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0, frac_shift2=0.0),
+        ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=1.0, frac_shift2=1.0),
+        # ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.5),
         # ApproximateModelW(prior=True, frac_alpha=0.0, frac_shift=-1.0),
         # ApproximateModelW(prior=True, frac_mean=0.00),
         # ApproximateModelW(prior=True, frac_mean=0.50),
         # ApproximateModelW(prior=True, frac_mean=1.00),
         # ApproximateModelW(prior=True, frac_mean=-0.5),
         # ApproximateModelW(prior=True, frac_mean=-1.0)
+        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=0.7),
+        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.2),
     ]
     simulations = [
         [SimpleSimulation(300, alpha_c=0), SimpleSimulation(200, alpha_c=0, lowz=True)],
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 15
+    ncosmo = 10
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
@@ -66,7 +65,7 @@ if __name__ == "__main__":
 
         print("Adding chains")
         ls = []
-        cs = ["r", "r", "g", "g", "b", "b", "a", "a", "brown", "brown", "p", "p", "o", "o", "e", "e", "c", "c"]
+        cs = ["r", "r", "g", "g", "b", "b", "a", "a", "p", "p", "brown", "brown", "o", "o", "e", "e", "c", "c"]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
             name = "%s %0.1f %0.1f" % (name_skew, m.frac_shift, m.frac_alpha)
