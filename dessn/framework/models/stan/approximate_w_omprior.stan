@@ -95,7 +95,8 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    real <lower = 0, upper = 5> alpha_c [n_surveys];
+    //real <lower = 0, upper = 5> alpha_c [n_surveys];
+    real <lower = 0, upper = 0.98> delta_c [n_surveys];
 
 
 }
@@ -210,7 +211,8 @@ transformed parameters {
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
-        delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.1; //  * sigma_c[i]
         sigma_c_adjust[i] = 1 + (frac_shift * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
 
@@ -294,7 +296,7 @@ transformed parameters {
         alpha_corrections[i] = frac_alpha * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            + normal_lpdf(alpha_c[i]  | 0, 3)
+            //+ normal_lpdf(alpha_c[i]  | 0, 1)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
