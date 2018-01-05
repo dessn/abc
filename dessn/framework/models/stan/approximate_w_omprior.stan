@@ -147,7 +147,7 @@ transformed parameters {
     real alpha_corrections [n_surveys];
     real mean_c_adjust [n_surveys];
     real sigma_c_adjust [n_surveys];
-    real delta_c [n_surveys];
+    //real delta_c [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
