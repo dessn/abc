@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
         print("Adding chains")
         ls = []
-        cs = ["k", "r", "k", "g", "k", "b", "k", "a", "k", "m", "k", "p"]
+        cs = ["r", "r", "g", "g", "b", "b", "a", "a", "brown", "brown", "p", "p"]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
             name = "%s %0.1f %0.1f" % (name_skew, m.frac_shift, m.frac_alpha)
