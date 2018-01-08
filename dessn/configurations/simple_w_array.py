@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     models = [
         ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.0, frac_shift2=0.0),
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.5, frac_shift2=0.5),
+        # ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.5, frac_shift2=0.5),
         ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0),
         ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0, frac_shift2=0.0),
         ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=1.0, frac_shift2=1.0),
@@ -30,8 +30,8 @@ if __name__ == "__main__":
         # ApproximateModelW(prior=True, frac_mean=1.00),
         # ApproximateModelW(prior=True, frac_mean=-0.5),
         # ApproximateModelW(prior=True, frac_mean=-1.0)
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=0.5),
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.4),
+        # ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=0.5),
+        # ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.4),
     ]
     simulations = [
         [SimpleSimulation(300, alpha_c=0), SimpleSimulation(200, alpha_c=0, lowz=True)],
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
         print("Adding chains")
         ls = []
-        cs = ["r", "r", "g", "g", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", ]
+        cs = ["r", "r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
             name = "%s shift %0.1f %0.1f global %0.1f" % (name_skew, m.frac_shift, m.frac_shift2, m.frac_alpha)
