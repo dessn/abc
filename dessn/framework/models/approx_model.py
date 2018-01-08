@@ -31,7 +31,7 @@ class ApproximateModel(Model):
             self.frac_shift2 = frac_shift2
         self.apply_efficiency = 1 if apply_efficiency else 0
 
-    self.fixed_sigma_c = fixed_sigma_c
+        self.fixed_sigma_c = fixed_sigma_c
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
