@@ -13,7 +13,7 @@ from dessn.framework.models.skewness_fix import get_shift_scale
 class ApproximateModel(Model):
 
     def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_shift2=None,
-                 frac_alpha=0.0, apply_efficiency=True):
+                 frac_alpha=0.0, apply_efficiency=True, fixed_sigma_c=0.1):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -30,6 +30,8 @@ class ApproximateModel(Model):
         else:
             self.frac_shift2 = frac_shift2
         self.apply_efficiency = 1 if apply_efficiency else 0
+
+    self.fixed_sigma_c = fixed_sigma_c
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -96,9 +98,9 @@ class ApproximateModel(Model):
             "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }
         chol = [[[1.0, 0.0, 0.0],
-                [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
-                [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
-                 np.random.random() * 0.1 + 0.7]] for i in range(num_surveys)]
+                 [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 + 0.7, 0.0],
+                 [np.random.random() * 0.1 - 0.05, np.random.random() * 0.1 - 0.05,
+                  np.random.random() * 0.1 + 0.7]] for i in range(num_surveys)]
         randoms["intrinsic_correlation"] = chol
         self.logger.info("Initial starting point is: %s" % randoms)
         return randoms
@@ -291,6 +293,7 @@ class ApproximateModel(Model):
         update["frac_shift"] = self.frac_shift
         update["frac_shift2"] = self.frac_shift2
         update["frac_alpha"] = self.frac_alpha
+        update["fixed_sigma_c"] = self.fixed_sigma_c
 
         update["mean_mass"] = mean_masses
         update["apply_efficiency"] = self.apply_efficiency
@@ -334,14 +337,20 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None):
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
+                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1):
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
+                         frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
+                         fixed_sigma_c=fixed_sigma_c)
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False, prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None):
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
+                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly, frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2)
+        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
+                         frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
+                         fixed_sigma_c=fixed_sigma_c)
 
 

@@ -43,6 +43,7 @@ data {
     real shift_scales [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
+    real fixed_sigma_c;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -215,7 +216,7 @@ transformed parameters {
 
         //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * 0.1; //  * sigma_c[i]
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c; //  * sigma_c[i]
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
 
         // Calculate selection effect widths
