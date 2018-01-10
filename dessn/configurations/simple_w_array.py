@@ -19,13 +19,9 @@ if __name__ == "__main__":
 
     models = [
         ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.0, frac_shift2=0.0),
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.06),
         ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07),
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.08),
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.09),
-        ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.10),
         # ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0, frac_shift2=0.0),
-        # ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0),
+        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07),
 
     ]
     simulations = [
@@ -40,10 +36,10 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 15
+    ncosmo = 30
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
-    fitter.set_max_steps(2000)
+    fitter.set_max_steps(3000)
     fitter.set_num_cpu(500)
 
     h = socket.gethostname()

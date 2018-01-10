@@ -13,7 +13,7 @@ from dessn.framework.models.skewness_fix import get_shift_scale
 class ApproximateModel(Model):
 
     def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_shift2=None,
-                 frac_alpha=0.0, apply_efficiency=True, fixed_sigma_c=0.1):
+                 frac_alpha=0.0, apply_efficiency=True, fixed_sigma_c=0.07):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -338,7 +338,7 @@ class ApproximateModel(Model):
 
 class ApproximateModelOl(ApproximateModel):
     def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1):
+                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07):
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
                          fixed_sigma_c=fixed_sigma_c)
@@ -346,7 +346,7 @@ class ApproximateModelOl(ApproximateModel):
 
 class ApproximateModelW(ApproximateModel):
     def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1):
+                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
