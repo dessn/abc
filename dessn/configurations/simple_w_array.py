@@ -21,7 +21,7 @@ if __name__ == "__main__":
         ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.0, frac_shift2=0.0),
         # ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07),
         # ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0, frac_shift2=0.0),
-        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07, beta_contrib=0.0),
+        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07),
 
     ]
     simulations = [
