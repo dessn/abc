@@ -13,7 +13,7 @@ from dessn.framework.models.skewness_fix import get_shift_scale
 class ApproximateModel(Model):
 
     def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_shift2=None,
-                 frac_alpha=0.0, apply_efficiency=True, fixed_sigma_c=0.07):
+                 frac_alpha=0.0, apply_efficiency=True, fixed_sigma_c=0.07, beta_contrib=0.1):
         if statonly:
             filename = filename.replace(".stan", "_statonly.stan")
         self.statonly = statonly
@@ -30,6 +30,7 @@ class ApproximateModel(Model):
         else:
             self.frac_shift2 = frac_shift2
         self.apply_efficiency = 1 if apply_efficiency else 0
+        self.beta_contrib = beta_contrib
 
         self.fixed_sigma_c = fixed_sigma_c
 
@@ -294,6 +295,7 @@ class ApproximateModel(Model):
         update["frac_shift2"] = self.frac_shift2
         update["frac_alpha"] = self.frac_alpha
         update["fixed_sigma_c"] = self.fixed_sigma_c
+        update["beta_contrib"] = self.beta_contrib
 
         update["mean_mass"] = mean_masses
         update["apply_efficiency"] = self.apply_efficiency
@@ -338,19 +340,19 @@ class ApproximateModel(Model):
 
 class ApproximateModelOl(ApproximateModel):
     def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07):
+                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07, beta_contrib=0.1):
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
-                         fixed_sigma_c=fixed_sigma_c)
+                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib)
 
 
 class ApproximateModelW(ApproximateModel):
     def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07):
+                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07, beta_contrib=0.1):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
-                         fixed_sigma_c=fixed_sigma_c)
+                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib)
 
 

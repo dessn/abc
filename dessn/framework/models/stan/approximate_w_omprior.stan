@@ -44,6 +44,7 @@ data {
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
     real fixed_sigma_c;
+    real beta_contrib;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -270,7 +271,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] + 0.1 * (9 * 3.1 + betas[i]) * mean_c_adjust[survey_map[i]] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] + beta_contrib * (((1 / beta_contrib) - 1) * 3.1 + betas[i]) * mean_c_adjust[survey_map[i]] - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
