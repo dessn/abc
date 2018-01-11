@@ -21,9 +21,7 @@ if __name__ == "__main__":
         ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=0.0, frac_shift2=0.0),
         # ApproximateModelW(prior=True, frac_alpha=0.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07),
         # ApproximateModelW(prior=True, frac_alpha=-1.0, frac_shift=0.0, frac_shift2=0.0),
-        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07, beta_contrib=0.1),
-        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07, beta_contrib=0.05),
-        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07, beta_contrib=0.15),
+        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07, beta_contrib=0.0),
 
     ]
     simulations = [
@@ -38,7 +36,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 50
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
@@ -61,7 +59,7 @@ if __name__ == "__main__":
         cs = ["r", "r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
-            name = "%s shift %0.1f %0.1f global %0.1f sigma %0.2f" % (name_skew, m.frac_shift, m.frac_shift2, m.frac_alpha, m.fixed_sigma_c)
+            name = "%s shift %0.1f %0.1f global %0.1f sigma %0.2f beta %0.2f" % (name_skew, m.frac_shift, m.frac_shift2, m.frac_alpha, m.fixed_sigma_c, m.beta_contrib)
             if name_skew == "Gauss":
                 ls.append("--")
             else:
