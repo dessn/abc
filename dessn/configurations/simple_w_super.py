@@ -19,11 +19,11 @@ if __name__ == "__main__":
 
     models = [
         ApproximateModelW(prior=True, frac_alpha=0,  frac_shift=0, frac_shift2=0, fixed_sigma_c=0.07),
-        ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07)
+        # ApproximateModelW(prior=True, frac_alpha=-1.0,  frac_shift=1.0, frac_shift2=1.0, fixed_sigma_c=0.07)
     ]
     simulations = [
         [SimpleSimulation(1000, alpha_c=0), SimpleSimulation(1000, alpha_c=0, lowz=True)],
-        [SimpleSimulation(1000, alpha_c=1), SimpleSimulation(1000, alpha_c=2, lowz=True)]
+        [SimpleSimulation(1000, alpha_c=2), SimpleSimulation(1000, alpha_c=2, lowz=True)]
     ]
 
     # print(model.get_data(simulation, 0))
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         from chainconsumer import ChainConsumer
         c1, c2 = ChainConsumer(), ChainConsumer()
-        res = fitter.load()
+        res = fitter.load(squeeze=False)
 
         ls = []
         cs = ["r", "r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
