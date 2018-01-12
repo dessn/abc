@@ -26,7 +26,7 @@ if __name__ == "__main__":
     ]
     simulations = [
         # [SimpleSimulation(300, alpha_c=0), SimpleSimulation(200, alpha_c=0, lowz=True)],
-        [SimpleSimulation(300, alpha_c=1), SimpleSimulation(200, alpha_c=2, lowz=True)]
+        [SimpleSimulation(300, alpha_c=2), SimpleSimulation(200, alpha_c=2, lowz=True)]
     ]
 
     # models[0].get_data(simulations[1], 0, plot=True)
