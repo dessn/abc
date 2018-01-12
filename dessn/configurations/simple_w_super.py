@@ -49,13 +49,18 @@ if __name__ == "__main__":
         c1, c2 = ChainConsumer(), ChainConsumer()
         res = fitter.load()
 
-        print("Adding data")
-        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            name = "Gauss" if s[0].alpha_c == 0 else "Skewed"
-            name = "%s %0.1f" % (name, m.frac_mean)
+        ls = []
+        cs = ["r", "r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
+        for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
+            name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
+            name = "%s shift %0.1f %0.1f global %0.1f sigma %0.2f beta %0.2f" % (name_skew, m.frac_shift, m.frac_shift2, m.frac_alpha, m.fixed_sigma_c, m.beta_contrib)
+            if name_skew == "Gauss":
+                ls.append("--")
+            else:
+                ls.append("-")
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-            # c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, summary=True)
+
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, linestyles=ls, colors=cs)
 
         # print("Adding individual realisations")
         # res = fitter.load(split_cosmo=True)
