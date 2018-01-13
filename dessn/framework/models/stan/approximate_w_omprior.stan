@@ -150,8 +150,10 @@ transformed parameters {
     real alpha_corrections [n_surveys];
     real mean_c_adjust [n_surveys];
     real sigma_c_adjust [n_surveys];
+    real sigma_c_adjust_ratio [n_surveys];
     //real delta_c [n_surveys];
     real alpha_c [n_surveys];
+    real kurtosis_c [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -216,9 +218,11 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        kurtosis_c[i] = 2 * (pi() - 3) * (delta_c[i]^2 * (2 / pi()))^2 / (1 - 2*delta_c[i]^2/pi())^2;
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c; //fixed_sigma_c; //  * sigma_c[i]
-        sigma_c_adjust[i] = 1 + (frac_shift2 * (sqrt(1 - 2 * delta_c[i]^2 / pi()) - 1));
+        sigma_c_adjust_ratio[i] = ((1 - (2 * delta_c[i]^2 / pi()))^2 + (kurtosis_c[i] / sigma_c[i]^4))^0.25;
+        sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * beta * sigma_c_adjust[i] * full_sigma[i][2][3]);
