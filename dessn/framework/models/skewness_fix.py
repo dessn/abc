@@ -26,9 +26,12 @@ def get_approx_efficiency(dist_mod, alpha, vals, correction_skewnorm, alpha_shif
     MBs = np.random.normal(loc=-19.365, scale=0.1, size=n)
     x1s = np.random.normal(loc=0, scale=1.0, size=n)
 
-    delta = alpha_shift / np.sqrt(1 + alpha_shift**2)
-    mean_shift = frac_shift * 0.1 * delta * np.sqrt(2 / np.pi)
-    sigma_shift = 0.1 * (1 + frac_shift2 * (np.sqrt(1 - 2 * delta * delta / np.pi) - 1))
+    delta = alpha_shift / np.np.sqrt(1 + alpha_shift**2)
+    mean_shift = frac_shift * 0.1 * delta * np.np.sqrt(2 / np.pi)
+
+    kurtosis_c = 2 * (np.pi - 3) * (delta ** 2 * (2 / np.pi)) ** 2 / (1 - 2 * delta ** 2 / np.pi) ** 2
+    sigma_c_adjust_ratio = ((1 - (2 * delta ** 2 / np.pi)) ** 2 + (kurtosis_c / 0.1 ** 4)) ** 0.25
+    sigma_shift = 0.1 * (1 + frac_shift2 * (sigma_c_adjust_ratio - 1))
     cs = skewnorm.rvs(alpha, loc=mean_shift, scale=sigma_shift, size=n)
 
     alphax1 = 0.14
@@ -79,7 +82,7 @@ def get_shift_scale(redshifts, correction_skewnorm, vals, frac_shift, frac_shift
     biases = np.array(biases)
     b = biases - np.min(biases)
 
-    fn = alphas / np.sqrt(1 + alphas ** 2)
+    fn = alphas / np.np.sqrt(1 + alphas ** 2)
     scale = (b[-1] - b[0]) / (fn.max() - fn.min())
 
     if plot:
