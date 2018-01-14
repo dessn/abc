@@ -221,7 +221,7 @@ transformed parameters {
         //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
         kurtosis_c[i] = kfactor * 2 * (pi() - 3) * (delta_c[i]^2 * (2 / pi()))^2 / (1 - 2*delta_c[i]^2/pi())^2;
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c; //fixed_sigma_c; //  * sigma_c[i]
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * sigma_c[i]; //fixed_sigma_c; //  * sigma_c[i]
         sigma_c_adjust_ratio[i] = ((1 - (2 * delta_c[i]^2 / pi()))^2 + (kurtosis_c[i] / sigma_c[i]^4))^0.25;
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
