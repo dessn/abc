@@ -94,7 +94,7 @@ parameters {
     matrix <lower = -0.3, upper = 0.3> [n_surveys, num_nodes] mean_c;
     real <lower = -4, upper = -0.5> log_sigma_MB [n_surveys];
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
-    real <lower = -8, upper = -1.5> log_sigma_c [n_surveys];
+    real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
 
@@ -212,7 +212,7 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * sigma_c[i]; //fixed_sigma_c
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
         sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
