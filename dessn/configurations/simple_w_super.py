@@ -50,12 +50,14 @@ if __name__ == "__main__":
         res = fitter.load(squeeze=False)
 
         ls = []
-        cs = ["r", "b", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
+        cs = ["#086ed3", "lb", "r", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gaussian" if s[0].alpha_c == 0 else "Skewed"
             name_approx = "unshifted" if m.frac_shift == 0 else "shifted"
             name = "%s population, %s  normal colour approximation" % (name_skew, name_approx)
-            if name_skew == "Gauss":
+            if name_skew == "Gaussian" and name_approx == "unshifted":
+                continue
+            if name_skew == "Gaussian":
                 ls.append("--")
             else:
                 ls.append("-")
