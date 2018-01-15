@@ -39,7 +39,6 @@ data {
     real mB_norm_orig [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
-    real shift_scales [n_surveys];
     real frac_shift;
     real frac_shift2;
     real fixed_sigma_c;
@@ -228,7 +227,7 @@ transformed parameters {
         shapes[i][1] = 0;
         shapes[i][2] = 0;
         shapes[i][3] = alpha_c[i] / sigma_c[i];
-        print(i, "  ", mean_c_adjust[i], "  ", sigma_c[i]);
+
     }
 
     // Now update the posterior using each supernova sample
@@ -296,7 +295,6 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
-            + normal_lpdf(mean_x1[i] | 0, 0.01) // REMOVE
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)

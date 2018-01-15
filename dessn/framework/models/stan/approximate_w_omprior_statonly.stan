@@ -39,6 +39,9 @@ data {
     real mB_norm_orig [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
+    real frac_shift;
+    real frac_shift2;
+    real fixed_sigma_c;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -47,6 +50,7 @@ data {
     matrix[3, 3] outlier_dispersion;
 
     real systematics_scale; // Use this to dynamically turn systematics on or off
+    int apply_efficiency;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -89,9 +93,9 @@ parameters {
     matrix <lower = -0.3, upper = 0.3> [n_surveys, num_nodes] mean_c;
     real <lower = -4, upper = -0.5> log_sigma_MB [n_surveys];
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
-    real <lower = -8, upper = 0> log_sigma_c [n_surveys];
+    real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    real <lower = 1, upper = 5> alpha_c [n_surveys];
+    real <lower = 0, upper = 0.98> delta_c [n_surveys];
 
 
 }
@@ -139,6 +143,10 @@ transformed parameters {
     real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
     real cor_mb_norm_width [n_surveys];
+    real mean_c_adjust [n_surveys];
+    real sigma_c_adjust [n_surveys];
+    real sigma_c_adjust_ratio [n_surveys];
+    real alpha_c [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -202,8 +210,13 @@ transformed parameters {
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
+        alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
+        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
+        sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
+
         // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (full_sigma[i][1][3]) - alpha * beta * full_sigma[i][2][3]);
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * beta * sigma_c_adjust[i] * full_sigma[i][2][3]);
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
@@ -253,7 +266,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] + 3.1 * mean_c_adjust[survey_map[i]] - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
@@ -281,17 +294,20 @@ transformed parameters {
     for (i in 1:n_surveys) {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
-            + normal_lpdf(alpha_c[i]  | 0, 3)
             + normal_lpdf(deltas[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
-    posterior = sum(point_posteriors) - weight + sum(survey_posteriors)
+    posterior = sum(point_posteriors) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
-        + cauchy_lpdf(sigma_MB | 0, 2.5)
-        + cauchy_lpdf(sigma_x1 | 0, 2.5)
-        + cauchy_lpdf(sigma_c  | 0, 2.5)
+        + cauchy_lpdf(sigma_MB | 0, 1)
+        + cauchy_lpdf(sigma_x1 | 0, 1)
+        + cauchy_lpdf(sigma_c  | 0, 1)
         + normal_lpdf(calibration | 0, systematics_scale);
 }
 model {
-    target += posterior;
+    if (apply_efficiency) {
+        target += posterior - weight;
+    } else {
+        target += posterior;
+    }
 }
