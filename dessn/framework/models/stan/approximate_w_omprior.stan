@@ -218,11 +218,10 @@ transformed parameters {
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
-        //delta_c[i] = alpha_c[i] / sqrt(1 + alpha_c[i]^2);
-        kurtosis_c[i] = kfactor * 2 * (pi() - 3) * (delta_c[i]^2 * (2 / pi()))^2 / (1 - 2*delta_c[i]^2/pi())^2;
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * sigma_c[i]; //fixed_sigma_c; //  * sigma_c[i]
-        sigma_c_adjust_ratio[i] = ((1 - (2 * delta_c[i]^2 / pi()))^2 + (kurtosis_c[i] / sigma_c[i]^4))^0.25;
+        kurtosis_c[i] = kfactor * 2 * (pi() - 3) * (delta_c[i]^2 * (2 / pi()))^2 / (1 - 2*delta_c[i]^2/pi())^2;
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c; //fixed_sigma_c; //  * sigma_c[i]
+        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi())) * ((kurtosis_c[i] + 4)^0.25);
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
@@ -302,7 +301,7 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        alpha_corrections[i] = frac_alpha * shift_scales[i] * alpha_c[i] / sqrt(1 + alpha_c[i]^2);
+        alpha_corrections[i] = frac_alpha * shift_scales[i] * delta_c[i];
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
@@ -314,9 +313,6 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 1)
         + cauchy_lpdf(sigma_x1 | 0, 1)
         + cauchy_lpdf(sigma_c  | 0, 1)
-        // + normal_lpdf(sigma_x1 | 1, 0.01) + normal_lpdf(sigma_MB | 0.1, 0.001) + normal_lpdf(sigma_c | 0.1, 0.001) + normal_lpdf(beta | 3.1, 0.01) // REMOVE
-        // + normal_lpdf(beta | 3.1, 0.01)  + normal_lpdf(sigma_c | 0.1, 0.001) // REMOVE
-        // + normal_lpdf(sigma_MB | 0.1, 0.001)
         + normal_lpdf(calibration | 0, systematics_scale);
 }
 model {
