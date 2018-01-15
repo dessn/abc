@@ -17,19 +17,15 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    num_nodes = 4
-    models = [ApproximateModel(num_nodes=num_nodes),
-              ApproximateModelOl(num_nodes=num_nodes),
-              ApproximateModelW(num_nodes=num_nodes)]
-    simulation = [SimpleSimulation(300, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes),
-                  SimpleSimulation(200, alpha_c=0, mass=True, dscale=0.08, num_nodes=num_nodes, lowz=True)]
+    models = [ApproximateModel(), ApproximateModelOl(), ApproximateModelW(), ApproximateModelW(prior=True)]
+    simulation = [SimpleSimulation(300), SimpleSimulation(200, lowz=True)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(25)
-    fitter.set_num_walkers(10)
-    fitter.set_max_steps(2000)
+    fitter.set_num_cosmologies(100)
+    fitter.set_num_walkers(1)
+    fitter.set_max_steps(3000)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!

@@ -350,7 +350,7 @@ class ApproximateModelOl(ApproximateModel):
 
 class ApproximateModelW(ApproximateModel):
     def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07, beta_contrib=0.1, kfactor=1.0):
+                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1, beta_contrib=0.1, kfactor=1.0):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,

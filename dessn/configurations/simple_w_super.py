@@ -18,7 +18,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, frac_alpha=0,  frac_shift=0, frac_shift2=0, fixed_sigma_c=0.07)
+        ApproximateModelW(prior=True),
+        ApproximateModelW(prior=True, frac_alpha=-1,  frac_shift=1, frac_shift2=1, fixed_sigma_c=0.1)
     ]
     simulations = [
         [SimpleSimulation(1000, alpha_c=0), SimpleSimulation(1000, alpha_c=0, lowz=True)],
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 500
+    ncosmo = 200
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
@@ -49,10 +50,11 @@ if __name__ == "__main__":
         res = fitter.load(squeeze=False)
 
         ls = []
-        cs = ["r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
+        cs = ["r", "b", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
-            name = "%s shift %0.1f %0.1f global %0.1f sigma %0.2f beta %0.2f" % (name_skew, m.frac_shift, m.frac_shift2, m.frac_alpha, m.fixed_sigma_c, m.beta_contrib)
+            name_skew = "Gaussian" if s[0].alpha_c == 0 else "Skewed"
+            name_approx = "unshifted" if m.frac_shift == 0 else "shifted"
+            name = "%s population, %s  normal colour approximation" % (name_skew, name_approx)
             if name_skew == "Gauss":
                 ls.append("--")
             else:
@@ -95,7 +97,7 @@ if __name__ == "__main__":
                                 extra_parameter_spacing=1.0)
 
         print("Plotting distributions")
-        c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
+        c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=5)
 
         print("Saving Parameter values")
         with open(pfn + "_all_params.txt", 'w') as f:
