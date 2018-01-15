@@ -37,15 +37,12 @@ data {
     real mB_alpha_orig [n_surveys];
     real mB_sgn_alpha [n_surveys];
     real mB_norm_orig [n_surveys];
-    real frac_shift;
-    real frac_shift2;
-    real frac_alpha;
-    real shift_scales [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
+    real shift_scales [n_surveys];
+    real frac_shift;
+    real frac_shift2;
     real fixed_sigma_c;
-    real beta_contrib;
-    real kfactor;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -99,7 +96,6 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = 0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
-    //real <lower = 0, upper = 5> alpha_c [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
 
 
@@ -148,13 +144,10 @@ transformed parameters {
     real cor_sigma [n_surveys];
     real cor_mb_width2 [n_surveys];
     real cor_mb_norm_width [n_surveys];
-    real alpha_corrections [n_surveys];
     real mean_c_adjust [n_surveys];
     real sigma_c_adjust [n_surveys];
     real sigma_c_adjust_ratio [n_surveys];
-    //real delta_c [n_surveys];
     real alpha_c [n_surveys];
-    real kurtosis_c [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -219,9 +212,8 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        kurtosis_c[i] = kfactor * 2 * (pi() - 3) * (delta_c[i]^2 * (2 / pi()))^2 / (1 - 2*delta_c[i]^2/pi())^2;
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c; //fixed_sigma_c; //  * sigma_c[i]
-        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi())) * ((kurtosis_c[i] + 4)^0.25);
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
+        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
@@ -301,7 +293,6 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        alpha_corrections[i] = frac_alpha * shift_scales[i] * delta_c[i];
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
@@ -317,7 +308,7 @@ transformed parameters {
 }
 model {
     if (apply_efficiency) {
-        target += posterior - weight - sum(alpha_corrections);
+        target += posterior - weight;
     } else {
         target += posterior;
     }
