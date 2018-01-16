@@ -210,9 +210,11 @@ transformed parameters {
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
-        alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
-        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
+
+        // delta_c === delta_c sigma_c
+        alpha_c[i] = (delta_c[i] / sigma_c[i]) / sqrt(1 - (delta_c[i] / sigma_c[i])^2);
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi());
+        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * (delta_c[i] / sigma_c[i])^2 / pi()));
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
