@@ -50,8 +50,9 @@ if __name__ == "__main__":
         res = fitter.load(squeeze=False)
 
         ls = []
-        cs = ["#086ed3", "lb", "r", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
+        cs = ["#086ed3", "lg", "p", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
+            params = list(chain.keys())
             name_skew = "Gaussian" if s[0].alpha_c == 0 else "Skewed"
             name_approx = "unshifted" if m.frac_shift == 0 else "shifted"
             name = "%s population, %s  normal colour approximation" % (name_skew, name_approx)
@@ -60,10 +61,15 @@ if __name__ == "__main__":
             if name_skew == "Gaussian":
                 ls.append("--")
             else:
-                ls.append("-")
+                if name_approx == "shifted":
+                    ls.append(":")
+                else:
+                    ls.append("-")
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, linestyles=ls, colors=cs)
+        print(params)
+        red_params = [p for p in params if "langle x_1" not in p and "Delta" not in p and "delta" not in p and "Omega" not in p]
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, linestyles=ls,
+                     colors=cs, max_ticks=4, linewidths=1.1)
 
         # print("Adding individual realisations")
         # res = fitter.load(split_cosmo=True)
@@ -90,22 +96,28 @@ if __name__ == "__main__":
         # with open(pfn + "_cosmo_params.txt", 'w') as f:
         #     f.write(c1.analysis.get_latex_table(parameters=parameters))
         #
-        print("Plotting cosmology")
-        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
-                        figsize="column")
-
-        print("Plotting summaries")
-        c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
-                                extra_parameter_spacing=1.0)
+        # print("Plotting cosmology")
+        # c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
+        #                 figsize="column")
+        #
+        # print("Plotting summaries")
+        # c1.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
+        #                         extra_parameter_spacing=1.0)
 
         print("Plotting distributions")
-        c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=5)
+        fig = c1.plotter.plot_distributions(truth=truth, col_wrap=5, parameters=red_params)
+        ax = fig.get_axes()
+        ax[2].set_ylim(0, 10)
+        ax[3].set_ylim(0, 10)
+        filenames = [pfn + "_dist.png", pfn + "_dist.pdf"]
+        for f in filenames:
+            c1.plotter._save_fig(fig, f, 300)
 
         print("Saving Parameter values")
         with open(pfn + "_all_params.txt", 'w') as f:
             f.write(c1.analysis.get_latex_table(transpose=True))
 
-        print("Plotting big triangle. This might take a while")
-        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=7)
+        # print("Plotting big triangle. This might take a while")
+        # c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=7)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
         # c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)

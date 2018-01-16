@@ -23,6 +23,7 @@
 \usepackage{amsmath}	% Advanced maths commands
 \usepackage{amssymb}	% Extra maths symbols
 \usepackage{tikz}
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
 \usetikzlibrary{bayesnet}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,12 +36,13 @@
 \newcommand{\myemail}{samuelreay@gmail.com}
 \newcommand\abs[1]{\left|#1\right|}
 \newcommand {\etal} {\emph{~et~al.} }
-\newcommand{\cov}{\mathcal{C}^{-1}}
 \newcommand{\green}{\color{green}}
 \newcommand{\blue}{\color{blue}}
 \newcommand{\red}{\color{red}}
 
 \newcommand{\kmsmpc}{{\rm km}\,{\rm s}^{-1}\,{\rm Mpc}^{-1}}
+\newcommand{\cov}{\mathcal{C}}
+\newcommand{\Z}{\mathcal{Z}}
 
 \defcitealias{Guy2010}{G10}
 \defcitealias{Chotard2011}{C11}
@@ -204,7 +206,7 @@ Like most of the BHM methods introduced previously, we work from the summary sta
 
 The first layer of the hierarchy represents the latent population of $m_B$, $x_1$ and $c$. This can be thought of as the `true' values for the supernova, and is normally distributed around the observed values such that 
 \begin{equation}
-P(m_B, x_1, c|\hat{m_B},\hat{x_1},\hat{c},\cov) = \mathcal{N}(\lbrace m_B, x_1, c \rbrace|\lbrace \hat{m_B},\hat{x_1},\hat{c} \rbrace, \cov).
+P(\hat{m_B},\hat{x_1},\hat{c}|m_B, x_1, c,\cov) = \mathcal{N}(\lbrace \hat{m_B},\hat{x_1},\hat{c} \rbrace|\lbrace m_B, x_1, c \rbrace, \cov). \label{eq:pop}
 \end{equation}
 As we are focused on the spectroscopically confirmed supernovae for this iteration of the method, we assume the observed redshift $\hat{z}$ is the true redshift $z$ such that $P(\hat{z}|z) = \delta(\hat{z} - z)$. Similarly, we assume that the observed mass is the true mass $m$, such that  Whilst the latter is not physically motivated like the redshift measurement, the relatively small contribution of the host galaxy mass to the model makes this an acceptable approximation.
 
@@ -272,19 +274,26 @@ We tested two models against simulated supernova sets; $\beta(c) = \beta_0 + \be
 
 \subsubsection{Host Galaxy Environment}
 
-It is now well known that host galaxy environment has a significant effect on supernova properties. The latest sample of over 1300 spectroscopically confirmed Type Ia supernovae show $>5\sigma$ evidence for correlation between host mass and luminosity \citep{Uddin2017}. The traditional correction, as employed in analyses such as \citet{Suzuki2012} and \citet{Betoule2014} invoke a step function such that $\Delta M = 0.08 \mathcal{H}(log(M) - 10))$, where $\mathcal{H}$ is the Heaviside step function and $M$ is the galaxy mass in solar masses. The scale of this step function varies from analysis to analysis, with the 0.08 value shown previously sourced from \cite{Sullivan2010} and used in \citet{Betoule2014}. In this work we adopt the model used in {\rubin}, which follows the work from \citet{Rigault2013}, such that we introduce two parameters to incorporate a redshift-dependent host galaxy mass correction:
+It is now well known that host galaxy environment has a significant effect on supernova properties. The latest sample of over 1300 spectroscopically confirmed Type Ia supernovae show $>5\sigma$ evidence for correlation between host mass and luminosity \citep{Uddin2017}. The traditional correction, as employed in analyses such as \citet{Suzuki2012} and \citet{Betoule2014} invoke a step function such that $\Delta M = 0.08 \mathcal{H}(\log(M) - 10))$, where $\mathcal{H}$ is the Heaviside step function and $M$ is the galaxy mass in solar masses. The scale of this step function varies from analysis to analysis, with the 0.08 value shown previously sourced from \cite{Sullivan2010} and used in \citet{Betoule2014}. In this work we adopt the model used in {\rubin}, which follows the work from \citet{Rigault2013}, such that we introduce two parameters to incorporate a redshift-dependent host galaxy mass correction:
 \begin{equation}
 \Delta M = \delta(0) \left[ \frac{1.9\left(1 - \frac{\delta(0)}{\delta(\infty)}\right)  }{0.9 + 10^{0.95z}} + \frac{\delta(0)}{\delta(\infty)}\right]
 \end{equation}
-We also take flat priors on the parameterisation $\delta(0)$, $\delta(0)/\delta(\infty)$.
+We also take flat priors on the parametrisation $\delta(0)$, $\delta(0)/\delta(\infty)$.
 
-\subsubsection{Systematics}
+
+
+\subsubsection{Uncertainty Propagation}
 \label{sec:systreat}
-The chief difficulty with including systematics in supernova analyses is that the generally occur during the observational pipeline, and have difficult to model effects on the output observations. As such, the normal treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{\partial \hat{m_B}}{\partial Z_i}$, $\frac{\partial \hat{x_1}}{\partial Z_i}$, $\frac{\partial \hat{c}}{\partial Z_i}$, where $Z_i$ represents the $i$\textsuperscript{th} systematic.
+The chief difficulty with including systematic uncertainties in supernova analyses is that they generally occur during the observational pipeline, and have difficult-to-model effects on the output observations. As such, the normal treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{\partial \hat{m_B}}{\partial \Z_i}$, $\frac{\partial \hat{x_1}}{\partial \Z_i}$, $\frac{\partial \hat{c}}{\partial \Z_i}$, where $\Z_i$ represents the $i$\textsuperscript{th} systematic.
 
-Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed original values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. But scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
+Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed original values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. By scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
 
-This method of adjusting the observed summary statistics is used throughout the traditional and BHM analyses, however it is normally constrained to band systematics. That is, each band for each survey has two systematics associated with it - the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, 10 SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic and also the systematic peculiar velocity uncertainty. This gives thirteen global systematics shared by all surveys, plus two systematics per band in each survey.
+This method of adjusting the observed summary statistics is used throughout the traditional and BHM analyses, however it is normally constrained to band systematics. That is, each band for each survey has two systematics associated with it - the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, 10 SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic and also the systematic peculiar velocity uncertainty. This gives thirteen global systematics shared by all surveys, plus two systematics per band in each survey. Denoting $\eta \equiv \lbrace m_B, x_1, c \rbrace$, our initial conditional likelihood for our observed summary statistics shown in Equation \eqref{eq:pop} becomes
+\begin{align}
+P(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i, C) = \mathcal{N}(\hat{\eta} + \delta \Z_i \frac{\partial \hat{\eta}}{\partial \Z_i}|\eta,\cov). \label{eq:pop2}
+\end{align}
+
+
 
 \subsubsection{Selection Effects}
 \label{sec:selection}
@@ -571,6 +580,18 @@ m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta
 &\quad\quad + 2(\beta \sigma_{M_B,c} - \alpha \sigma{m_B,x_1} - \alpha \beta \sigma_{x_1,c}).
 \end{align}
 Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral and reach equations \eqref{eq:seldes} and \eqref{eq:sellowz}.
+
+\subsection{Approximate Selection Effects}
+
+
+\begin{figure*}
+	\begin{center}
+		\includegraphics[width=\textwidth]{simple_w_super_dist.pdf}
+	\end{center}
+	\caption{Marginalised distributions for 200 realisations of cosmology, fit to Flat $w$CDM with prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, each containing 1000 simulated high-z and 1000 simulated low-z supernovae. The dashed green surfaces represent a fit to an underlying Gaussian colour population with the unshifted model. The blue solid surface represents fits to a skewed colour population with the unshifted model, and the purple dotted surface represents a fit to a skewed colour population with the shifted model. The superscript $0$ and $1$ denote the two different surveys (high-z and low-z respectively), and similarly the first four $\langle c^i \rangle$ parameters represent the four redshift nodes in the high-z survey, and the last four represent the nodes for the low-z survey. We can see that the shifted model is far better able to recover skewed input populations than the unshifted, performing better in terms of recovering skewness $\alpha_c$, mean colour $\langle c \rangle$ and width of the colour distribution $\sigma_c$. The unshifted model recovers the correct colour mean and width if you approximate a skew normal as a normal: $\Delta\mu = \sqrt{2/\pi}\sigma_c\delta_c \approx 0.071$, which is approximately the deviation found in fits to the colour population mean. Whilst the performance of the shifted model on skewed data populations is an improvement over the unshifted model, it comes at a cost - significant bias appears in the fits to $\alpha$, $\beta$, $\sigma_{m_B}$ and $w$. These biases in cosmological parameters are not found in the unshifted model, and similarly the bias when moving from a Gaussian to skewed colour population is negligible. For these reasons, we adopt the unshifted model.}
+	\label{fig:simple_w_super}
+\end{figure*}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
