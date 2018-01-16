@@ -18,12 +18,12 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [ApproximateModel(), ApproximateModelOl(), ApproximateModelW(), ApproximateModelW(prior=True)]
-    simulation = [SimpleSimulation(300), SimpleSimulation(200, lowz=True)]
+    simulation = [SimpleSimulation(1000), SimpleSimulation(1000, lowz=True)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(simulation)
-    fitter.set_num_cosmologies(10)
+    fitter.set_num_cosmologies(200)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(3000)
 
@@ -31,45 +31,37 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
-        parameters = [r"$\Omega_m$", r"$\alpha$", r"$\beta$"]
+        parameters = [r"$\Omega_m$", "$w$", r"$\Omega_\Lambda$"]
 
         from chainconsumer import ChainConsumer
-        m, s, chain, truth, weight, old_weight, posterior = fitter.load()
+
+        res = fitter.load(split_models=True, squeeze=False, split_cosmo=False)
 
         print("Adding data")
-        c1, c2 = ChainConsumer(), ChainConsumer()
-        c1.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
-        c2.add_chain(chain, weights=weight, posterior=posterior, name="Combined")
+        c1 = ChainConsumer()
 
-        print("Adding individual realisations")
-        res = fitter.load(split_cosmo=True)
-        for i, (m, s, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            c2.add_chain(chain, weights=weight, posterior=posterior, name="Realisation %d" % i)
+        for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
+            c1.add_chain(chain, weights=weight, posterior=posterior)
+            print(truth["$w$"])
 
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, contour_labels="confidence")
+        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
-        print("Saving table")
-        print(c1.analysis.get_latex_table(transpose=True))
-        with open(pfn + "_cosmo_params.txt", 'w') as f:
-            f.write(c1.analysis.get_latex_table(parameters=parameters))
+        # print("Saving table")
+        # print(c1.analysis.get_latex_table(transpose=True))
+        # with open(pfn + "_cosmo_params.txt", 'w') as f:
+        #     f.write(c1.analysis.get_latex_table(parameters=parameters))
 
         print("Plotting cosmology")
-        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], truth=truth, parameters=parameters,
-                       figsize="column", chains="Combined")
-
-        print("Plotting summaries")
-        c2.plotter.plot_summary(filename=[pfn + "_summary.png", pfn + "_summary.pdf"], truth=truth, parameters=parameters, errorbar=True,
-                                extra_parameter_spacing=1.0)
-
-        print("Plotting distributions")
-        c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
-
-        print("Saving Parameter values")
-        with open(pfn + "_all_params.txt", 'w') as f:
-            f.write(c1.analysis.get_latex_table(transpose=True))
-
-        print("Plotting big triangle. This might take a while")
-        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
-        c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
-        c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)
+        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], parameters=parameters)
+        #
+        #
+        # print("Plotting distributions")
+        # c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
+        #
+        # print("Saving Parameter values")
+        # with open(pfn + "_all_params.txt", 'w') as f:
+        #     f.write(c1.analysis.get_latex_table(transpose=True))
+        #
+        # print("Plotting big triangle. This might take a while")
+        # c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
+        # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
