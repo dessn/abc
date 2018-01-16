@@ -75,7 +75,7 @@ parameters {
     // Supernova model
     real <lower = -0.1, upper = 0.5> alpha;
     //real <lower = -0.2, upper = 0.2> delta_alpha;
-    real beta;
+    real <lower = 0, upper = 5> beta;
     //real <lower = -2, upper = 2> delta_beta;
 
     // Other effects
@@ -210,11 +210,9 @@ transformed parameters {
         population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
         full_sigma[i] = population[i] * population[i]';
 
-
-        // delta_c === delta_c sigma_c
-        alpha_c[i] = (delta_c[i] / sigma_c[i]) / sqrt(1 - (delta_c[i] / sigma_c[i])^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi());
-        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * (delta_c[i] / sigma_c[i])^2 / pi()));
+        alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
+        sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
@@ -268,7 +266,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * mean_c_sn[i] + betas[i] * mean_c_adjust[survey_map[i]] - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
