@@ -75,7 +75,7 @@ parameters {
     // Supernova model
     real <lower = -0.1, upper = 0.5> alpha;
     //real <lower = -0.2, upper = 0.2> delta_alpha;
-    real <lower = 0, upper = 5> beta;
+    real beta;
     //real <lower = -2, upper = 2> delta_beta;
 
     // Other effects
