@@ -31,37 +31,28 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
-        parameters = [r"$\Omega_m$", "$w$", r"$\Omega_\Lambda$"]
+        parameters = [r"$\Omega_m$", "$w$"]
 
         from chainconsumer import ChainConsumer
 
         res = fitter.load(split_models=True, squeeze=False, split_cosmo=False)
 
         print("Adding data")
-        c1 = ChainConsumer()
-
+        cb = ChainConsumer()
+        names = [r"Flat $\Lambda$CDM", r"$\Lambda$CDM", "Flat $w$CDM", r"Flat $w$CDM + $\Omega_m$ prior"]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            c1.add_chain(chain, weights=weight, posterior=posterior)
-            print(truth["$w$"])
+            c = ChainConsumer()
+            c.add_chain(chain, weights=weight, posterior=posterior, name=names[i])
+            if i in [0, 3]:
+                cb.add_chain(chain, weights=weight, posterior=posterior, name=names[i])
+            c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, sigmas=[0, 0.3, 1, 2], contour_labels="confidence")
+            ps = m.get_cosmo_params()
+            n = m.__class__.__name__
+            if m.prior:
+                n += "OmPrior"
+            c.plotter.plot(filename=[pfn + n + ".png", pfn + n + ".pdf"], parameters=ps, truth=truth, figsize="column")
 
-        c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
-
-        # print("Saving table")
-        # print(c1.analysis.get_latex_table(transpose=True))
-        # with open(pfn + "_cosmo_params.txt", 'w') as f:
-        #     f.write(c1.analysis.get_latex_table(parameters=parameters))
-
-        print("Plotting cosmology")
-        c1.plotter.plot(filename=[pfn + "_cosmo.png", pfn + "_cosmo.pdf"], parameters=parameters)
-        #
-        #
-        # print("Plotting distributions")
-        # c1.plotter.plot_distributions(filename=[pfn + "_dist.png", pfn + "_dist.pdf"], truth=truth, col_wrap=6)
-        #
-        # print("Saving Parameter values")
-        # with open(pfn + "_all_params.txt", 'w') as f:
-        #     f.write(c1.analysis.get_latex_table(transpose=True))
-        #
-        # print("Plotting big triangle. This might take a while")
-        # c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=10)
-        # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
+        print("Saving table")
+        print(cb.analysis.get_latex_table(transpose=True))
+        with open(pfn + "_cosmo_params.txt", 'w') as f:
+            f.write(cb.analysis.get_latex_table(parameters=parameters))

@@ -32,7 +32,7 @@ class ApproximateModel(Model):
         self.apply_efficiency = 1 if apply_efficiency else 0
         self.beta_contrib = beta_contrib
         self.kfactor = kfactor
-
+        self.prior = False
         self.fixed_sigma_c = fixed_sigma_c
 
     def get_parameters(self):
@@ -339,6 +339,9 @@ class ApproximateModel(Model):
         del dictionary["intrinsic_correlation"]
         return dictionary
 
+    def get_cosmo_params(self):
+        return [r"$\Omega_m$"]
+
 
 class ApproximateModelOl(ApproximateModel):
     def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
@@ -346,6 +349,9 @@ class ApproximateModelOl(ApproximateModel):
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
                          fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor)
+
+    def get_cosmo_params(self):
+        return [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 
 
 class ApproximateModelW(ApproximateModel):
@@ -356,5 +362,7 @@ class ApproximateModelW(ApproximateModel):
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
                          fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor)
+        self.prior = prior
 
-
+    def get_cosmo_params(self):
+        return [r"$\Omega_m$", r"$w$"]

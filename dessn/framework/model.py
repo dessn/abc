@@ -40,3 +40,7 @@ class Model(ABC):
         def init():
             return self.get_init(**kwargs)
         return init
+
+    @abstractmethod
+    def get_cosmo_params(self):
+        raise NotImplementedError()
