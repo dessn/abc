@@ -374,7 +374,7 @@ In order to verify our model we run it through several tests. First, we validate
 
 We generate simple toy data to validate the basic premise of the model. For both DES and LowZ data we draw from an underlying $M_B$, $x_1$, $c$ population and translate into apparent magnitude space using $\Omega_m = 0.3$, $\alpha= 0.14$ and $\beta = 3.1$. Masses are randomly drawn from the interval 0 to 1, and a mass correction with $\delta(0) = 0.08$ and $\delta(0)/\delta(\infty) =0.5$ included. Absolute magnitudes are drawn from $\mathcal{N}(-19.3, 0.1)$, true stretch values are drawn from $\mathcal{N}(0, 1)$ and true colour values are drawn from $\mathcal{N}^{\rm Skew}(0, 0.1, 2)$.
 
-Independent observational errors of $0.04$, $0.2$, $0.03$ on $m_B$, $x_1$ and $c$ (following the mean uncertainty for DES SNANA simulations) are added to create the observables. The results are then passed through the selection effects, where each supernova is only selected based on $P(S|m_B)$, using a skew normal function for the LowZ supernovae and error function for the DES-like supernovae. We draw from each survey simulation until we have 1000 LowZ supernovae and 1000 DES-like supernovae, representing a statistical sample of greater power than the estimated 250 supernovae for the DES spectroscopic analysis.
+Independent observational errors of $0.04$, $0.2$, $0.03$ on $m_B$, $x_1$ and $c$ (following the mean uncertainty for DES SNANA simulations) are added to create the observables. The selection functions (a skew normal for low-redshift and an error function for high-redshift) are given independent uncertainty of $0.01$ on all parameters. The results are then passed through the selection effects, where each supernova is only selected based on $P(S|m_B)$, using a skew normal function for the LowZ supernovae and error function for the DES-like supernovae. We draw from each survey simulation until we have 1000 LowZ supernovae and 1000 DES-like supernovae, representing a statistical sample of greater power than the estimated 250 supernovae for the DES spectroscopic analysis.
 
 We test four models: Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM and Flat $w$CDM with a prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, with the latter included to allow sensitive tests on bias for $w$. To achieve statistical precision, we fit 200 realisations of supernovae datasets. Cosmological parameters are recovered without significant bias. Combined posterior surfaces of all 200 realisations for Flat $wCDM$ fits are shown in Figure \ref{fig:simple_w}. By utilising the Stan framework, fits to these simulations of 2000 supernovae take only on order of a single CPU-hour to run.
 
@@ -384,7 +384,7 @@ To enforce investigate biases in the model in fine detail, we look for systemati
 	\centering
 	\caption{Maximum likelihood cosmological parameters determined from stacking the surfaces of 200 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. No significant bias is detected in either cosmological model.}
 	\label{tab:simple_model}
-	\begin{tabular}{ccc}
+	\begin{tabular}{l|cc}
 		\hline
 		Model & $\Omega_m$ & $w$ \\ 
 		\hline
@@ -411,7 +411,7 @@ Simulations (using the SNANA package) follow the observational schedule and obse
 	\centering
 	\caption{Tested population distributions, where the {\sk} LowZ stretch distribution is formed as sum of two bifurcated Gaussians, with the mean and spread of each component given respectively.}
 	\label{tab:dist}
-	\begin{tabular}{l|llll}
+	\begin{tabular}{l|cccc}
 		\hline
 		Model & $\langle x_1 \rangle$ & $\sigma_{x_1}$ &  $\langle c \rangle$ & $\sigma_c$  \\
 		\hline
@@ -429,7 +429,7 @@ Each realisation of cosmology fitted contains 300 LowZ supernovae, and 250 DES-l
 	\centering
 	\caption{Parameter summaries shown for 150 realisations of supernovae data, each comprising of 300 LowZ supernovae and 250 DES-like supernovae. Maximum likelihood statistics, with errors quoted to $1\sigma$ (68\% confidence) are reported.}
 	\label{tab:bulk_summary}
-	\begin{tabular}{ccccc}
+	\begin{tabular}{lcccc}
 		\hline
 		Model & $\Omega_m$ & $\alpha$ & $\beta$  \\ 
 		\hline

@@ -18,6 +18,7 @@ def get_systematic_mapping():
         "Fitz99ColorLaw": r"{\rm MWE ColorLaw}",
         "OD94ColorLaw": r"{\rm MWE ColorLaw}",
         "REDSHIFT_BIAS": r"{\rm \delta z }",
+        "zshift": r"{\rm \delta z }",
         "DES_ZP_g_survcal": r"\Delta g",
         "DES_ZP_r_survcal": r"\Delta r",
         "DES_ZP_i_survcal": r"\Delta i",
