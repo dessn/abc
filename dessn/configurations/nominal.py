@@ -51,7 +51,8 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         res = fitter.load()
         c = ChainConsumer()
-        for m, s, chain, truth, weight, old_weight, posterior in res:
+
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             name = "Stat + Syst" if not m.statonly else "Stat"
             c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
@@ -67,7 +68,7 @@ if __name__ == "__main__":
               r"$\sigma_{\rm m_B}^{0}$", r"$\sigma_{\rm m_B}^{1}$",]
         for p in ps:
             mus, stds = [], []
-            for m, s, chain, truth, weight, old_weight, posterior in res:
+            for m, s, ci, chain, truth, weight, old_weight, posterior in res:
                 w = chain[p]
                 mus.append(np.mean(w))
                 stds.append(np.std(w))
