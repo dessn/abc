@@ -2,11 +2,13 @@ import numpy as np
 from scipy.stats import norm, skewnorm
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
+from matplotlib import rc
+
 
 sigma = 0.1
 xs = np.linspace(-5, 5, 1000)
 sf = 1 - norm.cdf(xs, 2, 0.5)
-mids = np.linspace(0.5, 3.5, 100)
+mids = np.linspace(0.5, 4, 100)
 
 alpha = 2
 delta = alpha / np.sqrt(1 + alpha**2)
@@ -29,7 +31,8 @@ for i, mid in enumerate(mids):
         pop = norm.pdf(xs, mid + (shift * s / sigma), sigma * sigma_ratio1)
         efs[i, j] = simps(pop * sf, x=xs)
 
-fig, axes = plt.subplots(nrows=2, sharex=True, figsize=(5,6), gridspec_kw={"hspace":0.0})
+rc('text', usetex=True)
+fig, axes = plt.subplots(nrows=2, sharex=True, figsize=(4, 5), gridspec_kw={"hspace": 0.0})
 axes[0].plot(mids, ef_a, label="Correct", c="k")
 axes[0].plot(mids, ef_no, label="Unshifted")
 

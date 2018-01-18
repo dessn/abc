@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
-import matplotlib.pyplot as plt
 from scipy.stats import norm, skewnorm
 from scipy.optimize import curve_fit
 import os
@@ -82,16 +81,15 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - cdf(binc, *vals)) / ratio_error_adj) ** 2)
         red_chi2 = chi2 / (len(binc) - 3)
-        # print(red_chi2, adj)
-
-    print(vals)
-    print(cov)
-    print(np.sqrt(np.diag(cov)))
 
     if plot:
-        fig, ax = plt.subplots(1, 1)
-        ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3, label="Bin(err)")
-        ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error, label="Bin(err) (smoothed)")
+        import matplotlib.pyplot as plt
+        from matplotlib import rc
+        rc('text', usetex=True)
+
+        fig, ax = plt.subplots(figsize=(4, 3))
+        ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3, label="Simulation")
+        #ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error, label="Bin(err) (smoothed)")
 
         mbs = np.linspace(binc[0], binc[-1], 1000)
         cdf_eval = cdf(mbs, *vals)
@@ -100,16 +98,18 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
             rands = np.random.multivariate_normal([0, 0, 0, 0], cov=cov)
             vals2 = vals + rands
             cdf_eval2 = cdf(mbs, *vals2)
-            opts = {}
-            if i == 0:
-                opts["label"] = "uncert"
-            plt.plot(mbs, cdf_eval2, c='k', alpha=0.05, **opts)
-        plt.ylabel("Probability")
-        plt.xlabel(r"$m_B + \alpha x_1 + \beta c$")
-        plt.legend()
-        ax.plot(mbs, cdf_eval, c='k', label="Fitting efficiency")
-        plt.title(os.path.basename(dump_npy))
-        plt.show()
+            plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
+        ax.set_ylabel("Probability")
+        ax.set_xlabel(r"$m_B$")
+        ax.plot(mbs, cdf_eval, c='k', label="Fitted efficiency")
+        ax.legend(frameon=False, loc=3)
+        ax.set_xlim(20, 24)
+        fig.tight_layout()
+        name = os.path.basename(dump_npy)
+
+        ax.text(0.98, 0.95, "DES 3YR Spectroscopically Confirmed", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
+        fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
+        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
     return False, vals, cov
 
@@ -125,8 +125,9 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
     threshold = 0.1
     red_chi2 = np.inf
     adj = 0.001
-    while np.abs(red_chi2 - 1) > threshold:
-        if red_chi2 > 1:
+    goal = 1
+    while np.abs(red_chi2 - goal) > threshold:
+        if red_chi2 > goal:
             adj *= 1.2
         else:
             adj *= 0.8
@@ -136,16 +137,15 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - sknorm(binc, *vals)) / ratio_error_adj) ** 2)
         red_chi2 = chi2 / (len(binc) - 3)
-        # print("red chi2 ", red_chi2, adj, chi2, vals)
-
-    print(vals)
-    print(cov)
-    print(np.sqrt(np.diag(cov)))
 
     if plot:
-        fig, ax = plt.subplots(1, 1)
-        ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3)
-        ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error)
+        import matplotlib.pyplot as plt
+        from matplotlib import rc
+        rc('text', usetex=True)
+
+        fig, ax = plt.subplots(figsize=(4, 3))
+        ax.errorbar(binc, ratio, yerr=ratio_error_adj, ls="none", fmt='o', ms=3, label="Simulation")
+        # ax.errorbar(binc, ratio_smooth, yerr=ratio_smooth_error)
 
         mbs = np.linspace(binc[0], binc[-1], 1000)
         cdf_eval = sknorm(mbs, *vals)
@@ -156,15 +156,25 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
             cdf_eval2 = sknorm(mbs, *vals2)
             plt.plot(mbs, cdf_eval2, c='k', alpha=0.05)
 
-        ax.plot(mbs, cdf_eval, c='k', label="Fitting efficiency")
-        plt.show()
+        ax.set_ylabel("Probability")
+        ax.set_xlabel(r"$m_B$")
+        ax.plot(mbs, cdf_eval, c='k', label="Fitted efficiency")
+        ax.legend(frameon=False, loc=2)
+        ax.set_xlim(13, 17)
+        ax.set_ylim(0, 0.4)
+        fig.tight_layout()
+        name = os.path.basename(dump_npy)
+        #plt.show()
+        ax.text(0.98, 0.95, "Combined LowZ Sample", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
+        fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
+        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
     return True, vals, cov
 
 
 if __name__ == "__main__":
-    # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
+    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
-    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=18)
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=18)
