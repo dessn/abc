@@ -35,14 +35,22 @@ if __name__ == "__main__":
 
     fitter = Fitter(dir_name)
 
+    # Test systematics
     # data = models[0].get_data(simulation, 0)  # For testing
+    # cal = data["deta_dcalib"]
+    # print(cal.shape)
+    # print(np.max(cal[:, 0, :]))
+    # import matplotlib.pyplot as plt
+    # plt.imshow(cal[:, 0, :])
+    # cbar = plt.colorbar()
+    # plt.show()
     # exit()
 
     fitter.set_models(*models)
     fitter.set_simulations(simulation)
     fitter.set_num_cosmologies(10)
     fitter.set_max_steps(2000)
-    fitter.set_num_walkers(10)
+    fitter.set_num_walkers(20)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!

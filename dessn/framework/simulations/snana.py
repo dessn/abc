@@ -17,14 +17,16 @@ class SNANASimulation(Simulation):
         assert os.path.exists(self.data_folder), "Cannot find folder %s" % self.data_folder
         self.use_sim = use_sim
         self.num_nodes = num_nodes
-        self.systematic_labels = self.get_systematic_names()
-        self.num_calib = len(self.systematic_labels)
-        if self.num_calib == 0:
-            self.num_calib = 1
+        self.systematic_labels = None
+
         self.num_supernova = num_supernova
         self.cov_scale = cov_scale
         self.manual_selection = None
         self.shift = shift
+        self.get_systematic_names()
+        self.num_calib = len(self.systematic_labels)
+        if self.num_calib == 0:
+            self.num_calib = 1
 
     def get_correction(self, cov_scale=1.0):
         if "_des" in self.simulation_name.lower():
@@ -65,11 +67,13 @@ class SNANASimulation(Simulation):
         ]
 
     def get_systematic_names(self):
-        this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-        filename = this_dir + "/snana_data/%s/sys_names.pkl" % self.simulation_name
-        with open(filename, 'rb') as f:
-            names = pickle.load(f)
-        return names
+        if self.systematic_labels is None:
+            this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+            filename = this_dir + "/snana_data/%s/sys_names.pkl" % self.simulation_name
+            with open(filename, 'rb') as f:
+                names = pickle.load(f)
+            self.systematic_labels = names
+        return self.systematic_labels
 
     def get_all_supernova(self, n_sne, cosmology_index=0):
         self.logger.info("Getting SNANA data from %s" % self.data_folder)
@@ -88,7 +92,7 @@ class SNANASimulation(Simulation):
         filename = self.data_folder + "passed_%d.npy" % cosmology_index
         assert os.path.exists(filename), "Cannot find file %s, do you have this realisations?" % filename
         supernovae = np.load(filename)
-        print("%s SN in %s" % (supernovae.shape, filename))
+        self.logger.info("%s SN in %s" % (supernovae.shape[0], filename))
         if n_sne != -1:
             supernovae = supernovae[:n_sne, :]
         else:
@@ -131,8 +135,7 @@ class SNANASimulation(Simulation):
             "sim_apparents": s_ap,
             "sim_stretches": s_st,
             "sim_colours": s_co,
-            "prob_ia": np.ones(n_sne),
-            # "passed": np.ones(n_sne, dtype=np.bool)
+            "prob_ia": np.ones(n_sne)
         }
         return result
 

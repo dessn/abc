@@ -115,12 +115,16 @@ class ApproximateModel(Model):
         if not type(simulations) == list:
             simulations = [simulations]
 
-        n_snes = [sim.num_supernova for sim in simulations]
         data_list = [s.get_passed_supernova(s.num_supernova, cosmology_index=cosmology_index) for s in simulations]
         print(data_list[0].keys())
+        n_snes = [d["n_sne"] for d in data_list]
+        self.logger.info("Have %s supernovae" % n_snes)
+
         n_surveys = len(data_list)
 
-        global_calibration = self.get_num_global_from_sims(simulations)
+        labels, _ = self.get_systematic_labels(simulations)
+        self.logger.info("Systematic labels are %s" % labels)
+        label_lists = [s.get_systematic_names() for s in simulations]
 
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
@@ -161,7 +165,8 @@ class ApproximateModel(Model):
             sim_data_list.append(sim_data)
 
         node_weights = np.concatenate(node_weights_list)
-        num_calib = np.sum(num_calibs) - (global_calibration * (len(num_calibs) - 1))
+        num_calib = len(labels)
+        total_num_sne = np.sum(n_snes)
 
         # data_list is a list of dictionaries, aiming for a dictionary with lists
         data_dict = {}
@@ -172,16 +177,16 @@ class ApproximateModel(Model):
             for key in data_list[0].keys():
                 if key == "deta_dcalib":  # Changing shape of deta_dcalib makes this different
                     offset = 0
-                    vals = []
-                    for data in data_list:
+                    blank = np.zeros((total_num_sne, 3, num_calib))
+                    for data, labs in zip(data_list, label_lists):
                         nsne = data["n_sne"]
-                        blank = np.zeros((nsne, 3, num_calib))
-                        n = data["deta_dcalib"].shape[2] - global_calibration
-                        blank[:, :, :global_calibration] = data["deta_dcalib"][:, :, :global_calibration]
-                        blank[:, :, offset:offset+n] = data["deta_dcalib"][:, :, global_calibration:]
-                        offset += n
-                        vals.append(blank)
-                    data_dict[key] = np.vstack(vals)
+                        for i, l in enumerate(labels):
+                            if l not in labs:
+                                continue
+                            index = labs.index(l)
+                            blank[offset:offset + nsne, :, i] = data["deta_dcalib"][:, :, index]
+                        offset += nsne
+                    data_dict[key] = blank
                 else:
                     if type(data_list[0][key]) in [int, float]:
                         data_dict[key] = [d[key] for d in data_list]
@@ -305,23 +310,27 @@ class ApproximateModel(Model):
         final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
 
-    def get_num_global_from_sims(self, simulations):
+    def get_global_from_sims(self, simulations):
         num_sims = len(simulations)
         all_labels = [l for s in simulations for l in s.get_systematic_names()]
         counted = Counter(all_labels)
-        global_labels = [key for key in counted.keys() if counted[key] == num_sims]
-        return len(global_labels)
+        global_labels = []
+        for l in all_labels:
+            if l not in global_labels and counted[l] == num_sims:
+                global_labels.append(l)
+        return global_labels
 
     def get_systematic_labels(self, simulations):
-        label_list = [s.get_systematic_names() for s in simulations]
-        if len(label_list[0]) == 0:
-            label_list[0].append("Fake")
-        global_calibration = self.get_num_global_from_sims(simulations)
-        start = label_list[0][:global_calibration]
-        for l in label_list:
-            start += l[global_calibration:]
+        label_lists = [s.get_systematic_names() for s in simulations]
+        if len(label_lists[0]) == 0:
+            label_lists[0].append("Fake")
+        start = self.get_global_from_sims(simulations)
+        for label_list in label_lists:
+            for l in label_list:
+                if l not in start:
+                    start.append(l)
         res = [r"$\delta [ %s ]$" % s for s in start]
-        return res
+        return start, res
 
     def get_node_weights(self, nodes, redshifts):
         indexes = np.arange(nodes.size)

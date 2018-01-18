@@ -127,7 +127,7 @@ def load_dump_file(sim_dir):
 
 
 def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False, skip=6):
-
+    max_offset_mB = 0.2
     ind = 0
     if "-0" in sim_dir:
         ind = int(sim_dir.split("-0")[-1]) - 1
@@ -153,6 +153,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
 
     final_results = []
     passed_cids = []
+    all_offsets = []
     logging.debug("Have %d rows to process" % base_fits.shape)
     for i, row in enumerate(base_fits):
         if i % 1000 == 0 and i > 0:
@@ -220,16 +221,16 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
             offset_x1.append(0.0)
             offset_c.append(0.0)
 
-        if np.any(np.isnan(offset_mb)):
+        if np.any(np.isnan(offset_mb)) or np.any(np.abs(offset_mb) > max_offset_mB):
             num_bad_calib += 1
             num_bad_calib_index += np.isnan(offset_mb)
             continue
-        offsets = np.vstack((offset_mb, offset_x1, offset_c)).T
+        offsets = np.vstack((offset_mb, offset_x1, offset_c))
         passed_cids.append(cid)
 
         if isinstance(cid, str):
             cid = int(hashlib.sha256(cid.encode('utf-8')).hexdigest(), 16) % 10 ** 8
-
+        all_offsets.append(offsets)
         final_result = [cid, z, mass_prob, sim_mb, sim_x1, sim_c, mb, x1, c] \
                        + cov.flatten().tolist() + offsets.flatten().tolist()
         final_results.append(final_result)
@@ -238,6 +239,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         os.makedirs(output_dir)
 
     fitted_data = np.array(final_results).astype(np.float32)
+
     np.save("%s/passed_%d.npy" % (output_dir, ind), fitted_data)
     logging.info("Calib faliures: %d in total. Breakdown: %s" % (num_bad_calib, num_bad_calib_index))
 
