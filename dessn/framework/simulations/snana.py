@@ -8,9 +8,10 @@ from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10"):
         super().__init__()
         self.simulation_name = sim_name
+        self.type = type
         self.global_calib = global_calib
         this_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
         self.data_folder = this_dir + "/snana_data/%s/" % self.simulation_name
@@ -31,10 +32,10 @@ class SNANASimulation(Simulation):
     def get_correction(self, cov_scale=1.0):
         if "_des" in self.simulation_name.lower():
             self.logger.info("Getting DES correction for sim %s" % self.simulation_name)
-            return des_sel(cov_scale=cov_scale, shift=self.shift)
+            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type)
         elif "_lowz" in self.simulation_name.lower():
             self.logger.info("Getting LOWZ correction for sim %s" % self.simulation_name)
-            return lowz_sel(cov_scale=cov_scale, shift=self.shift)
+            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type)
         else:
             raise ValueError("Cannot find des or lowz in your sim name, unsure which selection function to use!")
 

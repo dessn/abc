@@ -6,8 +6,8 @@ import os
 import inspect
 
 
-def des_sel(cov_scale=1.0, shift=None):
-    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10")
+def des_sel(cov_scale=1.0, shift=None, type="G10"):
+    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type)
     if shift is None:
         shift = np.array([0.0, 0.2, 0.0, 0.0])
     mean += shift
@@ -15,8 +15,8 @@ def des_sel(cov_scale=1.0, shift=None):
     return sn, mean, cov
 
 
-def lowz_sel(cov_scale=1.0, shift=None):
-    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10")
+def lowz_sel(cov_scale=1.0, shift=None, type="G10"):
+    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type)
     if shift is not None:
         mean += shift
     cov *= cov_scale
@@ -108,7 +108,7 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         name = os.path.basename(dump_npy)
 
         ax.text(0.98, 0.95, "DES 3YR Spectroscopically Confirmed", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
-        fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
+        # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
         fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
     return False, vals, cov
@@ -166,7 +166,7 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         name = os.path.basename(dump_npy)
         #plt.show()
         ax.text(0.98, 0.95, "Combined LowZ Sample", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
-        fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
+        # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
         fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
     return True, vals, cov
