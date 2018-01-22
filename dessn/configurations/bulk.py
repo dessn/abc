@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
     models = [ApproximateModelW(prior=True, statonly=True)]
 
-    ndes = -1
+    ndes = 500
     nlowz = 137
     simulations = [
             [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW")]#, SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
