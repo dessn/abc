@@ -4,6 +4,7 @@ from scipy.stats import norm, skewnorm
 from scipy.optimize import curve_fit
 import os
 import inspect
+import logging
 
 
 def des_sel(cov_scale=1.0, shift=None, type="G10"):
@@ -11,14 +12,17 @@ def des_sel(cov_scale=1.0, shift=None, type="G10"):
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
     mean += shift
+    logging.info("Getting DES selection, shift of %s" % shift)
     cov *= cov_scale
     return sn, mean, cov
 
 
 def lowz_sel(cov_scale=1.0, shift=None, type="G10"):
     sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type)
-    if shift is not None:
-        mean += shift
+    if shift is None:
+        shift = np.array([0.0, 0.0, 0.0, 0.0])
+    mean += shift
+    logging.info("Getting LOWZ selection, shift of %s" % shift)
     cov *= cov_scale
     return sn, mean, cov
 
