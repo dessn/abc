@@ -179,9 +179,9 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         x1e = row["x1ERR"]
         ce = row["cERR"]
 
-        sim_mb = row["SIM_mB"] if "SIM_mB" in row else 0
-        sim_x1 = row["SIM_x1"] if "SIM_x1" in row else 0
-        sim_c = row["SIM_c"] if "SIM_c" in row else 0
+        sim_mb = row["SIM_mB"]
+        sim_x1 = row["SIM_x1"]
+        sim_c = row["SIM_c"]
 
         cov_x1_c = row["COV_x1_c"]
         cov_x0_c = row["COV_c_x0"]
@@ -288,7 +288,7 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_COMBINED_FITS")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    # convert("DES3YR_DES_BULK", skip=6)
+    convert("DES3YR_DES_BULK", skip=6)
     convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)

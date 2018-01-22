@@ -21,10 +21,10 @@ if __name__ == "__main__":
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
     models = [ApproximateModelW(prior=True, statonly=True)]
 
-    ndes = 204
+    ndes = -1
     nlowz = 137
     simulations = [
-            [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+            [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW")]#, SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SYM")],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SYM")]
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        res = fitter.load(split_models=True, split_sims=True)
+        res = fitter.load(split_models=True, split_sims=True, squeeze=False)
         # res2 = fitter.load(split_models=True, split_sims=False)
 
         c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
