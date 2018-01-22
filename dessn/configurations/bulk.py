@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-            name = "%s %0.1f" % (name, m.frac_mean)
+            name = "%s %s" % (name, m.statonly)
 
             if isinstance(m, ApproximateModelW):
                 print("C2")
@@ -73,6 +73,7 @@ if __name__ == "__main__":
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         c2.plotter.plot(filename=pfn + "_big.png", parameters=7, truth=truth)
+        c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
@@ -81,7 +82,7 @@ if __name__ == "__main__":
         for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
             if isinstance(m, ApproximateModelW):
                 name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-                name = "%s %0.1f" % (name, m.frac_mean)
+                name = "%s %s" % (name, m.statonly)
                 if wdict.get(name) is None:
                     wdict[name] = []
                 wdict[name].append([ci, chain])
