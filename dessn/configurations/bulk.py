@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
     models = [ApproximateModelW(prior=True, statonly=True)]
 
-    ndes = 500
+    ndes = 204
     nlowz = 137
     simulations = [
             [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 50
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)

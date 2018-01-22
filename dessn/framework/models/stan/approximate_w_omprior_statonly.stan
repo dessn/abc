@@ -302,6 +302,7 @@ transformed parameters {
         + cauchy_lpdf(sigma_MB | 0, 1)
         + cauchy_lpdf(sigma_x1 | 0, 1)
         + cauchy_lpdf(sigma_c  | 0, 1)
+        + normal_lpdf(mean_MB | -19.365, 0.01)
         + normal_lpdf(calibration | 0, systematics_scale);
 }
 model {
