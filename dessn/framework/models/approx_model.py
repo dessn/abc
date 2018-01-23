@@ -354,10 +354,11 @@ class ApproximateModel(Model):
 
 class ApproximateModelOl(ApproximateModel):
     def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07, beta_contrib=0.1, kfactor=0.0):
+                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07, beta_contrib=0.1, kfactor=0.0,
+                 apply_efficiency=True):
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
-                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor)
+                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor, apply_efficiency=apply_efficiency)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$\Omega_\Lambda$"]
@@ -365,12 +366,13 @@ class ApproximateModelOl(ApproximateModel):
 
 class ApproximateModelW(ApproximateModel):
     def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1, beta_contrib=0.1, kfactor=0.0):
+                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1, beta_contrib=0.1,
+                 kfactor=0.0, apply_efficiency=True):
         if prior:
             filename = filename.replace(".stan", "_omprior.stan")
         super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
                          frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
-                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor)
+                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor, apply_efficiency=apply_efficiency)
         self.prior = prior
 
     def get_cosmo_params(self):

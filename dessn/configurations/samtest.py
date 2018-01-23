@@ -19,7 +19,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
-    models = [ApproximateModelW(prior=True, statonly=True)]
+    models = [ApproximateModelW(prior=True, statonly=True), ApproximateModelW(prior=True, statonly=True, apply_efficiency=False)]
 
     ndes = 204
     nlowz = 137
@@ -36,10 +36,10 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 100
+    ncosmo = 2
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(1)
+    fitter.set_num_walkers(5)
     fitter.set_num_cpu(500)
 
     h = socket.gethostname()
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
-        res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
+        res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
         wdict = {}
         for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
             if isinstance(m, ApproximateModelW):
