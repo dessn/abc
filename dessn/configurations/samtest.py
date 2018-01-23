@@ -77,7 +77,8 @@ if __name__ == "__main__":
         #
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
-        c2.plotter.plot(filename=pfn + "_big.png", parameters=30, truth=truth)
+        c2.plotter.plot(filename=pfn + "_big.png", parameters=10, truth=truth)
+        c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
         c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
