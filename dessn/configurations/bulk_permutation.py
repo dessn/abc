@@ -18,7 +18,7 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=True)
+    model = ApproximateModelW(prior=True, statonly=True)
     # Turn off mass and skewness for easy test
 
     ndes = 204
@@ -26,17 +26,21 @@ if __name__ == "__main__":
     import numpy as np
 
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0])),
-         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0]))],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.1, 0, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([-0.1, 0, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0.1, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, -0.1, 0, 0])) ],
+         # SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0]))],
 
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.0, 0.1, 0, 0])),
-         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.0, 0, 0]))],
-
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0.2, 0, 0])),
-         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0, 0, 0]))],
-
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0])),
-         SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0]))],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.0, 0.1, 0, 0])),
+        #  SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.0, 0, 0]))],
+        #
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0.2, 0, 0])),
+        #  SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0, 0, 0]))],
+        #
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0])),
+        #  SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0.0, 0.2, 0, 0]))],
 
     ]
     fitter = Fitter(dir_name)
