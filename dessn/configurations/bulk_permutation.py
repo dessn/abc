@@ -67,7 +67,8 @@ if __name__ == "__main__":
 
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-            name = "%s - %s" % (s[0].shift, s[1].shift)
+            name = "%s" % (s[0].shift)
+            # name = "%s - %s" % (s[0].shift, s[1].shift)
             c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
