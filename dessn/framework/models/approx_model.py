@@ -49,21 +49,21 @@ class ApproximateModel(Model):
             ("Ol", r"$\Omega_\Lambda$"),
             ("w", r"$w$"),
             ("alpha", r"$\alpha$"),
-            ("delta_alpha", r"$\delta_\alpha$"),
-            ("alpha_c", r"$\alpha_c^{%d}$"),
-            ("alpha_x1", r"$\alpha_{x_1}^{%d}$"),
             ("beta", r"$\beta$"),
-            ("delta_beta", r"$\delta_\beta$"),
             ("mean_MB", r"$\langle M_B \rangle$"),
-            #("outlier_MB_delta", r"$\delta M_B$"),
-            #("outlier_dispersion", r"$\sigma_{\rm out}^{%d}$"),
-            ("mean_x1", r"$\langle x_1^{%d} \rangle$"),
-            ("mean_c", r"$\langle c^{%d} \rangle$"),
             ("sigma_MB", r"$\sigma_{\rm m_B}^{%d}$"),
             ("sigma_x1", r"$\sigma_{x_1}^{%d}$"),
             ("sigma_c", r"$\sigma_{c}^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
+            ("delta_alpha", r"$\delta_\alpha$"),
+            ("alpha_c", r"$\alpha_c^{%d}$"),
+            ("alpha_x1", r"$\alpha_{x_1}^{%d}$"),
+            ("delta_beta", r"$\delta_\beta$"),
+            #("outlier_MB_delta", r"$\delta M_B$"),
+            #("outlier_dispersion", r"$\sigma_{\rm out}^{%d}$"),
+            ("mean_x1", r"$\langle x_1^{%d} \rangle$"),
+            ("mean_c", r"$\langle c^{%d} \rangle$"),
             ("calibration", r"$\delta \mathcal{Z}_{%d}$"),
             ("deltas", r"$\Delta_{%d}$")
         ])
@@ -273,7 +273,10 @@ class ApproximateModel(Model):
         for sim, dataa in zip(simulations, data_list):
             res = sim.get_approximate_correction()
             correction_skewnorm, vals, cov = res
-            shift_scale.append(get_shift_scale(dataa["redshifts"], correction_skewnorm, vals, self.frac_shift, self.frac_shift2, plot=plot))
+            if self.frac_alpha > 0:
+                shift_scale.append(get_shift_scale(dataa["redshifts"], correction_skewnorm, vals, self.frac_shift, self.frac_shift2, plot=plot))
+            else:
+                shift_scale.append(0)
             mean, std, alpha, norm = vals.tolist()
             means.append(mean)
             stds.append(std)

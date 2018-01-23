@@ -19,7 +19,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
-    models = [ApproximateModelW(prior=True, statonly=True)]
+    models = [ApproximateModelW(prior=True, statonly=True)]#, ApproximateModelW(prior=True, statonly=True, apply_efficiency=False)]
+    # models = [ApproximateModelW(prior=True, statonly=True)]
 
     ndes = 204
     nlowz = 137
@@ -32,6 +33,9 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
 
     # data = models[0].get_data(simulations[0], 0, plot=True)  # For testing
+    # print(data.keys())
+    # print(data["mean_mass"])
+    # print(data["masses"])
     # exit()
 
     fitter.set_models(*models)
@@ -73,7 +77,7 @@ if __name__ == "__main__":
         #
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
-        c2.plotter.plot(filename=pfn + "_big.png", parameters=7, truth=truth)
+        c2.plotter.plot(filename=pfn + "_big.png", parameters=30, truth=truth)
         c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)

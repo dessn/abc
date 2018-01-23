@@ -155,6 +155,11 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
     passed_cids = []
     all_offsets = []
     logging.debug("Have %d rows to process" % base_fits.shape)
+    mass_mean = np.mean(base_fits["HOST_LOGMASS_ERR"])
+    fake_mass = False
+    if mass_mean == -9 or mass_mean == 0:
+        logging.warning("Mass is fake")
+        fake_mass = True
     for i, row in enumerate(base_fits):
         if i % 1000 == 0 and i > 0:
             logging.debug("Up to row %d" % i)
@@ -169,12 +174,13 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         mass = row['HOST_LOGMASS']
         mass_err = row['HOST_LOGMASS_ERR']
         if mass < 0:
-            mass = 10
-            mass_err = 1.0
-        if mass_err < 0.01:
-            mass_err = 0.01
-        mass_prob = 1 - norm.cdf(10, mass, mass_err)
-
+            mass_prob = 0
+        else:
+            if mass_err < 0.01:
+                mass_err = 0.01
+            mass_prob = 1 - norm.cdf(10, mass, mass_err)
+        if fake_mass:
+            mass_prob = 0
         mbe = row["mBERR"]
         x1e = row["x1ERR"]
         ce = row["cERR"]
@@ -288,8 +294,8 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_COMBINED_FITS")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    # convert("DES3YR_DES_BULK", skip=6)
-    # convert("DES3YR_LOWZ_BULK", skip=6)
+    convert("DES3YR_DES_BULK", skip=6)
+    convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
