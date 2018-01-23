@@ -22,15 +22,13 @@ if __name__ == "__main__":
     # Turn off mass and skewness for easy test
 
     ndes = 204
-    nlowz = 137
+    nlowz = 200
     import numpy as np
 
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0])) ],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.1, 0, 0, 0])) ],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([-0.1, 0, 0, 0])) ],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, 0.1, 0, 0])) ],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0, -0.1, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0, 0.1, 0, 0])) ],
+        [SNANASimulation(ndes, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0, -0.1, 0, 0])) ],
          # SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", shift=np.array([0, 0, 0, 0]))],
 
         # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", shift=np.array([0.0, 0.1, 0, 0])),
