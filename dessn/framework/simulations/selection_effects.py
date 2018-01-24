@@ -122,7 +122,7 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, delta=0):
     return False, vals, cov, r2
 
 
-def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
+def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, delta=0):
     binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag)
 
     def sknorm(b, mean, sigma, alpha, n):
