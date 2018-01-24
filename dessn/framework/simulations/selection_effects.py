@@ -185,7 +185,7 @@ def test_colour_contribution():
     a1 = []
     a2 = []
     for delta in np.linspace(1, 5, 10):
-        sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True, delta=delta)
+        sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", delta=delta)
         _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", delta=delta)
         print("%5.2f %5.2f %5.2f" % (delta, adj, adj2))
         ds.append(delta)
