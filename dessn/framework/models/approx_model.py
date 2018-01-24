@@ -282,7 +282,7 @@ class ApproximateModel(Model):
             stds.append(std)
             correction_skewnorms.append(1 if correction_skewnorm else 0)
             covs.append(cov)
-            deltas.append(delta)
+            deltas.append(-delta)
             if alpha is not None:
                 alphas.append(alpha)
                 signs.append(np.sign(alpha))
