@@ -10,7 +10,7 @@ import logging
 def des_sel(cov_scale=1.0, shift=None, type="G10"):
     sn, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type)
     if shift is None:
-        shift = np.array([0.0, -0.1, 0.0, 0.0])
+        shift = np.array([0.0, -0.15, 0.0, 0.0])
     mean += shift
     logging.info("Getting DES selection, shift of %s" % shift)
     cov *= cov_scale
