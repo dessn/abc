@@ -1,13 +1,13 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 from scipy.stats import norm, skewnorm
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, minimize
 import os
 import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10", delta=3.4):
+def des_sel(cov_scale=1.0, shift=None, type="G10", delta=3.3):
     sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, delta=delta)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
@@ -17,7 +17,7 @@ def des_sel(cov_scale=1.0, shift=None, type="G10", delta=3.4):
     return sn, mean, cov, delta
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10", delta=0):
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", delta=3.3):
     sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, delta=delta)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
@@ -116,14 +116,14 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, delta=0):
         name = os.path.basename(dump_npy)
 
         ax.text(0.98, 0.95, "DES 3YR Spectroscopically Confirmed", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
-        fig.savefig("../../../papers/methods/figures/%s_%0.2f.png" % (name, delta), bbox_inches="tight", transparent=True)
-        # fig.savefig("../../../papers/methods/figures/%s_%0.2f.pdf" % (name, delta), bbox_inches="tight", transparent=True)
+        # fig.savefig("../../../papers/methods/figures/%s_%0.2f.png" % (name, delta), bbox_inches="tight", transparent=True)
+        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
     return False, vals, cov, r2
 
 
 def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, delta=0):
-    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag)
+    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, delta=delta, cut_mag=cut_mag)
 
     def sknorm(b, mean, sigma, alpha, n):
 
@@ -132,19 +132,23 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, delta=0):
 
     threshold = 0.1
     red_chi2 = np.inf
-    adj = 0.001
+    adj = 0.0001
     goal = 1
+    r2 = None
     while np.abs(red_chi2 - goal) > threshold:
         if red_chi2 > goal:
             adj *= 1.2
         else:
             adj *= 0.8
-        ratio_error_adj = ratio_smooth_error + adj
+        # ratio_error_adj = ratio_smooth_error + adj
+        ratio_error_adj = np.sqrt(ratio_smooth_error**2 + adj**2)
         result = curve_fit(sknorm, binc, ratio_smooth, p0=np.array([15.0, 1.0, 0.0, 0.5]),
                            sigma=ratio_error_adj, bounds=([10, 0, -10, 0], [30, 10, 10, 5.0]))
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - sknorm(binc, *vals)) / ratio_error_adj) ** 2)
         red_chi2 = chi2 / (len(binc) - 3)
+        if r2 is None:
+            r2 = red_chi2
 
     if plot:
         import matplotlib.pyplot as plt
@@ -175,18 +179,20 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, delta=0):
         #plt.show()
         ax.text(0.98, 0.95, "Combined LowZ Sample", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
         # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
-        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
+        # fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
-    return True, vals, cov, adj
+    return True, vals, cov, r2
 
 
 def test_colour_contribution():
     ds = []
     a1 = []
     a2 = []
-    for delta in np.linspace(1, 5, 10):
-        sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", delta=delta)
-        _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", delta=delta)
+    for delta in np.linspace(2.5, 4, 10):
+        # sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", delta=delta)
+        # _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", delta=delta)
+        sn, mean, cov, adj = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", delta=delta)
+        _, _, _, adj2 = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", delta=delta)
         print("%5.2f %5.2f %5.2f" % (delta, adj, adj2))
         ds.append(delta)
         a1.append(adj)

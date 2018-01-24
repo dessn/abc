@@ -148,6 +148,7 @@ transformed parameters {
     real sigma_c_adjust [n_surveys];
     real sigma_c_adjust_ratio [n_surveys];
     real alpha_c [n_surveys];
+    real <lower=0, upper=3.7> kappa_c [n_surveys];
 
     real cor_mB_mean_out [n_sne];
     real cor_sigma_out [n_surveys];
@@ -217,7 +218,7 @@ transformed parameters {
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + ((beta-mB_delta[i]) * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + (beta-mB_delta[i]) * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * (beta-mB_delta[i]) * sigma_c_adjust[i] * full_sigma[i][2][3]);
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + ((beta-kappa_c[i]) * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + (beta-kappa_c[i]) * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * (beta-kappa_c[i]) * sigma_c_adjust[i] * full_sigma[i][2][3]);
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
@@ -267,7 +268,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + (betas[i]-mB_delta[survey_map[i]]) * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + (betas[i]-kappa_c[survey_map[i]]) * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
@@ -296,6 +297,7 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1.0)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
+            + normal_lpdf(kappa_c[i] | mB_delta[i], 0.1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
