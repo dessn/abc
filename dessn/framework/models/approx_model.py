@@ -268,11 +268,11 @@ class ApproximateModel(Model):
         self.logger.debug("Obs x1 std is %f, colour std is %f" % (np.std(obs_data[:, 1]), np.std(obs_data[:, 2])))
 
         # Add in data for the approximate selection efficiency in mB
-        means, stds, alphas, correction_skewnorms, norms, signs, covs = [], [], [], [], [], [], []
+        means, stds, alphas, correction_skewnorms, norms, signs, covs, deltas = [], [], [], [], [], [], [], []
         shift_scale = []
         for sim, dataa in zip(simulations, data_list):
             res = sim.get_approximate_correction()
-            correction_skewnorm, vals, cov = res
+            correction_skewnorm, vals, cov, delta = res
             if self.frac_alpha > 0:
                 shift_scale.append(get_shift_scale(dataa["redshifts"], correction_skewnorm, vals, self.frac_shift, self.frac_shift2, plot=plot))
             else:
@@ -282,6 +282,7 @@ class ApproximateModel(Model):
             stds.append(std)
             correction_skewnorms.append(1 if correction_skewnorm else 0)
             covs.append(cov)
+            deltas.append(delta)
             if alpha is not None:
                 alphas.append(alpha)
                 signs.append(np.sign(alpha))
@@ -298,6 +299,7 @@ class ApproximateModel(Model):
         update["mB_norm_orig"] = norms
         update["mB_sgn_alpha"] = signs
         update["mB_cov"] = covs
+        update["mB_delta"] = deltas
         update["correction_skewnorm"] = correction_skewnorms
         update["shift_scales"] = shift_scale
         update["frac_shift"] = self.frac_shift

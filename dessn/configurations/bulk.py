@@ -18,8 +18,8 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
-    # models = [ApproximateModelW(prior=True, statonly=True)]
+    # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
+    models = [ApproximateModelW(prior=True, statonly=True)]
 
     ndes = 204
     nlowz = 137
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 100
+    ncosmo = 50
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
@@ -74,44 +74,44 @@ if __name__ == "__main__":
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         c2.plotter.plot(filename=pfn + "_big.png", parameters=10, truth=truth)
-        c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
         c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
+        c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
-        res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
-        wdict = {}
-        for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
-            if isinstance(m, ApproximateModelW):
-                name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-                name = "%s %s" % (name, m.statonly)
-                if wdict.get(name) is None:
-                    wdict[name] = []
-                wdict[name].append([ci, chain])
-        import numpy as np
-        with open(pfn + "_comp.txt", 'w') as f:
-            f.write("%10s %5s(%5s) %5s %5s\n" % ("Key", "<w>", "<werr>", "std<w>", "bias"))
-            for key in sorted(wdict.keys()):
-                ws = [cc[1]["$w$"] for cc in wdict[key]]
-                indexes = [cc[0] for cc in wdict[key]]
-                means = [np.mean(w) for w in ws]
-                stds = [np.std(w) for w in ws]
-                name2 = pfn + key.replace(" ", "_") + ".txt"
-                with open(name2, "w") as f2:
-                    for i in range(ncosmo):
-                        if i in indexes:
-                            f2.write("%0.5f\n" % means[indexes.index(i)])
-                        else:
-                            f2.write("0\n")
-
-                # import matplotlib.pyplot as plt
-                # plt.hist(means, bins=50)
-                # plt.show()
-                # mean_mean = np.mean(means)
-                mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
-                mean_std = np.mean(stds)
-                bias = (mean_mean + 1) / mean_std
-                f.write("%10s %0.4f(%0.4f) %0.4f %0.4f\n" % (key, mean_mean, mean_std, np.std(means), bias))
+        # res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
+        # wdict = {}
+        # for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
+        #     if isinstance(m, ApproximateModelW):
+        #         name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
+        #         name = "%s %s" % (name, m.statonly)
+        #         if wdict.get(name) is None:
+        #             wdict[name] = []
+        #         wdict[name].append([ci, chain])
+        # import numpy as np
+        # with open(pfn + "_comp.txt", 'w') as f:
+        #     f.write("%10s %5s(%5s) %5s %5s\n" % ("Key", "<w>", "<werr>", "std<w>", "bias"))
+        #     for key in sorted(wdict.keys()):
+        #         ws = [cc[1]["$w$"] for cc in wdict[key]]
+        #         indexes = [cc[0] for cc in wdict[key]]
+        #         means = [np.mean(w) for w in ws]
+        #         stds = [np.std(w) for w in ws]
+        #         name2 = pfn + key.replace(" ", "_") + ".txt"
+        #         with open(name2, "w") as f2:
+        #             for i in range(ncosmo):
+        #                 if i in indexes:
+        #                     f2.write("%0.5f\n" % means[indexes.index(i)])
+        #                 else:
+        #                     f2.write("0\n")
+        #
+        #         # import matplotlib.pyplot as plt
+        #         # plt.hist(means, bins=50)
+        #         # plt.show()
+        #         # mean_mean = np.mean(means)
+        #         mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
+        #         mean_std = np.mean(stds)
+        #         bias = (mean_mean + 1) / mean_std
+        #         f.write("%10s %0.4f(%0.4f) %0.4f %0.4f\n" % (key, mean_mean, mean_std, np.std(means), bias))
 
 
 

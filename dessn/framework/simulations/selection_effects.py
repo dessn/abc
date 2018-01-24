@@ -7,24 +7,24 @@ import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10"):
-    sn, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type)
+def des_sel(cov_scale=1.0, shift=None, type="G10", delta=3.4):
+    sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, delta=delta)
     if shift is None:
-        shift = np.array([0.0, -0.15, 0.0, 0.0])
+        shift = np.array([0.0, 0, 0.0, 0.0])
     mean += shift
     logging.info("Getting DES selection, shift of %s" % shift)
     cov *= cov_scale
-    return sn, mean, cov
+    return sn, mean, cov, delta
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10"):
-    sn, mean, cov = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type)
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", delta=0):
+    sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, delta=delta)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
     mean += shift
     logging.info("Getting LOWZ selection, shift of %s" % shift)
     cov *= cov_scale
-    return sn, mean, cov
+    return sn, mean, cov, delta
 
 
 def get_data(base):
@@ -34,19 +34,21 @@ def get_data(base):
     supernovae_files = [folder + "/" + f for f in os.listdir(folder) if f.startswith("all")]
     supernovae_data = [np.load(f) for f in supernovae_files]
     supernovae = np.vstack(tuple(supernovae_data))
-    passed = supernovae > 100
-    mags = supernovae - 100 * passed.astype(np.int)
-    return mags, passed
+    passed = supernovae[:, 0] > 100
+    mags = supernovae[:, 0] - 100 * passed.astype(np.int)
+    colors = supernovae[:, 1]
+    return mags, passed, colors
 
 
-def get_ratio(base_folder, cut_mag=19.75):
-    mB_all, passed = get_data(base_folder)
-    print("Got data to compute selection function")
+def get_ratio(base_folder, cut_mag=19.75, delta=0):
+    mB_all, passed, colors = get_data(base_folder)
+    # print("Got data to compute selection function")
     mB_passed = mB_all[passed]
+    color_passed = colors[passed]
 
     # Bin data and get ratio
-    hist_all, bins = np.histogram(mB_all, bins=100)
-    hist_passed, _ = np.histogram(mB_passed, bins=bins)
+    hist_all, bins = np.histogram(mB_all + delta * colors, bins=100)
+    hist_passed, _ = np.histogram(mB_passed + delta * color_passed, bins=bins)
     hist_passed_err = np.sqrt(hist_passed)
 
     binc = 0.5 * (bins[:-1] + bins[1:])
@@ -62,8 +64,8 @@ def get_ratio(base_folder, cut_mag=19.75):
     return binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error
 
 
-def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
-    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag)
+def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, delta=0):
+    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=delta)
 
     def cdf(b, mean, sigma, alpha, n):
         model = (1 - norm.cdf(b, loc=mean, scale=sigma)) * n + 10 * alpha
@@ -72,19 +74,21 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
     threshold = 0.02
     red_chi2 = 100
     adj = 0.0001
-    adj = 1
+    r2 = None
     while np.abs(red_chi2 - 1) > threshold:
         if red_chi2 > 1:
             adj *= 1.01
         else:
             adj *= 0.98
-        # ratio_error_adj = ratio_error + adj
-        ratio_error_adj = 0.001 + ratio_error * adj
+        ratio_error_adj = np.sqrt(ratio_error**2 + adj**2)
+        # ratio_error_adj = 0.001 + ratio_error * adj
         # print(ratio_error_adj)
         result = curve_fit(cdf, binc, ratio, p0=np.array([23.0, 1.0, 0.0, 0.5]), sigma=ratio_error_adj)
         vals, cov, *_ = result
         chi2 = np.sum(((ratio - cdf(binc, *vals)) / ratio_error_adj) ** 2)
         red_chi2 = chi2 / (len(binc) - 3)
+        if r2 is None:
+            r2 = red_chi2
 
     if plot:
         import matplotlib.pyplot as plt
@@ -112,10 +116,10 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=20):
         name = os.path.basename(dump_npy)
 
         ax.text(0.98, 0.95, "DES 3YR Spectroscopically Confirmed", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
-        # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
-        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
+        fig.savefig("../../../papers/methods/figures/%s_%0.2f.png" % (name, delta), bbox_inches="tight", transparent=True)
+        # fig.savefig("../../../papers/methods/figures/%s_%0.2f.pdf" % (name, delta), bbox_inches="tight", transparent=True)
 
-    return False, vals, cov
+    return False, vals, cov, r2
 
 
 def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
@@ -173,13 +177,32 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10):
         # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
         fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
-    return True, vals, cov
+    return True, vals, cov, adj
 
+
+def test_colour_contribution():
+    ds = []
+    a1 = []
+    a2 = []
+    for delta in np.linspace(1, 5, 10):
+        sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True, delta=delta)
+        _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", delta=delta)
+        print("%5.2f %5.2f %5.2f" % (delta, adj, adj2))
+        ds.append(delta)
+        a1.append(adj)
+        a2.append(adj2)
+        # print(mean)
+        # print(np.sqrt(np.diag(cov)))
+    import matplotlib.pyplot as plt
+    plt.plot(ds, a1)
+    plt.plot(ds, a2)
+    plt.show()
 
 if __name__ == "__main__":
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
-    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
+    test_colour_contribution()
+    #get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=18)
 

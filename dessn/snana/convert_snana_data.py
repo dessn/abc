@@ -109,9 +109,9 @@ def get_realisations(base_folder, dump_dir):
 def load_dump_file(sim_dir):
     filename = "SIMGEN.DAT.gz" if os.path.exists(sim_dir + "/SIMGEN.DAT.gz") else "SIMGEN.DAT"
     compression = "gzip" if filename.endswith("gz") else None
-    names = ["SN", "CID", "S2mb", "MAGSMEAR_COH"]
-    keep = ["CID", "S2mb", "MAGSMEAR_COH"]
-    dtypes = [int, float, float]
+    names = ["SN", "CID", "S2mb", "MAGSMEAR_COH", "S2c", "S2x1", "Z"]
+    keep = ["CID", "S2mb", "MAGSMEAR_COH", "S2c"]
+    dtypes = [int, float, float, float]
     dataframe = pd.read_csv(sim_dir + "/" + filename, compression=compression, sep='\s+',
                             skiprows=1, comment="V", error_bad_lines=False, names=names)
     logging.info("Loaded dump file from %s" % (sim_dir + "/" + filename))
@@ -123,7 +123,7 @@ def load_dump_file(sim_dir):
             res.append(tuple(r))
         except Exception:
             pass
-    return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64)])
+    return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64), ("S2c", np.float64)])
 
 
 def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False, skip=6):
@@ -257,6 +257,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
 
         supernovae = load_dump_file(sim_dir)
         all_mags = supernovae["S2mb"].astype(np.float64) + supernovae["MAGSMEAR_COH"].astype(np.float64)
+        all_cs = supernovae["S2c"].astype(np.float64)
         all_cids = supernovae["CID"].astype(np.int32)
 
         cids_dict = dict([(c, True) for c in passed_cids])
@@ -264,9 +265,10 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         supernovae_passed = np.array([c in cids_dict for c in all_cids])
         mask_nan = ~np.isnan(all_mags)
 
-        all_data = all_mags[mask_nan] + 100 * supernovae_passed[mask_nan]
-        if all_data.size > 10000000:
-            all_data = all_data[:10000000]
+        all_data = np.vstack((all_mags[mask_nan] + 100 * supernovae_passed[mask_nan], all_cs[mask_nan])).T
+        print(all_data.shape)
+        if all_data.shape[0] > 7000000:
+            all_data = all_data[:7000000, :]
         np.save(output_dir + "/all_%s.npy" % ind, all_data.astype(np.float32))
         logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
@@ -294,12 +296,12 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_COMBINED_FITS")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    convert("DES3YR_DES_BULK", skip=6)
-    convert("DES3YR_LOWZ_BULK", skip=6)
+    # convert("DES3YR_DES_BULK", skip=6)
+    # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
-    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
+    convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
+    convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_VALIDATION", skip=6)
     # convert("DES3YR_DES_VALIDATION", skip=6)
 
