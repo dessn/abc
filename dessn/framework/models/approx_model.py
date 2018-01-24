@@ -37,7 +37,7 @@ class ApproximateModel(Model):
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
-                "sigma_MB", "sigma_x1", "sigma_c", "kappa_c", "alpha_c", "alpha_x1",
+                "sigma_MB", "sigma_x1", "sigma_c", "alpha_c", "alpha_x1",
                 #"outlier_MB_delta", "outlier_dispersion"
                 "delta_alpha", "delta_beta",
                 "mean_x1", "mean_c",
@@ -54,7 +54,6 @@ class ApproximateModel(Model):
             ("sigma_MB", r"$\sigma_{\rm m_B}^{%d}$"),
             ("sigma_x1", r"$\sigma_{x_1}^{%d}$"),
             ("sigma_c", r"$\sigma_{c}^{%d}$"),
-            ("kappa_c", r"$\kappa_{c}^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
             ("delta_alpha", r"$\delta_\alpha$"),
@@ -86,7 +85,6 @@ class ApproximateModel(Model):
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-19.5, -19.2),
             "alpha_c": uniform(0, 0.1, size=(num_surveys,)),
-            "kappa_c": uniform(3.3, 3.35, size=(num_surveys,)),
             "delta_c": uniform(0, 0.05, size=(num_surveys,)),
             "skew_c": uniform(0, 0.05, size=(num_surveys,)),
             "alpha_x1": uniform(0, 0.05, size=(num_surveys,)),
@@ -284,7 +282,7 @@ class ApproximateModel(Model):
             stds.append(std)
             correction_skewnorms.append(1 if correction_skewnorm else 0)
             covs.append(cov)
-            deltas.append(-delta)
+            deltas.append(delta)
             if alpha is not None:
                 alphas.append(alpha)
                 signs.append(np.sign(alpha))
