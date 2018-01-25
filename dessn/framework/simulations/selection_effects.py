@@ -7,24 +7,24 @@ import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10", delta=3.3):
-    sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, delta=delta)
+def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=3.3):
+    sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, kappa=kappa)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
     mean += shift
     logging.info("Getting DES selection, shift of %s" % shift)
     cov *= cov_scale
-    return sn, mean, cov, delta
+    return sn, mean, cov, kappa
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10", delta=3.3):
-    sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, delta=delta)
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=3.3):
+    sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, kappa=kappa)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
     mean += shift
     logging.info("Getting LOWZ selection, shift of %s" % shift)
     cov *= cov_scale
-    return sn, mean, cov, delta
+    return sn, mean, cov, kappa
 
 
 def get_data(base):
@@ -64,8 +64,8 @@ def get_ratio(base_folder, cut_mag=19.75, delta=0):
     return binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error
 
 
-def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, delta=0):
-    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=delta)
+def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0):
+    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=kappa)
 
     def cdf(b, mean, sigma, alpha, n):
         model = (1 - norm.cdf(b, loc=mean, scale=sigma)) * n + 10 * alpha
@@ -122,8 +122,8 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, delta=0):
     return False, vals, cov, r2
 
 
-def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, delta=0):
-    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, delta=delta, cut_mag=cut_mag)
+def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, kappa=0):
+    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, delta=kappa, cut_mag=cut_mag)
 
     def sknorm(b, mean, sigma, alpha, n):
 
@@ -191,8 +191,8 @@ def test_colour_contribution():
     for delta in np.linspace(2.5, 4, 10):
         # sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", delta=delta)
         # _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", delta=delta)
-        sn, mean, cov, adj = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", delta=delta)
-        _, _, _, adj2 = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", delta=delta)
+        sn, mean, cov, adj = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", kappa=delta)
+        _, _, _, adj2 = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", kappa=delta)
         print("%5.2f %5.2f %5.2f" % (delta, adj, adj2))
         ds.append(delta)
         a1.append(adj)

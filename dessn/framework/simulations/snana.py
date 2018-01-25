@@ -8,7 +8,7 @@ from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10"):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10", kappa=0.0):
         super().__init__()
         self.simulation_name = sim_name
         self.type = type
@@ -19,7 +19,7 @@ class SNANASimulation(Simulation):
         self.use_sim = use_sim
         self.num_nodes = num_nodes
         self.systematic_labels = None
-
+        self.kappa = kappa
         self.num_supernova = num_supernova
         self.cov_scale = cov_scale
         self.manual_selection = None
@@ -32,10 +32,10 @@ class SNANASimulation(Simulation):
     def get_correction(self, cov_scale=1.0):
         if "_des" in self.simulation_name.lower():
             self.logger.info("Getting DES correction for sim %s" % self.simulation_name)
-            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type)
+            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa)
         elif "_lowz" in self.simulation_name.lower():
             self.logger.info("Getting LOWZ correction for sim %s" % self.simulation_name)
-            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type)
+            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa)
         else:
             raise ValueError("Cannot find des or lowz in your sim name, unsure which selection function to use!")
 

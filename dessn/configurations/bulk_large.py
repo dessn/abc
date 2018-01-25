@@ -23,23 +23,24 @@ if __name__ == "__main__":
 
     ndes = 500
     nlowz = 250
-    simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR"), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR")],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
-            # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SYM")],
-            # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SYM")]
-        ]
     fitter = Fitter(dir_name)
+    simulations = [
+        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", kappa=0), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", kappa=0)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", kappa=0), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", kappa=0)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", kappa=0), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", kappa=0)],
+        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", kappa=3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", kappa=3.3)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", kappa=3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", kappa=3.3)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", kappa=3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", kappa=3.3)],
+    ]
 
     # data = models[0].get_data(simulations[0], 0, plot=True)  # For testing
     # exit()
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 100
+    ncosmo = 10
     fitter.set_num_cosmologies(ncosmo)
-    fitter.set_max_steps(3000)
+    fitter.set_max_steps(2000)
     fitter.set_num_walkers(1)
     fitter.set_num_cpu(500)
 
