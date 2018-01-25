@@ -7,7 +7,7 @@ import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10", delta=2.3):
+def des_sel(cov_scale=1.0, shift=None, type="G10", delta=3.3):
     sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, delta=delta)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
@@ -17,7 +17,7 @@ def des_sel(cov_scale=1.0, shift=None, type="G10", delta=2.3):
     return sn, mean, cov, delta
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10", delta=2.3):
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", delta=3.3):
     sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, delta=delta)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
