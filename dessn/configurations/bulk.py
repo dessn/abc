@@ -19,13 +19,14 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
-    models = [ApproximateModelW(prior=True, statonly=True, frac_shift=1.0, fixed_sigma_c=0.1)]
+    models = [ApproximateModelW(prior=True, statonly=True)]
 
     ndes = 204
     nlowz = 137
     simulations = [
-            [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
-            [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR"), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SYM")],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SYM")]
         ]
@@ -53,8 +54,8 @@ if __name__ == "__main__":
         c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
 
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            name = s[0].simulation_name.replace("DES3YR_DES_BULK_", "").replace("_", " ").replace("SKEW", "SK16")
-            name = "%s %s" % (name, m.statonly)
+            name = s[0].simulation_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
+            name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
 
             if isinstance(m, ApproximateModelW):
                 print("C2")
@@ -71,8 +72,9 @@ if __name__ == "__main__":
         #         print("C1")
         #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
         #
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
+        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, flip=False, shade=True)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
+        c2.plotter.plot(filename=pfn + "_small.png", parameters=2, truth=truth, extents={"$w$": (-1.3, -0.7)})
         c2.plotter.plot(filename=pfn + "_big.png", parameters=10, truth=truth)
         c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
         c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)

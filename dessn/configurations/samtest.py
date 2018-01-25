@@ -75,8 +75,10 @@ if __name__ == "__main__":
         #         print("C1")
         #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
         #
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True)
+        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, flip=False)
         c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
+        c2.plotter.plot(filename=pfn + "_small.png", parameters=2, truth=truth, extents={"$w$": (-1.3, -0.7)})
+        exit()
         c2.plotter.plot(filename=pfn + "_big.png", parameters=10, truth=truth)
         c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
         c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
