@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 10
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(2000)
     fitter.set_num_walkers(1)
