@@ -299,7 +299,7 @@ class ApproximateModel(Model):
         update["mB_norm_orig"] = norms
         update["mB_sgn_alpha"] = signs
         update["mB_cov"] = covs
-        update["mB_delta"] = deltas
+        update["mB_kappa"] = deltas
         update["correction_skewnorm"] = correction_skewnorms
         update["shift_scales"] = shift_scale
         update["frac_shift"] = self.frac_shift
