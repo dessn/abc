@@ -25,12 +25,12 @@ if __name__ == "__main__":
     nlowz = 250
     fitter = Fitter(dir_name)
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", kappa=0), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", kappa=0)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", kappa=0), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", kappa=0)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", kappa=0), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", kappa=0)],
-        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", kappa=-3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", kappa=-3.3)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", kappa=-3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", kappa=-3.3)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", kappa=-3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", kappa=-3.3)],
+        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", use_sim=True)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=True)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=True)],
+        # [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", kappa=-3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", kappa=-3.3)],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", kappa=-3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", kappa=-3.3)],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", kappa=-3.3), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", kappa=-3.3)],
     ]
 
     # data = models[0].get_data(simulations[0], 0, plot=True)  # For testing
@@ -59,17 +59,17 @@ if __name__ == "__main__":
             name = s[0].simulation_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")\
                 .replace("SAMTEST", "").replace("BULK", "")
             name = "%s %0.1f" % (name, s[0].kappa)
-            # if s[0].kappa != 0:
-            #     continue
             c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
         c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, flip=False, shade=True,
                      linestyles=ls, colors=cs)
-        c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
+        c2.plotter.plot_summary(filename=pfn + "_summary.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         c2.plotter.plot(filename=pfn + "_small.png", parameters=2, truth=truth, figsize=2.0, extents={"$w$": (-1.3, -0.7)})
         c2.plotter.plot(filename=pfn + "_big.png", parameters=5, truth=truth)
-        c2.plotter.plot(filename=pfn + "_big2.png", parameters=10, truth=truth)
-        # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
-        # c2.plotter.plot(filename=pfn + "_big3.png", parameters=31, truth=truth)
-
+        c2.plotter.plot(filename=pfn + "_big2.png", parameters=12, truth=truth)
+        c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
+        c2.plotter.plot(filename=pfn + "_big3.png", parameters=31, truth=truth)
+        print("Saving Parameter values")
+        with open(pfn + "_all_params1.txt", 'w') as f:
+            f.write(c2.analysis.get_latex_table(transpose=True))
 
