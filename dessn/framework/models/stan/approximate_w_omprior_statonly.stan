@@ -37,7 +37,7 @@ data {
     real mB_alpha_orig [n_surveys];
     real mB_sgn_alpha [n_surveys];
     real mB_norm_orig [n_surveys];
-    real mB_delta [n_surveys];
+    real mB_kappa [n_surveys];
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
     real frac_shift;
@@ -217,7 +217,7 @@ transformed parameters {
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + ((beta-mB_delta[i]) * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + (beta-mB_delta[i]) * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * (beta-mB_delta[i]) * sigma_c_adjust[i] * full_sigma[i][2][3]);
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + ((beta+mB_kappa[i]) * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + (beta+mB_kappa[i]) * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * (beta+mB_kappa[i]) * sigma_c_adjust[i] * full_sigma[i][2][3]);
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
@@ -267,7 +267,7 @@ transformed parameters {
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + (betas[i]-mB_delta[survey_map[i]]) * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + (betas[i]+mB_kappa[survey_map[i]]) * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
