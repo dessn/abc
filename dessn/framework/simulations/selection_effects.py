@@ -7,7 +7,7 @@ import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=3.3):
+def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0):
     sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, kappa=kappa)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
@@ -17,7 +17,7 @@ def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=3.3):
     return sn, mean, cov, kappa
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=3.3):
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0):
     sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, kappa=kappa)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
@@ -188,11 +188,11 @@ def test_colour_contribution():
     ds = []
     a1 = []
     a2 = []
-    for delta in np.linspace(2.5, 4, 10):
-        # sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", delta=delta)
-        # _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", delta=delta)
-        sn, mean, cov, adj = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", kappa=delta)
-        _, _, _, adj2 = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", kappa=delta)
+    for delta in np.linspace(-2.5, -4, 40):
+        sn, mean, cov, adj = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", kappa=delta)
+        _, _, _, adj2 = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", kappa=delta)
+        # sn, mean, cov, adj = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", kappa=delta)
+        # _, _, _, adj2 = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", kappa=delta)
         print("%5.2f %5.2f %5.2f" % (delta, adj, adj2))
         ds.append(delta)
         a1.append(adj)
