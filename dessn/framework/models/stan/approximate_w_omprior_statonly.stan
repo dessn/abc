@@ -266,7 +266,8 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
+        //model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
+        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
         // model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
@@ -306,8 +307,8 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1.0)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
-            + cauchy_lpdf(kappa_c0[i] | 0, 0.01)
-            + cauchy_lpdf(kappa_c1[i] | 0, 0.03)
+            + cauchy_lpdf(kappa_c0[i] | 0, 0.1)
+            + cauchy_lpdf(kappa_c1[i] | 0, 3)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
