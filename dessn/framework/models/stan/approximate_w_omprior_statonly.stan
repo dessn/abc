@@ -97,8 +97,8 @@ parameters {
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
-    vector[3] <lower=0, upper=0.2> kappa_c0 [n_surveys];
-    vector[3] <lower=0, upper=10> kappa_c1 [n_surveys];
+    vector<lower=0, upper=0.2>[3]  kappa_c0 [n_surveys];
+    vector<lower=0, upper=1>[3]  kappa_c1 [n_surveys];
 
 }
 
@@ -239,7 +239,7 @@ transformed parameters {
     for (i in 1:n_sne) {
 
         // Intrinsic
-        obs_mBx1c_chol_extra[i] = diag_matrix(kappa_c0[survey_map[i]] * (1 + kappa_c1[survey_map[i]] * redshifts[i]));
+        obs_mBx1c_chol_extra[i] = diag_matrix(kappa_c0[survey_map[i]] .* (1 + kappa_c1[survey_map[i]] * redshifts[i]));
 
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
@@ -303,8 +303,8 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1.0)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
-            + cauchy_lpdf(kappa_c0 | 0, 0.1)
-            + cauchy_lpdf(kappa_c1 | 0, 1)
+            + cauchy_lpdf(kappa_c0[i] | 0, 0.1)
+            + cauchy_lpdf(kappa_c1[i] | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
