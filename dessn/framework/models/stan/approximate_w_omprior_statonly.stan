@@ -98,7 +98,7 @@ parameters {
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
     vector<lower=0, upper=0.2>[3]  kappa_c0 [n_surveys];
-    vector<lower=0, upper=1>[3]  kappa_c1 [n_surveys];
+    vector<lower=0, upper=10>[3]  kappa_c1 [n_surveys];
 
 }
 
