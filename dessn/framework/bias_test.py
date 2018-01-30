@@ -37,7 +37,7 @@ def fit_colour_error(names):
         data_all = simulation.get_passed_supernova(-1)
         zs = data_all["redshifts"]
         num_z_bins = 50
-        z_bins = np.linspace(zs.min(), zs.max()*0.9, num_z_bins)
+        z_bins = np.linspace(zs.min(), zs.max()*0.999, num_z_bins)
         indexes = np.digitize(zs, bins=z_bins) - 1
         s_cs = data_all["sim_colours"]
         obs = data_all["obs_mBx1c"]
@@ -47,19 +47,21 @@ def fit_colour_error(names):
         pull = diff / sigma_cs
 
         zs = 0.5 * (z_bins[1:] + z_bins[:-1])
-        datasets = [diff[indexes == i] for i in range(num_z_bins - 1)]
-        ys = np.array([np.std(d) - 0.75 for d in datasets])
-        uncert = np.array([y/np.sqrt(2*len(d) - 2) for d, y in zip(datasets, ys)])
+        datasets = [diff[indexes == i] - sigma_cs[indexes == i] for i in range(num_z_bins - 1)]
+        # datasets = [pull[indexes == i] for i in range(num_z_bins - 1)]
+        ys = np.array([np.std(d) for d in datasets])
+        # ys = np.array([np.std(d) - 0.75 for d in datasets])
+        uncert = 0.001 + np.array([y/np.sqrt(2*len(d) - 2) for d, y in zip(datasets, ys)])
 
         def model(k):
             k0, k1 = k
-            vals = k0 + zs * k1
+            vals = k0 * (1 + zs * k1)
             diff = ((ys - vals) / uncert)**2
             return diff.sum()
 
         fit_val = minimize(model, np.array([0, 0.2]))
         xs = fit_val["x"]
-        plt.plot(zs, xs[0] + xs[1] * zs)
+        plt.plot(zs, xs[0] * (1 + xs[1] * zs))
         print(fit_val)
         plt.errorbar(zs, ys, yerr=uncert, fmt='.')
         #

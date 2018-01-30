@@ -97,8 +97,8 @@ parameters {
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
-    real <lower=0, upper=1> kappa_c0 [n_surveys];
-    real <lower=0, upper=1> kappa_c1 [n_surveys];
+    vector[3] <lower=0, upper=0.2> kappa_c0 [n_surveys];
+    vector[3] <lower=0, upper=10> kappa_c1 [n_surveys];
 
 }
 
@@ -119,7 +119,7 @@ transformed parameters {
     matrix [3,3] model_mBx1c_cov [n_sne];
 
     // Unexplained dispersion
-    vector[3] deviations_adj [n_sne];
+    matrix[3, 3] obs_mBx1c_chol_extra [n_sne];
 
     // Helper variables for Simpsons rule
     real Hinv [n_z];
@@ -238,10 +238,8 @@ transformed parameters {
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
 
-        // update uncert
-        deviations_adj[i][1] = deviations[i][1];
-        deviations_adj[i][2] = deviations[i][2];
-        deviations_adj[i][3] = deviations[i][3] * (1 + kappa_c0[survey_map[i]] + kappa_c1[survey_map[i]] * redshifts[i]);
+        // Intrinsic
+        obs_mBx1c_chol_extra[i] = diag_matrix(kappa_c0[survey_map[i]] * (1 + kappa_c1[survey_map[i]] * redshifts[i]));
 
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
@@ -265,7 +263,7 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations_adj[i];
+        model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
 
         // Add calibration uncertainty
         // model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
@@ -305,13 +303,14 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1.0)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
+            + cauchy_lpdf(kappa_c0 | 0, 0.1)
+            + cauchy_lpdf(kappa_c1 | 0, 1)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
         + cauchy_lpdf(sigma_MB | 0, 1)
-        + cauchy_lpdf(kappa_c0 | 0, 1)
-        + cauchy_lpdf(kappa_c1 | 0, 1)
+
         + cauchy_lpdf(sigma_x1 | 0, 1)
         + cauchy_lpdf(sigma_c  | 0, 1)
         + normal_lpdf(calibration | 0, systematics_scale);
