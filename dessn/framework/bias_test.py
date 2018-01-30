@@ -1,85 +1,85 @@
 import numpy as np
-from simulations.snana import SNANASimulationGauss0p3, SNANASimulationIdeal0p3, SNANASimulationIdealNoBias0p3, \
-    SNANASimulationLowzGauss0p3
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+from scipy.optimize import minimize
+from dessn.framework.simulations.snana import SNANASimulation
 
 
-def inspect_bias(simulation):
-    data_all = simulation.get_all_supernova(-1)
+def investigate_color(sim_names):
 
-    mean, sigma, alpha, normalisation = simulation.get_approximate_correction()
-    mv, mp = 30, 20
-    nbin = [50, 40]
-    passed = data_all["passed"]
-    zs = data_all["redshifts"]
-    mbs = data_all["sim_apparents"]
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(5, 5))
+    bins = np.linspace(-4, 4, 100)
 
-    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(12, 5))
-    axes = axes.flatten()
+    for name in sim_names:
+        simulation = SNANASimulation(1000, name)
+        data_all = simulation.get_passed_supernova(-1)
+        zs = data_all["redshifts"]
+        meanz = zs.mean()
+        below = zs < meanz
+        s_cs = data_all["sim_colours"]
+        obs = data_all["obs_mBx1c"]
+        sigma_cs = np.sqrt(data_all["obs_mBx1c_cov"][:, 2, 2])
+        cs = np.array(obs[:, 2])
+        diff = cs - s_cs
 
-    hist_all, binx, biny = np.histogram2d(mbs, zs, bins=nbin)
-    hist_passed, _, _ = np.histogram2d(mbs[passed], zs[passed], bins=[binx, biny])
-    mask = (hist_all.T < mv) | (hist_passed.T < mp)
-    binxc = 0.5 * (binx[:-1] + binx[1:])
-    correction = 1 / ((1 - norm.cdf(binxc, mean, sigma)) + 0.015)
-    ratio = hist_passed / (1 + hist_all)
-    ratio = ratio.T
-    ratio[mask] = np.nan
-    ratio2 = ratio * correction
-    hist_passed = hist_passed.T
-    hist_passed[mask] = np.nan
-    axes[0].imshow(ratio, interpolation="nearest", origin="lower",
-                   extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-    axes[3].imshow(ratio2, interpolation="nearest", origin="lower",
-                   extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-    axes[6].imshow(hist_passed, interpolation="nearest", origin="lower",
-                   extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
+        ax.hist(diff[below] / sigma_cs[below], bins=bins, histtype='step', label=name.replace("DES3YR_DES_", "") + " z<%0.2f" % meanz, normed=True)
+        ax.hist(diff[~below] / sigma_cs[~below], bins=bins, histtype='step', label=name.replace("DES3YR_DES_", "") + " z>%0.2f" % meanz, normed=True)
 
-    if "sim_colors" in data_all.keys():
-        cs = data_all["sim_colors"]
-        x1s = data_all["sim_stretches"]
-        hist_all, binx, biny = np.histogram2d(mbs, cs, bins=nbin)
-        hist_passed, _, _ = np.histogram2d(mbs[passed], cs[passed], bins=[binx, biny])
-        mask = (hist_all.T < mv) | (hist_passed.T < mp)
-        binxc = 0.5 * (binx[:-1] + binx[1:])
-        correction = 1 / ((1 - norm.cdf(binxc, mean, sigma)) + 0.015)
-        ratio = hist_passed / (1 + hist_all)
-        ratio = ratio.T
-        ratio[mask] = np.nan
-        ratio2 = ratio * correction
-        hist_passed = hist_passed.T
-        hist_passed[mask] = np.nan
-        axes[1].imshow(ratio, interpolation="nearest", origin="lower",
-                       extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-        axes[4].imshow(ratio2, interpolation="nearest", origin="lower",
-                       extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-        axes[7].imshow(hist_passed, interpolation="nearest", origin="lower",
-                       extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-
-        hist_all, binx, biny = np.histogram2d(mbs, x1s, bins=nbin)
-        hist_passed, _, _ = np.histogram2d(mbs[passed], x1s[passed], bins=[binx, biny])
-        mask = (hist_all.T < mv) | (hist_passed.T < mp)
-        binxc = 0.5 * (binx[:-1] + binx[1:])
-        correction = 1 / ((1 - norm.cdf(binxc, mean, sigma)) + 0.015)
-        ratio = hist_passed / (1 + hist_all)
-        ratio = ratio.T
-        ratio[mask] = np.nan
-        ratio2 = ratio * correction
-        hist_passed = hist_passed.T
-        hist_passed[mask] = np.nan
-        axes[2].imshow(ratio, interpolation="nearest", origin="lower",
-                       extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-        axes[5].imshow(ratio2, interpolation="nearest", origin="lower",
-                       extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-        axes[8].imshow(hist_passed, interpolation="nearest", origin="lower",
-                       extent=[binx[0], binx[-1], biny[0], biny[-1]], aspect="auto", cmap="viridis")
-        print(binx, biny)
-
-    plt.savefig(simulation.__class__.__name__ + "BiasCorrection.png")
+    ax.plot(bins, norm.pdf(bins))
+    ax.legend()
     plt.show()
 
+
+def fit_colour_error(names):
+    cmaps = "viridis", "magma", "jet"
+    for cmap, name in zip(cmaps, names):
+        simulation = SNANASimulation(1000, name)
+        data_all = simulation.get_passed_supernova(-1)
+        zs = data_all["redshifts"]
+        num_z_bins = 50
+        z_bins = np.linspace(zs.min(), zs.max()*0.9, num_z_bins)
+        indexes = np.digitize(zs, bins=z_bins) - 1
+        s_cs = data_all["sim_colours"]
+        obs = data_all["obs_mBx1c"]
+        sigma_cs = np.sqrt(data_all["obs_mBx1c_cov"][:, 2, 2])
+        cs = np.array(obs[:, 2])
+        diff = cs - s_cs
+        pull = diff / sigma_cs
+
+        zs = 0.5 * (z_bins[1:] + z_bins[:-1])
+        datasets = [diff[indexes == i] for i in range(num_z_bins - 1)]
+        ys = np.array([np.std(d) - 0.75 for d in datasets])
+        uncert = np.array([y/np.sqrt(2*len(d) - 2) for d, y in zip(datasets, ys)])
+
+        def model(k):
+            k0, k1 = k
+            vals = k0 + zs * k1
+            diff = ((ys - vals) / uncert)**2
+            return diff.sum()
+
+        fit_val = minimize(model, np.array([0, 0.2]))
+        xs = fit_val["x"]
+        plt.plot(zs, xs[0] + xs[1] * zs)
+        print(fit_val)
+        plt.errorbar(zs, ys, yerr=uncert, fmt='.')
+        #
+        # def test_kappa(k0, k1):
+        #     ratio = k0 + k1 * zs
+        #     pull2 = pull / ratio
+        #     return stds
+        #
+        # xx, yy = np.meshgrid(np.linspace(1, 2, 30), np.linspace(0, 1, 30), indexing='ij')
+        # zz = test_kappa(xx, yy)
+        # levels = np.linspace(0, 0.5, 30)
+        # cc = plt.contour(xx, yy, zz, levels=levels, cmap=cmap)
+        # plt.clabel(cc, inline=1)
+    plt.show()
+
+
 if __name__ == "__main__":
-    # inspect_bias(SNANASimulationIdeal0p3(-1))
-    # inspect_bias(SNANASimulationIdealNoBias0p3(-1))
-    inspect_bias(SNANASimulationLowzGauss0p3(-1))
+    # sim_names = ["DES3YR_DES_SAMTEST_MAGSMEAR", "DES3YR_DES_BULK_G10_SKEW", "DES3YR_DES_BULK_C11_SKEW"]
+    # sim_names = ["DES3YR_DES_SAMTEST_MAGSMEAR"]
+    sim_names = ["DES3YR_DES_BHMEFF_AMG10", "DES3YR_DES_BHMEFF_AMC11"]
+    # sim_names = ["DES3YR_LOWZ_BHMEFF_G10", "DES3YR_LOWZ_BHMEFF_C11"]
+    # investigate_color(sim_names)
+    fit_colour_error(sim_names)
