@@ -340,7 +340,7 @@ class ApproximateModel(Model):
         return node_weights
 
     def correct_chain(self, dictionary, simulation, data):
-        del dictionary["intrinsic_correlation"]
+        # del dictionary["intrinsic_correlation"]
         return dictionary
 
     def get_cosmo_params(self):

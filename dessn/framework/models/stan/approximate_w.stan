@@ -93,7 +93,6 @@ parameters {
     real <lower = -4, upper = -0.5> log_sigma_MB [n_surveys];
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
-    cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
     real<lower=0, upper=0.2>  kappa_c0 [n_surveys];
     real<lower=0, upper=10>  kappa_c1 [n_surveys];
@@ -101,6 +100,7 @@ parameters {
 }
 
 transformed parameters {
+    cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
 
     // Back to real space
     real sigma_MB [n_surveys];
@@ -129,8 +129,6 @@ transformed parameters {
     matrix [3,3] population [n_surveys];
     matrix [3,3] full_sigma [n_surveys];
     vector [3] mean_MBx1c [n_sne];
-    real alphas [n_sne];
-    real betas [n_sne];
     vector [3] mean_MBx1c_out [n_sne];
     vector [3] sigmas [n_surveys];
 
@@ -141,7 +139,7 @@ transformed parameters {
     real mB_norm [n_surveys];
     real mB_width2 [n_surveys];
     real mB_alpha2 [n_surveys];
-    row_vector[4] zeros;
+
     vector[4] shifts [n_surveys];
     real cor_mB_mean [n_sne];
     real cor_sigma [n_surveys];
@@ -188,7 +186,8 @@ transformed parameters {
 
     // Calculate intrinsic dispersion and selection effects for each survey
     cor_mb_width2_out = outlier_population[1,1]^2 + (alpha * outlier_population[2,2])^2 + (beta * outlier_population[3,3])^2;
-    zeros = rep_row_vector(0, 4);
+
+    intrinsic_correlation = diag_matrix(rep_vector(1, 3));
 
     for (i in 1:n_surveys) {
         shifts[i] = mb_cov_chol[i] * deltas[i] * systematics_scale;
