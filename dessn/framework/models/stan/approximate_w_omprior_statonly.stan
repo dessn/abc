@@ -266,8 +266,8 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
-        //model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
+        //model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
+        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
         // model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
