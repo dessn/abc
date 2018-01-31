@@ -17,8 +17,8 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    model = ApproximateModelW(prior=True)
-    simulation = [SimpleSimulation(300), SimpleSimulation(200, lowz=True)]
+    model = ApproximateModelW(prior=True, statonly=True, apply_efficiency=True)
+    simulation = [SimpleSimulation(30), SimpleSimulation(20, lowz=True)]
 
     # print(model.get_data(simulation, 0))
     # exit()
