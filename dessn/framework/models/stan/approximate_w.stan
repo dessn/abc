@@ -187,9 +187,11 @@ transformed parameters {
     // Calculate intrinsic dispersion and selection effects for each survey
     cor_mb_width2_out = outlier_population[1,1]^2 + (alpha * outlier_population[2,2])^2 + (beta * outlier_population[3,3])^2;
 
-    intrinsic_correlation = diag_matrix(rep_vector(1, 3));
 
     for (i in 1:n_surveys) {
+
+        intrinsic_correlation[i] = diag_matrix(rep_vector(1, 3));
+
         shifts[i] = mb_cov_chol[i] * deltas[i] * systematics_scale;
         mB_mean[i] = mB_mean_orig[i] + shifts[i][1];
         mB_width[i] = mB_width_orig[i] + shifts[i][2];
