@@ -216,7 +216,7 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * sigma_c[i];
         sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
         sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
 
@@ -309,7 +309,7 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + cauchy_lpdf(kappa_c0[i] | 0, 0.1)
             + cauchy_lpdf(kappa_c1[i] | 0, 3)
-            + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
+            + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 0.1);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)
