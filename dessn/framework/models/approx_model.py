@@ -7,33 +7,21 @@ from scipy.interpolate import interp1d
 from collections import Counter
 
 from dessn.framework.model import Model
-from dessn.framework.models.skewness_fix import get_shift_scale
 
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, systematics_scale=1.0, statonly=False, frac_shift=0.0, frac_shift2=None,
-                 frac_alpha=0.0, apply_efficiency=True, fixed_sigma_c=0.07, beta_contrib=0.1, kfactor=0.0):
-        if statonly:
-            filename = filename.replace(".stan", "_statonly.stan")
+    def __init__(self, filename="approximate.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False):
         self.statonly = statonly
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
         stan_file = directory + "/stan/" + filename
         super().__init__(stan_file)
         self.num_redshift_nodes = num_nodes
-        self.systematics_scale = systematics_scale
-        self.frac_alpha = frac_alpha
+        self.systematics_scale = 0 if statonly else 1
         self.frac_shift = frac_shift
-        if frac_shift2 is None:
-            self.frac_shift2 = self.frac_shift
-        else:
-            self.frac_shift2 = frac_shift2
         self.apply_efficiency = 1 if apply_efficiency else 0
-        self.beta_contrib = beta_contrib
-        self.kfactor = kfactor
-        self.prior = False
-        self.fixed_sigma_c = fixed_sigma_c
+        self.prior = prior
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -129,6 +117,12 @@ class ApproximateModel(Model):
         labels, _ = self.get_systematic_labels(simulations)
         self.logger.info("Systematic labels are %s" % labels)
         label_lists = [s.get_systematic_names() for s in simulations]
+        if self.statonly:
+            for d in data_list:
+                if "deta_dcalib" in d.keys():
+                    d["deta_dcalib"] = np.zeros((d["n_sne"], 3, 1))
+            label_lists = [["Fake"] for s in simulations]
+            labels = ["Fake" for s in simulations]
 
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
@@ -273,14 +267,9 @@ class ApproximateModel(Model):
 
         # Add in data for the approximate selection efficiency in mB
         means, stds, alphas, correction_skewnorms, norms, signs, covs, deltas = [], [], [], [], [], [], [], []
-        shift_scale = []
         for sim, dataa in zip(simulations, data_list):
             res = sim.get_approximate_correction()
             correction_skewnorm, vals, cov, delta = res
-            if self.frac_alpha > 0:
-                shift_scale.append(get_shift_scale(dataa["redshifts"], correction_skewnorm, vals, self.frac_shift, self.frac_shift2, plot=plot))
-            else:
-                shift_scale.append(0)
             mean, std, alpha, norm = vals.tolist()
             means.append(mean)
             stds.append(std)
@@ -305,16 +294,11 @@ class ApproximateModel(Model):
         update["mB_cov"] = covs
         update["mB_kappa"] = deltas
         update["correction_skewnorm"] = correction_skewnorms
-        update["shift_scales"] = shift_scale
         update["frac_shift"] = self.frac_shift
-        update["frac_shift2"] = self.frac_shift2
-        update["frac_alpha"] = self.frac_alpha
-        update["fixed_sigma_c"] = self.fixed_sigma_c
-        update["beta_contrib"] = self.beta_contrib
-        update["kfactor"] = self.kfactor
 
         update["mean_mass"] = mean_masses
         update["apply_efficiency"] = self.apply_efficiency
+        update["apply_prior"] = 1 if self.prior else 0
 
         final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
@@ -362,27 +346,16 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.07, beta_contrib=0.1, kfactor=0.0,
-                 apply_efficiency=True):
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
-                         frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
-                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor, apply_efficiency=apply_efficiency)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, systematics_scale=1.0, statonly=False,
-                 prior=False, frac_shift=0.0, frac_alpha=0.0, frac_shift2=None, fixed_sigma_c=0.1, beta_contrib=0.1,
-                 kfactor=0.0, apply_efficiency=True):
-        if prior:
-            filename = filename.replace(".stan", "_omprior.stan")
-        super().__init__(filename, num_nodes=num_nodes, systematics_scale=systematics_scale, statonly=statonly,
-                         frac_alpha=frac_alpha, frac_shift=frac_shift, frac_shift2=frac_shift2,
-                         fixed_sigma_c=fixed_sigma_c, beta_contrib=beta_contrib, kfactor=kfactor, apply_efficiency=apply_efficiency)
-        self.prior = prior
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=0.0, apply_efficiency=True):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$w$"]

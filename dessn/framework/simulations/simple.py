@@ -7,7 +7,7 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, num_supernova, dscale=0.08, alpha_c=2, mass=True, num_nodes=4, lowz=False, min_prob_ia=1.0, disable_selection=False):
+    def __init__(self, num_supernova, dscale=0.08, alpha_c=2, mass=True, num_nodes=4, lowz=False, min_prob_ia=0.9999999, disable_selection=False):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale

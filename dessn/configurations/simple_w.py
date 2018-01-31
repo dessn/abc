@@ -20,7 +20,8 @@ if __name__ == "__main__":
     model = ApproximateModelW(prior=True)
     simulation = [SimpleSimulation(300), SimpleSimulation(200, lowz=True)]
 
-    # print(model.get_data(simulation, 0))
+    # d = model.get_data(simulation, 0)
+    # print(d["deta_dcalib"].shape)
     # exit()
 
     fitter = Fitter(dir_name)

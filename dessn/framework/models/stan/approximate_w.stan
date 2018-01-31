@@ -40,8 +40,6 @@ data {
     matrix[4, 4] mB_cov [n_surveys];
     int correction_skewnorm [n_surveys];
     real frac_shift;
-    real frac_shift2;
-    real fixed_sigma_c;
 
     // Calibration std
     matrix[3, n_calib] deta_dcalib [n_sne]; // Sensitivity of summary stats to change in calib
@@ -51,6 +49,7 @@ data {
 
     real systematics_scale; // Use this to dynamically turn systematics on or off
     int apply_efficiency;
+    int apply_prior;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -63,7 +62,7 @@ transformed data {
         obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
     }
     for (i in 1:n_surveys) {
-        mb_cov_chol[i] = cholesky_decompose(systematics_scale * mB_cov[i]);
+        mb_cov_chol[i] = cholesky_decompose(mB_cov[i]);
     }
 }
 
@@ -96,7 +95,8 @@ parameters {
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     cholesky_factor_corr[3] intrinsic_correlation [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
-
+    real<lower=0, upper=0.2>  kappa_c0 [n_surveys];
+    real<lower=0, upper=10>  kappa_c1 [n_surveys];
 
 }
 
@@ -115,6 +115,10 @@ transformed parameters {
     vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
     matrix [3,3] model_mBx1c_cov [n_sne];
+
+    // Unexplained dispersion
+    vector[3] diag_extra [n_sne];
+    matrix[3, 3] obs_mBx1c_chol_extra [n_sne];
 
     // Helper variables for Simpsons rule
     real Hinv [n_z];
@@ -187,7 +191,7 @@ transformed parameters {
     zeros = rep_row_vector(0, 4);
 
     for (i in 1:n_surveys) {
-        shifts[i] = mb_cov_chol[i] * deltas[i];
+        shifts[i] = mb_cov_chol[i] * deltas[i] * systematics_scale;
         mB_mean[i] = mB_mean_orig[i] + shifts[i][1];
         mB_width[i] = mB_width_orig[i] + shifts[i][2];
         mB_alpha[i] = mB_alpha_orig[i] + shifts[i][3];
@@ -211,9 +215,9 @@ transformed parameters {
         full_sigma[i] = population[i] * population[i]';
 
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
-        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * fixed_sigma_c;
+        mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * sigma_c[i];
         sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
-        sigma_c_adjust[i] = 1 + (frac_shift2 * (sigma_c_adjust_ratio[i] - 1));
+        sigma_c_adjust[i] = 1 + (frac_shift * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
         cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * beta * sigma_c_adjust[i] * full_sigma[i][2][3]);
@@ -233,6 +237,12 @@ transformed parameters {
     // Now update the posterior using each supernova sample
     for (i in 1:n_sne) {
 
+        // Intrinsic
+        diag_extra[i][1] = 0;
+        diag_extra[i][2] = 0;
+        diag_extra[i][3] = 0.001; // kappa_c0[survey_map[i]];// * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
+        obs_mBx1c_chol_extra[i] = diag_matrix(diag_extra[i]);
+
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
         mean_c_sn[i] = dot_product(mean_c[survey_map[i]], node_weights[i]);
@@ -240,12 +250,6 @@ transformed parameters {
         mean_MBx1c[i][1] = mean_MB;
         mean_MBx1c[i][2] = mean_x1_sn[i];
         mean_MBx1c[i][3] = mean_c_sn[i];
-
-        // alphas[i] = alpha + delta_alpha * mean_MBx1c[i][2]; // Switching from alpha(z) to alpha(x1) to test impact
-        // betas[i] = beta + delta_beta * mean_MBx1c[i][3];
-        alphas[i] = alpha; // Keeping this nomenclature alive so I can make alpha/beta change easily in the future
-        betas[i] = beta;
-
 
         mean_MBx1c_out[i][1] = mean_MB - outlier_MB_delta;
         mean_MBx1c_out[i][2] = mean_x1_sn[i];
@@ -255,18 +259,19 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
+        model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
+        //model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
-        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration;
+        model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration * systematics_scale;
 
         // Convert population into absolute magnitude
-        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alphas[i] * model_mBx1c[i][2] - betas[i] * model_mBx1c[i][3] + mass_correction * masses[i];
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha * model_mBx1c[i][2] - beta * model_mBx1c[i][3] + mass_correction * masses[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alphas[i] * mean_x1_sn[i] + betas[i] * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
@@ -292,21 +297,27 @@ transformed parameters {
     }
     weight = sum(weights);
     for (i in 1:n_surveys) {
-        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
+        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1.0)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
+            + cauchy_lpdf(kappa_c0[i] | 0, 0.1)
+            + cauchy_lpdf(kappa_c1[i] | 0, 3)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
         + cauchy_lpdf(sigma_MB | 0, 1)
         + cauchy_lpdf(sigma_x1 | 0, 1)
         + cauchy_lpdf(sigma_c  | 0, 1)
-        + normal_lpdf(calibration | 0, systematics_scale);
+        + normal_lpdf(calibration | 0, 1);
 }
 model {
+    target += posterior;
+    
     if (apply_efficiency) {
-        target += posterior - weight;
-    } else {
-        target += posterior;
+        target += -weight;
+    }
+    
+    if (apply_prior) {
+        target += normal_lpdf(Om | 0.3, 0.01);
     }
 }

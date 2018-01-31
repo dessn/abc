@@ -136,7 +136,7 @@ class SNANASimulation(Simulation):
             "sim_apparents": s_ap,
             "sim_stretches": s_st,
             "sim_colours": s_co,
-            "prob_ia": np.ones(n_sne)
+            "prob_ia": np.ones(n_sne) * 0.999999
         }
         return result
 
