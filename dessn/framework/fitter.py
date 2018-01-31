@@ -216,7 +216,10 @@ class Fitter(object):
             label, res = temp_list[i]
             if "\delta \mathcal{Z}" in label:
                 n = int(label.split("\delta \mathcal{Z}_{")[1].split("}")[0])
-                temp_list[i][0] = sys_labels[n]
+                if n >= len(sys_labels):
+                    temp_list[i][0] = '$\\delta [ Unknown ]$'
+                else:
+                    temp_list[i][0] = sys_labels[n]
         result = OrderedDict(temp_list)
         return self.models[model_index], self.simulations[simulation_index], cosmo_index, result, truth, new_weight, stan_weight, posterior
 

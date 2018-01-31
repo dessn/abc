@@ -121,8 +121,6 @@ class ApproximateModel(Model):
             for d in data_list:
                 if "deta_dcalib" in d.keys():
                     d["deta_dcalib"] = np.zeros((d["n_sne"], 3, 1))
-            label_lists = [["Fake"] for s in simulations]
-            labels = ["Fake" for s in simulations]
 
         self.logger.info("Got observational data")
         # Redshift shenanigans below used to create simpsons rule arrays
@@ -304,6 +302,8 @@ class ApproximateModel(Model):
         return final_dict
 
     def get_global_from_sims(self, simulations):
+        if self.statonly:
+            return ["Fake"]
         num_sims = len(simulations)
         all_labels = [l for s in simulations for l in s.get_systematic_names()]
         counted = Counter(all_labels)
@@ -315,6 +315,8 @@ class ApproximateModel(Model):
 
     def get_systematic_labels(self, simulations):
         label_lists = [s.get_systematic_names() for s in simulations]
+        if self.statonly:
+            label_lists = [["Fake"] for s in simulations]
         if len(label_lists[0]) == 0:
             label_lists[0].append("Fake")
         start = self.get_global_from_sims(simulations)
