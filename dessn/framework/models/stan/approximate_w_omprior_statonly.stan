@@ -309,7 +309,7 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + cauchy_lpdf(kappa_c0[i] | 0, 0.1)
             + cauchy_lpdf(kappa_c1[i] | 0, 3)
-            + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 0.1);
+            + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 0.01);
     }
     posterior = sum(point_posteriors) + sum(survey_posteriors)
         + normal_lpdf(Om | 0.3, 0.01)

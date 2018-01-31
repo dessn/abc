@@ -75,5 +75,5 @@ if __name__ == "__main__":
         c1.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=6)
 
         print("Plotting big triangle. This might take a while")
-        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=7)
+        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=14)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
