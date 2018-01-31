@@ -28,7 +28,7 @@ class ApproximateModel(Model):
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
-                "sigma_MB", "sigma_x1", "sigma_c", "kappa_c0", "kappa_c1", "alpha_c", "alpha_x1",
+                "sigma_MB", "sigma_x1", "sigma_c", "kappa", "kappa_c0", "kappa_c1", "alpha_c", "alpha_x1",
                 #"outlier_MB_delta", "outlier_dispersion"
                 "delta_alpha", "delta_beta",
                 "mean_x1", "mean_c",
