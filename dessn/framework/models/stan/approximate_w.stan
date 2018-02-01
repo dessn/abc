@@ -241,7 +241,8 @@ transformed parameters {
         // Intrinsic
         diag_extra[i][1] = 0;
         diag_extra[i][2] = 0;
-        diag_extra[i][3] = kappa_c0[survey_map[i]] * (1 + 3 * redshifts[i]);// * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
+        diag_extra[i][3] = 0.025 * (1 + 2.7 * redshifts[i]);// * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
+        //diag_extra[i][3] = kappa_c0[survey_map[i]] * (1 + 3 * redshifts[i]);// * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
         obs_mBx1c_chol_extra[i] = diag_matrix(diag_extra[i]);
 
         // redshift dependent effects
