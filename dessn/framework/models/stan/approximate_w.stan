@@ -322,5 +322,5 @@ model {
     if (apply_prior) {
         target += normal_lpdf(Om | 0.3, 0.01);
     }
-    target += normal_lpdf(mean_MB | -19.365, 0.01)
+    target += normal_lpdf(mean_MB | -19.365, 0.01);
 }
