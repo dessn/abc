@@ -294,7 +294,7 @@ transformed parameters {
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
-                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]] + diag_matrx(diag_extra2[i]))
+                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]] + diag_matrix(diag_extra2[i]))
                 + normal_lcdf(dot_product(shapes[survey_map[i]], (model_MBx1c[i] - mean_MBx1c[i])) | 0, 1),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
