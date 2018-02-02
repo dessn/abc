@@ -120,7 +120,6 @@ transformed parameters {
     // Unexplained dispersion
     vector[3] diag_extra [n_sne];
     vector[3] diag_extra2 [n_sne];
-    matrix[3, 3] obs_mBx1c_chol_extra [n_sne];
 
     // Helper variables for Simpsons rule
     real Hinv [n_z];
@@ -247,7 +246,6 @@ transformed parameters {
         diag_extra2[i][1] = (rho_c[survey_map[i]] * diag_extra[i][3])^2;
         diag_extra2[i][2] = 0;
         diag_extra2[i][3] = 0;
-        obs_mBx1c_chol_extra[i] = diag_matrix(diag_extra[i]);
 
         // redshift dependent effects
         mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
@@ -265,7 +263,7 @@ transformed parameters {
         mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
-        model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + obs_mBx1c_chol_extra[i]) * deviations[i];
+        model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
         //model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
 
         // Add calibration uncertainty
@@ -296,7 +294,7 @@ transformed parameters {
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
-                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]] + diag_matrx(diag_extra2))
+                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]] + diag_matrx(diag_extra2[i]))
                 + normal_lcdf(dot_product(shapes[survey_map[i]], (model_MBx1c[i] - mean_MBx1c[i])) | 0, 1),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
