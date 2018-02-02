@@ -131,7 +131,6 @@ transformed parameters {
     matrix [3,3] full_sigma [n_surveys];
     vector [3] mean_MBx1c [n_sne];
     vector [3] mean_MBx1c_out [n_sne];
-    vector [3] sigmas [n_surveys];
 
     // Variables to calculate the bias correction
     real mB_mean [n_surveys];
@@ -155,9 +154,6 @@ transformed parameters {
     real cor_sigma_out [n_surveys];
     real cor_mb_width2_out;
     real cor_mb_norm_width_out [n_surveys];
-
-    // SKEWNESS
-    vector[3] shapes [n_surveys];
 
     // Lets actually record the proper posterior values
     vector [n_sne] point_posteriors;
@@ -207,32 +203,19 @@ transformed parameters {
         sigma_x1[i] = exp(log_sigma_x1[i]);
         sigma_c[i] = exp(log_sigma_c[i]);
 
-        // Construct sigma vector
-        sigmas[i][1] = sigma_MB[i];
-        sigmas[i][2] = sigma_x1[i];
-        sigmas[i][3] = sigma_c[i];
-
-        // Turn this into population matrix
-        population[i] = diag_pre_multiply(sigmas[i], intrinsic_correlation[i]);
-        full_sigma[i] = population[i] * population[i]';
-
         alpha_c[i] = delta_c[i] / sqrt(1 - delta_c[i]^2);
         mean_c_adjust[i] = frac_shift * delta_c[i] * sqrt(2 / pi()) * sigma_c[i];
         sigma_c_adjust_ratio[i] = sqrt(1 - (2 * delta_c[i]^2 / pi()));
         sigma_c_adjust[i] = 1 + (frac_shift * (sigma_c_adjust_ratio[i] - 1));
 
         // Calculate selection effect widths
-        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2 + 2 * (-alpha * full_sigma[i][1][2] + beta * (sigma_c_adjust[i] * full_sigma[i][1][3]) - alpha * beta * sigma_c_adjust[i] * full_sigma[i][2][3]);
+        cor_mb_width2[i] = sigma_MB[i]^2 + (alpha * sigma_x1[i])^2 + (beta * sigma_c[i] * sigma_c_adjust[i])^2;
         cor_sigma[i] = sqrt(((cor_mb_width2[i] + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2[i]) / (cor_mb_width2[i] + mB_width2[i]))));
 
         cor_mb_norm_width[i] = sqrt(mB_width2[i] + cor_mb_width2[i]);
 
         cor_sigma_out[i] = sqrt(((cor_mb_width2_out + mB_width2[i]) / mB_width2[i])^2 * ((mB_width2[i] / mB_alpha2[i]) + ((mB_width2[i] * cor_mb_width2_out) / (cor_mb_width2_out + mB_width2[i]))));
         cor_mb_norm_width_out[i] = sqrt(mB_width2[i] + cor_mb_width2_out);
-
-        shapes[i][1] = 0;
-        shapes[i][2] = 0;
-        shapes[i][3] = alpha_c[i] / sigma_c[i];
 
     }
 
@@ -294,8 +277,9 @@ transformed parameters {
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
-                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]] + diag_matrix(diag_extra2[i]))
-                + normal_lcdf(dot_product(shapes[survey_map[i]], (model_MBx1c[i] - mean_MBx1c[i])) | 0, 1),
+                log(prob_ia[i]) + normal_lpdf(model_MBx1c[i][1] | mean_MB[survey_map[i]], sqrt(sigma_MB[survey_map[i]]^2 + (rho_c[survey_map[i]] * diag_extra[i][3])^2))
+                + normal_lpdf(model_MBx1c[i][2] | mean_x1_sn[i], sigma_x1[survey_map[i]])
+                + skew_normal_lpdf(model_MBx1c[i][3] | mean_c_sn[i], sigma_c[survey_map[i]]),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];
     }
