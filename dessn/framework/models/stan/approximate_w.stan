@@ -96,6 +96,7 @@ parameters {
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
     real<lower=0, upper=1.0>  kappa_c0 [n_surveys];
     real<lower=0, upper=10>  kappa_c1 [n_surveys];
+    real<lower=-1, upper=1>  rho_c [n_surveys];
 
 }
 
@@ -118,6 +119,7 @@ transformed parameters {
 
     // Unexplained dispersion
     vector[3] diag_extra [n_sne];
+    vector[3] diag_extra2 [n_sne];
     matrix[3, 3] obs_mBx1c_chol_extra [n_sne];
 
     // Helper variables for Simpsons rule
@@ -241,8 +243,10 @@ transformed parameters {
         // Intrinsic
         diag_extra[i][1] = 0;
         diag_extra[i][2] = 0;
-        //diag_extra[i][3] = 0.025 * (1 + 2.7 * redshifts[i]);// * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
-        diag_extra[i][3] = sigma_MB[survey_map[i]] * beta * kappa_c0[survey_map[i]];// * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
+        diag_extra[i][3] = sigma_MB[survey_map[i]] * kappa_c0[survey_map[i]] * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
+        diag_extra2[i][1] = (rho_c[survey_map[i]] * diag_extra[i][3])^2;
+        diag_extra2[i][2] = 0;
+        diag_extra2[i][3] = 0;
         obs_mBx1c_chol_extra[i] = diag_matrix(diag_extra[i]);
 
         // redshift dependent effects
@@ -292,7 +296,7 @@ transformed parameters {
         // Track and update posterior
         point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1)
             + log_sum_exp(
-                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]])
+                log(prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c[i], population[survey_map[i]] + diag_matrx(diag_extra2))
                 + normal_lcdf(dot_product(shapes[survey_map[i]], (model_MBx1c[i] - mean_MBx1c[i])) | 0, 1),
                 log(1 - prob_ia[i]) + multi_normal_cholesky_lpdf(model_MBx1c[i] | mean_MBx1c_out[i], outlier_dispersion))
             + numerator_weight[i];

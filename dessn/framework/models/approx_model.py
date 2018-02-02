@@ -25,7 +25,7 @@ class ApproximateModel(Model):
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
-                "sigma_MB", "sigma_x1", "sigma_c", "kappa_c0", "kappa_c1", "alpha_c", "alpha_x1",
+                "sigma_MB", "sigma_x1", "sigma_c", "kappa_c0", "kappa_c1", "rho_c", "alpha_c", "alpha_x1",
                 #"outlier_MB_delta", "outlier_dispersion"
                 "delta_alpha", "delta_beta",
                 "mean_x1", "mean_c",
@@ -45,6 +45,7 @@ class ApproximateModel(Model):
             ("alpha_c", r"$\alpha_c^{%d}$"),
             ("kappa_c0", r"$\kappa_{c0}^{%d}$"),
             ("kappa_c1", r"$\kappa_{c1}^{%d}$"),
+            ("rho_c", r"$\rho_{c}^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
             ("delta_alpha", r"$\delta_\alpha$"),
@@ -89,6 +90,7 @@ class ApproximateModel(Model):
             "deltas": normal(scale=0.1, size=(num_surveys, 4)),
             "kappa_c0": uniform(0, 0.02, size=(num_surveys, )),
             "kappa_c1": uniform(0, 5, size=(num_surveys, )),
+            "rho_c": uniform(-0.5, 0.5, size=(num_surveys, )),
             "calibration": uniform(-0.3, 0.3, size=deta_dcalib.shape[2])
         }
         chol = [[[1.0, 0.0, 0.0],
