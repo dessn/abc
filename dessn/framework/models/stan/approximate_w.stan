@@ -107,6 +107,10 @@ transformed parameters {
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
 
+    real alpha_c [n_surveys];
+    real weight;
+    real posterior;
+
     {
         // Pop at given redshift
         real mean_x1_sn [n_sne];
@@ -163,9 +167,7 @@ transformed parameters {
         real mass_correction [n_sne];
 
     }
-    real alpha_c [n_surveys];
-    real weight;
-    real posterior;
+
 
 
 
