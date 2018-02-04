@@ -107,62 +107,67 @@ transformed parameters {
     real sigma_x1 [n_surveys];
     real sigma_c [n_surveys];
 
-    // Pop at given redshift
-    real mean_x1_sn [n_sne];
-    real mean_c_sn [n_sne];
+    {
+        // Pop at given redshift
+        real mean_x1_sn [n_sne];
+        real mean_c_sn [n_sne];
 
-    // Our SALT2 model
-    vector [3] model_MBx1c [n_sne];
-    vector [3] model_mBx1c [n_sne];
-    matrix [3,3] model_mBx1c_cov [n_sne];
+        // Our SALT2 model
+        vector [3] model_MBx1c [n_sne];
+        vector [3] model_mBx1c [n_sne];
+        matrix [3,3] model_mBx1c_cov [n_sne];
 
-    // Unexplained dispersion
-    vector[3] diag_extra [n_sne];
+        // Unexplained dispersion
+        vector[3] diag_extra [n_sne];
 
-    // Helper variables for Simpsons rule
-    real Hinv [n_z];
-    real cum_simps[n_simps];
-    real model_mu[n_sne];
+        // Helper variables for Simpsons rule
+        real Hinv [n_z];
+        real cum_simps[n_simps];
+        real model_mu[n_sne];
 
-    // Modelling intrinsic dispersion
-    matrix [3,3] population [n_surveys];
-    matrix [3,3] full_sigma [n_surveys];
-    vector [3] mean_MBx1c [n_sne];
-    vector [3] mean_MBx1c_out [n_sne];
+        // Modelling intrinsic dispersion
+        matrix [3,3] population [n_surveys];
+        matrix [3,3] full_sigma [n_surveys];
+        vector [3] mean_MBx1c [n_sne];
+        vector [3] mean_MBx1c_out [n_sne];
 
-    // Variables to calculate the bias correction
-    real mB_mean [n_surveys];
-    real mB_width [n_surveys];
-    real mB_alpha [n_surveys];
-    real mB_norm [n_surveys];
-    real mB_width2 [n_surveys];
-    real mB_alpha2 [n_surveys];
+        // Variables to calculate the bias correction
+        real mB_mean [n_surveys];
+        real mB_width [n_surveys];
+        real mB_alpha [n_surveys];
+        real mB_norm [n_surveys];
+        real mB_width2 [n_surveys];
+        real mB_alpha2 [n_surveys];
 
-    vector[4] shifts [n_surveys];
-    real cor_mB_mean [n_sne];
-    real cor_sigma [n_surveys];
-    real cor_mb_width2 [n_surveys];
-    real cor_mb_norm_width [n_surveys];
-    real mean_c_adjust [n_surveys];
-    real sigma_c_adjust [n_surveys];
-    real sigma_c_adjust_ratio [n_surveys];
+        vector[4] shifts [n_surveys];
+        real cor_mB_mean [n_sne];
+        real cor_sigma [n_surveys];
+        real cor_mb_width2 [n_surveys];
+        real cor_mb_norm_width [n_surveys];
+        real mean_c_adjust [n_surveys];
+        real sigma_c_adjust [n_surveys];
+        real sigma_c_adjust_ratio [n_surveys];
+
+        real cor_mB_mean_out [n_sne];
+        real cor_sigma_out [n_surveys];
+        real cor_mb_width2_out;
+        real cor_mb_norm_width_out [n_surveys];
+
+        // Lets actually record the proper posterior values
+        vector [n_sne] point_posteriors;
+        vector [n_surveys] survey_posteriors;
+        vector [n_sne] weights;
+        vector [n_sne] numerator_weight;
+
+        // Other temp variables for corrections
+        real [n_sne] mass_correction;
+
+    }
     real alpha_c [n_surveys];
-
-    real cor_mB_mean_out [n_sne];
-    real cor_sigma_out [n_surveys];
-    real cor_mb_width2_out;
-    real cor_mb_norm_width_out [n_surveys];
-
-    // Lets actually record the proper posterior values
-    vector [n_sne] point_posteriors;
-    vector [n_surveys] survey_posteriors;
-    vector [n_sne] weights;
-    vector [n_sne] numerator_weight;
     real weight;
     real posterior;
 
-    // Other temp variables for corrections
-    real mass_correction;
+
 
     // -------------Begin numerical integration-----------------
     real expon;
@@ -238,7 +243,7 @@ transformed parameters {
         mean_MBx1c_out[i][3] = mean_c_sn[i];
 
         // Calculate mass correction
-        mass_correction = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
+        mass_correction[i] = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
         // Convert into apparent magnitude
         model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
@@ -247,12 +252,12 @@ transformed parameters {
         model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration * systematics_scale;
 
         // Convert population into absolute magnitude
-        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha * model_mBx1c[i][2] - beta * model_mBx1c[i][3] + mass_correction * masses[i];
+        model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha * model_mBx1c[i][2] - beta * model_mBx1c[i][3] + mass_correction[i] * masses[i];
         model_MBx1c[i][2] = model_mBx1c[i][2];
         model_MBx1c[i][3] = model_mBx1c[i][3];
 
         // Mean of population
-        cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction * masses[i];
+        cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction[i] * masses[i];
         cor_mB_mean_out[i] = cor_mB_mean[i] - outlier_MB_delta;
 
         if (correction_skewnorm[survey_map[i]]) {
