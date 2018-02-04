@@ -160,7 +160,7 @@ transformed parameters {
         vector [n_sne] numerator_weight;
 
         // Other temp variables for corrections
-        real [n_sne] mass_correction;
+        real mass_correction [n_sne];
 
     }
     real alpha_c [n_surveys];
