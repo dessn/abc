@@ -226,7 +226,7 @@ transformed parameters {
             // Intrinsic
             diag_extra[i][1] = 0;
             diag_extra[i][2] = 0;
-            diag_extra[i][3] = sigma_MB[survey_map[i]] * kappa_c0[survey_map[i]] * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
+            diag_extra[i][3] = kappa_c0[survey_map[i]] * (1 + kappa_c1[survey_map[i]] * redshifts[i]);
 
             // redshift dependent effects
             mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
