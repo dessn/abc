@@ -284,7 +284,7 @@ transformed parameters {
         posteriorsum = sum(point_posteriors);
     }
     for (i in 1:n_surveys) {
-        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1.0)
+        survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 0.01)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
             + cauchy_lpdf(kappa_c0[i] | 0, 0.5)
