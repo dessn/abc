@@ -287,8 +287,8 @@ transformed parameters {
         survey_posteriors[i] = normal_lpdf(mean_x1[i]  | 0, 1)
             + normal_lpdf(mean_c[i]  | 0, 0.1)
             + normal_lpdf(deltas[i] | 0, 1)
-            + cauchy_lpdf(kappa_c0[i] | 0, 0.01)
-            + cauchy_lpdf(kappa_c1[i] | 0, 3)
+            + cauchy_lpdf(kappa_c0[i] | 0.02, 0.001)
+            + cauchy_lpdf(kappa_c1[i] | 3, 0.01)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = posteriorsum + sum(survey_posteriors)
