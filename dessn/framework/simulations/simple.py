@@ -7,13 +7,16 @@ from dessn.framework.simulation import Simulation
 
 class SimpleSimulation(Simulation):
 
-    def __init__(self, num_supernova, dscale=0.08, alpha_c=2, mass=True, num_nodes=4, lowz=False, min_prob_ia=0.9999999, disable_selection=False):
+    def __init__(self, num_supernova, dscale=0.08, alpha_c=2, mass=True, num_nodes=4, lowz=False, min_prob_ia=0.9999999,
+                 disable_selection=False, kappa0=0, kappa1=0):
         super().__init__()
         self.alpha_c = alpha_c
         self.dscale = dscale
         self.min_prob_ia = min_prob_ia
         self.num_calib = 1
         self.disable_selection = disable_selection
+        self.kappa0 = kappa0
+        self.kappa1 = kappa1
         if lowz:
             self.skewnorm = True
             self.mb_alpha = 5.87
@@ -101,7 +104,7 @@ class SimpleSimulation(Simulation):
             p_high_masses = np.random.uniform(low=0.0, high=1.0, size=dist_mod.size) * self.mass_scale
             ia_probs = np.random.uniform(low=self.min_prob_ia, high=1.0, size=nn)
             contaminations = np.random.random(nn) > ia_probs
-            for zz, mu, p, contamination in zip(redshift_pre_comp, dist_mod, p_high_masses, contaminations):
+            for zz, mu, p, contamination, red in zip(redshift_pre_comp, dist_mod, p_high_masses, contaminations, redshifts):
                 while True:
                     MB, x1, c = np.random.multivariate_normal(means, pop_cov)
                     if np.random.random() < norm.cdf(truth["alpha_c"] * (c - truth["mean_c"][0]) / truth["sigma_c"], 0, 1):
@@ -119,7 +122,7 @@ class SimpleSimulation(Simulation):
                 mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
                 vector = np.array([mb, x1, c])
                 # Add intrinsic scatter to the mix
-                diag = np.array([0.04, 0.2, 0.03]) ** 2
+                diag = np.array([0.04, 0.2, 0.03 + self.kappa0 * (1 + self.kappa1 * red)]) ** 2
                 cov = np.diag(diag)
                 sim_mBx1c.append(vector)
                 vector += np.random.multivariate_normal([0, 0, 0], cov)
