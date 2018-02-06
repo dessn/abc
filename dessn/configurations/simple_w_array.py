@@ -18,13 +18,11 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, frac_shift=0.0, frac_shift2=0.0),
-        ApproximateModelW(prior=True, frac_shift=1.0, frac_shift2=1.0),
-
+        ApproximateModelW(prior=True, statonly=True)
     ]
     simulations = [
-        [SimpleSimulation(300, alpha_c=0), SimpleSimulation(200, alpha_c=0, lowz=True)],
-        [SimpleSimulation(300, alpha_c=2), SimpleSimulation(200, alpha_c=2, lowz=True)]
+        [SimpleSimulation(300), SimpleSimulation(200, lowz=True)],
+        [SimpleSimulation(300, kappa0=0.02, kappa1=3), SimpleSimulation(200, lowz=True, kappa0=0.02, kappa1=3)]
     ]
 
     # models[0].get_data(simulations[1], 0, plot=True)
@@ -54,11 +52,11 @@ if __name__ == "__main__":
 
         print("Adding chains")
         ls = []
-        cs = ["r", "r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
+        cs = ["r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
-            name = "%s shift %0.1f %0.1f global %0.1f sigma %0.2f beta %0.2f kfac %0.1f" % \
-                   (name_skew, m.frac_shift, m.frac_shift2, m.frac_alpha, m.fixed_sigma_c, m.beta_contrib, m.kfactor)
+            name = "%s Kappas = %0.3f, %0.1f" % \
+                   (name_skew, s[0].kappa0, s[0].kappa1)
             if name_skew == "Gauss":
                 ls.append("--")
             else:
@@ -67,6 +65,8 @@ if __name__ == "__main__":
 
         c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3,
                      linestyles=ls, colors=cs)
+        allk = list(chain.keys())
+        ps = allk[:5] + [a for a in allk if "sigma" in a] + [a for a in allk if "kappa" in a]
 
         print("Plotting cosmology")
         c1.plotter.plot(filename=pfn + "_cosmo.png", truth=truth, parameters=parameters, figsize="column")
@@ -75,5 +75,5 @@ if __name__ == "__main__":
         c1.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=6)
 
         print("Plotting big triangle. This might take a while")
-        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=14)
+        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=ps)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)

@@ -18,10 +18,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     model = ApproximateModelW(prior=True, statonly=True)
-    simulations = [
-        [SimpleSimulation(300), SimpleSimulation(200, lowz=True)],
-        [SimpleSimulation(300, kappa0=0.02, kappa1=3), SimpleSimulation(200, lowz=True, kappa0=0.02, kappa1=3)]
-    ]
+    simulation = [SimpleSimulation(300), SimpleSimulation(200, lowz=True)]
 
     # d = model.get_data(simulation, 0)
     # print(d["deta_dcalib"].shape)
@@ -29,7 +26,7 @@ if __name__ == "__main__":
 
     fitter = Fitter(dir_name)
     fitter.set_models(model)
-    fitter.set_simulations(*simulations)
+    fitter.set_simulations(simulation)
     ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
