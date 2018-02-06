@@ -181,7 +181,7 @@ class SimpleSimulation(Simulation):
     def get_approximate_correction(self):
         if not self.skewnorm:
             print("ccdf approx")
-            return False, np.array([self.mb_mean, self.mb_width, 0, 1]), 0.0001 * np.eye(4), 0
+            return False, np.array([self.mb_mean, self.mb_width, 0.1, 1]), 0.0001 * np.eye(4), 0
         else:
             print("skewnorm approx")
             return True, np.array([self.mb_mean, self.mb_width, self.mb_alpha, 1.0]), 0.0001 * np.eye(4), 0
