@@ -61,6 +61,8 @@ class SimpleSimulation(Simulation):
             ("log_sigma_MB", np.log(0.1), r"$\log\sigma_{\rm m_B}$"),
             ("log_sigma_x1", np.log(0.5), r"$\log\sigma_{x_1}$"),
             ("log_sigma_c", np.log(0.1), r"$\log\sigma_c$"),
+            ("kappa_c0", self.kappa0, r"$\kappa_{c0}"),
+            ("kappa_c1", self.kappa1, r"$\kappa_{c1}"),
             ("alpha_c", self.alpha_c, r"$\alpha_c$"),
             ("dscale", self.dscale, r"$\delta(0)$"),
             ("dratio", 0.5, r"$\delta(\infty)/\delta(0)$"),
@@ -123,10 +125,12 @@ class SimpleSimulation(Simulation):
                 vector = np.array([mb, x1, c])
                 # Add intrinsic scatter to the mix
                 diag = np.array([0.04**2, 0.2**2, 0.03**2 + (self.kappa0 + self.kappa1 * red)**2])
+                diag2 = np.array([0.04**2, 0.2**2, 0.03**2])
                 cov = np.diag(diag)
+                cov2 = np.diag(diag)
                 sim_mBx1c.append(vector)
                 vector += np.random.multivariate_normal([0, 0, 0], cov)
-                obs_mBx1c_cov.append(cov)
+                obs_mBx1c_cov.append(cov2)
                 obs_mBx1c.append(vector)
                 deta_dcalib.append(np.zeros((3, self.num_calib)))
             redshifts_all += redshifts.tolist()
