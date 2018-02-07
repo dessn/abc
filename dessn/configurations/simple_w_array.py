@@ -18,7 +18,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, statonly=True)
+        ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
     ]
     simulations = [
         [SimpleSimulation(300), SimpleSimulation(200, lowz=True)],
@@ -75,4 +75,5 @@ if __name__ == "__main__":
 
         print("Plotting big triangle. This might take a while")
         c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=ps)
+        c1.plotter.plot(filename=pfn + "_big2.png", truth=truth, parameters=19)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
