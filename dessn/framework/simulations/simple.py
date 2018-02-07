@@ -124,13 +124,13 @@ class SimpleSimulation(Simulation):
                 mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
                 vector = np.array([mb, x1, c])
                 # Add intrinsic scatter to the mix
-                diag = np.array([0.04**2, 0.2**2, 0.03**2 + (self.kappa0 + self.kappa1 * red)**2])
-                diag2 = np.array([0.04**2, 0.2**2, 0.03**2])
+                diag = np.array([0.04, 0.2, 0.03])**2
                 cov = np.diag(diag)
-                cov2 = np.diag(diag)
+                obs_mBx1c_cov.append(cov)
                 sim_mBx1c.append(vector)
-                vector += np.random.multivariate_normal([0, 0, 0], cov)
-                obs_mBx1c_cov.append(cov2)
+                cov2 = cov.copy()
+                cov2[2, 2] += (self.kappa0 + self.kappa1 * red)**2
+                vector += np.random.multivariate_normal([0, 0, 0], cov2)
                 obs_mBx1c.append(vector)
                 deta_dcalib.append(np.zeros((3, self.num_calib)))
             redshifts_all += redshifts.tolist()
