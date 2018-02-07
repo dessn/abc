@@ -22,7 +22,7 @@ if __name__ == "__main__":
     ]
     simulations = [
         [SimpleSimulation(300), SimpleSimulation(200, lowz=True)],
-        [SimpleSimulation(300, kappa0=0.03, kappa1=0.0), SimpleSimulation(200, lowz=True, kappa0=0.03, kappa1=0.0)]
+        [SimpleSimulation(300, kappa0=0.03, kappa1=0.03), SimpleSimulation(200, lowz=True, kappa0=0.03, kappa1=0.03)]
     ]
 
     # models[0].get_data(simulations[1], 0, plot=True)
