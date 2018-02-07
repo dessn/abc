@@ -122,7 +122,7 @@ class SimpleSimulation(Simulation):
                 mb = MB + mu - alpha * x1 + beta * c - mass_correction * p
                 vector = np.array([mb, x1, c])
                 # Add intrinsic scatter to the mix
-                diag = np.array([0.04**2, 0.2**2, 0.03**2 + (self.kappa0 * (1 + self.kappa1 * red))**2])
+                diag = np.array([0.04**2, 0.2**2, 0.03**2 + (self.kappa0 + self.kappa1 * red)**2])
                 cov = np.diag(diag)
                 sim_mBx1c.append(vector)
                 vector += np.random.multivariate_normal([0, 0, 0], cov)

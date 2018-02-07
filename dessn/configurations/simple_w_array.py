@@ -22,7 +22,7 @@ if __name__ == "__main__":
     ]
     simulations = [
         [SimpleSimulation(300), SimpleSimulation(200, lowz=True)],
-        [SimpleSimulation(300, kappa0=0.02, kappa1=0), SimpleSimulation(200, lowz=True, kappa0=0.02, kappa1=0)]
+        [SimpleSimulation(300, kappa0=0.04, kappa1=0.04), SimpleSimulation(200, lowz=True, kappa0=0.04, kappa1=0.04)]
     ]
 
     # models[0].get_data(simulations[1], 0, plot=True)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
         print("Adding chains")
         ls = []
-        cs = ["r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c","o", "o", "e", "e", "g", "g", ]
+        cs = ["r", "b", "b", "a", "a", "p", "p", "brown", "brown", "c", "c", "o", "o", "e", "e", "g", "g", ]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
             name_skew = "Gauss" if s[0].alpha_c == 0 else "Skewed"
             name = "%s Kappas = %0.3f, %0.1f" % (name_skew, s[0].kappa0, s[0].kappa1)
