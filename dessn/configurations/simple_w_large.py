@@ -21,8 +21,8 @@ if __name__ == "__main__":
         ApproximateModelW(prior=True, statonly=True)
     ]
     simulations = [
-        [SimpleSimulation(300), SimpleSimulation(200, lowz=True)],
-        [SimpleSimulation(300, kappa0=0.02, kappa1=0), SimpleSimulation(200, lowz=True, kappa0=0.02, kappa1=0)]
+        [SimpleSimulation(1000), SimpleSimulation(1000, lowz=True)],
+        [SimpleSimulation(1000, kappa0=0.02, kappa1=0), SimpleSimulation(1000, lowz=True, kappa0=0.02, kappa1=0)]
     ]
 
     # models[0].get_data(simulations[1], 0, plot=True)
