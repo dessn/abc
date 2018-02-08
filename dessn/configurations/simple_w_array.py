@@ -65,7 +65,7 @@ if __name__ == "__main__":
         c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, shade=True, shade_alpha=0.3,
                      linestyles=ls, colors=cs)
         allk = list(chain.keys())
-        ps = allk[:5] + [a for a in allk if "sigma" in a] + [a for a in allk if "kappa" in a]
+        ps = allk[:5] + [a for a in allk if "sigma" in a and "x_1" not in a] + [a for a in allk if "kappa" in a]
 
         print("Plotting cosmology")
         c1.plotter.plot(filename=pfn + "_cosmo.png", truth=truth, parameters=parameters, figsize="column")
