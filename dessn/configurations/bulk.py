@@ -19,7 +19,10 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     # models = [ApproximateModelW(prior=True), ApproximateModelW(prior=True, statonly=True)]
-    models = [ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)]
+    models = [
+        ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
+        ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
+    ]
 
     ndes = 204
     nlowz = 137
