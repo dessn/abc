@@ -350,7 +350,7 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False):
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=1.0, apply_efficiency=True, prior=False):
         super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior)
 
     def get_cosmo_params(self):
@@ -358,7 +358,7 @@ class ApproximateModelOl(ApproximateModel):
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=0.0, apply_efficiency=True):
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True):
         super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior)
 
     def get_cosmo_params(self):
