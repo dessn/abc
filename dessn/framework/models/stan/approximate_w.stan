@@ -96,7 +96,8 @@ parameters {
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
     real<lower=0, upper=0.1>  kappa_c0 [n_surveys];
     real<lower=0, upper=0.1>  kappa_c1 [n_surveys];
-    real<lower=-1, upper=1>  rho_c [n_surveys];
+    real<lower=-0.1, upper=0.1>  kappa_c2 [n_surveys];
+    real<lower=-0.1, upper=0.1>  kappa_c3 [n_surveys];
 
 }
 
@@ -126,6 +127,7 @@ transformed parameters {
 
         // Unexplained dispersion
         vector[3] diag_extra [n_sne];
+        vector[3] diag_extra2 [n_sne];
 
         // Helper variables for Simpsons rule
         real Hinv [n_z];
@@ -228,6 +230,10 @@ transformed parameters {
             diag_extra[i][1] = 0;
             diag_extra[i][2] = 0;
             diag_extra[i][3] = sqrt(obs_mBx1c_chol[i][3][3]^2 + (kappa_c0[survey_map[i]] + kappa_c1[survey_map[i]] * redshifts[i])^2) - obs_mBx1c_chol[i][3][3];
+            diag_extra2[i][1] = 0;
+            diag_extra2[i][2] = 0;
+            diag_extra2[i][3] = kappa_c2[survey_map[i]] + kappa_c3[survey_map[i]] * redshifts[i];
+
 
             // redshift dependent effects
             mean_x1_sn[i] = dot_product(mean_x1[survey_map[i]], node_weights[i]);
@@ -245,7 +251,7 @@ transformed parameters {
             mass_correction[i] = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
             // Convert into apparent magnitude
-            model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
+            model_mBx1c[i] = obs_mBx1c[i] + diag_extra2[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
 
             // Add calibration uncertainty
             model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration * systematics_scale;
@@ -290,6 +296,8 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + cauchy_lpdf(kappa_c0[i] | 0, 0.03)
             + cauchy_lpdf(kappa_c1[i] | 0, 0.03)
+            + cauchy_lpdf(kappa_c2[i] | 0, 0.03)
+            + cauchy_lpdf(kappa_c3[i] | 0, 0.03)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = posteriorsum + sum(survey_posteriors)
