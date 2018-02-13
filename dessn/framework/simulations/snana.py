@@ -112,7 +112,7 @@ class SNANASimulation(Simulation):
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
         for i, (mb, x1, c, smb, sx1, sc, eu) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert)):
             if self.use_sim:
-                cov = np.diag(np.array([0.02, 0.1, 0.02]) ** 2)
+                cov = np.diag(np.array([0.04, 0.1, 0.04]) ** 2)
                 vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)
             else:
                 vector = np.array([mb, x1, c])
