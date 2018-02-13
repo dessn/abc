@@ -93,9 +93,9 @@ if __name__ == "__main__":
         c2.plotter.plot(filename=pfn + "_small.png", parameters=2, truth=truth, extents={"$w$": (-1.3, -0.7)}, figsize=2.0)
         c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
         c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
-        c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
         with open(pfn + "_summary.txt", "w") as f:
             f.write(c2.analysis.get_latex_table(transpose=True))
+        c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
