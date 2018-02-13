@@ -25,10 +25,11 @@ if __name__ == "__main__":
 
     ndes = 204
     nlowz = 137
+    use_sim = False
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", use_sim=True)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=True)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=True)],
+        [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", use_sim=use_sim), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", use_sim=use_sim)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim)],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SYM")],
             # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SYM")]
         ]

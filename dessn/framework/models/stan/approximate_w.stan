@@ -230,9 +230,9 @@ transformed parameters {
             diag_extra[i][1] = 0;
             diag_extra[i][2] = 0;
             diag_extra[i][3] = sqrt(obs_mBx1c_chol[i][3][3]^2 + (kappa_c0[survey_map[i]] + kappa_c1[survey_map[i]] * redshifts[i])^2) - obs_mBx1c_chol[i][3][3];
-            //diag_extra2[i][1] = 0;
-            //diag_extra2[i][2] = 0;
-            //diag_extra2[i][3] = kappa_c2[survey_map[i]];// + kappa_c3[survey_map[i]] * redshifts[i];
+            diag_extra2[i][1] = 0;
+            diag_extra2[i][2] = 0;
+            diag_extra2[i][3] = kappa_c2[survey_map[i]];// + kappa_c3[survey_map[i]] * redshifts[i];
 
 
             // redshift dependent effects
@@ -251,7 +251,7 @@ transformed parameters {
             mass_correction[i] = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
             // Convert into apparent magnitude
-            model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i]; // + diag_extra2[i]
+            model_mBx1c[i] = obs_mBx1c[i] + diag_extra2[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
 
             // Add calibration uncertainty
             model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration * systematics_scale;
@@ -296,8 +296,8 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + cauchy_lpdf(kappa_c0[i] | 0, 0.02)
             + cauchy_lpdf(kappa_c1[i] | 0, 0.02)
-            + cauchy_lpdf(kappa_c2[i] | 0, 0.002)
-            + cauchy_lpdf(kappa_c3[i] | 0, 0.002)
+            + cauchy_lpdf(kappa_c2[i] | 0, 0.01)
+            + cauchy_lpdf(kappa_c3[i] | 0, 0.01)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = posteriorsum + sum(survey_posteriors)
