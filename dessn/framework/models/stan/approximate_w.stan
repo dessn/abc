@@ -96,8 +96,6 @@ parameters {
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
     real<lower=0, upper=0.1>  kappa_c0 [n_surveys];
     real<lower=0, upper=0.1>  kappa_c1 [n_surveys];
-    real<lower=-0.1, upper=0.1>  kappa_c2 [n_surveys];
-    real<lower=-0.1, upper=0.1>  kappa_c3 [n_surveys];
 
 }
 
@@ -230,9 +228,6 @@ transformed parameters {
             diag_extra[i][1] = 0;
             diag_extra[i][2] = 0;
             diag_extra[i][3] = sqrt(obs_mBx1c_chol[i][3][3]^2 + (kappa_c0[survey_map[i]] + kappa_c1[survey_map[i]] * redshifts[i])^2) - obs_mBx1c_chol[i][3][3];
-            diag_extra2[i][1] = 0;
-            diag_extra2[i][2] = 0;
-            diag_extra2[i][3] = kappa_c3[survey_map[i]] * redshifts[i]; //kappa_c2[survey_map[i]];//
 
 
             // redshift dependent effects
@@ -296,8 +291,6 @@ transformed parameters {
             + normal_lpdf(deltas[i] | 0, 1)
             + cauchy_lpdf(kappa_c0[i] | 0, 0.02)
             + cauchy_lpdf(kappa_c1[i] | 0, 0.02)
-            + cauchy_lpdf(kappa_c2[i] | 0, 0.005)
-            + cauchy_lpdf(kappa_c3[i] | 0, 0.005)
             + lkj_corr_cholesky_lpdf(intrinsic_correlation[i] | 4);
     }
     posterior = posteriorsum + sum(survey_posteriors)
