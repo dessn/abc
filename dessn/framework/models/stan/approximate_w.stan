@@ -246,7 +246,7 @@ transformed parameters {
             mass_correction[i] = dscale * (1.9 * (1 - dratio) / redshift_pre_comp[i] + dratio);
 
             // Convert into apparent magnitude
-            model_mBx1c[i] = obs_mBx1c[i] + diag_extra2[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
+            model_mBx1c[i] = obs_mBx1c[i] + (obs_mBx1c_chol[i] + diag_matrix(diag_extra[i])) * deviations[i];
 
             // Add calibration uncertainty
             model_mBx1c[i] = model_mBx1c[i] + deta_dcalib[i] * calibration * systematics_scale;
