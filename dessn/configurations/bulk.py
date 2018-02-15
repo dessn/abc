@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 30
+    ncosmo = 60
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 name = "C11"
             else:
                 name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
-            name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
+            name = "%s %s %s" % (name, "Stat" if m.statonly else "Stat+Syst", "Biascor" if s[0].bias_cor else "Nocor")
             if m.statonly:
                 ls.append("--")
             else:

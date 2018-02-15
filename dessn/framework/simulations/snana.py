@@ -149,7 +149,7 @@ class SNANASimulation(Simulation):
                 cov = np.diag(np.array([0.04, 0.1, 0.04]) ** 2)
                 vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)
             else:
-                vector = np.array([mb, x1, c + sa])
+                vector = np.array([mb, x1, c - sa])
                 cov = supernovae[i, 9:9 + 9].reshape((3, 3))
             cov[0, 0] += eu**2
             calib = supernovae[i, 9 + 9:].reshape((3, -1))
