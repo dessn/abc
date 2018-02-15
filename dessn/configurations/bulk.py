@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 30
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
         c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
         ls = []
-        cs = ['b', 'g', 'r', 'b', 'g', 'r']
+        cs = ['b', 'g', 'r', 'a', 'g', 'r']
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             sim_name = s[0].simulation_name
             if "MAGSMEAR" in sim_name:
@@ -73,7 +73,7 @@ if __name__ == "__main__":
                 name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
             name = "%s %s %s" % (name, "Stat" if m.statonly else "Stat+Syst", "Biascor" if s[0].bias_cor else "Nocor")
             if m.statonly:
-                ls.append("--")
+                ls.append("-")
             else:
                 ls.append("-")
 
