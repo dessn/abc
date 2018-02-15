@@ -139,10 +139,13 @@ class SNANASimulation(Simulation):
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
 
         shift_amount = np.zeros(redshifts.shape)
+        shift_deltas = np.zeros(redshifts.shape)
         if self.bias_cor:
             cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
-            c11 = cor_means[cor_models.index("C11")]
-            shift_amount = interp1d(cor_z, c11, bounds_error=False, fill_value=(c11[0], c11[-1]))(redshifts)
+            shift0 = cor_means[0]
+            shift_amount = interp1d(cor_z, shift0, bounds_error=False, fill_value=(shift0[0], shift0[-1]))(redshifts)
+            delta = cor_means[1] - cor_means[0]
+            shift_deltas = interp1d(cor_z, delta, bounds_error=False, fill_value=(delta[0], delta[-1]))(redshifts)
 
         for i, (mb, x1, c, smb, sx1, sc, eu, sa) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert, shift_amount)):
             if self.use_sim:
@@ -170,6 +173,7 @@ class SNANASimulation(Simulation):
             "sim_apparents": s_ap,
             "sim_stretches": s_st,
             "sim_colours": s_co,
+            "shift_deltas": shift_deltas,
             "prob_ia": np.ones(n_sne) * 0.999999
         }
         return result

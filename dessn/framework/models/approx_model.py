@@ -25,7 +25,7 @@ class ApproximateModel(Model):
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
-                "sigma_MB", "sigma_x1", "sigma_c", "kappa_c0", "kappa_c1", "kappa_c2", "kappa_c3",
+                "sigma_MB", "sigma_x1", "sigma_c", "kappa_c0", "kappa_c1", "kappa_c2", "kappa_c3", "smear",
                 "rho_c", "alpha_c", "alpha_x1",
                 #"outlier_MB_delta", "outlier_dispersion"
                 "delta_alpha", "delta_beta",
@@ -49,6 +49,7 @@ class ApproximateModel(Model):
             ("kappa_c2", r"$\kappa_{c2}^{%d}$"),
             ("kappa_c3", r"$\kappa_{c3}^{%d}$"),
             ("rho_c", r"$\rho_{c}^{%d}$"),
+            ("smear", r"$s_c^{%d}$"),
             ("dscale", r"$\delta(0)$"),
             ("dratio", r"$\delta(\infty)/\delta(0)$"),
             ("delta_alpha", r"$\delta_\alpha$"),
@@ -78,6 +79,7 @@ class ApproximateModel(Model):
             "dscale": uniform(0, 0.2),
             "dratio": uniform(0, 1),
             "mean_MB": uniform(-19.5, -19.2),
+            "smear": uniform(0, 1),
             "alpha_c": uniform(0, 0.1, size=(num_surveys,)),
             "delta_c": uniform(0.8, 0.85, size=(num_surveys,)),
             "skew_c": uniform(0, 0.05, size=(num_surveys,)),
