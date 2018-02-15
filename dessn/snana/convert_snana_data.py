@@ -15,7 +15,7 @@ import hashlib
 import logging
 
 from scipy.stats import norm
-
+from scipy.stats import binned_statistic
 from dessn.snana.systematic_names import get_systematic_mapping
 
 
@@ -290,6 +290,30 @@ def convert(base_folder, load_dump=False, override=False, skip=11):
         digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump, skip=skip)
 
 
+def get_bias_cor(des=True):
+    file = os.path.abspath(inspect.stack()[0][1])
+    dir_name = os.path.dirname(file)
+    if des:
+        file = "%s/data_dump/DES3YR_DES_BHMEFF/DES3YR_DES_BHMEFF_AM%s/FITOPT000.FITRES.gz"
+    else:
+        file = "%s/data_dump/DES3YR_LOWZ_BHMEFF/DES3YR_LOWZ_BHMEFF_%s/FITOPT000.FITRES.gz"
+    models = ["C11", "G10"]
+    bine = 30
+    means = []
+    for model in models:
+        f = load_fitres(file % (dir_name, model), skiprows=11)
+        c_obs = f['c']
+        c_true = f['SIM_c']
+        z = f['zHD']
+        diff = c_obs - c_true
+        mean, bine, _ = binned_statistic(z, diff, bins=bine)
+        means.append(mean)
+        # std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x) / np.sqrt(len(x)), bins=bine)
+
+    middle = np.array(means)
+    binc = 0.5 * (bine[1:] + bine[:-1])
+    return binc, models, middle
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
     # convert("DES3YR_LOWZ_COMBINED_FITS")
@@ -300,10 +324,34 @@ if __name__ == "__main__":
     # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
-    convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
+    # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
+    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_VALIDATION", skip=6)
     # convert("DES3YR_DES_VALIDATION", skip=6)
+    #
+    # import matplotlib.pyplot as plt
+    # from scipy.stats import binned_statistic
+    #
+    # fig, ax = plt.subplots()
+    # models = ["C11", "G10"]
+    # cs = ["r", "g"]
+    # for i, (model, c) in enumerate(zip(models, cs)):
+    #     # f = load_fitres("data_dump/DES3YR_DES_BHMEFF/DES3YR_DES_BHMEFF_AM%s/FITOPT000.FITRES.gz" % model, skiprows=11)
+    #     f = load_fitres("data_dump/DES3YR_LOWZ_BHMEFF/DES3YR_LOWZ_BHMEFF_%s/FITOPT000.FITRES.gz" % model, skiprows=11)
+    #     c_obs = f['c']
+    #     c_true = f['SIM_c']
+    #     z = f['zHD']
+    #     diff = c_obs - c_true
+    #     mean, bine, _ = binned_statistic(z, diff, bins=30)
+    #     std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x)/np.sqrt(len(x)), bins=bine)
+    #     binc = 0.5 * (bine[1:] + bine[:-1])
+    #     ax.errorbar(binc+0.004*i, mean, yerr=std, fmt='o', c=c, label=model)
+    # ax.legend()
+    # plt.show()
+
+    get_bias_cor()
+    get_bias_cor(model="G10")
+    get_bias_cor(model="C11")
 
 
 

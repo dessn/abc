@@ -2,13 +2,17 @@ import numpy as np
 import os
 import inspect
 import pickle
+
+from scipy.interpolate import interp1d
+
 from dessn.framework.simulation import Simulation
 from dessn.general.pecvelcor import get_sigma_mu_pecvel
 from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
+from dessn.snana.convert_snana_data import get_bias_cor
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10", kappa=0.0):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10", kappa=0.0, bias_cor=True):
         super().__init__()
         self.simulation_name = sim_name
         self.type = type
@@ -26,6 +30,7 @@ class SNANASimulation(Simulation):
         self.shift = shift
         self.get_systematic_names()
         self.num_calib = len(self.systematic_labels)
+        self.bias_cor = bias_cor
         if self.num_calib == 0:
             self.num_calib = 1
 
@@ -110,12 +115,19 @@ class SNANASimulation(Simulation):
         colours = supernovae[:, 8]
         extra_uncert = get_sigma_mu_pecvel(redshifts)
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
-        for i, (mb, x1, c, smb, sx1, sc, eu) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert)):
+
+        shift_amount = np.zeros(redshifts.shape)
+        if self.bias_cor:
+            cor_z, cor_models, cor_means = get_bias_cor("_DES" in self.simulation_name)
+            c11 = cor_means[cor_models.index("C11")]
+            shift_amount = interp1d(cor_z, c11, bounds_error=False, fill_value=(c11[0], c11[-1]))(redshifts)
+
+        for i, (mb, x1, c, smb, sx1, sc, eu, sa) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert, shift_amount)):
             if self.use_sim:
                 cov = np.diag(np.array([0.04, 0.1, 0.04]) ** 2)
                 vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)
             else:
-                vector = np.array([mb, x1, c])
+                vector = np.array([mb, x1, c + sa])
                 cov = supernovae[i, 9:9 + 9].reshape((3, 3))
             cov[0, 0] += eu**2
             calib = supernovae[i, 9 + 9:].reshape((3, -1))
