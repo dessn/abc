@@ -36,6 +36,7 @@ if __name__ == "__main__":
         ]
     fitter = Fitter(dir_name)
 
+    # data = models[0].get_data(simulations[0], 0, plot=True)  # For testing
     # data = models[0].get_data(simulations[1], 0, plot=True)  # For testing
     # exit()
 

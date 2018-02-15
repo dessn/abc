@@ -290,30 +290,6 @@ def convert(base_folder, load_dump=False, override=False, skip=11):
         digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump, skip=skip)
 
 
-def get_bias_cor(des=True):
-    file = os.path.abspath(inspect.stack()[0][1])
-    dir_name = os.path.dirname(file)
-    if des:
-        file = "%s/data_dump/DES3YR_DES_BHMEFF/DES3YR_DES_BHMEFF_AM%s/FITOPT000.FITRES.gz"
-    else:
-        file = "%s/data_dump/DES3YR_LOWZ_BHMEFF/DES3YR_LOWZ_BHMEFF_%s/FITOPT000.FITRES.gz"
-    models = ["C11", "G10"]
-    bine = 30
-    means = []
-    for model in models:
-        f = load_fitres(file % (dir_name, model), skiprows=11)
-        c_obs = f['c']
-        c_true = f['SIM_c']
-        z = f['zHD']
-        diff = c_obs - c_true
-        mean, bine, _ = binned_statistic(z, diff, bins=bine)
-        means.append(mean)
-        # std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x) / np.sqrt(len(x)), bins=bine)
-
-    middle = np.array(means)
-    binc = 0.5 * (bine[1:] + bine[:-1])
-    return binc, models, middle
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
     # convert("DES3YR_LOWZ_COMBINED_FITS")

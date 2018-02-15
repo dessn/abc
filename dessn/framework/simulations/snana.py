@@ -4,11 +4,11 @@ import inspect
 import pickle
 
 from scipy.interpolate import interp1d
+from scipy.stats import binned_statistic
 
 from dessn.framework.simulation import Simulation
 from dessn.general.pecvelcor import get_sigma_mu_pecvel
 from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
-from dessn.snana.convert_snana_data import get_bias_cor
 
 
 class SNANASimulation(Simulation):
@@ -94,6 +94,28 @@ class SNANASimulation(Simulation):
         }
         return res
 
+    def get_bias_cor(self, des=True):
+        if des:
+            file = self.data_folder + "../DES3YR_DES_BHMEFF_AM%s/passed_0.npy"
+        else:
+            file = self.data_folder + "../DES3YR_LOWZ_BHMEFF_%s/passed_0.npy"
+        models = ["C11", "G10"]
+        bine = 30
+        means = []
+        for model in models:
+            data = np.load(file % model)
+            z = data[:, 1]
+            c_obs = data[:, 8]
+            c_true = data[:, 5]
+            diff = c_obs - c_true
+            mean, bine, _ = binned_statistic(z, diff, bins=bine)
+            means.append(mean)
+            # std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x) / np.sqrt(len(x)), bins=bine)
+
+        middle = np.array(means)
+        binc = 0.5 * (bine[1:] + bine[:-1])
+        return binc, models, middle
+
     def get_passed_supernova(self, n_sne, cosmology_index=0):
         filename = self.data_folder + "passed_%d.npy" % cosmology_index
         assert os.path.exists(filename), "Cannot find file %s, do you have this realisations?" % filename
@@ -118,7 +140,7 @@ class SNANASimulation(Simulation):
 
         shift_amount = np.zeros(redshifts.shape)
         if self.bias_cor:
-            cor_z, cor_models, cor_means = get_bias_cor("_DES" in self.simulation_name)
+            cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
             c11 = cor_means[cor_models.index("C11")]
             shift_amount = interp1d(cor_z, c11, bounds_error=False, fill_value=(c11[0], c11[-1]))(redshifts)
 
