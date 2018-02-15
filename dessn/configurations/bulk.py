@@ -19,7 +19,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        # ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
+        ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
         ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
     ]
 
@@ -29,12 +29,10 @@ if __name__ == "__main__":
     simulations = [
         # [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", use_sim=use_sim), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", use_sim=use_sim)],
         [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim, bias_cor=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim, bias_cor=True)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False)],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False)],
         [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim, bias_cor=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim, bias_cor=True)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False)],
-            # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SYM")],
-            # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SYM"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SYM")]
-        ]
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False)],
+    ]
     fitter = Fitter(dir_name)
 
     # data = models[0].get_data(simulations[0], 0, plot=True)  # For testing
