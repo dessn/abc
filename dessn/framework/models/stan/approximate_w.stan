@@ -95,8 +95,8 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
-    real<lower=0, upper=0.1>  kappa_c0 [n_surveys];
-    real<lower=0, upper=0.1>  kappa_c1 [n_surveys];
+    real<lower=0, upper=0.05>  kappa_c0 [n_surveys];
+    real<lower=0, upper=0.05>  kappa_c1 [n_surveys];
     real<lower=0, upper=1.0> smear;
 
 }
@@ -256,7 +256,7 @@ transformed parameters {
             // Convert population into absolute magnitude
             model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha * model_mBx1c[i][2] - beta * model_mBx1c[i][3] + mass_correction[i] * masses[i];
             model_MBx1c[i][2] = model_mBx1c[i][2];
-            model_MBx1c[i][3] = model_mBx1c[i][3] - smear * shift_deltas[i];
+            model_MBx1c[i][3] = model_mBx1c[i][3] - kappa_c0[survey_map[i]]/0.03 * shift_deltas[i];
 
             // Mean of population
             cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction[i] * masses[i];
