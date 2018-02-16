@@ -95,6 +95,7 @@ class SNANASimulation(Simulation):
         return res
 
     def get_bias_cor(self, des=True):
+        print("Getting biascor for des=%s" % des)
         if des:
             file = self.data_folder + "../DES3YR_DES_BHMEFF_AM%s/passed_0.npy"
         else:
@@ -110,11 +111,11 @@ class SNANASimulation(Simulation):
             diff = c_obs - c_true
             mean, bine, _ = binned_statistic(z, diff, bins=bine)
             means.append(mean)
-            # std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x) / np.sqrt(len(x)), bins=bine)
+            std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x) / np.sqrt(len(x)), bins=bine)
 
         middle = np.array(means)
         binc = 0.5 * (bine[1:] + bine[:-1])
-        return binc, models, middle
+        return binc, models[0], middle[0]
 
     def get_passed_supernova(self, n_sne, cosmology_index=0):
         filename = self.data_folder + "passed_%d.npy" % cosmology_index
@@ -142,10 +143,11 @@ class SNANASimulation(Simulation):
         shift_deltas = np.zeros(redshifts.shape)
         if self.bias_cor:
             cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
-            shift0 = cor_means[0]
-            shift_amount = interp1d(cor_z, shift0, bounds_error=False, fill_value=(shift0[0], shift0[-1]))(redshifts)
-            delta = cor_means[1] - cor_means[0]
-            shift_deltas = interp1d(cor_z, delta, bounds_error=False, fill_value=(delta[0], delta[-1]))(redshifts)
+            # shift0 = cor_means[0]
+            # shift_amount = interp1d(cor_z, shift0, bounds_error=False, fill_value=(shift0[0], shift0[-1]))(redshifts)
+            # delta = cor_means[1] - cor_means[0]
+            # shift_deltas = interp1d(cor_z, delta, bounds_error=False, fill_value=(delta[0], delta[-1]))(redshifts)
+            shift_deltas = interp1d(cor_z, cor_means, bounds_error=False, fill_value=(cor_means[0], cor_means[-1]))(redshifts)
 
         for i, (mb, x1, c, smb, sx1, sc, eu, sa) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert, shift_amount)):
             if self.use_sim:

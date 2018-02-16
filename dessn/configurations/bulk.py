@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
             name = "%s %s %s" % (name, "Stat" if m.statonly else "Stat+Syst", "Biascor" if s[0].bias_cor else "Nocor")
             if m.statonly:
-                ls.append("-")
+                ls.append("--")
             else:
                 ls.append("-")
 
