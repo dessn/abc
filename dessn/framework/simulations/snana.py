@@ -12,7 +12,7 @@ from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10", kappa=0.0, bias_cor=True):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10", kappa=0.0, bias_cor=True, zlim=None):
         super().__init__()
         self.simulation_name = sim_name
         self.type = type
@@ -31,16 +31,17 @@ class SNANASimulation(Simulation):
         self.get_systematic_names()
         self.num_calib = len(self.systematic_labels)
         self.bias_cor = bias_cor
+        self.zlim = zlim
         if self.num_calib == 0:
             self.num_calib = 1
 
     def get_correction(self, cov_scale=1.0):
         if "_des" in self.simulation_name.lower():
             self.logger.info("Getting DES correction for sim %s" % self.simulation_name)
-            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa)
+            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa, zlim=self.zlim)
         elif "_lowz" in self.simulation_name.lower():
             self.logger.info("Getting LOWZ correction for sim %s" % self.simulation_name)
-            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa)
+            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa, zlim=self.zlim)
         else:
             raise ValueError("Cannot find des or lowz in your sim name, unsure which selection function to use!")
 
@@ -122,13 +123,21 @@ class SNANASimulation(Simulation):
         assert os.path.exists(filename), "Cannot find file %s, do you have this realisations?" % filename
         supernovae = np.load(filename)
         self.logger.info("%s SN in %s" % (supernovae.shape[0], filename))
+
+        redshifts = supernovae[:, 1]
+        if self.zlim is not None:
+            self.logger.info("Enforcing zlim of %0.2f" % self.zlim)
+            mask = redshifts < self.zlim
+            self.logger.info("%d supernova out of %d passed the redshift cut" % (mask.sum(), supernovae.shape[0]))
+            supernovae = supernovae[mask, :]
+            redshifts = supernovae[:, 1]
+
         if n_sne != -1:
             supernovae = supernovae[:n_sne, :]
         else:
             n_sne = supernovae.shape[0]
             self.logger.info("All SN requested: found %d SN" % n_sne)
         cids = supernovae[:, 0]
-        redshifts = supernovae[:, 1]
         masses = supernovae[:, 2]
         s_ap = supernovae[:, 3]
         s_st = supernovae[:, 4]

@@ -257,7 +257,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
 
         supernovae = load_dump_file(sim_dir)
         all_mags = supernovae["S2mb"].astype(np.float64) + supernovae["MAGSMEAR_COH"].astype(np.float64)
-        all_cs = supernovae["S2c"].astype(np.float64)
+        all_zs = supernovae["Z"].astype(np.float64)
         all_cids = supernovae["CID"].astype(np.int32)
 
         cids_dict = dict([(c, True) for c in passed_cids])
@@ -265,7 +265,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         supernovae_passed = np.array([c in cids_dict for c in all_cids])
         mask_nan = ~np.isnan(all_mags)
 
-        all_data = np.vstack((all_mags[mask_nan] + 100 * supernovae_passed[mask_nan], all_cs[mask_nan])).T
+        all_data = np.vstack((all_mags[mask_nan] + 100 * supernovae_passed[mask_nan], all_zs[mask_nan])).T
         print(all_data.shape)
         if all_data.shape[0] > 7000000:
             all_data = all_data[:7000000, :]
@@ -300,34 +300,10 @@ if __name__ == "__main__":
     # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
-    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
+    convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
+    convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_VALIDATION", skip=6)
     # convert("DES3YR_DES_VALIDATION", skip=6)
-    #
-    # import matplotlib.pyplot as plt
-    # from scipy.stats import binned_statistic
-    #
-    # fig, ax = plt.subplots()
-    # models = ["C11", "G10"]
-    # cs = ["r", "g"]
-    # for i, (model, c) in enumerate(zip(models, cs)):
-    #     # f = load_fitres("data_dump/DES3YR_DES_BHMEFF/DES3YR_DES_BHMEFF_AM%s/FITOPT000.FITRES.gz" % model, skiprows=11)
-    #     f = load_fitres("data_dump/DES3YR_LOWZ_BHMEFF/DES3YR_LOWZ_BHMEFF_%s/FITOPT000.FITRES.gz" % model, skiprows=11)
-    #     c_obs = f['c']
-    #     c_true = f['SIM_c']
-    #     z = f['zHD']
-    #     diff = c_obs - c_true
-    #     mean, bine, _ = binned_statistic(z, diff, bins=30)
-    #     std, _, _ = binned_statistic(z, diff, statistic=lambda x: np.std(x)/np.sqrt(len(x)), bins=bine)
-    #     binc = 0.5 * (bine[1:] + bine[:-1])
-    #     ax.errorbar(binc+0.004*i, mean, yerr=std, fmt='o', c=c, label=model)
-    # ax.legend()
-    # plt.show()
-
-    get_bias_cor()
-    get_bias_cor(model="G10")
-    get_bias_cor(model="C11")
 
 
 

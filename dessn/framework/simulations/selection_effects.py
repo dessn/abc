@@ -7,8 +7,8 @@ import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0):
-    sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, kappa=kappa)
+def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
+    sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, kappa=kappa, zlim=zlim)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
     mean += shift
@@ -17,8 +17,8 @@ def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0):
     return sn, mean, cov, kappa
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0):
-    sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, kappa=kappa)
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
+    sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, kappa=kappa, zlim=zlim)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
     mean += shift
@@ -27,7 +27,7 @@ def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0):
     return sn, mean, cov, kappa
 
 
-def get_data(base):
+def get_data(base, zlim=None):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     folder = dir_name + "/" + base
@@ -36,19 +36,21 @@ def get_data(base):
     supernovae = np.vstack(tuple(supernovae_data))
     passed = supernovae[:, 0] > 100
     mags = supernovae[:, 0] - 100 * passed.astype(np.int)
-    colors = supernovae[:, 1]
-    return mags, passed, colors
+    zs = supernovae[:, 1]
+    if zlim is not None:
+        mask = zs < zlim
+        mags = mags[mask]
+        passed = passed[mask]
+    return mags, passed
 
 
-def get_ratio(base_folder, cut_mag=19.75, delta=0):
-    mB_all, passed, colors = get_data(base_folder)
-    # print("Got data to compute selection function")
+def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None):
+    mB_all, passed = get_data(base_folder, zlim=zlim)
     mB_passed = mB_all[passed]
-    color_passed = colors[passed]
 
     # Bin data and get ratio
-    hist_all, bins = np.histogram(mB_all + delta * colors, bins=100)
-    hist_passed, _ = np.histogram(mB_passed + delta * color_passed, bins=bins)
+    hist_all, bins = np.histogram(mB_all, bins=100)
+    hist_passed, _ = np.histogram(mB_passed, bins=bins)
     hist_passed_err = np.sqrt(hist_passed)
 
     binc = 0.5 * (bins[:-1] + bins[1:])
@@ -64,8 +66,8 @@ def get_ratio(base_folder, cut_mag=19.75, delta=0):
     return binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error
 
 
-def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0):
-    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=kappa)
+def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0, zlim=None):
+    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=kappa, zlim=zlim)
 
     def cdf(b, mean, sigma, alpha, n):
         model = (1 - norm.cdf(b, loc=mean, scale=sigma)) * n + 10 * alpha
@@ -122,8 +124,8 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0):
     return False, vals, cov, r2
 
 
-def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, kappa=0):
-    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, delta=kappa, cut_mag=cut_mag)
+def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, kappa=0, zlim=None):
+    binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, delta=kappa, cut_mag=cut_mag, zlim=zlim)
 
     def sknorm(b, mean, sigma, alpha, n):
 

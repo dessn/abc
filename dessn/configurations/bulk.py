@@ -19,19 +19,22 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
+        # ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
         ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
     ]
 
     ndes = 204
     nlowz = 137
-    use_sim = False
+    bcor = False
     simulations = [
         # [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", use_sim=use_sim), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", use_sim=use_sim)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim, bias_cor=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim, bias_cor=True)],
         # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim, bias_cor=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim, bias_cor=True)],
         # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False)],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", bias_cor=bcor), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", bias_cor=bcor)],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", bias_cor=bcor), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", bias_cor=bcor)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=bcor, zlim=0.9), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=bcor, zlim=0.9)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=bcor, zlim=0.8), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=bcor, zlim=0.8)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=bcor, zlim=0.7), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=bcor, zlim=0.7)],
     ]
     fitter = Fitter(dir_name)
 

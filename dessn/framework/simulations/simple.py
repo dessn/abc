@@ -173,6 +173,7 @@ class SimpleSimulation(Simulation):
             "obs_mBx1c_cov": np.array(obs_mBx1c_cov[:cut_index]),
             "deta_dcalib": np.array(deta_dcalib[:cut_index]),
             "redshifts": np.array(redshifts_all[:cut_index]),
+            "shift_deltas": np.zeros(n_sne),
             "masses": np.array(p_high_masses_all[:cut_index]),
             "existing_prob": np.array(probs[:cut_index]),
             "sim_apparents": np.array(mbs_all[:cut_index]),
