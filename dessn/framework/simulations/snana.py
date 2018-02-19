@@ -124,13 +124,12 @@ class SNANASimulation(Simulation):
         supernovae = np.load(filename)
         self.logger.info("%s SN in %s" % (supernovae.shape[0], filename))
 
-        redshifts = supernovae[:, 1]
         if self.zlim is not None:
+            redshifts = supernovae[:, 1]
             self.logger.info("Enforcing zlim of %0.2f" % self.zlim)
             mask = redshifts < self.zlim
             self.logger.info("%d supernova out of %d passed the redshift cut" % (mask.sum(), supernovae.shape[0]))
             supernovae = supernovae[mask, :]
-            redshifts = supernovae[:, 1]
 
         if n_sne != -1:
             supernovae = supernovae[:n_sne, :]
@@ -138,6 +137,7 @@ class SNANASimulation(Simulation):
             n_sne = supernovae.shape[0]
             self.logger.info("All SN requested: found %d SN" % n_sne)
         cids = supernovae[:, 0]
+        redshifts = supernovae[:, 1]
         masses = supernovae[:, 2]
         s_ap = supernovae[:, 3]
         s_st = supernovae[:, 4]
