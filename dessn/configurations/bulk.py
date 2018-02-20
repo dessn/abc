@@ -19,22 +19,15 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        # ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
+        ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
         ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
     ]
 
     ndes = 204
     nlowz = 137
-    bcor = False
     simulations = [
-        # [SNANASimulation(ndes, "DES3YR_DES_SAMTEST_MAGSMEAR", use_sim=use_sim), SNANASimulation(nlowz, "DES3YR_LOWZ_SAMTEST_MAGSMEAR", use_sim=use_sim)],
-        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=use_sim, bias_cor=False)],
-        # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=use_sim, bias_cor=False)],
-        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", bias_cor=bcor), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", bias_cor=bcor)],
-        # [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", bias_cor=bcor), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", bias_cor=bcor)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=bcor, zlim=0.9), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=bcor, zlim=0.9)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=bcor, zlim=0.8), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=bcor, zlim=0.8)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=bcor, zlim=0.7), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=bcor, zlim=0.7)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
     ]
     fitter = Fitter(dir_name)
 
@@ -61,7 +54,9 @@ if __name__ == "__main__":
 
         c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
         ls = []
-        cs = ['b', 'g', 'r', 'a', 'g', 'r']
+        shades = []
+        cs = ['b', 'g', 'p', 'a']
+        cs = ['b', 'g', 'lb', 'lg']
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             sim_name = s[0].simulation_name
             if "MAGSMEAR" in sim_name:
@@ -72,12 +67,13 @@ if __name__ == "__main__":
                 name = "C11"
             else:
                 name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
-            name = "%s %s %s" % (name, "Stat" if m.statonly else "Stat+Syst", "Biascor" if s[0].bias_cor else "Nocor")
+            name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
             if m.statonly:
                 ls.append("--")
+                shades.append(0.0)
             else:
                 ls.append("-")
-
+                shades.append(0.2)
             if isinstance(m, ApproximateModelW):
                 print("C2")
                 c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
@@ -93,15 +89,16 @@ if __name__ == "__main__":
         #         print("C1")
         #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
         #
-        c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, flip=False, shade=True,
-                     linestyles=ls, colors=cs)
-        c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
-        c2.plotter.plot(filename=pfn + "_small.png", parameters=2, truth=truth, extents={"$w$": (-1.3, -0.7)}, figsize=2.0)
-        c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
-        c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
+        c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True,
+                     linestyles=ls, colors=cs, shade_alpha=shades)
+        c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
+        c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
+        c2.plotter.plot(filename=[pfn + "_small2.png", pfn + "_small2.pdf"], parameters=5, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize=1.0)
+        # c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
+        # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
         with open(pfn + "_summary.txt", "w") as f:
             f.write(c2.analysis.get_latex_table(transpose=True))
-        c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
+        # c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
 
         # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
