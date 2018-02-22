@@ -26,7 +26,7 @@ if __name__ == "__main__":
         [SimpleSimulation(1000, alpha_c=2), SimpleSimulation(1000, alpha_c=2, lowz=True)]
     ]
 
-    # print(model.get_data(simulation, 0))
+    # print(models[0].get_data(simulations[0], 0))
     # exit()
 
     fitter = Fitter(dir_name)
