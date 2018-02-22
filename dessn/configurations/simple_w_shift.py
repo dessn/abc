@@ -18,8 +18,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True),
-        ApproximateModelW(prior=True, frac_shift=1, frac_shift2=1, fixed_sigma_c=0.1)
+        ApproximateModelW(prior=True, statonly=True, frac_shift=0),
+        ApproximateModelW(prior=True, statonly=True, frac_shift=1)
     ]
     simulations = [
         [SimpleSimulation(1000, alpha_c=0), SimpleSimulation(1000, alpha_c=0, lowz=True)],
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 200
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_num_walkers(1)
     fitter.set_max_steps(2000)
