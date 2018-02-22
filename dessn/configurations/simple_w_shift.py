@@ -68,19 +68,30 @@ if __name__ == "__main__":
             c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
         print(params)
         red_params = [p for p in params if "langle x_1" not in p and "Delta" not in p and "delta" not in p and "Omega" not in p]
+
+        red_params = ['$w$', '$\\sigma_{c}^{0}$', '$\\sigma_{c}^{1}$', '$\\alpha_c^{0}$',
+                      '$\\alpha_c^{1}$', '$\\langle c^{0} \\rangle$', '$\\langle c^{1} \\rangle$',
+                      '$\\langle c^{2} \\rangle$', '$\\langle c^{3} \\rangle$', '$\\langle c^{4} \\rangle$',
+                      '$\\langle c^{5} \\rangle$', '$\\langle c^{6} \\rangle$', '$\\langle c^{7} \\rangle$']
+        red_params2 = ['$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\sigma_{\\rm m_B}^{0}$',
+                       '$\\sigma_{\\rm m_B}^{1}$', '$\\sigma_{x_1}^{0}$', '$\\sigma_{x_1}^{1}$',
+                       '$\\kappa_{c0}^{0}$', '$\\kappa_{c0}^{1}$', '$\\kappa_{c1}^{0}$',
+                       '$\\kappa_{c1}^{1}$', '$s_c^{0}$']
         c1.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, linestyles=ls,
                      colors=cs, max_ticks=4, linewidths=1.1)
 
         c1.plotter.plot(filename=pfn + "_small.png", truth=truth, parameters=2)
 
         print("Plotting distributions")
-        fig = c1.plotter.plot_distributions(truth=truth, col_wrap=5, parameters=red_params)
-        ax = fig.get_axes()
-        ax[10].set_ylim(0, 10)
-        ax[11].set_ylim(0, 10)
-        filenames = [pfn + "_dist.png", pfn + "_dist.pdf"]
-        for f in filenames:
-            c1.plotter._save_fig(fig, f, 300)
+
+        for i, p in enumerate([red_params, red_params + red_params2]):
+            fig = c1.plotter.plot_distributions(truth=truth, col_wrap=5, parameters=p)
+            ax = fig.get_axes()
+            ax[3].set_ylim(0, 5)
+            ax[4].set_ylim(0, 5)
+            filenames = [pfn + "_dist_%d.png" % i, pfn + "_dist_%d.pdf" % i]
+            for f in filenames:
+                c1.plotter._save_fig(fig, f, 300)
 
         print("Saving Parameter values")
         with open(pfn + "_all_params.txt", 'w') as f:
