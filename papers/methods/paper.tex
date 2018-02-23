@@ -499,39 +499,14 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 \end{table}
 
 
-
-
-
-%\section{DES Forecasts}
-%\label{sec:forecasts}
-%
-%To forecast the results for the 3 year DES spectroscopic supernova sample, we generate 100 realisations of datasets, each comprising 300 low redshift supernovae and 250 DES-like supernovae. We fit these through the three cosmological models - Flat $\Lambda$CDM, $\Lambda$CDM and $w$CDM, however focus mostly on the $w$CDM model as it is the primary scientific concern of the Dark Energy Survey. We run all three cosmological models with systematics enabled and disabled to explicitly show the uncertainty included from systematic contribution.
-%
-%{\red How to include flat lambdacdm - the plot is boring, just quote the results, or just quote uncertainty, should I round the uncertainty to make it symmetric? Cant do that for wCDM or LambdaCDM because theyre definitely not gaussian}
-%
-%{\red Talk about how these arent even competitive with JLA and we really need to combine data? Talk about how the photometric supernova dataset should be way better? Talk about statistics limited.}
-%
-%\begin{figure}
-%	\begin{center}
-%		\includegraphics[width=\columnwidth]{combined_ApproximateModelW.pdf}
-%	\end{center}
-%	\caption{w.}
-%	\label{fig:combined_w}
-%\end{figure}
-%\begin{figure}
-%	\begin{center}
-%		\includegraphics[width=\columnwidth]{combined_ApproximateModelOl.pdf}
-%	\end{center}
-%	\caption{ole.}
-%	\label{fig:combined_ol}
-%\end{figure}
-
-
 \section{Conclusions}
 
-Conclude.
+Points to make:
 
-
+1. Created more efficient BHM model with treatment of selection effects, populations, unexplained dispersion, systematics.
+2. Main issue is still scatter model. Need to characterise this theoretically because adding full variance for them into the model results in weak cosmology.
+3. Bias in observed summary statistics is difficult to model analytically, and future work should incorporate bias corrections calculated from simulations. However, even numerically calculated bias corrections run into issues in that the type Ia dispersion is not well characterised.
+4. Model will be applied shortly to the DES 3yr spectroscopic sample.
 
 \section*{Acknowledgements}
 

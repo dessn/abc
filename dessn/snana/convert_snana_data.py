@@ -185,9 +185,14 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         x1e = row["x1ERR"]
         ce = row["cERR"]
 
-        sim_mb = row["SIM_mB"]
-        sim_x1 = row["SIM_x1"]
-        sim_c = row["SIM_c"]
+        if "SIM_mB" not in row:
+            sim_mb = 0
+            sim_x1 = 0
+            sim_c = 0
+        else:
+            sim_mb = row["SIM_mB"]
+            sim_x1 = row["SIM_x1"]
+            sim_c = row["SIM_c"]
 
         cov_x1_c = row["COV_x1_c"]
         cov_x0_c = row["COV_c_x0"]
@@ -292,16 +297,16 @@ def convert(base_folder, load_dump=False, override=False, skip=11):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
-    # convert("DES3YR_LOWZ_COMBINED_FITS")
-    # convert("DES3YR_DES_COMBINED_FITS")
+    convert("DES3YR_LOWZ_COMBINED_TEXT")
+    convert("DES3YR_DES_COMBINED_TEXT")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
     # convert("DES3YR_DES_BULK", skip=6)
     # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
-    convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
+    # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
+    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11)
     # convert("DES3YR_LOWZ_VALIDATION", skip=6)
     # convert("DES3YR_DES_VALIDATION", skip=6)
 

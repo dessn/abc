@@ -93,7 +93,7 @@ if __name__ == "__main__":
                      linestyles=ls, colors=cs, shade_alpha=shades)
         c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
-        c2.plotter.plot(filename=[pfn + "_small2.png", pfn + "_small2.pdf"], parameters=5, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize=1.0)
+        c2.plotter.plot(filename=[pfn + "_small2.png", pfn + "_small2.pdf"], parameters=4, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize=1.0)
         # c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
         # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
         with open(pfn + "_summary.txt", "w") as f:
