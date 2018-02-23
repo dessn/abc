@@ -32,7 +32,7 @@
 % Please keep new commands to a minimum, and use \newcommand not \def to avoid
 % overwriting existing commands. Example:
 %\newcommand{\pcm}{\,cm$^{-2}$}	% per cm-squared
-\newcommand{\name}{SN-BHM}
+\newcommand{\name}{Steve-o}
 \newcommand{\myemail}{samuelreay@gmail.com}
 \newcommand\abs[1]{\left|#1\right|}
 \newcommand {\etal} {\emph{~et~al.} }
@@ -53,6 +53,7 @@
 \newcommand{\rubin}{\citetalias{Rubin2015}}
 \newcommand{\sk}{\citetalias{Scolnic2016}}
 \newcommand{\angstrom}{\mbox{\normalfont\AA}}
+
 
 \graphicspath{ {./figures/} }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,12 +101,7 @@
 
 % Abstract of the paper
 \begin{abstract}
-Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
-Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
-Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
-Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
-Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
-Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract Abstract
+We present a hierarchical Bayesian model for use in supernova cosmology which takes into account full analysis systematics, Malmquist bias, underlying populations and standardisation coefficients. Our model is optimised for efficient fitting and has been validated on a combined dataset of more than $250\,000$ supernovae. Simplified statistical simulations for ideal supernovae cosmology show no bias, and sophisticated SNANA simulations quantify the bias for Flat $w$CDM with a matter prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$ allow rigorous determination of model bias in $w$ when provided with information on matter density (such as might be found from CMB constraints). Bias is found to range from $-0.15\sigma$ to $+0.27\sigma$ across intrinsic dispersion models for datasets of comparable strength to the Dark Energy Survey three-year analysis. 
 \end{abstract}
 
 % Select between one and six entries from the list of approved keywords.
@@ -133,7 +129,7 @@ In attempts to tease out the nature of dark energy, currently running and planne
 As such, staggering effort is being put into developing more sophisticated supernovae analyses. \citet{Scolnic2016} and \citet{Kessler2017} explore sophisticated simulation corrections to traditional analyses. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with only the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian Models abound \citep{Mandel2009, March2011, March2014, Rubin2015, Shariff2016, Roberts2017}, however often face difficulties finding sufficient analytic approximations for complicated effects such as Malmquist bias.
 
 
-In this paper, we lay out a new hierarchical model that advances the past work of \citet{Rubin2015} to include more robust treatment of systematics and selection effects whilst improving computational performance. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology. Model verification on simulated datasets is given in Section \ref{sec:verification}. Forecasts for the impending DES three year spectroscopic supernova survey are contained in Section \ref{sec:forecasts}. {\red Section \ref{sec:sys} investigates the effect of various systematics on our model, and Section \ref{sec:details} provides details on potential areas of improvement and unsuccessful methodologies. }
+In this paper, we lay out a new hierarchical model that advances the past work of \citet{Rubin2015} to include more robust treatment of systematics and selection effects whilst improving computational performance. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology. Model verification on simulated datasets is given in Section \ref{sec:verification}, along with details on potential areas of improvement.
 
 
 
@@ -634,7 +630,7 @@ Not many fitting methodologies and algorithms can handle the thousands of fit pa
 
 The simplest and most commonly found optimisation we employed was to precompute as much as possible to reduce the complexity of the mathematical graph our model is translated into to compute the surface derivatives. For example, when computing the distance modulus, redshift is encountered to various powers. Instead of computing those powers in Stan, we simply pass in several arrays of redshift values already raised to the correct power. Small changes like this however only give small results.
 
-The primary numerical improvement we made on existing frameworks was to remove costly probability evaluations of multivariate normals. To increase efficiency, the optimum way to sample a multivariate normal is to reparameterise it such that instead of sampling $\mathcal{N}(\vec{x}|\vec{\mu}, \Sigma)$, you sample $\mathcal{N}(\vec{\delta}|0,1)$ where $\vec{x} = \vec{\mu} + L \vec{\delta}$ and $L$ is the cholesky decomposition of $\Sigma$. In this way, we can efficiently sample the unit normal probability distribution instead of sampling a multivariate normal probability distribution. Switching to this parametrisation resulted in a computational increase of an order of magnitude, taking fits for a sample of approximately 500 supernovae from roughly four hours down to twenty minutes. 
+The primary numerical improvement we made on existing frameworks was to remove costly probability evaluations of multivariate normals. To increase efficiency, the optimum way to sample a multivariate normal is to reparameterise it such that instead of sampling $\mathcal{N}(\vec{x}|\vec{\mu}, \Sigma)$, you sample $\mathcal{N}(\vec{\delta}|0,1)$ where $\vec{x} = \vec{\mu} + L \vec{\delta}$ and $L$ is the cholesky decomposition of $\Sigma$. In this way, we can efficiently sample the unit normal probability distribution instead of sampling a multivariate normal probability distribution. Switching to this parametrisation resulted in a computational increase of an order of magnitude, taking fits for a sample of approximately 500 supernovae from roughly four hours down to thirty minutes. 
 
 This parametrisation does come with one significant downside - inflexibility. For each step the algorithm takes, we do not recompute the cholesky decomposition of the covariance of the summary statistics - that happens once at the beginning of the model setup. If we had kept the full covariance matrix parametrisation we could modify the matrix easily - for example when incorporating intrinsic dispersion we could simple add on a secondary matrix to create an updated covariance. Using cholesky decompositions, ${\rm cholesky}(\Sigma_1 + \Sigma_2) \neq L_1 + L_2$, and so we would need to recompute the decomposition for each step, which discards most of the computational benefit just gained.
 
