@@ -98,6 +98,6 @@ if __name__ == "__main__":
             f.write(c1.analysis.get_latex_table(transpose=True))
 
         # print("Plotting big triangle. This might take a while")
-        # c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=7)
+        c1.plotter.plot(filename=pfn + "_big.png", truth=truth, parameters=20)
         # c1.plotter.plot_walks(filename=pfn + "_walk.png", truth=truth, parameters=3)
         # c2.plotter.plot_summary(filename=pfn + "_summary_big.png", truth=truth)

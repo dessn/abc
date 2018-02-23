@@ -208,7 +208,7 @@ The first layer of the hierarchy represents the latent population of $m_B$, $x_1
 \begin{equation}
 P(\hat{m_B},\hat{x_1},\hat{c}|m_B, x_1, c,\cov) = \mathcal{N}(\lbrace \hat{m_B},\hat{x_1},\hat{c} \rbrace|\lbrace m_B, x_1, c \rbrace, \cov). \label{eq:pop}
 \end{equation}
-However, the presence of chromatic smearing in the intrinsic supernova population \citep{Guy2010, Chotard2011} means the summary statistics report from light curve fitting are not Gaussian. We model the extra dispersion included in the observations from colour smearing by adding extra independent uncertainty on the colour observation. As shown in \citep{Kessler2013}, the extra dispersion shows heavy redshift dependence. As this may represent underlying physics more than the effects of Malmquist bias, we decide to incorporate redshift dependence in our extra uncertainty. We thus add $\kappa_0 + \kappa_1 z$ to our observed colour uncertainty (in quadrature), where $\kappa_0$ and $\kappa_1$ are subject to strong Cauchy priors centered on zero and with width $0.002$, to enforce minimum possible extra uncertainty in our model. Each survey has its own set of $\kappa$ parameters. Furthermore, we use fiducial simulations (discussed further in Section \ref{sec:selection}) to characterise the bias in the mean colour measured as a function of redshift, and subtract this bias from our observed data. We allow the amount of bias to be parametrised to account for different intrinsic scatter models, where parameter $\kappa_2$ controlled the fraction of bias subtraction - 0 for no bias, up to 1 for the maximum bias found in simulations (which corresponded to the intrinsic scatter model from \citet{Chotard2011}). Unlike $\kappa_0$ and $\kappa_1$, which are redefined for each survey, $\kappa_2$ represents a universal shift in supernovae biases. We place a uniform prior on $\kappa_2$.
+However, the presence of chromatic smearing in the intrinsic supernova population \citep{Guy2010, Chotard2011} means the summary statistics report from light curve fitting are not Gaussian. We model the extra dispersion included in the observations from colour smearing by adding extra independent uncertainty on the colour observation. As shown in \citep{Kessler2013}, the extra dispersion shows heavy redshift dependence. As this may represent underlying physics more than the effects of Malmquist bias, we decide to incorporate redshift dependence in our extra uncertainty. We thus add $\kappa_0 + \kappa_1 z$ to our observed colour uncertainty (in quadrature), where $\kappa_0$ and $\kappa_1$ are subject to strong Cauchy priors centered on zero and with width $0.002$, to enforce minimum possible extra uncertainty in our model. Each survey has its own set of $\kappa$ parameters. Furthermore, we use fiducial simulations (discussed further in Section \ref{sec:selection}) to characterise the bias in the mean colour measured as a function of redshift, and subtract this bias from our observed data. We allow the amount of bias to be parametrised to account for different intrinsic scatter models, where parameter $s_c$ controlled the fraction of bias subtraction - 0 for no bias, up to 1 for the maximum bias found in simulations (which corresponded to the intrinsic scatter model from \citet{Chotard2011}). Unlike $\kappa_0$ and $\kappa_1$, which are redefined for each survey, $s_c$ represents a universal shift in supernovae biases. We place a uniform prior on $s_c$.
 
 As we are focused on the spectroscopically confirmed supernovae for this iteration of the method, we assume the observed redshift $\hat{z}$ is the true redshift $z$ such that $P(\hat{z}|z) = \delta(\hat{z} - z)$. Similarly, we take the mass probability estimate $\hat{m}$ as correct, and do not model a latent variable.
 
@@ -227,7 +227,7 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 \node[det, above=of z] (mu) {$\mu$};
 \node[latent, above=of m] (MBobs) {$M_B$};
 % Survey nodes
-\node[latent, above=of sum, yshift=1cm,text width=2.3cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\rho,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c, \kappa_0, \kappa_1$ };
+\node[latent, above=of sum, yshift=1cm,text width=2.7cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\rho,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c, \kappa_0, \kappa_1, s_c$ };
 \node[latent, right=1.5cm of pop1, align=center] (sf) {$\Delta_i, \delta_i$};
 % Global nodes
 \node[latent, above=2cm of mu]  (cosmo) {$\Omega_m, w$};
@@ -469,7 +469,7 @@ Each realisation of cosmology fitted contains 137 LowZ supernovae, and 204 DES-l
  Combined posterior surfaces for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. Note that we have combined the posteriors for 100 realisations, and so we should expect the size of the uncertainty to be representative of one realisation, but the statistical spread of the final surface should be $\sqrt{100} = 10$ times less than a single realisation. The parameter bounds are listed in Table \ref{tab:bulk_summary}.
  
  
-Cosmological bias is detected with $\approx 2.7\sigma$ significance for the {\celeven} model and $\approx 1.5\sigma$ significance for the {\gten} model when fitting both systematics and statistics. For the statistics only fits, the respective bias detection levels are $0.9\sigma$ and $5.5\sigma$. We investigate the source of the {\celeven} bias and find its source to be bias in the observed summary statistics, in addition to incorrect reported uncertainty on those summary statistics. By replacing fully simulated observed $m_B$, $x_1$ and $c$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. Unfortunately, adding extra fit parameters to allow for shifting observables washes out cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data, and is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strength of which are controlled by a fit parameter, $\kappa_2$, however neither the {\gten} nor {\celeven} simulations constrained the fitting of this parameter, and thus the majority of bias in the {\celeven} fits remain. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections without having to precompute standardisation parameters and populations.
+Cosmological bias is detected with $\approx 2.7\sigma$ significance for the {\celeven} model and $\approx 1.5\sigma$ significance for the {\gten} model when fitting both systematics and statistics. For the statistics only fits, the respective bias detection levels are $0.9\sigma$ and $5.5\sigma$. We investigate the source of the {\celeven} bias and find its source to be bias in the observed summary statistics, in addition to incorrect reported uncertainty on those summary statistics. By replacing fully simulated observed $m_B$, $x_1$ and $c$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. Unfortunately, adding extra fit parameters to allow for shifting observables washes out cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data, and is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strength of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulations constrained the fitting of this parameter, and thus the majority of bias in the {\celeven} fits remain. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections without having to precompute standardisation parameters and populations.
 
 
 For the sample size of the DES and LowZ supernova samples (of order 350 supernova), the bias from intrinsic scatter models are sub-dominant to the statistical uncertainty, representing at most a deviation of $0.27\sigma$ for the full statistics and systematics model fit for the {\celeven} model, and as such we will leave more complicated treatment of them for future work.
@@ -580,6 +580,8 @@ which is equal to the likelihood $\mathcal{L}$. Introducing an integral over all
 \end{align}
 where we define the denominator as $w$ for simplicity in future derivations.
 
+
+
 \subsection{Supernova Selection Effects}
 
 We assume that our selection effects can be reasonably well encapsulated by independent functions of (actual) apparent magnitude and redshift, such that $P(S|{\rm data}, \theta) = P(S|z) P(S|m_B)$. Our denominator then becomes
@@ -603,6 +605,10 @@ m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta
 \end{align}
 Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral and reach equations \eqref{eq:seldes} and \eqref{eq:sellowz}.
 
+
+
+
+
 \subsection{Approximate Selection Effects}
 \label{app:approx}
 
@@ -611,30 +617,83 @@ Equations \eqref{eq:disc1} and \eqref{eq:disc2} make the assumption that, for ou
 \mu_1 &= \mu_0 + \sqrt{\frac{2}{\pi}} \delta \sigma_0 \\
 \sigma_1 &= \sigma_0 \sqrt{1 - \frac{2 \delta^2}{\pi}}.
 \end{align}
-We can then test the approximation $\mathcal{N}^{\rm Skew}(\mu_0, \sigma_0, \alpha) \rightarrow \mathcal{N}(\mu_1, \sigma_1)$. Unfortunately, this shift to the mean and standard deviation of the normal approximation did not produce stable posterior surfaces which Stan could fit. The surface instability was caused by severe degeneracy between three parameters: $\langle c \rangle$, $\sigma_c$ and $\alpha_c$. Shifting the mean colour was thus accomplished either by shifting the actual mean colour $\langle c \rangle$, by increasing skewness $\alpha_c$, or by modifying $\sigma_c$. Stable surfaces were only found when we fixed $\sigma_c$ in the shift correction, such that $\mu_1 = \mu_0 + \sqrt{2/\pi}\delta k$, where we set $k=0.1$ to mirror the width of the input simulation population. Figure \ref{fig:shift} shows that even an different fixed value than the correct value still give a better approximation than the unshifted approximation. However, implementing the shifted approximation in our full model resulted in biased parameter recover for cosmological parameters, resulting in us ultimately discarding the shifted approximation. These biases are shown in Figure \ref{fig:simple_w_super}.
-
+We can then test the approximation $\mathcal{N}^{\rm Skew}(\mu_0, \sigma_0, \alpha) \rightarrow \mathcal{N}(\mu_1, \sigma_1)$. Unfortunately, this shift to the mean and standard deviation of the normal approximation did not produce stable posterior surfaces which Stan could fit when we included full covariance between $m_B$, $x_1$ and $c$ in the underlying population, and so we simplified the model to have independent parameters. Stable surfaces with underlying population covariance were found when we fixed $\sigma_c$ in the shift correction, such that $\mu_1 = \mu_0 + \sqrt{2/\pi}\delta k$, where we set $k=0.1$ to mirror the width of the input simulation population.  However, this resulted in several population parameters becoming biased, and so we do not fix $\sigma_c$. Comparing whether we shift our normal in the approximation or simply discard skewness, Figure \ref{fig:shift} shows that the calculated efficiency is significantly discrepant to the actual efficiency if the normal approximation is not shifted. The biases when using shifted or unshifted normal approximations when we fit our model on Gaussian and skewed underlying populations are shown in Figure \ref{fig:simple_w_super}, and only the shifted normal approximation correctly recovers underlying population parameters.
 
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{shift.pdf}
 	\end{center}
-	\caption{Testing the significance of fixing $\sigma_c$ when calculating the efficiency using a shifted normal approximation. The `correct' line (shown in black) represents the exact integral $w = \int P(S|x) P(x) dx$ where $P(S|x)$ is an error function (following our high-redshift surveys) and $P(x) = \mathcal{N}^{\rm Skew}(x, 0.1, 2)$. The $x$-axis is analogous to $m_B$ is cosmological context. As expected, all efficiencies drop towards zero as shift increases (as objects get fainter). With a correct choice of $\sigma_c$, there is negligible error between the correct solution and the shifted normal approximation. For both under and over-estimating $\sigma_c$, the shifted normal approximation outperforms the unshifted normal approximation. Thus we implemented the shifted normal approximation into our model to test it in full: whilst $\sigma_c$ itself gets sampled.}
+	\caption{Testing the correctness of our normal approximation to the skewed colour distribution. The `correct' line (shown in black) represents the exact integral $w = \int P(S|x) P(x) dx$ where $P(S|x)$ is an error function (following our high-redshift surveys) and $P(x) = \mathcal{N}^{\rm Skew}(x, 0.1, 2)$, calculated numerically. The $x$-axis is analogous to $m_B$ is cosmological context. As expected, all efficiencies drop towards zero as shift increases (as objects get fainter). The unshifted normal approximation shows significant discrepancy in the calculated efficiency as it transitions from 1 to 0, whilst the shifted normal approximation shows negligible error to the correct solution. From these plots, further refinement of the normal approximation (such as including kurtosis or higher powers) as unnecessary.}
 	\label{fig:shift}
 \end{figure}
 
 \begin{figure*}
 	\begin{center}
-		\includegraphics[width=\textwidth]{simple_w_super_dist.pdf}
+		\includegraphics[width=\textwidth]{simple_w_shift_dist_0.pdf}
 	\end{center}
-	\caption{Marginalised probability distributions for 200 realisations of cosmology, fit to Flat $w$CDM with prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, each containing 1000 simulated high-z and 1000 simulated low-z supernovae. The dashed green surfaces represent a fit to an underlying Gaussian colour population with the unshifted model. The blue solid surface represents fits to a skewed colour population with the unshifted model, and the purple dotted surface represents a fit to a skewed colour population with the shifted model. The superscript $0$ and $1$ denote the two different surveys (high-z and low-z respectively), and similarly the first four $\langle c^i \rangle$ parameters represent the four redshift nodes in the high-z survey, and the last four represent the nodes for the low-z survey. We can see that the shifted model is far better able to recover skewed input populations than the unshifted, performing better in terms of recovering skewness $\alpha_c$, mean colour $\langle c \rangle$ and width of the colour distribution $\sigma_c$. The unshifted model recovers the correct colour mean and width if you approximate a skew normal as a normal: $\Delta\mu = \sqrt{2/\pi}\sigma_c\delta_c \approx 0.071$, which is approximately the deviation found in fits to the colour population mean. Whilst the performance of the shifted model on skewed data populations is an improvement over the unshifted model, it comes at a cost - significant bias appears in the fits to $\alpha$, $\beta$, $\sigma_{m_B}$ and $w$. These biases in cosmological parameters are not found in the unshifted model, and similarly the bias when moving from a Gaussian to skewed colour population is negligible. For these reasons, we adopt the unshifted model.}
+	\caption{Marginalised probability distributions for 100 realisations of cosmology, fit to Flat $w$CDM with prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, each containing 1000 simulated high-z and 1000 simulated low-z supernovae. The dashed green surfaces represent a fit to an underlying Gaussian colour population with the unshifted model. The blue solid surface represents fits to a skewed colour population with the unshifted model, and the purple dotted surface represents a fit to a skewed colour population with the shifted model. The superscript $0$ and $1$ denote the two different surveys (high-z and low-z respectively), and similarly the first four $\langle c^i \rangle$ parameters represent the four redshift nodes in the high-z survey, and the last four represent the nodes for the low-z survey. We can see that the shifted model is far better able to recover skewed input populations than the unshifted, performing better in terms of recovering skewness $\alpha_c$, mean colour $\langle c \rangle$ and width of the colour distribution $\sigma_c$. The unshifted model recovers the correct colour mean and width if you approximate a skew normal as a normal: $\Delta\mu = \sqrt{2/\pi}\sigma_c\delta_c \approx 0.071$, which is approximately the deviation found in fits to the colour population mean. Importantly, the unshifted model when run on skewed data (the solid blue) shows extreme bias in $\alpha_c$, where it fits strongly around zero regardless, showing it to be a poor approximation.}
 	\label{fig:simple_w_super}
 \end{figure*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{Numerical Optimisations}
 \label{app:optimisations}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Not many fitting methodologies and algorithms can handle the thousands of fit parameters our model requires. By using Stan, we are able to take advantage automatic differentiation and the NUTS sampler, which is a class of Hamiltonian Monte Carlo samplers. Even with these advantages, early implementations of our model still had excessive fit times, with our desired sub-hour running time far exceeded. 
+
+The simplest and most commonly found optimisation we employed was to precompute as much as possible to reduce the complexity of the mathematical graph our model is translated into to compute the surface derivatives. For example, when computing the distance modulus, redshift is encountered to various powers. Instead of computing those powers in Stan, we simply pass in several arrays of redshift values already raised to the correct power. Small changes like this however only give small results.
+
+The primary numerical improvement we made on existing frameworks was to remove costly probability evaluations of multivariate normals. To increase efficiency, the optimum way to sample a multivariate normal is to reparameterise it such that instead of sampling $\mathcal{N}(\vec{x}|\vec{\mu}, \Sigma)$, you sample $\mathcal{N}(\vec{\delta}|0,1)$ where $\vec{x} = \vec{\mu} + L \vec{\delta}$ and $L$ is the cholesky decomposition of $\Sigma$. In this way, we can efficiently sample the unit normal probability distribution instead of sampling a multivariate normal probability distribution. Switching to this parametrisation resulted in a computational increase of an order of magnitude, taking fits for a sample of approximately 500 supernovae from roughly four hours down to twenty minutes. 
+
+This parametrisation does come with one significant downside - inflexibility. For each step the algorithm takes, we do not recompute the cholesky decomposition of the covariance of the summary statistics - that happens once at the beginning of the model setup. If we had kept the full covariance matrix parametrisation we could modify the matrix easily - for example when incorporating intrinsic dispersion we could simple add on a secondary matrix to create an updated covariance. Using cholesky decompositions, ${\rm cholesky}(\Sigma_1 + \Sigma_2) \neq L_1 + L_2$, and so we would need to recompute the decomposition for each step, which discards most of the computational benefit just gained.
+
+Considering a $3\times3$ matrix with cholesky decomposition
+\begin{align}
+L = \begin{pmatrix}
+a & 0 & 0 \\ b & c & 0 \\ d & e & f \\
+\end{pmatrix},
+\end{align}
+the original covariance matrix $\Sigma$ is given by
+\begin{align}
+\Sigma = \begin{pmatrix}
+a^2 & ab & ad \\ ab & b^2 + c^2 & bd + ce \\ ad & bd + ce & d^2 + e^2 + f^2\\
+\end{pmatrix}.
+\end{align}
+Now, the primary source of extra uncertainty in the intrinsic dispersion models comes from chromatic smearing, which primarily influences the recovered colour parameter, which is placed as the last element in the observables vector $\lbrace m_B, x_1, c\rbrace$. We can now see that it is possible to add extra uncertainty to the colour observation on the diagonal without having to recompute the cholesky decomposition - notice that $f$ is unique in that it is the only element of $L$ that appears in only one position in the covariance matrix. To take our covariance and add on the diagonal uncertainty for colour an extra $\sigma_e$ term, we get
+\begin{align}
+C = \begin{pmatrix}
+\sigma_{m_B}^2 & \rho_{0,1} \sigma_{m_B} \sigma_{x_1} & \rho_{0,2} \sigma_{m_B} \sigma_c \\
+\rho_{0,1} \sigma_{m_B} \sigma_{x_1} & \sigma_{x_1}^2 & \rho_{1, 2} \sigma_{x_1} \sigma_c \\
+\rho_{0,2} \sigma_{m_B} \sigma_c & \rho_{1, 2} \sigma_{x_1} \sigma_c &  \sigma_c^2 + \sigma_e^2 \\
+\end{pmatrix}
+\end{align}.
+The cholesky decomposition of this is, in terms of the original cholesky decomposition, is
+\begin{align}
+L = \begin{pmatrix}
+a & 0 & 0 \\ b & c & 0 \\ d & e & f + g \\
+\end{pmatrix},
+\end{align}
+where $g = \sqrt{f^2 + \sigma_e^2} - f$. This allows an easy update to the cholesky decomposition to add extra uncertainty to the independent colour uncertainty. For both the {\gten} and {\celeven} models, we ran fits without the cholesky parametrisation to allow for extra correlated dispersion (instead of just dispersion on $c$), but find no decrease in bias or improved fit statistics, allowing us to use the more efficient cholesky parametrisation.
+
+
+
 
 
 % Don't change these lines

@@ -12,7 +12,7 @@ mids = np.linspace(0.5, 4, 100)
 
 alpha = 2
 delta = alpha / np.sqrt(1 + alpha**2)
-sigma_cor = [0.05, 0.075, 0.1, 0.15]
+sigma_cor = [0.1]
 shift = np.sqrt(2 / np.pi) * delta * sigma
 sigma_ratio1 = np.sqrt(1 - 2 * delta**2 / np.pi)
 
@@ -32,7 +32,7 @@ for i, mid in enumerate(mids):
         efs[i, j] = simps(pop * sf, x=xs)
 
 rc('text', usetex=True)
-fig, axes = plt.subplots(nrows=2, sharex=True, figsize=(4, 5), gridspec_kw={"hspace": 0.0})
+fig, axes = plt.subplots(nrows=2, sharex=True, figsize=(4, 4), gridspec_kw={"hspace": 0.0})
 axes[0].plot(mids, ef_a, label="Correct", c="k")
 axes[0].plot(mids, ef_no, label="Unshifted")
 
@@ -40,8 +40,8 @@ axes[0].plot(mids, ef_no, label="Unshifted")
 axes[1].axhline(0, c="k")
 axes[1].plot(mids, ef_no - ef_a, label="Unshifted")
 for row, c in zip(efs.T, sigma_cor):
-    axes[0].plot(mids, row, label="Shifted, $\sigma_c = %0.2f$" % c, ls="--")
-    axes[1].plot(mids, row - ef_a, label="Shifted, $\sigma_c = %0.2f$" % c, ls="--")
+    axes[0].plot(mids, row, label="Shifted", ls="--")
+    axes[1].plot(mids, row - ef_a, label="Shifted", ls="--")
 
 axes[1].set_xlabel("Shift")
 axes[0].set_ylabel("Efficiency")
