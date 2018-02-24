@@ -145,18 +145,24 @@ class SNANASimulation(Simulation):
         apparents = supernovae[:, 6]
         stretches = supernovae[:, 7]
         colours = supernovae[:, 8]
+        bias_mB = supernovae[:, 9]
+        bias_x1 = supernovae[:, 10]
+        bias_c = supernovae[:, 11]
         extra_uncert = get_sigma_mu_pecvel(redshifts)
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
 
         shift_amount = np.zeros(redshifts.shape)
         shift_deltas = np.zeros(redshifts.shape)
         if self.bias_cor:
-            cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
+            apparents += bias_mB
+            stretches += bias_x1
+            colours += bias_c
+            # cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
             # shift0 = cor_means[0]
             # shift_amount = interp1d(cor_z, shift0, bounds_error=False, fill_value=(shift0[0], shift0[-1]))(redshifts)
             # delta = cor_means[1] - cor_means[0]
             # shift_deltas = interp1d(cor_z, delta, bounds_error=False, fill_value=(delta[0], delta[-1]))(redshifts)
-            shift_deltas = interp1d(cor_z, cor_means, bounds_error=False, fill_value=(cor_means[0], cor_means[-1]))(redshifts)
+            # shift_deltas = interp1d(cor_z, cor_means, bounds_error=False, fill_value=(cor_means[0], cor_means[-1]))(redshifts)
 
         for i, (mb, x1, c, smb, sx1, sc, eu, sa) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert, shift_amount)):
             if self.use_sim:
@@ -164,9 +170,9 @@ class SNANASimulation(Simulation):
                 vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)
             else:
                 vector = np.array([mb, x1, c - sa])
-                cov = supernovae[i, 9:9 + 9].reshape((3, 3))
+                cov = supernovae[i, 12:12 + 9].reshape((3, 3))
             cov[0, 0] += eu**2
-            calib = supernovae[i, 9 + 9:].reshape((3, -1))
+            calib = supernovae[i, 12+9:].reshape((3, -1))
             obs_mBx1c_cov.append(cov)
             obs_mBx1c.append(vector)
             deta_dcalibs.append(calib)

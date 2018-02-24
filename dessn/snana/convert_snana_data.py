@@ -30,9 +30,10 @@ def load_fitres(filename, skiprows=6):
     except ValueError:
         logging.error("Filename %s failed to load" % filename)
         return None
-    columns = ['CID', 'zHD', 'HOST_LOGMASS', 'HOST_LOGMASS_ERR', 'x1',
+    columns = ['CID', 'IDSURVEY', 'zHD', 'HOST_LOGMASS', 'HOST_LOGMASS_ERR', 'x1',
                'x1ERR', 'c', 'cERR', 'mB', 'mBERR', 'x0', 'x0ERR',
-               'COV_x1_c', 'COV_x1_x0', 'COV_c_x0', 'SIM_mB', 'SIM_x1', 'SIM_c']
+               'COV_x1_c', 'COV_x1_x0', 'COV_c_x0', 'SIM_mB', 'SIM_x1', 'SIM_c',
+               'biasCor_mB', 'biasCor_x1', 'biasCor_c']
     final_columns = [c for c in columns if c in dataframe.columns]
     data = dataframe[final_columns].to_records()
     return data
@@ -126,12 +127,23 @@ def load_dump_file(sim_dir):
     return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64), ("S2c", np.float64)])
 
 
-def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False, skip=6):
+def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False, skip=6, biascor=None):
+
     max_offset_mB = 0.2
     ind = 0
     if "-0" in sim_dir:
         ind = int(sim_dir.split("-0")[-1]) - 1
     logging.info("Digesting index %d in folder %s" % (ind, sim_dir))
+
+    bias_fitres = None
+    if biascor is not None:
+        logging.info("Biascor is %s" % biascor)
+        short_name = os.path.basename(sim_dir).replace("DES3YR", "").replace("_DES_", "").replace("_LOWZ_", "")
+        bias_loc = os.path.dirname(os.path.dirname(sim_dir)) + os.sep + biascor + os.sep + short_name
+        bias_fitres_file = bias_loc + os.sep + "SALT2mu_FITOPT000_MUOPT000.FITRES"
+        assert os.path.exists(bias_fitres_file)
+        fres = load_fitres(bias_fitres_file, skiprows=5)
+        bias_fitres = {"%d_%d" % (row["IDSURVEY"], row["CID"]): [row['biasCor_mB'], row['biasCor_x1'], row['biasCor_c']] for row in fres}
 
     inner_files = sorted(list(os.listdir(sim_dir)))
 
@@ -156,6 +168,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
     all_offsets = []
     logging.debug("Have %d rows to process" % base_fits.shape)
     mass_mean = np.mean(base_fits["HOST_LOGMASS_ERR"])
+    not_found = 0
     fake_mass = False
     if mass_mean == -9 or mass_mean == 0:
         logging.warning("Mass is fake")
@@ -164,6 +177,19 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         if i % 1000 == 0 and i > 0:
             logging.debug("Up to row %d" % i)
         cid = row['CID']
+        survey_id = row['IDSURVEY']
+
+        key = "%d_%d" % (survey_id, cid)
+        if bias_fitres is None:
+            not_found += 1
+            bias_mB, bias_x1, bias_c = 0, 0, 0
+        else:
+            if key not in bias_fitres:
+                not_found += 1
+                continue
+            else:
+                bias_mB, bias_x1, bias_c = bias_fitres[key]
+
         z = row['zHD']
 
         mb = row['mB']
@@ -242,7 +268,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         if isinstance(cid, str):
             cid = int(hashlib.sha256(cid.encode('utf-8')).hexdigest(), 16) % 10 ** 8
         all_offsets.append(offsets)
-        final_result = [cid, z, mass_prob, sim_mb, sim_x1, sim_c, mb, x1, c] \
+        final_result = [cid, z, mass_prob, sim_mb, sim_x1, sim_c, mb, x1, c, bias_mB, bias_x1, bias_c] \
                        + cov.flatten().tolist() + offsets.flatten().tolist()
         final_results.append(final_result)
 
@@ -252,6 +278,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
     fitted_data = np.array(final_results).astype(np.float32)
 
     np.save("%s/passed_%d.npy" % (output_dir, ind), fitted_data)
+    logging.info("Bias not found for %d  out of %d SN (%d found)" % (not_found, base_fits.shape[0], base_fits.shape[0] - not_found))
     logging.info("Calib faliures: %d in total. Breakdown: %s" % (num_bad_calib, num_bad_calib_index))
 
     # Save the labels out
@@ -278,7 +305,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         logging.info("%d nans in apparents. Probably correspond to num sims." % (~mask_nan).sum())
 
 
-def convert(base_folder, load_dump=False, override=False, skip=11):
+def convert(base_folder, load_dump=False, override=False, skip=11, biascor=None):
 
     dump_dir, output_dir, nml_file = get_directories(base_folder)
     logging.info("Found nml file %s" % nml_file)
@@ -292,17 +319,17 @@ def convert(base_folder, load_dump=False, override=False, skip=11):
             this_output_dir = output_dir + sim_name
         if base_folder.endswith("sys"):
             this_output_dir += "sys"
-        digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump, skip=skip)
+        digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump, skip=skip, biascor=biascor)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
-    convert("DES3YR_LOWZ_COMBINED_TEXT")
-    convert("DES3YR_DES_COMBINED_TEXT")
+    # convert("DES3YR_LOWZ_COMBINED_TEXT")
+    # convert("DES3YR_DES_COMBINED_TEXT")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    # convert("DES3YR_DES_BULK", skip=6)
-    # convert("DES3YR_LOWZ_BULK", skip=6)
+    # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
+    convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)

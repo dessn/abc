@@ -26,6 +26,10 @@ if __name__ == "__main__":
     om = chain[:, params.index(r"$\Omega_m$")]
     w = chain[:, params.index(r"$w$")]
 
-    import matplotlib.pyplot as plt
-    plt.hist2d(om, w, bins=100, weights=weights)
-    plt.show()
+    from chainconsumer import ChainConsumer
+    c = ChainConsumer()
+    c.add_chain(chain, parameters=params)
+    c.plotter.plot(display=True)
+    # import matplotlib.pyplot as plt
+    # plt.hist2d(om, w, bins=100, weights=weights)
+    # plt.show()
