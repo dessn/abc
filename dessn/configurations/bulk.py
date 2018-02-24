@@ -19,15 +19,17 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
+        # ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
         ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
     ]
 
     ndes = 204
-    nlowz = 137
+    nlowz = 128
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", bias_cor=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", bias_cor=True)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", bias_cor=False)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=True)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", bias_cor=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", bias_cor=False)],
     ]
     fitter = Fitter(dir_name)
 

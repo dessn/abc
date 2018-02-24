@@ -246,9 +246,9 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
                 continue
             index = np.searchsorted(magcids, cid)
             if index >= magcids.size or magcids[index] != cid:
-                offset_mb.append(np.nan)
-                offset_x1.append(np.nan)
-                offset_c.append(np.nan)
+                offset_mb.append(0.0)
+                offset_x1.append(0.0)
+                offset_c.append(0.0)
             else:
                 offset_mb.append((mag['mB'][sorted_indexes[index]] - mb) * scale)
                 offset_x1.append((mag['x1'][sorted_indexes[index]] - x1) * scale)
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_COMBINED_TEXT")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
+    convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
