@@ -143,7 +143,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         bias_fitres_file = bias_loc + os.sep + "SALT2mu_FITOPT000_MUOPT000.FITRES"
         assert os.path.exists(bias_fitres_file)
         fres = load_fitres(bias_fitres_file, skiprows=5)
-        bias_fitres = {"%d_%d" % (row["IDSURVEY"], row["CID"]): [row['biasCor_mB'], row['biasCor_x1'], row['biasCor_c']] for row in fres}
+        bias_fitres = {"%s_%s" % (row["IDSURVEY"], row["CID"]): [row['biasCor_mB'], row['biasCor_x1'], row['biasCor_c']] for row in fres}
 
     inner_files = sorted(list(os.listdir(sim_dir)))
 
@@ -179,7 +179,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         cid = row['CID']
         survey_id = row['IDSURVEY']
 
-        key = "%d_%d" % (survey_id, cid)
+        key = "%s_%s" % (survey_id, cid)
         if bias_fitres is None:
             not_found += 1
             bias_mB, bias_x1, bias_c = 0, 0, 0
@@ -325,11 +325,11 @@ def convert(base_folder, load_dump=False, override=False, skip=11, biascor=None)
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
     # convert("DES3YR_LOWZ_COMBINED_TEXT")
-    # convert("DES3YR_DES_COMBINED_TEXT")
+    convert("DES3YR_DES_COMBINED_TEXT")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
-    convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
-    convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
+    # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
+    # convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11)
