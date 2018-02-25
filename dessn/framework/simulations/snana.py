@@ -154,15 +154,15 @@ class SNANASimulation(Simulation):
         shift_amount = np.zeros(redshifts.shape)
         shift_deltas = np.zeros(redshifts.shape)
         if self.bias_cor:
-            apparents -= bias_mB
-            stretches -= bias_x1
-            colours -= bias_c
-            # cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
+            # apparents -= bias_mB
+            # stretches -= bias_x1
+            # colours -= bias_c
+            cor_z, cor_models, cor_means = self.get_bias_cor("_DES" in self.simulation_name)
             # shift0 = cor_means[0]
             # shift_amount = interp1d(cor_z, shift0, bounds_error=False, fill_value=(shift0[0], shift0[-1]))(redshifts)
             # delta = cor_means[1] - cor_means[0]
             # shift_deltas = interp1d(cor_z, delta, bounds_error=False, fill_value=(delta[0], delta[-1]))(redshifts)
-            # shift_deltas = interp1d(cor_z, cor_means, bounds_error=False, fill_value=(cor_means[0], cor_means[-1]))(redshifts)
+            shift_deltas = interp1d(cor_z, cor_means, bounds_error=False, fill_value=(cor_means[0], cor_means[-1]))(redshifts)
 
         for i, (mb, x1, c, smb, sx1, sc, eu, sa) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert, shift_amount)):
             if self.use_sim:
