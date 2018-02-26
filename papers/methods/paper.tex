@@ -556,17 +556,17 @@ where we define the denominator as $w$ for simplicity in future derivations.
 
 \subsection{Supernova Selection Effects}
 
-We assume that our selection effects can be reasonably well encapsulated by independent functions of (actual) apparent magnitude and redshift, such that $P(S|{\rm data}, \theta) = P(S|z) P(S|m_B)$. Our denominator then becomes
+We assume that our selection effects can be reasonably well encapsulated by independent functions of (true) apparent magnitude and redshift, such that $P(S|{\rm data}, \theta) = P(S|z) P(S|m_B)$. Our denominator then becomes
 \begin{align}
-w &= \int d\hat{z} \, d\hat{m_B} \, dz \, dm_B P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m_B}|m_B) P(z, m_B | \theta),
+w &= \int d\hat{z} \, d\hat{m_B} \, dz \, dm_B P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m_B}|m_B) P(z, m_B | \theta), \label{eq:sel}
 \end{align}
-where for simplicity we have not written out all the integrals which do not interact with the selection effects explicitly. Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m_B} | m_B)$ is a Gaussian due to our Gaussian model of summary statistics $m_B$, $x_1$, $c$, and can be analytically integrated out, collapsing the integral over $\hat{m_B}$. Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
+where for simplicity we have not written out all the integrals which do not interact with the selection effects explicitly. Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m_B} | m_B)$ is a Gaussian due to our Gaussian model of summary statistics, and $m_B$, $x_1$, $c$, and can be analytically integrated out, collapsing the integral over $\hat{m_B}$ (which is why they were not included in equation \eqref{eq:sel}). Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
 \begin{align}
 w = \int \left[ \int P(S|m_B) P(m_B | z, \theta)\, dm_B \right] P(S|z)P(z|\theta)\, dz.
 \end{align}
 By assuming that the distribution $P(S|z)P(z|\theta)$ is well sampled by the observed supernovae redshifts, we can approximate the integral over redshift by evaluating
 \begin{align}
-\int P(S|m_B) P(m_B | z, \theta)\, dm_B
+\int P(S|m_B) P(m_B | z, \theta)\, dm_B \label{eq:selint}
 \end{align}
 for each supernova in the dataset -- i.e. Monte Carlo integration with assumed perfect importance sampling.
 
@@ -575,7 +575,7 @@ As stated in Section \ref{sec:selection}, the underlying population in apparent 
 m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \left(\langle c(z) \rangle + \sqrt{\frac{2}{\pi}}\sigma_c \delta_c\right)\label{eq:disc1} \\
 \sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 +  \left(\beta \sigma_c \sqrt{1 - \frac{2\delta_c^2}{\pi}}\right)^2. \label{eq:disc2}
 \end{align}
-Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral and reach equations \eqref{eq:seldes} and \eqref{eq:sellowz}.
+Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral in equation \eqref{eq:selint} and reach equations \eqref{eq:seldes} and \eqref{eq:sellowz}.
 
 
 
@@ -654,8 +654,8 @@ C = \begin{pmatrix}
 \sigma_{m_B}^2 & \rho_{0,1} \sigma_{m_B} \sigma_{x_1} & \rho_{0,2} \sigma_{m_B} \sigma_c \\
 \rho_{0,1} \sigma_{m_B} \sigma_{x_1} & \sigma_{x_1}^2 & \rho_{1, 2} \sigma_{x_1} \sigma_c \\
 \rho_{0,2} \sigma_{m_B} \sigma_c & \rho_{1, 2} \sigma_{x_1} \sigma_c &  \sigma_c^2 + \sigma_e^2 \\
-\end{pmatrix}
-\end{align}.
+\end{pmatrix}.
+\end{align}
 The cholesky decomposition of this is, in terms of the original cholesky decomposition, is
 \begin{align}
 L = \begin{pmatrix}
