@@ -469,6 +469,8 @@ Each realisation of cosmology simulated contains 137 LowZ supernovae, and 204 DE
  
 Cosmological bias is detected with $\approx 2.7\sigma$ significance for the {\celeven} model and $\approx 1.5\sigma$ significance for the {\gten} model when fitting both systematics and statistics. For the statistics only fits, the respective bias detection levels are $0.9\sigma$ and $5.5\sigma$. We investigate the source of the {\celeven} bias and find its source to be bias in the observed summary statistics, in addition to incorrect reported uncertainty on those summary statistics. By replacing fully simulated observed $m_B$, $x_1$ and $c$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. Unfortunately, adding extra fit parameters to allow for shifting observables washes out cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data, and is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strength of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulation fits constrained this parameter, and thus the majority of bias in the {\celeven} fits remain. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
 
+Table \ref{tab:parameter_correlations} list the fit correlations to our model fit parameters (excluding the LowZ band systematics, which had negligible correlation), and Figure \ref{fig:bulk_cor} show the full correlations between all non-systematic model parameters. As expected, $w$ bias is introduced primarily through incorrectly determined $\beta$, which itself is tied to the unexplained colour dispersion. Other interesting correlations are shown and discussed in Figure \ref{fig:bulk_cor}, however none have as significant an impact on cosmology than $\beta$. Table \ref{tab:parameter_correlations} does show that $\langle M_B \rangle$ is strongly correlated with $w$, however it is recovered much more accurately than $\beta$. The band systematics for DES filters $g$, $r$ and $i$ also show significant correlation with $w$, highlighting the importance of minimising instrumental uncertainty.
+
 
 For the sample size of the DES and LowZ supernova samples (of order 350 supernova), the bias from intrinsic scatter models are sub-dominant to the statistical uncertainty, as shown in Figure \ref{fig:bulk_posterior}. For our full systematics model, the bias represents a deviation from $0.27\sigma$ to $-0.15\sigma$ depending on scatter model, and as such we will leave more complicated treatment of them for future work.
 
@@ -495,6 +497,140 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 		\hline
 	\end{tabular}
 \end{table}
+
+
+
+
+
+\begin{table}
+	\centering
+	\caption{Parameter Correlations with $w$ for the combined 100 simulation fits. Correlations for the LowZ band systematics and the latent parameters representing selection function uncertainty are not shown but have negligible correlation.}
+	\label{tab:parameter_correlations}
+	\begin{tabular}{c|cc}
+		Parameter & {\gten} Stat+Syst & {\celeven} Stat+Syst  \\
+		\hline
+		$\Omega_m$ &   -0.19 &     -0.21     \\
+		$\alpha$ &   -0.17 &     -0.20     \\
+		$\beta$ &   -0.29 &     -0.23     \\
+		$\langle M_B \rangle$ &    0.68 &      0.66     \\
+		$\sigma_{\rm m_B}^{0}$ &    0.04 &      0.07     \\
+		$\sigma_{\rm m_B}^{1}$ &    0.23 &      0.18     \\
+		$\sigma_{x_1}^{0}$ &    0.04 &      0.03     \\
+		$\sigma_{x_1}^{1}$ &    0.05 &      0.01     \\
+		$\sigma_{c}^{0}$ &    0.01 &      0.11     \\
+		$\sigma_{c}^{1}$ &    0.08 &      0.04     \\
+		$\alpha_c^{0}$ &   -0.04 &      0.04     \\
+		$\alpha_c^{1}$ &    0.03 &      0.01     \\
+		$\kappa_{c0}^{0}$ &   -0.10 &     -0.05     \\
+		$\kappa_{c0}^{1}$ &   -0.20 &     -0.17     \\
+		$\kappa_{c1}^{0}$ &   -0.05 &     -0.01     \\
+		$\kappa_{c1}^{1}$ &   -0.01 &      0.01     \\
+		$s_c^{0}$ &    0.00 &      0.01     \\
+		$\delta(0)$ &    0.00 &      0.00     \\
+		$\delta(\infty)/\delta(0)$ &    0.00 &      0.00     \\
+		$\langle x_1^{0} \rangle$ &   -0.01 &     -0.05     \\
+		$\langle x_1^{1} \rangle$ &   -0.02 &      0.02     \\
+		$\langle x_1^{2} \rangle$ &   -0.04 &     -0.04     \\
+		$\langle x_1^{3} \rangle$ &   -0.03 &     -0.06     \\
+		$\langle x_1^{4} \rangle$ &   -0.06 &     -0.06     \\
+		$\langle x_1^{5} \rangle$ &    0.04 &      0.02     \\
+		$\langle x_1^{6} \rangle$ &    0.04 &      0.04     \\
+		$\langle x_1^{7} \rangle$ &    0.08 &      0.03     \\
+		$\langle c^{0} \rangle$ &   -0.05 &     -0.12     \\
+		$\langle c^{1} \rangle$ &    0.11 &      0.03     \\
+		$\langle c^{2} \rangle$ &    0.11 &      0.06     \\
+		$\langle c^{3} \rangle$ &    0.14 &      0.04     \\
+		$\langle c^{4} \rangle$ &   -0.11 &     -0.11     \\
+		$\langle c^{5} \rangle$ &   -0.15 &     -0.08     \\
+		$\langle c^{6} \rangle$ &   -0.12 &     -0.13     \\
+		$\langle c^{7} \rangle$ &   -0.12 &     -0.06     \\
+		$\delta [ {\rm SALT}_0 ]$ &    0.05 &      0.05     \\
+		$\delta [ {\rm SALT}_1 ]$ &   -0.01 &      0.02     \\
+		$\delta [ {\rm SALT}_2 ]$ &   -0.10 &     -0.09     \\
+		$\delta [ {\rm SALT}_3 ]$ &   -0.03 &     -0.03     \\
+		$\delta [ {\rm SALT}_4 ]$ &    0.08 &      0.09     \\
+		$\delta [ {\rm SALT}_5 ]$ &    0.01 &      0.02     \\
+		$\delta [ {\rm SALT}_6 ]$ &    0.05 &      0.07     \\
+		$\delta [ {\rm SALT}_7 ]$ &   -0.11 &     -0.10     \\
+		$\delta [ {\rm SALT}_8 ]$ &    0.01 &      0.02     \\
+		$\delta [ {\rm SALT}_9 ]$ &    0.02 &      0.02     \\
+		$\delta [ {\rm MWE}_{B-V} ]$ &    0.03 &      0.02     \\
+		$\delta [ {\rm HST Calib} ]$ &   -0.07 &     -0.07     \\
+		$\delta [ v_{\rm pec} ]$ &    0.00 &     -0.01     \\
+		$\delta [ {\rm \delta z } ]$ &    0.01 &      0.00     \\
+		$\delta [ \Delta g ]$ &    0.05 &      0.11     \\
+		$\delta [ \Delta r ]$ &    0.16 &      0.10     \\
+		$\delta [ \Delta i ]$ &   -0.16 &     -0.18     \\
+		$\delta [ \Delta z ]$ &   -0.26 &     -0.26     \\
+		$\delta [ \Delta \lambda_g ]$ &    0.16 &      0.20     \\
+		$\delta [ \Delta \lambda_r ]$ &    0.05 &      0.06     \\
+		$\delta [ \Delta \lambda_i ]$ &    0.00 &     -0.01     \\
+		$\delta [ \Delta \lambda_z ]$ &    0.09 &      0.07     \\
+		\hline
+	\end{tabular}
+\end{table}
+%		$\delta [ \Delta t ]$ &   -0.01 &      0.00     \\
+%		$\delta [ \Delta y ]$ &   -0.03 &     -0.04     \\
+%		$\delta [ \Delta Z ]$ &    0.10 &      0.10     \\
+%		$\delta [ \Delta A ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta u ]$ &   -0.04 &     -0.03     \\
+%		$\delta [ \Delta v ]$ &    0.01 &      0.02     \\
+%		$\delta [ \Delta \lambda_{t} ]$ &    0.00 &      0.02     \\
+%		$\delta [ \Delta \lambda_{y} ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta \lambda_{z} ]$ &   -0.05 &     -0.04     \\
+%		$\delta [ \Delta \lambda_{A} ]$ &    0.00 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{u} ]$ &   -0.02 &     -0.02     \\
+%		$\delta [ \Delta \lambda_{v} ]$ &   -0.01 &      0.01     \\
+%		$\delta [ \Delta gl ]$ &   -0.12 &     -0.13     \\
+%		$\delta [ \Delta hm ]$ &    0.02 &      0.01     \\
+%		$\delta [ \Delta in ]$ &    0.08 &      0.13     \\
+%		$\delta [ \Delta jo ]$ &    0.00 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{gl} ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta \lambda_{hm} ]$ &   -0.01 &     -0.03     \\
+%		$\delta [ \Delta \lambda_{in} ]$ &   -0.10 &     -0.12     \\
+%		$\delta [ \Delta \lambda_{jo} ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta p ]$ &   -0.01 &     -0.01     \\
+%		$\delta [ \Delta q ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta R ]$ &    0.00 &      0.01     \\
+%		$\delta [ \Delta s ]$ &    0.00 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{p} ]$ &    0.00 &      0.01     \\
+%		$\delta [ \Delta \lambda_{q} ]$ &    0.01 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{r} ]$ &   -0.01 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{s} ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta b ]$ &    0.00 &     -0.01     \\
+%		$\delta [ \Delta c ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta d ]$ &    0.00 &      0.01     \\
+%		$\delta [ \Delta e ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta \lambda_{b} ]$ &    0.00 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{c} ]$ &    0.00 &      0.00     \\
+%		$\delta [ \Delta \lambda_{d} ]$ &    0.00 &     -0.01     \\
+%		$\delta [ \Delta \lambda_{e} ]$ &    0.00 &     -0.01     \\
+%		$\Delta_{0}$ &    0.00 &      0.01     \\
+%		$\Delta_{1}$ &    0.00 &     -0.01     \\
+%		$\Delta_{2}$ &    0.00 &      0.00     \\
+%		$\Delta_{3}$ &   -0.01 &     -0.01     \\
+%		$\Delta_{4}$ &    0.00 &     -0.01     \\
+%		$\Delta_{5}$ &    0.00 &     -0.01     \\
+%		$\Delta_{6}$ &    0.00 &      0.00     \\
+%		$\Delta_{7}$ &    0.00 &     -0.01     \\
+
+\begin{figure*}
+	\begin{center}
+		\includegraphics[width=\textwidth]{bulk_cor.pdf}
+	\end{center}
+	\caption{Parameter correlations for the combined fits to the 100 {\gten} scatter model simulations. We see that the primary correlations with $w$ enter through $\alpha$, $\beta$ and $\langle M_B \rangle$, as shown in Table \ref{tab:parameter_correlations}. Also visible in this figure are several other interesting relationships. $\beta$ is strongly anti-correlated with intrinsic dispersion $\sigma_{m_B}$ for both surveys (DES like and LowZ), with $\sigma_{m_B}$ showing strong anti-correlation with $\kappa^0_c$. This relationship is indeed expected - as $\kappa^0_c$ grows larger (more unexplained dispersion on the colour observation), the width of the supernova population in apparent magnitude space increases. As the fit prefers it to conform to the observed width of the distribution, the extra width in colour causes the inherent magnitude smearing amount to decrease. And with extra freedom on the observed colour from $\kappa^0_c$, $\beta$ shifts in response. The other striking feature in the plot are the strong correlation blocks in the bottom right and the anti-correlation stripes on the edges. These too are expected, for they show the relationship between the colour distributions mean value, its width and its skewness. As skewness or population width increases, the effective mean of the population shifts (see Appendix \ref{app:approx} for details), creating anti-correlation between skewness and the (Gaussian) mean colour population. Finally, we notice the blank cross in the middle of the figure, the result of four parameters. Firstly, the redshift-dependent extra colour dispersion for the LowZ simulation is negligible (due to the low redshift values), the bias correciton $s_c^0$ is unconstrained by our fits, and as the SNANA simulations do not include mass, we expect zero correlation across the mass step $\delta(0)$ and $\delta(\infty)/\delta(0)$ parameters. }
+	\label{fig:bulk_cor}
+\end{figure*}
+
+
+
+
+
+
+
+
+
+
 
 
 \section{Conclusions}

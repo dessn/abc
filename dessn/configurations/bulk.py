@@ -2,6 +2,7 @@ import os
 import logging
 import socket
 
+
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel
 from dessn.framework.simulations.snana import SNANASimulation
@@ -82,77 +83,99 @@ if __name__ == "__main__":
             else:
                 print("C1")
                 c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        # for m, s, chain, truth, weight, old_weight, posterior in res2:
-        #     name = "All"
-        #     if isinstance(m, ApproximateModelW):
-        #         print("C2")
-        #         c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        #     else:
-        #         print("C1")
-        #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        #
+
         c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True,
                      linestyles=ls, colors=cs, shade_alpha=shades)
-        c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
-        c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
-        c2.plotter.plot(filename=[pfn + "_small2.png", pfn + "_small2.pdf"], parameters=4, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize=1.0)
+        # c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
+        # c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
+        # c2.plotter.plot(filename=[pfn + "_small2.png", pfn + "_small2.pdf"], parameters=4, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize=1.0)
         # c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
         # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
-        with open(pfn + "_summary.txt", "w") as f:
-            f.write(c2.analysis.get_latex_table(transpose=True))
+        # with open(pfn + "_summary.txt", "w") as f:
+        #     f.write(c2.analysis.get_latex_table(transpose=True))
+
+        pps = ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
+               '$\\sigma_{\\rm m_B}^{0}$', '$\\sigma_{\\rm m_B}^{1}$', '$\\sigma_{x_1}^{0}$',
+               '$\\sigma_{x_1}^{1}$', '$\\sigma_{c}^{0}$', '$\\sigma_{c}^{1}$', '$\\alpha_c^{0}$',
+               '$\\alpha_c^{1}$', '$\\kappa_{c0}^{0}$', '$\\kappa_{c0}^{1}$', '$\\kappa_{c1}^{0}$',
+               '$\\kappa_{c1}^{1}$', '$s_c^{0}$', '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$',
+               '$\\langle x_1^{0} \\rangle$', '$\\langle x_1^{1} \\rangle$', '$\\langle x_1^{2} \\rangle$',
+               '$\\langle x_1^{3} \\rangle$', '$\\langle x_1^{4} \\rangle$', '$\\langle x_1^{5} \\rangle$',
+               '$\\langle x_1^{6} \\rangle$', '$\\langle x_1^{7} \\rangle$', '$\\langle c^{0} \\rangle$',
+               '$\\langle c^{1} \\rangle$', '$\\langle c^{2} \\rangle$', '$\\langle c^{3} \\rangle$',
+               '$\\langle c^{4} \\rangle$', '$\\langle c^{5} \\rangle$', '$\\langle c^{6} \\rangle$',
+               '$\\langle c^{7} \\rangle$']
+        p_cor, c_cor = c2.analysis.get_correlations(chain=0, parameters=pps)
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from matplotlib import ticker
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        fig, ax = plt.subplots(figsize=(9, 9))
+        handle = ax.imshow(c_cor, cmap="magma")
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="3%", pad=0.05)
+        fig.colorbar(handle, cax=cax)
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+        ax.set_yticklabels([''] + pps, fontsize=10)
+        ax.set_xticklabels([''] + pps, fontsize=10)
+        for tick in ax.get_xticklabels():
+            tick.set_rotation(90)
+        plt.tight_layout()
+        fig.savefig(pfn + "_cor.pdf", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+        fig.savefig(pfn + "_cor.png", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+
+
+        with open(pfn + "_cor_tab.txt", 'w') as f:
+            f.write(c2.chains[0].name)
+            f.write(c2.analysis.get_correlation_table(chain=0))
+            f.write(c2.chains[1].name)
+            f.write(c2.analysis.get_correlation_table(chain=1))
+            f.write(c2.chains[2].name)
+            f.write(c2.analysis.get_correlation_table(chain=2))
+            f.write(c2.chains[3].name)
+            f.write(c2.analysis.get_correlation_table(chain=3))
+
+        # print(c2.analysis.get_correlations(chain=1))
+        # print(c2.analysis.get_correlations(chain=2))
+        # print(c2.analysis.get_correlations(chain=3))
         # c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
 
-        # c2.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False)
 
-        res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
-        wdict = {}
-        for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
-            if isinstance(m, ApproximateModelW):
-                sim_name = s[0].simulation_name
-                if "MAGSMEAR" in sim_name:
-                    name = "Coherent"
-                elif "G10" in sim_name:
-                    name = "G10"
-                elif "C11" in sim_name:
-                    name = "C11"
-                else:
-                    name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
-                name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
-                if wdict.get(name) is None:
-                    wdict[name] = []
-                wdict[name].append([ci, chain])
-        import numpy as np
-        with open(pfn + "_comp.txt", 'w') as f:
-            f.write("%10s %5s(%5s) %5s %5s\n" % ("Key", "<w>", "<werr>", "std<w>", "bias"))
-            for key in sorted(wdict.keys()):
-                ws = [cc[1]["$w$"] for cc in wdict[key]]
-                indexes = [cc[0] for cc in wdict[key]]
-                means = [np.mean(w) for w in ws]
-                stds = [np.std(w) for w in ws]
-                name2 = pfn + key.replace(" ", "_") + ".txt"
-                with open(name2, "w") as f2:
-                    for i in range(ncosmo):
-                        if i in indexes:
-                            f2.write("%0.5f\n" % means[indexes.index(i)])
-                        else:
-                            f2.write("0\n")
-
-                # import matplotlib.pyplot as plt
-                # plt.hist(means, bins=50)
-                # plt.show()
-                # mean_mean = np.mean(means)
-                mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
-                mean_std = np.mean(stds)
-                bias = (mean_mean + 1) / mean_std
-                f.write("%10s %0.4f(%0.4f) %0.4f %0.4f\n" % (key, mean_mean, mean_std, np.std(means), bias))
-
-
-
-        # print("Saving Parameter values")
-        # with open(pfn + "_all_params1.txt", 'w') as f:
-        #     f.write(c1.analysis.get_latex_table(transpose=True))
-        # with open(pfn + "_all_params2.txt", 'w') as f:
-        #     f.write(c2.analysis.get_latex_table(transpose=True))
-        # c1.plotter.plot_summary(filename=pfn + "1.png", parameters=1, truth=[0.3], figsize=1.5, errorbar=True)
-        # c2.plotter.plot_summary(filename=pfn + "2.png", parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
-
+        # res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=True)
+        # wdict = {}
+        # for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
+        #     if isinstance(m, ApproximateModelW):
+        #         sim_name = s[0].simulation_name
+        #         if "MAGSMEAR" in sim_name:
+        #             name = "Coherent"
+        #         elif "G10" in sim_name:
+        #             name = "G10"
+        #         elif "C11" in sim_name:
+        #             name = "C11"
+        #         else:
+        #             name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
+        #         name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
+        #         if wdict.get(name) is None:
+        #             wdict[name] = []
+        #         wdict[name].append([ci, chain])
+        # import numpy as np
+        # with open(pfn + "_comp.txt", 'w') as f:
+        #     f.write("%10s %5s(%5s) %5s %5s\n" % ("Key", "<w>", "<werr>", "std<w>", "bias"))
+        #     for key in sorted(wdict.keys()):
+        #         ws = [cc[1]["$w$"] for cc in wdict[key]]
+        #         indexes = [cc[0] for cc in wdict[key]]
+        #         means = [np.mean(w) for w in ws]
+        #         stds = [np.std(w) for w in ws]
+        #         name2 = pfn + key.replace(" ", "_") + ".txt"
+        #         with open(name2, "w") as f2:
+        #             for i in range(ncosmo):
+        #                 if i in indexes:
+        #                     f2.write("%0.5f\n" % means[indexes.index(i)])
+        #                 else:
+        #                     f2.write("0\n")
+        #         mean_mean = np.average(means, weights=1 / (np.array(stds) ** 2))
+        #         mean_std = np.mean(stds)
+        #         bias = (mean_mean + 1) / mean_std
+        #         f.write("%10s %0.4f(%0.4f) %0.4f %0.4f\n" % (key, mean_mean, mean_std, np.std(means), bias))
