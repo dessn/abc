@@ -378,14 +378,6 @@ In order to verify our model we run it through several tests. First, we validate
 	\label{fig:simple_w}
 \end{figure}
 
-We generate simple toy data to validate the basic premise of the model. For both high-redshift and low-redshift (LowZ) data we draw from an underlying $M_B$, $x_1$, $c$ population and translate into apparent magnitude space using $\Omega_m = 0.3$, $\alpha= 0.14$ and $\beta = 3.1$. Mass probabilities are randomly drawn from the interval 0 to 1, and a mass correction with $\delta(0) = 0.08$ and $\delta(0)/\delta(\infty) =0.5$ included. Absolute magnitudes are drawn from $\mathcal{N}(-19.3, 0.1)$, true stretch values are drawn from $\mathcal{N}(0, 1)$ and true colour values are drawn from $\mathcal{N}^{\rm Skew}(0, 0.1, 2)$. Redshifts are drawn from a power law to increase the number of events as redshift increases. 
-
-Independent observational errors of $0.04$, $0.2$, $0.03$ on $m_B$, $x_1$ and $c$ (following the mean uncertainty for DES SNANA simulations) are added to create the observables. Extra dispersion of $0.02(1+3z)$ is added in quadrature to the $c$ uncertainty to simulation unexplained colour dispersion from chromatic variation in supernovae. The selection functions (a skew normal for low-redshift and an error function for high-redshift) are given independent uncertainty of $0.01$ on all parameters. The results are then passed through the selection effects, where each supernova is only selected based on $P(S|m_B)$, using a skew normal function for the LowZ supernovae and error function for the DES-like supernovae. We draw from each survey simulation until we have 1000 LowZ supernovae and 1000 DES-like supernovae, representing a statistical sample of greater power than the estimated 350 supernovae for the DES spectroscopic analysis. Sample data for 1000 high and low redshift supernovae are shown in Figure \ref{fig:simple_pop}, confirming the presence of strong selection effects in both toy surveys. 
-
-We test four models: Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM and Flat $w$CDM with a prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, with the latter included to allow sensitive tests on bias for $w$. To achieve statistical precision, we fit 100 realisations of supernovae datasets. Cosmological parameters are recovered without significant bias. Combined posterior surfaces of all 100 realisations fits for $\Lambda$CDM are shown in Figure \ref{fig:simple_ol} and fits for Flat $wCDM$ are shown in Figure \ref{fig:simple_w}. By utilising the Stan framework and several efficient parametrisations (discussed further in Appendix \ref{app:optimisations}), fits to these simulations of 2000 supernovae take only on order of a single CPU-hour to run.
-
-To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The results of the analysis are detailed in Table \ref{tab:simple_model}, and do not reveal evidence of systematic bias in our model.
-
 \begin{table}
 	\centering
 	\caption{Maximum likelihood cosmological parameters determined from stacking the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. As our surfaces are stacked, a shift away from the simulated values of more than $\sigma/\sqrt{100} = 0.1\sigma$ would give a $1\sigma$ detection of bias. No significant bias is detected in either cosmological model.}
@@ -399,6 +391,14 @@ To investigate biases in the model in fine detail, we look for systematic bias i
 		\hline
 	\end{tabular}
 \end{table}
+
+We generate simple toy data to validate the basic premise of the model. For both high-redshift and low-redshift (LowZ) data we draw from an underlying $M_B$, $x_1$, $c$ population and translate into apparent magnitude space using $\Omega_m = 0.3$, $\alpha= 0.14$ and $\beta = 3.1$. Mass probabilities are randomly drawn from the interval 0 to 1, and a mass correction with $\delta(0) = 0.08$ and $\delta(0)/\delta(\infty) =0.5$ included. Absolute magnitudes are drawn from $\mathcal{N}(-19.3, 0.1)$, true stretch values are drawn from $\mathcal{N}(0, 1)$ and true colour values are drawn from $\mathcal{N}^{\rm Skew}(0, 0.1, 2)$. Redshifts are drawn from a power law to increase the number of events as redshift increases. 
+
+Independent observational errors of $0.04$, $0.2$, $0.03$ on $m_B$, $x_1$ and $c$ (following the mean uncertainty for DES SNANA simulations) are added to create the observables. Extra dispersion of $0.02(1+3z)$ is added in quadrature to the $c$ uncertainty to simulation unexplained colour dispersion from chromatic variation in supernovae. The selection functions (a skew normal for low-redshift and an error function for high-redshift) are given independent uncertainty of $0.01$ on all parameters. The results are then passed through the selection effects, where each supernova is only selected based on $P(S|m_B)$, using a skew normal function for the LowZ supernovae and error function for the DES-like supernovae. We draw from each survey simulation until we have 1000 LowZ supernovae and 1000 DES-like supernovae, representing a statistical sample of greater power than the estimated 350 supernovae for the DES spectroscopic analysis. Sample data for 1000 high and low redshift supernovae are shown in Figure \ref{fig:simple_pop}, confirming the presence of strong selection effects in both toy surveys. 
+
+We test four models: Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM and Flat $w$CDM with a prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, with the latter included to allow sensitive tests on bias for $w$. To achieve statistical precision, we fit 100 realisations of supernovae datasets. Cosmological parameters are recovered without significant bias. Combined posterior surfaces of all 100 realisations fits for $\Lambda$CDM are shown in Figure \ref{fig:simple_ol} and fits for Flat $wCDM$ are shown in Figure \ref{fig:simple_w}. By utilising the Stan framework and several efficient parametrisations (discussed further in Appendix \ref{app:optimisations}), fits to these simulations of 2000 supernovae take only on order of a single CPU-hour to run.
+
+To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The results of the analysis are detailed in Table \ref{tab:simple_model}, and do not reveal evidence of systematic bias in our model.
 
 
 
@@ -459,21 +459,6 @@ Simulations (using the SNANA package) follow the observational schedule and obse
 
 
 
-
-
-Each realisation of cosmology simulated contains 137 LowZ supernovae, and 204 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. As our primary focus is upon Dark Energy, we now focus specifically on the Flat $w$CDM model with matter prior.
-
-
- Combined posterior surfaces for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. Note that we have combined the posteriors for 100 realisations, and so we should expect the size of the uncertainty to be representative of one realisation, but the statistical spread of the final surface should be $\sqrt{100} = 10$ times less than a single realisation. The parameter bounds are listed in Table \ref{tab:bulk_summary}.
- 
- 
-Cosmological bias is detected with $\approx 2.7\sigma$ significance for the {\celeven} model and $\approx 1.5\sigma$ significance for the {\gten} model when fitting both systematics and statistics. For the statistics only fits, the respective bias detection levels are $0.9\sigma$ and $5.5\sigma$. We investigate the source of the {\celeven} bias and find its source to be bias in the observed summary statistics, in addition to incorrect reported uncertainty on those summary statistics. By replacing fully simulated observed $m_B$, $x_1$ and $c$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. Unfortunately, adding extra fit parameters to allow for shifting observables washes out cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data, and is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strength of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulation fits constrained this parameter, and thus the majority of bias in the {\celeven} fits remain. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
-
-Table \ref{tab:parameter_correlations} list the fit correlations to our model fit parameters (excluding the LowZ band systematics, which had negligible correlation), and Figure \ref{fig:bulk_cor} show the full correlations between all non-systematic model parameters. As expected, $w$ bias is introduced primarily through incorrectly determined $\beta$, which itself is tied to the unexplained colour dispersion. Other interesting correlations are shown and discussed in Figure \ref{fig:bulk_cor}, however none have as significant an impact on cosmology than $\beta$. Table \ref{tab:parameter_correlations} does show that $\langle M_B \rangle$ is strongly correlated with $w$, however it is recovered much more accurately than $\beta$. The band systematics for DES filters $g$, $r$ and $i$ also show significant correlation with $w$, highlighting the importance of minimising instrumental uncertainty.
-
-
-For the sample size of the DES and LowZ supernova samples (of order 350 supernova), the bias from intrinsic scatter models are sub-dominant to the statistical uncertainty, as shown in Figure \ref{fig:bulk_posterior}. For our full systematics model, the bias represents a deviation from $0.27\sigma$ to $-0.15\sigma$ depending on scatter model, and as such we will leave more complicated treatment of them for future work.
-
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{bulk_small2.pdf}
@@ -497,9 +482,6 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 		\hline
 	\end{tabular}
 \end{table}
-
-
-
 
 
 \begin{table}
@@ -569,6 +551,34 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 		\hline
 	\end{tabular}
 \end{table}
+
+
+Each realisation of cosmology simulated contains 137 LowZ supernovae, and 204 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. As our primary focus is upon Dark Energy, we now focus specifically on the Flat $w$CDM model with matter prior.
+
+
+ Combined posterior surfaces for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. Note that we have combined the posteriors for 100 realisations, and so we should expect the size of the uncertainty to be representative of one realisation, but the statistical spread of the final surface should be $\sqrt{100} = 10$ times less than a single realisation. The parameter bounds are listed in Table \ref{tab:bulk_summary}.
+ 
+ 
+Cosmological bias is detected with $\approx 2.7\sigma$ significance for the {\celeven} model and $\approx 1.5\sigma$ significance for the {\gten} model when fitting both systematics and statistics. For the statistics only fits, the respective bias detection levels are $0.9\sigma$ and $5.5\sigma$. We investigate the source of the {\celeven} bias and find its source to be bias in the observed summary statistics, in addition to incorrect reported uncertainty on those summary statistics. By replacing fully simulated observed $m_B$, $x_1$ and $c$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. Unfortunately, adding extra fit parameters to allow for shifting observables washes out cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data, and is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strength of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulation fits constrained this parameter, and thus the majority of bias in the {\celeven} fits remain. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
+
+\begin{figure*}
+	\begin{center}
+		\includegraphics[width=\textwidth]{bulk_cor.pdf}
+	\end{center}
+	\caption{Parameter correlations for the combined fits to the 100 {\gten} scatter model simulations. We see that the primary correlations with $w$ enter through $\alpha$, $\beta$ and $\langle M_B \rangle$, as shown in Table \ref{tab:parameter_correlations}. Also visible in this figure are several other interesting relationships. $\beta$ is strongly anti-correlated with intrinsic dispersion $\sigma_{m_B}$ for both surveys (DES like and LowZ), with $\sigma_{m_B}$ showing strong anti-correlation with $\kappa^0_c$. This relationship is indeed expected - as $\kappa^0_c$ grows larger (more unexplained dispersion on the colour observation), the width of the supernova population in apparent magnitude space increases. As the fit prefers it to conform to the observed width of the distribution, the extra width in colour causes the inherent magnitude smearing amount to decrease. And with extra freedom on the observed colour from $\kappa^0_c$, $\beta$ shifts in response. The other striking feature in the plot are the strong correlation blocks in the bottom right and the anti-correlation stripes on the edges. These too are expected, for they show the relationship between the colour distributions mean value, its width and its skewness. As skewness or population width increases, the effective mean of the population shifts (see Appendix \ref{app:approx} for details), creating anti-correlation between skewness and the (Gaussian) mean colour population. Finally, we notice the blank cross in the middle of the figure, the result of four parameters. Firstly, the redshift-dependent extra colour dispersion for the LowZ simulation is negligible (due to the low redshift values), the bias correciton $s_c^0$ is unconstrained by our fits, and as the SNANA simulations do not include mass, we expect zero correlation across the mass step $\delta(0)$ and $\delta(\infty)/\delta(0)$ parameters. }
+	\label{fig:bulk_cor}
+\end{figure*}
+
+
+
+Table \ref{tab:parameter_correlations} list the fit correlations to our model fit parameters (excluding the LowZ band systematics, which had negligible correlation), and Figure \ref{fig:bulk_cor} show the full correlations between all non-systematic model parameters. As expected, $w$ bias is introduced primarily through incorrectly determined $\beta$, which itself is tied to the unexplained colour dispersion. Other interesting correlations are shown and discussed in Figure \ref{fig:bulk_cor}, however none have as significant an impact on cosmology than $\beta$. Table \ref{tab:parameter_correlations} does show that $\langle M_B \rangle$ is strongly correlated with $w$, however it is recovered much more accurately than $\beta$. The band systematics for DES filters $g$, $r$ and $i$ also show significant correlation with $w$, highlighting the importance of minimising instrumental uncertainty.
+
+
+For the sample size of the DES and LowZ supernova samples (of order 350 supernova), the bias from intrinsic scatter models are sub-dominant to the statistical uncertainty, as shown in Figure \ref{fig:bulk_posterior}. For our full systematics model, the bias represents a deviation from $0.27\sigma$ to $-0.15\sigma$ depending on scatter model, and as such we will leave more complicated treatment of them for future work.
+
+
+
+
 %		$\delta [ \Delta t ]$ &   -0.01 &      0.00     \\
 %		$\delta [ \Delta y ]$ &   -0.03 &     -0.04     \\
 %		$\delta [ \Delta Z ]$ &    0.10 &      0.10     \\
@@ -613,14 +623,6 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 %		$\Delta_{5}$ &    0.00 &     -0.01     \\
 %		$\Delta_{6}$ &    0.00 &      0.00     \\
 %		$\Delta_{7}$ &    0.00 &     -0.01     \\
-
-\begin{figure*}
-	\begin{center}
-		\includegraphics[width=\textwidth]{bulk_cor.pdf}
-	\end{center}
-	\caption{Parameter correlations for the combined fits to the 100 {\gten} scatter model simulations. We see that the primary correlations with $w$ enter through $\alpha$, $\beta$ and $\langle M_B \rangle$, as shown in Table \ref{tab:parameter_correlations}. Also visible in this figure are several other interesting relationships. $\beta$ is strongly anti-correlated with intrinsic dispersion $\sigma_{m_B}$ for both surveys (DES like and LowZ), with $\sigma_{m_B}$ showing strong anti-correlation with $\kappa^0_c$. This relationship is indeed expected - as $\kappa^0_c$ grows larger (more unexplained dispersion on the colour observation), the width of the supernova population in apparent magnitude space increases. As the fit prefers it to conform to the observed width of the distribution, the extra width in colour causes the inherent magnitude smearing amount to decrease. And with extra freedom on the observed colour from $\kappa^0_c$, $\beta$ shifts in response. The other striking feature in the plot are the strong correlation blocks in the bottom right and the anti-correlation stripes on the edges. These too are expected, for they show the relationship between the colour distributions mean value, its width and its skewness. As skewness or population width increases, the effective mean of the population shifts (see Appendix \ref{app:approx} for details), creating anti-correlation between skewness and the (Gaussian) mean colour population. Finally, we notice the blank cross in the middle of the figure, the result of four parameters. Firstly, the redshift-dependent extra colour dispersion for the LowZ simulation is negligible (due to the low redshift values), the bias correciton $s_c^0$ is unconstrained by our fits, and as the SNANA simulations do not include mass, we expect zero correlation across the mass step $\delta(0)$ and $\delta(\infty)/\delta(0)$ parameters. }
-	\label{fig:bulk_cor}
-\end{figure*}
 
 
 
