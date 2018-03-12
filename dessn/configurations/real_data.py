@@ -60,41 +60,62 @@ if __name__ == "__main__":
             c.add_chain(chain, weights=weight, posterior=posterior, name=name)
             c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
+        import numpy as np
+        # data = np.vstack(chain[x] for x in ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\delta(0)$'])
+        # data = data.T
+        # np.save("samchain.npy", data.astype(np.float32))
+        # np.savetxt("samchain.txt", data)
+        # print(data.shape)
+        # exit()
+
         chain_planck, params, weights, likelihood = get_planck()
         if blind:
             chain_planck[:, 0] = blind_om(chain_planck[:, 0])
             chain_planck[:, 1] = blind_w(chain_planck[:, 1])
         c.add_chain(chain_planck, parameters=params, name="Planck")
 
-        import numpy as np
         subset = np.vstack((chain_full[r"$\Omega_m$"], chain_full["$w$"]))
-        print(subset.shape, chain_planck.shape)
         kde = gaussian_kde(chain_planck.T)
         print("Trained")
-        weights = kde.evaluate(subset)
-        print(weights.shape)
-        c.add_chain(subset.T, weights=weights, name="Combined", parameters=params)
-        c2.add_chain(subset.T, weights=weights, name="Combined", parameters=params)
+        weights = kde.evaluate(subset[:, ::1])
+        print("Eval")
+        c.add_chain(subset.T[::1, :], weights=weights, name="Combined", parameters=params)
+        c2.add_chain(subset.T[::1, :], weights=weights, name="Combined", parameters=params)
+
+        if False:
+            bonnie_file = plot_dir + "/output/bonnie.txt"
+            import numpy as np
+            bnames = ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\delta(0)$']
+            bonnie_data = np.loadtxt(bonnie_file, delimiter=",")
+            bonnie_data = bonnie_data[10000:, :]
+            bdic = {bnames[i]: bonnie_data[:, i] for i in range(len(bnames))}
+            subset_bonnie = np.vstack((bdic[r"$\Omega_m$"], bdic["$w$"]))
+            c.add_chain(chain=bdic, name="JLA-Like")
+            weights_bonnie = kde.evaluate(subset_bonnie[:, ::5])
+            c.add_chain(subset_bonnie.T[::5, :], weights=weights_bonnie, name="Combined JLA", parameters=params)
+            c2.add_chain(subset_bonnie.T[::5, :], weights=weights_bonnie, name="Combined JLA", parameters=params)
 
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
-                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', "-"], colors=["b", "k", 'a', 'g'],
-                    shade_alpha=[0.7, 0.0, 0.2, 0.8])
+                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'],
+                    legend_kwargs={"loc": "center right"}, watermark_text_kwargs={"alpha": 0.2},
+                    colors=["b", "k", 'a', 'g', 'r', 'lb'], shade_alpha=[0.5, 0.0, 0.2, 0.4, 0.8, 0.1, 0.1])
         parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
-        print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", parameters=parameters, watermark="Blinded", figsize=1.5)
+        extents = {r"$\Omega_m$": (0.15, 0.65), "$w$": (-1.8, -0.5)}
+        # print(c.analysis.get_latex_table(transpose=True))
+        c.plotter.plot(filename=pfn + ".png", parameters=parameters, watermark="Blinded", figsize=1.5, extents=extents)
 
-        c.configure(sigma2d=False, plot_hists=True, linestyles=["-", "--", ':', '-'],
-                    colors=["b", "k", 'a', 'g'], shade_alpha=[0.7, 0.0, 0.2, 0.8])
-
-        c.plotter.plot(filename=pfn + "big.png", parameters=20)
+        # c.configure(sigma2d=False, plot_hists=True, linestyles=["-", "--", '-', ':', '-', '-'],
+        #             colors=["b", "k", 'a', 'r', 'g', 'lb'], shade_alpha=[0.7, 0.0, 0.2, 0.1, 0.1, 0.1, 0.1])
+        # c.plotter.plot(filename=pfn + "big.png", parameters=20)
+        # c.plotter.plot_distributions(filename=pfn + "_dist.png", col_wrap=8)
         # print("Plotting distributions")
         # c = ChainConsumer()
         # c.add_chain(chain, weights=weight, posterior=posterior, name="Approx")
         # c.configure(label_font_size=10, tick_font_size=10, diagonal_tick_labels=False)
         # c.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=8)
-        c2.configure(statistics="mean")
-        with open(pfn + "_nusiance_mean.txt", "w") as f:
-            f.write(c2.analysis.get_latex_table(transpose=True))
-        c2.configure(statistics="max")
-        with open(pfn + "_nusiance_max.txt", "w") as f:
-            f.write(c2.analysis.get_latex_table(transpose=True))
+        # c2.configure(statistics="mean")
+        # with open(pfn + "_nusiance_mean.txt", "w") as f:
+        #     f.write(c2.analysis.get_latex_table(transpose=True))
+        # c2.configure(statistics="max")
+        # with open(pfn + "_nusiance_max.txt", "w") as f:
+        #     f.write(c2.analysis.get_latex_table(transpose=True))
