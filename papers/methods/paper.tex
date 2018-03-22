@@ -54,6 +54,8 @@
 \newcommand{\sk}{\citetalias{Scolnic2016}}
 \newcommand{\angstrom}{\mbox{\normalfont\AA}}
 
+\usepackage{lineno}
+\linenumbers
 
 \graphicspath{ {./figures/} }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -148,24 +150,28 @@ In this paper, we lay out a new hierarchical model that advances the past work o
 Whilst supernova observations take the form of time-series photometric measurements of brightness in many photometric bands, most analyses do not work from these measurements. Instead, most techniques fit these observations (along with redshift) to a supernova model, with the most widely used being that of the empirical SALT2 model \citep{Guy2007, Guy2010}. This model is trained separately before fitting the supernovae light curves for cosmology \citep{Guy2010, Mosher2014}. The resulting output from the model is, for each supernova, a characterised amplitude $x_0$ (which can be converted into apparent magnitude $m_B = -2.5\log(x_0)$), a stretch term $x_1$ and colour term $c$, along with a covariance matrix describing the uncertainty on these summary statistics. As such, the product at the end is a (redshift-dependent) population of $m_B$, $x_1$ and $c$.
 
 The underlying actual supernova population is not such a clear cut, and accurately characterising this population, its evolution over redshift, and effects from environment, is one of the challenges of supernova cosmology. However, given some modelled underlying population that lives in the redshift-dependent space $M_B$ (absolute magnitude), $x_1$ and $c$, the introduction of cosmology into the model is simple -- it is encoded in the functional map between those two populations, from apparent magnitude space to absolute magnitude. Specifically, for any given supernova our functional map may take the traditional form:
+
 \begin{equation}
 M_B = m_B + \alpha x_1 - \beta c - \mu(z) + \text{corrections}, \label{eq:standard}
 \end{equation}
+
 where $\alpha$ is the stretch correction \citep{Phillips1993, Phillips1999}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader and bluer supernovae are brighter. The $\text{corrections}$ term often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010, Lampeitl2010, Sullivan2010, DAndrea2011, Gupta2011, Johansson2013, Rigault2013, Uddin2017}. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and an input redshift.
 
 \subsection{Traditional Cosmology Analyses}
 
 Traditional $\chi^2$ analyses such as that found in \citet{Riess1998, Perlmutter1999, Wood-Vasey2007, Kowalski2008, Kessler2009, Conley2011, Betoule2014}, minimise the difference in distance modulus between the observed distance modulus $\mu_{\rm obs}$ (attained from rearranging equation \eqref{eq:standard}), and the cosmologically predicted values $\mu_C$. This function is given by
+
 \begin{equation}
 \chi^2 = (\mu_{\rm obs} - \mu_C)^\dagger C^{-1} (\mu_{\rm obs} - \mu_C),
 \end{equation}
+
 where $C^{-1}$ is an uncertainty matrix that combines the uncertainty from the SALT2 fits, intrinsic dispersion, calibration, dust, peculiar velocity and many other factors (see \citet{Betoule2014} for a review). The cosmological $\mu_C$ is defined as
+
 \begin{align}
 \mu_C &= 5 \log\left[ \frac{(1+z)r}{10} \right],\\
 r& =\frac{c}{H_0} \int_0^z \frac{dz'}{\sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}}, \label{eq:mu0}\\
 \mu_{\rm obs} &= m_B + \alpha x_1 - \beta c - M_B. \label{eq:mu1}
 \end{align}
-
 
 The benefit this analysis methodology provides is speed -- for samples of hundreds of supernovae or less, efficient matrix inversion algorithms allow the likelihood to be evaluated quickly. The speed comes with several limitations. Firstly, formulating a $\chi^2$ likelihood requires a loss of model flexibility by building into the model assumptions of Gaussian uncertainty. Secondly, the method of creating a global covariance matrix relies on computing partial derivatives and thus any uncertainty estimated from this method loses all information about uncertainty correlation. Thirdly, the computational efficiency is dependent on inverting a covariance matrix with dimensionality linearly proportional to the number of supernovae. As this number increases, the cost of inversion rises quickly, and is not viable for samples with thousands of supernovae.
 
@@ -205,26 +211,35 @@ We construct our hierarchical Bayesian model with several goals in mind: creatio
 At the most fundamental level, a supernova analysis is simply a mapping from an underlying population onto an observed population, where cosmology is encoded directly in the mapping function. The difficulty arises both in adequately describing the biases in the mapping function, and in adding sufficient, physically motivated flexibility in both of these populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model.
 
 
-\subsection{Observables Nature Provides: Populations}
+\subsection{Observed Populations}
 
 Like most of the BHM methods introduced previously, we work from the summary statistics, where each observed supernova has an apparent magnitude $\hat{m}_B$, stretch $\hat{x}_1$ and colour $\hat{c}$, with uncertainty $\cov$ on those values. Additionally, each supernova has an observed redshift $\hat{z}$ and a host galaxy mass associated with it, $\hat{m}$, where the mass measurement takes the form of a probability of being above $10^{10}$ solar masses. We will also have a probability of being a Type Ia, $\hat{p}$. Our set of observables is therefore given as $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{p}, \hat{m}, \cov \rbrace$, as shown in the probabilistic graphical model (PGM) in Figure \ref{fig:pgm}.
 
 
 The first layer of the hierarchy represents the parameters that describe each supernova. For the moment, let us consider a single supernova, and represent its parameters as $\theta$. The underlying supernova model and intrinsic dispersion model gives the probability of $p(y|\theta)$ for obtaining light curve data $y$. As mentioned earlier, we work with summary statistics -- numbers output from a light curve fitter given the input $y$. The function $f$ describes the action of the fitter $\lbrace \hat{m}_B, \hat{x}_1., \hat{c} \rbrace = f(y)$. For notational simplify, let us denote $\eta \equiv \lbrace m_B, x_1, c \rbrace$. The model prediction for our derived data is
+
 \begin{align}
 p(\hat{\eta} | \theta) = \int \delta(\hat{\eta} - f(y)) p(y | \theta) \, dy.
 \end{align}
+
 To help confuse things, we often consider models that are parametrised as $\theta = \lbrace m_B, x_1, c \rbrace = \eta$, so that the probability of derived data is expressed as
+
 \begin{align}
 p(\hat{\eta}|\eta) = \int \delta(\hat{\eta} - f(y)) p(y|\eta) dy. \label{eq:intsmear}
 \end{align}
+
 It is common in analytic supernova cosmology models to take that
+
 \begin{align}
 p(\hat{\eta}|\eta) \sim \mathcal{N}(\hat{\eta} | \eta, \mathcal{C}), \label{eq:pop}
 \end{align}
+
 where $\mathcal{C}$ is a covariance matrix reported from light curve fitting. However, the presence of chromatic smearing in the intrinsic supernova population \citep{Guy2010, Chotard2011} means the summary statistics reported from light curve fitting are not Gaussian and equation \eqref{eq:pop} is violated. We address this problem with a similar method to previous analytic likelihoods -- including extra dispersion in the reported covariance matrix $\mathcal{C}$.
 
-We model the extra dispersion only in colour, and do so by adding extra independent uncertainty on the colour observation. Fully covariant extra dispersion on $\lbrace m_B, x_1, c \rbrace$ was also tested, but it showed negligible improvement over just colour dispersion and was far more computationally inefficient. As shown in \citep{Kessler2013}, the extra colour dispersion shows heavy redshift dependence. As the extra dispersion may arise from underlying supernova physics, rather than Malmquist bias, we decide to incorporate redshift dependence in our extra uncertainty. We thus add $\kappa_0 + \kappa_1 z$ to our observed colour uncertainty (in quadrature), where $\kappa_0$ and $\kappa_1$ are subject to strong Cauchy priors centered on zero and with width $0.002$, to enforce minimum possible extra uncertainty in our model. The value of this prior was determined from running many iterations with differing prior strengths on our simple data set with simulated extra dispersion according to the results of \citet{Kessler2013}. Each survey has its own set of $\kappa$ parameters. Furthermore, we use fiducial simulations (discussed further in Section \ref{sec:selection}) to characterise the shift in the mean colour measured as a function of redshift, and subtract this shift from our observed data. We allow the amount of shift to be parametrised to account for different intrinsic scatter models, where parameter $s_c$ controls the fraction of bias subtraction -- 0 for no shift, up to 1 for the maximum shift found in simulations \citep[which corresponds to the intrinsic scatter model from][]{Chotard2011}. Unlike $\kappa_0$ and $\kappa_1$, which are redefined for each survey, $s_c$ represents a universal shift in supernovae colour. We place a uniform prior on $s_c$.
+We model the extra dispersion only in colour, and do so by adding extra independent uncertainty on the colour observation. Fully covariant extra dispersion on $\lbrace m_B, x_1, c \rbrace$ was also tested, but it showed negligible improvement over just colour dispersion and was far more computationally inefficient. As shown in \citep{Kessler2013}, the extra colour dispersion shows heavy redshift dependence. As the extra dispersion may arise from underlying supernova physics, rather than Malmquist bias, we decide to incorporate redshift dependence in our extra uncertainty. We thus add $\kappa_0 + \kappa_1 z$ to our observed colour uncertainty (in quadrature), where $\kappa_0$ and $\kappa_1$ are subject to strong Cauchy priors centered on zero and with width $0.002$, to enforce minimum possible extra uncertainty in our model. The value of this prior was determined from running many iterations with differing prior strengths on our simple data set with simulated extra dispersion according to the results of \citet{Kessler2013}. Each survey has its own set of $\kappa$ parameters. As such, our combined covariance on the observation $\hat{\eta}$ is given by $\mathcal{C}_{\rm tot} = \mathcal{C} + {\rm DiagMatrix}\left[0, 0, (\kappa_0 + \kappa_1 z)^2\right]$.
+
+
+Furthermore, we use fiducial simulations (discussed further in Section \ref{sec:selection}) to characterise the shift in the mean colour measured as a function of redshift, and subtract this shift from our observed data. We allow the amount of shift to be parametrised to account for different intrinsic scatter models, where parameter $s_c$ controls the fraction of bias subtraction -- 0 for no shift, up to 1 for the maximum shift found in simulations \citep[which corresponds to the intrinsic scatter model from][]{Chotard2011}. Unlike $\kappa_0$ and $\kappa_1$, which are redefined for each survey, $s_c$ represents a universal shift in supernovae colour. We place a uniform prior on $s_c$.
 
 As we are focused on the spectroscopically confirmed supernovae for this iteration of the method, we assume the observed redshift $\hat{z}$ is the true redshift $z$ such that $P(\hat{z}|z) = \delta(\hat{z} - z)$. Similarly, we take the mass probability estimate $\hat{m}$ as correct, and do not model a latent variable. One of the strengths of this model (and the {\rubin} analysis) is that for future data sets where supernovae have been classified photometrically, and we expect some misclassification and misidentification of the host galaxies, those can naturally be modelled and taken into account.
 
@@ -260,7 +275,7 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 \plated[thick] {sn} {(obssum)(zobs)(mobs)(pobs)(sum)(z)(m)(mu)} {$\forall\ \rm{SN}$} ;
 \plated[thick] {survey} {(sn)(pop1)} {\\$\forall\ \rm{Survey}$} ;
 \end{tikzpicture}
-\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, and standard nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernovae population for the survey and the systematics associated with it.}
+\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, and standard nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it.}
 \label{fig:pgm}
 \end{figure}
 
@@ -272,8 +287,9 @@ The underlying supernova population is characterised by underlying distributions
 We follow prior work and model the colour population as an independent redshift-dependent skew normal for each survey. For the stretch population, we adopt a redshift-dependent normal, and magnitude dispersion is modelled as a normal. Following {\rubin} we allow the mean colour and stretch to vary over redshift, anchoring four equally spaced redshift nodes spanning the redshift range of each survey, linearly interpolating between the nodes. These nodes are represented as $\langle x_1^i \rangle$ and $\langle c^i \rangle$. Both the colour and stretch means are modelled with normal priors. Initial versions of our model adopted a fully covariant multivariate skew normal (with skewness set to zero only for the magnitude component), however pathological fitting complications required us to simplify our treatment. We parameterise the standard skew normal skewness $\alpha_c$ by sampling $\delta_c = \alpha_c / \sqrt{1 + \alpha_c^2}$ which itself is given a uniform prior $\mathcal{U}(0,0.98)$. The width of the population, represented by the vector $\lbrace \sigma_{M_B}, \sigma_{x_1}, \sigma_c \rbrace$ is subject to Cauchy priors, however are sampled in log space for efficiency in sampling close to zero. 
 
 As such, the only constant between survey populations is the absolute magnitude $M_B$, with the skewness, redshift-dependent means and width fit individually for each survey. The probability for a supernova to have true values $M_B$, $x_1$, $c$ given the underlying population is thus given as
+
 \begin{align}
-P(M_B, x_1, c, z | \langle M_B \rangle, \langle x_1(z) \rangle, \langle c(z) \rangle, \rho, \sigma_{m_B}, \sigma_{x_1}, \sigma_c, \alpha_c) = \notag \\
+P(M_B, x_1, c, z | \langle M_B \rangle, \langle x_1(z) \rangle, \langle c(z) \rangle, \sigma_{m_B}, \sigma_{x_1}, \sigma_c, \alpha_c) = \notag \\
 \mathcal{N}(M_B|\langle M_B \rangle, \sigma_{M_B}) \mathcal{N}(x_1 | \langle x_1(z) \rangle, \sigma_{x_1}) \mathcal{N}^{\rm{skew}}(c| \langle c(z) \rangle, \sigma_c, \alpha_c) \label{eq:l1}.
 \end{align}
 
@@ -285,7 +301,7 @@ On top of the Ia populations, as described above, we also include a simplistic o
 
 \subsubsection{Cosmology}
 
-We formulate our model with three different cosmological parameterisations; Flat $\Lambda$CDM, Flat $w$CDM and standard $\Lambda$CDM. $\Omega_m$ is given the prior $\mathcal{U}(0.05, 0.99)$, $\Omega_\Lambda$ was treated with $\mathcal{U}(0, 1.5)$ and the equation of state $w$ was similarly set to a flat prior $\mathcal{U}(-0.4, -2.0)$. For calculating the distance modulus, we fix $H_0 = 70 \kmsmpc $. 
+We formulate our model with three different cosmological parameterisations; Flat $\Lambda$CDM, Flat $w$CDM and standard $\Lambda$CDM. $\Omega_m$ is given the prior $\mathcal{U}(0.05, 0.99)$, $\Omega_\Lambda$ was treated with $\mathcal{U}(0, 1.5)$ and the equation of state $w$ was similarly set to a flat prior $\mathcal{U}(-0.4, -2.0)$. For calculating the distance modulus, we fix $H_0 = 70 \kmsmpc $. If the Hubble constant has a different value, the absolute magnitude is $M_B + 5\log(H_0/70 \kmsmpc )$ with the other cosmological parameters unaffected.
 
 \subsubsection{Standardisation Parameters}
 
@@ -296,12 +312,15 @@ We tested two models against simulated supernova sets; $\beta(c) = \beta_0 + \be
 \subsubsection{Host Galaxy Environment}
 
 It is now well known that host galaxy environment has a significant effect on supernova properties. The latest sample of over 1300 spectroscopically confirmed Type Ia supernovae show $>5\sigma$ evidence for correlation between host mass and luminosity \citep{Uddin2017}. The traditional correction, as employed in analyses such as \citet{Suzuki2012} and \citet{Betoule2014} invoke a step function such that $\Delta M = 0.08 \mathcal{H}(\log(M) - 10))$, where $\mathcal{H}$ is the Heaviside step function and $M$ is the galaxy mass in solar masses. The scale of this step function varies from analysis to analysis, with the 0.08 value shown previously sourced from \cite{Sullivan2010} and used in \citet{Betoule2014}. In this work we adopt the model used in {\rubin}, which follows the work from \citet{Rigault2013}, such that we introduce two parameters to incorporate a redshift-dependent host galaxy mass correction:
+
 \begin{equation}
 \Delta M = \delta(0) \left[ \frac{1.9\left(1 - \frac{\delta(0)}{\delta(\infty)}\right)  }{0.9 + 10^{0.95z}} + \frac{\delta(0)}{\delta(\infty)}\right].
 \end{equation}
+
 We also take flat priors on the parametrisation $\delta(0)$, $\delta(0)/\delta(\infty)$. With this correction, our calculation of absolute magnitude becomes
+
 \begin{align}
-M_B = m_B - \mu(z) - \alpha x_1 + \beta c - \Delta M \cdot m. \label{eq:l2}
+M_B = m_B - \mu(z) - \alpha x_1 + \beta c - \Delta M \times m. \label{eq:l2}
 \end{align}
 
 
@@ -312,7 +331,8 @@ The chief difficulty with including systematic uncertainties in supernova analys
 
 Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed original values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. By scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
 
-This method of adjusting the observed summary statistics is used throughout the traditional and BHM analyses, however it is normally constrained to band systematics. That is, each band for each survey has two systematics associated with it - the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, ten SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic and also the systematic peculiar velocity uncertainty. This gives thirteen global systematics shared by all surveys, plus two systematics per band in each survey. Denoting $\eta \equiv \lbrace m_B, x_1, c \rbrace$, our initial conditional likelihood for our observed summary statistics shown in Equation \eqref{eq:pop} becomes
+This method of adjusting the observed summary statistics is used throughout the traditional and BHM analyses, however it is normally constrained to band systematics. That is, each band for each survey has two systematics associated with it - the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, ten SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic and also the systematic peculiar velocity uncertainty. This gives thirteen global systematics shared by all surveys, plus two systematics per band in each survey. With $\eta \equiv \lbrace m_B, x_1, c \rbrace$, our initial conditional likelihood for our observed summary statistics shown in Equation \eqref{eq:pop} becomes
+
 \begin{align}
 P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i, C\right) = \mathcal{N}\left(\hat{\eta} + \delta \Z_i \frac{\partial \hat{\eta}}{\partial \Z_i}|\eta,\cov\right). \label{eq:l3}
 \end{align}
@@ -322,40 +342,54 @@ P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i
 \subsubsection{Selection Effects}
 \label{sec:selection}
 Our treatment of selection effects is to incorporate selection efficiency into our model, rather than relying on simulation-driven data corrections. We need to describe the probability that the events we observe are both drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are subsequently successfully observed.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
+
 \begin{align}
 \mathcal{L} &= P({\rm data} | \theta, S). \label{eq:like}
 \end{align}
+
 As our model so far described in previous sections describe components of a basic likelihood $P({\rm data}|\theta)$, and we wish to formulate a function $P(S|{\rm data},\theta)$ that describes the chance of an event being successfully observed, we rearrange the likelihood in terms of those functions and find
+
 \begin{align}
 \mathcal{L} &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:main}
 \end{align}
-where the denominator represents an integral over all potential data. Full derivation of this can be found in Appendix \ref{app:selection}. As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by HMC, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently, such that the denominator of equation \eqref{eq:main}, denoted now $w$ for simplicity, is given as
+
+where the denominator represents an integral over all potential data. As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by HMC, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $w$ for simplicity, is given as
+
 \begin{align}
 w &= \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz. \label{eq:w1}
 \end{align}
-We now apply two further approximations similar to those made in {\rubin} -- that the redshift distribution of the observed supernova reasonably well sampled the $P(S|z)P(z|\theta)$ distribution, and that the survey colour and stretch populations can be treated as Gaussian for the purposes of this integral. It was found that discarding the skewness entirely resulted in highly biased population recovery, and so we instead characterise the skew normal colour distribution with a Gaussian that follows the mean and variance of a skew normal; with mean given by $\langle c(z) \rangle + \sqrt{\frac{2}{\pi}} \sigma_c \delta_c$ and variance $\sigma_c^2(1 - 2\delta_c^2/\pi)$. This shifted Gaussian approximation removes the unintended bias when simply discarding skewness. More detail on this shift can be found in Appendix \ref{app:approx}. The population $P(m_B | z, \theta)$ becomes $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
+
+A full derivation of this can be found in Appendix \ref{app:selection}. We now apply two further approximations similar to those made in {\rubin} -- that the redshift distribution of the observed supernova reasonably well samples the $P(S|z)P(z|\theta)$ distribution, and that the survey colour and stretch populations can be treated as Gaussian for the purposes of this integral. It was found that discarding the skewness entirely resulted in highly biased population recovery, and so we instead characterise the skew normal colour distribution with a Gaussian that follows the mean and variance of a skew normal; with mean given by $\langle c(z) \rangle + \sqrt{\frac{2}{\pi}} \sigma_c \delta_c$ and variance $\sigma_c^2(1 - 2\delta_c^2/\pi)$. This shifted Gaussian approximation removes the unintended bias when simply discarding skewness. More detail on this shift can be found in Appendix \ref{app:approx}. The population $P(m_B | z, \theta)$ becomes $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
+
 \begin{align}
 m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \langle c(z) \rangle \\
 \sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2.
 \end{align}
+
 What then remains is determining the functional form of $P(S|m_B)$. For the treatment of most surveys, we find that the error function which smoothly transitions from some constant efficiency down to zero is sufficient. Formally, this gives
+
 \begin{align}
 P(S|m_B) = \Phi^c(m_B | \mu_{\rm CDF}, \sigma_{\rm CDF}),
 \end{align}
+
 where $\Phi^c$ the complimentary CDF and $\mu_{\rm CDF}$ and $\sigma_{\rm CDF}$ specify the selection function. The appropriateness of an error function has been found by many past surveys \citep{Dilday2008, Barbary2010, Perrett2012, Graur2013, Rodney2014}. However, for surveys which suffer from saturation and thus rejection of low-redshift supernovae, or for groups of surveys treated together (as is common to do with low-redshift surveys), we find that a skew normal is a suitable analytic form, taking the form
+
 \begin{align}
 P(S|m_B) = \mathcal{N}^{{\rm Skew}}(m_B | \mu_{\rm Skew}, \sigma_{\rm Skew}, \alpha_{\rm Skew}).
 \end{align}
+
 
 The selection functions are fit to apparent magnitude efficiency ratios calculated from SNANA simulations, by calculating an efficiency ratio as a function of apparent magnitude. Uncertainty of the Malmquist bias from the imperfection of the analytic function is incorporated into the fit. Uncertainty was uniformly added in quadrature (similar to adding intrinsic dispersion as a fit parameter) to the efficiency ratio data from our simulations until the reduced $\chi^2$ of the analytic fit reached $1$, allowing us to extract an uncertainty covariance matrix for our analytic fits to either the error function or the skew normal.
 
 
 With the well sampled approximation we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (denoted with the subscript `CDF') and skew normal selection functions respectively (denoted with a subscript `Skew'), this correction becomes
+
 \begin{align}
 w_{\rm CDF} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm CDF}^2}}  \right) \label{eq:seldes}\\
 w_{\rm Skew} &= 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm Skew}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm Skew}^2}}\right) \times \notag\\
 &\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm Skew})(m_B^* - \mu_{\rm Skew})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}{\sigma^2_{\rm Skew}} \sqrt{\frac{\sigma^2_{\rm Skew}}{\alpha^2_{\rm Skew}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm Skew}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}} }\right), \label{eq:sellowz}
 \end{align}
+
 and is incorporated into our likelihood.
 
 
