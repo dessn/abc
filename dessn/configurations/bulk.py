@@ -57,38 +57,36 @@ if __name__ == "__main__":
         ls = []
         shades = []
         cs = ['b', 'g', 'p', 'a']
-        cs = ['b', 'g', 'lb', 'lg']
-        # for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-        #     sim_name = s[0].simulation_name
-        #     if "MAGSMEAR" in sim_name:
-        #         name = "Coherent"
-        #     elif "G10" in sim_name:
-        #         name = "G10"
-        #     elif "C11" in sim_name:
-        #         name = "C11"
-        #     else:
-        #         name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
-        #     name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
-        #     # if s[0].bias_cor:
-        #     #     name += " Biascor"
-        #     if m.statonly:
-        #         ls.append("--")
-        #         shades.append(0.0)
-        #     else:
-        #         ls.append("-")
-        #         shades.append(0.2)
-        #     if isinstance(m, ApproximateModelW):
-        #         print("C2")
-        #         c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        #     else:
-        #         print("C1")
-        #         c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        #
-        # c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True,
-        #              linestyles=ls, colors=cs, shade_alpha=shades)
+        cs = ['g', 'r', 'k', 'k']
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+            sim_name = s[0].simulation_name
+            if "MAGSMEAR" in sim_name:
+                name = "Coherent"
+            elif "G10" in sim_name:
+                name = "G10"
+            elif "C11" in sim_name:
+                name = "C11"
+            else:
+                name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
+            name = "%s %s" % (name, "Stat" if m.statonly else "Stat+Syst")
+            # if s[0].bias_cor:
+            #     name += " Biascor"
+            if m.statonly:
+                ls.append("--")
+                shades.append(0.0)
+            else:
+                ls.append("-")
+                shades.append(0.7)
+            if isinstance(m, ApproximateModelW):
+                c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            else:
+                c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
+
+        c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True, linestyles=ls, colors=cs, shade_gradient=1.4, shade_alpha=shades, linewidths=1.2)
         # c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         # c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
-        # c2.plotter.plot(filename=[pfn + "_small2.png", pfn + "_small2.pdf"], parameters=4, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize=1.0)
+        c2.plotter.plot(filename=[pfn + "_small_g10.png", pfn + "_small_g10.pdf"], chains=["G10 Stat+Syst", "G10 Stat"], parameters=4, truth=truth, extents={r"\Omega_m$": (0.27, 0.33), "$w$": (-1.4, -0.7), r"$\alpha$": (0.1, 0.19), r"$\beta$": (2.4, 4.4)}, figsize=1.0)
+        c2.plotter.plot(filename=[pfn + "_small_c11.png", pfn + "_small_c11.pdf"], chains=["C11 Stat+Syst", "C11 Stat"], parameters=4, truth=truth, extents={r"\Omega_m$": (0.27, 0.33),"$w$": (-1.4, -0.7), r"$\alpha$": (0.1, 0.19), r"$\beta$": (2.4, 4.4)}, figsize=1.0)
         # c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
         # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
         # with open(pfn + "_summary.txt", "w") as f:
@@ -141,56 +139,61 @@ if __name__ == "__main__":
         # print(c2.analysis.get_correlations(chain=3))
         # c2.plotter.plot(filename=pfn + "_big2.png", parameters=31, truth=truth)
 
-        import numpy as np
+        #
+        #
+        #
+        # KDE Stacking
 
-        def convert_to_stdev(sigma):  # pragma: no cover
-            # From astroML
-            shape = sigma.shape
-            sigma = sigma.ravel()
-            i_sort = np.argsort(sigma)[::-1]
-            i_unsort = np.argsort(i_sort)
-
-            sigma_cumsum = 1.0 * sigma[i_sort].cumsum()
-            sigma_cumsum /= sigma_cumsum[-1]
-
-            val = sigma_cumsum[i_unsort].reshape(shape)
-            return val
-
-        res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
-        from fastkde import fastKDE
-        from scipy.interpolate import interp2d
-        theta_prob_c11, theta_prob_g10 = [], []
-        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            sim_name = s[0].simulation_name
-            if not m.statonly:
-                continue
-
-            omega_m = chain['$\\Omega_m$']
-            w = chain['$w$']
-            myPDF, axes = fastKDE.pdf(omega_m, w)
-            probs = convert_to_stdev(myPDF)
-
-            # Get prob value at truth value 0,0
-            v1, v2 = axes
-            inter = interp2d(v1, v2, probs)
-            val = inter(0.3, -1)
-            if "C11" in sim_name:
-                theta_prob_c11.append(val[0])
-            elif "G10" in sim_name:
-                theta_prob_g10.append(val[0])
-            else:
-                print("Oh no ", sim_name)
-
-        print(theta_prob_g10)
-        m = np.mean(theta_prob_g10)
-        me = np.std(theta_prob_g10) / np.sqrt(len(theta_prob_g10))
-        print(len(theta_prob_g10))
-        print("G10: Mean is %0.3f, error is %0.3f, not including KDE error" % (m, me))
-
-        print(theta_prob_c11)
-        m = np.mean(theta_prob_c11)
-        me = np.std(theta_prob_c11) / np.sqrt(len(theta_prob_c11))
-        print("C11: Mean is %0.3f, error is %0.3f, not including KDE error" % (m, me))
+        # import numpy as np
+        #
+        # def convert_to_stdev(sigma):  # pragma: no cover
+        #     # From astroML
+        #     shape = sigma.shape
+        #     sigma = sigma.ravel()
+        #     i_sort = np.argsort(sigma)[::-1]
+        #     i_unsort = np.argsort(i_sort)
+        #
+        #     sigma_cumsum = 1.0 * sigma[i_sort].cumsum()
+        #     sigma_cumsum /= sigma_cumsum[-1]
+        #
+        #     val = sigma_cumsum[i_unsort].reshape(shape)
+        #     return val
+        #
+        # res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
+        # from fastkde import fastKDE
+        # from scipy.interpolate import interp2d
+        # theta_prob_c11, theta_prob_g10 = [], []
+        # for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+        #     sim_name = s[0].simulation_name
+        #     if not m.statonly:
+        #         continue
+        #
+        #     omega_m = chain['$\\Omega_m$']
+        #     w = chain['$w$']
+        #     myPDF, axes = fastKDE.pdf(omega_m, w)
+        #     probs = convert_to_stdev(myPDF)
+        #
+        #     # Get prob value at truth value 0,0
+        #     v1, v2 = axes
+        #     inter = interp2d(v1, v2, probs)
+        #     val = inter(0.3, -1)
+        #     if "C11" in sim_name:
+        #         theta_prob_c11.append(val[0])
+        #     elif "G10" in sim_name:
+        #         theta_prob_g10.append(val[0])
+        #     else:
+        #         print("Oh no ", sim_name)
+        #
+        # print(theta_prob_g10)
+        # m = np.mean(theta_prob_g10)
+        # me = np.std(theta_prob_g10) / np.sqrt(len(theta_prob_g10))
+        # print(len(theta_prob_g10))
+        # print("G10: Mean is %0.3f, error is %0.3f, not including KDE error" % (m, me))
+        #
+        # print(theta_prob_c11)
+        # m = np.mean(theta_prob_c11)
+        # me = np.std(theta_prob_c11) / np.sqrt(len(theta_prob_c11))
+        # print("C11: Mean is %0.3f, error is %0.3f, not including KDE error" % (m, me))
 
 
 
