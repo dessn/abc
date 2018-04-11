@@ -94,6 +94,7 @@ transformed parameters {
     real posterior;
     real posteriorsum;
     vector [n_surveys] survey_posteriors;
+    vector [3] model_mBx1c [n_sne];
     real sigma_MB;
 
     {
