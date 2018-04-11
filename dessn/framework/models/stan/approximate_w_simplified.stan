@@ -82,7 +82,7 @@ parameters {
 
     ///////////////// Population (Hyper) Parameters
     real <lower = -20.5, upper = -18.5> mean_MB;
-    real <lower = -4, upper = -0.5> log_sigma_MB;
+    real <lower = -4, upper = -0.5> log_sigma_MB [n_surveys];
 
 
 }
@@ -127,7 +127,7 @@ transformed parameters {
         }
         // -------------End numerical integration---------------
 
-        sigma_MB = exp(log_sigma_MB);
+        sigma_MB = exp(log_sigma_MB[1]);
 
         // Now update the posterior using each supernova sample
         for (i in 1:n_sne) {
