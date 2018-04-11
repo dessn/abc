@@ -125,7 +125,7 @@ transformed parameters {
         }
         // -------------End numerical integration---------------
 
-        sigma_MB[i] = exp(log_sigma_MB[i]);
+        sigma_MB = exp(log_sigma_MB);
 
         // Now update the posterior using each supernova sample
         for (i in 1:n_sne) {
