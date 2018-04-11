@@ -93,7 +93,6 @@ transformed parameters {
     real weight;
     real posterior;
     real posteriorsum;
-    vector [n_surveys] survey_posteriors;
     vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
     real sigma_MB;
@@ -144,7 +143,7 @@ transformed parameters {
         }
         posteriorsum = sum(point_posteriors);
     }
-    posterior = posteriorsum + sum(survey_posteriors) + cauchy_lpdf(sigma_MB | 0, 1);
+    posterior = posteriorsum + cauchy_lpdf(sigma_MB | 0, 1);
 }
 model {
     target += posterior;
