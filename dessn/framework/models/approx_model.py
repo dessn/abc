@@ -190,9 +190,6 @@ class ApproximateModel(Model):
                             if l not in labs:
                                 continue
                             index = labs.index(l)
-                            print(data["deta_dcalib"][:, :, index].shape)
-                            print(blank[offset:offset + nsne, :, i].shape)
-                            print(index, i, nsne, offset, offset + nsne)
                             blank[offset:offset + nsne, :, i] = data["deta_dcalib"][:, :, index]
                         offset += nsne
                     data_dict[key] = blank

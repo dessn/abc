@@ -145,9 +145,9 @@ class SNANASimulation(Simulation):
         apparents = supernovae[:, 6]
         stretches = supernovae[:, 7]
         colours = supernovae[:, 8]
-        bias_mB = supernovae[:, 9]
-        bias_x1 = supernovae[:, 10]
-        bias_c = supernovae[:, 11]
+        # bias_mB = supernovae[:, 9]
+        # bias_x1 = supernovae[:, 10]
+        # bias_c = supernovae[:, 11]
         extra_uncert = get_sigma_mu_pecvel(redshifts)
         obs_mBx1c_cov, obs_mBx1c, deta_dcalibs = [], [], []
 
