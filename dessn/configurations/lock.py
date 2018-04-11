@@ -22,7 +22,7 @@ if __name__ == "__main__":
     models = [
         ApproximateModelW(prior=True, statonly=False),
         ApproximateModelW(prior=True, statonly=True),
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, apply_efficiency=False),
     ]
 
     ndes = 204
@@ -48,6 +48,7 @@ if __name__ == "__main__":
         res = fitter.load(split_models=True, split_sims=True, squeeze=False)
 
         c = ChainConsumer()
+        names = []
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             sim_name = s[0].simulation_name
             if "G10" in sim_name:
@@ -62,7 +63,12 @@ if __name__ == "__main__":
                 name += " Stat"
             else:
                 name += "Stat+Syst"
+            names.append(name)
             c.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        c.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=4, truth=truth, figsize=1.0)
+
+        c.plotter.plot(filename=[pfn + "_small_c11.png", pfn + "_small_c11.pdf"], parameters=4, truth=truth, figsize=1.0,
+                       chains=[n for n in names if "C11" in n])
+        c.plotter.plot(filename=[pfn + "_small_g10.png", pfn + "_small_g10.pdf"], parameters=4, truth=truth, figsize=1.0,
+                       chains=[n for n in names if "G10" in n])
         with open(pfn + "_summary.txt", "w") as f:
-                f.write(c.analysis.get_latex_table(transpose=True))
+                f.write(c.analysis.get_latex_table(parameters=["$w$"]))
