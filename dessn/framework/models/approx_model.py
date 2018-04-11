@@ -372,3 +372,11 @@ class ApproximateModelW(ApproximateModel):
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$w$"]
+
+
+class ApproximateModelWSimplified(ApproximateModel):
+    def __init__(self, filename="approximate_w_simplified.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True, lock_systematics=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics)
+
+    def get_cosmo_params(self):
+        return [r"$\Omega_m$", r"$w$"]

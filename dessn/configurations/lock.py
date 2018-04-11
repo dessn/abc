@@ -4,7 +4,7 @@ import socket
 
 
 from dessn.framework.fitter import Fitter
-from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel
+from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel, ApproximateModelWSimplified
 from dessn.framework.simulations.snana import SNANASimulation
 
 
@@ -20,9 +20,10 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, statonly=False),
-        ApproximateModelW(prior=True, statonly=True),
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, apply_efficiency=False),
+        # ApproximateModelW(prior=True, statonly=False),
+        # ApproximateModelW(prior=True, statonly=True),
+        # ApproximateModelW(prior=True, statonly=True, lock_systematics=True, apply_efficiency=False),
+        ApproximateModelWSimplified(prior=True, statonly=True, lock_systematics=True, apply_efficiency=False),
     ]
 
     ndes = 204
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 100
+    ncosmo = 5
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
