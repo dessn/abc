@@ -34,9 +34,9 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    ncosmo = 10
+    ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
-    fitter.set_max_steps(3000)
+    fitter.set_max_steps(4000)
     fitter.set_num_walkers(1)
     fitter.set_num_cpu(500)
 
@@ -46,3 +46,23 @@ if __name__ == "__main__":
     else:
         from chainconsumer import ChainConsumer
         res = fitter.load(split_models=True, split_sims=True, squeeze=False)
+
+        c = ChainConsumer()
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+            sim_name = s[0].simulation_name
+            if "G10" in sim_name:
+                name = "G10"
+            elif "C11" in sim_name:
+                name = "C11"
+            else:
+                name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
+            if m.lock_systematics:
+                name += " Locked Sys"
+            elif m.statonly:
+                name += " Stat"
+            else:
+                name += "Stat+Syst"
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        c.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=4, truth=truth, figsize=1.0)
+        with open(pfn + "_summary.txt", "w") as f:
+                f.write(c.analysis.get_latex_table(transpose=True))
