@@ -51,6 +51,7 @@ data {
     real systematics_scale; // Use this to dynamically turn systematics on or off
     int apply_efficiency;
     int apply_prior;
+    int lock_systematics;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -310,5 +311,21 @@ model {
     
     if (apply_prior) {
         target += normal_lpdf(Om | 0.3, 0.01);
+    }
+
+    if (lock_systematics) {
+        for (i in 1:n_surveys) {
+            target += normal_lpdf(mean_x1[i] | 0, 0.01)
+                + normal_lpdf(mean_c[i]  | 0, 0.01)
+                + normal_lpdf(deltas[i] | 0, 0.01)
+                + normal_lpdf(kappa_c0[i] | 0.02, 0.001)
+                + normal_lpdf(kappa_c1[i] | 0.02, 0.001)
+                + normal_lpdf(delta_c[i] | 0, 0.01);
+        }
+        target += normal_lpdf(sigma_MB | 0.1, 0.01)
+            + cauchy_lpdf(sigma_x1 | 1, 0.01)
+            + cauchy_lpdf(sigma_c  | 0.1, 0.01)
+            + normal_lpdf(calibration | 0, 0.01)
+            + normal_lpdf(smear | 0.5, 0.01);
     }
 }

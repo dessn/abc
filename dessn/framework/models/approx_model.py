@@ -11,7 +11,7 @@ from dessn.framework.model import Model
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False):
+    def __init__(self, filename="approximate.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False, lock_systematics=False):
         self.statonly = statonly
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
@@ -22,6 +22,7 @@ class ApproximateModel(Model):
         self.frac_shift = frac_shift
         self.apply_efficiency = 1 if apply_efficiency else 0
         self.prior = prior
+        self.lock_systematics = 1 if lock_systematics else 0
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -305,6 +306,7 @@ class ApproximateModel(Model):
 
         update["mean_mass"] = mean_masses
         update["apply_efficiency"] = self.apply_efficiency
+        update["lock_systematics"] = self.lock_systematics
         update["apply_prior"] = 1 if self.prior else 0
 
         final_dict = {**data_dict, **update, **sim_dict}
@@ -357,16 +359,16 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=1.0, apply_efficiency=True, prior=False):
-        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=1.0, apply_efficiency=True, prior=False, lock_systematics=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True):
-        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior)
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True, lock_systematics=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$w$"]
