@@ -29,7 +29,7 @@ if __name__ == "__main__":
     ndes = 204
     nlowz = 128
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=True)],
         # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
     ]
     fitter = Fitter(dir_name)
@@ -76,16 +76,13 @@ if __name__ == "__main__":
 
         import numpy as np
         res = fitter.load(split_cosmo=True, squeeze=False)
-        ws_pecv = []
-        ws_nopecv = []
+        ws = {}
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            sim_name = s[0].simulation_name
-            if s[0].add_pecv:
-                ws_pecv.append(np.mean(chain["$w$"]))
-            else:
-                ws_nopecv.append(np.mean(chain["$w$"]))
+            key = m.__class__.__name__ + "_" + ("statonly_" if m.statonly else "syst_") + ("lock" if m.lock_systematics else "nolock")
+            if ws.get(key) is None:
+                ws[key] = []
+            ws[key].append(np.mean(chain["$w$"]))
 
-        print(np.std(ws_pecv), np.std(ws_nopecv))
-        # import matplotlib.pyplot as plt
-        # plt.hist(ws, bins=20)
-        # plt.show()
+        for k in ws.keys():
+            print(k, np.std(ws[k]))
+
