@@ -18,13 +18,13 @@ if __name__ == "__main__":
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-
     models = [
-        # ApproximateModelW(prior=True, statonly=False),
-        # ApproximateModelW(prior=True, statonly=True),
-        # ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
         ApproximateModelWSimplified(prior=True, statonly=True, lock_systematics=True),
+        ApproximateModelW(prior=True, statonly=False),
+        ApproximateModelW(prior=True, statonly=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
     ]
+
 
     ndes = 204
     nlowz = 128
