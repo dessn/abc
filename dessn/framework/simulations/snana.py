@@ -12,7 +12,8 @@ from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 
 class SNANASimulation(Simulation):
-    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13, shift=None, type="G10", kappa=0.0, bias_cor=True, zlim=None):
+    def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13,
+                 shift=None, type="G10", kappa=0.0, bias_cor=True, zlim=None, add_pecv=True):
         super().__init__()
         self.simulation_name = sim_name
         self.type = type
@@ -32,6 +33,7 @@ class SNANASimulation(Simulation):
         self.num_calib = len(self.systematic_labels)
         self.bias_cor = bias_cor
         self.zlim = zlim
+        self.add_pecv = add_pecv
         if self.num_calib == 0:
             self.num_calib = 1
 
@@ -171,7 +173,8 @@ class SNANASimulation(Simulation):
             else:
                 vector = np.array([mb, x1, c - sa])
                 cov = supernovae[i, 12:12 + 9].reshape((3, 3))
-            cov[0, 0] += eu**2
+            if self.add_pecv:
+                cov[0, 0] += eu**2
             calib = supernovae[i, 12+9:].reshape((3, -1))
             obs_mBx1c_cov.append(cov)
             obs_mBx1c.append(vector)
