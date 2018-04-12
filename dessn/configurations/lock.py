@@ -20,9 +20,9 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
     models = [
         ApproximateModelWSimplified(prior=True, statonly=True, lock_systematics=True),
-        ApproximateModelW(prior=True, statonly=False),
-        ApproximateModelW(prior=True, statonly=True),
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
+        # ApproximateModelW(prior=True, statonly=False),
+        # ApproximateModelW(prior=True, statonly=True),
+        # ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
     ]
 
 
