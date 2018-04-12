@@ -20,9 +20,9 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
     models = [
         ApproximateModelWSimplified(prior=True, statonly=True, lock_systematics=True),
-        # ApproximateModelW(prior=True, statonly=False),
-        # ApproximateModelW(prior=True, statonly=True),
-        # ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
+        ApproximateModelW(prior=True, statonly=False),
+        ApproximateModelW(prior=True, statonly=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
     ]
 
 
@@ -32,6 +32,10 @@ if __name__ == "__main__":
         [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", use_sim=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=True)],
         # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
     ]
+
+    # data = models[0].get_data(simulations[0], 0)
+    # exit()
+
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
@@ -67,10 +71,8 @@ if __name__ == "__main__":
             names.append(name)
             c.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
-        # c.plotter.plot(filename=[pfn + "_small_c11.png", pfn + "_small_c11.pdf"], parameters=4, truth=truth, figsize=1.0,
-        #                chains=[n for n in names if "C11" in n])
-        # c.plotter.plot(filename=[pfn + "_small_g10.png", pfn + "_small_g10.pdf"], parameters=4, truth=truth, figsize=1.0,
-        #                chains=[n for n in names if "G10" in n])
+        # c.plotter.plot(filename=[pfn + "_small_c11.png", pfn + "_small_c11.pdf"], parameters=4, truth=truth, figsize=1.0, chains=[n for n in names if "C11" in n])
+        # c.plotter.plot(filename=[pfn + "_small_g10.png", pfn + "_small_g10.pdf"], parameters=4, truth=truth, figsize=1.0, chains=[n for n in names if "G10" in n])
         with open(pfn + "_summary.txt", "w") as f:
                 f.write(c.analysis.get_latex_table(parameters=["$w$"]))
 

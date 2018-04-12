@@ -167,6 +167,7 @@ class SNANASimulation(Simulation):
             shift_deltas = interp1d(cor_z, cor_means, bounds_error=False, fill_value=(cor_means[0], cor_means[-1]))(redshifts)
 
         for i, (mb, x1, c, smb, sx1, sc, eu, sa) in enumerate(zip(apparents, stretches, colours, s_ap, s_st, s_co, extra_uncert, shift_amount)):
+            print(smb, sx1, sc)
             if self.use_sim:
                 cov = np.diag(np.array([0.04, 0.1, 0.04]) ** 2)
                 vector = np.array([smb, sx1, sc]) + np.random.multivariate_normal([0, 0, 0], cov)

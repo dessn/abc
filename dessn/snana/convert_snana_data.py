@@ -211,7 +211,7 @@ def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels
         x1e = row["x1ERR"]
         ce = row["cERR"]
 
-        if "SIM_mB" not in row:
+        if "SIM_mB" not in row.dtype.names:
             sim_mb = 0
             sim_x1 = 0
             sim_c = 0
@@ -329,8 +329,8 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
     # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
-    # convert("DES3YR_DES_BULK", skip=6)
     # convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
+    # convert("DES3YR_DES_BULK", skip=6)
     convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
