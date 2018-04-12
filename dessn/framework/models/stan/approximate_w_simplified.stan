@@ -81,6 +81,7 @@ parameters {
 transformed parameters {
 
     real posterior;
+    real posteriorsum;
     vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
     real sigma_MB;
@@ -116,8 +117,9 @@ transformed parameters {
             point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1) + normal_lpdf(model_MBx1c[i][1] | mean_MB, sigma_MB);
 
         }
+        posteriorsum = sum(point_posteriors);
     }
-    posterior = sum(point_posteriors) + cauchy_lpdf(sigma_MB | 0, 1);
+    posterior = posteriorsum + cauchy_lpdf(sigma_MB | 0, 1);
 }
 model {
     target += posterior;

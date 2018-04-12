@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 f.write(c.analysis.get_latex_table(parameters=["$w$"]))
 
         import numpy as np
-        res = fitter.load(split_cosmo=True)
+        res = fitter.load(split_cosmo=True, squeeze=False)
         ws_pecv = []
         ws_nopecv = []
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
