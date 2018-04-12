@@ -55,16 +55,8 @@ data {
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
-    matrix[4, 4] mb_cov_chol [n_surveys];
-    matrix[3, 3] outlier_population;
-
-    outlier_population = outlier_dispersion * outlier_dispersion';
-
     for (i in 1:n_sne) {
         obs_mBx1c_chol[i] = cholesky_decompose(obs_mBx1c_cov[i]);
-    }
-    for (i in 1:n_surveys) {
-        mb_cov_chol[i] = cholesky_decompose(mB_cov[i]);
     }
 }
 
@@ -84,32 +76,21 @@ parameters {
     real <lower = -20.5, upper = -18.5> mean_MB;
     real <lower = -4, upper = -0.5> log_sigma_MB [n_surveys];
 
-
 }
 
 transformed parameters {
 
-
-    real weight;
     real posterior;
-    real posteriorsum;
     vector [3] model_MBx1c [n_sne];
     vector [3] model_mBx1c [n_sne];
     real sigma_MB;
 
     {
-
         // Helper variables for Simpsons rule
         real Hinv [n_z];
         real cum_simps[n_simps];
         real model_mu[n_sne];
-
-        // Lets actually record the proper posterior values
         vector [n_sne] point_posteriors;
-        vector [n_sne] weights;
-        vector [n_sne] numerator_weight;
-
-        // Other temp variables for corrections
         real expon;
 
         // -------------Begin numerical integration-----------------
@@ -128,26 +109,18 @@ transformed parameters {
 
         sigma_MB = exp(log_sigma_MB[1]);
 
-        // Now update the posterior using each supernova sample
         for (i in 1:n_sne) {
 
-            // Convert into apparent magnitude
             model_mBx1c[i] = obs_mBx1c[i] + obs_mBx1c_chol[i] * deviations[i];
-
-            // Convert population into absolute magnitude
             model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha * model_mBx1c[i][2] - beta * model_mBx1c[i][3];
-
-            // Track and update posterior
             point_posteriors[i] = normal_lpdf(deviations[i] | 0, 1) + normal_lpdf(model_MBx1c[i][1] | mean_MB, sigma_MB);
 
         }
-        posteriorsum = sum(point_posteriors);
     }
-    posterior = posteriorsum + cauchy_lpdf(sigma_MB | 0, 1);
+    posterior = sum(point_posteriors) + cauchy_lpdf(sigma_MB | 0, 1);
 }
 model {
     target += posterior;
-
     if (apply_prior) {
         target += normal_lpdf(Om | 0.3, 0.01);
     }

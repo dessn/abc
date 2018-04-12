@@ -29,9 +29,8 @@ if __name__ == "__main__":
     ndes = 204
     nlowz = 128
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", add_pecv=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", add_pecv=False)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", add_pecv=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", add_pecv=True)],
-        # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", add_pecv=add_pecv), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", add_pecv=add_pecv)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
     ]
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
@@ -46,43 +45,47 @@ if __name__ == "__main__":
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
         fitter.fit(file)
     else:
-        # from chainconsumer import ChainConsumer
-        # res = fitter.load(split_models=True, split_sims=True, squeeze=False)
-        #
-        # c = ChainConsumer()
-        # names = []
-        # for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-        #     sim_name = s[0].simulation_name
-        #     if "G10" in sim_name:
-        #         name = "G10"
-        #     elif "C11" in sim_name:
-        #         name = "C11"
-        #     else:
-        #         name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
-        #     if m.lock_systematics:
-        #         name += " Locked Sys"
-        #     elif m.statonly:
-        #         name += " Stat"
-        #     else:
-        #         name += "Stat+Syst"
-        #     names.append(name)
-        #     c.add_chain(chain, weights=weight, posterior=posterior, name=name)
-        #
+        from chainconsumer import ChainConsumer
+        res = fitter.load(split_models=True, split_sims=True, squeeze=False)
+
+        c = ChainConsumer()
+        names = []
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+            sim_name = s[0].simulation_name
+            if "G10" in sim_name:
+                name = "G10"
+            elif "C11" in sim_name:
+                name = "C11"
+            else:
+                name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
+            if m.lock_systematics:
+                name += " Locked Sys"
+            elif m.statonly:
+                name += " Stat"
+            else:
+                name += "Stat+Syst"
+            names.append(name)
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+
         # c.plotter.plot(filename=[pfn + "_small_c11.png", pfn + "_small_c11.pdf"], parameters=4, truth=truth, figsize=1.0,
         #                chains=[n for n in names if "C11" in n])
         # c.plotter.plot(filename=[pfn + "_small_g10.png", pfn + "_small_g10.pdf"], parameters=4, truth=truth, figsize=1.0,
         #                chains=[n for n in names if "G10" in n])
-        # with open(pfn + "_summary.txt", "w") as f:
-        #         f.write(c.analysis.get_latex_table(parameters=["$w$"]))
+        with open(pfn + "_summary.txt", "w") as f:
+                f.write(c.analysis.get_latex_table(parameters=["$w$"]))
 
         import numpy as np
         res = fitter.load(split_cosmo=True)
-        ws = []
+        ws_pecv = []
+        ws_nopecv = []
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             sim_name = s[0].simulation_name
-            if "G10" in sim_name:
-                ws.append(np.mean(chain["$w$"]))
-        print(np.std(ws))
-        import matplotlib.pyplot as plt
-        plt.hist(ws, bins=20)
-        plt.show()
+            if s[0].add_pecv:
+                ws_pecv.append(np.mean(chain["$w$"]))
+            else:
+                ws_nopecv.append(np.mean(chain["$w$"]))
+
+        print(np.std(ws_pecv), np.std(ws_nopecv))
+        # import matplotlib.pyplot as plt
+        # plt.hist(ws, bins=20)
+        # plt.show()
