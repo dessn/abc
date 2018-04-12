@@ -28,10 +28,10 @@ if __name__ == "__main__":
 
     ndes = 204
     nlowz = 128
-    add_pecv = False
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", add_pecv=add_pecv), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", add_pecv=add_pecv)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", add_pecv=add_pecv), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", add_pecv=add_pecv)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", add_pecv=False), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", add_pecv=False)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", add_pecv=True), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", add_pecv=True)],
+        # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", add_pecv=add_pecv), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", add_pecv=add_pecv)],
     ]
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
