@@ -5,8 +5,7 @@ import socket
 
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel, ApproximateModelWSimplified
-from dessn.framework.simulations.snana import SNANASimulation
-from simulations.simple import SimpleSimulation
+from dessn.framework.simulations.simple import SimpleSimulation
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
