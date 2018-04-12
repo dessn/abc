@@ -126,4 +126,7 @@ model {
     if (apply_prior) {
         target += normal_lpdf(Om | 0.3, 0.01);
     }
+    if (lock_systematics) {
+        target += normal_lpdf(alpha | 0.14, 0.01) + normal_lpdf(beta | 3.1, 0.01) + normal_lpdf(mean_MB | -19.365, 0.01) + normal_lpdf(sigma_MB | 0.1, 0.01);
+    }
 }

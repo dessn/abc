@@ -19,6 +19,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
     models = [
         ApproximateModelWSimplified(prior=True, statonly=True, lock_systematics=True),
+        ApproximateModelWSimplified(prior=True, statonly=True, lock_systematics=False),
         # ApproximateModelW(prior=True, statonly=False),
         # ApproximateModelW(prior=True, statonly=True),
         # ApproximateModelW(prior=True, statonly=True, lock_systematics=True),
@@ -28,7 +29,8 @@ if __name__ == "__main__":
     ndes = 204
     nlowz = 128
     simulations = [
-        [SimpleSimulation(300), SimpleSimulation(200, lowz=True)]
+        [SimpleSimulation(300, mass=False, dscale=0, alpha_c=0, kappa0=0, kappa1=0),
+         SimpleSimulation(200, lowz=True, mass=False, dscale=0, alpha_c=0, kappa0=0, kappa1=0)]
     # [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
     ]
 
@@ -54,13 +56,7 @@ if __name__ == "__main__":
         c = ChainConsumer()
         names = []
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            sim_name = s[0].simulation_name
-            if "G10" in sim_name:
-                name = "G10"
-            elif "C11" in sim_name:
-                name = "C11"
-            else:
-                name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
+            name = ""
             if m.lock_systematics:
                 name += " Locked Sys"
             elif m.statonly:
