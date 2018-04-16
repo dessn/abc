@@ -311,7 +311,7 @@ class ApproximateModel(Model):
         update["apply_prior"] = 1 if self.prior else 0
 
         if self.fakes:
-            update["fakes"] = np.random.normal(loc=-1, scale=3, size=nsne)
+            update["fakes"] = np.random.normal(loc=-1, scale=3, size=total_num_sne)
 
         final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
