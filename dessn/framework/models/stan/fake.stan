@@ -53,7 +53,7 @@ data {
     int apply_prior;
     int lock_systematics;
 
-    real fakes [nsne];
+    real fakes [n_sne];
 }
 
 
