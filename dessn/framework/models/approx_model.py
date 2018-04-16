@@ -11,7 +11,7 @@ from dessn.framework.model import Model
 
 class ApproximateModel(Model):
 
-    def __init__(self, filename="approximate.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False, lock_systematics=False):
+    def __init__(self, filename="approximate.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True, prior=False, lock_systematics=False, fakes=False):
         self.statonly = statonly
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
@@ -23,6 +23,7 @@ class ApproximateModel(Model):
         self.apply_efficiency = 1 if apply_efficiency else 0
         self.prior = prior
         self.lock_systematics = 1 if lock_systematics else 0
+        self.fakes = fakes
 
     def get_parameters(self):
         return ["Om", "Ol", "w", "alpha", "beta", "dscale", "dratio", "mean_MB",
@@ -309,6 +310,9 @@ class ApproximateModel(Model):
         update["lock_systematics"] = self.lock_systematics
         update["apply_prior"] = 1 if self.prior else 0
 
+        if self.fakes:
+            update["fakes"] = np.random.normal(loc=-1, scale=3, size=nsne)
+
         final_dict = {**data_dict, **update, **sim_dict}
         return final_dict
 
@@ -380,3 +384,11 @@ class ApproximateModelWSimplified(ApproximateModel):
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$w$"]
+
+
+class FakeModel(ApproximateModel):
+    def __init__(self, filename="fake.stan"):
+        super().__init__(filename, fakes=True)
+
+    def get_cosmo_params(self):
+        return [r"$w$"]
