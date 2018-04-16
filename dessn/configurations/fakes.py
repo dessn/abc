@@ -19,7 +19,7 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
     models = [FakeModel()]
 
-    simulations = [SimpleSimulation(20)]
+    simulations = [SimpleSimulation(30)]
 
     fitter = Fitter(dir_name)
     fitter.set_models(*models)
