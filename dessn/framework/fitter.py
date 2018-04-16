@@ -210,7 +210,6 @@ class Fitter(object):
                         temp_list.append([p, vals])
             except KeyError:
                 self.logger.warning("Key error on %s" % p)
-
         _, sys_labels = self.models[model_index].get_systematic_labels(self.simulations[simulation_index])
         for i in range(len(temp_list)):
             label, res = temp_list[i]

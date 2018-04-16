@@ -329,6 +329,8 @@ class ApproximateModel(Model):
         return global_labels
 
     def get_systematic_labels(self, simulations):
+        if not isinstance(simulations, list):
+            simulations = [simulations]
         label_lists = [s.get_systematic_names() for s in simulations]
         if self.statonly:
             label_lists = [["Fake"] for s in simulations]
