@@ -62,7 +62,7 @@ parameters {
 }
 transformed parameters {
     real posterior;
-    posterior = normal_lpdf(fakes | w, 1);
+    posterior = normal_lpdf(fakes | w, 3);
 }
 model {
     target += posterior;
