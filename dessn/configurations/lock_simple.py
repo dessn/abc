@@ -64,7 +64,7 @@ if __name__ == "__main__":
             else:
                 name += "Stat+Syst"
             names.append(name)
-            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+            c.add_chain(chain, weights=weight, posterior=posterior, name=name, power=2.0)
 
         # c.plotter.plot(filename=[pfn + "_small_c11.png", pfn + "_small_c11.pdf"], parameters=4, truth=truth, figsize=1.0, chains=[n for n in names if "C11" in n])
         # c.plotter.plot(filename=[pfn + "_small_g10.png", pfn + "_small_g10.pdf"], parameters=4, truth=truth, figsize=1.0, chains=[n for n in names if "G10" in n])

@@ -4,6 +4,7 @@ import socket
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModel, ApproximateModelOl, ApproximateModelW
 from dessn.framework.simulations.simple import SimpleSimulation
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -36,23 +37,41 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
 
         res = fitter.load(split_models=True, squeeze=False, split_cosmo=False)
+        res2 = fitter.load(split_models=True, squeeze=False, split_cosmo=True)
 
         print("Adding data")
         cb = ChainConsumer()
         names = [r"Flat $\Lambda$CDM", r"$\Lambda$CDM", "Flat $w$CDM", r"Flat $w$CDM + $\Omega_m$ prior"]
         for i, (m, s, ci, chain, truth, weight, old_weight, posterior) in enumerate(res):
-            c = ChainConsumer()
-            c.add_chain(chain, weights=weight, posterior=posterior, name=names[i])
-            if i in [0, 3]:
-                cb.add_chain(chain, weights=weight, posterior=posterior, name=names[i])
-            c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, sigmas=[0, 0.3, 1, 2], contour_labels="confidence")
+            # c = ChainConsumer()
+            # c.add_chain(chain, weights=weight, posterior=posterior, name=names[i])
+            # if i in [0, 3]:
+            #     cb.add_chain(chain, weights=weight, posterior=posterior, name=names[i])
+            #
             ps = m.get_cosmo_params()
             n = m.__class__.__name__
             if m.prior:
                 n += "OmPrior"
-            c.plotter.plot(filename=[pfn + n + ".png", pfn + n + ".pdf"], parameters=ps, truth=truth, figsize="column")
 
-        print("Saving table")
-        print(cb.analysis.get_latex_table(transpose=True))
-        with open(pfn + "_cosmo_params.txt", 'w') as f:
-            f.write(cb.analysis.get_latex_table(parameters=parameters))
+            if len(ps) == 2:
+                c2 = ChainConsumer()
+                i = 0
+                for m2, s2, ci, chain, _, weight, _, _ in res2:
+                    if m2 == m and s2 == s:
+                        c2.add_chain(chain, weights=weight, plot_point=True, plot_contour=False, color='b', name="MaxL")
+                        if i == 0:
+                            c2.add_chain(chain, weights=weight, plot_point=True, plot_contour=True, color='g',
+                                         name="Rep", shade=True, shade_alpha=0.3, kde=1.0, bar_shade=True)
+                        i += 1
+
+                c2.plotter.plot(filename=[pfn + n + "2.png"], truth=truth, figsize="column", parameters=ps)
+
+            # c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, sigmas=[0, 1, 2], kde=[False, False, 1.0])
+            # c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, sigmas=[0, 0.3, 1, 2], contour_labels="confidence")
+            # c.plotter.plot(filename=[pfn + n + ".png", pfn + n + ".pdf"], parameters=ps, truth=truth, figsize="column")
+        #
+        # print("Saving table")
+        # cb.configure(smooth=5, bins=0.6)
+        # print(cb.analysis.get_latex_table(transpose=True))
+        # with open(pfn + "_cosmo_params.txt", 'w') as f:
+        #     f.write(cb.analysis.get_latex_table(parameters=parameters))
