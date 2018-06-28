@@ -56,12 +56,13 @@ if __name__ == "__main__":
             if len(ps) == 2:
                 c2 = ChainConsumer()
                 i = 0
-                for m2, s2, ci, chain, _, weight, _, _ in res2:
+                for m2, s2, ci, chain, _, weight, _, pp in res2:
                     if m2 == m and s2 == s:
-                        c2.add_chain(chain, weights=weight, plot_point=True, plot_contour=False, color='b', name="MaxL")
+                        c2.add_chain(chain, weights=weight, posterior=pp, plot_point=True, plot_contour=False, color='k',
+                                     marker_style="+", marker_size=20, name="Posterior Maximums")
                         if i == 0:
-                            c2.add_chain(chain, weights=weight, plot_point=True, plot_contour=True, color='g',
-                                         name="Rep", shade=True, shade_alpha=0.3, kde=1.0, bar_shade=True)
+                            c2.add_chain(chain, weights=weight, plot_point=True, plot_contour=True, color='b',
+                                         name="Representative Surface", shade=True, shade_alpha=0.5, kde=1.0, bar_shade=True)
                         i += 1
 
                 c2.plotter.plot(filename=[pfn + n + "2.png"], truth=truth, figsize="column", parameters=ps)
