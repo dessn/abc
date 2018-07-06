@@ -49,6 +49,10 @@ def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None):
     mB_passed = mB_all[passed]
 
     # Bin data and get ratio
+    # import matplotlib.pyplot as plt
+    # plt.hist(mB_passed, 100)
+    # plt.show()
+    # exit()
     hist_all, bins = np.histogram(mB_all, bins=100)
     hist_passed, _ = np.histogram(mB_passed, bins=bins)
     hist_passed_err = np.sqrt(hist_passed)
@@ -68,7 +72,7 @@ def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None):
 
 def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0, zlim=None):
     binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=kappa, zlim=zlim)
-
+    print(binc, ratio)
     def cdf(b, mean, sigma, alpha, n):
         model = (1 - norm.cdf(b, loc=mean, scale=sigma)) * n + 10 * alpha
         return model
@@ -119,8 +123,8 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0, zlim=No
 
         ax.text(0.98, 0.95, "DES 3YR Spectroscopically Confirmed", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
         # fig.savefig("../../../papers/methods/figures/%s_%0.2f.png" % (name, delta), bbox_inches="tight", transparent=True)
-        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
-
+        # fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
+        plt.show()
     return False, vals, cov, r2
 
 
@@ -178,7 +182,7 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, kappa=0, zl
         ax.set_ylim(0, 0.4)
         fig.tight_layout()
         name = os.path.basename(dump_npy)
-        #plt.show()
+        plt.show()
         ax.text(0.98, 0.95, "Combined LowZ Sample", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
         # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
         # fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)

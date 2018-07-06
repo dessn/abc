@@ -124,8 +124,11 @@ def load_dump_file(sim_dir):
             res.append(tuple(r))
         except Exception:
             pass
-    return np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64),
+    data = np.array(res, dtype=[('CID', np.int32), ('S2mb', np.float64), ('MAGSMEAR_COH', np.float64),
                                 ("S2c", np.float64), ("Z", np.float64)])
+    good_mask = (data["S2mb"] > 10) & (data["S2mb"] < 30)
+    data = data[good_mask]
+    return data
 
 
 def digest_simulation(sim_dir, systematics_scales, output_dir, systematic_labels, load_dump=False, skip=6, biascor=None, zipped=True):
@@ -332,12 +335,12 @@ if __name__ == "__main__":
     # convert("DES3YR_LOWZ_NOMINAL")
     # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
-    convert("DES3YR_DES_BULK", skip=6)
-    convert("DES3YR_LOWZ_BULK", skip=6)
+    # convert("DES3YR_DES_BULK", skip=6)
+    # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11, zipped=False)
-    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11, zipped=True)
+    convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11, zipped=True)
     # convert("DES3YR_LOWZ_VALIDATION", skip=6)
     # convert("DES3YR_DES_VALIDATION", skip=6)
 

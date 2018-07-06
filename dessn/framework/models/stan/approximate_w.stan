@@ -194,7 +194,7 @@ transformed parameters {
 
             intrinsic_correlation[i] = diag_matrix(rep_vector(1, 3));
 
-            shifts[i] = mb_cov_chol[i] * deltas[i] * systematics_scale * 0.0;
+            shifts[i] = mb_cov_chol[i] * deltas[i] * systematics_scale;
             mB_mean[i] = mB_mean_orig[i] + shifts[i][1];
             mB_width[i] = mB_width_orig[i] + shifts[i][2];
             mB_alpha[i] = mB_alpha_orig[i] + shifts[i][3];
