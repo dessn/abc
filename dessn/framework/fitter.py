@@ -196,7 +196,11 @@ class Fitter(object):
                         else:
                             temp_list.append([mapping[p] % i, vals[:, i]])
                         if truth.get(mapping[p]) is not None:
-                            truth[mapping[p] % i] = truth[mapping[p]][i]
+                            if len(truth[mapping[p]]) <= i:
+                                self.logger.warning("Truth values don't line up for %s %d" % (p, i))
+                                truth[mapping[p] % i] = 0
+                            else:
+                                truth[mapping[p] % i] = truth[mapping[p]][i]
                     if truth.get(mapping[p]) is not None:
                         del truth[mapping[p]]
                 else:

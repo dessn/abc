@@ -97,11 +97,6 @@
 
 
 
-
-
-
-
-
 % Abstract of the paper
 \begin{abstract}
 We present a hierarchical Bayesian model for use in supernova cosmology which takes into account a full range of analysis systematics and selection effects. This advances previous works with hierarchical Bayesian models by including additional sources of systematic uncertainty and improved treatment of Malmquist bias, whilst increasing numerical efficiency. Our model is optimised for efficient fitting and has been validated on a combined simulated dataset of more than $250\,000$ supernovae to rule out the presence of significant model biases in parameter recovery. Simplified statistical simulations for ideal supernovae cosmology show no bias, and sophisticated SNANA simulations of the combined low-redshift and DES 3-year spectroscopic survey sample quantify the bias for flat $w$CDM cosmology, with a matter prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$ included to allow rigorous determination of model bias in $w$. SNANA simulations can recover the input cosmology to within $0.27\sigma$, while taking into an increased number of systematics than prior analyses.
@@ -111,7 +106,7 @@ We present a hierarchical Bayesian model for use in supernova cosmology which ta
 % Select between one and six entries from the list of approved keywords.
 % Don't make up new ones.
 \begin{keywords}
-keyword1 -- keyword2 -- keyword3
+keyword1 -- keyword2 -- keyword3\vspace{-5mm}
 \end{keywords}
 
 
@@ -126,20 +121,20 @@ keyword1 -- keyword2 -- keyword3
 
 \section{Introduction}
 
+
+
+
 Almost two decades have passed since the discovery of the accelerating universe \citep{Riess1998, Perlmutter1999}. Since that time, the number of observed Type Ia supernovae (SNIa) have increased by more than an order of magnitude, with contributions from modern surveys at both low redshift \citep{Bailey2008, Freedman2009, Hicken2009,  Contreras2010, Conley2011}, and higher redshift \citep{Astier2006, Wood-Vasey2007, Frieman2008, Balland2009, Amanullah2010, Sako2014}. Cosmological analyses of these supernova samples \citep{Kowalski2008, Kessler2009, Conley2011, Suzuki2012, Betoule2014, Rest2014} have been combined with complimentary probes of large scale structureand the CMB. For a recent review, see \citet{Huterer2018}. Despite these prodigious efforts, the nature of dark energy remains an unsolved mystery.
 
+
 In attempts to tease out the nature of dark energy, active and planned surveys are once again ramping up their statistical power. The Dark Energy Survey \citep[DES,][]{Bernstein2012, Abbott2016} has observed thousands of Type Ia supernova, attaining both spectroscopic and photometric selected samples. The Large Synoptic Survey Telescope \citep[LSST,][]{Ivezic2008, LSSTScienceCollaboration2009} will observe scores of thousands of photometrically classified supernovae. Such increased statistical power demands greater fidelity and flexibility in modelling the supernovae for cosmological purposes, as systematic uncertainties will prove to be the limiting factor in our analyses \citep{Betoule2014}.
+
 
 As such, staggering effort is being put into developing more sophisticated supernova cosmology analyses. The role of simulations mimicking survey observations has become increasingly important in determining biases in cosmological constraints and validating specific cosmological models. First used in ESSENCE analyses \citep{Wood-Vasey2007}, and then refined and improved in \citet{Kessler2009}, simulations are now a fundamental component of modern supernovae cosmology.  \citet{Betoule2014} quantise and then correct observational bias using simulations, and more recently \citet{Scolnic2016} and \citet{Kessler2017} explore simulation to quantify observational bias in as a function of many factors to better remove fitting biases. Approximate Bayesian computation methods also make use of simulations, trading traditional likelihoods and analytic approximations for more robust models with the cost of increased computational time \citep{Weyant2013, Jennings2016}. Hierarchical Bayesian models abound \citep{Mandel2009, March2011, March2014, Rubin2015, Shariff2016, Roberts2017}, and either also use simulation corrections or attempt to find sufficient analytic approximations for complicated effects such as Malmquist bias.
 
 
+
 In this paper, we lay out a new hierarchical model that builds off the past work of \citet{Rubin2015} to include more robust treatment of systematics and selection effects, whilst improving computational performance. Section \ref{sec:review} is dedicated to a quick review of the supernovae cosmology. In Section \ref{sec:method} we outline our methodology. Model verification on simulated datasets is given in Section \ref{sec:verification}, along with details on potential areas of improvement.
-
-
-
-
-
-
 
 
 
@@ -150,9 +145,9 @@ Whilst supernova observations take the form of time-series photometric measureme
 
 The population previous discussed represents an observed population, which -- due to the presence of various selection effects -- may not represent the underlying supernova population. Accurately characterising this population, its evolution over redshift, and effects from environment, is one of the challenges of supernova cosmology. However, given some modelled underlying supernova population that lives in the redshift-dependent space $M_B$ (absolute magnitude), $x_1$ and $c$, the introduction of cosmology into the model is simple -- it is encoded in the functional map between those two populations, from apparent magnitude space to absolute magnitude. Specifically, for any given supernova our functional map may take the traditional form:
 
-\begin{equation}
+\begin{align}
 M_B = m_B + \alpha x_1 - \beta c - \mu(z) + \text{other corrections}, \label{eq:standard}
-\end{equation}
+\end{align}
 
 where $M_B$ is the mean absolute magnitude for all SN Ia  $\alpha$ is the stretch correction \citep{Phillips1993, Phillips1999}, and $\beta$ is the colour correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader (longer-lasting) and bluer supernovae are brighter. The cosmological term, $\mu(z)$ represents the distance modulus, and is precisely known given cosmological parameters and a redshift. The $\text{other corrections}$ term often includes corrections for host galaxy environment, as this has statistically significant effects on supernova properties \citep{Kelly2010, Lampeitl2010, Sullivan2010, DAndrea2011, Gupta2011, Johansson2013, Rigault2013, Uddin2017} In traditional analyses, the other corections term often includes bias corrections, which can take the form of a redshift-dependent function \citep{Betoule2014}.
 
@@ -160,16 +155,15 @@ where $M_B$ is the mean absolute magnitude for all SN Ia  $\alpha$ is the stretc
 
 Traditional $\chi^2$ analyses such as that found in \citet{Riess1998, Perlmutter1999, Wood-Vasey2007, Kowalski2008, Kessler2009, Conley2011, Betoule2014}, minimise the difference in distance modulus between the observed distance modulus $\mu_{\rm obs}$ (attained from rearranging equation \eqref{eq:standard}), and the cosmologically predicted values $\mu_C$. This function is given by
 
-\begin{equation}
+\begin{align}
 \chi^2 = (\mu_{\rm obs} - \mu_C)^\dagger C^{-1} (\mu_{\rm obs} - \mu_C),
-\end{equation}
+\end{align}
 
 where $C^{-1}$ is an uncertainty matrix that combines the uncertainty from the SALT2 fits, intrinsic dispersion, calibration, dust, peculiar velocity and many other factors (see \citet{Betoule2014} for a review). The cosmological $\mu_C$ is defined as
 
 \begin{align}
 \mu_C &= 5 \log\left[ \frac{(1+z)r}{10} \right],\\
 r& =\frac{c}{H_0} \int_0^z \frac{dz'}{\sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}}, \label{eq:mu0}
-%\mu_{\rm obs} &= m_B + \alpha x_1 - \beta c - M_B. \label{eq:mu1}
 \end{align}
 where $r$ is the comoving distance for redshift $z$ given a specific cosmology and $H_0$ is the current value of Hubble's constant in $\kmsmpc$.
 
@@ -326,6 +320,7 @@ We tested two models against simulated supernova sets; $\beta(c) = \beta_0 + \be
 
 It is now well known that host galaxy environment is significantly correlated with supernova properties. The latest sample of over 1300 spectroscopically confirmed Type Ia supernovae show $>5\sigma$ evidence for correlation between host mass and luminosity \citep{Uddin2017}. The traditional correction, as employed in analyses such as \citet{Suzuki2012} and \citet{Betoule2014} invoke a step function such that $\Delta M = 0.08 \mathcal{H}(\log(M) - 10))$, where $\mathcal{H}$ is the Heaviside step function, $M$ is the galaxy mass in solar masses and $0.08$ represents the size of the magnitude step. The scale of this step function varies from analysis to analysis, with the 0.08 value shown previously sourced from \cite{Sullivan2010} and used in \citet{Betoule2014}. In this work we adopt the model used in {\rubin}, which follows the work from \citet{Rigault2013}, such that we introduce two parameters to incorporate a redshift-dependent host galaxy mass correction:
 
+
 \begin{align}
 \Delta M = \delta(0) \left[ \frac{1.9\left(1 - \frac{\delta(0)}{\delta(\infty)}\right)  }{0.9 + 10^{0.95z}} + \frac{\delta(0)}{\delta(\infty)}\right], \label{eq:mass}
 \end{align}
@@ -438,27 +433,27 @@ In order to verify our model we run it through several tests. First, we validate
 	\begin{center}
 		\includegraphics[width=\columnwidth]{simpleApproximateModelOl.pdf}
 	\end{center}
-	\caption{Posterior surfaces for 100 realisations of supernova data with the $\Lambda$CDM model. Even a large supernova sample when treated robustly is insufficient to provide tight constraints on either $\Omega_m$ and $\Omega_\Lambda$ due to the severe degeneracy between the parameters.}
+	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $\Lambda$CDM model, with a representative contour from a single data realisation shown for context. Even a large supernova sample when treated robustly is insufficient to provide tight constraints on either $\Omega_m$ and $\Omega_\Lambda$ due to the severe degeneracy between the parameters.}
 	\label{fig:simple_ol}
 \end{figure}
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{simpleApproximateModelW.pdf}
 	\end{center}
-	\caption{Posterior surfaces for 100 realisations of supernova data with the Flat $w$CDM model. The well known banana shaped contour is recovered, with the marginalised distributions in $\Omega_m$ and $w$ providing misleading statistics due to the highly non-Gaussian nature of the posterior surface, where the point attained from each parameters independent maximum likelihood lands well outside the $3\sigma$ contour in parameter space.}
+	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $w$CDM model, with a representative contour from a single data realisation shown for context. The well known banana shaped contour is recovered, with the marginalised distributions in $\Omega_m$ and $w$ providing misleading statistics due to the highly non-Gaussian nature of the posterior surface. The recovered posteior maximums show the same degeneracy direction as the representative surface and scatter around the truth values input into the simulation, shown in dashed lines.}
 	\label{fig:simple_w}
 \end{figure}
 
 \begin{table}
 	\centering
-	\caption{Maximum likelihood cosmological parameters determined from stacking the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. As our surfaces are stacked, a shift away from the simulated values of more than $\sigma/\sqrt{100} = 0.1\sigma$ would give a $1\sigma$ detection of bias. No significant bias is detected in either cosmological model.}
+	\caption{Cosmological parameters determined from the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. For each chain, we record the mean and standard deviation, and then show the average mean and average standard deviations in the table. The scatter introduced by simulation variance (the standard deviation of the 100 mean parameter values) is shown in brackets. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. As we are using 100 independent realisations, the precision of our determination of the mean simulation result is a tenth of the quoted standard deviation: $\sqrt{100} = 10$. As the deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model (which was run with a prior on $\Omega_m$).}
 	\label{tab:simple_model}
 	\begin{tabular}{l|cc}
 		\hline
-		Model & $\Omega_m$ & $w$ \\ 
+		Model & $\Omega_m$(scatter) & $w$(scatter) \\ 
 		\hline
-		Flat $\Lambda$CDM & $0.302\pm 0.015$ & -- \\ 
-		Flat $w$CDM + $\Omega_m$ prior & $\left( 300.9\pm7.4 \right) \times 10^{-3}$ & $-0.996\pm 0.038$ \\ 
+		Flat $\Lambda$CDM & $0.301\pm 0.015(0.012)$ & -- \\ 
+		Flat $w$CDM & -- & $-1.00\pm 0.042(0.030)$ \\ 
 		\hline
 	\end{tabular}
 \end{table}
@@ -543,7 +538,7 @@ Simulations (using the SNANA package) follow the observational schedule and obse
 
 \begin{figure}
 	\begin{center}
-		\includegraphics[width=\columnwidth]{bulk_small_g10.pdf}		\includegraphics[width=\columnwidth]{bulk_small_c11.pdf}
+		\includegraphics[width=\columnwidth]{bulk_points_g10.pdf}		\includegraphics[width=\columnwidth]{bulk_points_c11.pdf}
 	\end{center}
 	\caption{Posterior surfaces for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Surfaces for $\Omega_m$, $w$, $\alpha$, $\beta$ and $\langle M_B \rangle$ are shown, with the other fit parameters being marginalised over. The intrinsic scatter model has significant impact on the recovered $\beta$, which in itself effects cosmology, resulting in small biases in $w$.}
 	\label{fig:bulk_posterior}
