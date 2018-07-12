@@ -2,10 +2,10 @@ import os
 import logging
 import socket
 
-
 from dessn.framework.fitter import Fitter
 from dessn.framework.models.approx_model import ApproximateModelW, ApproximateModel
 from dessn.framework.simulations.snana import SNANASimulation
+from dessn.general.helper import weighted_avg_and_std
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
@@ -46,6 +46,8 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
+        import numpy as np
+
         res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
         # res2 = fitter.load(split_models=True, split_sims=False)
 
@@ -54,6 +56,9 @@ if __name__ == "__main__":
         shades = []
         cs = ['b', 'g', 'p', 'a']
         cs = ['g', 'r', 'k', 'k']
+
+        ws = {}
+        ws_std = {}
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             sim_name = s[0].simulation_name
             col = "k"
@@ -86,21 +91,34 @@ if __name__ == "__main__":
                     cc = c3
                 else:
                     cc = c2
+                if ws.get(name) is None:
+                    ws[name] = []
+                if ws_std.get(name) is None:
+                    ws_std[name] = []
+                w_mean, w_std = weighted_avg_and_std(chain["$w$"], weight)
+                ws[name].append(w_mean)
+                ws_std[name].append(w_std)
                 cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True,
                            color=col, marker_style=ms, marker_size=msize)
             else:
                 c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
+        for k in ws.keys():
+            print("%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.std(ws[k]), np.mean(ws_std[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k])))
         # c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True, linestyles=ls, colors=cs, shade_gradient=1.4, shade_alpha=shades, linewidths=1.2)
         # c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         # c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
-        c2.configure(global_point=False, plot_hists=False, legend_artists=True)
-        c3.configure(global_point=False, plot_hists=False, legend_artists=True)
-        ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (2.6, 4.)}
-        c2.plotter.plot(filename=[pfn + "_points_g10.png", pfn + "_points_g10.pdf"], parameters=4,
-                        truth=truth, extents=ex, figsize=1.0, )
-        c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
-                        truth=truth, extents=ex, figsize=1.0)
+
+        if False:
+            c2.configure(global_point=False, plot_hists=False, legend_artists=True)
+            c3.configure(global_point=False, plot_hists=False, legend_artists=True)
+            ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (2.6, 4.)}
+            c2.plotter.plot(filename=[pfn + "_points_g10.png", pfn + "_points_g10.pdf"], parameters=4,
+                            truth=truth, extents=ex, figsize=1.0, )
+            c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
+                            truth=truth, extents=ex, figsize=1.0)
+
+
         # c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
         # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)
         # with open(pfn + "_summary.txt", "w") as f:

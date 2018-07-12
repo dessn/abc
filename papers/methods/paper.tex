@@ -540,22 +540,22 @@ Simulations (using the SNANA package) follow the observational schedule and obse
 	\begin{center}
 		\includegraphics[width=\columnwidth]{bulk_points_g10.pdf}		\includegraphics[width=\columnwidth]{bulk_points_c11.pdf}
 	\end{center}
-	\caption{Posterior surfaces for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Surfaces for $\Omega_m$, $w$, $\alpha$, $\beta$ and $\langle M_B \rangle$ are shown, with the other fit parameters being marginalised over. The intrinsic scatter model has significant impact on the recovered $\beta$, which in itself effects cosmology, resulting in small biases in $w$.}
+	\caption{Maximum posterior points for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Points are shown for parameters $\Omega_m$, $w$, $\alpha$, $\beta$ and $\langle M_B \rangle$, with the other fit parameters being marginalised over. The intrinsic scatter model has significant impact on the recovered $\beta$, which in itself effects cosmology, resulting in small biases in $w$.}
 	\label{fig:bulk_posterior}
 \end{figure}
 
 \begin{table}
 	\centering
-	\caption{Investigating the combined 100 fits to {\gten} and {\celeven} simulations, fitting with both statistics only and also when including systematics. Whilst the {\gten} models do not show significant evidence of bias, the {\celeven} model does. With the current statistical size of the supernovae dataset, the bias is sub-dominant to the size of the uncertainty. }
+	\caption{Investigating the combined 100 fits to {\gten} and {\celeven} simulations, fitting with both statistics only and also when including systematics. With systematics enabled, both the {\gten} and {\celeven} models show evidence of bias, scattering to either side of the simulated value of $w=-1$. However, their deviation from the truth value represents a shift of approximately $0.3\sigma$ when taking into account the uncertainty on fits to $w$. The bias is sub-dominant to both the size of the uncertainty for each fit, and the scatter induced by statistical variance in the simulations. }
 	\label{tab:bulk_summary}
-	\begin{tabular}{l|cc}
+	\begin{tabular}{l|c}
 		\hline
-		Model & $w$ & Bias Detection Level \\
+		Model & $w$ (scatter) \\
 		\hline
-		{\gten} Stat + Syst  &  $-1.02\pm 0.13$ & $1.5\sigma$  \\
-		{\celeven} Stat + Syst  &  $-0.97\pm 0.11$ & $2.7\sigma$  \\
-		{\gten}  Stat         &  $-1.01\pm 0.11$ & $0.9\sigma$  \\
-		{\celeven} Stat         &  $-0.95\pm 0.09$ & $5.5\sigma$  \\
+		{\gten} Stat + Syst  &  $-1.03\pm 0.10\ (0.08)$   \\
+		{\celeven} Stat + Syst  &  $-0.97\pm 0.09\ (0.06)$  \\
+		{\gten}  Stat         &  $-1.01\pm 0.08\ (0.08)$   \\
+		{\celeven} Stat         &  $-0.96\pm 0.07\ (0.05)$   \\
 		\hline
 	\end{tabular}
 \end{table}
