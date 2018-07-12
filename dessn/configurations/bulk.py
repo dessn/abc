@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
         for k in ws.keys():
-            print("%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.std(ws[k]), np.mean(ws_std[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k])))
+            print("%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k])))
         # c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True, linestyles=ls, colors=cs, shade_gradient=1.4, shade_alpha=shades, linewidths=1.2)
         # c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
         # c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
