@@ -214,10 +214,52 @@ The flexibility afforded by a hierarchical model allows for investigations into 
 
 We construct our hierarchical Bayesian model with several goals in mind: creation of a redshift-dependent underlying supernova population, increased treatment of systematics, and analytic correction of selection effects, including systematic uncertainty on those corrections. We also desire this to be more computationally efficient than prior works, such that cosmological results from thousands of supernovae are obtainable in the order of hours, rather than days. As this is closest to the UNITY method from \citet[][hereafter denoted \rubin]{Rubin2015}, we follow a similar model scaffold, and construct the model in Stan \citep{Carpenter2017, StanDevelopmentTeam2017}. The primary challenge of fitting hierarchical models is their large number of fit parameters, and Stan, which uses automatic differentiation and the no-U-turn Sampler (NUTS, a variant of Hamiltonian Monte Carlo), allows us to efficiently sample high dimensional parameter space.
 
-At the most fundamental level, a supernova cosmology analysis is simply a mapping from an underlying population onto an observed population, where cosmology is encoded directly in the mapping function. The difficulty arises both in adequately describing the biases in the mapping function, and in adding sufficient, physically motivated flexibility in both of these populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model. In the following sections, we will describe these layers, mapping functions, and occurrences of these fatal pathologies.
+At the most fundamental level, a supernova cosmology analysis is simply a mapping from an underlying population onto an observed population, where cosmology is encoded directly in the mapping function. The difficulty arises both in adequately describing the biases in the mapping function, and in adding sufficient, physically motivated flexibility in both of these populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model. In the following sections, we will describe these layers, mapping functions, and occurrences of these fatal pathologies. Summaries of observables and model parameters are shown in Table \ref{tab:param_summary} for easy reference.
 
 
 \subsection{Observed Populations}
+
+
+\begin{table}
+	\centering
+	\caption{{\green Top-level parameters defined in our model and a summary of their use. The parameters are broken into two sections, the top for parameters which are defined globally across all surveys, the second section for parameters which are fit for each survey, the third section are parameters which are defined for each supernova. The bottom section shows the observables (not parameters) that are the input data to the model.}}
+	\label{tab:param_summary}
+	\begin{tabular}{ll}
+		\hline
+		Parameter & Description \\
+		\hline
+		$\Omega_m$  & Matter density  \\
+		$w$  &  Dark energy equation of state  \\
+		$\alpha$ & Stretch standardisation   \\
+		$\beta$         &  Colour standardisation   \\
+		$\delta(0)$ & Scale of the mass-magnitude correction\\
+		$\delta(\infty)/\delta(0)$ & Redshift-dependence of mass-magnitude correction\\
+		$\delta\mathcal{Z}_i$ & Systematics scale\\
+		$\delta S$ & Selection effect deviation \\
+		$\langle M_B \rangle$ & Mean absolute magnitude \\
+		$s_c$ & Colour bias\\
+		\hline
+		$\langle x_1^i \rangle$ & Mean stretch nodes\\
+		$\langle c^i \rangle$ & Mean colour nodes\\
+		$\sigma_{M_B}$ & Population magnitude scatter \\
+		$\sigma_{x_1}$ & Population stretch scatter \\
+		$\sigma_{c}$ & Population colour scatter \\
+		$\kappa_{0}$ & Extra colour dispersion\\
+		$\kappa_{1}$ & Redshift-dependence of extra colour dispersion\\
+		\hline
+		$m_B$ & True flux\\
+		$x_1$ & True stretch \\
+		$c$ & True colour \\
+		\hline
+		$\hat{m}_B$ & Measured flux\\
+		$\hat{x}_1$ & Measured stretch \\
+		$\hat{c}$ & Measured colour \\
+		$C$ & Covariance on flux, stretch and colour \\
+		$\hat{z}$ & Determined redshift \\
+		$\hat{m}$ & Determined mass probability \\
+		\hline
+	\end{tabular}
+\end{table}
 
 \subsubsection{Observables}
 Like most of the BHM methods introduced previously, we work from the summary statistics, where each observed supernova has a flux measurement $\hat{m}_B$ (which is analogous to apparent magnitude), stretch $\hat{x}_1$ and colour $\hat{c}$, with uncertainty $\cov$ on those values. Additionally, each supernova has an observed redshift $\hat{z}$ and a host galaxy mass associated with it, $\hat{m}$, where the mass measurement takes the form of a probability of being above $10^{10}$ solar masses. We will also have a probability of each supernovae being a Type Ia, $\hat{p}$. Our set of observables is therefore given as $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{p}, \hat{m}, \cov \rbrace$, as shown in the probabilistic graphical model (PGM) in Figure \ref{fig:pgm}.
@@ -249,35 +291,6 @@ p(\hat{\eta}|\eta) \sim \mathcal{N}(\hat{\eta} | \eta, \mathcal{C}), \label{eq:p
 
 where $\mathcal{C}$ is a covariance matrix reported from light curve fitting. 
 
-\begin{table}
-	\centering
-	\caption{{\green Top-level parameters defined in our model and a summary of their use. The parameters are broken into two sections, the top for parameters which are defined globally across all surveys, and the bottom section for parameters which are fit for each survey.}}
-	\label{tab:param_summary}
-	\begin{tabular}{ll}
-		\hline
-		Parameter & Description \\
-		\hline
-		$\Omega_m$  & Matter density  \\
-		$w$  &  Dark energy equation of state  \\
-		$\alpha$ & Stretch standardisation   \\
-		$\beta$         &  Colour standardisation   \\
-		$\delta(0)$ & Scale of the mass-magnitude correction\\
-		$\delta(\infty)/\delta(0)$ & Redshift-dependence of mass-magnitude correction\\
-		$\delta\mathcal{Z}_i$ & Systematics scale\\
-		$\delta S$ & Selection effect deviation \\
-		$\langle M_B \rangle$ & Mean absolute magnitude \\
-		$s_c$ & Colour bias\\
-		\hline
-		$\langle x_1^i \rangle$ & Mean stretch nodes\\
-		$\langle c^i \rangle$ & Mean colour nodes\\
-		$\sigma_{M_B}$ & Population magnitude scatter \\
-		$\sigma_{x_1}$ & Population stretch scatter \\
-		$\sigma_{c}$ & Population colour scatter \\
-		$\kappa_{0}$ & Extra colour dispersion\\
-		$\kappa_{1}$ & Redshift-dependence of extra colour dispersion\\
-		\hline
-	\end{tabular}
-\end{table}
 
 \subsubsection{Dealing with incorrect observables}
 
