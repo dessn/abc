@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     fitter = Fitter(dir_name)
 
-    # data = model.get_data(simulation, 0)  # For testing
+    # data = models[0].get_data(simulation, 0)  # For testing
     # exit()
 
     fitter.set_models(*models)

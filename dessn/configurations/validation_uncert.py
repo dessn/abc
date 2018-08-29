@@ -19,14 +19,19 @@ if __name__ == "__main__":
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    models = [ApproximateModelW(prior=True, statonly=True)]#, ApproximateModelW(prior=True)]
+    models = [
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=False),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=False, lock_disp=False, lock_pop=False),
+        ApproximateModelW(prior=True, statonly=False, lock_systematics=False, lock_disp=False, lock_pop=False)
+    ]
     # Turn off mass and skewness for easy test
 
     ndes = 204
     nlowz = 138
     simulations = [
             [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STATONLY")],
-            #[SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STAT+SYST1"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STAT+SYST1")]
     ]
     fitter = Fitter(dir_name)
 
@@ -38,6 +43,7 @@ if __name__ == "__main__":
     fitter.set_num_cosmologies(30)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(2)
+    fitter.set_num_cpu(400)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
