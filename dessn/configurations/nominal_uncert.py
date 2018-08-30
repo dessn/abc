@@ -17,7 +17,10 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
 
     if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+        try:
+            os.makedirs(dir_name)
+        except FileExistsError:
+            pass
 
     models = [
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True),
