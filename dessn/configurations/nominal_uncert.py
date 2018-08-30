@@ -31,7 +31,7 @@ if __name__ == "__main__":
     ndes = 204
     nlowz = 138
     simulations = [
-            [SNANASimulation(ndes, "DES3YR_DES_VALIDATION_STATONLY"), SNANASimulation(nlowz, "DES3YR_LOWZ_VALIDATION_STATONLY")],
+            [SNANASimulation(ndes, "DES3YR_DES_NOMINAL"), SNANASimulation(nlowz, "DES3YR_LOWZ_NOMINAL")],
     ]
     fitter = Fitter(dir_name)
 

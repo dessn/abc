@@ -227,7 +227,9 @@ class Fitter(object):
         return self.models[model_index], self.simulations[simulation_index], cosmo_index, result, truth, new_weight, stan_weight, posterior
 
     def load(self, split_models=True, split_sims=True, split_cosmo=False, convert_names=True, max_deviation=2.5, squeeze=True):
-        files = sorted([f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")])
+        files = [f for f in os.listdir(self.temp_dir) if f.endswith(".pkl")]
+        files.sort(key=lambda s: list(map(int, s.replace(".", "_").split('_')[1:-1])))
+        print(files)
         filenames = [self.temp_dir + "/" + f for f in files]
         model_indexes = [int(f.split("_")[1]) for f in files]
         sim_indexes = [int(f.split("_")[2]) for f in files]

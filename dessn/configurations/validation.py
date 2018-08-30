@@ -61,6 +61,27 @@ if __name__ == "__main__":
             print("%35s %8.4f %8.4f %8.4f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.mean(vals[:, 1])))
+            np.savetxt(plot_dir + "%s.txt" % key, vals, fmt="%0.6f")
+
+        if True:
+            dillon = np.loadtxt(plot_dir + "dillon.txt")
+            print("%35s %8.4f %8.4f %8.4f"
+                  % ("Dillon", np.average(dillon[:, 0], weights=1 / (dillon[:, 1] ** 2)),
+                     np.std(dillon[:, 0]), np.mean(dillon[:, 1])))
+
+            print(np.std(dillon[:, 0] - vals[:, 0]))
+            print(np.sqrt(np.var(vals[:, 0]) - np.var(dillon[:, 0])))
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots()
+
+            x = np.linspace(-1.2, -0.8, 2)
+            ax.errorbar(dillon[:, 0], vals[:, 0], yerr=vals[:, 1], xerr=dillon[:, 1], fmt="o", ecolor="#cccccc", capthick=2)
+            ax.plot(x, x, c='k', ls='--')
+            ax.set_xlabel("w (BBC)")
+            ax.set_ylabel("w (Steve)")
+            plt.show()
+        print("---")
+        print(vals)
             # from chainconsumer import ChainConsumer
 
             # chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
