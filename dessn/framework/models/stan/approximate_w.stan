@@ -54,6 +54,7 @@ data {
     int lock_systematics;
     int lock_pop;
     int lock_disp;
+    int lock_base;
 }
 transformed data {
     matrix[3, 3] obs_mBx1c_chol [n_sne];
@@ -339,5 +340,14 @@ model {
             target += normal_lpdf(deltas[i] | 0, 0.01);
         }
         target += normal_lpdf(calibration | 0, 0.01);
+    }
+
+    if (lock_base) {
+        target += normal_lpdf(dscale | 0, 0.01)
+               + normal_lpdf(dratio | 0, 0.01)
+               + normal_lpdf(alpha | 0.14, 0.01)
+               + normal_lpdf(beta | 3.1, 0.01)
+               + normal_lpdf(mean_MB | -19.365, 0.01);
+
     }
 }

@@ -23,7 +23,8 @@ if __name__ == "__main__":
             pass
 
     models = [
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, apply_efficiency=False),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_base=True, apply_efficiency=False),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_base=True),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=True),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=False),
@@ -46,8 +47,8 @@ if __name__ == "__main__":
     fitter.set_simulations(*simulations)
     fitter.set_num_cosmologies(10)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(4)
-    fitter.set_num_cpu(400)
+    fitter.set_num_walkers(6)
+    fitter.set_num_cpu(500)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!
@@ -62,7 +63,8 @@ if __name__ == "__main__":
                   + ("locksyst " if m.lock_systematics else "") \
                   + ("lockdisp " if m.lock_disp else "") \
                   + ("lockpop " if m.lock_pop else "") \
-                  + ("appeff " if m.apply_efficiency else "")
+                  + ("lockbase " if m.lock_base else "") \
+                  + ("noeff " if not m.apply_efficiency else "")
 
             if key not in ws:
                 ws[key] = []
@@ -73,7 +75,7 @@ if __name__ == "__main__":
             # print(key, vals[:, 0])
         for key in sorted(ws.keys()):
             vals = np.array(ws[key])
-            print("%35s %8.4f %8.4f %8.4f"
+            print("%45s %8.4f %8.4f %8.4f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.mean(vals[:, 1])))
             # from chainconsumer import ChainConsumer
