@@ -23,6 +23,7 @@ if __name__ == "__main__":
             pass
 
     models = [
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, apply_efficiency=False),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=True),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=False),
@@ -57,7 +58,12 @@ if __name__ == "__main__":
 
         ws = {}
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            key = s[0].simulation_name
+            key = ("Statonly " if m.statonly else "Syst ") \
+                  + ("locksyst " if m.lock_systematics else "") \
+                  + ("lockdisp " if m.lock_disp else "") \
+                  + ("lockpop " if m.lock_pop else "") \
+                  + ("appeff " if m.apply_efficiency else "")
+
             if key not in ws:
                 ws[key] = []
             ws[key].append([chain["$w$"].mean(), np.std(chain["$w$"])])

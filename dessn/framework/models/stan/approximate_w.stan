@@ -317,10 +317,10 @@ model {
 
     if (lock_disp) {
             for (i in 1:n_surveys) {
-                target += normal_lpdf(kappa_c0[i] | 0.02, 0.001)
-                       + normal_lpdf(kappa_c1[i] | 0.02, 0.001);
+                target += normal_lpdf(kappa_c0[i] | 0.0, 0.001)
+                       + normal_lpdf(kappa_c1[i] | 0.0, 0.001);
             }
-            target += normal_lpdf(smear | 0.5, 0.01);
+            target += normal_lpdf(smear | 0, 0.01);
     }
 
     if (lock_pop) {
