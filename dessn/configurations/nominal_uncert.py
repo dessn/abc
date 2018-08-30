@@ -40,9 +40,9 @@ if __name__ == "__main__":
 
     fitter.set_models(*models)
     fitter.set_simulations(*simulations)
-    fitter.set_num_cosmologies(30)
+    fitter.set_num_cosmologies(1)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(2)
+    fitter.set_num_walkers(1)
     fitter.set_num_cpu(400)
 
     h = socket.gethostname()
