@@ -436,6 +436,9 @@ P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i
 
 \subsubsection{Selection Effects}
 \label{sec:selection}
+
+
+
 One large difference between traditional methods and BHM methods is that we treat selection effects by incorporating selection efficiency into our model, rather than relying on simulation-driven data corrections. We need to describe the probability that the events we observe are both drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are subsequently successfully observed.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
 
 \begin{align}
@@ -458,8 +461,6 @@ where $P(m_B | z, \theta)$ can be expressed by translating the underlying $M_B$,
 
 We now apply two further approximations similar to those made in {\rubin} -- that the redshift distribution of the observed supernova reasonably well samples the $P(S|z)P(z|\theta)$ distribution, and that the survey colour and stretch populations can be treated as Gaussian for the purposes of this evaluating $P(m_B | z, \theta)$. It was found that discarding the colour population skewness entirely resulted in highly biased population recovery (see Figure \ref{fig:simple_w_super} to see the populations), and so we instead characterise the skew normal colour distribution with a Gaussian that follows the mean and variance of a skew normal; with mean given by $\langle c(z) \rangle + \sqrt{\frac{2}{\pi}} \sigma_c \delta_c$ and variance $\sigma_c^2(1 - 2\delta_c^2/\pi)$. This shifted Gaussian approximation for colour completely removes the unintended bias when simply discarding skewness. This shift was not required for the stretch population, and so was left out for numerical reasons. The impact of this approximation on the calculated efficiency is shown in Figure \ref{fig:shift}, and more detail on this shift and resulting population recovery can be found in Appendix \ref{app:approx}. 
 
-
-
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{shift.pdf}
@@ -467,6 +468,7 @@ We now apply two further approximations similar to those made in {\rubin} -- tha
 	\caption{Testing the correctness of our normal approximation to the skewed colour distribution. The `correct' line (shown in black) represents the exact integral $w = \int P(S|x) P(x) dx$ where $P(S|x)$ is an error function (following our high-redshift surveys) and $P(x) = \mathcal{N}^{\rm Skew}(x, 0.1, 2)$, calculated numerically. The $x$-axis is analogous to $m_B$ is cosmological context. As expected, all efficiencies drop towards zero as shift increases (as objects get fainter). The unshifted normal approximation shows significant discrepancy in the calculated efficiency as it transitions from 1 to 0, whilst the shifted normal approximation shows negligible error to the correct solution. From these plots, further refinement of the normal approximation (such as including kurtosis or higher powers) as unnecessary.}
 	\label{fig:shift}
 \end{figure}
+
 
 
 The population $P(m_B | z, \theta)$ becomes $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
@@ -497,7 +499,7 @@ We can thus include into our model parametrised selection effects by including t
 With the well sampled approximation we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (denoted with the subscript `CDF') and skew normal selection functions respectively (denoted with a subscript `Skew'), the correction \textit{per SNIa} becomes
 
 \begin{align}
-d_{\rm CDF/SNIa} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm CDF}^2}}  \right) \label{eq:seldes}\\
+d_{\rm CDF} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm CDF}^2}}  \right) \label{eq:seldes}\\
 d_{\rm Skew} &= 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm Skew}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm Skew}^2}}\right) \times \notag\\
 &\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm Skew})(m_B^* - \mu_{\rm Skew})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}{\sigma^2_{\rm Skew}} \sqrt{\frac{\sigma^2_{\rm Skew}}{\alpha^2_{\rm Skew}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm Skew}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}} }\right), \label{eq:sellowz}
 \end{align}
@@ -508,7 +510,7 @@ and is incorporated into our likelihood. This is illustrated in Figure \ref{fig:
 	\begin{center}
 		\includegraphics[width=\columnwidth]{efficiency.pdf}
 	\end{center}
-	\caption{The efficiency for supernova discovery at an arbitrary redshift. Shown in both panels in dashed blue is the SNIa population distribution, which takes the form of a normal distribution. The top panel shows a CDF based survey efficiency (green dotted line), whilst the bottom panel shows a skew normal based survey efficiency (red dotted line), but as generic functions of apparent magnitude. The survey efficiency, given the SNIa population, is shown as a solid line in both panels, and the probability of observing a SNIa is found by integrating over the population detection efficiency as described in equation \eqref{eq:w1}, and has been shown by shading the area integrated. This area is what is analytically given by equations \eqref{eq:seldes} and \eqref{eq:sellowz}.}
+	\caption{The efficiency for supernova discovery at an arbitrary redshift. Shown in both panels in dashed blue is the SNIa population distribution, which takes the form of a normal distribution. The top panel shows a CDF based survey efficiency (green dotted line), whilst the bottom panel shows a skew normal based survey efficiency (red dotted line), as functions of apparent magnitude. The survey efficiency, given the SNIa population, is shown as a solid line in both panels, and the probability of observing a SNIa is found by integrating over the population detection efficiency as described in equation \eqref{eq:w1}, and has been shown by shading the area integrated. This area is what is analytically given by equations \eqref{eq:seldes} and \eqref{eq:sellowz}.}
 	\label{fig:efficiency}
 \end{figure}
 
@@ -521,7 +523,7 @@ and is incorporated into our likelihood. This is illustrated in Figure \ref{fig:
 \section{Model Verification}
 \label{sec:verification}
 
-In order to verify our model we run it through several tests. First, we validate on toy models, verifying that there is not significant cosmological bias in highly constraining datasets. We then validate our model on SNANA simulations based on a collection of low redshift surveys and the DES three year spectroscopic sample.
+In order to verify our model we run it through stringent tests. First, we validate on toy models, verifying that we recover accurate cosmology in highly constraining datasets. We then validate our model on SNANA simulations based on a collection of low redshift surveys and the DES three-year spectroscopic sample.
 
 \subsection{Applied to Toy Spectroscopic Data}
 \label{sec:toy}
@@ -531,27 +533,27 @@ In order to verify our model we run it through several tests. First, we validate
 	\begin{center}
 		\includegraphics[width=\columnwidth]{plot_pop_simple.pdf}
 	\end{center}
-	\caption{Population distributions shown in redshift and uncorrected absolute magnitude $m_B - \mu$ for 1000 supernovae in both high-redshift and low-redshift surveys. Selection effects are visible in both samples, where red supernovae are often cut as redshift increases. The colour of the data points is representative over the supernovae colour itself, blue dots represent blue supernovae, with warmer colours representing redder supernovae.}
+	\caption{Population distributions shown in redshift and uncorrected absolute magnitude $m_B - \mu$ for 1000 supernovae in both high-redshift and low-redshift surveys. Selection effects are visible in both samples, where red supernovae are often cut as redshift increases. The colour of the data points is representative over the supernovae colour itself, a negative colour value showing bluer supernovae, with positive colour values representing redder supernovae.}
 	\label{fig:simple_pop}
 \end{figure}
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{simpleApproximateModelOl.pdf}
 	\end{center}
-	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $\Lambda$CDM model, with a representative contour from a single data realisation shown for context. Even a large supernova sample when treated robustly is insufficient to provide tight constraints on either $\Omega_m$ and $\Omega_\Lambda$ due to the severe degeneracy between the parameters.}
+	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $\Lambda$CDM model, with a representative contour from a single data realisation shown for context. Even a large supernova sample when treated robustly is insufficient to provide tight constraints on either $\Omega_m$ or $\Omega_\Lambda$ separately due to the severe degeneracy between the parameters.}
 	\label{fig:simple_ol}
 \end{figure}
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{simpleApproximateModelW.pdf}
 	\end{center}
-	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $w$CDM model, with a representative contour from a single data realisation shown for context. The well known banana shaped contour is recovered, with the marginalised distributions in $\Omega_m$ and $w$ providing misleading statistics due to the highly non-Gaussian nature of the posterior surface. The recovered posteior maximums show the same degeneracy direction as the representative surface and scatter around the truth values input into the simulation, shown in dashed lines.}
+	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $w$CDM model, with a representative contour from a single data realisation shown for context. The well known banana shaped contour is recovered, with the marginalised distributions in $\Omega_m$ and $w$ providing misleading statistics due to the non-Gaussian nature of the posterior surface. The recovered posteior maximums show the same degeneracy direction as the representative surface, and scatter around the truth values input into the simulation, which are shown in dashed lines.}
 	\label{fig:simple_w}
 \end{figure}
 
 \begin{table}
 	\centering
-	\caption{Cosmological parameters determined from the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. For each chain, we record the mean and standard deviation, and then show the average mean and average standard deviations in the table. The scatter introduced by simulation variance (the standard deviation of the 100 mean parameter values) is shown in brackets. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. As we are using 100 independent realisations, the precision of our determination of the mean simulation result is a tenth of the quoted standard deviation: $\sqrt{100} = 10$. As the deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model (which was run with a prior on $\Omega_m$).}
+	\caption{Cosmological parameters determined from the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. For each chain, we record the mean and standard deviation, and then show the average mean and average standard deviations in the table. The scatter introduced by simulation variance (the standard deviation of the 100 mean parameter values) is shown in brackets. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. As we are using 100 independent realisations, the precision of our determination of the mean simulation result is a tenth of the quoted standard deviation: $\sqrt{100} = 10$. As the deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model. For the Flat $w$CDM model, the value of $w$ is reported with a prior on $\Omega_m$ of $\mathcal{N}(0.3, 0.01)$.}
 	\label{tab:simple_model}
 	\begin{tabular}{l|cc}
 		\hline
@@ -563,22 +565,22 @@ In order to verify our model we run it through several tests. First, we validate
 	\end{tabular}
 \end{table}
 
-We generate simple toy data to validate the basic premise of the model. Data generation algorithm is described below:
+We generate simple toy data to validate the basic premise of the model. The data generation algorithm is described below:
 
 \begin{enumerate}[1.]
 	\item Draw a redshift from a power law distribution. For the low redshift survey this is $\mathcal{U}(0.0004, 0.01)^{0.5}$, and for the DES-like survey this is $\mathcal{U}(0.008, 1.0)^{0.3}$.
 	\item Draw a true absolute magnitude, stretch and colour from the respective distributions $\mathcal{N}(-19.3, 0.1)$, $\mathcal{N}(0, 1)$, $\mathcal{N}(0, 0.1)$.
-	\item Draw a random mass probability from $\mathcal{U}(0, 1)$ and calculate the mass-brightness correction using $\delta(0) = 0.08$ and $\delta(0)/\delta(\infty) = 0.5$ and equation \eqref{eq:mass}.
+	\item Draw a random mass probability from $\mathcal{U}(0, 1)$ and calculate the mass-brightness correction using $\delta(0) = 0.08$, $\delta(0)/\delta(\infty) = 0.5$, and equation \eqref{eq:mass}.
 	\item Calculate $\mu(z)$ given the drawn redshift and cosmological parameters $\Omega_m = 0.3$, $w = -1$. Use this to determine the true apparent magnitude of the object $m_B$ using equation \eqref{eq:l2}.
-	\item Determine if the SNIa is detected using detection probability $P(S|m_B) = \mathcal{N}^{\rm skew}(13.72, 1.35, 5.87)$ for the low redshift survey (numeric values obtained by fitting to existing low redshift data). For the DES-like survey, accept with probability $P(S|m_B) = \Phi^C(23.14, 0.5)$. Repeat from step one until we have a supernova which passes.
+	\item Determine if the SNIa is detected using detection probability $P(S|m_B) = \mathcal{N}^{\rm skew}(13.72, 1.35, 5.87)$ for the low redshift survey (numeric values obtained by fitting to existing low redshift data). For the DES-like survey, accept with probability $P(S|m_B) = \Phi^C(23.14, 0.5)$. Repeat from step one until we have a supernova that passes.
 	\item Add independent, Gaussian observational error onto the true $m_B$, $x_1$, $c$ using Gaussian widths of $0.04$, $0.2$, $0.03$ respectively (following the mean uncertainty for DES-like SNANA simulations). Add extra colour uncertainty in quadrature of $\kappa_0 + \kappa_1 z$, where $\kappa_0 = \kappa_1 = 0.03$.
 \end{enumerate}
 
-For supernova independent uncertainty, the selection functions (a skew normal for low-redshift and an error function for high-redshift) are given independent uncertainty of $0.01$ on all parameters. We draw from each survey simulation until we have 1000 LowZ supernovae and 1000 DES-like supernovae, representing a statistical sample of greater power than the estimated 350 supernovae for the DES spectroscopic analysis. Sample data for 1000 high and low redshift supernovae are shown in Figure \ref{fig:simple_pop}, confirming the presence of strong selection effects in both toy surveys, as designed. 
+For supernova-independent uncertainty, the selection functions (a skew normal for low-redshift and an error function for high-redshift) are given independent uncertainty of $0.01$ on all parameters (mean and width for the CDF selection function, and mean, width and skewness for the skew normal selection function). Draw from each survey simulation until we have 1000 LowZ supernovae and 1000 DES-like supernovae, representing a statistical sample of greater power than the estimated 250 supernovae for the DES three-year spectroscopic analysis. Sample data for 1000 high and low redshift supernovae are shown in Figure \ref{fig:simple_pop}, confirming the presence of strong selection effects in both toy surveys, as designed. 
 
 We test four models: Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM, and Flat $w$CDM with a prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, with the latter included to allow sensitive tests on bias for $w$. To achieve statistical precision, we fit 100 realisations of supernovae datasets. Cosmological parameters are recovered without significant bias. Combined posterior surfaces of all 100 realisations fits for $\Lambda$CDM are shown in Figure \ref{fig:simple_ol} and fits for Flat $w$CDM are shown in Figure \ref{fig:simple_w}. By utilising the Stan framework and several efficient parametrisations (discussed further in Appendix \ref{app:optimisations}), fits to these simulations of 2000 supernovae take only on order of a single CPU-hour to run.
 
-To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The strong prior on $\Omega_m$ cuts a slice through the traditional `banana' posterior surface in the $w$-$\Omega_m$ plane of Figure \ref{fig:simple_w}. Without making such a slice, the variation in $w$ can appear to be large due to a shift along the degeneracy direction of the banana. By focusing the slice at an almost fixed $\Omega_m$, we can see the variation in the mean value of $w$ approximately perpendicular to the lines of degeneracy, instead of along them. The results of the analysis are detailed in Table \ref{tab:simple_model}, and do not reveal evidence of systematic bias in our model.
+To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The strong prior on $\Omega_m$ cuts a slice through the traditional `banana' posterior surface in the $w$-$\Omega_m$ plane of Figure \ref{fig:simple_w}. Without making such a slice, the variation in $w$ can appear to be large due to a shift along the degeneracy direction of the banana. By focusing the slice at an almost fixed $\Omega_m$, we can see the variation in the mean value of $w$ approximately perpendicular to the lines of degeneracy, instead of along them. The results of the analysis are detailed in Table \ref{tab:simple_model}, and demonstrate the performance of our model in recovering the true cosmological parameters.
 
 
 
@@ -607,7 +609,7 @@ Early analyses often treated intrinsic dispersion simply as scatter in the under
 Simulations (using the SNANA package) follow the observational schedule and observing conditions for the DES and LowZ surveys, where the LowZ sample is comprised of CfA3 \citep{Hicken2009, Hicken2009a}, CfA4 \citep{Hicken2012} and CSP \citep{Contreras2010,Folatelli2010,Stritzinger2011}.
 
 
-In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and our full treatment of systematics. {\green Our simulated populations are sourced from \citet[][hereafter {\sk}]{Scolnic2016} and shown in Table \ref{tab:dist}. Initial tests were also done with a second, Gaussian population, however cosmological parameters were not significantly impacted by choice of the underlying population and we continue using only the {\sk} population for computational efficiency.} The selection effects were quantified by comparing all the generated supernovae to those that pass our simulated cuts, as shown in Figure~\ref{fig:sf_snana}. It is from this simulation that our analytic determination of the selection functions for the LowZ and DES survey are based. We note that there was no significant difference in the selection effect of Malmquist bias between using the {\gten} or {\celeven} scatter model compared to the fit uncertainty.
+In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and our full treatment of systematics. {\green Our simulated populations are sourced from \citet[][hereafter {\sk}]{Scolnic2016} and shown in Table \ref{tab:dist}. Initial tests were also done with a second, Gaussian population with colour and stretch populations centered on zero and with respective width $0.1$ and $1$, however cosmological parameters were not significantly impacted by choice of the underlying population and we continue using only the {\sk} population for computational efficiency.} The selection effects were quantified by comparing all the generated supernovae to those that pass our simulated cuts, as shown in Figure~\ref{fig:sf_snana}. It is from this simulation that our analytic determination of the selection functions for the LowZ and DES survey are based. We note that there was no significant difference in the selection effect of Malmquist bias between using the {\gten} or {\celeven} scatter model compared to the fit uncertainty.
 
 
 \begin{table}
@@ -645,7 +647,7 @@ In addition to the improvements in the scatter models over the simple data, we a
 	\begin{center}
 		\includegraphics[width=\columnwidth]{bulk_points_g10.pdf}		\includegraphics[width=\columnwidth]{bulk_points_c11.pdf}
 	\end{center}
-	\caption{Maximum posterior points for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Points are shown for parameters $\Omega_m$, $w$, $\alpha$, $\beta$ and $\langle M_B \rangle$, with the other fit parameters being marginalised over. The intrinsic scatter model has significant impact on the recovered $\beta$, which in itself effects cosmology, resulting in small biases in $w$.}
+	\caption{Maximum posterior points for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Points are shown for parameters $\Omega_m$, $w$, $\alpha$, $\beta$ and $\langle M_B \rangle$, with the other fit parameters being marginalised over. As we are unable to fully correct observed summary statistics, a step required by the lack of intrinsic scatter in the SALT2 model, we expect to see an offset in $\alpha$ and $\beta$. This in turn effects cosmology, resulting in small biases in $w$.}
 	\label{fig:bulk_posterior}
 \end{figure}
 
@@ -655,12 +657,12 @@ In addition to the improvements in the scatter models over the simple data, we a
 	\label{tab:bulk_summary}
 	\begin{tabular}{l|cc}
 		\hline
-		Model & $w$ (scatter) & Bias Significance \\
+		Model & $w$ (scatter) & Bias \\
 		\hline
-		{\gten} Stat + Syst  &  $-1.03\pm 0.10\ (0.08)$ & $3.9\sigma$  \\
-		{\celeven} Stat + Syst  &  $-0.97\pm 0.09\ (0.06)$ & $4.4\sigma$  \\
-		{\gten}  Stat         &  $-1.01\pm 0.08\ (0.08)$ & $2.0\sigma$   \\
-		{\celeven} Stat         &  $-0.96\pm 0.07\ (0.05)$ & $7.9\sigma$   \\
+		{\gten} Stat + Syst  &  $-1.03\pm 0.10\ (0.08)$ & $0.3\sigma$  \\
+		{\celeven} Stat + Syst  &  $-0.97\pm 0.09\ (0.06)$ & $0.3\sigma$  \\
+		{\gten}  Stat         &  $-1.01\pm 0.08\ (0.08)$ & $0.1\sigma$   \\
+		{\celeven} Stat         &  $-0.96\pm 0.07\ (0.05)$ & $0.6\sigma$   \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -738,10 +740,10 @@ In addition to the improvements in the scatter models over the simple data, we a
 Each realisation of simulated cosmology contains 137 LowZ supernovae, and 204 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. As our primary focus is Dark Energy, we now focus specifically on the Flat $w$CDM model with matter prior.
 
 
-Points of maximum posterior for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. The parameter bounds are listed in Table \ref{tab:bulk_summary}.
+Points of maximum posterior for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. The parameter bounds are listed in Table \ref{tab:bulk_summary}. Our recovered results are all within $0.5\sigma$ of the true values, however some bias does emerge.
  
  
-Cosmological bias is detected with a confidence of more than $3\sigma$ for the {\gten} and {\celeven} models. We investigate the bias and find its source to be a bias in the observed summary statistics, in addition to incorrect reported uncertainty on the summary statistics. This is confirmed by replacing the fully simulated observed $m_B$, $x_1$ and $c$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits. With this test, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. {\green Our current model and techniques can quantify the effect of different scatter models, but being unable to constrain the `correct' (simulated) scatter model in our model fit means we cannot fully correct for the bias introduced an unknown scatter model. We note that the incorrect summary statistics do not only bias cosmology, but also cause significant bias with the recovery of the standardisation parameters $\alpha$ and $\beta$. Fixing $\alpha$ and $\beta$ values to simulation values when fitting aids in recovering correct cosmology, but does not remove all bias.}
+We investigate the cosmological bias and find its source to be a bias in the observed summary statistics, in addition to incorrect reported uncertainty on the summary statistics. This is confirmed by replacing the fully simulated observed $\hat{m}_B$, $\hat{x}_1$ and $\hat{c}$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits. With this test, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty is incorrect, non-Gaussian and biased. {\green Our current model and techniques can quantify the effect of different scatter models, but being unable to constrain the `correct' (simulated) scatter model in our model fit means we cannot fully correct for the bias introduced an unknown scatter model. We note that the incorrect summary statistics do not only bias cosmology, but also cause significant bias with the recovery of the standardisation parameters $\alpha$ and $\beta$. Fixing $\alpha$ and $\beta$ values to simulation values when fitting aids in recovering correct cosmology, but does not remove all bias.}
 
 Unfortunately, adding extra fit parameters to allow for shifting observables washes out cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data, and is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strength of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulation fits constrained this parameter, and thus the majority of bias in the {\celeven} fits remain. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
 
