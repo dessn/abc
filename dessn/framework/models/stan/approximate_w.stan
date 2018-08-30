@@ -331,13 +331,13 @@ model {
         }
         target += normal_lpdf(sigma_MB | 0.1, 0.01)
                + cauchy_lpdf(sigma_x1 | 1, 0.01)
-               + cauchy_lpdf(sigma_c  | 0.1, 0.01)
+               + cauchy_lpdf(sigma_c  | 0.1, 0.01);
     }
 
     if (lock_systematics) {
         for (i in 1:n_surveys) {
             target += normal_lpdf(deltas[i] | 0, 0.01);
         }
-        target += normal_lpdf(calibration | 0, 0.01)
+        target += normal_lpdf(calibration | 0, 0.01);
     }
 }
