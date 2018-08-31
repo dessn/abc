@@ -53,6 +53,7 @@ data {
     int apply_prior;
     int lock_systematics;
     int lock_pop;
+    int lock_drift;
     int lock_disp;
     int lock_base;
 }
@@ -325,14 +326,17 @@ model {
     }
 
     if (lock_pop) {
+        target += normal_lpdf(sigma_MB | 0.1, 0.01)
+               + cauchy_lpdf(sigma_x1 | 1, 0.01)
+               + cauchy_lpdf(sigma_c  | 0.1, 0.01);
+    }
+
+    if (lock_drift) {
         for (i in 1:n_surveys) {
             target += normal_lpdf(mean_x1[i] | 0, 0.01)
                 + normal_lpdf(mean_c[i]  | 0, 0.01)
                 + normal_lpdf(delta_c[i] | 0, 0.01);
         }
-        target += normal_lpdf(sigma_MB | 0.1, 0.01)
-               + cauchy_lpdf(sigma_x1 | 1, 0.01)
-               + cauchy_lpdf(sigma_c  | 0.1, 0.01);
     }
 
     if (lock_systematics) {

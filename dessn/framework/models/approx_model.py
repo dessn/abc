@@ -12,7 +12,7 @@ from dessn.framework.model import Model
 class ApproximateModel(Model):
 
     def __init__(self, filename="approximate.stan", num_nodes=4, statonly=False, frac_shift=0.0, apply_efficiency=True,
-                 prior=False, lock_systematics=False, lock_disp=False, lock_pop=False, lock_base=False, fakes=False):
+                 prior=False, lock_systematics=False, lock_disp=False, lock_pop=False, lock_base=False, lock_drift=False, fakes=False):
         self.statonly = statonly
         file = os.path.abspath(inspect.stack()[0][1])
         directory = os.path.dirname(file)
@@ -27,6 +27,7 @@ class ApproximateModel(Model):
         self.lock_disp = 1 if lock_disp else 0
         self.lock_pop = 1 if lock_pop else 0
         self.lock_base = 1 if lock_base else 0
+        self.lock_drift = 1 if lock_drift else 0
         self.fakes = fakes
 
     def get_parameters(self):
@@ -372,24 +373,24 @@ class ApproximateModel(Model):
 
 
 class ApproximateModelOl(ApproximateModel):
-    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=1.0, apply_efficiency=True, prior=False, lock_systematics=False, lock_disp=False, lock_pop=False, lock_base=False):
-        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics, lock_disp=lock_disp, lock_pop=lock_pop, lock_base=lock_base)
+    def __init__(self, filename="approximate_ol.stan", num_nodes=4, statonly=False, frac_shift=1.0, apply_efficiency=True, prior=False, lock_systematics=False, lock_disp=False, lock_pop=False, lock_base=False, lock_drift=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics, lock_disp=lock_disp, lock_pop=lock_pop, lock_base=lock_base, lock_drift=lock_drift)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 
 
 class ApproximateModelW(ApproximateModel):
-    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True, lock_systematics=False, lock_disp=False, lock_pop=False, lock_base=False):
-        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics, lock_disp=lock_disp, lock_pop=lock_pop, lock_base=lock_base)
+    def __init__(self, filename="approximate_w.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True, lock_systematics=False, lock_disp=False, lock_pop=False, lock_base=False, lock_drift=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics, lock_disp=lock_disp, lock_pop=lock_pop, lock_base=lock_base, lock_drift=lock_drift)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$w$"]
 
 
 class ApproximateModelWSimplified(ApproximateModel):
-    def __init__(self, filename="approximate_w_simplified.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True, lock_systematics=False, lock_disp=False, lock_pop=False):
-        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics, lock_disp=lock_disp, lock_pop=lock_pop)
+    def __init__(self, filename="approximate_w_simplified.stan", num_nodes=4, statonly=False, prior=False, frac_shift=1.0, apply_efficiency=True, lock_systematics=False, lock_disp=False, lock_pop=False, lock_drift=False):
+        super().__init__(filename, num_nodes=num_nodes, statonly=statonly, frac_shift=frac_shift, apply_efficiency=apply_efficiency, prior=prior, lock_systematics=lock_systematics, lock_disp=lock_disp, lock_pop=lock_pop, lock_drift=lock_drift)
 
     def get_cosmo_params(self):
         return [r"$\Omega_m$", r"$w$"]

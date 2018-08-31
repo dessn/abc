@@ -23,10 +23,11 @@ if __name__ == "__main__":
             pass
 
     models = [
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_base=True, apply_efficiency=False),
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_base=True),
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True),
-        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_drift=True, lock_base=True, apply_efficiency=False),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_drift=True, lock_base=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=True, lock_pop=True, lock_drift=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=True, lock_drift=True),
+        ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=False, lock_drift=True),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=True, lock_disp=False, lock_pop=False),
         ApproximateModelW(prior=True, statonly=True, lock_systematics=False, lock_disp=False, lock_pop=False),
         ApproximateModelW(prior=True, statonly=False, lock_systematics=False, lock_disp=False, lock_pop=False)
@@ -75,7 +76,7 @@ if __name__ == "__main__":
             # print(key, vals[:, 0])
         for key in sorted(ws.keys()):
             vals = np.array(ws[key])
-            print("%45s %8.4f %8.4f %8.4f"
+            print("%55s %8.3f %8.3f %8.3f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.mean(vals[:, 1])))
             # from chainconsumer import ChainConsumer
