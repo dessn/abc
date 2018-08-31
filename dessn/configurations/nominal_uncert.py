@@ -65,6 +65,7 @@ if __name__ == "__main__":
                   + ("lockdisp " if m.lock_disp else "") \
                   + ("lockpop " if m.lock_pop else "") \
                   + ("lockbase " if m.lock_base else "") \
+                  + ("lockdrift " if m.lock_drift else "") \
                   + ("noeff " if not m.apply_efficiency else "")
 
             if key not in ws:
@@ -76,7 +77,7 @@ if __name__ == "__main__":
             # print(key, vals[:, 0])
         for key in sorted(ws.keys()):
             vals = np.array(ws[key])
-            print("%55s %8.3f %8.3f %8.3f"
+            print("%65s %8.4f %8.4f %8.4f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.mean(vals[:, 1])))
             # from chainconsumer import ChainConsumer
