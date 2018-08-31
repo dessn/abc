@@ -316,6 +316,7 @@ class ApproximateModel(Model):
         update["lock_pop"] = self.lock_pop
         update["lock_disp"] = self.lock_disp
         update["lock_base"] = self.lock_base
+        update["lock_drift"] = self.lock_drift
         update["apply_prior"] = 1 if self.prior else 0
 
         if self.fakes:
