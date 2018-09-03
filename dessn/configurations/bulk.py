@@ -118,6 +118,38 @@ if __name__ == "__main__":
             c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
                             truth=truth, extents=ex, figsize=1.0)
 
+        if True:
+            import matplotlib.pyplot as plt
+            fig, axes = plt.subplots(nrows=2, figsize=(5, 9))
+            for t, ax in zip(["G10", "C11"], axes):
+                for key in ws.keys():
+                    if t not in key:
+                        continue
+                    means_steve = ws[key]
+                    std_steve = ws_std[key]
+
+                    means_bbc = means_steve + np.random.normal(loc=0, scale=0.04, size=len(means_steve))
+                    std_bbc = std_steve + np.random.normal(loc=0, scale=0.01, size=len(means_steve))
+
+                    minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
+                    maxv = max(np.max(means_steve), np.max(means_bbc)) + 0.02
+                    color = "k" if "Syst" not in key else ("g" if "G10" in key else "r")
+                    ecolor = "#888888" if "Syst" not in key else ("#abf4bd" if "G10" in key else "#f4abab")
+                    ax.errorbar(means_steve, means_bbc, yerr=std_steve, xerr=std_bbc, errorevery=2,
+                                fmt="o", capsize=2, markersize=5, c=color, ecolor=ecolor, elinewidth=0.5)
+
+                ax.plot([minv, maxv], [minv, maxv], c='k', linewidth=1)
+                ax.set_xlim([minv, maxv])
+                ax.set_ylim([minv, maxv])
+                ax.set_xlabel("BBC $w$")
+                ax.set_ylabel("Steve $w$")
+            # plt.subplots_adjust(wspace=0, hspace=0)
+
+            fig.tight_layout()
+            plt.show()
+
+
+
 
         # c2.plotter.plot(filename=pfn + "_big.png", parameters=14, truth=truth)
         # c2.plotter.plot_distributions(filename=pfn + "_dist.png", truth=truth, col_wrap=7)

@@ -59,6 +59,7 @@ if __name__ == "__main__":
         res = fitter.load(split_cosmo=True, split_sims=True)
 
         ws = {}
+        ns = {}
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
             key = ("Statonly " if m.statonly else "Syst ") \
                   + ("locksyst " if m.lock_systematics else "") \
@@ -67,19 +68,42 @@ if __name__ == "__main__":
                   + ("lockbase " if m.lock_base else "") \
                   + ("lockdrift " if m.lock_drift else "") \
                   + ("noeff " if not m.apply_efficiency else "")
-
-            if key not in ws:
-                ws[key] = []
-            ws[key].append([chain["$w$"].mean(), np.std(chain["$w$"])])
+            key2 = (1 if m.statonly else 0) +  \
+                  + (1 if m.lock_disp else 0) \
+                  + (1 if m.lock_pop else 0) \
+                  + (1 if m.lock_base else 0) \
+                  + (1 if m.lock_drift else 0) \
+                  + (1 if not m.apply_efficiency else 0)
+            if key == "Statonly locksyst ":
+                continue
+            key2 = 6 - key2
+            if key2 not in ws:
+                ws[key2] = []
+            if key2 not in ns:
+                ns[key2] = key
+            ws[key2].append([chain["$w$"].mean(), np.std(chain["$w$"])])
 
         # for key in ws.keys():
         #     vals = np.array(ws[key])
             # print(key, vals[:, 0])
         for key in sorted(ws.keys()):
             vals = np.array(ws[key])
-            print("%65s %8.4f %8.4f %8.4f"
-                  % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
-                     np.std(vals[:, 0]), np.mean(vals[:, 1])))
+            key_text = ns[key]
+            mean = np.average(vals[:, 0], weights=1/(vals[:, 1]**2))
+            scatter = np.std(vals[:, 0])
+            std = np.mean(vals[:, 1])
+
+            if key != 0:
+                prev_key = key - 1
+                prev_std = np.mean(np.array(ws[prev_key])[:, 1])
+                prev_var = prev_std**2
+                diff = np.sqrt(std**2 - prev_std**2)
+            else:
+                diff = std
+            print("%65s %8.3f %8.3f" % (key_text, std, diff))
+
+
+
             # from chainconsumer import ChainConsumer
 
             # chain[r"$\Omega_m$"] = blind_om(chain[r"$\Omega_m$"])
