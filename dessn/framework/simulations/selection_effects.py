@@ -72,7 +72,7 @@ def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None):
 
 def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0, zlim=None):
     binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=kappa, zlim=zlim)
-    print(binc, ratio)
+    # print(binc, ratio)
     def cdf(b, mean, sigma, alpha, n):
         model = (1 - norm.cdf(b, loc=mean, scale=sigma)) * n + 10 * alpha
         return model
@@ -125,6 +125,8 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0, zlim=No
         # fig.savefig("../../../papers/methods/figures/%s_%0.2f.png" % (name, delta), bbox_inches="tight", transparent=True)
         # fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
         plt.show()
+
+    print(vals, cov, r2)
     return False, vals, cov, r2
 
 
@@ -213,9 +215,10 @@ def test_colour_contribution():
 if __name__ == "__main__":
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
-    test_colour_contribution()
-    #get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
-    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
+    # test_colour_contribution()
+    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
+    print("---")
+    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=18)
 
     # _, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10")

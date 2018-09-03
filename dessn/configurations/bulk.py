@@ -19,8 +19,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [
-        ApproximateModelW(prior=True, statonly=False, frac_shift=1.0),
-        ApproximateModelW(prior=True, statonly=True, frac_shift=1.0)
+        ApproximateModelW(prior=True, statonly=False),
+        ApproximateModelW(prior=True, statonly=True)
     ]
 
     ndes = 204
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
     fitter.set_num_walkers(1)
-    fitter.set_num_cpu(500)
+    fitter.set_num_cpu(600)
 
     h = socket.gethostname()
     if h != "smp-hk5pn72":  # The hostname of my laptop. Only will work for me, ha!

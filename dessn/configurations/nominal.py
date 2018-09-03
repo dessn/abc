@@ -40,7 +40,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
 
     # Test systematics
-    # data = models[0].get_data(simulation, 0)  # For testing
+    data = models[0].get_data(simulations[0], 0)  # For testing
     # cal = data["deta_dcalib"]
     # print(cal.shape)
     # print(np.max(cal[:, 0, :]))
@@ -62,41 +62,33 @@ if __name__ == "__main__":
         fitter.fit(file)
     else:
         from chainconsumer import ChainConsumer
-        res = fitter.load()
-        c = ChainConsumer()
+        # res = fitter.load()
+        # c = ChainConsumer()
+        #
+        # for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+        #     name = "Stat + Syst" if not m.statonly else "Stat"
+        #     c.add_chain(chain, weights=weight, posterior=posterior, name=name)
+        #
+        # c.configure(spacing=1.0, diagonal_tick_labels=False)
+        # parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
+        # print(c.analysis.get_latex_table(transpose=True))
+        # c.plotter.plot(filename=pfn + ".png", parameters=parameters, figsize=1.5)
 
-        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            name = "Stat + Syst" if not m.statonly else "Stat"
-            c.add_chain(chain, weights=weight, posterior=posterior, name=name)
-
-        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
-                    sigmas=[0, 1, 2], linestyles=["-", "--"], colors=["b", "k"], shade_alpha=[1.0, 0.0])
-        parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
-        print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", parameters=parameters, figsize=1.5)
-
-        res = fitter.load(split_cosmo=True)
         import numpy as np
-        ps = [r"$\Omega_m$", "$w$", r"$\alpha$", r"$\beta$", r"$\delta(0)$",
-              r"$\sigma_{\rm m_B}^{0}$", r"$\sigma_{\rm m_B}^{1}$",]
-        for p in ps:
-            mus, stds = [], []
-            for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-                w = chain[p]
-                mus.append(np.mean(w))
-                stds.append(np.std(w))
-            mus = np.array(mus)
-            stds = np.array(stds)
-            n = mus.size
+        res = fitter.load(split_cosmo=True, split_sims=True)
 
-            # err(Mean) = RMS(w)/sqrt(n) +- RMS/sqtr(2*n^2)
-            # <werr>    = average werr over all sims +- RMS among werr values
-            # I am so confused
-            wmean = np.average(mus, weights=1/stds)
-            wmean_error_from_rms = np.std(mus) / np.sqrt(n)
-            wmean_error_on_error = wmean_error_from_rms / np.sqrt(2 * n)
-            std = np.sqrt(1 / np.sum(1 / stds**2))
-            std_std = np.std(stds)
-            print("%s %8.3f %8.3f %8.3f %8.3f %8.3f" % (p, wmean, wmean_error_from_rms, wmean_error_on_error, std, std_std))
-            print("%s %6.3f %6.3f %6.3f" % (p, getweightedAvg(mus, stds), getRMSErr(mus), getweightedAvgErr(stds)))
-            # print(mus)
+        ws = {}
+        for m, s, ci, chain, truth, weight, old_weight, posterior in res:
+            key =  s[0].type
+            if key not in ws:
+                ws[key] = []
+            ws[key].append([chain["$w$"].mean(), np.std(chain["$w$"])])
+
+        # for key in ws.keys():
+        #     vals = np.array(ws[key])
+            # print(key, vals[:, 0])
+        for key in sorted(ws.keys()):
+            vals = np.array(ws[key])
+            print("%65s %8.4f %8.4f %8.4f"
+                  % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
+                     np.std(vals[:, 0]), np.mean(vals[:, 1])))

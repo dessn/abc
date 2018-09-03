@@ -336,7 +336,7 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_DES_BULK", skip=6)
-    # convert("DES3YR_LOWZ_BULK", skip=6)
+    convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
     # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11, zipped=True)
