@@ -26,8 +26,8 @@ if __name__ == "__main__":
         ApproximateModelW(prior=True, statonly=True)
     ]
 
-    ndes = 204
-    nlowz = 128
+    ndes = -1  # 204
+    nlowz = -1  # 128
     simulations = [
         [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
         [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
