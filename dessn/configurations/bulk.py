@@ -29,8 +29,8 @@ if __name__ == "__main__":
     ndes = 204
     nlowz = 128
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW"), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", type=None), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", type=None), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
     ]
     fitter = Fitter(dir_name)
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
                     means_steve = np.array(ws[key])
                     std_steve = np.array(ws_std[key])
 
-                    means_bbc = bbc[:, 0]
+                    means_bbc = bbc[:, 0] - 1
                     std_bbc = bbc[:, 1]
 
                     print(means_steve.shape, means_bbc.shape)

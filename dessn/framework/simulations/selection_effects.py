@@ -8,7 +8,11 @@ import logging
 
 
 def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
-    sn, mean, cov, _ = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AM%s" % type, kappa=kappa, zlim=zlim)
+    if type is None:
+        name = "snana_data/DES3YR_DES_BHMEFF_CD"
+    else:
+        name = "snana_data/DES3YR_DES_BHMEFF_AM%s" % type
+    sn, mean, cov, _ = get_selection_effects_cdf(name, kappa=kappa, zlim=zlim)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
     mean += shift
@@ -18,6 +22,8 @@ def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
 
 
 def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
+    if type is None:
+        type = "G10"
     sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, kappa=kappa, zlim=zlim)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
@@ -70,7 +76,7 @@ def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None):
     return binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error
 
 
-def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=18, kappa=0, zlim=None):
+def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=19, kappa=0, zlim=None):
     binc, ratio, ratio_error, ratio_smooth, ratio_smooth_error = get_ratio(dump_npy, cut_mag=cut_mag, delta=kappa, zlim=zlim)
     # print(binc, ratio)
     def cdf(b, mean, sigma, alpha, n):
@@ -216,10 +222,11 @@ if __name__ == "__main__":
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
     # test_colour_contribution()
-    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
-    print("---")
-    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
-    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=18)
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
+    # print("---")
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
+    # print("---")
+    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=19)
 
     # _, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10")
     # print(mean, np.sqrt(np.diag(cov)))
