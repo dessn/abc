@@ -16,7 +16,10 @@ if __name__ == "__main__":
     file = os.path.abspath(__file__)
 
     if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+        try:
+            os.makedirs(dir_name)
+        except FileExistsError:
+            pass
 
     models = [
         ApproximateModelW(prior=True, statonly=False),
@@ -38,7 +41,7 @@ if __name__ == "__main__":
     ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(1)
+    fitter.set_num_walkers(2)
     fitter.set_num_cpu(600)
 
     h = socket.gethostname()
@@ -119,17 +122,21 @@ if __name__ == "__main__":
                             truth=truth, extents=ex, figsize=1.0)
 
         if True:
+            bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
+
             import matplotlib.pyplot as plt
             fig, axes = plt.subplots(nrows=2, figsize=(5, 9))
-            for t, ax in zip(["G10", "C11"], axes):
+            for t, ax, bbc in zip(["G10", "C11"], axes, bbcs):
                 for key in ws.keys():
                     if t not in key:
                         continue
-                    means_steve = ws[key]
-                    std_steve = ws_std[key]
+                    means_steve = np.array(ws[key])
+                    std_steve = np.array(ws_std[key])
 
-                    means_bbc = means_steve + np.random.normal(loc=0, scale=0.04, size=len(means_steve))
-                    std_bbc = std_steve + np.random.normal(loc=0, scale=0.01, size=len(means_steve))
+                    means_bbc = bbc[:, 0]
+                    std_bbc = bbc[:, 1]
+
+                    print(means_steve.shape, means_bbc.shape)
 
                     minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
                     maxv = max(np.max(means_steve), np.max(means_bbc)) + 0.02
