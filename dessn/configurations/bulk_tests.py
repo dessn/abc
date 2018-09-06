@@ -23,7 +23,6 @@ if __name__ == "__main__":
             pass
 
     models = [
-        ApproximateModelW(prior=True, statonly=False),
         ApproximateModelW(prior=True, statonly=True)
     ]
 
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(2)
+    fitter.set_num_walkers(1)
     fitter.set_num_cpu(600)
 
     h = socket.gethostname()

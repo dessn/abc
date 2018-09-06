@@ -234,7 +234,7 @@ transformed parameters {
             // Intrinsic
             diag_extra[i][1] = 0;
             diag_extra[i][2] = 0;
-            diag_extra[i][3] = sqrt(obs_mBx1c_chol[i][3][3]^2 + (kappa_c0[survey_map[i]] + kappa_c1[survey_map[i]] * redshifts[i])^2) - obs_mBx1c_chol[i][3][3];
+            diag_extra[i][3] = 0; // sqrt(obs_mBx1c_chol[i][3][3]^2 + (kappa_c0[survey_map[i]] + kappa_c1[survey_map[i]] * redshifts[i])^2) - obs_mBx1c_chol[i][3][3];
 
 
             // redshift dependent effects
@@ -261,7 +261,7 @@ transformed parameters {
             // Convert population into absolute magnitude
             model_MBx1c[i][1] = model_mBx1c[i][1] - model_mu[i] + alpha * model_mBx1c[i][2] - beta * model_mBx1c[i][3] + mass_correction[i] * masses[i];
             model_MBx1c[i][2] = model_mBx1c[i][2];
-            model_MBx1c[i][3] = model_mBx1c[i][3] - smear * shift_deltas[i];
+            model_MBx1c[i][3] = model_mBx1c[i][3]; // - smear * shift_deltas[i];
 
             // Mean of population
             cor_mB_mean[i] = mean_MB + model_mu[i] - alpha * mean_x1_sn[i] + beta * (mean_c_sn[i] + mean_c_adjust[survey_map[i]]) - mass_correction[i] * masses[i];

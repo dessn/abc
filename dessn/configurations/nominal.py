@@ -40,7 +40,7 @@ if __name__ == "__main__":
     fitter = Fitter(dir_name)
 
     # Test systematics
-    data = models[0].get_data(simulations[0], 0)  # For testing
+    # data = models[0].get_data(simulations[0], 0)  # For testing
     # cal = data["deta_dcalib"]
     # print(cal.shape)
     # print(np.max(cal[:, 0, :]))
@@ -79,7 +79,8 @@ if __name__ == "__main__":
 
         ws = {}
         for m, s, ci, chain, truth, weight, old_weight, posterior in res:
-            key =  s[0].type
+            key = s[0].type + (" Syst" if not m.statonly else " Stat")
+
             if key not in ws:
                 ws[key] = []
             ws[key].append([chain["$w$"].mean(), np.std(chain["$w$"])])
@@ -89,6 +90,6 @@ if __name__ == "__main__":
             # print(key, vals[:, 0])
         for key in sorted(ws.keys()):
             vals = np.array(ws[key])
-            print("%65s %8.4f %8.4f %8.4f"
+            print("%15s %8.4f %8.4f %8.4f"
                   % (key, np.average(vals[:, 0], weights=1/(vals[:, 1]**2)),
                      np.std(vals[:, 0]), np.mean(vals[:, 1])))
