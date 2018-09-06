@@ -202,7 +202,7 @@ class SNANASimulation(Simulation):
             else:
                 vector = np.array([mb, x1, c - sa])
                 cov = supernovae[i, 12:12 + 9].reshape((3, 3))
-                cov[2, 2] *= extra_colour_mult[i]
+                cov[2, 2] *= extra_colour_mult[i]**2
             if self.add_pecv:
                 cov[0, 0] += eu**2
             calib = supernovae[i, 12+9:].reshape((3, -1))
