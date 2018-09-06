@@ -13,7 +13,7 @@ from dessn.framework.simulations.selection_effects import des_sel, lowz_sel
 
 class SNANASimulation(Simulation):
     def __init__(self, num_supernova, sim_name, num_nodes=4, use_sim=False, cov_scale=1.0, global_calib=13,
-                 shift=None, type="G10", kappa=0.0, bias_cor=True, zlim=None, add_pecv=True):
+                 shift=None, type="G10", kappa=0.0, bias_cor=True, zlim=None, add_pecv=True, add_disp=False):
         super().__init__()
         self.simulation_name = sim_name
         self.type = type
@@ -33,6 +33,7 @@ class SNANASimulation(Simulation):
         self.num_calib = len(self.systematic_labels)
         self.bias_cor = bias_cor
         self.zlim = zlim
+        self.add_disp = add_disp
         self.add_pecv = add_pecv
         if self.num_calib == 0:
             self.num_calib = 1
@@ -120,6 +121,29 @@ class SNANASimulation(Simulation):
         binc = 0.5 * (bine[1:] + bine[:-1])
         return binc, models[0], middle[0]
 
+    def get_disp(self, des=True):
+        print("Getting dispersion for des=%s" % des)
+        if des:
+            file = self.data_folder + "../DES3YR_DES_BHMEFF_AM%s/passed_0.npy"
+        else:
+            file = self.data_folder + "../DES3YR_LOWZ_BHMEFF_%s/passed_0.npy"
+        models = ["C11", "G10"]
+        bine = 10
+        means = []
+        for model in models:
+            data = np.load(file % model)
+            z = data[:, 1]
+            c_obs = data[:, 8]
+            c_true = data[:, 5]
+            c_std = np.sqrt(data[:, 12 + 8])
+            rms = (np.abs(c_obs - c_true) / c_std)
+            mean, bine, _ = binned_statistic(z, rms, bins=bine)
+            mean = np.array([max(i, 1) for i in mean])
+            means.append(mean)
+        binc = 0.5 * (bine[1:] + bine[:-1])
+        print(means[0])
+        return binc, means[0]
+
     def get_passed_supernova(self, n_sne, cosmology_index=0):
         filename = self.data_folder + "passed_%d.npy" % cosmology_index
         assert os.path.exists(filename), "Cannot find file %s, do you have this realisations?" % filename
@@ -155,6 +179,11 @@ class SNANASimulation(Simulation):
 
         shift_amount = np.zeros(redshifts.shape)
         shift_deltas = np.zeros(redshifts.shape)
+        extra_colour_mult = np.ones(redshifts.shape)
+        if self.add_disp:
+            disp_z, disp_ratio = self.get_disp("_DES" in self.simulation_name)
+            extra_colour_mult = interp1d(disp_z, disp_ratio, bounds_error=False, fill_value=(disp_ratio[0], disp_ratio[-1]))(redshifts)
+
         if self.bias_cor:
             # apparents -= bias_mB
             # stretches -= bias_x1
@@ -173,6 +202,7 @@ class SNANASimulation(Simulation):
             else:
                 vector = np.array([mb, x1, c - sa])
                 cov = supernovae[i, 12:12 + 9].reshape((3, 3))
+                cov[2,2] *= extra_colour_mult[i]
             if self.add_pecv:
                 cov[0, 0] += eu**2
             calib = supernovae[i, 12+9:].reshape((3, -1))
