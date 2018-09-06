@@ -136,12 +136,16 @@ class SNANASimulation(Simulation):
             c_obs = data[:, 8]
             c_true = data[:, 5]
             c_std = np.sqrt(data[:, 12 + 8])
-            rms = (np.abs(c_obs - c_true) / c_std)
-            mean, bine, _ = binned_statistic(z, rms, bins=bine)
-            mean = np.array([max(i, 1) for i in mean])
+            rms = np.abs(c_obs - c_true)
+
+            mean_rms, bine, _ = binned_statistic(z, rms, bins=bine)
+            mean_cstd, _, _ = binned_statistic(z, c_std, bins=bine)
+
+            extra = mean_rms**2 - mean_cstd**2
+            mean = np.array([max(i, 0) for i in extra])
             means.append(mean)
         binc = 0.5 * (bine[1:] + bine[:-1])
-        print(means[0])
+        print("EXTRA ", means[0])
         return binc, means[0]
 
     def get_passed_supernova(self, n_sne, cosmology_index=0):
@@ -179,10 +183,10 @@ class SNANASimulation(Simulation):
 
         shift_amount = np.zeros(redshifts.shape)
         shift_deltas = np.zeros(redshifts.shape)
-        extra_colour_mult = np.ones(redshifts.shape)
+        extra_colour_add = np.zeros(redshifts.shape)
         if self.add_disp:
             disp_z, disp_ratio = self.get_disp("_DES" in self.simulation_name)
-            extra_colour_mult = interp1d(disp_z, disp_ratio, bounds_error=False, fill_value=(disp_ratio[0], disp_ratio[-1]))(redshifts)
+            extra_colour_add = interp1d(disp_z, disp_ratio, bounds_error=False, fill_value=(disp_ratio[0], disp_ratio[-1]))(redshifts)
 
         if self.bias_cor:
             # apparents -= bias_mB
@@ -202,7 +206,7 @@ class SNANASimulation(Simulation):
             else:
                 vector = np.array([mb, x1, c - sa])
                 cov = supernovae[i, 12:12 + 9].reshape((3, 3))
-                cov[2, 2] *= extra_colour_mult[i]**2
+                cov[2, 2] += extra_colour_add[i]
             if self.add_pecv:
                 cov[0, 0] += eu**2
             calib = supernovae[i, 12+9:].reshape((3, -1))
