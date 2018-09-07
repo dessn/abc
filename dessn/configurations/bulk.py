@@ -52,7 +52,7 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         import numpy as np
 
-        if False:
+        if True:
             res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
 
             c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
@@ -124,7 +124,7 @@ if __name__ == "__main__":
                 c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
                                 truth=truth, extents=ex, figsize=1.0)
 
-            if True:
+            if False:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 fig.tight_layout()
                 plt.show()
 
-        if True:
+        if False:
             cc = ChainConsumer()
             res2 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
             for m, s, ci, chain, truth, weight, old_weight, posterior in res2:

@@ -128,7 +128,7 @@ class SNANASimulation(Simulation):
         else:
             file = self.data_folder + "../DES3YR_LOWZ_BHMEFF_%s/passed_0.npy"
         models = ["C11", "G10"]
-        bine = 20
+        bine = 10
         means = []
         for model in models:
             data = np.load(file % model)
@@ -142,11 +142,13 @@ class SNANASimulation(Simulation):
             mean_cstd, _, _ = binned_statistic(z, c_std, bins=bine)
 
             extra = mean_rms**2 - mean_cstd**2
-            mean = np.array([max(i, 0) for i in extra])
-            means.append(mean)
+            print(model, extra)
+            means.append(extra)
+        final = means[0] - means[1]
+        final = np.array([max(0, i) for i in final])
         binc = 0.5 * (bine[1:] + bine[:-1])
-        print("EXTRA ", np.sqrt(means[0]), mean_rms)
-        return binc, means[0]
+        print("EXTRA ", np.sqrt(final), mean_rms)
+        return binc, final
 
     def get_passed_supernova(self, n_sne, cosmology_index=0):
         filename = self.data_folder + "passed_%d.npy" % cosmology_index
