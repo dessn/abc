@@ -96,7 +96,7 @@ parameters {
     real <lower = -20.5, upper = -18.5> mean_MB;
     matrix <lower = -2.0, upper = 2.0> [n_surveys, num_nodes] mean_x1;
     matrix <lower = -0.3, upper = 0.3> [n_surveys, num_nodes] mean_c;
-    real <lower = -3, upper = -0.5> log_sigma_MB [n_surveys];
+    real <lower = -5, upper = -0.5> log_sigma_MB [n_surveys];
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
