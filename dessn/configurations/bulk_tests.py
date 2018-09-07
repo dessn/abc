@@ -53,7 +53,7 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         import numpy as np
 
-        if False:
+        if True:
             res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
 
             c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
