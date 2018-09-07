@@ -53,7 +53,7 @@ if __name__ == "__main__":
         from chainconsumer import ChainConsumer
         import numpy as np
 
-        if True:
+        if False:
             res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
 
             c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
@@ -103,8 +103,7 @@ if __name__ == "__main__":
                     w_mean, w_std = weighted_avg_and_std(chain["$w$"], weight)
                     ws[name].append(w_mean)
                     ws_std[name].append(w_std)
-                    cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True,
-                               color=col, marker_style=ms, marker_size=msize)
+                    cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True, color=col, marker_style=ms, marker_size=msize)
                 else:
                     c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
             with open(pfn + "res.txt", "w") as f:
@@ -161,3 +160,18 @@ if __name__ == "__main__":
 
                 fig.tight_layout()
                 plt.show()
+
+        if True:
+            cc = ChainConsumer()
+            res2 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
+            for m, s, ci, chain, truth, weight, old_weight, posterior in res2:
+                if "G10" in s[0].simulation_name:
+                    name = "G10"
+                    c = "g"
+                elif "C11" in s[0].simulation_name:
+                    name = "C11"
+                    c = "r"
+                if not m.statonly:
+                    continue
+                cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True, color=c)
+            cc.plotter.plot(parameters=18, filename=pfn + "big.png")

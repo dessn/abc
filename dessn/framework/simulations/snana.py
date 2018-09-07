@@ -133,6 +133,8 @@ class SNANASimulation(Simulation):
         for model in models:
             data = np.load(file % model)
             z = data[:, 1]
+            mb_obs = data[:, 6]
+            mb_true = data[:, 3]
             c_obs = data[:, 8]
             c_true = data[:, 5]
             c_std = np.sqrt(data[:, 12 + 8])
