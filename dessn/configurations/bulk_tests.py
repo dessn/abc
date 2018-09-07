@@ -23,13 +23,13 @@ if __name__ == "__main__":
             pass
 
     models = [
-        ApproximateModelW(prior=True, statonly=True)
+        ApproximateModelW(prior=True, statonly=True, apply_efficiency=False)
     ]
 
     ndes = -1  # 204
     nlowz = -1  # 128
     sim = False
-    disp = True
+    disp = False
     simulations = [
         [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", type=None, use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW", use_sim=sim, add_disp=disp)],
         [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", type=None, use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW", use_sim=sim, add_disp=disp)],
