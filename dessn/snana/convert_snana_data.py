@@ -104,9 +104,10 @@ def get_realisations(base_folder, dump_dir):
         base_folder = base_folder[:-4]
     if base_folder.split("_")[-1].startswith("v"):
         base_folder = "_".join(base_folder.split("_")[:-1])
+    print("Base folder for sims: %s" % base_folder)
     inner_files = sorted(list(os.listdir(dump_dir)))
     inner_paths = [dump_dir + "/" + f for f in inner_files]
-    sim_dirs = [p for p, f in zip(inner_paths, inner_files) if os.path.isdir(p) and f.startswith(base_folder)]
+    sim_dirs = [p for p, f in zip(inner_paths, inner_files) if os.path.isdir(p) and f.startswith("DES3YR")]
     logging.info("Found %d sim directories in %s" % (len(sim_dirs), dump_dir))
     return sim_dirs
 
@@ -343,11 +344,14 @@ if __name__ == "__main__":
     # convert("DES3YR_LOWZ_NOMINAL")
     # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
-    # convert("DES3YR_DES_BULK", skip=6)
+    # convert("DES3YR_DES_SAM_NOMAGERR_v8", skip=11)
+    # convert("DES3YR_DES_SAM_MINUIT_v8", skip=11)
+    # convert("DES3YR_LOWZ_SAM_NOMAGERR_v8", skip=11)
+    convert("DES3YR_LOWZ_SAM_MINUIT_v8", skip=11)
     # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    convert("DES3YR_DES_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
+    # convert("DES3YR_DES_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
     # convert("DES3YR_LOWZ_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
     # convert("DES3YR_LOWZ_VALIDATION", skip=11)
     # convert("DES3YR_DES_VALIDATION", skip=11)
