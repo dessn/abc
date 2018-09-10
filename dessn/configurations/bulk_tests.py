@@ -31,8 +31,10 @@ if __name__ == "__main__":
     sim = False
     disp = False
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW_v5", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW_v5", use_sim=sim, add_disp=disp)],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW_v5", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW_v5", use_sim=sim, add_disp=disp)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp)],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp)],
     ]
     fitter = Fitter(dir_name)
 
