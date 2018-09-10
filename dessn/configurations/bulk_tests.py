@@ -23,7 +23,7 @@ if __name__ == "__main__":
             pass
 
     models = [
-        ApproximateModelW(prior=True, statonly=True, apply_efficiency=False)
+        ApproximateModelW(prior=True, statonly=True)
     ]
 
     ndes = 204

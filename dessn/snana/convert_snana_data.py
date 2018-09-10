@@ -90,6 +90,8 @@ def get_directories(base_folder):
     dir_name = os.path.dirname(file)
     dump_dir = os.path.abspath(dir_name + "/data_dump/" + base_folder)
     output_dir = os.path.abspath(dir_name + "/../framework/simulations/snana_data/") + "/"
+    if base_folder.split("_")[-1].startswith("v"):
+        base_folder = "_".join(base_folder.split("_")[:-1])
     nml_file = dump_dir + "/" + base_folder + ".nml"
     if not os.path.exists(nml_file):
         logging.error("Cannot find the NML file at %s" % nml_file)
@@ -100,6 +102,8 @@ def get_directories(base_folder):
 def get_realisations(base_folder, dump_dir):
     if base_folder.endswith("sys"):
         base_folder = base_folder[:-4]
+    if base_folder.split("_")[-1].startswith("v"):
+        base_folder = "_".join(base_folder.split("_")[:-1])
     inner_files = sorted(list(os.listdir(dump_dir)))
     inner_paths = [dump_dir + "/" + f for f in inner_files]
     sim_dirs = [p for p, f in zip(inner_paths, inner_files) if os.path.isdir(p) and f.startswith(base_folder)]
@@ -315,6 +319,9 @@ def convert(base_folder, load_dump=False, override=False, skip=11, biascor=None,
     logging.info("Found nml file %s" % nml_file)
     systematic_labels, systematics_scales = get_systematic_scales(nml_file, override=override)
     sim_dirs = get_realisations(base_folder, dump_dir)
+    version = ""
+    if base_folder.split("_")[-1].startswith("v"):
+        version = "_" + base_folder.split("_")[-1]
     for sim in sim_dirs:
         sim_name = os.path.basename(sim)
         if "-0" in sim_name:
@@ -323,6 +330,7 @@ def convert(base_folder, load_dump=False, override=False, skip=11, biascor=None,
             this_output_dir = output_dir + sim_name
         if base_folder.endswith("sys"):
             this_output_dir += "sys"
+        this_output_dir += version
         digest_simulation(sim, systematics_scales, this_output_dir, systematic_labels, load_dump=load_dump,
                           skip=skip, biascor=biascor, zipped=zipped)
 
@@ -336,11 +344,11 @@ if __name__ == "__main__":
     # convert("DES3YR_DES_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_LOWZ_BULK", skip=6, biascor="SALT2mu_DES_BULK+LOWZ_BULK")
     # convert("DES3YR_DES_BULK", skip=6)
-    convert("DES3YR_LOWZ_BULK", skip=6)
+    # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    # convert("DES3YR_DES_BHMEFF", load_dump=True, skip=11, zipped=True)
-    # convert("DES3YR_LOWZ_BHMEFF", load_dump=True, skip=11, zipped=True)
+    convert("DES3YR_DES_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
+    # convert("DES3YR_LOWZ_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
     # convert("DES3YR_LOWZ_VALIDATION", skip=11)
     # convert("DES3YR_DES_VALIDATION", skip=11)
 
