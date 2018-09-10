@@ -26,8 +26,8 @@ if __name__ == "__main__":
         ApproximateModelW(prior=True, statonly=True, apply_efficiency=False)
     ]
 
-    ndes = -1  # 204
-    nlowz = -1  # 128
+    ndes = 204
+    nlowz = 128
     sim = False
     disp = False
     simulations = [
