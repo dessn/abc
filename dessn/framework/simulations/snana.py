@@ -39,12 +39,15 @@ class SNANASimulation(Simulation):
             self.num_calib = 1
 
     def get_correction(self, cov_scale=1.0):
+        version = self.simulation_name.lower().split("_")[-1]
+        if not version.startswith("v"):
+            version = None
         if "_des" in self.simulation_name.lower():
             self.logger.info("Getting DES correction for sim %s" % self.simulation_name)
-            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa, zlim=self.zlim)
+            return des_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa, zlim=self.zlim, version=version)
         elif "_lowz" in self.simulation_name.lower():
             self.logger.info("Getting LOWZ correction for sim %s" % self.simulation_name)
-            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa, zlim=self.zlim)
+            return lowz_sel(cov_scale=cov_scale, shift=self.shift, type=self.type, kappa=self.kappa, zlim=self.zlim, version=version)
         else:
             raise ValueError("Cannot find des or lowz in your sim name, unsure which selection function to use!")
 

@@ -7,11 +7,14 @@ import inspect
 import logging
 
 
-def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
+def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None, version=None):
     if type is None:
         name = "snana_data/DES3YR_DES_BHMEFF_CD"
     else:
         name = "snana_data/DES3YR_DES_BHMEFF_AM%s" % type
+    if version is not None:
+        logging.info("Using version %s" % version)
+        name += "_%s" % version
     sn, mean, cov, _ = get_selection_effects_cdf(name, kappa=kappa, zlim=zlim)
     if shift is None:
         shift = np.array([0.0, 0, 0.0, 0.0])
@@ -21,10 +24,14 @@ def des_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
     return sn, mean, cov, kappa
 
 
-def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None):
+def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None, version=None):
     if type is None:
         type = "G10"
-    sn, mean, cov, _ = get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_%s" % type, kappa=kappa, zlim=zlim)
+    name = "snana_data/DES3YR_LOWZ_BHMEFF_%s" % type
+    if version is not None:
+        logging.info("Using version %s" % version)
+        name += "_%s" % version
+    sn, mean, cov, _ = get_selection_effects_skewnorm(name, kappa=kappa, zlim=zlim)
     if shift is None:
         shift = np.array([0.0, 0.0, 0.0, 0.0])
     mean += shift
