@@ -100,8 +100,8 @@ parameters {
     real <lower = -6, upper = 1> log_sigma_x1 [n_surveys];
     real <lower = -8, upper = -1.0> log_sigma_c [n_surveys];
     real <lower = 0, upper = 0.98> delta_c [n_surveys];
-    real<lower=0.01, upper=0.05>  kappa_c0 [n_surveys];
-    real<lower=0.01, upper=0.05>  kappa_c1 [n_surveys];
+    real<lower=0.0, upper=0.05>  kappa_c0 [n_surveys];
+    real<lower=0.0, upper=0.05>  kappa_c1 [n_surveys];
     real<lower=0, upper=1.0> smear;
 
 }
