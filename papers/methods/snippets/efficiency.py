@@ -48,5 +48,5 @@ axes[1].set_ylim(0, 1.1)
 axes[0].set_xlim(19, 27)
 
 #fig.tight_layout()
-plt.savefig("efficiency.png", dpi=300, bbox_inches="tight", transparent=True)
+plt.savefig("efficiency.png", dpi=600, bbox_inches="tight", transparent=True)
 plt.savefig("../figures/efficiency.pdf", bbox_inches="tight", transparent=True)

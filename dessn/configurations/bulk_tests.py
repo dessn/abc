@@ -33,8 +33,8 @@ if __name__ == "__main__":
     simulations = [
         [SNANASimulation(ndes, "DES3YR_DES_SAM_G10_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_SAM_G10_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp)],
         [SNANASimulation(ndes, "DES3YR_DES_SAM_C11_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_SAM_C11_SKEW_MINUIT_v8", use_sim=sim, add_disp=disp)],
-        [SNANASimulation(ndes, "DES3YR_DES_SAM_G10_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_SAM_G10_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp)],
-        [SNANASimulation(ndes, "DES3YR_DES_SAM_C11_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_SAM_C11_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp)],
+        # [SNANASimulation(ndes, "DES3YR_DES_SAM_G10_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_SAM_G10_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp)],
+        # [SNANASimulation(ndes, "DES3YR_DES_SAM_C11_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp), SNANASimulation(nlowz, "DES3YR_LOWZ_SAM_C11_SKEW_NOMAGERR_v8", use_sim=sim, add_disp=disp)],
     ]
     fitter = Fitter(dir_name)
 
@@ -74,10 +74,10 @@ if __name__ == "__main__":
                 if "MAGSMEAR" in sim_name:
                     name = "Coherent"
                 elif "G10" in sim_name:
-                    name = "G10"
+                    name = sim_name
                     col = "g"
                 elif "C11" in sim_name:
-                    name = "C11"
+                    name = sim_name
                     col = "r"
                 else:
                     name = sim_name.replace("DES3YR_DES_", "").replace("_", " ").replace("SKEW", "SK16")
