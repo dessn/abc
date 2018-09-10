@@ -50,5 +50,5 @@ ax.set_ylabel(r"$\mu$", fontsize=14)
 ax.legend(loc=4, frameon=False, markerfirst=False)
 
 fig.tight_layout()
-plt.savefig("malmquist.png", bbox_inches="tight", transparent=True)
+plt.savefig("malmquist.png", dpi=600, bbox_inches="tight", transparent=True)
 plt.savefig("../figures/malmquist.pdf", bbox_inches="tight", transparent=True)
