@@ -55,7 +55,7 @@ if __name__ == "__main__":
         if True:
             res = fitter.load(split_models=True, split_sims=True, split_cosmo=True, squeeze=False)
 
-            c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer()
+            call, c1, c2, c3 = ChainConsumer(), ChainConsumer(), ChainConsumer(), ChainConsumer()
             ls = []
             shades = []
             cs = ['b', 'g', 'p', 'a']
@@ -102,8 +102,12 @@ if __name__ == "__main__":
                     w_mean, w_std = weighted_avg_and_std(chain["$w$"], weight)
                     ws[name].append(w_mean)
                     ws_std[name].append(w_std)
-                    cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True,
-                               color=col, marker_style=ms, marker_size=msize)
+                    cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True, color=col, marker_style=ms, marker_size=msize)
+                    if "Syst" in name:
+                        ms = "+" if "G10" in name else "o"
+                        col = "lb" if "G10" in name else "p"
+                        msize = 10 if "G10" in name else 5
+                        call.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True, color=col, marker_style=ms, marker_size=msize)
                 else:
                     c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
@@ -124,11 +128,17 @@ if __name__ == "__main__":
                 c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
                                 truth=truth, extents=ex, figsize=1.0)
 
-            if False:
+            if True:
+                ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.45, -0.6), r"$\alpha$": (0.1, 0.2), r"$\beta$": (3.4, 4.4)}
+                truth[r"$\beta$"] = None
+                call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
+
+            if True:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
-                fig, axes = plt.subplots(nrows=2, figsize=(5, 9))
+                fig, axes = plt.subplots(nrows=1, figsize=(5, 5))
+                axes = [axes, axes]
                 for t, ax, bbc in zip(["G10", "C11"], axes, bbcs):
                     for key in ws.keys():
                         if t not in key:
@@ -144,22 +154,24 @@ if __name__ == "__main__":
 
                         minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
                         maxv = max(np.max(means_steve), np.max(means_bbc)) + 0.02
-                        color = "k" if "Syst" not in key else ("g" if "G10" in key else "r")
-                        ecolor = "#888888" if "Syst" not in key else ("#abf4bd" if "G10" in key else "#f4abab")
+                        color = "k" if "Syst" not in key else ("#4FC3F7" if "G10" in key else "#673AB7")
+                        ecolor = "#888888" if "Syst" not in key else ("#8edcff" if "G10" in key else "#a785e2")
                         ax.errorbar(means_steve, means_bbc, yerr=std_steve, xerr=std_bbc, errorevery=2,
-                                    fmt="o", capsize=2, markersize=5, c=color, ecolor=ecolor, elinewidth=0.5)
-
+                                    fmt="o", capsize=2, markersize=5, c=color, ecolor=ecolor, elinewidth=0.5, label=t)
+                    minv = -1.2
+                    maxv = -0.7
                     ax.plot([minv, maxv], [minv, maxv], c='k', linewidth=1)
                     ax.set_xlim([minv, maxv])
                     ax.set_ylim([minv, maxv])
                     ax.set_ylabel("BBC $w$")
-                    ax.set_xlabel("Steve $w$")
+                    ax.set_xlabel("BHM $w$")
+                    ax.legend(frameon=False)
                 # plt.subplots_adjust(wspace=0, hspace=0)
 
                 fig.tight_layout()
-                plt.show()
+                fig.savefig(pfn + "_comparison.png", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
 
-        if False:
+        if True:
             cc = ChainConsumer()
             res2 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
             for m, s, ci, chain, truth, weight, old_weight, posterior in res2:
@@ -169,23 +181,24 @@ if __name__ == "__main__":
                     name = "C11 New"
                 if not m.statonly:
                     continue
-                cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True, color="g")
+                cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True)
 
-            fitter.temp_dir = dir_name.replace("bulk", "bulk2")
-            res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
-            for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
-                if "G10" in s[0].simulation_name:
-                    name = "G10 Old"
-                elif "C11" in s[0].simulation_name:
-                    name = "C11 Old"
-                if m.statonly:
-                    continue
-                print(chain.keys())
-
-                cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True, color="k")
+            # fitter.temp_dir = dir_name.replace("bulk", "bulk2")
+            # res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
+            # for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
+            #     if "G10" in s[0].simulation_name:
+            #         name = "G10 Old"
+            #     elif "C11" in s[0].simulation_name:
+            #         name = "C11 Old"
+            #     if m.statonly:
+            #         continue
+            #     print(chain.keys())
+            #
+            #     cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True, color="k")
             # cc.plotter.plot_distributions(col_wrap=6, truth=truth, filename=pfn + "%s_dist.png" % name)
-            cc.plotter.plot(parameters=18, chains=["G10 New", "G10 Old"], filename=pfn + "big_g10.png")
-            cc.plotter.plot(parameters=18, chains=["C11 New", "C11 Old"], filename=pfn + "big_c11.png")
+            cc.plotter.plot(parameters=18, filename=pfn + "_big.png")
+            # cc.plotter.plot(parameters=18, chains=["G10 New", "G10 Old"], filename=pfn + "_big_g10.png")
+            # cc.plotter.plot(parameters=18, chains=["C11 New", "C11 Old"], filename=pfn + "_big_c11.png")
 
 
 
