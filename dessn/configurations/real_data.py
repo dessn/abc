@@ -22,8 +22,8 @@ if __name__ == "__main__":
         os.makedirs(dir_name)
 
     models = [ApproximateModelW(), ApproximateModelW(statonly=True)]
-    simulation = [SNANASimulation(-1, "DES3YR_LOWZ_COMBINED_TEXT"),
-                  SNANASimulation(-1, "DES3YR_DES_COMBINED_TEXT")]
+    simulation = [SNANASimulation(-1, "DES3YR_LOWZ_COMBINED_TEXT_v8"),
+                  SNANASimulation(-1, "DES3YR_DES_COMBINED_TEXT_v8")]
 
     fitter = Fitter(dir_name)
 

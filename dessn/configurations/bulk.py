@@ -30,8 +30,8 @@ if __name__ == "__main__":
     ndes = -1  # 204
     nlowz = -1  # 128
     simulations = [
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW", type=None), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW")],
-        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW", type=None), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_G10_SKEW_v8", type=None), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_G10_SKEW_v8")],
+        [SNANASimulation(ndes, "DES3YR_DES_BULK_C11_SKEW_v8", type=None), SNANASimulation(nlowz, "DES3YR_LOWZ_BULK_C11_SKEW_v8")],
     ]
     fitter = Fitter(dir_name)
 
