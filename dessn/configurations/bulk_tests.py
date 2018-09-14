@@ -173,6 +173,9 @@ if __name__ == "__main__":
                 elif "C11" in s[0].simulation_name:
                     name = "C11"
                     c = "r"
+                else:
+                    name = "COH"
+                    c = 'k'
                 if not m.statonly:
                     continue
                 cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True, color=c)
