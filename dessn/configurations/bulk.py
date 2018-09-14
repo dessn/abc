@@ -103,7 +103,7 @@ if __name__ == "__main__":
                     ws[name].append(w_mean)
                     ws_std[name].append(w_std)
                     cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True, color=col, marker_style=ms, marker_size=msize)
-                    if "Syst" in name:
+                    if True or "Syst" in name:
                         ms = "+" if "G10" in name else "o"
                         col = "lb" if "G10" in name else "p"
                         msize = 10 if "G10" in name else 5
@@ -113,6 +113,8 @@ if __name__ == "__main__":
 
             for k in ws.keys():
                 print("%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k])))
+                # mls = [i["$w$"][1] for i in call.analysis.get_summary(parameters=["$w$"], chains=k)]
+                # print(np.mean(mls))
 
             if False:
                 c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True, linestyles=ls, colors=cs, shade_gradient=1.4, shade_alpha=shades, linewidths=1.2)
@@ -128,12 +130,12 @@ if __name__ == "__main__":
                 c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
                                 truth=truth, extents=ex, figsize=1.0)
 
-            if True:
+            if False:
                 ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.45, -0.6), r"$\alpha$": (0.1, 0.2), r"$\beta$": (3.4, 4.4)}
                 truth[r"$\beta$"] = None
                 call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
 
-            if True:
+            if False:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
@@ -171,7 +173,7 @@ if __name__ == "__main__":
                 fig.tight_layout()
                 fig.savefig(pfn + "_comparison.png", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
 
-        if True:
+        if False:
             cc = ChainConsumer()
             res2 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
             for m, s, ci, chain, truth, weight, old_weight, posterior in res2:
