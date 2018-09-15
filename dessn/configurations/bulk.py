@@ -23,7 +23,7 @@ if __name__ == "__main__":
             pass
 
     models = [
-        # ApproximateModelW(prior=True, statonly=False),
+        ApproximateModelW(prior=True, statonly=False),
         ApproximateModelW(prior=True, statonly=True)
     ]
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(2)
+    fitter.set_num_walkers(1)
     fitter.set_num_cpu(600)
 
     h = socket.gethostname()
@@ -111,10 +111,13 @@ if __name__ == "__main__":
                 else:
                     c1.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
-            for k in ws.keys():
-                print("%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k])))
-                # mls = [i["$w$"][1] for i in call.analysis.get_summary(parameters=["$w$"], chains=k)]
-                # print(np.mean(mls))
+            with open(pfn + "_res.txt", "w") as f:
+                for k in ws.keys():
+                    s = "%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k]))
+                    # mls = [i["$w$"][1] for i in call.analysis.get_summary(parameters=["$w$"], chains=k)]
+                    print(s)
+                    f.write(s)
+                    # print(np.mean(mls))
 
             if False:
                 c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True, linestyles=ls, colors=cs, shade_gradient=1.4, shade_alpha=shades, linewidths=1.2)
@@ -173,30 +176,17 @@ if __name__ == "__main__":
                 fig.tight_layout()
                 fig.savefig(pfn + "_comparison.png", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
 
-        if False:
+        if True:
             cc = ChainConsumer()
             res2 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
             for m, s, ci, chain, truth, weight, old_weight, posterior in res2:
                 if "G10" in s[0].simulation_name:
-                    name = "G10 New"
+                    name = "G10"
                 elif "C11" in s[0].simulation_name:
-                    name = "C11 New"
-                if not m.statonly:
-                    continue
+                    name = "C11"
+                if m.statonly:
+                    name += " Statonly"
                 cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True)
-
-            # fitter.temp_dir = dir_name.replace("bulk", "bulk2")
-            # res3 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
-            # for m, s, ci, chain, truth, weight, old_weight, posterior in res3:
-            #     if "G10" in s[0].simulation_name:
-            #         name = "G10 Old"
-            #     elif "C11" in s[0].simulation_name:
-            #         name = "C11 Old"
-            #     if m.statonly:
-            #         continue
-            #     print(chain.keys())
-            #
-            #     cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=True, color="k")
             # cc.plotter.plot_distributions(col_wrap=6, truth=truth, filename=pfn + "%s_dist.png" % name)
             cc.plotter.plot(parameters=18, filename=pfn + "_big.png")
             # cc.plotter.plot(parameters=18, chains=["G10 New", "G10 Old"], filename=pfn + "_big_g10.png")
