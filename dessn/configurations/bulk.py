@@ -127,7 +127,7 @@ if __name__ == "__main__":
             if True:
                 c2.configure(global_point=False, plot_hists=False, legend_artists=True)
                 c3.configure(global_point=False, plot_hists=False, legend_artists=True)
-                ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (2.6, 4.)}
+                ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (3, 4.3)}
                 c2.plotter.plot(filename=[pfn + "_points_g10.png", pfn + "_points_g10.pdf"], parameters=4,
                                 truth=truth, extents=ex, figsize=1.0, )
                 c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
