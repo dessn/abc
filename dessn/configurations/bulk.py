@@ -128,10 +128,12 @@ if __name__ == "__main__":
                 c2.configure(global_point=False, plot_hists=False, legend_artists=True)
                 c3.configure(global_point=False, plot_hists=False, legend_artists=True)
                 ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (3, 4.3)}
+                truth2 = truth.copy()
+                truth2[r"$\beta$"] = 3.8
                 c2.plotter.plot(filename=[pfn + "_points_g10.png", pfn + "_points_g10.pdf"], parameters=4,
                                 truth=truth, extents=ex, figsize=1.0, )
                 c3.plotter.plot(filename=[pfn + "_points_c11.png", pfn + "_points_c11.pdf"], parameters=4,
-                                truth=truth, extents=ex, figsize=1.0)
+                                truth=truth2, extents=ex, figsize=1.0)
 
             if False:
                 ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.45, -0.6), r"$\alpha$": (0.1, 0.2), r"$\beta$": (3.4, 4.4)}
@@ -144,6 +146,7 @@ if __name__ == "__main__":
                 import matplotlib.pyplot as plt
                 fig, axes = plt.subplots(nrows=1, figsize=(5, 5))
                 axes = [axes, axes]
+                res = {}
                 for t, ax, bbc in zip(["G10", "C11"], axes, bbcs):
                     for key in ws.keys():
                         if t not in key:
@@ -158,7 +161,8 @@ if __name__ == "__main__":
 
                         diff = means_bbc - means_steve
                         print("Diff ", t, np.mean(means_steve), np.mean(means_bbc), np.mean(diff), np.std(diff))
-
+                        res[t + "_Steve"] = means_steve
+                        res[t + "_BBC"] = means_bbc
                         minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
                         maxv = max(np.max(means_steve), np.max(means_bbc)) + 0.02
                         color = "k" if "Syst" not in key else ("#4FC3F7" if "G10" in key else "#673AB7")
@@ -174,6 +178,10 @@ if __name__ == "__main__":
                     ax.set_xlabel("BHM $w$")
                     ax.legend(frameon=False)
                 # plt.subplots_adjust(wspace=0, hspace=0)
+                print(res.keys())
+                mid_bbc = 0.5 * (res["G10_BBC"] + res["C11_BBC"])
+                mid_steve = 0.5 * (res["G10_Steve"] + res["C11_Steve"])
+                print("mids ", np.mean(mid_bbc), np.mean(mid_steve))
 
                 fig.tight_layout()
                 fig.savefig(pfn + "_comparison.png", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
