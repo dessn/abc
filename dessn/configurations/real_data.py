@@ -76,11 +76,12 @@ if __name__ == "__main__":
 
         subset = np.vstack((chain_full[r"$\Omega_m$"], chain_full["$w$"]))
         kde = gaussian_kde(chain_planck.T)
+        nn = 1
         print("Trained")
-        weights = kde.evaluate(subset[:, ::1])
+        weights = kde.evaluate(subset[:, ::nn])
         print("Eval")
-        c.add_chain(subset.T[::1, :], weights=weights, name="Combined", parameters=params)
-        c2.add_chain(subset.T[::1, :], weights=weights, name="Combined", parameters=params)
+        c.add_chain(subset.T[::nn, :], weights=weights, name="Combined", parameters=params)
+        c2.add_chain(subset.T[::nn, :], weights=weights, name="Combined", parameters=params)
 
         if False:
             bonnie_file = plot_dir + "/output/bonnie.txt"
