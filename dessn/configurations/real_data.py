@@ -102,11 +102,12 @@ if __name__ == "__main__":
         parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
         extents = {r"$\Omega_m$": (0.15, 0.65), "$w$": (-1.8, -0.5)}
         # print(c.analysis.get_latex_table(transpose=True))
-        c.plotter.plot(filename=pfn + ".png", parameters=parameters, watermark="Blinded", figsize=1.5, extents=extents)
+        watermark = "Blinded" if blind else None
+        c.plotter.plot(filename=pfn + ".png", parameters=parameters, watermark=watermark, figsize=1.5, extents=extents)
         with open(pfn + "_res.txt", "w") as f:
             p = c.analysis.get_latex_table(transpose=True)
             f.write(p)
-        c2.plotter.plot(filename=pfn + "_big.png", parameters=18, watermark="Blinded")
+        c2.plotter.plot(filename=pfn + "_big.png", parameters=18, watermark=watermark)
 
 
             # c.configure(sigma2d=False, plot_hists=True, linestyles=["-", "--", '-', ':', '-', '-'],

@@ -124,7 +124,7 @@ if __name__ == "__main__":
                 c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
                 c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
 
-            if True:
+            if False:
                 c2.configure(global_point=False, plot_hists=False, legend_artists=True)
                 c3.configure(global_point=False, plot_hists=False, legend_artists=True)
                 ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (3, 4.3)}
@@ -154,8 +154,10 @@ if __name__ == "__main__":
                         std_steve = np.array(ws_std[key])
 
                         means_bbc = bbc[:, 0] - 1
-                        print(t, np.mean(means_bbc))
                         std_bbc = bbc[:, 1]
+
+                        diff = means_bbc - means_steve
+                        print("Diff ", t, np.mean(means_steve), np.mean(means_bbc), np.mean(diff), np.std(diff))
 
                         minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
                         maxv = max(np.max(means_steve), np.max(means_bbc)) + 0.02
@@ -163,7 +165,7 @@ if __name__ == "__main__":
                         ecolor = "#888888" if "Syst" not in key else ("#8edcff" if "G10" in key else "#a785e2")
                         ax.errorbar(means_steve, means_bbc, yerr=std_steve, xerr=std_bbc, errorevery=2,
                                     fmt="o", capsize=2, markersize=5, c=color, ecolor=ecolor, elinewidth=0.5, label=t)
-                    minv = -1.2
+                    minv = -1.25
                     maxv = -0.7
                     ax.plot([minv, maxv], [minv, maxv], c='k', linewidth=1)
                     ax.set_xlim([minv, maxv])
@@ -176,7 +178,7 @@ if __name__ == "__main__":
                 fig.tight_layout()
                 fig.savefig(pfn + "_comparison.png", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
 
-        if True:
+        if False:
             cc = ChainConsumer()
             res2 = fitter.load(split_models=True, split_sims=True, split_cosmo=False)
             for m, s, ci, chain, truth, weight, old_weight, posterior in res2:
