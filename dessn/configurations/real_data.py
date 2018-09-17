@@ -103,8 +103,13 @@ if __name__ == "__main__":
         extents = {r"$\Omega_m$": (0.15, 0.65), "$w$": (-1.8, -0.5)}
         # print(c.analysis.get_latex_table(transpose=True))
         c.plotter.plot(filename=pfn + ".png", parameters=parameters, watermark="Blinded", figsize=1.5, extents=extents)
+        with open(pfn + "_res.txt", "w") as f:
+            p = c.analysis.get_latex_table(transpose=True)
+            f.write(p)
+        c2.plotter.plot(filename=pfn + "_big.png", parameters=18, watermark="Blinded")
 
-        # c.configure(sigma2d=False, plot_hists=True, linestyles=["-", "--", '-', ':', '-', '-'],
+
+            # c.configure(sigma2d=False, plot_hists=True, linestyles=["-", "--", '-', ':', '-', '-'],
         #             colors=["b", "k", 'a', 'r', 'g', 'lb'], shade_alpha=[0.7, 0.0, 0.2, 0.1, 0.1, 0.1, 0.1])
         # c.plotter.plot(filename=pfn + "big.png", parameters=20)
         # c.plotter.plot_distributions(filename=pfn + "_dist.png", col_wrap=8)

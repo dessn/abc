@@ -42,7 +42,7 @@ if __name__ == "__main__":
     ncosmo = 100
     fitter.set_num_cosmologies(ncosmo)
     fitter.set_max_steps(3000)
-    fitter.set_num_walkers(1)
+    fitter.set_num_walkers(2)
     fitter.set_num_cpu(600)
 
     h = socket.gethostname()
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
             with open(pfn + "_res.txt", "w") as f:
                 for k in ws.keys():
-                    s = "%s %5.3f %5.3f (%5.3f) : %4.2f" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k]))
+                    s = "%s %5.3f %5.3f (%5.3f) : %4.2f\n" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k]))
                     # mls = [i["$w$"][1] for i in call.analysis.get_summary(parameters=["$w$"], chains=k)]
                     print(s)
                     f.write(s)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
                 c2.plotter.plot_summary(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=["$w$"], truth=[-1.0], figsize=1.5, errorbar=True)
                 c2.plotter.plot(filename=[pfn + "_small.png", pfn + "_small.pdf"], parameters=2, truth=truth, extents={"$w$": (-1.4, -0.7)}, figsize="column")
 
-            if False:
+            if True:
                 c2.configure(global_point=False, plot_hists=False, legend_artists=True)
                 c3.configure(global_point=False, plot_hists=False, legend_artists=True)
                 ex = {r"\Omega_m$": (0.27, 0.33), "$w$": (-1.35, -0.7), r"$\alpha$": (0.12, 0.18), r"$\beta$": (2.6, 4.)}
@@ -138,7 +138,7 @@ if __name__ == "__main__":
                 truth[r"$\beta$"] = None
                 call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
 
-            if False:
+            if True:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
