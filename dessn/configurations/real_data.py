@@ -76,39 +76,35 @@ if __name__ == "__main__":
 
         subset = np.vstack((chain_full[r"$\Omega_m$"], chain_full["$w$"]))
         kde = gaussian_kde(chain_planck.T)
-        nn = 1
+        nn = 10
         print("Trained")
         weights = kde.evaluate(subset[:, ::nn])
         print("Eval")
         c.add_chain(subset.T[::nn, :], weights=weights, name="Combined", parameters=params)
         c2.add_chain(subset.T[::nn, :], weights=weights, name="Combined", parameters=params)
 
-        if False:
-            bonnie_file = plot_dir + "/output/bonnie.txt"
-            import numpy as np
-            bnames = ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\delta(0)$']
-            bonnie_data = np.loadtxt(bonnie_file, delimiter=",")
-            bonnie_data = bonnie_data[10000:, :]
-            bdic = {bnames[i]: bonnie_data[:, i] for i in range(len(bnames))}
-            subset_bonnie = np.vstack((bdic[r"$\Omega_m$"], bdic["$w$"]))
-            c.add_chain(chain=bdic, name="JLA-Like")
-            weights_bonnie = kde.evaluate(subset_bonnie[:, ::5])
-            c.add_chain(subset_bonnie.T[::5, :], weights=weights_bonnie, name="Combined JLA", parameters=params)
-            c2.add_chain(subset_bonnie.T[::5, :], weights=weights_bonnie, name="Combined JLA", parameters=params)
+        parameters = [r"$\Omega_m$", "$w$"]
+        extents = {r"$\Omega_m$": (0.15, 0.65), "$w$": (-1.8, -0.5)}
+        watermark = "Blinded" if blind else None
 
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
-                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'],
+                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=2.0,
                     legend_kwargs={"loc": "center right"}, watermark_text_kwargs={"alpha": 0.2},
                     colors=["b", "k", 'a', 'g', 'r', 'lb'], shade_alpha=[0.5, 0.0, 0.2, 0.4, 0.8, 0.1, 0.1])
-        parameters = [r"$\Omega_m$", "$w$"]  # r"$\alpha$", r"$\beta$", r"$\langle M_B \rangle$"]
-        extents = {r"$\Omega_m$": (0.15, 0.65), "$w$": (-1.8, -0.5)}
-        # print(c.analysis.get_latex_table(transpose=True))
-        watermark = "Blinded" if blind else None
-        c.plotter.plot(filename=pfn + ".png", parameters=parameters, watermark=watermark, figsize=1.5, extents=extents)
+        c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=parameters, watermark=watermark,
+                       figsize=1.5, extents=extents)
+
+        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
+                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=0.5,
+                    legend_kwargs={"loc": "center right"}, watermark_text_kwargs={"alpha": 0.2},
+                    colors=["p", "k", 'a', 'g', 'r', 'lb'], shade_alpha=[0.5, 0.0, 0.2, 0.4, 0.8, 0.1, 0.1])
+        c.plotter.plot(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=parameters, watermark=watermark,
+                       figsize=1.5, extents=extents)
+
         with open(pfn + "_res.txt", "w") as f:
             p = c.analysis.get_latex_table(transpose=True)
             f.write(p)
-        c2.plotter.plot(filename=pfn + "_big.png", parameters=18, watermark=watermark)
+        c2.plotter.plot(filename=pfn + "_big.png", parameters=17, watermark=watermark)
 
 
             # c.configure(sigma2d=False, plot_hists=True, linestyles=["-", "--", '-', ':', '-', '-'],
