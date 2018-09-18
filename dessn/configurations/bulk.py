@@ -165,18 +165,23 @@ if __name__ == "__main__":
                         res[t + "_BBC"] = means_bbc
                         minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
                         maxv = max(np.max(means_steve), np.max(means_bbc)) + 0.02
-                        color = "k" if "Syst" not in key else ("#4FC3F7" if "G10" in key else "#673AB7")
-                        ecolor = "#888888" if "Syst" not in key else ("#8edcff" if "G10" in key else "#a785e2")
+                        # color = "k" if "Syst" not in key else ("#4FC3F7" if "G10" in key else "#673AB7")
+                        color = "k" if "Syst" not in key else ("#43A047" if "G10" in key else "#E53935")
+                        # ecolor = "#888888" if "Syst" not in key else ("#8edcff" if "G10" in key else "#a785e2")
+                        ecolor = "#888888" if "Syst" not in key else ("#a0e8a3" if "G10" in key else "#f9a19f")
                         ax.errorbar(means_steve, means_bbc, yerr=std_steve, xerr=std_bbc, errorevery=2,
                                     fmt="o", capsize=2, markersize=5, c=color, ecolor=ecolor, elinewidth=0.5, label=t)
-                    minv = -1.25
-                    maxv = -0.7
-                    ax.plot([minv, maxv], [minv, maxv], c='k', linewidth=1)
-                    ax.set_xlim([minv, maxv])
-                    ax.set_ylim([minv, maxv])
-                    ax.set_ylabel("BBC $w$")
-                    ax.set_xlabel("BHM $w$")
-                    ax.legend(frameon=False)
+
+                minv = -1.25
+                maxv = -0.7
+                ax.plot([minv, maxv], [minv, maxv], c='k', linewidth=1)
+                ax.set_xlim([minv, maxv])
+                ax.set_ylim([minv, maxv])
+                ax.set_ylabel("BBC $w$")
+                ax.set_xlabel("BHM $w$")
+                ax.legend(frameon=False)
+
+
                 # plt.subplots_adjust(wspace=0, hspace=0)
                 print(res.keys())
                 mid_bbc = 0.5 * (res["G10_BBC"] + res["C11_BBC"])
@@ -185,6 +190,7 @@ if __name__ == "__main__":
 
                 fig.tight_layout()
                 fig.savefig(pfn + "_comparison.png", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
+                fig.savefig(pfn + "_comparison.pdf", dpi=900, bbox_inches="tight", transparent=True, pad_inches=0.05)
 
         if False:
             cc = ChainConsumer()

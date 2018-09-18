@@ -61,12 +61,6 @@ if __name__ == "__main__":
             c2.add_chain(chain, weights=weight, posterior=posterior, name=name)
 
         import numpy as np
-        # data = np.vstack(chain[x] for x in ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$', '$\\delta(0)$'])
-        # data = data.T
-        # np.save("samchain.npy", data.astype(np.float32))
-        # np.savetxt("samchain.txt", data)
-        # print(data.shape)
-        # exit()
 
         chain_planck, params, weights, likelihood = get_planck()
         if blind:
@@ -88,7 +82,7 @@ if __name__ == "__main__":
         watermark = "Blinded" if blind else None
 
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
-                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=2.0,
+                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=1.0,
                     legend_kwargs={"loc": "center right"}, watermark_text_kwargs={"alpha": 0.2},
                     colors=["b", "k", 'a', 'g', 'r', 'lb'], shade_alpha=[0.5, 0.0, 0.2, 0.4, 0.8, 0.1, 0.1])
         c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=parameters, watermark=watermark,
