@@ -140,7 +140,7 @@ if __name__ == "__main__":
                 truth[r"$\beta$"] = None
                 call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
 
-            if True:
+            if False:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
@@ -217,37 +217,38 @@ if __name__ == "__main__":
         # with open(pfn + "_summary.txt", "w") as f:
         #     f.write(c2.analysis.get_latex_table(transpose=True))
         #
-        # pps = ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
-        #        '$\\sigma_{\\rm m_B}^{0}$', '$\\sigma_{\\rm m_B}^{1}$', '$\\sigma_{x_1}^{0}$',
-        #        '$\\sigma_{x_1}^{1}$', '$\\sigma_{c}^{0}$', '$\\sigma_{c}^{1}$', '$\\alpha_c^{0}$',
-        #        '$\\alpha_c^{1}$', '$\\kappa_{c0}^{0}$', '$\\kappa_{c0}^{1}$', '$\\kappa_{c1}^{0}$',
-        #        '$\\kappa_{c1}^{1}$', '$s_c^{0}$', '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$',
-        #        '$\\langle x_1^{0} \\rangle$', '$\\langle x_1^{1} \\rangle$', '$\\langle x_1^{2} \\rangle$',
-        #        '$\\langle x_1^{3} \\rangle$', '$\\langle x_1^{4} \\rangle$', '$\\langle x_1^{5} \\rangle$',
-        #        '$\\langle x_1^{6} \\rangle$', '$\\langle x_1^{7} \\rangle$', '$\\langle c^{0} \\rangle$',
-        #        '$\\langle c^{1} \\rangle$', '$\\langle c^{2} \\rangle$', '$\\langle c^{3} \\rangle$',
-        #        '$\\langle c^{4} \\rangle$', '$\\langle c^{5} \\rangle$', '$\\langle c^{6} \\rangle$',
-        #        '$\\langle c^{7} \\rangle$']
-        # p_cor, c_cor = c2.analysis.get_correlations(chain=0, parameters=pps)
-        # import numpy as np
-        # import matplotlib.pyplot as plt
-        # from matplotlib import ticker
-        # from mpl_toolkits.axes_grid1 import make_axes_locatable
-        #
-        # fig, ax = plt.subplots(figsize=(9, 9))
-        # handle = ax.imshow(c_cor, cmap="magma")
-        # divider = make_axes_locatable(ax)
-        # cax = divider.append_axes("right", size="3%", pad=0.05)
-        # fig.colorbar(handle, cax=cax)
-        # ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-        # ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
-        # ax.set_yticklabels([''] + pps, fontsize=10)
-        # ax.set_xticklabels([''] + pps, fontsize=10)
-        # for tick in ax.get_xticklabels():
-        #     tick.set_rotation(90)
-        # plt.tight_layout()
-        # fig.savefig(pfn + "_cor.pdf", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
-        # fig.savefig(pfn + "_cor.png", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+        if True:
+            pps = ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
+               '$\\sigma_{\\rm m_B}^{0}$', '$\\sigma_{\\rm m_B}^{1}$', '$\\sigma_{x_1}^{0}$',
+               '$\\sigma_{x_1}^{1}$', '$\\sigma_{c}^{0}$', '$\\sigma_{c}^{1}$', '$\\alpha_c^{0}$',
+               '$\\alpha_c^{1}$', '$\\kappa_{c0}^{0}$', '$\\kappa_{c0}^{1}$', '$\\kappa_{c1}^{0}$',
+               '$\\kappa_{c1}^{1}$', '$\\delta(0)$', '$\\delta(\\infty)/\\delta(0)$',
+               '$\\langle x_1^{0} \\rangle$', '$\\langle x_1^{1} \\rangle$', '$\\langle x_1^{2} \\rangle$',
+               '$\\langle x_1^{3} \\rangle$', '$\\langle x_1^{4} \\rangle$', '$\\langle x_1^{5} \\rangle$',
+               '$\\langle x_1^{6} \\rangle$', '$\\langle x_1^{7} \\rangle$', '$\\langle c^{0} \\rangle$',
+               '$\\langle c^{1} \\rangle$', '$\\langle c^{2} \\rangle$', '$\\langle c^{3} \\rangle$',
+               '$\\langle c^{4} \\rangle$', '$\\langle c^{5} \\rangle$', '$\\langle c^{6} \\rangle$',
+               '$\\langle c^{7} \\rangle$']
+            p_cor, c_cor = c2.analysis.get_correlations(chain=0, parameters=pps)
+            import numpy as np
+            import matplotlib.pyplot as plt
+            from matplotlib import ticker
+            from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+            fig, ax = plt.subplots(figsize=(9, 9))
+            handle = ax.imshow(c_cor, cmap="magma")
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="3%", pad=0.05)
+            fig.colorbar(handle, cax=cax)
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+            ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+            ax.set_yticklabels([''] + pps, fontsize=10)
+            ax.set_xticklabels([''] + pps, fontsize=10)
+            for tick in ax.get_xticklabels():
+                tick.set_rotation(90)
+            plt.tight_layout()
+            fig.savefig(pfn + "_cor.pdf", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+            fig.savefig(pfn + "_cor.png", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
         #
         # with open(pfn + "_cor_tab.txt", 'w') as f:
         #     f.write(c2.chains[0].name)
