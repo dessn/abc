@@ -229,26 +229,27 @@ if __name__ == "__main__":
                '$\\langle c^{1} \\rangle$', '$\\langle c^{2} \\rangle$', '$\\langle c^{3} \\rangle$',
                '$\\langle c^{4} \\rangle$', '$\\langle c^{5} \\rangle$', '$\\langle c^{6} \\rangle$',
                '$\\langle c^{7} \\rangle$']
-            p_cor, c_cor = c2.analysis.get_correlations(chain=0, parameters=pps)
-            import numpy as np
-            import matplotlib.pyplot as plt
-            from matplotlib import ticker
-            from mpl_toolkits.axes_grid1 import make_axes_locatable
+            for c, t in zip([c2, c3], ["G10", "C11"]):
+                p_cor, c_cor = c.analysis.get_correlations(chain=0, parameters=pps)
+                import numpy as np
+                import matplotlib.pyplot as plt
+                from matplotlib import ticker
+                from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-            fig, ax = plt.subplots(figsize=(9, 9))
-            handle = ax.imshow(c_cor, cmap="magma")
-            divider = make_axes_locatable(ax)
-            cax = divider.append_axes("right", size="3%", pad=0.05)
-            fig.colorbar(handle, cax=cax)
-            ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-            ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
-            ax.set_yticklabels([''] + pps, fontsize=10)
-            ax.set_xticklabels([''] + pps, fontsize=10)
-            for tick in ax.get_xticklabels():
-                tick.set_rotation(90)
-            plt.tight_layout()
-            fig.savefig(pfn + "_cor.pdf", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
-            fig.savefig(pfn + "_cor.png", bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+                fig, ax = plt.subplots(figsize=(9, 9))
+                handle = ax.imshow(c_cor, cmap="magma")
+                divider = make_axes_locatable(ax)
+                cax = divider.append_axes("right", size="3%", pad=0.05)
+                fig.colorbar(handle, cax=cax)
+                ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+                ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+                ax.set_yticklabels([''] + pps, fontsize=10)
+                ax.set_xticklabels([''] + pps, fontsize=10)
+                for tick in ax.get_xticklabels():
+                    tick.set_rotation(90)
+                plt.tight_layout()
+                fig.savefig(pfn + "_cor_%s.pdf" % t, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
+                fig.savefig(pfn + "_cor_%s.png" % t, bbox_inches="tight", dpi=300, transparent=True, pad_inches=0.05)
         #
         # with open(pfn + "_cor_tab.txt", 'w') as f:
         #     f.write(c2.chains[0].name)
