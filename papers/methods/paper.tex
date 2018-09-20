@@ -816,11 +816,11 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 \subsection{Uncertainty Analysis}
 \label{sec:ucnert}
 
-With the increased flexibility of Bayesian hierarchical models over traditional modes, we expect to find an increased uncertainty on parameter inference. To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES three-year spectroscopic survey with various model parameters allowed to vary or locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
+With the increased flexibility of Bayesian hierarchical models over traditional models, we expect to find an increased uncertainty on parameter inference. To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES three-year spectroscopic survey with various model parameters allowed to either vary or stay locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
 
 \begin{table}
 	\centering
-	\caption{The error budget on $w$, as determined from analysing uncertainty on simulation data whilst progressively enabling model features.}
+	\caption{The error budget on $w$, as determined from analysing uncertainty on simulation data whilst progressively enabling model features. We start from the top of the table, only varying cosmological parameters $\Omega_m$ and $w$, and then progressively unlock parameters and let them fit as we progress down the table. The cumulative uncertainty shows the total uncertainty on $w$ on the fit for all, where the $\sigma_w$ term is derived by taking the quadrature difference in cumulative uncertainty as we progress.}
 	\label{tab:uncert}
 	\begin{tabular}{l|rr}
 		Feature & $\sigma_w$ & Cumulative  \\
@@ -828,35 +828,39 @@ With the increased flexibility of Bayesian hierarchical models over traditional 
 		Cosmology only                 & 0.051  &   0.051       \\
 		Standardisation parameters     & 0.046  &   0.068       \\
 		Intrinsic scatter              & 0.020  &   0.071       \\
-		Static survey populations      & 0.022  &   0.074       \\
+		Redshift-independent populations      & 0.022  &   0.074       \\
 		Redshift-dependent populations & 0.030  &   0.080       \\
 		Systematics                    & 0.054  &   0.096       \\
 		\hline
 	\end{tabular}
 \end{table}
 
-The error budget detailed in Table \ref{tab:uncert} shows that our uncertainty is still dominated by statistical error, as the total statistical uncertainty is on $w$ is $0.08$. With the low number of supernovae in the DES three-year spectroscopic sample, this is expected. We note that the label `Systematics' in Table \ref{tab:uncert} represents all numerically computed systematics (as discussed in Section \ref{sec:systreat}) and systematic uncertainty on the selection function.
+The error budget detailed in Table \ref{tab:uncert} shows that our uncertainty is still dominated by statistical error, as the total statistical uncertainty is on $w$ is $\pm0.08$. With the low number of supernovae in the DES three-year spectroscopic sample, this is expected. We note that the label `Systematics' in Table \ref{tab:uncert} represents all numerically computed systematics (as discussed in Section \ref{sec:systreat}) and systematic uncertainty on the selection function.
 
 \subsection{Methodology Comparison}
 \label{sec:comp}
 
-We compare the results of our model against those of the BBC method \citep{Kessler2017}. BBC has been used in prior analyses, such as the Pantheon sample analysis of \citet{Scolnic2017}, as a leading supernova cosmology method provides a good consistency as to the current levels of accuracy in recovering cosmological parameters.
+We compare the results of our model against those of the BBC method \citep{Kessler2017}. BBC has been used in prior analyses, such as the Pantheon sample analysis of \citet{Scolnic2017}. As a leading supernova cosmology method, it provides a good consistency as to the current levels of accuracy in recovering cosmological parameters.
 
-To this end, we take the results of the BBC method also run on our set of 200 validation simulations and compare the recovered $w$ values to those of our method. The results are detailed in Table \ref{tab:bulk_summary_bbc}, and a scatter plot of the simulation results is presented in Figure \ref{fig:bulk_comparison}. These show that the difference in recovered $w$ over different intrinsic scatter models is comparable, with our methodology having a small (but not statistically significant) reduction in the sensitivity to intrinsic scatter model. However, as the BBC method introduces a bias to lower $w$ for {\gten} and a bias towards higher $w$ for {\celeven}, taking the average result over both {\gten} and {\celeven} only results in a small bias of $0.01$ in $w$. As our method recovers $w$ without bias for {\gten} and finds a biased high $w$ for {\celeven}, the average bias over the two scatter models is $-0.028$. When comparing both the {\gten} and {\celeven} set of simulations independently, our model differs from BBC in its average prediction of $w$ by $-0.044$ and $-0.033$ respectively. For the {\gten} model this difference is a result of bias in the BBC results, however for the {\celeven} simulations this is a result of both bias from BBC, and a larger bias from our method. These results also allow us to state the expectation values for $w$ when run on the DES three year spectroscopic survey sample -- factoring in the calculated uncertainty from Planck priors (shrinking the scatter from $0.06$ to $0.04$), we expect our BHM method to, on average, recover $w_{\rm BHM} = w_{\rm BBC} -0.04\pm0.04$.
+To this end, we take the results of the BBC method also run on our set of 200 validation simulations and compare the recovered $w$ values to those of our method. The results are detailed in Table \ref{tab:bulk_summary_bbc}, and a scatter plot of the simulation results is presented in Figure \ref{fig:bulk_comparison}. 
 
-Having established that existing methodologies exhibit similar shifts in their recovery of $w$ compared to our method, future work will focus on improving the parametrisation of intrinsic scatter model into our framework, with the goal of minimising the effect of the underlying scatter model on the recovery of cosmology.
+These results show that both BBC and BHM are sensitive to the intrinsic scatter model, finding differences of $\sim0.06$ in $w$ when varying the scatter model. The BBC method finds $w$ biased low for G10 and $w$ biased high for C11 (by about $\pm0.03$), so taking the average result only results in a small bias of $-0.01$ in $w$. Our method shows a small (but not statistically significant) improvement in the insensitivity to the intrinsic scatter model, finding no bias for {\gten} but a $w$ biased high for {\celeven}. The average bias over the two scatter models is $+0.028$, representing a larger bias than the BBC method.
+
+When comparing both the {\gten} and {\celeven} set of simulations independently, our model differs from BBC in its average prediction of $w$ by $+0.044$ and $+0.033$ respectively. For the {\gten} model this difference is a result of bias in the BBC results, however for the {\celeven} simulations this is a result of both bias from BBC, and a larger bias from our method. These results also allow us to state the expected values for $w$ when run on the DES three year spectroscopic survey sample. When using Planck priors our uncertainty on $w$ is reduced compared to using our simulation Gaussian prior on $\Omega_m$, shrinking the average scatter from $0.06$ to $0.04$. After factoring this into our uncertainty, we expect our BHM method to, on average, recover $w_{\rm BHM} = w_{\rm BBC} +0.04\pm0.04$.
+
+Having established that our method exhibits similar shifts in their recovery of $w$ compared to BBC, future work will focus on improving the parametrisation of intrinsic scatter model into our framework, with the goal of minimising the effect of the underlying scatter model on the recovery of cosmology.
 
 \begin{table}
 	\centering
-	\caption{Characterising the bias on $w$ using the 100 simulations for the {\gten} scatter model and 100 simulations for {\celeven} scatter model. The mean $w$ value for our method and BBC are presented, along with the mean when averaging the difference between our method and BBC for each individual simulation. Finally, we also characterise the scatter between the methods in the final row.}
+	\caption{Characterising the bias on $w$ using the 100 simulations for the {\gten} scatter model and 100 simulations for {\celeven} scatter model. The mean $w$ value for our method and BBC are presented, along with the mean when averaging the difference between our method and BBC for each individual simulation. Finally, we also characterise the scatter between the methods in the final row. Averages are computed giving each simulation sample the same weight.}
 	\label{tab:bulk_summary_bbc}
 	\begin{tabular}{l|ccc}
 		\hline
 		Model & {\gten} & {\celeven} & Mean ({\gten} + {\celeven}) \\
 		\hline
-		Steve $\langle w \rangle$           & $-0.998$ & $-0.945$ & $-1.010$ \\
-		BBC $\langle w \rangle$             & $-1.044$ & $-0.978$ & $-0.972$ \\
-		(Steve - BBC)  $\langle w \rangle$  & $-0.044$ & $-0.033$ & $-0.039$ \\
+		Steve $\langle w \rangle$           & $-0.998$ & $-0.945$ & $-0.972$\\
+		BBC $\langle w \rangle$             & $-1.044$ & $-0.978$ & $-1.010$ \\
+		(Steve - BBC)  $\langle w \rangle$  & $+0.044$ & $+0.033$ & $+0.039$ \\
 		\hline
 		(Steve - BBC)  $\sigma_w$           & $0.057$ & $0.062$ & $0.060$ \\
 		\hline

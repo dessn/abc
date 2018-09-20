@@ -140,7 +140,7 @@ if __name__ == "__main__":
                 truth[r"$\beta$"] = None
                 call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
 
-            if False:
+            if True:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
@@ -161,6 +161,11 @@ if __name__ == "__main__":
 
                         diff = means_bbc - means_steve
                         print("Diff ", t, np.mean(means_steve), np.mean(means_bbc), np.mean(diff), np.std(diff))
+
+                        bbc_mean, bbc_std = weighted_avg_and_std(means_bbc, 1/std_bbc**2)
+                        bhm_mean, bhm_std = weighted_avg_and_std(means_steve, 1/std_steve**2)
+                        print(t, bbc_mean, bbc_std, bhm_mean, bhm_std)
+
                         res[t + "_Steve"] = means_steve
                         res[t + "_BBC"] = means_bbc
                         minv = min(np.min(means_steve), np.min(means_bbc)) - 0.02
@@ -217,7 +222,7 @@ if __name__ == "__main__":
         # with open(pfn + "_summary.txt", "w") as f:
         #     f.write(c2.analysis.get_latex_table(transpose=True))
         #
-        if True:
+        if False:
             pps = ['$\\Omega_m$', '$w$', '$\\alpha$', '$\\beta$', '$\\langle M_B \\rangle$',
                '$\\sigma_{\\rm m_B}^{0}$', '$\\sigma_{\\rm m_B}^{1}$', '$\\sigma_{x_1}^{0}$',
                '$\\sigma_{x_1}^{1}$', '$\\sigma_{c}^{0}$', '$\\sigma_{c}^{1}$', '$\\alpha_c^{0}$',
