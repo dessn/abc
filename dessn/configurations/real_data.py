@@ -70,29 +70,22 @@ if __name__ == "__main__":
 
         subset = np.vstack((chain_full[r"$\Omega_m$"], chain_full["$w$"]))
         kde = gaussian_kde(chain_planck.T)
-        nn = 10
+        nn = 1
         print("Trained")
         weights = kde.evaluate(subset[:, ::nn])
         print("Eval")
-        c.add_chain(subset.T[::nn, :], weights=weights, name="Combined", parameters=params)
-        c2.add_chain(subset.T[::nn, :], weights=weights, name="Combined", parameters=params)
+        c.add_chain(chain_full, weights=weights, name="Combined")
+        c2.add_chain(chain_full, weights=weights, name="Combined")
 
         parameters = [r"$\Omega_m$", "$w$"]
         extents = {r"$\Omega_m$": (0.15, 0.65), "$w$": (-1.8, -0.5)}
         watermark = "Blinded" if blind else None
 
         c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
-                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=1.0,
+                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=False,
                     legend_kwargs={"loc": "center right"}, watermark_text_kwargs={"alpha": 0.2},
                     colors=["b", "k", 'a', 'g', 'r', 'lb'], shade_alpha=[0.5, 0.0, 0.2, 0.4, 0.8, 0.1, 0.1])
         c.plotter.plot(filename=[pfn + ".png", pfn + ".pdf"], parameters=parameters, watermark=watermark,
-                       figsize=1.5, extents=extents)
-
-        c.configure(spacing=1.0, diagonal_tick_labels=False, sigma2d=False, plot_hists=False,
-                    sigmas=[0, 1, 2], linestyles=["-", "--", ':', '-', '--', '-'], kde=0.5,
-                    legend_kwargs={"loc": "center right"}, watermark_text_kwargs={"alpha": 0.2},
-                    colors=["p", "k", 'a', 'g', 'r', 'lb'], shade_alpha=[0.5, 0.0, 0.2, 0.4, 0.8, 0.1, 0.1])
-        c.plotter.plot(filename=[pfn + "2.png", pfn + "2.pdf"], parameters=parameters, watermark=watermark,
                        figsize=1.5, extents=extents)
 
         with open(pfn + "_res.txt", "w") as f:
