@@ -24,6 +24,8 @@
 \usepackage{amssymb}	% Extra maths symbols
 \usepackage{tikz}
 \usepackage{enumerate}
+%\usepackage{tabu}
+%\usepackage{tabularx}
 \DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
 \usetikzlibrary{bayesnet}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -252,10 +254,10 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 		$\delta(0)$ & Scale of the mass-magnitude correction\\
 		$\delta(\infty)/\delta(0)$ & Redshift-dependence of mass-magnitude correction\\
 		$\delta\mathcal{Z}_i$ & Systematics scale\\
-		$\delta S$ & Selection effect deviation \\
 		$\langle M_B \rangle$ & Mean absolute magnitude \\
 		%$s_c$ & Colour bias\\
 		\hline
+		$\delta S$ & Selection effect deviation \\
 		$\langle x_1^i \rangle$ & Mean stretch nodes\\
 		$\langle c^i \rangle$ & Mean colour nodes\\
 		$\alpha_c$ & Skewness of colour population \\
@@ -278,7 +280,7 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 		$C$ & Covariance on flux, stretch and colour \\
 		$\hat{z}$ & Observed redshift \\
 		$\hat{m}$ & Determined mass probability \\
-		$\hat{p}$ & Determined outlier probability \\
+		$\hat{p}$ & Determined {\green Ia} probability \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -349,11 +351,11 @@ Fully covariant extra dispersion on $\lbrace m_B, x_1, c \rbrace$ (rather than j
 	\node[det, above=of z] (mu) {$\mu$};
 	\node[latent, right=4.33cm of mu] (MBobs) {$M_B$};
 	% Survey nodes
-	\node[latent, above=of sum, yshift=1cm,text width=2.7cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\rho,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c, \kappa_0, \kappa_1$ };
-	\node[latent, right=1.5cm of pop1, align=center] (sf) {$\Delta_i, \delta_i$};
+	\node[latent, above=of sum, yshift=1cm,text width=2.7cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c, \kappa_0, \kappa_1$ };
+	\node[latent, right=1.5cm of pop1, align=center] (sf) {$\delta S$};
 	% Global nodes
 	\node[latent, above=2cm of mu]  (cosmo) {$\Omega_m, w$};
-	\node[latent, above=1.7cm of MBobs, text width=3cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, $\delta(0)$, \\$\delta(\infty)$, $\delta \mathcal{Z}_i$, $\delta S$};
+	\node[latent, above=1.7cm of MBobs, text width=3cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, $\delta(0)$, \\$\delta(\infty)$, $\delta \mathcal{Z}_i$};
 	
 	% Connect the nodes
 	\edge {sum} {obssum};
@@ -609,7 +611,7 @@ Early analyses often treated intrinsic dispersion simply as scatter in the under
 Simulations (using the SNANA package) follow the observational schedule and observing conditions for the DES and LowZ surveys, where the LowZ sample is comprised of CfA3 \citep{Hicken2009, Hicken2009a}, CfA4 \citep{Hicken2012} and CSP \citep{Contreras2010,Folatelli2010,Stritzinger2011}.
 
 
-In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and our full treatment of systematics. Our simulated populations are sourced from \citet[][hereafter {\sk}]{Scolnic2016} and shown in Table \ref{tab:dist}. Initial tests were also done with a second, Gaussian population with colour and stretch populations centered on zero and with respective width $0.1$ and $1$, however cosmological parameters were not impacted by choice of the underlying population and we continue using only the {\sk} population for computational efficiency. The selection effects were quantified by comparing all the generated supernovae to those that pass our simulated cuts, as shown in Figure~\ref{fig:sf_snana}. It is from this simulation that our analytic determination of the selection functions for the LowZ and DES survey are based. {\green We run two simulations to determine the efficiency using the {\gten} and {\celeven} scatter models and find no difference in the selection effect of Malmquist bias between the two models.}
+In addition to the improvements in the scatter models over the simple data, we also include peculiar velocities for the LowZ sample, and our full treatment of systematics. Our simulated populations are sourced from \citet[][hereafter {\sk}]{Scolnic2016} and shown in Table \ref{tab:dist}. Initial tests were also done with a second, Gaussian population with colour and stretch populations centered on zero and with respective width $0.1$ and $1$, however cosmological parameters were not impacted by choice of the underlying population and we continue using only the {\sk} population for computational efficiency. The selection effects were quantified by comparing all the generated supernovae to those that pass our simulated cuts, as shown in Figure~\ref{fig:sf_snana}. It is from this simulation that our analytic determination of the selection functions for the LowZ and DES survey are based. {\green We run two simulations to determine the efficiency using the {\gten} and {\celeven} scatter models and find no difference in the Malmquist bias between the two models.}
 
 
 \begin{table}
@@ -639,7 +641,21 @@ In addition to the improvements in the scatter models over the simple data, we a
 \end{figure}
 
 
-
+\begin{table*}
+	\centering
+	\caption{Standardisation parameters and base intrinsic scatter parameter results for the 100 fits to {\gten} and {\celeven} simulations. We show the average parameter mean and standard deviation, with the simulation scatter shown in brackets. Truth values for the simulations are $\alpha=0.15$, $\langle M_B \rangle = -19.365$, $\beta_{\rm G10} = 3.1$, $\beta_{\rm C11} = 3.8$.  The width of the intrinsic scatter does not have an input truth value as it is determined from the scatter model, with {\gten} having 70\% achromatic scatter and {\celeven} only having 25\% achromatic scatter.}
+	\label{tab:standardisation}
+	\begin{tabular}{l|ccccc}
+		\hline
+		Model & $\alpha$ & $\beta$ & $\langle M_B \rangle$ & $\sigma_{m_B}^0$ &  $\sigma_{m_B}^1$ \\
+		\hline
+		{\gten} Stat + Syst  & $0.152\pm0.009\ (0.008)$ & $ 3.44\pm0.19\ (0.18)$ & $-19.367\pm0.028\ (0.015)$ & $0.070\pm0.022\ (0.018)$ & $0.073\pm0.025\ (0.022)$\\
+		{\gten}  Stat         & $0.150\pm0.008\ (0.008)$ & $3.43\pm0.20\ (0.17)$ & $-19.374\pm0.016\ (0.013)$ & $0.069\pm0.023\ (0.019)$ & $0.072\pm0.026\ (0.023)$\\
+		{\celeven} Stat + Syst  &  $0.152\pm0.009\ (0.007)$ & $3.76\pm0.15\ (0.13)$ & $-19.351\pm0.030\ (0.018)$ & $0.024\pm0.016\ (0.011)$ & $0.029\pm0.020\ (0.014)$ \\
+		{\celeven} Stat         &  $0.150\pm0.008\ (0.007)$ & $3.75\pm0.16\ (0.13)$ & $-19.359\pm0.016\ (0.015)$ & $0.025\pm0.016\ (0.012)$ & $0.027\pm0.020\ (0.015)$\\
+		\hline
+	\end{tabular}
+\end{table*}
 
 
 
@@ -647,7 +663,7 @@ In addition to the improvements in the scatter models over the simple data, we a
 	\begin{center}
 		\includegraphics[width=\columnwidth]{bulk_points_g10.pdf}		\includegraphics[width=\columnwidth]{bulk_points_c11.pdf}
 	\end{center}
-	\caption{Maximum posterior points for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Points are shown for parameters $\Omega_m$, $w$, $\alpha$, $\beta$ and $\langle M_B \rangle$, with the other fit parameters being marginalised over. As we are unable to fully correct observed summary statistics, a step required by the lack of intrinsic scatter in the SALT2 model, we expect to see an offset in $\alpha$ and $\beta$. This in turn effects cosmology, resulting in small biases in $w$.}
+	\caption{Maximum posterior points for 100 realisations of supernova data for two intrinsic dispersion models - the {\gten} model for the top panel and the {\celeven} model for the bottom panel. Points are shown for parameters $\Omega_m$, $w$, $\alpha$ and $\beta$, with the other fit parameters being marginalised over. As we are unable to fully correct observed summary statistics, a step required by the lack of intrinsic scatter in the SALT2 model, we expect to see an offset in $\alpha$ and $\beta$. This in turn effects cosmology, resulting in small biases in $w$.}
 	\label{fig:bulk_posterior}
 \end{figure}
 
@@ -657,15 +673,17 @@ In addition to the improvements in the scatter models over the simple data, we a
 	\label{tab:bulk_summary}
 	\begin{tabular}{l|cc}
 		\hline
-		Model & $w$ (scatter) & Bias \\
+		Model & $w$ (scatter) & $w$-Bias \\
 		\hline
-		{\gten} Stat + Syst  &  $-1.00\pm 0.10\ (0.08)$ & $0.0\sigma$  \\
-		{\celeven} Stat + Syst  &  $-0.95\pm 0.10\ (0.06)$ & $0.5\sigma$  \\
-		{\gten}  Stat         &  $-1.00\pm 0.08\ (0.08)$ & $0.0\sigma$   \\
-		{\celeven} Stat         &  $-0.95\pm 0.08\ (0.05)$ & $0.6\sigma$   \\
+		{\gten} Stat + Syst  &  $-0.998\pm 0.097\ (0.073)$ & $(0.02\pm0.07)\sigma$  \\
+		{\gten}  Stat         &  $-1.008\pm 0.080\ (0.068)$ & $(-0.10\pm0.08)\sigma$   \\
+		{\celeven} Stat + Syst  &  $-0.945\pm 0.098\ (0.077)$ & $(0.55\pm0.08)\sigma$  \\
+		{\celeven} Stat         &  $-0.948\pm 0.079\ (0.066)$ & $(0.65\pm0.08)\sigma$   \\
 		\hline
 	\end{tabular}
 \end{table}
+
+
 
 
 \begin{table}
@@ -782,18 +800,6 @@ In addition to the improvements in the scatter models over the simple data, we a
 %		$\Delta_{7}$ &    0.00 &     -0.01     \\
 
 
-Each realisation of simulated cosmology contains 137 LowZ supernovae, and 204 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. As our primary focus is Dark Energy, we now focus specifically on the Flat $w$CDM model with matter prior.
-
-
-Points of maximum posterior for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. The parameter bounds are listed in Table \ref{tab:bulk_summary}. {\green Our recovered results are all within $0.5\sigma$ of the true values of $\Omega_m = 0.3$, $w=-1$.}
- 
- 
-We investigate the cosmological bias and find its source to be a bias in the observed summary statistics, in addition to incorrect reported uncertainty on the summary statistics. {\green To confirm this, we run two tests. The first of which, we replace the fully simulated observed $\hat{m}_B$, $\hat{x}_1$ and $\hat{c}$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits. With this test, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. Our second test, to allow measurement biases not sourced from intrinsic scatter through, we test a set of 100 simulations generated using only coherent magnitude scatter, and also find $w=-1.00$, showing that the source of the biases in summary statistics is the underlying intrinsic scatter model.} From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty reported from fitting the SALT2 model to light curves is incorrect, non-Gaussian and biased. Our current model and techniques can quantify the effect of different scatter models on biasing the observed summary statistics, but being unable to constrain the `correct' (simulated) scatter model in our model fit means we cannot fully correct for the bias introduced an unknown scatter model. 
-
-Unfortunately, adding extra fit parameters to allow for shifting observables washes out our ability to constrain cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model) and binning data. It is difficult to do whilst accounting for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit inherently. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
-
-% Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strengths of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulation fits constrained this parameter, and thus the majority of bias in the {\celeven} fits remain
-
 \begin{figure*}
 	\begin{center}
 		\includegraphics[width=\textwidth]{bulk_cor.pdf}
@@ -803,8 +809,21 @@ Unfortunately, adding extra fit parameters to allow for shifting observables was
 \end{figure*}
 
 
+Each realisation of simulated cosmology contains 137 LowZ supernovae, and 204 DES-like supernovae, such that the uncertainties found when combining chains is representative of the uncertainty in the final DES spectroscopic analysis. As our primary focus is Dark Energy, we now focus specifically on the Flat $w$CDM model with matter prior.
 
-Table \ref{tab:parameter_correlations} lists the fit correlations between our model fit parameters (excluding the LowZ band systematics, and Malmquist bias uncertainty parameters which had negligible correlation), showing (in order) cosmological parameters, standardisation parameters, population width and skewness parameters, intrinsic dispersion parameters, mass-step parameters, population mean parameters, SALT2 model systematics, dust systematic, global HST calibration systematic, peculiar velocity systematic, global redshift systematic and DES band magnitude and wavelength systematics. Figure \ref{fig:bulk_cor} show the full correlations between all non-systematic model parameters. As expected, $w$ bias would be introduced primarily through incorrectly determined standardisation parameters and mean absolute magnitude, which itself is tied to the unexplained colour dispersion and biases in colour introduced by the unknown intrinsic scatter model. Other interesting correlations are shown and discussed in Figure \ref{fig:bulk_cor}. The band systematics for DES filters $g$, $r$ and $i$ also show significant correlation with $w$, highlighting the importance of minimising instrumental uncertainty.
+
+Points of maximum posterior for 100 data realisations are shown in Figure \ref{fig:bulk_posterior}. The parameter bounds and biases for $w$ are listed in Table \ref{tab:bulk_summary},  {\green and secondary parameters are shown in Table \ref{tab:standardisation}. Our recovered results for $w$ are all within $0.5\sigma$ of the true values of $w=-1$. Table \ref{tab:standardisation} shows a clear difference in both $\beta$ and $\sigma_{m_B}$ across the {\gten} and {\celeven} simulations. As expected, the {\celeven} simulations recover a far smaller intrinsic magnitude scatter, giving results of approximately $0.025$ when compared to the result of $0.070$ for the {\gten} simulations. The extra smearing of the {\celeven} model does not result in a biased $\beta$ value, with recovery of $\beta\approx3.76$ close to the input truth value of $3.8$, however the $\beta$ recovery for the {\gten} simulations is biased high, finding $\beta\approx3.44$ with an input of $3.1$. Interestingly, $w$-bias is only found for the {\celeven} simulations.}
+ 
+ 
+We investigate the cosmological bias and find its source to be a bias in the observed summary statistics, in addition to incorrect reported uncertainty on the summary statistics. {\green To confirm this, we run two tests. The first of which, we replace the fully simulated observed $\hat{m}_B$, $\hat{x}_1$ and $\hat{c}$ with random numbers drawn from a true Gaussian centered on the simulated SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits. With this test, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. Our second test, to allow measurement biases not sourced from intrinsic scatter through, we test a set of 100 simulations generated using only coherent magnitude scatter, and also find $w=-1.00$, showing that the source of the biases in summary statistics is the underlying intrinsic scatter model.} From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty reported from fitting the SALT2 model to light curves is incorrect, non-Gaussian and biased. Our current model and techniques can quantify the effect of different scatter models on biasing the observed summary statistics, but being unable to constrain the `correct' (simulated) scatter model in our model fit means we cannot fully correct for the bias introduced an unknown scatter model. 
+
+Unfortunately, adding extra fit parameters to allow for shifting observables {\green washes out our ability to constrain cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model), which presents difficulties when trying to account for correlations with population and scatter model.} This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit parametrically. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies - incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
+
+% Colour bias corrections for the {\celeven} scatter model are included in our cosmology model, the strengths of which are controlled by a fit parameter, $s_c$, however neither the {\gten} nor {\celeven} simulation fits constrained this parameter, and thus the majority of bias in the {\celeven} fits remain
+
+
+
+Table \ref{tab:parameter_correlations} lists the fit correlations between our model fit parameters (excluding the LowZ band systematics, and Malmquist bias uncertainty parameters which had negligible correlation), showing (in order) cosmological parameters, standardisation parameters, population width and skewness parameters, intrinsic dispersion parameters, mass-step parameters, population mean parameters, SALT2 model systematics, dust systematic, global HST calibration systematic, peculiar velocity systematic, global redshift systematic and DES band magnitude and wavelength systematics. Figure \ref{fig:bulk_cor} show the full correlations between all non-systematic model parameters. {\green As expected, $w$ bias would be introduced primarily through incorrectly determined standardisation parameters, mean absolute magnitude or incorrect dispersion parameters. As discussed previously, the culprit for our $w$-bias is the dispersion model, rather than standardisation parameters}. Other interesting correlations are shown and discussed in Figure \ref{fig:bulk_cor}. The band systematics for DES filters $g$, $r$ and $i$ also show significant correlation with $w$, highlighting the importance of minimising instrumental uncertainty.
 
 
 For the sample size of the DES and LowZ supernova samples (of order 350 supernova), the bias from intrinsic scatter models is sub-dominant to the statistical uncertainty, as shown in Figure \ref{fig:bulk_posterior}. For our full systematics model, the bias represents a deviation between $0\sigma$ to $0.5\sigma$ depending on scatter model, and as such we will leave more complicated treatment of them for future work.
@@ -816,24 +835,25 @@ For the sample size of the DES and LowZ supernova samples (of order 350 supernov
 \subsection{Uncertainty Analysis}
 \label{sec:ucnert}
 
-With the increased flexibility of Bayesian hierarchical models over traditional models, we expect to find an increased uncertainty on parameter inference. To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES three-year spectroscopic survey with various model parameters allowed to either vary or stay locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
-
-\begin{table}
+\begin{table*}
 	\centering
 	\caption{The error budget on $w$, as determined from analysing uncertainty on simulation data whilst progressively enabling model features. We start from the top of the table, only varying cosmological parameters $\Omega_m$ and $w$, and then progressively unlock parameters and let them fit as we progress down the table. The cumulative uncertainty shows the total uncertainty on $w$ on the fit for all, where the $\sigma_w$ term is derived by taking the quadrature difference in cumulative uncertainty as we progress.}
 	\label{tab:uncert}
-	\begin{tabular}{l|rr}
-		Feature & $\sigma_w$ & Cumulative  \\
+	\begin{tabular}{l|l|rr}
+		Feature & {\green Parameters} & $\sigma_w$ & Cumulative  \\
 		\hline
-		Cosmology only                 & 0.051  &   0.051       \\
-		Standardisation parameters     & 0.046  &   0.068       \\
-		Intrinsic scatter              & 0.020  &   0.071       \\
-		Redshift-independent populations      & 0.022  &   0.074       \\
-		Redshift-dependent populations & 0.030  &   0.080       \\
-		Systematics                    & 0.054  &   0.096       \\
+		Cosmology                      & $\Omega_m$, $w$ & 0.051  &   0.051       \\
+		Standardisation                & $\alpha$, $\beta$, $\langle M_B \rangle$, $\delta(0)$, $\delta(\infty)/\delta(0)$ & 0.046  &   0.068       \\
+		Intrinsic scatter              & $\kappa_0$, $\kappa_1$ & 0.020  &   0.071       \\
+		Redshift-independent populations             & $\sigma_{M_B}$, $\sigma_c$, $\sigma_{x_1}$, $\alpha_c$ & 0.022  &   0.074       \\
+		Redshift-dependent populations & $\langle c_i \rangle$, $\langle x_{1,i} \rangle$ & 0.030  &   0.080   \\
+		Systematics                    & $\delta \mathcal{Z}_i$, $\delta S$ & 0.054  &   0.096      \\ 
 		\hline
 	\end{tabular}
-\end{table}
+\end{table*}
+
+With the increased flexibility of Bayesian hierarchical models over traditional models, we expect to find an increased uncertainty on parameter inference. To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES three-year spectroscopic survey with various model parameters allowed to either vary or stay locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
+
 
 The error budget detailed in Table \ref{tab:uncert} shows that our uncertainty is still dominated by statistical error, as the total statistical uncertainty is on $w$ is $\pm0.08$. With the low number of supernovae in the DES three-year spectroscopic sample, this is expected. We note that the label `Systematics' in Table \ref{tab:uncert} represents all numerically computed systematics (as discussed in Section \ref{sec:systreat}) and systematic uncertainty on the selection function.
 
@@ -844,7 +864,7 @@ We compare the results of our model against those of the BBC method \citep{Kessl
 
 To this end, we take the results of the BBC method also run on our set of 200 validation simulations and compare the recovered $w$ values to those of our method. The results are detailed in Table \ref{tab:bulk_summary_bbc}, and a scatter plot of the simulation results is presented in Figure \ref{fig:bulk_comparison}. 
 
-{\green As shown in GET-BROUT-CITATION, BBC recovers cosmological parameters without bias so long as the intrinsic scatter model is known. As we do not know the correct intrinsic scatter model, the BBC method averages the results when using bias corrections from {\gten} and from {\celeven}. As such, we expect the BBC method to be biased in one direction for {\gten} simulations and the other direction for {\celeven} simulations. These results are consistent with those displayed in Table \ref{tab:bulk_summary_bbc}, as both} BBC and BHM are sensitive to the intrinsic scatter model, finding differences of $\sim0.06$ in $w$ when varying the scatter model. The BBC method finds $w$ biased low for G10 and $w$ biased high for C11 (by about $\pm0.03$), so taking the average result only results in a small bias of $-0.01$ in $w$. Our method shows a small improvement in the insensitivity to the intrinsic scatter model, finding no bias for {\gten} but a $w$ biased high for {\celeven}. This decrease in error is not statistically significant as we have statistical uncertainty of $\sim0.01$ for $100$ simulation realisations. The average bias over the two scatter models is $+0.028$, representing a larger bias than the BBC method.
+{\green As shown in \citet{Brout18SYS}, BBC recovers cosmological parameters without bias so long as the intrinsic scatter model is known. As we do not know the correct intrinsic scatter model, the BBC method averages the results when using bias corrections from {\gten} and from {\celeven}. As such, we expect the BBC method to be biased in one direction for {\gten} simulations and the other direction for {\celeven} simulations. These results are consistent with those displayed in Table \ref{tab:bulk_summary_bbc}, as both} BBC and BHM are sensitive to the intrinsic scatter model, finding differences of $\sim0.06$ in $w$ when varying the scatter model. The BBC method finds $w$ biased low for G10 and $w$ biased high for C11 (by about $\pm0.03$), so taking the average result only results in a small bias of $-0.01$ in $w$. Our method shows a small improvement in the insensitivity to the intrinsic scatter model, finding no bias for {\gten} but a $w$ biased high for {\celeven}. This decrease in error is not statistically significant as we have statistical uncertainty of $\sim0.01$ for $100$ simulation realisations. The average bias over the two scatter models is $+0.028$, representing a larger bias than the BBC method.
 
 When comparing both the {\gten} and {\celeven} set of simulations independently, our model differs from BBC in its average prediction of $w$ by $+0.044$ and $+0.033$ respectively. For the {\gten} model this difference is a result of bias in the BBC results, however for the {\celeven} simulations this is a result of both bias from BBC, and a larger bias from our method. These results also allow us to state the expected values for $w$ when run on the DES three year spectroscopic survey sample. When using Planck priors our uncertainty on $w$ is reduced compared to using our simulation Gaussian prior on $\Omega_m$, shrinking the average scatter from $0.06$ to $0.04$. After factoring this into our uncertainty, we expect our BHM method to, on average, recover $w_{\rm BHM} = w_{\rm BBC} +0.04\pm0.04$.
 

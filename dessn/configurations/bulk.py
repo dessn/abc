@@ -61,6 +61,8 @@ if __name__ == "__main__":
             cs = ['b', 'g', 'p', 'a']
             cs = ['g', 'r', 'k', 'k']
 
+            pars = ["$w$", r"$\Omega_m$", r"$\alpha$", r"$\beta$", '$\\langle M_B \\rangle$',
+               '$\\sigma_{\\rm m_B}^{0}$', '$\\sigma_{\\rm m_B}^{1}$']
             ws = {}
             ws_std = {}
             for m, s, ci, chain, truth, weight, old_weight, posterior in res:
@@ -96,12 +98,17 @@ if __name__ == "__main__":
                     else:
                         cc = c2
                     if ws.get(name) is None:
-                        ws[name] = []
+                        ws[name] = {}
                     if ws_std.get(name) is None:
-                        ws_std[name] = []
-                    w_mean, w_std = weighted_avg_and_std(chain["$w$"], weight)
-                    ws[name].append(w_mean)
-                    ws_std[name].append(w_std)
+                        ws_std[name] = {}
+                    for p in pars:
+                        w_mean, w_std = weighted_avg_and_std(chain[p], weight)
+                        if ws[name].get(p) is None:
+                            ws[name][p] = []
+                        if ws_std[name].get(p) is None:
+                            ws_std[name][p] = []
+                        ws[name][p].append(w_mean)
+                        ws_std[name][p].append(w_std)
                     cc.add_chain(chain, weights=weight, posterior=posterior, name=name, plot_contour=False, plot_point=True, color=col, marker_style=ms, marker_size=msize)
                     if True or "Syst" in name:
                         ms = "+" if "G10" in name else "o"
@@ -113,11 +120,14 @@ if __name__ == "__main__":
 
             with open(pfn + "_res.txt", "w") as f:
                 for k in ws.keys():
-                    s = "%s %5.3f %5.3f (%5.3f) : %4.2f\n" % (k, np.mean(ws[k]), np.mean(ws_std[k]), np.std(ws[k]), np.sqrt(100)*(-1-np.mean(ws[k]))/np.std(ws[k]))
-                    # mls = [i["$w$"][1] for i in call.analysis.get_summary(parameters=["$w$"], chains=k)]
-                    print(s)
-                    f.write(s)
-                    # print(np.mean(mls))
+                    for p in ws[k].keys():
+                        means = ws[k][p]
+                        stds = ws_std[k][p]
+                        s = "%15s %30s %8.4f %8.4f (%8.4f)\n" % (k, p, np.mean(means), np.mean(stds), np.std(means))
+                        # mls = [i["$w$"][1] for i in call.analysis.get_summary(parameters=["$w$"], chains=k)]
+                        print(s)
+                        f.write(s)
+                        # print(np.mean(mls))
 
             if False:
                 c2.configure(spacing=1.0, sigma2d=False, flip=False, shade=True, linestyles=ls, colors=cs, shade_gradient=1.4, shade_alpha=shades, linewidths=1.2)
@@ -140,7 +150,7 @@ if __name__ == "__main__":
                 truth[r"$\beta$"] = None
                 call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
 
-            if True:
+            if False:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
