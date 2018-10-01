@@ -150,27 +150,31 @@ if __name__ == "__main__":
                 truth[r"$\beta$"] = None
                 call.plotter.plot(filename=pfn + "_poster.png", truth=truth, parameters=4, extents=ex)
 
-            if False:
+            if True:
                 bbcs = [np.loadtxt(plot_dir + "dillon_g10.txt"), np.loadtxt(plot_dir + "dillon_c11.txt")]
 
                 import matplotlib.pyplot as plt
                 fig, axes = plt.subplots(nrows=1, figsize=(5, 5))
                 axes = [axes, axes]
                 res = {}
+                m_s, m_b, m_d = [], [], []
                 for t, ax, bbc in zip(["G10", "C11"], axes, bbcs):
                     for key in ws.keys():
                         if t not in key:
                             continue
                         if "Syst" not in key:
                             continue
-                        means_steve = np.array(ws[key])
-                        std_steve = np.array(ws_std[key])
+                        means_steve = np.array(ws[key]["$w$"])
+                        std_steve = np.array(ws_std[key]["$w$"])
 
                         means_bbc = bbc[:, 0] - 1
                         std_bbc = bbc[:, 1]
-
                         diff = means_bbc - means_steve
-                        print("Diff ", t, np.mean(means_steve), np.mean(means_bbc), np.mean(diff), np.std(diff))
+
+                        m_d.append(diff)
+                        m_b.append(means_bbc)
+                        m_s.append(means_steve)
+                        print("Diff %s %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f" % (t, np.mean(means_steve), np.std(means_steve), np.mean(means_bbc), np.std(means_bbc), np.mean(diff), np.std(diff), np.std(diff)/np.sqrt(2*len(diff))))
 
                         bbc_mean, bbc_std = weighted_avg_and_std(means_bbc, 1/std_bbc**2)
                         bhm_mean, bhm_std = weighted_avg_and_std(means_steve, 1/std_steve**2)
@@ -186,6 +190,15 @@ if __name__ == "__main__":
                         ecolor = "#888888" if "Syst" not in key else ("#a0e8a3" if "G10" in key else "#f9a19f")
                         ax.errorbar(means_steve, means_bbc, yerr=std_steve, xerr=std_bbc, errorevery=2,
                                     fmt="o", capsize=2, markersize=5, c=color, ecolor=ecolor, elinewidth=0.5, label=t)
+
+                print("=====")
+                m_d = np.array(m_d).flatten()
+                m_b = np.array(m_b).flatten()
+                m_s = np.array(m_s).flatten()
+                print("bbc %7.4f %7.4f  %7.4f  %7.4f"   % (np.mean(m_b), np.std(m_b)/np.sqrt(len(m_b)), np.std(m_b), np.std(m_b)/np.sqrt(2*len(m_b))))
+                print("steve %7.4f %7.4f  %7.4f  %7.4f" % (np.mean(m_s), np.std(m_s)/np.sqrt(len(m_s)), np.std(m_s), np.std(m_s)/np.sqrt(2*len(m_s))))
+                print("diff %7.4f %7.4f  %7.4f  %7.4f"  % (np.mean(m_d), np.std(m_d)/np.sqrt(len(m_d)), np.std(m_d), np.std(m_d)/np.sqrt(2*len(m_d))))
+                print("=====")
 
                 minv = -1.25
                 maxv = -0.7
