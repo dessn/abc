@@ -53,6 +53,7 @@
 \defcitealias{Rubin2015}{R15}	
 \defcitealias{Scolnic2016}{SK16}	 
 \newcommand{\gten}{\citetalias{Guy2010}}
+\newcommand{\steve}{\textit{Steve}}
 \newcommand{\celeven}{\citetalias{Chotard2011}}
 \newcommand{\rubin}{\citetalias{Rubin2015}}
 \newcommand{\sk}{\citetalias{Scolnic2016}}
@@ -102,7 +103,25 @@
 
 % Abstract of the paper
 \begin{abstract}
-We present a hierarchical Bayesian model for use in supernova cosmology which takes into account a full range of analysis systematics and selection effects. This advances previous works with hierarchical Bayesian models by including additional sources of systematic uncertainty and improving treatment of Malmquist bias, whilst increasing numerical efficiency. Our model is optimised for efficient fitting and has been validated on a combined simulated dataset of more than $250\,000$ supernovae to rule out the presence of significant model biases in parameter recovery. We demonstrate its effectiveness by fitting simplified statistical simulations for ideal supernova cosmology, and sophisticated SNANA simulations configured to mimic the Dark Energy Survey (DES) 3-year spectroscopic supernova sample. SNANA simulations can recover the input cosmology between $0$ and half the statistical uncertainty from a DES 3-year spectroscopic sample. The method fits cosmology, population and systematics simultaneously while taking into account an increased number of systematics and minimising simulation dependence. Future development will focus on increasing model agnosticism towards intrinsic scatter model.
+We present a new Bayesian hierarchical model named {\steve} for performing type Ia supernova (SN~Ia) cosmology fits. 
+%
+This advances previous works with Bayesian hierarchical models by including 
+an improved treatment of Malmquist bias, 
+accounting for additional sources of systematic uncertainty, 
+and increasing numerical efficiency. 
+%
+Given light curve fit parameters, redshifts, and host-galaxy masses, {\steve} simultaneously fits for parameters describing cosmology, SN~Ia populations, and systematic uncertainties. Selection effects are characterised using Monte-Carlo simulations.
+
+
+We demonstrate its implementation by fitting realisations of SN~Ia datasets where the SN~Ia model closely follows that used in {\steve}.
+%
+Next, we validate on more realistic SNANA simulations of SN~Ia samples from the Dark Energy Survey and low-redshift surveys \citep{DESKEY}.
+%
+These simulated datasets contain more than $250\,000$ SNe~Ia, which we use to evaluate biases in the recovery of cosmological parameters, specifically the equation-of-state of dark energy, $w$. 
+%
+This is the most rigorous test of a BHM model, and reveals small $w$-biases that depend on the simulated SN~Ia properties, in particular the intrinsic SN~Ia scatter model. This $w$-bias is less than $0.03$ on average, roughly half the uncertainty on $w$.
+%
+These simulation test results are a concern for upcoming large surveys, and therefore future development will focus on minimising the sensitivity of {\steve} to the SN~Ia intrinsic scatter model.
 \end{abstract}
 % Bias in SNANA tests across intrinsic dispersion models is found to range from $-0.15\sigma$ to $+0.27\sigma$ in $w$ for datasets of comparable strength to the Dark Energy Survey three-year analysis. 
 
@@ -920,6 +939,34 @@ With our model being validated against hundreds of simulation realisations, repr
 Plots of posterior surfaces and parameter summaries were created with \verb|ChainConsumer| \citep{Hinton2016}.
 
 
+Funding for the DES Projects has been provided by the U.S. Department of Energy, the U.S. National Science Foundation, the Ministry of Science and Education of Spain, 
+the Science and Technology Facilities Council of the United Kingdom, the Higher Education Funding Council for England, the National Center for Supercomputing 
+Applications at the University of Illinois at Urbana-Champaign, the Kavli Institute of Cosmological Physics at the University of Chicago, 
+the Center for Cosmology and Astro-Particle Physics at the Ohio State University,
+the Mitchell Institute for Fundamental Physics and Astronomy at Texas A\&M University, Financiadora de Estudos e Projetos, 
+Funda{\c c}{\~a}o Carlos Chagas Filho de Amparo {\`a} Pesquisa do Estado do Rio de Janeiro, Conselho Nacional de Desenvolvimento Cient{\'i}fico e Tecnol{\'o}gico and 
+the Minist{\'e}rio da Ci{\^e}ncia, Tecnologia e Inova{\c c}{\~a}o, the Deutsche Forschungsgemeinschaft and the Collaborating Institutions in the Dark Energy Survey. 
+
+The Collaborating Institutions are Argonne National Laboratory, the University of California at Santa Cruz, the University of Cambridge, Centro de Investigaciones Energ{\'e}ticas, 
+Medioambientales y Tecnol{\'o}gicas-Madrid, the University of Chicago, University College London, the DES-Brazil Consortium, the University of Edinburgh, 
+the Eidgen{\"o}ssische Technische Hochschule (ETH) Z{\"u}rich, 
+Fermi National Accelerator Laboratory, the University of Illinois at Urbana-Champaign, the Institut de Ci{\`e}ncies de l'Espai (IEEC/CSIC), 
+the Institut de F{\'i}sica d'Altes Energies, Lawrence Berkeley National Laboratory, the Ludwig-Maximilians Universit{\"a}t M{\"u}nchen and the associated Excellence Cluster Universe, 
+the University of Michigan, the National Optical Astronomy Observatory, the University of Nottingham, The Ohio State University, the University of Pennsylvania, the University of Portsmouth, 
+SLAC National Accelerator Laboratory, Stanford University, the University of Sussex, Texas A\&M University, and the OzDES Membership Consortium.
+
+Based in part on observations at Cerro Tololo Inter-American Observatory, National Optical Astronomy Observatory, which is operated by the Association of 
+Universities for Research in Astronomy (AURA) under a cooperative agreement with the National Science Foundation.
+
+The DES data management system is supported by the National Science Foundation under Grant Numbers AST-1138766 and AST-1536171.
+The DES participants from Spanish institutions are partially supported by MINECO under grants AYA2015-71825, ESP2015-66861, FPA2015-68048, SEV-2016-0588, SEV-2016-0597, and MDM-2015-0509, 
+some of which include ERDF funds from the European Union. IFAE is partially funded by the CERCA program of the Generalitat de Catalunya.
+Research leading to these results has received funding from the European Research
+Council under the European Union's Seventh Framework Program (FP7/2007-2013) including ERC grant agreements 240672, 291329, and 306478.
+We  acknowledge support from the Australian Research Council Centre of Excellence for All-sky Astrophysics (CAASTRO), through project number CE110001020, and the Brazilian Instituto Nacional de Ci\^encia
+e Tecnologia (INCT) e-Universe (CNPq grant 465376/2014-2).
+
+This manuscript has been authored by Fermi Research Alliance, LLC under Contract No. DE-AC02-07CH11359 with the U.S. Department of Energy, Office of Science, Office of High Energy Physics. The United States Government retains and the publisher, by accepting the article for publication, acknowledges that the United States Government retains a non-exclusive, paid-up, irrevocable, world-wide license to publish or reproduce the published form of this manuscript, or allow others to do so, for United States Government purposes.
 
 %%%%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%
 
