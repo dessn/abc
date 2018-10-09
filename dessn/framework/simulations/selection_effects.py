@@ -40,7 +40,7 @@ def lowz_sel(cov_scale=1.0, shift=None, type="G10", kappa=0, zlim=None, version=
     return sn, mean, cov, kappa
 
 
-def get_data(base, zlim=None):
+def get_data(base, zlim=None, maxc=None, minc=None):
     file = os.path.abspath(inspect.stack()[0][1])
     dir_name = os.path.dirname(file)
     folder = dir_name + "/" + base
@@ -57,8 +57,8 @@ def get_data(base, zlim=None):
     return mags, passed
 
 
-def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None):
-    mB_all, passed = get_data(base_folder, zlim=zlim)
+def get_ratio(base_folder, cut_mag=19.75, delta=0, zlim=None, maxc=None, minc=None):
+    mB_all, passed = get_data(base_folder, zlim=zlim, maxc=maxc, minc=minc)
     mB_passed = mB_all[passed]
 
     # Bin data and get ratio
@@ -135,8 +135,7 @@ def get_selection_effects_cdf(dump_npy, plot=False, cut_mag=19, kappa=0, zlim=No
         name = os.path.basename(dump_npy)
 
         ax.text(0.98, 0.95, "DES 3YR Spectroscopically Confirmed", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
-        # fig.savefig("../../../papers/methods/figures/%s_%0.2f.png" % (name, delta), bbox_inches="tight", transparent=True)
-        # fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
+        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
         plt.show()
 
     print(vals, cov, r2)
@@ -198,9 +197,9 @@ def get_selection_effects_skewnorm(dump_npy, plot=False, cut_mag=10, kappa=0, zl
         fig.tight_layout()
         name = os.path.basename(dump_npy)
         plt.show()
-        ax.text(0.98, 0.95, "Combined LowZ Sample", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
-        # fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
-        # fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
+        ax.text(0.98, 0.95, "Low-$z$ Sample", verticalalignment='top', horizontalalignment='right', transform=ax.transAxes)
+        fig.savefig("../../../papers/methods/figures/%s.png" % name, bbox_inches="tight", transparent=True)
+        fig.savefig("../../../papers/methods/figures/%s.pdf" % name, bbox_inches="tight", transparent=True)
 
     return True, vals, cov, r2
 
@@ -226,14 +225,14 @@ def test_colour_contribution():
     plt.show()
 
 if __name__ == "__main__":
-    # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
+    get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_G10", plot=True)
     # get_selection_effects_skewnorm("snana_data/DES3YR_LOWZ_BHMEFF_C11", plot=True)
     # test_colour_contribution()
-    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
-    # print("---")
+    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10", plot=True)
+    print("---")
     # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMC11", plot=True)
     # print("---")
-    get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=19)
+    # get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_CD", plot=True, cut_mag=19)
 
     # _, mean, cov = get_selection_effects_cdf("snana_data/DES3YR_DES_BHMEFF_AMG10")
     # print(mean, np.sqrt(np.diag(cov)))
