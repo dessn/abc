@@ -339,7 +339,7 @@ def convert(base_folder, load_dump=False, override=False, skip=11, biascor=None,
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG, format="[%(funcName)20s()] %(message)s")
     # convert("DES3YR_LOWZ_COMBINED_TEXT_v8")
-    convert("DES3YR_DES_COMBINED_TEXT_v8")
+    # convert("DES3YR_DES_COMBINED_TEXT_v8")
     # convert("DES3YR_DES_NOMINAL")
     # convert("DES3YR_LOWZ_NOMINAL")
     # convert("DES3YR_DES_BULK_v8", skip=6)
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     # convert("DES3YR_LOWZ_BULK", skip=6)
     # convert("DES3YR_DES_SAMTEST", skip=11)
     # convert("DES3YR_LOWZ_SAMTEST", skip=11)
-    # convert("DES3YR_DES_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
+    convert("DES3YR_DES_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
     # convert("DES3YR_LOWZ_BHMEFF_v8", load_dump=True, skip=11, zipped=True)
     # convert("DES3YR_LOWZ_VALIDATION", skip=11)
     # convert("DES3YR_DES_VALIDATION", skip=11)
