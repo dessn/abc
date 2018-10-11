@@ -42,10 +42,10 @@ ax.scatter(sn_zs[~mask], sn_disp[~mask], s=2, c="#f44141", alpha=0.4, label="Uno
 
 cax = ax.scatter(bin_center, means, c=np.abs(bias), s=50, lw=1, edgecolor='k', label="SN means")
 cbar = fig.colorbar(cax)
-cbar.set_label(r"$\Delta \mu$", fontsize=14)
+cbar.set_label(r"$\langle\mu_{\rm obs} - \mu_C\rangle$", fontsize=14)
 
 ax.set_xlabel("$z$", fontsize=14)
-ax.set_ylabel(r"$\mu$", fontsize=14)
+ax.set_ylabel(r"$\mu_{\rm obs}$", fontsize=14)
 
 ax.legend(loc=4, frameon=False, markerfirst=False)
 
