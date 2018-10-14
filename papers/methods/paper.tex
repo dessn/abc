@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Basic setup. Most papers should leave these options alone.
-\documentclass[a4paper,fleqn,usenatbib]{emulateapj}
+\documentclass[a4paper,fleqn,usenatbib,manuscript]{emulateapj}
 
 % MNRAS is set in Times font. If you don't have this installed (most LaTeX
 % installations will be fine) or prefer the old Computer Modern fonts, comment
@@ -22,12 +22,12 @@
 \usepackage{graphicx}	% Including figure files
 \usepackage{amsmath}	% Advanced maths commands
 \usepackage{amssymb}	% Extra maths symbols
-\usepackage{tikz}
 \usepackage{enumerate}
+\usepackage{xcolor}
+
 %\usepackage{tabu}
 %\usepackage{tabularx}
 \DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
-\usetikzlibrary{bayesnet}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% AUTHORS - PLACE YOUR OWN COMMANDS HERE %%%%%
@@ -70,14 +70,13 @@
 % Title of the paper, and the short title which is used in the headers.
 % Keep the title short and informative.
 
-\shorttitle{\name}
+\shorttitle{{\steve}}
 % Don't change these lines
 \begin{document}
-\title{\name: A hierarchical Bayesian model for Supernova Cosmology}
+\title{{\steve}: A hierarchical Bayesian model for Supernova Cosmology}
 
 
 
- The list of authors, and the short list which is used in the headers.
  % If you need two or more lines of authors, add an extra line using \newauthor
  \author{
  	S.~R.~Hinton\altaffilmark{1,2},\thanks{E-mail: samuelreay@gmail.com}
@@ -122,6 +121,7 @@ This is the most rigorous test of a BHM model, and reveals small $w$-biases that
 These simulation test results are a concern for BHM applications on large upcoming surveys, and therefore future development will focus on minimising the sensitivity of {\steve} to the SN~Ia intrinsic scatter model.
 \end{abstract}
 
+\keywords{cosmology: supernovae}
 
 
 
@@ -159,9 +159,9 @@ Whilst supernova observations take the form of photometric time-series brightnes
 
 This ensemble of $\hat{m}_B$, $\hat{x}_1$ and $\hat{c}$ represents an observed population, which -- due to the presence of various selection effects -- may not represent the true, underlying supernova population. Accurately characterising this underlying population, its evolution over redshift, and effects from host-galaxy environment, is one of the challenges of supernova cosmology. Given some modelled underlying supernova population that lives in the redshift-dependent space $M_B$ (absolute magnitude of the supernova, traditionally in the Bessell $B$ band), $x_1$, and $c$, the introduction of cosmology into the model is simple -- it translates the underlying population from absolute magnitude space into the observed population in apparent magnitude space. Specifically, for any given supernova our map between absolute magnitude and apparent magnitude is given by the distance modulus:
 
-\begin{align}
+\begin{equation}
 \mu_{\rm obs} = m_B + \alpha x_1 - \beta c - M_B + \Delta M \cdot m + \text{other corrections}, \label{eq:standard}
-\end{align}
+\end{equation}
 
 where $M_B$ is the mean absolute magnitude for all SN~Ia given $x_1=c=0$,  $\alpha$ is the stretch correction \citep{Phillips1993, Phillips1999}, and $\beta$ is the color correction \citep{Tripp1998} that respectively encapsulate the empirical relation that broader (longer-lasting) and bluer supernovae are brighter. $\Delta M \cdot m$ refers to the host-galaxy mass correlation discussed in Section \ref{sec:hostgal}. The distance modulus $\mu_{\rm obs}$ is a product of our observations, however a distance modulus $\mu_C$ can be precisely calculated given cosmological parameters and a redshift. The `$\text{other corrections}$' term often includes bias corrections for traditional $\chi^2$ analyses. Bias corrections can take multiple forms, such as a redshift-dependent function \citep{Betoule2014} or a 5D function of $c$, $x_1$, $\alpha$, $\beta$ and $z$ \citep{Kessler2017, Scolnic2017}.
 
@@ -170,17 +170,17 @@ where $M_B$ is the mean absolute magnitude for all SN~Ia given $x_1=c=0$,  $\alp
 
 Traditional $\chi^2$ analyses such as that found in \citet{Riess1998, Perlmutter1999, Wood-Vasey2007, Kowalski2008, Kessler2009, Conley2011, Betoule2014}, minimise the difference in distance modulus between the observed distance modulus attained from equation \ref{eq:standard}, and the cosmologically predicted distance modulus. The $\chi^2$ function minimised is
 
-\begin{align}
+\begin{equation}
 \chi^2 = (\mu_{\rm obs} - \mu_C)^\dagger C^{-1}_{\mu} (\mu_{\rm obs} - \mu_C),
-\end{align}
+\end{equation}
 
 where $C^{-1}_{\mu}$ is an uncertainty matrix that combines statistical and systematic uncertainties (see \citet{Brout18SYS} for a review of these uncertainties for the DES supernova analysis). The predicted $\mu_C$ is defined as
  
-\begin{align}
+\begin{eqnarray}
 \mu_C &= 5 \log\left[ \frac{d_L}{10{\rm pc}} \right], \label{eq:mu0}\\
 d_L& = (1+z)\frac{c}{H_0} \int_0^z \frac{dz'}{E(z')},\\
 E(z) &= \sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}
-\end{align}
+\end{eqnarray}
 
 where $d_L$ is the luminosity distance for redshift $z$ given a specific cosmology, $H_0$ is the current value of Hubble's constant in $\kmsmpc$ and $\Omega_m$, $\Omega_k$, and $\Omega_\Lambda$ represent the energy density terms for matter, curvature and dark energy respectively.
 
@@ -305,42 +305,19 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 The first layer of hierarchy is the set of true (latent) parameters that describe each supernova. In contrast to the observed parameters, the latent parameters are denoted without a hat. For example, $c$ is the true color of the supernova, whilst $\hat{c}$ is the observed color, which, as it has measurement error, is different from $c$.
 
 For the moment, let us consider a single supernova and its classic summary statistics $m_B$, $x_1$, $c$. For convenience, let us define $\eta \equiv \lbrace m_B, x_1, c \rbrace$. A full treatment of the summary statistics would involve determining $p(\hat{y}|\eta)$, where $\hat{y}$ represents the observed light curves fluxes and uncertainties. However, this is computationally prohibitive  as it would require incorporating SALT2 light curve fitting inside our model fitting. Due to this computational expense, we rely on initially fitting the light curve observations to produce a best fit $\hat{\eta}$ along with a $3\times3$ covariance matrix $\mathcal{C_\eta}$ describing the uncertainty on $\hat{\eta}$. Using this simplification, our latent variables are given by
-\begin{align}
+\begin{equation}
 p(\hat{\eta}|\eta) \sim \mathcal{N}(\hat{\eta} | \eta, \mathcal{C_\eta}). \label{eq:pop}
-\end{align}
+\end{equation}
 As discussed in Section \ref{sec:challenges},  the SALT2 model does not include full treatment of intrinsic dispersion, and thus this approximation does not encapsulate the full uncertainty introduced from this dispersion.
 
 
-% \begin{figure}
-% 	\begin{tikzpicture}
-% 	% Obs nodes
-% 	\node[obs]  (obssum) {$\hat{m}_B, \hat{x}_1, \hat{c}, \mathcal{C_\eta}^{-1}$};
-% 	\node[obs, left=0.8cm of obssum]  (zobs) {$\hat{z}$};
-% 	\node[obs, right=0.8cm of obssum]  (mobs) {$\hat{m}$};
-% 	\node[obs, right=0.8cm of mobs]  (pobs) {$\hat{p}$};
-% 	% Latent nodes
-% 	\node[latent, above=of obssum] (sum) {$m_B, x_1, c$};
-% 	\node[det, above=of zobs] (z) {$z$};
-% 	\node[det, above=of z] (mu) {$\mu$};
-% 	\node[latent, right=4.33cm of mu] (MBobs) {$M_B$};
-% 	% Survey nodes
-% 	\node[latent, above=of sum, yshift=1cm,text width=2.7cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c, \kappa_0, \kappa_1$ };
-% 	\node[latent, right=1.5cm of pop1, align=center] (sf) {$\delta S$};
-% 	% Global nodes
-% 	\node[latent, above=2cm of mu]  (cosmo) {$\Omega_m, w$};
-% 	\node[latent, above=1.7cm of MBobs, text width=3cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, $\delta(0)$, \\$\delta(\infty)$, $\delta \mathcal{Z}_i$};
-% 	% Connect the nodes
-% 	\edge {sum} {obssum};
-% 	\edge {z} {zobs};
-% 	\edge {z,cosmo} {mu};
-% 	\edge {mu, sum, mobs, pop1, ab, pobs, sf} {MBobs};
-% 	% Plates
-% 	\plated[thick] {sn} {(obssum)(zobs)(mobs)(pobs)(sum)(z)(mu)} {$\forall\ \rm{SN}$} ;
-% 	\plated[thick] {survey} {(sn)(pop1)} {\\$\forall\ \rm{Survey}$} ;
-% 	\end{tikzpicture}
-% 	\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, single-lined ellipse nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it. Variables that appear outside both boxes represent top level model parameters.}
-% 	\label{fig:pgm}
-% \end{figure}
+ \begin{figure}
+ 	\begin{center}
+ 		\includegraphics[width=\columnwidth]{tikz-figure0.pdf}
+ 	\end{center}
+ 	\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, single-lined ellipse nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it. Variables that appear outside both boxes represent top level model parameters.}
+ 	\label{fig:pgm}
+ \end{figure}
 
 
 
@@ -356,10 +333,10 @@ In addition to absolute magnitude, the underlying supernova population is also c
 
 The only constant between survey populations is the absolute magnitude $\langle M_B \rangle$. We model the colour skewness and the redshift-dependent means and width of the colour and skew distributions individually for each survey. The probability for a supernova to have true values $M_B$, $x_1$, $c$ given the underlying population is thus given as
 
-\begin{align}
+\begin{equation}
 P(M_B, x_1, c, z | \langle M_B \rangle, \langle x_1(z) \rangle, \langle c(z) \rangle, \sigma_{m_B}, \sigma_{x_1}, \sigma_c, \alpha_c) = \notag \\
 \mathcal{N}(M_B|\langle M_B \rangle, \sigma_{M_B}) \mathcal{N}(x_1 | \langle x_1(z) \rangle, \sigma_{x_1}) \mathcal{N}^{\rm{skew}}(c| \langle c(z) \rangle, \sigma_c, \alpha_c) \label{eq:l1}.
-\end{align}
+\end{equation}
 
 \subsubsection{Outlier populations}
 
@@ -394,9 +371,9 @@ We tested two models with varying $\beta$ against simulated supernova sets; $\be
 here are numerous results showing statistically significant correlations between host-galaxy environment and supernova properties \citep{Kelly2010, Lampeitl2010, Sullivan2010, DAndrea2011, Gupta2011, Johansson2013, Rigault2013}. The latest sample of over 1300 spectroscopically confirmed type Ia supernovae show $>5\sigma$ evidence for correlation between host mass and luminosity \citep{Uddin2017}. The traditional correction, as employed in analyses such as \citet{Suzuki2012} and \citet{Betoule2014}, invokes a step function such that $\Delta M = \gamma \mathcal{H}(\log(M) - 10))$, where $\mathcal{H}$ is the Heaviside step function, $M$ is the galaxy mass in solar masses and $\gamma$ represents the size of the magnitude step. The scale of this step function varies from analysis to analysis, and is treated as a fit parameter. In this work we adopt the model used in {\rubin}, which follows the work from \citet{Rigault2013}, such that we introduce two parameters to incorporate a redshift-dependent host galaxy mass correction:
 
 
-\begin{align}
+\begin{equation}
 \Delta M = \delta(0) \left[ \frac{1.9\left(1 - \frac{\delta(0)}{\delta(\infty)}\right)  }{0.9 + 10^{0.95z}} + \frac{\delta(0)}{\delta(\infty)}\right], \label{eq:mass}
-\end{align}
+\end{equation}
 
 where $\delta(0)$ represents the correction at redshift zero, and $\delta(\infty)$ a parameter allowing the behaviour to change with increasing redshift. We take flat priors on $\delta(0)$ and $\delta(0)/\delta(\infty)$.
 
@@ -410,9 +387,9 @@ Assuming that the gradients can be linearly extrapolated -- which is a reasonabl
 
 This method of creating a secondary covariance matrix using partial derivatives is used throughout the traditional and BHM analyses. For each survey and band, we have two systematics --- the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, ten SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic, and also the systematic peculiar velocity uncertainty. A comprehensive explanation of all systematics is given in \citet{Brout18SYS}; see Table~4 for details. This gives thirteen global systematics shared by all surveys, plus two systematics per band in each survey. With $\eta \equiv \lbrace m_B, x_1, c \rbrace$, our initial conditional likelihood for our observed summary statistics shown in Equation \eqref{eq:pop} becomes
 
-\begin{align}
+\begin{equation}
 P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i, C\right) = \mathcal{N}\left(\hat{\eta} + \delta \Z_i \frac{\partial \hat{\eta}}{\partial \Z_i}|\eta,\cov\right). \label{eq:l3}
-\end{align}
+\end{equation}
 
 
 
@@ -436,9 +413,9 @@ As our model so far describes components of a basic likelihood $P({\rm data}|\th
 
 where the denominator represents an integral over all potential data $D$. This is derived in Appendix \ref{app:selection1} As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
 
-\begin{align}
-d &= \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz, \label{eq:w1}
-\end{align}
+\begin{equation}
+d = \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz, \label{eq:w1}
+\end{equation}
 
 where $P(m_B | z, \theta)$ can be expressed by translating the underlying $M_B$, $x_1$, and $c$ population to $m_B$ given cosmological parameters. A full derivation of this can be found in Appendix \ref{app:selection2}.
 
@@ -456,22 +433,22 @@ We now apply two further approximations similar to those made in {\rubin} -- tha
 
 The population $P(m_B | z, \theta)$ becomes $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
 
-\begin{align}
+\begin{eqnarray}
 m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \langle c(z) \rangle \\
 \sigma^{*2}_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2.
-\end{align}
+\end{eqnarray}
 
 What then remains is determining the functional form of $P(S|m_B)$. For the treatment of most surveys, we find that the error function, which smoothly transitions from some constant efficiency down to zero, is sufficient. Formally, this gives
 
-\begin{align}
+\begin{equation}
 P(S|m_B) = \Phi^c(m_B | \mu_{\rm CDF}, \sigma_{\rm CDF}),
-\end{align}
+\end{equation}
 
 where $\Phi^c$ is the complementary cumulative distribution function and $\mu_{\rm CDF}$ and $\sigma_{\rm CDF}$ specify the selection function. The appropriateness of an error function has been found by many past surveys \citep{Dilday2008, Barbary2010, Perrett2012, Graur2013, Rodney2014}. However, for surveys which suffer from saturation and thus rejection of low-redshift supernovae, or for groups of surveys treated together (as is common to do with low-redshift surveys), we find that a skew normal is a better analytic form, taking the form
 
-\begin{align}
+\begin{equation}
 P(S|m_B) = \mathcal{N}^{{\rm Skew}}(m_B | \mu_{\rm Skew}, \sigma_{\rm Skew}, \alpha_{\rm Skew}).
-\end{align}
+\end{equation}
 
 
 The selection functions are fit to apparent magnitude efficiency ratios calculated from SNANA simulations, by taking the ratio of supernovae that are observed and passed cuts over the total number of supernovae generated in that apparent magnitude bin. That is, we calculate the probability we would include a particular supernova in our sample, divided by the number of such supernovae in our simulated fields. To take into account the uncertainty introduced by the imperfection of our analytic fit to the efficiency ratio, uncertainty was uniformly added in quadrature to the efficiency ratio data from our simulations until the reduced $\chi^2$ of the analytic fit reached one, allowing us to extract an uncertainty covariance matrix for our analytic fits to either the error function or the skew normal. This is mathematically identical to fitting the efficiency ratio with a second `intrinsic dispersion' parameter which adds uncertainty to the efficiency ratio data points.
@@ -481,11 +458,11 @@ We thus include into our model parametrised selection effects by including the c
 
 With the well-sampled redshift approximation we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (denoted with the subscript `CDF') and skew normal selection functions respectively (denoted with a subscript `Skew'), the correction \textit{per SN~Ia} becomes
 
-\begin{align}
+\begin{eqnarray}
 d_{\rm CDF} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm CDF}^2}}  \right) \label{eq:seldes}\\
 d_{\rm Skew} &= 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm Skew}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm Skew}^2}}\right) \times \notag\\
 &\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm Skew})(m_B^* - \mu_{\rm Skew})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}{\sigma^2_{\rm Skew}} \sqrt{\frac{\sigma^2_{\rm Skew}}{\alpha^2_{\rm Skew}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm Skew}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}} }\right), \label{eq:sellow-$z$}
-\end{align}
+\end{eqnarray}
 
 and is incorporated into our likelihood. This is illustrated in Figure \ref{fig:efficiency}. Our corrections for the DES spectroscopic data utilise the CDF functional form, with the combined low redshift surveys being modelled with the skew normal efficiency. Further details on this choice are given in Section \ref{sec:simdes}.
 
@@ -910,25 +887,25 @@ This manuscript has been authored by Fermi Research Alliance, LLC under Contract
 \subsection{General Selection Effects}
 \label{app:selection1}
 When formulating and fitting a model using a constraining dataset, we wish to resolve the posterior surface defined by
-\begin{align}
+\begin{equation}
 P(\theta | {\rm data}) \propto P({\rm data} | \theta) P(\theta),
-\end{align}
+\end{equation}
 which gives the probability of the model parameter values ($\theta$) given the data.  Prior knowledge of the allowed values of the model parameters is encapsulated in the prior probability $P(\theta)$. Of primary interest to us is the likelihood of observing the data given our parametrised model, $\mathcal{L} \equiv P({\rm data} | \theta)$. When dealing with experiments that have imperfect selection efficiency, our likelihood must take that efficiency into account.  We need to describe the probability that the events we observe are both drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are subsequently successfully observed.  To make this extra conditional explicit, we write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as:
-\begin{align}
-\mathcal{L} &= P({\rm data} | \theta, S). \label{eq:app_like}
-\end{align}
+\begin{equation}
+\mathcal{L} = P({\rm data} | \theta, S). \label{eq:app_like}
+\end{equation}
 A variety of selection criteria are possible, and in our method we use our data in combination with the proposed model to determine the probability of particular selection criteria.  That is, we characterise a function $P(S|{\rm data},\theta)$, which colloquially can be stated as \textit{the probability of a potential observation passing selection cuts, given our observations and the underlying model}. We can introduce this expression in a few lines due to symmetry of joint probabilities and utilising that $P(x,y,z) = P(x|y,z)P(y,z) = P(y|x, z)P(x, z)$:
-\begin{align}
+\begin{eqnarray}
 P({\rm data} | S , \theta) P(S, \theta) &= P(S | {\rm data}, \theta) P({\rm data}, \theta)\\
 P({\rm data} | S , \theta) &= \frac{ P(S | {\rm data}, \theta) P({\rm data}, \theta) }{ P(S, \theta) }\\
 &= \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta) P(\theta)}{ P(S | \theta)  P(\theta)}\\
 &= \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) }
-\end{align}
+\end{eqnarray}
 which is equal to the likelihood $\mathcal{L}$. Introducing an integral over all possible events $D$, so we can evaluate $P(S|\theta)$, 
-\begin{align}
+\begin{eqnarray}
 \mathcal{L}&= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
 \mathcal{L} &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:app_main}
-\end{align}
+\end{eqnarray}
 where we define the denominator as $d$ for simplicity in future derivations.
 
 
@@ -936,24 +913,24 @@ where we define the denominator as $d$ for simplicity in future derivations.
 \subsection{Supernova Selection Effects}
 \label{app:selection2}
 We assume that our selection effects can be reasonably well encapsulated by independent functions of (true) apparent magnitude and redshift, such that $P(S|{\rm data}, \theta) = P(S|z) P(S|m_B)$. Our denominator then becomes
-\begin{align}
-d &= \int d\hat{z} \, d\hat{m}_B \, dz \, dm_B P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta), \label{eq:sel}
-\end{align}
+\begin{equation}
+d = \int d\hat{z} \, d\hat{m}_B \, dz \, dm_B P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta), \label{eq:sel}
+\end{equation}
 where for simplicity we have not written out all the integrals that do not interact with the selection effects explicitly. Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m}_B | m_B)$ is a Gaussian due to our Gaussian model of summary statistics, and $m_B$, $x_1$, $c$, and can be analytically integrated out, collapsing the integral over $\hat{m}_B$ (which is why they were not included in equation \eqref{eq:sel}). Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
-\begin{align}
+\begin{equation}
 d = \int \left[ \int P(S|m_B) P(m_B | z, \theta)\, dm_B \right] P(S|z)P(z|\theta)\, dz.
-\end{align}
+\end{equation}
 By assuming that the distribution $P(S|z)P(z|\theta)$ is well sampled by the observed supernova redshifts, we can approximate the integral over redshift by evaluating
-\begin{align}
+\begin{equation}
 \int P(S|m_B) P(m_B | z, \theta)\, dm_B \label{eq:selint}
-\end{align}
+\end{equation}
 for each supernova in the dataset -- i.e. Monte Carlo integration with assumed perfect importance sampling.
 
 As stated in Section \ref{sec:selection}, the underlying population in apparent magnitude, when we discard skewness, can be represented as $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
-\begin{align}
+\begin{eqnarray}
 m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \left(\langle c(z) \rangle + \sqrt{\frac{2}{\pi}}\sigma_c \delta_c\right)\label{eq:disc1} \\
 \sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 +  \left(\beta \sigma_c \sqrt{1 - \frac{2\delta_c^2}{\pi}}\right)^2. \label{eq:disc2}
-\end{align}
+\end{eqnarray}
 Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral in equation \eqref{eq:selint} and reach equations \eqref{eq:seldes} and \eqref{eq:sellow-$z$}.
 
 
@@ -964,10 +941,10 @@ Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytica
 \label{app:approx}
 
 In this section, we investigate the effect of approximating the skew normal underlying color distribution as a normal. Specifically, equations \eqref{eq:disc1} and \eqref{eq:disc2} make the assumption that, for our color distribution, $\mathcal{N}^{\rm Skew}(\mu, \sigma, \alpha)$ is well approximated by $\mathcal{N}(\mu, \sigma)$. We sought to improve on this approximation by adjusting the mean and standard deviation of the approximated normal to more accurately describe the actual mean and standard deviation of a skew normal. With $\delta \equiv \alpha/\sqrt{1+\alpha^2}$, the correct mean and standard deviation are
-\begin{align}
+\begin{eqnarray}
 \mu_1 &= \mu_0 + \sqrt{\frac{2}{\pi}} \delta \sigma_0 \\
 \sigma_1 &= \sigma_0 \sqrt{1 - \frac{2 \delta^2}{\pi}},
-\end{align}
+\end{eqnarray}
 where we highlight that $\mu$ here represents the mean of the distribution, not distance modulus. We can then test the approximation $\mathcal{N}^{\rm Skew}(\mu_0, \sigma_0, \alpha) \rightarrow \mathcal{N}(\mu_1, \sigma_1)$. Unfortunately, this shift to the mean and standard deviation of the normal approximation where we treat $m_B$, $x_1$, and $c$ as a multivariate skew normal did not produce stable posterior surfaces. Due to this, we treat the underlying $m_B$, $x_1$, and $c$ populations as independent. 
 
 We tested a fixed $\sigma_c$ in the shift correction, such that $\mu_1 = \mu_0 + \sqrt{2/\pi}\delta k$, where we set $k=0.1$ to mirror the width of the input simulation population. This resulted in stable posterior surfaces, however this introduced recovery bias in several population parameters, and so we do not fix $\sigma_c$. Comparing whether we shift our normal in the approximation or simply discard skewness, Figure \ref{fig:shift} shows that the calculated efficiency is significantly discrepant to the actual efficiency if the normal approximation is not shifted. The biases when using shifted or unshifted normal approximations when we fit our model on Gaussian and skewed underlying populations are shown in Figure \ref{fig:simple_w_super}, and only the shifted normal approximation correctly recovers underlying population parameters.
@@ -1010,31 +987,31 @@ The primary numerical improvement we made on existing frameworks was to remove c
 This parametrisation does come with one significant downside --- inflexibility. For each step the algorithm takes, we do not recompute the cholesky decomposition of the covariance of the summary statistics --- that happens once at the beginning of the model setup. If we had kept the full covariance matrix parametrisation we could modify the matrix easily --- for example when incorporating intrinsic dispersion we could simply add on a secondary matrix to create an updated covariance. However as the cholesky decomposition of a sum of matrices is not equal to the sum of the cholesky decomposition of each individual matrix, we would need to recompute the decomposition for each step, which discards most of the computational benefit just gained.
 
 Considering a $3\times3$ matrix with cholesky decomposition
-\begin{align}
+\begin{equation}
 L = \begin{pmatrix}
 a & 0 & 0 \\ b & c & 0 \\ d & e & f \\
 \end{pmatrix},
-\end{align}
+\end{equation}
 the original covariance matrix $\Sigma$ is given by
-\begin{align}
+\begin{equation}
 \Sigma = \begin{pmatrix}
 a^2 & ab & ad \\ ab & b^2 + c^2 & bd + ce \\ ad & bd + ce & d^2 + e^2 + f^2\\
 \end{pmatrix}.
-\end{align}
+\end{equation}
 Now, the primary source of extra uncertainty in the intrinsic dispersion models comes from chromatic smearing, which primarily influences the recovered color parameter, which is placed as the last element in the observables vector $\lbrace m_B, x_1, c\rbrace$. We can now see that it is possible to add extra uncertainty to the color observation on the diagonal without having to recompute the cholesky decomposition - notice that $f$ is unique in that it is the only element of $L$ that appears in only one position in the covariance matrix. To take our covariance and add on the diagonal uncertainty for color an extra $\sigma_e$ term, we get
-\begin{align}
+\begin{equation}
 C = \begin{pmatrix}
 \sigma_{m_B}^2 & \rho_{0,1} \sigma_{m_B} \sigma_{x_1} & \rho_{0,2} \sigma_{m_B} \sigma_c \\
 \rho_{0,1} \sigma_{m_B} \sigma_{x_1} & \sigma_{x_1}^2 & \rho_{1, 2} \sigma_{x_1} \sigma_c \\
 \rho_{0,2} \sigma_{m_B} \sigma_c & \rho_{1, 2} \sigma_{x_1} \sigma_c &  \sigma_c^2 + \sigma_e^2 \\
 \end{pmatrix}.
-\end{align}
+\end{equation}
 The cholesky decomposition of this is, in terms of the original cholesky decomposition, is
-\begin{align}
+\begin{equation}
 L = \begin{pmatrix}
 a & 0 & 0 \\ b & c & 0 \\ d & e & f + g \\
 \end{pmatrix},
-\end{align}
+\end{equation}
 where $g = \sqrt{f^2 + \sigma_e^2} - f$. This allows an easy update to the cholesky decomposition to add extra uncertainty to the independent color uncertainty. For both the {\gten} and {\celeven} models, we ran fits without the cholesky parametrisation to allow for extra correlated dispersion (instead of just dispersion on $c$), but find no decrease in bias or improved fit statistics, allowing us to use the more efficient cholesky parametrisation.
 
 
