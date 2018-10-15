@@ -61,7 +61,7 @@
 
 \usepackage{lineno}
 \linenumbers
-
+\renewcommand{\arraystretch}{1.2}
 \graphicspath{ {./figures/} }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -77,23 +77,26 @@
 
 
 
- % If you need two or more lines of authors, add an extra line using \newauthor
- \author{
- 	S.~R.~Hinton\altaffilmark{1,2},\thanks{E-mail: samuelreay@gmail.com}
- 	T.~M.~Davis\altaffilmark{1,2},
- 	A.~G.~Kim\altaffilmark{3},
- 	A.~M\"oller\altaffilmark{2,4},
- 	M.~Sako\altaffilmark{5},
- 	M.~Smith\altaffilmark{6},
- 	\\}
- \affil{$^{1}$ School of Mathematics and Physics, University of Queensland,  Brisbane, QLD 4072, Australia}
- \affil{$^{2}$ ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)}
- \affil{$^{3}$ Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA}
- \affil{$^{4}$ The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
- \affil{$^{5}$ Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
- \affil{$^{6}$ School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
+\author{
+	S.~R.~Hinton\altaffilmark{1},
+	T.~M.~Davis\altaffilmark{1},
+	A.~G.~Kim\altaffilmark{3},
+	R.~Kessler\altaffilmark{2},
+	C.~Lidman\altaffilmark{4},
+	A.~M\"oller\altaffilmark{5,4},
+	M.~Sako\altaffilmark{6},
+	D.~Scolnic\altaffilmark{2},
+	M.~Smith\altaffilmark{7} 
+	\\ \vspace{0.2cm} (DES Collaboration) \\	
+}
 
-
+\affil{$^{1}$ School of Mathematics and Physics, University of Queensland,  Brisbane, QLD 4072, Australia}
+\affil{$^{2}$ Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
+\affil{$^{3}$ Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA}
+\affil{$^{4}$ The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
+\affil{$^{5}$ ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)}
+\affil{$^{6}$ Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
+\affil{$^{7}$ School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
 
 
 
@@ -101,9 +104,9 @@
 
 % Abstract of the paper
 \begin{abstract}
-We present a new Bayesian hierarchical model named {\steve} for performing type Ia supernova (SN~Ia) cosmology fits. 
+We present a new Bayesian hierarchical model (BHM) named {\steve} for performing type Ia supernova (SN~Ia) cosmology fits. 
 %
-This advances previous works with Bayesian hierarchical models by including 
+This advances previous works by including 
 an improved treatment of Malmquist bias, 
 accounting for additional sources of systematic uncertainty, 
 and increasing numerical efficiency. 
@@ -116,9 +119,9 @@ Next, we validate on more realistic SNANA simulations of SN~Ia samples from the 
 %
 These simulated datasets contain more than $60\,000$ SNe~Ia, which we use to evaluate biases in the recovery of cosmological parameters, specifically the equation-of-state of dark energy, $w$. 
 %
-This is the most rigorous test of a BHM model, and reveals small $w$-biases that depend on the simulated SN~Ia properties, in particular the intrinsic SN~Ia scatter model. This $w$-bias is less than $0.03$ on average, less than half the statistical uncertainty on $w$.
+This is the most rigorous test of a BHM method applied to SN~Ia cosmology fitting, and reveals small $w$-biases that depend on the simulated SN~Ia properties, in particular the intrinsic SN~Ia scatter model. This $w$-bias is less than $0.03$ on average, less than half the statistical uncertainty on $w$.
 %
-These simulation test results are a concern for BHM applications on large upcoming surveys, and therefore future development will focus on minimising the sensitivity of {\steve} to the SN~Ia intrinsic scatter model.
+These simulation test results are a concern for BHM cosmology fitting applications on large upcoming surveys, and therefore future development will focus on minimising the sensitivity of {\steve} to the SN~Ia intrinsic scatter model.
 \end{abstract}
 
 \keywords{cosmology: supernovae}
@@ -177,9 +180,9 @@ Traditional $\chi^2$ analyses such as that found in \citet{Riess1998, Perlmutter
 where $C^{-1}_{\mu}$ is an uncertainty matrix that combines statistical and systematic uncertainties (see \citet{Brout18SYS} for a review of these uncertainties for the DES supernova analysis). The predicted $\mu_C$ is defined as
  
 \begin{eqnarray}
-\mu_C &= 5 \log\left[ \frac{d_L}{10{\rm pc}} \right], \label{eq:mu0}\\
-d_L& = (1+z)\frac{c}{H_0} \int_0^z \frac{dz'}{E(z')},\\
-E(z) &= \sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}
+\mu_C &=& 5 \log\left[ \frac{d_L}{10{\rm pc}} \right], \label{eq:mu0}\\
+d_L &=& (1+z)\frac{c}{H_0} \int_0^z \frac{dz'}{E(z')},\\
+E(z) &=& \sqrt{ \Omega_m (1+z')^3 + \Omega_k (1 + z')^2 + \Omega_\Lambda (1+z')^{3(1+w)}}
 \end{eqnarray}
 
 where $d_L$ is the luminosity distance for redshift $z$ given a specific cosmology, $H_0$ is the current value of Hubble's constant in $\kmsmpc$ and $\Omega_m$, $\Omega_k$, and $\Omega_\Lambda$ represent the energy density terms for matter, curvature and dark energy respectively.
@@ -253,51 +256,61 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 
 
 
-\begin{table}
-	\centering
-	\caption{ Parameters defined in our model and a summary of their use. The parameters are broken into multiple sections, the top for parameters which are defined globally across all surveys, the second section for parameters which are defined for each survey, the third section are parameters which are defined for each supernova. The bottom section shows the observables (not parameters) that are the input data to the model.}
-	\label{tab:param_summary}
-	\begin{tabular}{ll}
-		\hline
-		Parameter & Description \\
-		\hline
-		$\Omega_m$  & Matter density  \\
-		$w$  &  Dark energy equation of state  \\
-		$\alpha$ & Stretch standardisation   \\
-		$\beta$         &  color standardisation   \\
-		$\delta(0)$ & Scale of the mass-magnitude correction\\
-		$\delta(\infty)/\delta(0)$ & Redshift-dependence of mass-magnitude correction\\
-		$\delta\mathcal{Z}_i$ & Systematics scale\\
-		$\langle M_B \rangle$ & Mean absolute magnitude \\
-		%$s_c$ & color bias\\
-		\hline
-		$\delta S$ & Selection effect deviation \\
-		$\langle x_1^i \rangle$ & Mean stretch nodes\\
-		$\langle c^i \rangle$ & Mean color nodes\\
-		$\alpha_c$ & Skewness of color population \\
-		$\sigma_{M_B}$ & Population magnitude scatter \\
-		$\sigma_{x_1}$ & Population stretch scatter \\
-		$\sigma_{c}$ & Population color scatter \\
-		$\kappa_{0}$ & Extra color dispersion\\
-		$\kappa_{1}$ & Redshift-dependence of extra color dispersion\\
-		\hline
-		$m_B$ & True flux\\
-		$x_1$ & True stretch \\
-		$c$ & True color \\
-		$z$ & True redshift \\
-		$M_B$ & Derived absolute magnitude \\
-		$\mu$ & Derived distance modulus \\
-		\hline
-		$\hat{m}_B$ & Measured flux\\
-		$\hat{x}_1$ & Measured stretch \\
-		$\hat{c}$ & Measured color \\
-		$C$ & Covariance on flux, stretch and color \\
-		$\hat{z}$ & Observed redshift \\
-		$\hat{m}$ & Determined mass probability \\
-		$\hat{p}$ & Determined Ia probability \\
-		\hline
-	\end{tabular}
-\end{table}
+\begin{deluxetable}{ll}
+	\tablecolumns{2}
+	\tablewidth{0.99\columnwidth}
+	\tablecaption{Model Parameters}
+	\tablehead { \colhead{Parameter} & \colhead{Description} }
+	\startdata
+	
+	&\textbf{Global Parameters} \\
+
+
+
+
+	$\Omega_m$  & Matter density  \\
+	$w$  &  Dark energy equation of state  \\
+	$\alpha$ & Stretch standardisation   \\
+	$\beta$         &  color standardisation   \\
+	$\delta(0)$ & Scale of the mass-magnitude correction\\
+	$\delta(\infty)/\delta(0)$ & Redshift-dependence of mass-magnitude correction\\
+	$\delta\mathcal{Z}_i$ & Systematics scale\\
+	$\langle M_B \rangle$ & Mean absolute magnitude \\
+	\\
+	& \textbf{Survey Parameters} \\
+	
+	$\delta S$ & Selection effect deviation \\
+	$\langle x_1^i \rangle$ & Mean stretch nodes\\
+	$\langle c^i \rangle$ & Mean color nodes\\
+	$\alpha_c$ & Skewness of color population \\
+	$\sigma_{M_B}$ & Population magnitude scatter \\
+	$\sigma_{x_1}$ & Population stretch scatter \\
+	$\sigma_{c}$ & Population color scatter \\
+	$\kappa_{0}$ & Extra color dispersion\\
+	$\kappa_{1}$ & Redshift-dependence of extra color dispersion\\
+	\\
+	& \textbf{Supernova Parameters} \\
+	$m_B$ & True flux\\
+	$x_1$ & True stretch \\
+	$c$ & True color \\
+	$z$ & True redshift \\
+	$M_B$ & Derived absolute magnitude \\
+	$\mu$ & Derived distance modulus \\
+	\\
+	& \textbf{Input Data}\textsuperscript{a} \\
+	
+	$\hat{m}_B$ & Measured flux\\
+	$\hat{x}_1$ & Measured stretch \\
+	$\hat{c}$ & Measured color \\
+	$C$ & Covariance on flux, stretch and color \\
+	$\hat{z}$ & Observed redshift \\
+	$\hat{m}$ & Determined mass probability \\
+	$\hat{p}$ & Determined Ia probability \\
+	\enddata
+	\tablenotetext{a}{Not model parameters but shown for completeness.}
+\label{tab:param_summary}
+\end{deluxetable}
+
 
 
 \subsubsection{Latent Variables for Observables}
@@ -434,8 +447,8 @@ We now apply two further approximations similar to those made in {\rubin} -- tha
 The population $P(m_B | z, \theta)$ becomes $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
 
 \begin{eqnarray}
-m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \langle c(z) \rangle \\
-\sigma^{*2}_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2.
+m_B^*(z) &=& \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \langle c(z) \rangle \\
+\sigma^{*2}_{m_B} &=& \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 + (\beta \sigma_c)^2.
 \end{eqnarray}
 
 What then remains is determining the functional form of $P(S|m_B)$. For the treatment of most surveys, we find that the error function, which smoothly transitions from some constant efficiency down to zero, is sufficient. Formally, this gives
@@ -459,9 +472,9 @@ We thus include into our model parametrised selection effects by including the c
 With the well-sampled redshift approximation we can remove the redshift integral in Eq \eqref{eq:w1} and replace it with a correction for each observed supernova. For the error function (denoted with the subscript `CDF') and skew normal selection functions respectively (denoted with a subscript `Skew'), the correction \textit{per SN~Ia} becomes
 
 \begin{eqnarray}
-d_{\rm CDF} &= \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm CDF}^2}}  \right) \label{eq:seldes}\\
-d_{\rm Skew} &= 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm Skew}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm Skew}^2}}\right) \times \notag\\
-&\quad\quad \Phi\left(  \frac{{\rm sign}(\alpha_{\rm Skew})(m_B^* - \mu_{\rm Skew})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}{\sigma^2_{\rm Skew}} \sqrt{\frac{\sigma^2_{\rm Skew}}{\alpha^2_{\rm Skew}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm Skew}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}} }\right), \label{eq:sellow-$z$}
+d_{\rm CDF} &=& \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm CDF}^2}}  \right) \label{eq:seldes}\\
+d_{\rm Skew} &=& 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm Skew}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm Skew}^2}}\right) \times \notag\\
+&\quad\quad& \Phi\left(  \frac{{\rm sign}(\alpha_{\rm Skew})(m_B^* - \mu_{\rm Skew})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}{\sigma^2_{\rm Skew}} \sqrt{\frac{\sigma^2_{\rm Skew}}{\alpha^2_{\rm Skew}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm Skew}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}} }\right), \label{eq:sellow-$z$}
 \end{eqnarray}
 
 and is incorporated into our likelihood. This is illustrated in Figure \ref{fig:efficiency}. Our corrections for the DES spectroscopic data utilise the CDF functional form, with the combined low redshift surveys being modelled with the skew normal efficiency. Further details on this choice are given in Section \ref{sec:simdes}.
@@ -511,19 +524,23 @@ In order to verify our model we run it through stringent tests. First, we valida
 	\label{fig:simple_w}
 \end{figure}
 
-\begin{table}
-	\centering
-	\caption{Cosmological parameters determined from the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. For each chain, we record the mean and standard deviation, and then show the average mean and average standard deviation in the table. The scatter introduced by simulation variance (the standard deviation of the 100 mean parameter values) is shown in brackets. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$. As we are using 100 independent realisations, the precision of our determination of the mean simulation result is a tenth of the quoted standard deviation: $\sqrt{100} = 10$. As the deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model. For the Flat $w$CDM model, the value of $w$ is reported with a prior on $\Omega_m$ of $\mathcal{N}(0.3, 0.01)$.}
-	\label{tab:simple_model}
-	\begin{tabular}{l|cc}
-		\hline
-		Model & $\Omega_m\, \langle\mu\rangle,\langle\sigma\rangle$(scatter) & $w\, \langle\mu\rangle,\langle\sigma\rangle$(scatter) \\ 
-		\hline
+\begin{deluxetable}{lcc}
+	\tablecolumns{3}
+	\tablecaption{Cosmological Parameters for toy supernova data}
+	\tablehead {
+		\colhead {Model}              &
+		\colhead {$\Omega_m\, \langle\mu\rangle,\langle\sigma\rangle$(scatter)}  &
+		\colhead{$w\, \langle\mu\rangle,\langle\sigma\rangle$(scatter)}
+	}
+	
+	\startdata
 		Flat $\Lambda$CDM & $0.301,\, 0.015\,(0.012)$ & -- \\ 
 		Flat $w$CDM & -- & $-1.00,\, 0.042\,(0.030)$ \\ 
-		\hline
-	\end{tabular}
-\end{table}
+	\enddata
+	\label{tab:simple_model}
+	\tablecomments{Cosmological parameters determined from the surfaces of 100 fits to independent realisations of toy supernova data. As described in the main text, each dataset comprised 1000 low-redshift supernovae and 1000 high-redshift supernovae. For each chain, we record the mean and standard deviation, and then show the average mean and average standard deviation in the table. The scatter introduced by simulation variance (the standard deviation of the 100 mean parameter values) is shown in brackets. Model bias would appear as shifts away from the simulation values of $\Omega_m = 0.3$, $w = -1$.}
+\end{deluxetable}
+
 
 We generate simple toy data to validate the basic premise of the model. The data generation algorithm is described below:
 
@@ -540,7 +557,7 @@ The selection functions parameters (a skew normal for low-redshift and an error 
 
 We test four models: Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM, and Flat $w$CDM with a prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, with the latter included to allow sensitive tests on bias for $w$. To achieve statistical precision, we fit 100 realisations of supernovae datasets. Cosmological parameters are recovered without significant bias. Combined posterior surfaces of all 100 realisations fits for $\Lambda$CDM are shown in Figure \ref{fig:simple_ol} and fits for Flat $w$CDM are shown in Figure \ref{fig:simple_w}. By utilising the Stan framework and several efficient parametrisations (discussed further in Appendix \ref{app:optimisations}), fits to these simulations of 2000 supernovae take only on order of a single CPU-hour to run.
 
-To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The strong prior on $\Omega_m$ cuts a slice through the traditional `banana' posterior surface in the $w$-$\Omega_m$ plane of Figure \ref{fig:simple_w}. Without making such a slice, the variation in $w$ is larger due to a shift along the degeneracy direction of the `banana'. By focusing the slice at an almost fixed $\Omega_m$, we can see the variation in the mean value of $w$ approximately perpendicular to the lines of degeneracy, instead of along them. The results of the analysis are detailed in Table \ref{tab:simple_model}, and demonstrate the performance of our model in recovering the true cosmological parameters. With this simple data, we also correctly recover underlying supernova populations, which can be seen in Figure \ref{fig:simple_w_super}.
+To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The strong prior on $\Omega_m$ cuts a slice through the traditional `banana' posterior surface in the $w$-$\Omega_m$ plane of Figure \ref{fig:simple_w}. Without making such a slice, the variation in $w$ is larger due to a shift along the degeneracy direction of the `banana'. By focusing the slice at an almost fixed $\Omega_m$, we can see the variation in the mean value of $w$ approximately perpendicular to the lines of degeneracy, instead of along them. The results of the analysis are detailed in Table \ref{tab:simple_model}, and demonstrate the performance of our model in recovering the true cosmological parameters.  As we are using 100 independent realisations, the precision of our determination of the mean simulation result is a tenth of the quoted scatter. The deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model. With this simple data, we also correctly recover underlying supernova populations, which can be seen in Figure \ref{fig:simple_w_super}.
 
 
 
@@ -572,19 +589,26 @@ In addition to the improvements in testing multiple scatter models, we also incl
 
 
 
-\begin{table}
-	\centering
-	\caption{Tested population distributions, where the {\sk} low-$z$ stretch distribution is formed as sum of two bifurcated Gaussians, with the mean and spread of each component given respectively.}
+\begin{deluxetable}{lcccc}
+\tablewidth{\columnwidth}
+
+
+\tablecolumns{5}
+\tablecaption{Supernova population distributions}
+\tablehead {
+	\colhead {Model} &
+	\colhead { $\langle x_1 \rangle$  } &
+	\colhead { $\sigma_{x_1}$ } &
+	\colhead { $\langle c \rangle$ } &
+	\colhead { $\sigma_c$ } 
+}
+	\startdata
+		{\sk} low-$z$    &  $0.55$ \& $-1.5$ & $^{+0.45}_{-1.0}$ \& $^{+0.5}_{-0.5}$ & $-0.055$ & $^{+0.15}_{-0.023}$ \\ \\
+		{\sk} DES     & $0.973$ & $^{+0.222}_{1.472}$ & $-0.054$  &  $^{+0.101}_{0.043}$  \\
+	\enddata
 	\label{tab:dist}
-	\begin{tabular}{l|cccc}
-		\hline
-		Model & $\langle x_1 \rangle$ & $\sigma_{x_1}$ &  $\langle c \rangle$ & $\sigma_c$  \\
-		\hline
-		{\sk} low-$z$    &  $0.55$ \& $-1.5$ & $^{+0.45}_{-1.0}$ \& $^{+0.5}_{-0.5}$ & $-0.055$ & $^{+0.15}_{-0.023}$ \\
-		{\sk} DES     & $0.973$ & $^{+0.222}_{1.472}$ & $-0.054$  &  $^{+0.101}_{0.043}$ \\
-		\hline
-	\end{tabular}
-\end{table}
+	\tablecomments{The {\sk} low-$z$ stretch distribution is formed as sum of two bifurcated Gaussians, with the mean and spread of each component given respectively.}
+\end{deluxetable}
 
 
 
@@ -599,21 +623,23 @@ In addition to the improvements in testing multiple scatter models, we also incl
 \end{figure}
 
 
-\begin{table*}
-	\centering
-	\caption{Standardisation parameters and base intrinsic scatter parameter results for the 100 fits to {\gten} and {\celeven} simulations. We show the average parameter mean and average standard deviation respectively, with the simulation scatter shown in brackets, such that each cell shows $\langle\mu\rangle\ [\langle\sigma\rangle\ ({\rm scatter})]$. The width of the intrinsic scatter ($\sigma_{m_B}$) does not have an input truth value as it is determined from the scatter model.}
-	\label{tab:standardisation}
-	\begin{tabular}{l|rrrrr}
-		\hline
-		Model & $\alpha - \alpha_{\rm True}$ & $\beta - \beta_{\rm True}$ & $\langle M_B \rangle - \langle M_B \rangle_{\rm True}$ & $\sigma_{m_B}^{\rm DES}$ & $\sigma_{m_B}^{{\rm low-}z}$ \\
-		\hline
+\begin{deluxetable*}{lrrrrr}
+	\tablewidth{\textwidth}
+	\tablecolumns{6}
+	\tablecaption{Realistic simulation standardisation parameters}
+	\tablecomments{Standardisation parameters and base intrinsic scatter parameter results for the 100 fits to {\gten} and {\celeven} simulations. We show the average parameter mean and average standard deviation respectively, with the simulation scatter shown in brackets, such that each cell shows $\langle\mu\rangle\ [\langle\sigma\rangle\ ({\rm scatter})]$. The width of the intrinsic scatter ($\sigma_{m_B}$) does not have an input truth value as it is determined from the scatter model.}
+	\tablehead{
+		Model & $\alpha - \alpha_{\rm True}$ & $\beta - \beta_{\rm True}$ & $\langle M_B \rangle - \langle M_B \rangle_{\rm True}$ & $\sigma_{m_B}^{\rm DES}$ & $\sigma_{m_B}^{{\rm low-}z}$	
+	}
+	\startdata
 		{\gten} Stat + Syst  & $0.022 \ [0.009\ (0.008)]$ & $ 0.34 \ [0.19\ (0.18)]$ & $-0.002 \ [0.028\ (0.015)]$ & $0.070 \ [0.022\ (0.018)]$ & $0.073 \ [0.025\ (0.022)]$\\
 		{\gten}  Stat         & $0.000 \ [0.008\ (0.008)]$ & $0.33 \ [0.20\ (0.17)]$ & $0.001 \ [0.016\ (0.013)]$ & $0.069 \ [0.023\ (0.019)]$ & $0.072 \ [0.026\ (0.023)]$\\
 		{\celeven} Stat + Syst  &  $0.002 \ [0.009\ (0.007)]$ & $-0.04 \ [0.15\ (0.13)]$ & $0.014 \ [0.030\ (0.018)]$ & $0.024 \ [0.016\ (0.011)]$ & $0.029 \ [0.020\ (0.014)]$ \\
-		{\celeven} Stat         &  $0.000 \ [0.008\ (0.007)]$ & $-0.05 \ [0.16\ (0.13)]$ & $0.006 \ [0.016\ (0.015)]$ & $0.025 \ [0.016\ (0.012)]$ & $0.027 \ [0.020\ (0.015)]$\\
-		\hline
-	\end{tabular}
-\end{table*}
+		{\celeven} Stat         &  $0.000 \ [0.008\ (0.007)]$ & $-0.05 \ [0.16\ (0.13)]$ & $0.006 \ [0.016\ (0.015)]$ & $0.025 \ [0.016\ (0.012)]$ & $0.027 \ [0.020\ (0.015)]$ \\
+		
+	\enddata
+	\label{tab:standardisation}
+\end{deluxetable*}
 
 
 
@@ -625,36 +651,36 @@ In addition to the improvements in testing multiple scatter models, we also incl
 	\label{fig:bulk_posterior}
 \end{figure}
 
-\begin{table}
-	\centering
-	\caption{Investigating the combined 100 fits to {\gten} and {\celeven} simulations, fitting with both statistics only and also when including systematics. The quoted value for $w$ represents the average mean of the fits, with the average uncertainty being shown in square brackets and the simulation scatter (the standard deviation of the mean of 100 fits) shown in standard brackets. The bias significance represents our confidence that the deviation in the mean $w$ away from $-1$ is not due to statistical fluctuation.}
-	\label{tab:bulk_summary}
-	\begin{tabular}{l|rr}
-		\hline
-		Model & $w\ \langle\mu\rangle\ [\langle\sigma_w\rangle$ (scatter)$]$ & $w$-Bias \\
-		\hline
+\begin{deluxetable}{lrr}
+	\tablecaption{Realistic simulation determination of $w$}
+	\tablewidth{\columnwidth}
+	\tablecomments{Investigating the combined 100 fits to {\gten} and {\celeven} simulations, fitting with both statistics only and also when including systematics. The quoted value for $w$ represents the average mean of the fits, with the average uncertainty being shown in square brackets and the simulation scatter (the standard deviation of the mean of 100 fits) shown in standard brackets. The bias significance represents our confidence that the deviation in the mean $w$ away from $-1$ is not due to statistical fluctuation.}
+	\tablehead{		Model & $w\ \langle\mu\rangle\ [\langle\sigma_w\rangle$ (scatter)$]$ & $w$-Bias		}
+	\startdata
 		{\gten} Stat + Syst  &  $-0.998 \ [0.097\ (0.073)]$ & $(0.02\pm0.07)\sigma$  \\
 		{\gten}  Stat         &  $-1.008\ [0.080\ (0.068)]$ & $(-0.10\pm0.08)\sigma$   \\
 		{\celeven} Stat + Syst  &  $-0.945\ [0.098\ (0.077)]$ & $(0.55\pm0.08)\sigma$  \\
 		{\celeven} Stat         &  $-0.948\ [0.079\ (0.066)]$ & $(0.65\pm0.08)\sigma$   \\
-		\hline
-	\end{tabular}
-\end{table}
+	\enddata
+		\label{tab:bulk_summary}
+\end{deluxetable}
 
 
 
 
-\begin{table}
-	\centering
-	\caption{Reduced parameter correlations with $w$ for the combined 100 simulation fits. Correlations for the low-$z$ band systematics and the latent parameters representing selection function uncertainty are not shown but have negligible correlation. Zero superscripts indicate the Dark Energy Survey, and a superscript one represents the low-$z$ survey.}
-	\label{tab:parameter_correlations}
-	\begin{tabular}{c|rr}
-		Parameter & {\gten} Stat+Syst & {\celeven} Stat+Syst  \\
-		\hline
+\begin{deluxetable}{crr}
+
+	\tablecaption{Reduced parameter correlations with $w$.}
+	\tablecomments{Correlations determined from the combined 100 simulation fits. Correlations for the low-$z$ band systematics and the latent parameters representing selection function uncertainty are not shown but have negligible correlation. Zero superscripts indicate the Dark Energy Survey, and a superscript one represents the low-$z$ survey.}
+	\tablehead{		Parameter & {\gten} Stat+Syst & {\celeven} Stat+Syst }
+	\startdata
 		$\Omega_m$ &   $-$0.19 &     $-$0.21     \\
 		$\alpha$ &   $-$0.17 &     $-$0.20     \\
 		$\beta$ &   $-$0.29 &     $-$0.23     \\
 		$\langle M_B \rangle$ &    0.68 &      0.66     \\
+		$\delta(0)$ &    0.00 &      0.00     \\
+		$\delta(\infty)/\delta(0)$ &    0.00 &      0.00     \\
+		\\
 		$\sigma_{\rm m_B}^{0}$ &    0.04 &      0.07     \\
 		$\sigma_{\rm m_B}^{1}$ &    0.23 &      0.18     \\
 		$\sigma_{x_1}^{0}$ &    0.04 &      0.03     \\
@@ -667,9 +693,6 @@ In addition to the improvements in testing multiple scatter models, we also incl
 		$\kappa_{c0}^{1}$ &   $-$0.20 &     $-$0.17     \\
 		$\kappa_{c1}^{0}$ &   $-$0.05 &     $-$0.01     \\
 		$\kappa_{c1}^{1}$ &   $-$0.01 &      0.01     \\
-		%$s_c^{0}$ &    0.00 &      0.01     \\
-		$\delta(0)$ &    0.00 &      0.00     \\
-		$\delta(\infty)/\delta(0)$ &    0.00 &      0.00     \\
 		$\langle x_1^{0} \rangle$ &   $-$0.01 &     $-$0.05     \\
 		$\langle x_1^{1} \rangle$ &   $-$0.02 &      0.02     \\
 		$\langle x_1^{2} \rangle$ &   $-$0.04 &     $-$0.04     \\
@@ -686,6 +709,7 @@ In addition to the improvements in testing multiple scatter models, we also incl
 		$\langle c^{5} \rangle$ &   $-$0.15 &     $-$0.08     \\
 		$\langle c^{6} \rangle$ &   $-$0.12 &     $-$0.13     \\
 		$\langle c^{7} \rangle$ &   $-$0.12 &     $-$0.06     \\
+		\\
 		$\delta [ {\rm SALT}_0 ]$ &    0.05 &      0.05     \\
 		$\delta [ {\rm SALT}_1 ]$ &   $-$0.01 &      0.02     \\
 		$\delta [ {\rm SALT}_2 ]$ &   $-$0.10 &     $-$0.09     \\
@@ -708,9 +732,9 @@ In addition to the improvements in testing multiple scatter models, we also incl
 		$\delta [ \Delta \lambda_r ]$ &    0.05 &      0.06     \\
 		$\delta [ \Delta \lambda_i ]$ &    0.00 &     $-$0.01     \\
 		$\delta [ \Delta \lambda_z ]$ &    0.09 &      0.07     \\
-		\hline
-	\end{tabular}
-\end{table}
+	\enddata
+	\label{tab:parameter_correlations}
+\end{deluxetable}
 
 
 \begin{figure*}
@@ -753,22 +777,20 @@ For the sample size of the DES $+$ low-$z$ supernova samples (332 supernova), th
 \subsection{Uncertainty Analysis}
 \label{sec:ucnert}
 
-\begin{table*}
-	\centering
-	\caption{The error budget on $w$, as determined from analysing uncertainty on simulation data whilst progressively enabling model features. We start from the top of the table, only varying cosmological parameters $\Omega_m$ and $w$, and then progressively unlock parameters and let them fit as we progress down the table. The cumulative uncertainty shows the total uncertainty on $w$ on the fit for all, where the $\sigma_w$ term is derived by taking the quadrature difference in cumulative uncertainty as we progress.}
-	\label{tab:uncert}
-	\begin{tabular}{l|l|rr}
-		Feature &  Parameters & $\sigma_w$ & Cumulative  \\
-		\hline
+\begin{deluxetable*}{llrr}
+	\tablecaption{$w$ error budget}
+	\tablecomments{Error budget determined from analysing uncertainty on simulation data whilst progressively enabling model features. We start from the top of the table, only varying cosmological parameters $\Omega_m$ and $w$, and then progressively unlock parameters and let them fit as we progress down the table. The cumulative uncertainty shows the total uncertainty on $w$ on the fit for all, where the $\sigma_w$ term is derived by taking the quadrature difference in cumulative uncertainty as we progress.}
+	\tablehead{		Feature &  Parameters & $\sigma_w$ & Cumulative }
+	\startdata
 		Cosmology                      & $\Omega_m$, $w$ & 0.051  &   0.051       \\
 		Standardisation                & $\alpha$, $\beta$, $\langle M_B \rangle$, $\delta(0)$, $\delta(\infty)/\delta(0)$ & 0.046  &   0.068       \\
 		Intrinsic scatter              & $\kappa_0$, $\kappa_1$ & 0.020  &   0.071       \\
 		Redshift-independent populations             & $\sigma_{M_B}$, $\sigma_c$, $\sigma_{x_1}$, $\alpha_c$ & 0.022  &   0.074       \\
 		Redshift-dependent populations & $\langle c_i \rangle$, $\langle x_{1,i} \rangle$ & 0.030  &   0.080   \\
 		Systematics                    & $\delta \mathcal{Z}_i$, $\delta S$ & 0.054  &   0.096      \\ 
-		\hline
-	\end{tabular}
-\end{table*}
+	\enddata
+	\label{tab:uncert}
+\end{deluxetable*}
 
 With the increased flexibility of Bayesian hierarchical models over traditional models, we expect to find an increased uncertainty on parameter inference. To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES-SN3YR sample with various model parameters allowed to either vary or stay locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
 
@@ -788,22 +810,22 @@ When comparing both the {\gten} and {\celeven} set of simulations independently,
 
 Having established that our method exhibits similar shifts in the recovery of $w$ compared to BBC, future work will focus on improving the parametrisation of intrinsic scatter model into our framework, with the goal of minimising the effect of the underlying scatter model on the recovery of cosmology.
 
-\begin{table}
-	\centering
-	\caption{Characterising the bias on $w$ using the 100 simulations for the {\gten} scatter model and 100 simulations for {\celeven} scatter model. We also show the results when combining the {\gten} and {\celeven} models into a combined set of 200 simulations. The mean $w$ value for our method and BBC are presented, along with the mean when averaging the difference between our method and BBC for each individual simulation. Averages are computed giving each simulation sample the same weight. In the model, $\Delta$ represents Steve - BBC. The final row shows the scatter between Steve and BBC for the different simulations.}
-	\label{tab:bulk_summary_bbc}
-	\begin{tabular}{l|ccc}
-		\hline
-		Model & {\gten} & {\celeven} & ({\gten} + {\celeven}) \\
-		\hline
+\begin{deluxetable}{lccc}
+	\tablecaption{$w$ bias comparison}
+	\tablecomments{We characterise the bias on $w$ using the 100 simulations for the {\gten} scatter model and 100 simulations for {\celeven} scatter model. We also show the results when combining the {\gten} and {\celeven} models into a combined set of 200 simulations. The mean $w$ value for our method and BBC are presented, along with the mean when averaging the difference between our method and BBC for each individual simulation. Averages are computed giving each simulation sample the same weight. In the model, $\Delta$ represents Steve - BBC. The final row shows the scatter between Steve and BBC for the different simulations.}
+	\tablehead{		Model & {\gten} & {\celeven} & ({\gten} + {\celeven}) }
+	\startdata
+
+
 		Steve $\langle w \rangle$           & $-0.998\pm0.007$ & $-0.945\pm0.007$ & $-0.972\pm0.006$\\
 		BBC $\langle w \rangle$             & $-1.044\pm0.006$ & $-0.978\pm0.007$ & $-1.010\pm0.005$\footnotemark\\
 		$\Delta$  $\langle w \rangle$  & $+0.044\pm0.006$ & $+0.033\pm0.006$ & $+0.038\pm0.004$ \\
-		\hline
+
 		$\Delta$  $\sigma_w$           & $0.057\pm0.004$ & $0.062\pm0.004$ & $0.060\pm0.003$ \\
-		\hline
-	\end{tabular}
-\end{table}
+
+	\enddata
+	\label{tab:bulk_summary_bbc}
+\end{deluxetable}
 \footnotetext{This value is computed with each simulation having the same weight. It disagrees with the value provided in \citet[Table 10, row 3]{Brout18SYS} which uses inverse variance weighted averages. We do not utilise this weight because the variance is correlated with the value of $w$ due to the $\Omega_m$ prior applied in the fitting process. We note that if inverse variance weighting is applied to both datasets, they both shift by $\Delta w \approx 0.005$, and thus the predicted difference between the BBC method and {\steve} remains the same.} 
 \begin{figure}
 	\begin{center}
@@ -896,15 +918,15 @@ which gives the probability of the model parameter values ($\theta$) given the d
 \end{equation}
 A variety of selection criteria are possible, and in our method we use our data in combination with the proposed model to determine the probability of particular selection criteria.  That is, we characterise a function $P(S|{\rm data},\theta)$, which colloquially can be stated as \textit{the probability of a potential observation passing selection cuts, given our observations and the underlying model}. We can introduce this expression in a few lines due to symmetry of joint probabilities and utilising that $P(x,y,z) = P(x|y,z)P(y,z) = P(y|x, z)P(x, z)$:
 \begin{eqnarray}
-P({\rm data} | S , \theta) P(S, \theta) &= P(S | {\rm data}, \theta) P({\rm data}, \theta)\\
-P({\rm data} | S , \theta) &= \frac{ P(S | {\rm data}, \theta) P({\rm data}, \theta) }{ P(S, \theta) }\\
-&= \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta) P(\theta)}{ P(S | \theta)  P(\theta)}\\
-&= \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) }
+P({\rm data} | S , \theta) P(S, \theta) &=& P(S | {\rm data}, \theta) P({\rm data}, \theta)\\
+P({\rm data} | S , \theta) &=& \frac{ P(S | {\rm data}, \theta) P({\rm data}, \theta) }{ P(S, \theta) }\\
+&=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta) P(\theta)}{ P(S | \theta)  P(\theta)}\\
+&=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) }
 \end{eqnarray}
 which is equal to the likelihood $\mathcal{L}$. Introducing an integral over all possible events $D$, so we can evaluate $P(S|\theta)$, 
 \begin{eqnarray}
-\mathcal{L}&= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
-\mathcal{L} &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:app_main}
+\mathcal{L}&=& \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
+\mathcal{L} &=& \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:app_main}
 \end{eqnarray}
 where we define the denominator as $d$ for simplicity in future derivations.
 
@@ -928,8 +950,8 @@ for each supernova in the dataset -- i.e. Monte Carlo integration with assumed p
 
 As stated in Section \ref{sec:selection}, the underlying population in apparent magnitude, when we discard skewness, can be represented as $\mathcal{N}(m_B|m_B^*(z), \sigma^*_{m_B})$, where
 \begin{eqnarray}
-m_B^*(z) &= \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \left(\langle c(z) \rangle + \sqrt{\frac{2}{\pi}}\sigma_c \delta_c\right)\label{eq:disc1} \\
-\sigma^*_{m_B} &= \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 +  \left(\beta \sigma_c \sqrt{1 - \frac{2\delta_c^2}{\pi}}\right)^2. \label{eq:disc2}
+m_B^*(z) &=& \langle M_B \rangle + \mu(z) - \alpha \langle x_1(z) \rangle + \beta \left(\langle c(z) \rangle + \sqrt{\frac{2}{\pi}}\sigma_c \delta_c\right)\label{eq:disc1} \\
+\sigma^*_{m_B} &=& \sigma_{M_B}^2 + (\alpha \sigma_{x_1})^2 +  \left(\beta \sigma_c \sqrt{1 - \frac{2\delta_c^2}{\pi}}\right)^2. \label{eq:disc2}
 \end{eqnarray}
 Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytically perform the integral in equation \eqref{eq:selint} and reach equations \eqref{eq:seldes} and \eqref{eq:sellow-$z$}.
 
@@ -942,8 +964,8 @@ Then, modelling $P(S|m_B)$ as either a normal or a skew normal, we can analytica
 
 In this section, we investigate the effect of approximating the skew normal underlying color distribution as a normal. Specifically, equations \eqref{eq:disc1} and \eqref{eq:disc2} make the assumption that, for our color distribution, $\mathcal{N}^{\rm Skew}(\mu, \sigma, \alpha)$ is well approximated by $\mathcal{N}(\mu, \sigma)$. We sought to improve on this approximation by adjusting the mean and standard deviation of the approximated normal to more accurately describe the actual mean and standard deviation of a skew normal. With $\delta \equiv \alpha/\sqrt{1+\alpha^2}$, the correct mean and standard deviation are
 \begin{eqnarray}
-\mu_1 &= \mu_0 + \sqrt{\frac{2}{\pi}} \delta \sigma_0 \\
-\sigma_1 &= \sigma_0 \sqrt{1 - \frac{2 \delta^2}{\pi}},
+\mu_1 &=& \mu_0 + \sqrt{\frac{2}{\pi}} \delta \sigma_0 \\
+\sigma_1 &=& \sigma_0 \sqrt{1 - \frac{2 \delta^2}{\pi}},
 \end{eqnarray}
 where we highlight that $\mu$ here represents the mean of the distribution, not distance modulus. We can then test the approximation $\mathcal{N}^{\rm Skew}(\mu_0, \sigma_0, \alpha) \rightarrow \mathcal{N}(\mu_1, \sigma_1)$. Unfortunately, this shift to the mean and standard deviation of the normal approximation where we treat $m_B$, $x_1$, and $c$ as a multivariate skew normal did not produce stable posterior surfaces. Due to this, we treat the underlying $m_B$, $x_1$, and $c$ populations as independent. 
 
