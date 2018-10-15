@@ -819,15 +819,17 @@ Having established that our method exhibits similar shifts in the recovery of $w
 
 
 		Steve $\langle w \rangle$           & $-0.998\pm0.007$ & $-0.945\pm0.007$ & $-0.972\pm0.006$\\
-		BBC $\langle w \rangle$             & $-1.044\pm0.006$ & $-0.978\pm0.007$ & $-1.010\pm0.005$\footnotemark\\
+		BBC $\langle w \rangle$             & $-1.044\pm0.006$ & $-0.978\pm0.007$ & $-1.010\pm0.005$\tablenotemark{a}\\
 		$\Delta$  $\langle w \rangle$  & $+0.044\pm0.006$ & $+0.033\pm0.006$ & $+0.038\pm0.004$ \\
 
 		$\Delta$  $\sigma_w$           & $0.057\pm0.004$ & $0.062\pm0.004$ & $0.060\pm0.003$ \\
 
 	\enddata
+	\tablenotetext{a}{This value is computed with each simulation having the same weight. It disagrees with the value provided in \citet[Table 10, row 3]{Brout18SYS} which uses inverse variance weighted averages. We do not utilise this weight because the variance is correlated with the value of $w$ due to the $\Omega_m$ prior applied in the fitting process. We note that if inverse variance weighting is applied to both datasets, they both shift by $\Delta w \approx 0.005$, and thus the predicted difference between the BBC method and {\steve} remains the same.}
 	\label{tab:bulk_summary_bbc}
 \end{deluxetable}
-\footnotetext{This value is computed with each simulation having the same weight. It disagrees with the value provided in \citet[Table 10, row 3]{Brout18SYS} which uses inverse variance weighted averages. We do not utilise this weight because the variance is correlated with the value of $w$ due to the $\Omega_m$ prior applied in the fitting process. We note that if inverse variance weighting is applied to both datasets, they both shift by $\Delta w \approx 0.005$, and thus the predicted difference between the BBC method and {\steve} remains the same.} 
+
+
 \begin{figure}
 	\begin{center}
 		\includegraphics[width=\columnwidth]{bulk_comparison.pdf}
