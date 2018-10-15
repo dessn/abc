@@ -297,8 +297,8 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 	$M_B$ & Derived absolute magnitude \\
 	$\mu$ & Derived distance modulus \\
 	\\
-	& \textbf{Input Data}\textsuperscript{a} \\
-	
+	& \textbf{Input Data}\tablenotemark{a} \\
+
 	$\hat{m}_B$ & Measured flux\\
 	$\hat{x}_1$ & Measured stretch \\
 	$\hat{c}$ & Measured color \\
@@ -346,10 +346,11 @@ In addition to absolute magnitude, the underlying supernova population is also c
 
 The only constant between survey populations is the absolute magnitude $\langle M_B \rangle$. We model the colour skewness and the redshift-dependent means and width of the colour and skew distributions individually for each survey. The probability for a supernova to have true values $M_B$, $x_1$, $c$ given the underlying population is thus given as
 
-\begin{equation}
-P(M_B, x_1, c, z | \langle M_B \rangle, \langle x_1(z) \rangle, \langle c(z) \rangle, \sigma_{m_B}, \sigma_{x_1}, \sigma_c, \alpha_c) = \notag \\
-\mathcal{N}(M_B|\langle M_B \rangle, \sigma_{M_B}) \mathcal{N}(x_1 | \langle x_1(z) \rangle, \sigma_{x_1}) \mathcal{N}^{\rm{skew}}(c| \langle c(z) \rangle, \sigma_c, \alpha_c) \label{eq:l1}.
-\end{equation}
+\begin{eqnarray}
+P(M_B, x_1, c, z | \theta) &=& \mathcal{N}(M_B|\langle M_B \rangle, \sigma_{M_B}) \, \mathcal{N}(x_1 | \langle x_1(z) \rangle, \sigma_{x_1})\notag\\ &\quad\quad& \mathcal{N}^{\rm{skew}}(c| \langle c(z) \rangle, \sigma_c, \alpha_c) \label{eq:l1},
+\end{eqnarray}
+
+where $\theta = \lbrace \langle M_B \rangle, \langle x_1(z) \rangle, \langle c(z) \rangle, \sigma_{m_B}, \sigma_{x_1}, \sigma_c, \alpha_c \rbrace$ for legibility.
 
 \subsubsection{Outlier populations}
 
