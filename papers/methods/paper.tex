@@ -75,30 +75,117 @@
 \begin{document}
 \title{{\steve}: A hierarchical Bayesian model for Supernova Cosmology}
 
-
 \author{
 	S.~R.~Hinton\altaffilmark{1},
 	T.~M.~Davis\altaffilmark{1},
 	A.~G.~Kim\altaffilmark{2},
 	D.~Brout\altaffilmark{3},
-	R.~Kessler\altaffilmark{4},
-	C.~Lidman\altaffilmark{5},
-	A.~M\"oller\altaffilmark{6,5},
+	R.~Kessler\altaffilmark{4,5},
+	J.~Lasker\altaffilmark{4,5},
+	C.~Lidman\altaffilmark{6},
+	A.~M\"oller\altaffilmark{7,6},
 	M.~Sako\altaffilmark{3},
-	D.~Scolnic\altaffilmark{4},
-	M.~Smith\altaffilmark{7},
-	R.~C.~Wolf\altaffilmark{8}
+	D.~Scolnic\altaffilmark{5},
+	M.~Smith\altaffilmark{8},
+	R.~C.~Wolf\altaffilmark{9},
+	Y.~Zhang\altaffilmark{10},
+	M.~March\altaffilmark{3},
+	S.~Allam\altaffilmark{10},
+	J.~Annis\altaffilmark{10},
+	S.~Avila\altaffilmark{11},
+	E.~Bertin\altaffilmark{12,13},
+	D.~Brooks\altaffilmark{14},
+	D.~L.~Burke\altaffilmark{15,16},
+	A.~Carnero~Rosell\altaffilmark{17,18},
+	M.~Carrasco~Kind\altaffilmark{19,20},
+	J.~Carretero\altaffilmark{21},
+	C.~E.~Cunha\altaffilmark{15},
+	L.~N.~da Costa\altaffilmark{18,22},
+	C.~Davis\altaffilmark{15},
+	J.~De~Vicente\altaffilmark{17},
+	D.~L.~DePoy\altaffilmark{23},
+	P.~Doel\altaffilmark{14},
+	T.~F.~Eifler\altaffilmark{24,25},
+	B.~Flaugher\altaffilmark{10},
+	P.~Fosalba\altaffilmark{26,27},
+	J.~Frieman\altaffilmark{10,5},
+	J.~Garc\'ia-Bellido\altaffilmark{28},
+	E.~Gaztanaga\altaffilmark{26,27},
+	D.~W.~Gerdes\altaffilmark{29,30},
+	R.~A.~Gruendl\altaffilmark{19,20},
+	J.~Gschwend\altaffilmark{18,22},
+	G.~Gutierrez\altaffilmark{10},
+	W.~G.~Hartley\altaffilmark{14,31},
+	D.~L.~Hollowood\altaffilmark{32},
+	K.~Honscheid\altaffilmark{33,34},
+	E.~Krause\altaffilmark{24},
+	K.~Kuehn\altaffilmark{35},
+	N.~Kuropatkin\altaffilmark{10},
+	O.~Lahav\altaffilmark{14},
+	M.~Lima\altaffilmark{36,18},
+	M.~A.~G.~Maia\altaffilmark{18,22},
+	J.~L.~Marshall\altaffilmark{23},
+	F.~Menanteau\altaffilmark{19,20},
+	R.~Miquel\altaffilmark{37,21},
+	R.~L.~C.~Ogando\altaffilmark{18,22},
+	A.~A.~Plazas\altaffilmark{25},
+	E.~Sanchez\altaffilmark{17},
+	V.~Scarpine\altaffilmark{10},
+	R.~Schindler\altaffilmark{16},
+	M.~Schubnell\altaffilmark{30},
+	S.~Serrano\altaffilmark{26,27},
+	I.~Sevilla-Noarbe\altaffilmark{17},
+	M.~Soares-Santos\altaffilmark{38},
+	F.~Sobreira\altaffilmark{39,18},
+	E.~Suchyta\altaffilmark{40},
+	G.~Tarle\altaffilmark{30},
+	D.~Thomas\altaffilmark{11},
+	and V.~Vikram\altaffilmark{41}
 	\\ \vspace{0.2cm} (DES Collaboration) \\
 }
 
 \affil{$^{1}$ School of Mathematics and Physics, University of Queensland,  Brisbane, QLD 4072, Australia}
 \affil{$^{2}$ Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA}
 \affil{$^{3}$ Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
-\affil{$^{4}$ Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
-\affil{$^{5}$ The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
-\affil{$^{6}$ ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)}
-\affil{$^{7}$ School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
-\affil{$^{8}$ Department of Physics, Stanford University, 382 Via Pueblo Mall, Stanford, CA 94305, USA}
+\affil{$^{4}$ Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL 60637, USA}
+\affil{$^{5}$ Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
+\affil{$^{6}$ The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
+\affil{$^{7}$ ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)}
+\affil{$^{8}$ School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
+\affil{$^{9}$ Graduate School of Education, Stanford University, 160, 450 Serra Mall, Stanford, CA 94305, USA}
+\affil{$^{10}$ Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\affil{$^{11}$ Institute of Cosmology and Gravitation, University of Portsmouth, Portsmouth, PO1 3FX, UK}
+\affil{$^{12}$ CNRS, UMR 7095, Institut d'Astrophysique de Paris, F-75014, Paris, France}
+\affil{$^{13}$ Sorbonne Universit\'es, UPMC Univ Paris 06, UMR 7095, Institut d'Astrophysique de Paris, F-75014, Paris, France}
+\affil{$^{14}$ Department of Physics \& Astronomy, University College London, Gower Street, London, WC1E 6BT, UK}
+\affil{$^{15}$ Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA}
+\affil{$^{16}$ SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA}
+\affil{$^{17}$ Centro de Investigaciones Energ\'eticas, Medioambientales y Tecnol\'ogicas (CIEMAT), Madrid, Spain}
+\affil{$^{18}$ Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\affil{$^{19}$ Department of Astronomy, University of Illinois at Urbana-Champaign, 1002 W. Green Street, Urbana, IL 61801, USA}
+\affil{$^{20}$ National Center for Supercomputing Applications, 1205 West Clark St., Urbana, IL 61801, USA}
+\affil{$^{21}$ Institut de F\'{\i}sica d'Altes Energies (IFAE), The Barcelona Institute of Science and Technology, Campus UAB, 08193 Bellaterra (Barcelona) Spain}
+\affil{$^{22}$ Observat\'orio Nacional, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\affil{$^{23}$ George P. and Cynthia Woods Mitchell Institute for Fundamental Physics and Astronomy, and Department of Physics and Astronomy, Texas A\&M University, College Station, TX 77843,  USA}
+\affil{$^{24}$ Department of Astronomy/Steward Observatory, 933 North Cherry Avenue, Tucson, AZ 85721-0065, USA}
+\affil{$^{25}$ Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Dr., Pasadena, CA 91109, USA}
+\affil{$^{26}$ Institut d'Estudis Espacials de Catalunya (IEEC), 08034 Barcelona, Spain}
+\affil{$^{27}$ Institute of Space Sciences (ICE, CSIC),  Campus UAB, Carrer de Can Magrans, s/n,  08193 Barcelona, Spain}
+\affil{$^{28}$ Instituto de Fisica Teorica UAM/CSIC, Universidad Autonoma de Madrid, 28049 Madrid, Spain}
+\affil{$^{29}$ Department of Astronomy, University of Michigan, Ann Arbor, MI 48109, USA}
+\affil{$^{30}$ Department of Physics, University of Michigan, Ann Arbor, MI 48109, USA}
+\affil{$^{31}$ Department of Physics, ETH Zurich, Wolfgang-Pauli-Strasse 16, CH-8093 Zurich, Switzerland}
+\affil{$^{32}$ Santa Cruz Institute for Particle Physics, Santa Cruz, CA 95064, USA}
+\affil{$^{33}$ Center for Cosmology and Astro-Particle Physics, The Ohio State University, Columbus, OH 43210, USA}
+\affil{$^{34}$ Department of Physics, The Ohio State University, Columbus, OH 43210, USA}
+\affil{$^{35}$ Australian Astronomical Optics, Macquarie University, North Ryde, NSW 2113, Australia}
+\affil{$^{36}$ Departamento de F\'isica Matem\'atica, Instituto de F\'isica, Universidade de S\~ao Paulo, CP 66318, S\~ao Paulo, SP, 05314-970, Brazil}
+\affil{$^{37}$ Instituci\'o Catalana de Recerca i Estudis Avan\c{c}ats, E-08010 Barcelona, Spain}
+\affil{$^{38}$ Brandeis University, Physics Department, 415 South Street, Waltham MA 02453}
+\affil{$^{39}$ Instituto de F\'isica Gleb Wataghin, Universidade Estadual de Campinas, 13083-859, Campinas, SP, Brazil}
+\affil{$^{40}$ Computer Science and Mathematics Division, Oak Ridge National Laboratory, Oak Ridge, TN 37831}
+\affil{$^{41}$ Argonne National Laboratory, 9700 South Cass Avenue, Lemont, IL 60439, USA}
+
 
 
 
