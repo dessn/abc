@@ -1,1 +1,1 @@
-python C:\Anaconda3\Lib\site-packages\mkauthlist\mkauthlist.py -f --doc -j emulateapj --sort --sort-builder --aux order.csv author_list.csv author_list.tex
+python C:\Anaconda3\Lib\site-packages\mkauthlist\mkauthlist.py -j emulateapj --sort-nonbuilder -a order.csv author_list.csv author_list.tex
