@@ -6,7 +6,6 @@
 **/doc/out/doctrees/**
 **/doc/out/latex/**
 *.aux
-*.bbl
 *.log
 *.out
 *.spl
