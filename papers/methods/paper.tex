@@ -488,7 +488,7 @@ P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i
 
 
 
-One large difference between traditional methods and BHM methods is that we treat selection effects by incorporating selection efficiency into our model, rather than relying on simulation-driven data corrections. We describe the probability that the events we observe are drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are observed and pass cuts.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
+One large difference between traditional methods and BHM methods is that we treat selection effects by incorporating selection efficiency into our model, rather than relying on simulation-driven data corrections. We describe the probability that the {\blue possible} events we observe are drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are observed and pass cuts.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
 \begin{align}
 \mathcal{L}(\theta; {\rm data}) &= P({\rm data} | \theta, S). \label{eq:like}
 \end{align}
@@ -496,7 +496,7 @@ As our model so far describes components of a basic likelihood $P({\rm data}|\th
 \begin{align}
 \mathcal{L}(\theta; {\rm data}) &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:main}
 \end{align}
-where the denominator represents an integral over all potential data $D$. This is derived in Appendix \ref{app:selection1} As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
+where the denominator represents an integral over all potential data $D$. This is derived in Appendix \ref{app:selection1}. {\blue To evaluate the effect of our selection effects, we need to evaluate this integral. The integral represents our global selection efficiency at a location in parameter space, rather than the probability of our data being selected into our sample.} As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
 \begin{equation}
 d = \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz, \label{eq:w1}
 \end{equation}
@@ -975,7 +975,7 @@ A variety of selection criteria are possible, and in our method we use our data 
 P({\rm data} | S , \theta) P(S, \theta) &=& P(S | {\rm data}, \theta) P({\rm data}, \theta)\\
 P({\rm data} | S , \theta) &=& \frac{ P(S | {\rm data}, \theta) P({\rm data}, \theta) }{ P(S, \theta) }\\
 &=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta) P(\theta)}{ P(S | \theta)  P(\theta)}\\
-&=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) }
+&=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) } \label{eq:general1}
 \end{eqnarray}
 which is equal to the likelihood $\mathcal{L}$. Introducing an integral over all possible events $D$, so we can evaluate $P(S|\theta)$, 
 \begin{eqnarray}
@@ -988,11 +988,17 @@ where we define the denominator as $d$ for simplicity in future derivations.
 
 \subsection{Supernova Selection Effects}
 \label{app:selection2}
-We assume that our selection effects can be reasonably well encapsulated by independent functions of (true) apparent magnitude and redshift, such that $P(S|{\rm data}, \theta) = P(S|z) P(S|m_B)$. Our denominator then becomes
+{\blue
+To turn the generalised equations from the previous sections into selection effects relevant for this model, we first need to write out our latent parameters, as $\theta$ represents only our top level parameters ($\Omega_m$, $w$, $\alpha$, $\beta$, etc). Whilst they can be inserted into the denominator of equation \eqref{eq:general1} to get $P(S|\theta) = \int P(S,L|\theta)\, dL$ and expanded out, we can simply write down our denominator with general latent parameter(s) $L$, as such:
 \begin{equation}
-d = \int d\hat{z} \, d\hat{m}_B \, dz \, dm_B P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta), \label{eq:sel}
+d = \iint  P(S|D, L, \theta) P(D | L, \theta) P(L | \theta)\, dD\, dL
 \end{equation}
-where for simplicity we have not written out all the integrals that do not interact with the selection effects explicitly. Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m}_B | m_B)$ is a Gaussian due to our Gaussian model of summary statistics, and $m_B$, $x_1$, $c$, and can be analytically integrated out, collapsing the integral over $\hat{m}_B$ (which is why they were not included in equation \eqref{eq:sel}). Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
+Here we can now move from the generic labels $D$ and $L$ to something specific to our model. In this case, $D$ would represent our observables, $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{m}, \hat{p}\rbrace$, and $L$ our latent parameters $\lbrace m_B, x_1, c, z\rbrace.$ However, as we assume that our selection effects can be sufficiently encapsulated by true apparent magnitude $m_B$ and redshift $z$, we will not write out the other parameters for simplicity. If we did, we'd simply find them integrated to unity. Formally, we assume that $P(S|D, L, \theta) = P(S|z) P(S|m_B)$.}
+Our denominator then becomes
+\begin{equation}
+d = \int P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta)\, d\hat{z} \, d\hat{m}_B \, dz \, dm_B.  \label{eq:sel} 
+\end{equation}
+Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m}_B | m_B)$ is a Gaussian due to our Gaussian model of summary statistics, and can be analytically integrated out, collapsing the integral over $\hat{m}_B$. Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
 \begin{equation}
 d = \int \left[ \int P(S|m_B) P(m_B | z, \theta)\, dm_B \right] P(S|z)P(z|\theta)\, dz.
 \end{equation}
