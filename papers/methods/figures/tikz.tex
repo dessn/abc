@@ -23,13 +23,13 @@
 	% Obs nodes
 	\node[obs]  (obssum) {$\hat{m}_B, \hat{x}_1, \hat{c}, \mathcal{C_\eta}^{-1}$};
 	\node[obs, left=0.8cm of obssum]  (zobs) {$\hat{z}$};
-	\node[obs, right=0.8cm of obssum]  (mobs) {$\hat{m}$};
-	\node[obs, right=0.8cm of mobs]  (pobs) {$\hat{p}$};
+	\node[obs, right=0.6cm of obssum]  (mobs) {$\hat{m}$};
+	\node[obs, right=0.6cm of mobs]  (pobs) {$\hat{p}$};
 	% Latent nodes
 	\node[latent, above=of obssum] (sum) {$m_B, x_1, c$};
-	\node[det, above=of zobs] (z) {$z$};
+	\node[det, above=of zobs] (z) {$z$};	
 	\node[det, above=of z] (mu) {$\mu$};
-	\node[latent, right=4.33cm of mu] (MBobs) {$M_B$};
+	\node[det, right=4.33cm of mu] (MBobs) {$M_B$};
 	% Survey nodes
 	\node[latent, above=of sum, yshift=1cm,text width=2.7cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c, \kappa_0, \kappa_1$ };
 	\node[latent, right=1.5cm of pop1, align=center] (sf) {$\delta S$};
@@ -40,7 +40,7 @@
 	\edge {sum} {obssum};
 	\edge {z} {zobs};
 	\edge {z,cosmo} {mu};
-	\edge {mu, sum, mobs, pop1, ab, pobs, sf} {MBobs};
+	\edge {mu, sum, pop1, ab, sf, pobs, mobs} {MBobs};	
 	% Plates
 	\plated[thick] {sn} {(obssum)(zobs)(mobs)(pobs)(sum)(z)(mu)} {$\forall\ \rm{SN}$} ;
 	\plated[thick] {survey} {(sn)(pop1)} {\\$\forall\ \rm{Survey}$} ;
