@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Basic setup. Most papers should leave these options alone.
-\documentclass[a4paper,fleqn,usenatbib,manuscript]{emulateapj}
+\documentclass[twocolumn,trackchanges,tighten]{aastex62}
 
 % MNRAS is set in Times font. If you don't have this installed (most LaTeX
 % installations will be fine) or prefer the old Computer Modern fonts, comment
@@ -24,6 +24,7 @@
 \usepackage{amssymb}	% Extra maths symbols
 \usepackage{enumerate}
 \usepackage{xcolor}
+
 
 %\usepackage{tabu}
 %\usepackage{tabularx}
@@ -61,7 +62,6 @@
 
 %\usepackage{lineno}
 %\linenumbers
-\renewcommand{\arraystretch}{1.2}
 %\graphicspath{ {./figures/} }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -75,120 +75,168 @@
 \begin{document}
 \title{{\steve}: A hierarchical Bayesian model for Supernova Cosmology}
 
-\author{
-S.~R.~Hinton\altaffilmark{1},
-T.~M.~Davis\altaffilmark{1},
-A.~G.~Kim\altaffilmark{2},
-D.~Brout\altaffilmark{3},
-C.~B.~D'Andrea\altaffilmark{3},
-R.~Kessler\altaffilmark{4,5},
-J.~Lasker\altaffilmark{4,5},
-C.~Lidman\altaffilmark{6},
-E.~Macaulay\altaffilmark{7},
-A.~M\"oller\altaffilmark{8,6},
-M.~Sako\altaffilmark{3},
-D.~Scolnic\altaffilmark{5},
-M.~Smith\altaffilmark{9},
-R.~C.~Wolf\altaffilmark{10},
-S.~Allam\altaffilmark{11},
-J.~Annis\altaffilmark{11},
-S.~Avila\altaffilmark{7},
-E.~Bertin\altaffilmark{12,13},
-D.~Brooks\altaffilmark{14},
-D.~L.~Burke\altaffilmark{15,16},
-A.~Carnero~Rosell\altaffilmark{17,18},
-M.~Carrasco~Kind\altaffilmark{19,20},
-J.~Carretero\altaffilmark{21},
-M.~Childress\altaffilmark{9},
-C.~E.~Cunha\altaffilmark{15},
-L.~N.~da Costa\altaffilmark{18,22},
-C.~Davis\altaffilmark{15},
-J.~De~Vicente\altaffilmark{17},
-D.~L.~DePoy\altaffilmark{23},
-P.~Doel\altaffilmark{14},
-T.~F.~Eifler\altaffilmark{24,25},
-B.~Flaugher\altaffilmark{11},
-P.~Fosalba\altaffilmark{26,27},
-J.~Frieman\altaffilmark{11,5},
-J.~Garc\'ia-Bellido\altaffilmark{28},
-E.~Gaztanaga\altaffilmark{26,27},
-D.~W.~Gerdes\altaffilmark{29,30},
-R.~A.~Gruendl\altaffilmark{19,20},
-J.~Gschwend\altaffilmark{18,22},
-G.~Gutierrez\altaffilmark{11},
-W.~G.~Hartley\altaffilmark{14,31},
-D.~L.~Hollowood\altaffilmark{32},
-K.~Honscheid\altaffilmark{33,34},
-E.~Krause\altaffilmark{24},
-K.~Kuehn\altaffilmark{35},
-N.~Kuropatkin\altaffilmark{11},
-O.~Lahav\altaffilmark{14},
-M.~Lima\altaffilmark{36,18},
-M.~A.~G.~Maia\altaffilmark{18,22},
-M.~March\altaffilmark{3},
-J.~L.~Marshall\altaffilmark{23},
-F.~Menanteau\altaffilmark{19,20},
-R.~Miquel\altaffilmark{37,21},
-E.~Morganson\altaffilmark{20},
-R.~L.~C.~Ogando\altaffilmark{18,22},
-A.~A.~Plazas\altaffilmark{25},
-E.~Sanchez\altaffilmark{17},
-V.~Scarpine\altaffilmark{11},
-R.~Schindler\altaffilmark{16},
-M.~Schubnell\altaffilmark{30},
-S.~Serrano\altaffilmark{26,27},
-I.~Sevilla-Noarbe\altaffilmark{17},
-M.~Soares-Santos\altaffilmark{38},
-F.~Sobreira\altaffilmark{39,18},
-E.~Suchyta\altaffilmark{40},
-G.~Tarle\altaffilmark{30},
-D.~Thomas\altaffilmark{7},
-V.~Vikram\altaffilmark{41},
-and Y.~Zhang\altaffilmark{11}
-\\ \vspace{0.2cm} (DES Collaboration) \\
-}
-
-\affil{$^{1}$ School of Mathematics and Physics, University of Queensland,  Brisbane, QLD 4072, Australia}
-\affil{$^{2}$ Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA}
-\affil{$^{3}$ Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
-\affil{$^{4}$ Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL 60637, USA}
-\affil{$^{5}$ Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
-\affil{$^{6}$ The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
-\affil{$^{7}$ Institute of Cosmology and Gravitation, University of Portsmouth, Portsmouth, PO1 3FX, UK}
-\affil{$^{8}$ ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)}
-\affil{$^{9}$ School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
-\affil{$^{10}$ Graduate School of Education, Stanford University, 160, 450 Serra Mall, Stanford, CA 94305, USA}
-\affil{$^{11}$ Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
-\affil{$^{12}$ CNRS, UMR 7095, Institut d'Astrophysique de Paris, F-75014, Paris, France}
-\affil{$^{13}$ Sorbonne Universit\'es, UPMC Univ Paris 06, UMR 7095, Institut d'Astrophysique de Paris, F-75014, Paris, France}
-\affil{$^{14}$ Department of Physics \& Astronomy, University College London, Gower Street, London, WC1E 6BT, UK}
-\affil{$^{15}$ Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA}
-\affil{$^{16}$ SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA}
-\affil{$^{17}$ Centro de Investigaciones Energ\'eticas, Medioambientales y Tecnol\'ogicas (CIEMAT), Madrid, Spain}
-\affil{$^{18}$ Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
-\affil{$^{19}$ Department of Astronomy, University of Illinois at Urbana-Champaign, 1002 W. Green Street, Urbana, IL 61801, USA}
-\affil{$^{20}$ National Center for Supercomputing Applications, 1205 West Clark St., Urbana, IL 61801, USA}
-\affil{$^{21}$ Institut de F\'{\i}sica d'Altes Energies (IFAE), The Barcelona Institute of Science and Technology, Campus UAB, 08193 Bellaterra (Barcelona) Spain}
-\affil{$^{22}$ Observat\'orio Nacional, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
-\affil{$^{23}$ George P. and Cynthia Woods Mitchell Institute for Fundamental Physics and Astronomy, and Department of Physics and Astronomy, Texas A\&M University, College Station, TX 77843,  USA}
-\affil{$^{24}$ Department of Astronomy/Steward Observatory, 933 North Cherry Avenue, Tucson, AZ 85721-0065, USA}
-\affil{$^{25}$ Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Dr., Pasadena, CA 91109, USA}
-\affil{$^{26}$ Institut d'Estudis Espacials de Catalunya (IEEC), 08034 Barcelona, Spain}
-\affil{$^{27}$ Institute of Space Sciences (ICE, CSIC),  Campus UAB, Carrer de Can Magrans, s/n,  08193 Barcelona, Spain}
-\affil{$^{28}$ Instituto de Fisica Teorica UAM/CSIC, Universidad Autonoma de Madrid, 28049 Madrid, Spain}
-\affil{$^{29}$ Department of Astronomy, University of Michigan, Ann Arbor, MI 48109, USA}
-\affil{$^{30}$ Department of Physics, University of Michigan, Ann Arbor, MI 48109, USA}
-\affil{$^{31}$ Department of Physics, ETH Zurich, Wolfgang-Pauli-Strasse 16, CH-8093 Zurich, Switzerland}
-\affil{$^{32}$ Santa Cruz Institute for Particle Physics, Santa Cruz, CA 95064, USA}
-\affil{$^{33}$ Center for Cosmology and Astro-Particle Physics, The Ohio State University, Columbus, OH 43210, USA}
-\affil{$^{34}$ Department of Physics, The Ohio State University, Columbus, OH 43210, USA}
-\affil{$^{35}$ Australian Astronomical Optics, Macquarie University, North Ryde, NSW 2113, Australia}
-\affil{$^{36}$ Departamento de F\'isica Matem\'atica, Instituto de F\'isica, Universidade de S\~ao Paulo, CP 66318, S\~ao Paulo, SP, 05314-970, Brazil}
-\affil{$^{37}$ Instituci\'o Catalana de Recerca i Estudis Avan\c{c}ats, E-08010 Barcelona, Spain}
-\affil{$^{38}$ Brandeis University, Physics Department, 415 South Street, Waltham MA 02453}
-\affil{$^{39}$ Instituto de F\'isica Gleb Wataghin, Universidade Estadual de Campinas, 13083-859, Campinas, SP, Brazil}
-\affil{$^{40}$ Computer Science and Mathematics Division, Oak Ridge National Laboratory, Oak Ridge, TN 37831}
-\affil{$^{41}$ Argonne National Laboratory, 9700 South Cass Avenue, Lemont, IL 60439, USA}
+\author{S.~R.~Hinton}
+\affiliation{School of Mathematics and Physics, University of Queensland,  Brisbane, QLD 4072, Australia}
+\author{T.~M.~Davis}
+\affiliation{School of Mathematics and Physics, University of Queensland,  Brisbane, QLD 4072, Australia}
+\author{A.~G.~Kim}
+\affiliation{Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA}
+\author{D.~Brout}
+\affiliation{Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
+\author{C.~B.~D'Andrea}
+\affiliation{Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
+\author{R.~Kessler}
+\affiliation{Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL 60637, USA}
+\affiliation{Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
+\author{J.~Lasker}
+\affiliation{Department of Astronomy and Astrophysics, University of Chicago, Chicago, IL 60637, USA}
+\affiliation{Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
+\author{C.~Lidman}
+\affiliation{The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
+\author{E.~Macaulay}
+\affiliation{Institute of Cosmology and Gravitation, University of Portsmouth, Portsmouth, PO1 3FX, UK}
+\author{A.~M\"oller}
+\affiliation{ARC Centre of Excellence for All-sky Astrophysics (CAASTRO)}
+\affiliation{The Research School of Astronomy and Astrophysics, Australian National University, ACT 2601, Australia}
+\author{M.~Sako}
+\affiliation{Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
+\author{D.~Scolnic}
+\affiliation{Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
+\author{M.~Smith}
+\affiliation{School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
+\author{R.~C.~Wolf}
+\affiliation{Graduate School of Education, Stanford University, 160, 450 Serra Mall, Stanford, CA 94305, USA}
+\author{M.~Childress}
+\affiliation{School of Physics and Astronomy, University of Southampton,  Southampton, SO17 1BJ, UK}
+\author{E.~Morganson}
+\affiliation{National Center for Supercomputing Applications, 1205 West Clark St., Urbana, IL 61801, USA}
+\author{S.~Allam}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\author{J.~Annis}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\author{S.~Avila}
+\affiliation{Institute of Cosmology and Gravitation, University of Portsmouth, Portsmouth, PO1 3FX, UK}
+\author{E.~Bertin}
+\affiliation{CNRS, UMR 7095, Institut d'Astrophysique de Paris, F-75014, Paris, France}
+\affiliation{Sorbonne Universit\'es, UPMC Univ Paris 06, UMR 7095, Institut d'Astrophysique de Paris, F-75014, Paris, France}
+\author{D.~Brooks}
+\affiliation{Department of Physics \& Astronomy, University College London, Gower Street, London, WC1E 6BT, UK}
+\author{D.~L.~Burke}
+\affiliation{Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA}
+\affiliation{SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA}
+\author{A.~Carnero~Rosell}
+\affiliation{Centro de Investigaciones Energ\'eticas, Medioambientales y Tecnol\'ogicas (CIEMAT), Madrid, Spain}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{M.~Carrasco~Kind}
+\affiliation{Department of Astronomy, University of Illinois at Urbana-Champaign, 1002 W. Green Street, Urbana, IL 61801, USA}
+\affiliation{National Center for Supercomputing Applications, 1205 West Clark St., Urbana, IL 61801, USA}
+\author{J.~Carretero}
+\affiliation{Institut de F\'{\i}sica d'Altes Energies (IFAE), The Barcelona Institute of Science and Technology, Campus UAB, 08193 Bellaterra (Barcelona) Spain}
+\author{C.~E.~Cunha}
+\affiliation{Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA}
+\author{L.~N.~da Costa}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\affiliation{Observat\'orio Nacional, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{C.~Davis}
+\affiliation{Kavli Institute for Particle Astrophysics \& Cosmology, P. O. Box 2450, Stanford University, Stanford, CA 94305, USA}
+\author{J.~De~Vicente}
+\affiliation{Centro de Investigaciones Energ\'eticas, Medioambientales y Tecnol\'ogicas (CIEMAT), Madrid, Spain}
+\author{D.~L.~DePoy}
+\affiliation{George P. and Cynthia Woods Mitchell Institute for Fundamental Physics and Astronomy, and Department of Physics and Astronomy, Texas A\&M University, College Station, TX 77843,  USA}
+\author{P.~Doel}
+\affiliation{Department of Physics \& Astronomy, University College London, Gower Street, London, WC1E 6BT, UK}
+\author{T.~F.~Eifler}
+\affiliation{Department of Astronomy/Steward Observatory, 933 North Cherry Avenue, Tucson, AZ 85721-0065, USA}
+\affiliation{Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Dr., Pasadena, CA 91109, USA}
+\author{B.~Flaugher}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\author{P.~Fosalba}
+\affiliation{Institut d'Estudis Espacials de Catalunya (IEEC), 08034 Barcelona, Spain}
+\affiliation{Institute of Space Sciences (ICE, CSIC),  Campus UAB, Carrer de Can Magrans, s/n,  08193 Barcelona, Spain}
+\author{J.~Frieman}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\affiliation{Kavli Institute for Cosmological Physics, University of Chicago, Chicago, IL 60637, USA}
+\author{J.~Garc\'ia-Bellido}
+\affiliation{Instituto de Fisica Teorica UAM/CSIC, Universidad Autonoma de Madrid, 28049 Madrid, Spain}
+\author{E.~Gaztanaga}
+\affiliation{Institut d'Estudis Espacials de Catalunya (IEEC), 08034 Barcelona, Spain}
+\affiliation{Institute of Space Sciences (ICE, CSIC),  Campus UAB, Carrer de Can Magrans, s/n,  08193 Barcelona, Spain}
+\author{D.~W.~Gerdes}
+\affiliation{Department of Astronomy, University of Michigan, Ann Arbor, MI 48109, USA}
+\affiliation{Department of Physics, University of Michigan, Ann Arbor, MI 48109, USA}
+\author{R.~A.~Gruendl}
+\affiliation{Department of Astronomy, University of Illinois at Urbana-Champaign, 1002 W. Green Street, Urbana, IL 61801, USA}
+\affiliation{National Center for Supercomputing Applications, 1205 West Clark St., Urbana, IL 61801, USA}
+\author{J.~Gschwend}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\affiliation{Observat\'orio Nacional, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{G.~Gutierrez}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\author{W.~G.~Hartley}
+\affiliation{Department of Physics \& Astronomy, University College London, Gower Street, London, WC1E 6BT, UK}
+\affiliation{Department of Physics, ETH Zurich, Wolfgang-Pauli-Strasse 16, CH-8093 Zurich, Switzerland}
+\author{D.~L.~Hollowood}
+\affiliation{Santa Cruz Institute for Particle Physics, Santa Cruz, CA 95064, USA}
+\author{K.~Honscheid}
+\affiliation{Center for Cosmology and Astro-Particle Physics, The Ohio State University, Columbus, OH 43210, USA}
+\affiliation{Department of Physics, The Ohio State University, Columbus, OH 43210, USA}
+\author{E.~Krause}
+\affiliation{Department of Astronomy/Steward Observatory, 933 North Cherry Avenue, Tucson, AZ 85721-0065, USA}
+\author{K.~Kuehn}
+\affiliation{Australian Astronomical Optics, Macquarie University, North Ryde, NSW 2113, Australia}
+\author{N.~Kuropatkin}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\author{O.~Lahav}
+\affiliation{Department of Physics \& Astronomy, University College London, Gower Street, London, WC1E 6BT, UK}
+\author{M.~Lima}
+\affiliation{Departamento de F\'isica Matem\'atica, Instituto de F\'isica, Universidade de S\~ao Paulo, CP 66318, S\~ao Paulo, SP, 05314-970, Brazil}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{M.~A.~G.~Maia}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\affiliation{Observat\'orio Nacional, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{M.~March}
+\affiliation{Department of Physics and Astronomy, University of Pennsylvania, Philadelphia, PA 19104, USA}
+\author{J.~L.~Marshall}
+\affiliation{George P. and Cynthia Woods Mitchell Institute for Fundamental Physics and Astronomy, and Department of Physics and Astronomy, Texas A\&M University, College Station, TX 77843,  USA}
+\author{F.~Menanteau}
+\affiliation{Department of Astronomy, University of Illinois at Urbana-Champaign, 1002 W. Green Street, Urbana, IL 61801, USA}
+\affiliation{National Center for Supercomputing Applications, 1205 West Clark St., Urbana, IL 61801, USA}
+\author{R.~Miquel}
+\affiliation{Instituci\'o Catalana de Recerca i Estudis Avan\c{c}ats, E-08010 Barcelona, Spain}
+\affiliation{Institut de F\'{\i}sica d'Altes Energies (IFAE), The Barcelona Institute of Science and Technology, Campus UAB, 08193 Bellaterra (Barcelona) Spain}
+\author{R.~L.~C.~Ogando}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\affiliation{Observat\'orio Nacional, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{A.~A.~Plazas}
+\affiliation{Jet Propulsion Laboratory, California Institute of Technology, 4800 Oak Grove Dr., Pasadena, CA 91109, USA}
+\author{E.~Sanchez}
+\affiliation{Centro de Investigaciones Energ\'eticas, Medioambientales y Tecnol\'ogicas (CIEMAT), Madrid, Spain}
+\author{V.~Scarpine}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
+\author{R.~Schindler}
+\affiliation{SLAC National Accelerator Laboratory, Menlo Park, CA 94025, USA}
+\author{M.~Schubnell}
+\affiliation{Department of Physics, University of Michigan, Ann Arbor, MI 48109, USA}
+\author{S.~Serrano}
+\affiliation{Institut d'Estudis Espacials de Catalunya (IEEC), 08034 Barcelona, Spain}
+\affiliation{Institute of Space Sciences (ICE, CSIC),  Campus UAB, Carrer de Can Magrans, s/n,  08193 Barcelona, Spain}
+\author{I.~Sevilla-Noarbe}
+\affiliation{Centro de Investigaciones Energ\'eticas, Medioambientales y Tecnol\'ogicas (CIEMAT), Madrid, Spain}
+\author{M.~Soares-Santos}
+\affiliation{Brandeis University, Physics Department, 415 South Street, Waltham MA 02453}
+\author{F.~Sobreira}
+\affiliation{Instituto de F\'isica Gleb Wataghin, Universidade Estadual de Campinas, 13083-859, Campinas, SP, Brazil}
+\affiliation{Laborat\'orio Interinstitucional de e-Astronomia - LIneA, Rua Gal. Jos\'e Cristino 77, Rio de Janeiro, RJ - 20921-400, Brazil}
+\author{E.~Suchyta}
+\affiliation{Computer Science and Mathematics Division, Oak Ridge National Laboratory, Oak Ridge, TN 37831}
+\author{G.~Tarle}
+\affiliation{Department of Physics, University of Michigan, Ann Arbor, MI 48109, USA}
+\author{D.~Thomas}
+\affiliation{Institute of Cosmology and Gravitation, University of Portsmouth, Portsmouth, PO1 3FX, UK}
+\author{V.~Vikram}
+\affiliation{Argonne National Laboratory, 9700 South Cass Avenue, Lemont, IL 60439, USA}
+\author{Y.~Zhang}
+\affiliation{Fermi National Accelerator Laboratory, P. O. Box 500, Batavia, IL 60510, USA}
 
 
 
@@ -336,19 +384,18 @@ At the most fundamental level, a supernova cosmology analysis is a mapping from 
 Like most of the BHM methods introduced previously, we work from the summary statistics, where each observed supernova has a brightness measurement $\hat{m}_B$ (which is analogous to apparent magnitude), stretch $\hat{x}_1$ and color $\hat{c}$, with uncertainty on those values encoded in the covariance matrix $\cov$. Additionally, each supernova has an observed redshift $\hat{z}$ and a host-galaxy stellar mass associated with it, $\hat{m}$, where the mass measurement is converted into a probability of being above $10^{10}$ solar masses. We also have a probability of each supernova being a type Ia, $\hat{p}$. Our set of observables input into the {\steve} is therefore given as $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{p}, \hat{m}, \cov \rbrace$, as shown in the probabilistic graphical model (PGM) in Figure \ref{fig:pgm}.
 
 
-As we are focused on the spectroscopically confirmed supernovae for this iteration of the method, we assume the observed redshift $\hat{z}$ is the true redshift $z$ such that $P(\hat{z}|z) = \delta(\hat{z} - z)$. Potential sources of redshift error (such as peculiar velocities) are taken into account not via uncertainty on redshift (which is technically challenging to implement {\blue as varying redshifts introduce computational complexity in computing the distance modulus integral}) but instead uncertainty on distance modulus. Similarly, we take the mass probability estimate $\hat{m}$ as correct, and do not model a latent variable to represent uncertainty on the probability estimate. One of the strengths of {\steve} (and the {\rubin} analysis) is that for future data sets where supernovae have been classified photometrically, and we expect some misclassification and misidentification of the host galaxies, these misclassifications can naturally be modelled and taken into account by introducing additional populations that supernovae have a non-zero probability of belonging to.
+As we are focused on the spectroscopically confirmed supernovae for this iteration of the method, we assume the observed redshift $\hat{z}$ is the true redshift $z$ such that $P(\hat{z}|z) = \delta(\hat{z} - z)$. Potential sources of redshift error (such as peculiar velocities) are taken into account not via uncertainty on redshift (which is technically challenging to implement \added{as varying redshifts introduce computational complexity in computing the distance modulus integral}) but instead uncertainty on distance modulus. Similarly, we take the mass probability estimate $\hat{m}$ as correct, and do not model a latent variable to represent uncertainty on the probability estimate. One of the strengths of {\steve} (and the {\rubin} analysis) is that for future data sets where supernovae have been classified photometrically, and we expect some misclassification and misidentification of the host galaxies, these misclassifications can naturally be modelled and taken into account by introducing additional populations that supernovae have a non-zero probability of belonging to.
 
 
 
 \begin{deluxetable}{ll}
+	\renewcommand{\arraystretch}{0.8}
 	\tablecolumns{2}
 	\tablewidth{0.99\columnwidth}
 	\tablecaption{Model Parameters}
 	\tablehead { \colhead{Parameter} & \colhead{Description} }
-	\startdata
-	
+	\startdata	
 	&\textbf{Global Parameters} \\
-
 	$\Omega_m$  & Matter density  \\
 	$w$  &  Dark energy equation of state  \\
 	$\alpha$ & Stretch standardisation   \\
@@ -359,7 +406,6 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 	$\langle M_B \rangle$ & Mean absolute magnitude \\
 	\\
 	& \textbf{Survey Parameters} \\
-	
 	$\delta S$ & Selection effect deviation \\
 	$\langle x_1^i \rangle$ & Mean stretch nodes\\
 	$\langle c^i \rangle$ & Mean color nodes\\
@@ -379,7 +425,6 @@ As we are focused on the spectroscopically confirmed supernovae for this iterati
 	$\mu$ & Derived distance modulus \\
 	\\
 	& \textbf{Input Data}\tablenotemark{a} \\
-
 	$\hat{m}_B$ & Measured flux\\
 	$\hat{x}_1$ & Measured stretch \\
 	$\hat{c}$ & Measured color \\
@@ -409,7 +454,7 @@ As discussed in Section \ref{sec:challenges},  the SALT2 model does not include 
  	\begin{center}
  		\includegraphics[width=\columnwidth]{tikz-figure0.pdf}
  	\end{center}
- 	\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, single-lined ellipse nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it. Variables that appear outside both boxes represent top level model parameters.}
+ 	\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, single-lined ellipse nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it. Variables that appear outside both boxes represent top level model parameters. \added{To solidify that the underlying supernova population lives in $\lbrace M_B, x_1, c\rbrace$ space, we write out the stretch and colour populations along with $M_B$, however note here that those $x_1$ and $c$ values (denoted by an asterix) are identically equal to the $x_1$ and $c$ values in the latent node they are conditioned on, and in the code implementation, they are the same variable.}}
  	\label{fig:pgm}
  \end{figure}
 
@@ -421,9 +466,9 @@ As discussed in Section \ref{sec:challenges},  the SALT2 model does not include 
 \subsubsection{Type Ia population} 
 \label{sec:underlying}
 
-Unlike many previous formalisms which utilise $M_B$ as a singular number and model magnitude scatter on the apparent magnitude $m_B$, we incorporate this scatter into the underlying rest-frame population by having a population in absolute magnitude space. {\blue This is mathematically equivalent, however allows us to model the underlying population and intrinsic scatter distinctly.} To denote this difference, we refer to the mean of our absolute magnitude population with $\langle M_B \rangle$.
+Unlike many previous formalisms which utilise $M_B$ as a singular number and model magnitude scatter on the apparent magnitude $m_B$, we incorporate this scatter into the underlying rest-frame population by having a population in absolute magnitude space. \added{This is mathematically equivalent, however allows us to model the underlying population and intrinsic scatter distinctly.} To denote this difference, we refer to the mean of our absolute magnitude population with $\langle M_B \rangle$.
 
-In addition to absolute magnitude, the underlying supernova population is also characterised by distributions in color and stretch. We follow the prior work of {\rubin} and model the color population as an independent redshift-dependent skew normal distribution for each survey. For the stretch population, we adopt a redshift-dependent normal distribution, and magnitude dispersion is modelled as a normal distribution. We also tested a skew-normal approach for these parameters, reverting to the normal distributions as they are computationally easier to evaluate and we found no reduction in cosmological bias with the skew-normal distributions for stretch and magnitude. Following {\rubin} we allow the mean color and stretch to vary over redshift, anchoring four equally spaced redshift nodes spanning the redshift range of each survey, linearly interpolating between the nodes to determine the mean stretch and color for a given redshift. These nodes are represented as $\langle x_1^i \rangle$ and $\langle c^i \rangle$. Both the color and stretch means are modelled with normal priors. Initial versions of our model adopted a fully covariant multivariate skew normal (with skewness set to zero only for the magnitude component) to capture correlations between $m_B$ and $c$, however pathological fitting complications required us to simplify our treatment. We parametrise the color skewness $\alpha_c$ by sampling $\delta_c = \alpha_c / \sqrt{1 + \alpha_c^2}$ which itself is given a uniform prior $\mathcal{U}(0,0.98)$ that allows $\alpha_c$ to span positive values in the realm of physical plausibility as determined from constraints in \citet{Scolnic2016}. We sample $\delta_c$ in log space for efficiency in sampling close to zero. The width of the population, represented by the vector $\lbrace \sigma_{M_B}, \sigma_{x_1}, \sigma_c \rbrace$ is subject to Cauchy priors with {\blue mean 0 and width 1}. 
+In addition to absolute magnitude, the underlying supernova population is also characterised by distributions in color and stretch. We follow the prior work of {\rubin} and model the color population as an independent redshift-dependent skew normal distribution for each survey. For the stretch population, we adopt a redshift-dependent normal distribution, and magnitude dispersion is modelled as a normal distribution. We also tested a skew-normal approach for these parameters, reverting to the normal distributions as they are computationally easier to evaluate and we found no reduction in cosmological bias with the skew-normal distributions for stretch and magnitude. Following {\rubin} we allow the mean color and stretch to vary over redshift, anchoring four equally spaced redshift nodes spanning the redshift range of each survey, linearly interpolating between the nodes to determine the mean stretch and color for a given redshift. These nodes are represented as $\langle x_1^i \rangle$ and $\langle c^i \rangle$. Both the color and stretch means are modelled with normal priors. Initial versions of our model adopted a fully covariant multivariate skew normal (with skewness set to zero only for the magnitude component) to capture correlations between $m_B$ and $c$, however pathological fitting complications required us to simplify our treatment. We parametrise the color skewness $\alpha_c$ by sampling $\delta_c = \alpha_c / \sqrt{1 + \alpha_c^2}$ which itself is given a uniform prior $\mathcal{U}(0,0.98)$ that allows $\alpha_c$ to span positive values in the realm of physical plausibility as determined from constraints in \citet{Scolnic2016}. We sample $\delta_c$ in log space for efficiency in sampling close to zero. The width of the population, represented by the vector $\lbrace \sigma_{M_B}, \sigma_{x_1}, \sigma_c \rbrace$ is subject to Cauchy priors \added{with mean 0 and width 1, following recommendations from the Stan user guide}.
 
 The only constant between survey populations is the absolute magnitude $\langle M_B \rangle$. We model the colour skewness and the redshift-dependent means and width of the colour and skew distributions individually for each survey. The probability for a supernova to have true values $M_B$, $x_1$, $c$ given the underlying population is thus given as
 \begin{eqnarray}
@@ -450,7 +495,7 @@ Fully covariant extra dispersion on $\lbrace m_B, x_1, c \rbrace$ (rather than j
 
 \subsubsection{Cosmology}
 
-We formulate our model with three different cosmological parameterisations; Flat $\Lambda$CDM, Flat $w$CDM, and standard $\Lambda$CDM {\blue (without a flatness prior)}. $\Omega_m$ is given the prior $\mathcal{U}(0.05, 0.99)$, $\Omega_\Lambda$ was treated with $\mathcal{U}(0, 1.5)$ and the equation of state $w$ was similarly set to a flat prior $\mathcal{U}(-0.4, -2.0)$. For calculating the distance modulus, we fix $H_0 = 70 \kmsmpc $. If the Hubble constant has a different value, the absolute magnitude is $M_B + 5\log(H_0/70 \kmsmpc )$ with the other cosmological parameters unaffected.
+We formulate our model with three different cosmological parameterisations; Flat $\Lambda$CDM, Flat $w$CDM, and standard $\Lambda$CDM \added{ (without a flatness prior)}. $\Omega_m$ is given the prior $\mathcal{U}(0.05, 0.99)$, $\Omega_\Lambda$ was treated with $\mathcal{U}(0, 1.5)$ and the equation of state $w$ was similarly set to a flat prior $\mathcal{U}(-0.4, -2.0)$. For calculating the distance modulus, we fix $H_0 = 70 \kmsmpc $. If the Hubble constant has a different value, the absolute magnitude is $M_B + 5\log(H_0/70 \kmsmpc )$ with the other cosmological parameters unaffected.
 
 \subsubsection{Supernova Standardisation Parameters}
 
@@ -471,11 +516,11 @@ where $\delta(0)$ represents the correction at redshift zero, and $\delta(\infty
 
 \subsubsection{Uncertainty Propagation}
 \label{sec:systreat}
-The chief difficulty with including systematic uncertainties in supernova analyses is that they have difficult-to-model effects on the output observations. As such, the traditional treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{{\rm d} \hat{m}_B}{{\rm d} \Z_i}$, $\frac{{\rm d} \hat{x}_1}{{\rm d} \Z_i}$, $\frac{{\rm d} \hat{c}}{{\rm d} \Z_i}$ {\blue for each supernova light curve fit}, where $\Z_i$ represents the $i$\textsuperscript{th} systematic.
+The chief difficulty with including systematic uncertainties in supernova analyses is that they have difficult-to-model effects on the output observations. As such, the traditional treatment for systematics is to compute their effect on the supernova summary statistics -- computing the numerical derivatives $\frac{{\rm d} \hat{m}_B}{{\rm d} \Z_i}$, $\frac{{\rm d} \hat{x}_1}{{\rm d} \Z_i}$, $\frac{{\rm d} \hat{c}}{{\rm d} \Z_i}$ \added{ for each supernova light curve fit}, where $\Z_i$ represents the $i$\textsuperscript{th} systematic.
 
 Assuming that the gradients can be linearly extrapolated -- which is a reasonable approximation for modern surveys with high quality control of systematics -- we can incorporate into our model a deviation from the observed values by constructing a $(3 \times N_{\rm sys})$ matrix containing the numerical derivatives for the $N_{\rm sys}$ systematics and multiplying it with the row vector containing the offset for each systematic. By scaling the gradient matrix to represent the shift over $1\sigma$ of systematic uncertainty, we can simply enforce a unit normal prior on the systematic row vector to increase computational efficiency.
 
-This method of creating a secondary covariance matrix using partial derivatives is used throughout the traditional and BHM analyses. For each survey and band, we have two systematics --- the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, ten SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic, and also the systematic peculiar velocity uncertainty. A comprehensive explanation of all systematics is given in \citet{Brout18SYS}; see Table~4 for details. This gives thirteen global systematics shared by {\blue all surveys that apply globally to all supernova summary statistics}, plus two systematics per band in each survey. With $\eta \equiv \lbrace m_B, x_1, c \rbrace$, our initial conditional likelihood for our observed summary statistics shown in Equation \eqref{eq:pop} becomes
+This method of creating a secondary covariance matrix using partial derivatives is used throughout the traditional and BHM analyses. For each survey and band, we have two systematics --- the calibration uncertainty and the filter wavelength uncertainty. We include these in our approach, in addition to including HST Calspec calibration uncertainty, ten SALT2 model systematic uncertainties, a dust systematic, a global redshift bias systematic, and also the systematic peculiar velocity uncertainty. A comprehensive explanation of all systematics is given in \citet{Brout18SYS}; see Table~4 for details. This gives thirteen global systematics shared by \added{ all surveys that apply globally to all supernova summary statistics}, plus two systematics per band in each survey. With $\eta \equiv \lbrace m_B, x_1, c \rbrace$, our initial conditional likelihood for our observed summary statistics shown in Equation \eqref{eq:pop} becomes
 \begin{equation}
 P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i, C_\eta\right) = \mathcal{N}\left(\hat{\eta} + \delta \Z_i \frac{\partial \hat{\eta}}{\partial \Z_i}|\eta,\cov\right). \label{eq:l3}
 \end{equation}
@@ -488,7 +533,7 @@ P\left(\hat{\eta}, \frac{\partial \hat{\eta}}{\partial \Z_i} | \eta, \delta \Z_i
 
 
 
-One large difference between traditional methods and BHM methods is that we treat selection effects by incorporating selection efficiency into our model, rather than relying on simulation-driven data corrections. We describe the probability that the {\blue possible} events we observe are drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are observed and pass cuts.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
+One large difference between traditional methods and BHM methods is that we treat selection effects by incorporating selection efficiency into our model, rather than relying on simulation-driven data corrections. We describe the probability that the \added{ possible} events we observe are drawn from the distribution predicted by the underlying theoretical model \textit{and} that those events, given they happened, are observed and pass cuts.  To make this extra conditional explicit, we can write the likelihood of the data given an underlying model, $\theta$, \textit{and} that the data are included in our sample, denoted by $S$, as
 \begin{align}
 \mathcal{L}(\theta; {\rm data}) &= P({\rm data} | \theta, S). \label{eq:like}
 \end{align}
@@ -496,7 +541,7 @@ As our model so far describes components of a basic likelihood $P({\rm data}|\th
 \begin{align}
 \mathcal{L}(\theta; {\rm data}) &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:main}
 \end{align}
-where the denominator represents an integral over all potential data $D$. This is derived in Appendix \ref{app:selection1}. {\blue To evaluate the effect of our selection effects, we need to evaluate this integral. The integral represents our global selection efficiency at a location in parameter space, rather than the probability of our data being selected into our sample.} As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
+where the denominator represents an integral over all potential data $D$. This is derived in Appendix \ref{app:selection1}. \added{ To evaluate the effect of our selection effects, we need to evaluate both the selection effect terms in the numerator and the integral in the denominator. The numerator represents the probability we caught the supernova and it was selected into the cosmology sample. The integral represents our global selection efficiency at a location in parameter space, rather than the probability of our data being selected into our sample.} As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
 \begin{equation}
 d = \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz, \label{eq:w1}
 \end{equation}
@@ -539,7 +584,7 @@ d_{\rm CDF} &=& \Phi^c\left(  \frac{m^*_B - \mu_{\rm CDF}}{\sqrt{\sigma^{*2}_{m_
 d_{\rm Skew} &=& 2\mathcal{N}\left( \frac{m_B^* - \mu_{\rm Skew}}{\sqrt{\sigma^{*2}_{m_B} + \sigma_{\rm Skew}^2}}\right) \times \notag\\
 &\quad\quad& \Phi\left(  \frac{{\rm sign}(\alpha_{\rm Skew})(m_B^* - \mu_{\rm Skew})}{\frac{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}{\sigma^2_{\rm Skew}} \sqrt{\frac{\sigma^2_{\rm Skew}}{\alpha^2_{\rm Skew}} + \frac{\sigma_{m_B}^{*2} \sigma^2_{\rm Skew}}{\sigma_{m_B}^{*2} + \sigma^2_{\rm Skew}}} }\right), \label{eq:sellow-$z$}
 \end{eqnarray}
-and is incorporated into our likelihood. {\blue Note that the above efficiencies utilise the common form of the normal distribution rather than the conditional probability notation found previously in this work.} This is illustrated in Figure \ref{fig:efficiency}. Our corrections for the DES spectroscopic data utilise the CDF functional form, with the combined low redshift surveys being modelled with the skew normal efficiency. Further details on this choice are given in Section \ref{sec:simdes}.
+and is incorporated into our likelihood. \added{ Note that the above efficiencies utilise the common form of the normal distribution rather than the conditional probability notation found previously in this work.} This is illustrated in Figure \ref{fig:efficiency}. Our corrections for the DES spectroscopic data utilise the CDF functional form, with the combined low redshift surveys being modelled with the skew normal efficiency. Further details on this choice are given in Section \ref{sec:simdes}.
 
 \begin{figure}
 	\begin{center}
@@ -582,7 +627,7 @@ In order to verify our model we run it through stringent tests. First, we valida
 	\begin{center}
 		\includegraphics[width=\columnwidth]{simpleApproximateModelW.pdf}
 	\end{center}
-	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $w$CDM model, with a representative contour from a single data realisation shown for context. The well known banana shaped contour is recovered, with the marginalised distributions in $\Omega_m$ and $w$ {\blue shown to recover input cosmology. For contours that are non-Gaussian due to the curved degeneracy between $\Omega_m$ and $w$, the marginalised distributions can provide misleading statistics where maximum marginalised distribution can disagree with the maximum likelihood in multiple dimensions. For our contours, the non-Gaussianity is small and the marginalised distributions still provide a valuable metric.} The recovered posteior maximums show the same degeneracy direction as the representative surface, and scatter around the truth values input into the simulation, which are shown in dashed lines.}
+	\caption{Maximal posterior points for 100 realisations of supernova data with the Flat $w$CDM model, with a representative contour from a single data realisation shown for context. The well known banana shaped contour is recovered, with the marginalised distributions in $\Omega_m$ and $w$ \added{ shown to recover input cosmology. For contours that are non-Gaussian due to the curved degeneracy between $\Omega_m$ and $w$, the marginalised distributions can provide misleading statistics where maximum marginalised distribution can disagree with the maximum likelihood in multiple dimensions. For our contours, the non-Gaussianity is small and the marginalised distributions still provide a valuable metric.} The recovered posteior maximums show the same degeneracy direction as the representative surface, and scatter around the truth values input into the simulation, which are shown in dashed lines.}
 	\label{fig:simple_w}
 \end{figure}
 
@@ -607,7 +652,7 @@ In order to verify our model we run it through stringent tests. First, we valida
 We generate simple toy data to validate the basic premise of the model. The data generation algorithm is described below:
 
 \begin{enumerate}[1.]
-	\item Draw a redshift from a power law distribution. For the low redshift survey this is $\mathcal{U}(0.0004, 0.01)^{0.5}$, and for the DES-like survey this is $\mathcal{U}(0.008, 1.0)^{0.33}$. {\blue For the low redshift survey, this is equivalent to sampling $y = z$ from $0.02$ to $\sqrt{0.1}$, for the high redshift survey, this is equivalent to sampling $y = z^2$ from $0.2$ to $1.0$. These distributions are arbitrary, and this test has been performed with various flat and power law distributions.}
+	\item Draw a redshift from a power law distribution. For the low redshift survey this is $\mathcal{U}(0.0004, 0.01)^{0.5}$, and for the DES-like survey this is $\mathcal{U}(0.008, 1.0)^{0.33}$. \added{ For the low redshift survey, this is equivalent to sampling $y = z$ from $0.02$ to $\sqrt{0.1}$, for the high redshift survey, this is equivalent to sampling $y = z^2$ from $0.2$ to $1.0$. These distributions are arbitrary, and this test has been performed with various flat and power law distributions.}
 	\item Draw a random mass probability from $\mathcal{U}(0, 1)$ and calculate the mass-brightness correction using $\delta(0) = 0.08$, $\delta(0)/\delta(\infty) = 0.5$, and equation \eqref{eq:mass}.
 	\item Draw an absolute magnitude, stretch and color from the respective distributions $\mathcal{N}(-19.3, 0.1)$, $\mathcal{N}(0, 1)$, $\mathcal{N}(0, 0.1)$.
 	\item Calculate $\mu(z)$ given the drawn redshift and cosmological parameters $\Omega_m = 0.3$, $w = -1$ under Flat $\Lambda$CDM cosmology. Use this to determine the true apparent magnitude of the object $m_B$ using $m_B = \mu + M_B - \alpha x_1 + \beta c$.
@@ -619,7 +664,7 @@ The selection functions parameters (a skew normal for low-redshift and a complim
 
 We test four models: Flat $\Lambda$CDM, Flat $w$CDM, $\Lambda$CDM, and Flat $w$CDM with a prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$, with the latter included to allow sensitive tests on bias for $w$. To achieve statistical precision, we fit 100 realisations of supernovae datasets. Cosmological parameters are recovered without significant bias. Combined posterior surfaces of all 100 realisations fits for $\Lambda$CDM are shown in Figure \ref{fig:simple_ol} and fits for Flat $w$CDM are shown in Figure \ref{fig:simple_w}. By utilising the Stan framework and several efficient parametrisations (discussed further in Appendix \ref{app:optimisations}), fits to these simulations of 2000 supernovae take only on order of a single CPU-hour to run.
 
-To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The strong prior on $\Omega_m$ cuts a slice through the traditional `banana' posterior surface in the $w$-$\Omega_m$ plane of Figure \ref{fig:simple_w}. Without making such a slice, the variation in $w$ is larger due to a shift along the degeneracy direction of the `banana'. By focusing the slice at an almost fixed $\Omega_m$, we can see the variation in the mean value of $w$ approximately perpendicular to the lines of degeneracy, instead of along them. The results of the analysis are detailed in Table \ref{tab:simple_model}, and demonstrate the performance of our model in recovering the true cosmological parameters.  As we are using 100 independent realisations, the precision of our determination of the mean simulation result is {\blue approximately a tenth of the quoted scatter (as a degree of non-Gaussianity of our fits will make this relationship inexact)}. The deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model. With this simple data, we also correctly recover underlying supernova populations, which can be seen in Figure \ref{fig:simple_w_super}.
+To investigate biases in the model in fine detail, we look for systematic bias in $\Omega_m$ in the Flat $\Lambda$CDM cosmology test, and bias in $w$ for the Flat $w$CDM test with strong prior $\Omega_m \sim \mathcal{N}(0.3, 0.01)$. This allows us to investigate biases without the investigative hindrances of non-Gaussian or truncated posterior surfaces. The strong prior on $\Omega_m$ cuts a slice through the traditional `banana' posterior surface in the $w$-$\Omega_m$ plane of Figure \ref{fig:simple_w}. Without making such a slice, the variation in $w$ is larger due to a shift along the degeneracy direction of the `banana'. By focusing the slice at an almost fixed $\Omega_m$, we can see the variation in the mean value of $w$ approximately perpendicular to the lines of degeneracy, instead of along them. The results of the analysis are detailed in Table \ref{tab:simple_model}, and demonstrate the performance of our model in recovering the true cosmological parameters.  As we are using 100 independent realisations, the precision of our determination of the mean simulation result is \added{ approximately a tenth of the quoted scatter (as a degree of non-Gaussianity of our fits will make this relationship inexact)}. The deviation from truth values is below this threshold, no significant bias is detected in either the Flat $\Lambda$CDM model or the Flat $w$CDM model. With this simple data, we also correctly recover underlying supernova populations, which can be seen in Figure \ref{fig:simple_w_super}.
 
 
 
@@ -643,18 +688,19 @@ To investigate biases in the model in fine detail, we look for systematic bias i
 \subsection{DES SN data validation}
 \label{sec:simdes}
 
-Many BHM methods have previously been validated on data constructed explicitly to validate the assumptions of the model. This is a useful consistency check that the model implementation is correct, efficient and free of obvious pathologies. However, the real test of a model is its application to realistic datasets that mimic expected observational data in as many possible ways. To this end, we test using simulations (using the SNANA package) that follow the observational schedule and observing conditions for the DES and low-$z$ surveys, where the low-$z$ sample is based on observations from CfA3 \citep{Hicken2009, Hicken2009a}, CfA4 \citep{Hicken2012} and CSP \citep{Contreras2010,Folatelli2010,Stritzinger2011}. Simulation specifics can be found in \citet{Kessler18}. {\blue The primary difference between the toy data of the previous section are the different underlying colour and stretch, inclusion of spectroscopic data cuts and light curve cuts, and inclusion of intrinsic dispersion models.}
+Many BHM methods have previously been validated on data constructed explicitly to validate the assumptions of the model. This is a useful consistency check that the model implementation is correct, efficient and free of obvious pathologies. However, the real test of a model is its application to realistic datasets that mimic expected observational data in as many possible ways. To this end, we test using simulations (using the SNANA package) that follow the observational schedule and observing conditions for the DES and low-$z$ surveys, where the low-$z$ sample is based on observations from CfA3 \citep{Hicken2009, Hicken2009a}, CfA4 \citep{Hicken2012} and CSP \citep{Contreras2010,Folatelli2010,Stritzinger2011}. Simulation specifics can be found in \citet{Kessler18}. \added{ The primary difference between the toy data of the previous section are the different underlying colour and stretch, inclusion of spectroscopic data cuts and light curve cuts, and inclusion of intrinsic dispersion models.}
 
-{\blue The inclusion of a proper treatment of intrinsic scatter is significant, as} prior analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population \citep{Conley2011, Betoule2014}, but recent analyses require a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of two different scatter models via simulations, the {\gten} and {\celeven} models described in Section \ref{sec:challenges}. The {\gten} models dispersion with 70\% contribution from coherent variation and 30\% from chromatic variation whilst the {\celeven} model has 25\% coherent scatter and 75\% from chromatic variation. These two broadband scatter models are converted to spectral energy distribution models for use in simulations in \citet{Kessler13}.
+\added{ The inclusion of a proper treatment of intrinsic scatter is significant, as} prior analyses often treated intrinsic dispersion simply as scatter in the underlying absolute magnitude of the underlying population \citep{Conley2011, Betoule2014}, but recent analyses require a more sophisticated approach. In our development of this model and tests of intrinsic dispersion, we analyse the effects of two different scatter models via simulations, the {\gten} and {\celeven} models described in Section \ref{sec:challenges}. The {\gten} models dispersion with 70\% contribution from coherent variation and 30\% from chromatic variation whilst the {\celeven} model has 25\% coherent scatter and 75\% from chromatic variation. These two broadband scatter models are converted to spectral energy distribution models for use in simulations in \citet{Kessler13}.
 
-In addition to the improvements in testing multiple scatter models, we also include peculiar velocities for the low-$z$ sample, and our full treatment of systematics as detailed in \citet{Brout18SYS}. Our simulated populations are sourced from \citet[][hereafter {\sk}]{Scolnic2016} and shown in Table \ref{tab:dist}. Initial tests were also done with a second, Gaussian population with color and stretch populations centered on zero and with respective width $0.1$ and $1$, however cosmological parameters were not impacted by choice of the underlying population and we continue using only the {\sk} population for computational efficiency. The selection effects were quantified by comparing all the generated supernovae to those that pass our cuts, as shown in Figure~\ref{fig:sf_snana}. It is from this simulation that our analytic determination of the selection functions for the low-$z$ and DES survey are based. We run two simulations to determine the efficiency using the {\gten} and {\celeven} scatter models and find no difference in the functional form of the Malmquist bias between the two models. {\blue Uncertainty on the analytic selection function is incorporated into our fits, mitigating the imperfection of our analytic form by allowing it to vary in our fits.}
+In addition to the improvements in testing multiple scatter models, we also include peculiar velocities for the low-$z$ sample, and our full treatment of systematics as detailed in \citet{Brout18SYS}. Our simulated populations are sourced from \citet[][hereafter {\sk}]{Scolnic2016} and shown in Table \ref{tab:dist}. Initial tests were also done with a second, Gaussian population with color and stretch populations centered on zero and with respective width $0.1$ and $1$, however cosmological parameters were not impacted by choice of the underlying population and we continue using only the {\sk} population for computational efficiency. The selection effects were quantified by comparing all the generated supernovae to those that pass our cuts, as shown in Figure~\ref{fig:sf_snana}. It is from this simulation that our analytic determination of the selection functions for the low-$z$ and DES survey are based. We run two simulations to determine the efficiency using the {\gten} and {\celeven} scatter models and find no difference in the functional form of the Malmquist bias between the two models. \added{ Uncertainty on the analytic selection function is incorporated into our fits, mitigating the imperfection of our analytic form by allowing it to vary in our fits.}
 
 
 
 \begin{deluxetable}{lcccc}
+	\renewcommand{\arraystretch}{1.2}
 \tablewidth{\columnwidth}
-
-
+	\label{tab:dist}
+	\tablecomments{The {\sk} low-$z$ stretch distribution is formed as sum of two bifurcated Gaussians, with the mean and spread of each component given respectively.}
 \tablecolumns{5}
 \tablecaption{Supernova population distributions}
 \tablehead {
@@ -665,11 +711,9 @@ In addition to the improvements in testing multiple scatter models, we also incl
 	\colhead { $\sigma_c$ } 
 }
 	\startdata
-		{\sk} low-$z$    &  $0.55$ \& $-1.5$ & $^{+0.45}_{-1.0}$ \& $^{+0.5}_{-0.5}$ & $-0.055$ & $^{+0.15}_{-0.023}$ \\ \\
+		{\sk} low-$z$    &  $0.55$ \& $-1.5$ & $^{+0.45}_{-1.0}$ \& $^{+0.5}_{-0.5}$ & $-0.055$ & $^{+0.15}_{-0.023}$ \\
 		{\sk} DES     & $0.973$ & $^{+0.222}_{1.472}$ & $-0.054$  &  $^{+0.101}_{0.043}$  \\
 	\enddata
-	\label{tab:dist}
-	\tablecomments{The {\sk} low-$z$ stretch distribution is formed as sum of two bifurcated Gaussians, with the mean and spread of each component given respectively.}
 \end{deluxetable}
 
 
@@ -686,6 +730,7 @@ In addition to the improvements in testing multiple scatter models, we also incl
 
 
 \begin{deluxetable*}{lrrrrr}
+	\label{tab:standardisation}
 	\tablewidth{\textwidth}
 	\tablecolumns{6}
 	\tablecaption{Realistic simulation standardisation parameters}
@@ -698,9 +743,7 @@ In addition to the improvements in testing multiple scatter models, we also incl
 		{\gten}  Stat         & $0.000 \ [0.008\ (0.008)]$ & $0.33 \ [0.20\ (0.17)]$ & $0.001 \ [0.016\ (0.013)]$ & $0.069 \ [0.023\ (0.019)]$ & $0.072 \ [0.026\ (0.023)]$\\
 		{\celeven} Stat + Syst  &  $0.002 \ [0.009\ (0.007)]$ & $-0.04 \ [0.15\ (0.13)]$ & $0.014 \ [0.030\ (0.018)]$ & $0.024 \ [0.016\ (0.011)]$ & $0.029 \ [0.020\ (0.014)]$ \\
 		{\celeven} Stat         &  $0.000 \ [0.008\ (0.007)]$ & $-0.05 \ [0.16\ (0.13)]$ & $0.006 \ [0.016\ (0.015)]$ & $0.025 \ [0.016\ (0.012)]$ & $0.027 \ [0.020\ (0.015)]$ \\
-		
 	\enddata
-	\label{tab:standardisation}
 \end{deluxetable*}
 
 
@@ -714,6 +757,7 @@ In addition to the improvements in testing multiple scatter models, we also incl
 \end{figure}
 
 \begin{deluxetable}{lrr}
+	\label{tab:bulk_summary}
 	\tablecaption{Realistic simulation determination of $w$}
 	\tablewidth{\columnwidth}
 	\tablecomments{Investigating the combined 100 fits to {\gten} and {\celeven} simulations, fitting with both statistics only and also when including systematics. The quoted value for $w$ represents the average mean of the fits, with the average uncertainty being shown in square brackets and the simulation scatter (the standard deviation of the mean of 100 fits) shown in standard brackets. The bias significance represents our confidence that the deviation in the mean $w$ away from $-1$ is not due to statistical fluctuation.}
@@ -724,17 +768,17 @@ In addition to the improvements in testing multiple scatter models, we also incl
 		{\celeven} Stat + Syst  &  $-0.945\ [0.098\ (0.077)]$ & $(0.55\pm0.08)\sigma$  \\
 		{\celeven} Stat         &  $-0.948\ [0.079\ (0.066)]$ & $(0.65\pm0.08)\sigma$   \\
 	\enddata
-		\label{tab:bulk_summary}
 \end{deluxetable}
 
 
 
 
 \begin{deluxetable}{crr}
-
+	\label{tab:parameter_correlations}
+	\renewcommand{\arraystretch}{0.6}
 	\tablecaption{Reduced parameter correlations with $w$.}
 	\tablecomments{Correlations determined from the combined 100 simulation fits. Correlations for the low-$z$ band systematics and the latent parameters representing selection function uncertainty are not shown but have negligible correlation. Zero superscripts indicate the Dark Energy Survey, and a superscript one represents the low-$z$ survey.}
-	\tablehead{		Parameter & {\gten} Stat+Syst & {\celeven} Stat+Syst }
+	\tablehead{	\\	Parameter & {\gten} Stat+Syst & {\celeven} Stat+Syst }
 	\startdata
 		$\Omega_m$ &   $-$0.19 &     $-$0.21     \\
 		$\alpha$ &   $-$0.17 &     $-$0.20     \\
@@ -795,7 +839,6 @@ In addition to the improvements in testing multiple scatter models, we also incl
 		$\delta [ \Delta \lambda_i ]$ &    0.00 &     $-$0.01     \\
 		$\delta [ \Delta \lambda_z ]$ &    0.09 &      0.07     \\
 	\enddata
-	\label{tab:parameter_correlations}
 \end{deluxetable}
 
 
@@ -817,11 +860,11 @@ Table \ref{tab:bulk_summary} shows that the {\gten} model is consistent with $w=
 
 Table \ref{tab:standardisation} shows a clear difference in both $\beta$ and $\sigma_{m_B}$ across the {\gten} and {\celeven} simulations. As expected, the {\celeven} simulations recover a far smaller intrinsic magnitude scatter, giving results of approximately $0.025$ when compared to the result of $0.070$ for the {\gten} simulations. The extra smearing of the {\celeven}  model does not result in a significantly biased $\beta$ value compared to the average uncertainty on $\beta$, with recovery of $\beta\approx3.76$ close to the input truth value of $3.8$, however the $\beta$ recovery for the {\gten} simulations is biased high, finding $\beta\approx3.44$ with an input of $3.1$. Interestingly, $w$-bias is only found for the {\celeven} simulations. A measure of the significance of the parameter bias can be calculated by comparing the bias to a tenth of the scatter (as our Monte-Carlo estimate uncertainty is $\sqrt{100}$ of the scatter). From this, we can see that most biases are detected with high statistical significance due to the large number of simulations tested against. 
  
-We investigate the cosmological bias and find its source to be a bias in the observed summary statistics (i.e. the $\hat{m}_B$, $\hat{x}_1$, $\hat{c}$ output from SALT2 light curve fitting), in addition to incorrect reported uncertainty on the summary statistics. To confirm this, we run two tests. The first of which, we replace the SALT2-fitted $\hat{m}_B$, $\hat{x}_1$ and $\hat{c}$ with random numbers drawn from a Gaussian centered on the true SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits. With this test, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. Our second test aims to test our model whilst allowing biases in the summary statistics not caused from intrinsic scatter through. {\blue That is, the first test ascertained that biases in the summary statistics are the cause of cosmological bias. It is thus important to determine the source of those biases; whether they are from intrinsic scatter model or another aspect of the simulation. To} this end, we test a set of 100 simulations generated using an intrinsic dispersion model of only coherent magnitude scatter. {\blue We find $w=-1.00$, showing} that the source of the biases in summary statistics is the underlying intrinsic scatter model. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty reported from fitting the SALT2 model to light curves is incorrect, non-Gaussian and biased. Our current model and techniques can quantify the effect of different scatter models on biasing the observed summary statistics, but being unable to constrain the `correct' (simulated) scatter model in our model fit means we cannot fully correct for the bias introduced by an unknown scatter model. 
+We investigate the cosmological bias and find its source to be a bias in the observed summary statistics (i.e. the $\hat{m}_B$, $\hat{x}_1$, $\hat{c}$ output from SALT2 light curve fitting), in addition to incorrect reported uncertainty on the summary statistics. To confirm this, we run two tests. The first of which, we replace the SALT2-fitted $\hat{m}_B$, $\hat{x}_1$ and $\hat{c}$ with random numbers drawn from a Gaussian centered on the true SALT2 $m_B$, $x_1$ and $c$ values with covariance as reported by initial light curve fits. With this test, both the {\gten} and {\celeven} fits recover $w=-1.00$ exactly. Our second test aims to test our model whilst allowing biases in the summary statistics not caused from intrinsic scatter through. \added{ That is, the first test ascertained that biases in the summary statistics are the cause of cosmological bias. It is thus important to determine the source of those biases; whether they are from intrinsic scatter model or another aspect of the simulation. To} this end, we test a set of 100 simulations generated using an intrinsic dispersion model of only coherent magnitude scatter. \added{ We find $w=-1.00$, showing} that the source of the biases in summary statistics is the underlying intrinsic scatter model. From this, the main challenge of improving our methodology is to handle the fact that observational uncertainty reported from fitting the SALT2 model to light curves is incorrect, non-Gaussian and biased. Our current model and techniques can quantify the effect of different scatter models on biasing the observed summary statistics, but being unable to constrain the `correct' (simulated) scatter model in our model fit means we cannot fully correct for the bias introduced by an unknown scatter model. 
 
 Unfortunately, adding extra fit parameters to allow for shifting observables washes out our ability to constrain cosmology, and applying a specific bias correction requires running a fiducial simulation (assuming cosmology, population and scatter model), which presents difficulties when trying to account for correlations with population and scatter model. This is compounded by the fact that bias corrections do not in general improve fits (increase the log posterior), and so are difficult to fit parametrically. Works such as \citet{Kessler2017} show that bias corrections can be applied to supernovae datasets that can robustly handle multiple intrinsic scatter models, and future work will center on uniting these methodologies --- incorporating better bias corrections that separate intrinsic scatter bias and non-Gaussian summary statistic bias from Malmquist bias, without having to precompute standardisation parameters and populations.
 
-Difficulty in providing an adequate parametrisation for realistic intrinsic dispersion, and the simplification of Malmquist bias to only apparent magnitude also leads to biases in the population parameters. {\blue To determine if the underlying population mischaracterisation was a cause of cosmological bias, we ran fits wherein the underlying population was fixed to the known distributions used for the simulation. These fits did not show reduced cosmological bias in the {\celeven} simulations, and thus the determination of underlying population in our model may give biased distributions, however does not impact cosmology.} As the population parameters recovered using the simplistic toy supernova data in the previous section do not exhibit significant bias, future work will focus on intrinsic dispersion and Malmquist bias rather than alternate parametrisations of the underlying supernova population.
+Difficulty in providing an adequate parametrisation for realistic intrinsic dispersion, and the simplification of Malmquist bias to only apparent magnitude also leads to biases in the population parameters. \added{ To determine if the underlying population mischaracterisation was a cause of cosmological bias, we ran fits wherein the underlying population was fixed to the known distributions used for the simulation. These fits did not show reduced cosmological bias in the {\celeven} simulations, and thus the determination of underlying population in our model may give biased distributions, however does not impact cosmology.} As the population parameters recovered using the simplistic toy supernova data in the previous section do not exhibit significant bias, future work will focus on intrinsic dispersion and Malmquist bias rather than alternate parametrisations of the underlying supernova population.
 
 Table \ref{tab:parameter_correlations} lists the fit correlations between our model fit parameters (excluding the low-$z$ band systematics, and Malmquist bias uncertainty parameters which had negligible correlation), showing (in order) cosmological parameters, standardisation parameters, population width and skewness parameters, intrinsic dispersion parameters, mass-step parameters, population mean parameters, SALT2 model systematics, dust systematic, global HST calibration systematic, peculiar velocity systematic, global redshift systematic and DES band magnitude and wavelength systematics. Figure \ref{fig:bulk_cor} show the full correlations between all non-systematic model parameters. Other interesting correlations are shown and discussed in Figure \ref{fig:bulk_cor}. The band systematics for DES filters $g$, $r$ and $i$ also show significant correlation with $w$, highlighting the importance of minimising instrumental uncertainty.
 
@@ -835,6 +878,7 @@ For the sample size of the DES $+$ low-$z$ supernova samples (332 supernova), th
 \label{sec:ucnert}
 
 \begin{deluxetable*}{llrr}
+	\label{tab:uncert}
 	\tablecaption{$w$ error budget}
 	\tablecomments{Error budget determined from analysing uncertainty on simulation data whilst progressively enabling model features. We start from the top of the table, only varying cosmological parameters $\Omega_m$ and $w$, and then progressively unlock parameters and let them fit as we progress down the table. The cumulative uncertainty shows the total uncertainty on $w$ on the fit for all, where the $\sigma_w$ term is derived by taking the quadrature difference in cumulative uncertainty as we progress.}
 	\tablehead{		Feature &  Parameters & $\sigma_w$ & Cumulative }
@@ -846,10 +890,9 @@ For the sample size of the DES $+$ low-$z$ supernova samples (332 supernova), th
 		Redshift-dependent populations & $\langle c_i \rangle$, $\langle x_{1,i} \rangle$ & 0.030  &   0.080   \\
 		Systematics                    & $\delta \mathcal{Z}_i$, $\delta S$ & 0.054  &   0.096      \\ 
 	\enddata
-	\label{tab:uncert}
 \end{deluxetable*}
 
-With the increased flexibility of Bayesian hierarchical models over traditional models, we expect to find an increased uncertainty on parameter inference. {\blue This increased uncertainty is one of the strengths of hierarchical models as it represents a more thorough accounting of model uncertainty.} To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES-SN3YR sample with various model parameters allowed to either vary or stay locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
+With the increased flexibility of Bayesian hierarchical models over traditional models, we expect to find an increased uncertainty on parameter inference. \added{This increased uncertainty is one of the strengths of hierarchical models as it represents a more thorough accounting of model uncertainty.} To characterise the influence of the extra degrees of freedom in our model, we analyse the uncertainty on $w$ averaged across 10 nominal simulations of the DES-SN3YR sample with various model parameters allowed to either vary or stay locked to a fixed value. By taking the difference in uncertainty in quadrature, we can infer the relative contribution for each model feature to the uncertainty error budget.
 
 The error budget detailed in Table \ref{tab:uncert} shows that our uncertainty is dominated by statistical error, as the total statistical uncertainty is on $w$ is $\pm0.08$. With the low number of supernovae in the DES-SN3YR sample, this is expected. We note that the label `Systematics' in Table \ref{tab:uncert} represents all numerically computed systematics (as discussed in Section \ref{sec:systreat}) and systematic uncertainty on the selection function.
 
@@ -977,24 +1020,29 @@ P({\rm data} | S , \theta) &=& \frac{ P(S | {\rm data}, \theta) P({\rm data}, \t
 &=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta) P(\theta)}{ P(S | \theta)  P(\theta)}\\
 &=& \frac{ P(S | {\rm data}, \theta) P({\rm data} | \theta)}{ P(S | \theta) } \label{eq:general1}
 \end{eqnarray}
-which is equal to the likelihood $\mathcal{L}$. Introducing an integral over all possible events $D$, so we can evaluate $P(S|\theta)$, 
+which is equal to the likelihood $\mathcal{L}$. \added{ At this point, our derivation depends on whether our selection effects are best modelled as a function of observables or as a function of latent parameters. In most cases, selection effects will be best modelled directly as a function of observables, and we would introducing an integral over all possible events $D$, so we can evaluate $P(S|\theta)$, 
 \begin{eqnarray}
 \mathcal{L}(\theta; {\rm data})&=& \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
 \mathcal{L}(\theta; {\rm data}) &=& \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:app_main}
 \end{eqnarray}
-where we define the denominator as $d$ for simplicity in future derivations.
+where we define the denominator as $d$ for simplicity in future derivations. The second option, wherein selection effects can be more efficiently modelled with the inclusion of latent parameters (for example, in the case where we do not have direct access to the observables upon which our data selection is determined), we can introduce our latent parameters in addition to an integral over all possible data:
+\begin{eqnarray}
+\mathcal{L}(\theta; {\rm data})&=& \frac{\int P(S| L,\theta) P({\rm data}|L) P(L|\theta)\, dL}{\iint P(S|D,L,\theta)P(D|L,\theta) P(L|\theta)\, dD\, dL},\label{eq:latent}
+\end{eqnarray}
+where $L$ represents our latent parameters that model the true underlying values of our observables, such that our data is conditioned directly on them.
+}
 
 
 
 \subsection{Supernova Selection Effects}
 \label{app:selection2}
-{\blue
-To turn the generalised equations from the previous sections into selection effects relevant for this model, we first need to write out our latent parameters, as $\theta$ represents only our top level parameters ($\Omega_m$, $w$, $\alpha$, $\beta$, etc). Whilst they can be inserted into the denominator of equation \eqref{eq:general1} to get $P(S|\theta) = \int P(S,L|\theta)\, dL$ and expanded out, we can simply write down our denominator with general latent parameter(s) $L$, as such:
+\added{
+To turn the generalised equations from the previous sections into selection effects relevant for this model, need to highlight that $\theta$ represents only our top level parameters ($\Omega_m$, $w$, $\alpha$, $\beta$, etc), and that our parametrisation of true underlying values (for example $m_B$) takes the form of latent parameters. We thus continue from equation \eqref{eq:latent} and write out denominator
 \begin{equation}
 d = \iint  P(S|D, L, \theta) P(D | L, \theta) P(L | \theta)\, dD\, dL
 \end{equation}
-Here we can now move from the generic labels $D$ and $L$ to something specific to our model. In this case, $D$ would represent our observables, $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{m}, \hat{p}\rbrace$, and $L$ our latent parameters $\lbrace m_B, x_1, c, z\rbrace.$ However, as we assume that our selection effects can be sufficiently encapsulated by true apparent magnitude $m_B$ and redshift $z$, we will not write out the other parameters for simplicity. If we did, we'd simply find them integrated to unity. Formally, we assume that $P(S|D, L, \theta) = P(S|z) P(S|m_B)$.}
-Our denominator then becomes
+Here we can now move from the generic labels $D$ and $L$ to something specific to our model. In this case, $D$ would represent our observables, $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{m}, \hat{p}\rbrace$, and $L$ our latent parameters $\lbrace m_B, x_1, c, z\rbrace.$ However, as we assume that our selection effects can be sufficiently encapsulated by latent parameters. That is, we simplify $P(S|D,L, \theta) \rightarrow P(S|L)$. Specifically, we assume that our selection effects can be quantified using the true apparent magnitude $m_B$ and redshift $z$, and due to this we will not write out the other parameters in our model for simplicity. If we did, we'd simply find them integrated to unity. Formally, we assume that $P(S|D, L, \theta) = P(S|z) P(S|m_B)$.}
+Writing out the relevant observables $\hat{m}_B$, $\hat{z}$ and latent parameters $m_B$ and $z$, our denominator then becomes
 \begin{equation}
 d = \int P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta)\, d\hat{z} \, d\hat{m}_B \, dz \, dm_B.  \label{eq:sel} 
 \end{equation}
