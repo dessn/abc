@@ -1,0 +1,1 @@
+python C:\Anaconda3\Lib\site-packages\mkauthlist\mkauthlist.py -j arxiv --sort-nonbuilder -a order.csv author_list.csv author_list_arxiv.tex

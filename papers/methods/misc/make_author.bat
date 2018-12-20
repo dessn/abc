@@ -1,0 +1,1 @@
+python C:\Anaconda3\Lib\site-packages\mkauthlist\mkauthlist.py -j emulateapj --sort-nonbuilder -a order.csv author_list.csv author_list.tex
