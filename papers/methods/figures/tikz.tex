@@ -29,15 +29,15 @@
 	\node[latent, above=of obssum] (sum) {$m_B, x_1, c$};
 	\node[det, above=of zobs] (z) {$z$};	
 	\node[det, above=of z] (mu) {$\mu$};
-	\node[det, right=4.33cm of mu] (MBobs) {$M_B, x_1^*, c^*$};
+	\node[latent, right=4.1cm of mu] (MBobs) {$M_B, x_1^*, c^*$};
 	% Survey nodes
 	\node[latent, above=of sum, yshift=1.6cm, xshift=1cm, text width=1.9cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c$ };
 	\node[latent, right=1.2cm of pop1, align=center] (sf) {$\delta S$};
 	\node[latent, left=0.8cm of pop1, align=center] (kappa) {$\kappa_0, \kappa_1$};
 	% Global nodes
 	\node[latent, above=2.3cm of mu]  (cosmo) {$\Omega_m, w$};
-	\node[latent, above=1.7cm of MBobs, text width=2.5cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, $\delta(0)$, \\$\delta(\infty)$};
-	\node[latent, right=0.5cm of cosmo, align=center]  (dz) {$\delta \mathcal{Z}_i$};
+	\node[latent, above=2.3cm of MBobs, text width=2cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, \\$\delta(0)$, $\delta(\infty)$};
+	\node[latent, right=0.7cm of cosmo, align=center]  (dz) {$\delta \mathcal{Z}_i$};
 	% Connect the nodes
 	\edge {sum} {obssum};
 	\edge {z} {zobs};
