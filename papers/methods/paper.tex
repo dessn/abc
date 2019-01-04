@@ -454,7 +454,7 @@ As discussed in Section \ref{sec:challenges},  the SALT2 model does not include 
  	\begin{center}
  		\includegraphics[width=\columnwidth]{tikz-figure0.pdf}
  	\end{center}
- 	\caption{Probabilistic graphical model for our likelihood. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, single-lined ellipse nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it. Variables that appear outside both boxes represent top level model parameters. \added{To solidify that the underlying supernova population lives in $\lbrace M_B, x_1, c\rbrace$ space, we write out the stretch and colour populations along with $M_B$, however note here that those $x_1$ and $c$ values (denoted by an asterix) are identically equal to the $x_1$ and $c$ values in the latent node they are conditioned on, and in the code implementation, they are the same variable.}}
+ 	\caption{Probabilistic graphical model for our likelihood \added{and selection effects}. Double-lined nodes represent observed variables, diamond nodes represent deterministic variables, single-lined ellipse nodes represent fit variables. The SN box represents observed variables and latent variables for each individual supernova, whilst the survey box represents survey-specific variables, which in general describe the supernova population for the survey and the systematics associated with it. Variables that appear outside both boxes represent top level model parameters. \added{To solidify that the underlying supernova population lives in $\lbrace M_B, x_1, c\rbrace$ space, we write out the stretch and colour populations along with $M_B$, however note here that those $x_1$ and $c$ values (denoted by an asterix) are identically equal to the $x_1$ and $c$ values in the latent node they are conditioned on, and in the code implementation, they are the same variable.}}
  	\label{fig:pgm}
  \end{figure}
 
@@ -1143,10 +1143,6 @@ a & 0 & 0 \\ b & c & 0 \\ d & e & f + g \\
 \end{pmatrix},
 \end{equation}
 where $g = \sqrt{f^2 + \sigma_e^2} - f$. This allows an easy update to the cholesky decomposition to add extra uncertainty to the independent color uncertainty. For both the {\gten} and {\celeven} models, we ran fits without the cholesky parametrisation to allow for extra correlated dispersion (instead of just dispersion on $c$), but find no decrease in bias or improved fit statistics, allowing us to use the more efficient cholesky parametrisation.
-
-
-
-
 
 
 \end{document}

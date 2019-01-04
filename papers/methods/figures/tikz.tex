@@ -21,7 +21,7 @@
 \begin{document}
 	\begin{tikzpicture}
 	% Obs nodes
-	\node[obs]  (obssum) {$\hat{m}_B, \hat{x}_1, \hat{c}, \mathcal{C_\eta}^{-1}$};
+	\node[obs]  (obssum) {$\hat{m}_B, \hat{x}_1, \hat{c}, \hat{\mathcal{C}}_\eta^{-1}$};
 	\node[obs, left=0.8cm of obssum]  (zobs) {$\hat{z}$};
 	\node[obs, right=0.6cm of obssum]  (mobs) {$\hat{m}$};
 	\node[obs, right=0.6cm of mobs]  (pobs) {$\hat{p}$};
@@ -31,22 +31,22 @@
 	\node[det, above=of z] (mu) {$\mu$};
 	\node[latent, right=4.1cm of mu] (MBobs) {$M_B, x_1^*, c^*$};
 	% Survey nodes
-	\node[latent, above=of sum, yshift=1.6cm, xshift=1cm, text width=1.9cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c$ };
-	\node[latent, right=1.2cm of pop1, align=center] (sf) {$\delta S$};
+	\node[latent, above=of sum, yshift=1.6cm, xshift=1.4cm, text width=1.9cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c$ };
+
 	\node[latent, left=0.8cm of pop1, align=center] (kappa) {$\kappa_0, \kappa_1$};
 	% Global nodes
 	\node[latent, above=2.3cm of mu]  (cosmo) {$\Omega_m, w$};
 	\node[latent, above=2.3cm of MBobs, text width=2cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, \\$\delta(0)$, $\delta(\infty)$};
-	\node[latent, right=0.7cm of cosmo, align=center]  (dz) {$\delta \mathcal{Z}_i$};
+	\node[latent, right=0.7cm of cosmo, align=center]  (dz) {$\delta \mathcal{Z}_i, \delta S$};
 	% Connect the nodes
 	\edge {sum} {obssum};
 	\edge {z} {zobs};
 	\edge {z,cosmo} {mu};
-	\edge {mu, pop1, ab, sf} {MBobs};	
+	\edge {mu, pop1, ab} {MBobs};	
 	\edge {MBobs} {pobs, mobs};
 	\edge {dz, kappa, MBobs} {sum};
 	% Plates
 	\plated[thick] {sn} {(obssum)(zobs)(mobs)(pobs)(sum)(z)(mu)(MBobs)} {$\forall\ \rm{SN}$} ;
-	\plated[thick] {survey} {(sn)(pop1)(kappa)(sf)} {\\$\forall\ \rm{Survey}$} ;
+	\plated[thick] {survey} {(sn)(pop1)(kappa)} {\\$\forall\ \rm{Survey}$} ;
 	\end{tikzpicture}
 \end{document}
