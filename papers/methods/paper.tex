@@ -375,7 +375,11 @@ Finally, one of the other persistent challenges facing supernova cosmology analy
 
 We construct our hierarchical Bayesian model {\steve} with several goals in mind: creation of a redshift-dependent underlying supernova population,  treatment of an increased number of systematics, and analytic correction of selection effects, including systematic uncertainty on those corrections. We also desire {\steve} more computationally efficient than prior works, such that cosmological results from thousands of supernovae are obtainable in the order of hours, rather than days. As this is closest to the UNITY method from \citet[][hereafter denoted \rubin]{Rubin2015}, we follow a similar model scaffold, and construct the model in the programming language Stan \citep{Carpenter2017, StanDevelopmentTeam2017}. The primary challenge of fitting hierarchical models is their large number of fit parameters, and Stan, which uses automatic differentiation and the no-U-turn Sampler (NUTS, a variant of Hamiltonian Monte Carlo), allows us to efficiently sample high dimensional parameter space.
 
-At the most fundamental level, a supernova cosmology analysis is a mapping from an underlying population onto an observed population, where cosmological parameters are encoded directly in the mapping function. The difficulty arises both in adequately describing the biases in the mapping function, and in adding sufficient, physically motivated flexibility in both the observed and underlying populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model. In the following sections, we will describe these layers, mapping functions, and occurrences of these fatal pathologies. Summaries of observables and model parameters are shown in Table \ref{tab:param_summary} for easy reference.
+At the most fundamental level, a supernova cosmology analysis is a mapping from an underlying population onto an observed population, where cosmological parameters are encoded directly in the mapping function. The difficulty arises both in adequately describing the biases in the mapping function, and in adding sufficient, physically motivated flexibility in both the observed and underlying populations whilst not adding \textit{too} much flexibility, such that model fitting becomes pathological due to increasing parameter degeneracies within the model.
+
+\added{In the analysis of this article, the underlying model universe maps to the observed universe as sketched in the BHM of Figure \ref{fig:pgm}. The dependencies that between the model and observations can be tracked following the arrows of the BHM, and a summary of all the conditional probabilities can be found in \ref{sec:model_summary}.
+
+In the following sections, we will describe the model parameters, the mapping functions that connect them to data, the effect of sample selection (in Equation \eqref{eq:main}), and the pathologies that can occur when evaluating the model. Summaries of observables and model parameters are shown in Table 1 for easy reference.}
 
 
 \subsection{Observed Populations}
@@ -593,6 +597,24 @@ and is incorporated into our likelihood. \added{ Note that the above efficiencie
 	\caption{The efficiency for supernova discovery at an arbitrary redshift. Shown in both panels in dashed blue is the SN~Ia population distribution, which takes the form of a normal distribution. The top panel shows a CDF based survey efficiency (green dotted line), whilst the bottom panel shows a skew normal based survey efficiency (red dotted line), as functions of apparent magnitude. The survey efficiency, given the SN~Ia population, is shown as a solid line in both panels, and the probability of observing a SN~Ia is found by integrating over the population detection efficiency as described in equation \eqref{eq:w1}, and has been shown by shading the area integrated. This area is what is analytically given by equations \eqref{eq:seldes} and \eqref{eq:sellow-$z$}.}
 	\label{fig:efficiency}
 \end{figure}
+
+\added{
+\subsection{Model Summary}
+\label{sec:model_summary}
+
+Having laid out each individual aspect of the model, the relationships between variables and our treatment of uncertainty, here we summarise the relationships in our model likelihood mathematically. In this likelihood summary, we leave out sample selection for simplicity. Our likelihood is thus given as:
+
+\begin{align}
+&P({\rm data}|\theta) = \notag \\
+&\int\, d\mu\, d\eta \ P( \hat{\eta}, \hat{\mathcal{C}}_\eta^{-1} | \eta, \delta \mathcal{Z}_i, \kappa_0, \kappa_1) P(\hat{z}|z) \notag \\
+& P(\eta, \hat{m}, \hat{p} | \langle M_B \rangle, \langle x_1^i \rangle, \langle c^i \rangle, \mu, \delta(0), \delta(\infty), \sigma_{M_B}, \sigma_{x_1}, \sigma_c, \alpha, \beta) \notag \\
+& P(\mu |z, \Omega_m, w) 
+\end{align}
+}
+
+
+
+
 
 
 
@@ -1041,7 +1063,11 @@ To turn the generalised equations from the previous sections into selection effe
 \begin{equation}
 d = \iint  P(S|D, L, \theta) P(D | L, \theta) P(L | \theta)\, dD\, dL.
 \end{equation}
-Here we can now move from the generic labels $D$ and $L$ to something specific to our model. In this case, $D$ would represent our observables, $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{m}, \hat{p}\rbrace$, and $L$ our latent parameters $\lbrace m_B, x_1, c, z\rbrace.$ We assume that our selection effects can be sufficiently encapsulated by latent parameters. That is, we simplify $P(S|D,L, \theta) \rightarrow P(S|L)$. Specifically, we assume that our selection effects can be quantified using the true apparent magnitude $m_B$ and redshift $z$, and due to this we will not write out the other parameters in our model for simplicity. If we did, we would simply find them integrated to unity. Formally, we assume that $P(S|D, L, \theta) = P(S|z) P(S|m_B)$.}
+Here we can now move from the generic labels $D$ and $L$ to something specific to our model. In this case, $D$ would represent our observables, $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{m}, \hat{p}\rbrace$, and $L$ our latent parameters $\lbrace m_B, x_1, c, z\rbrace.$ We assume that our selection effects can be sufficiently encapsulated by latent parameters. That is, we simplify $P(S|D,L, \theta) \rightarrow P(S|L)$. Specifically, we assume that our selection effects can be quantified using the true apparent magnitude $m_B$ and redshift $z$, and due to this we will not write out the other parameters in our model for simplicity. If we did, we would simply find them integrated to unity. Note that this assumption does not capture biases engendered by
+Poisson noise fluctuations.  
+We advocate that future analyses with
+higher statistical precision do use a precisely determined $P(S|D)$.
+Formally, we assume that $P(S|D, L, \theta) = P(S|z) P(S|m_B)$.}
 Writing out the relevant observables $\hat{m}_B$, $\hat{z}$ and latent parameters $m_B$ and $z$, our denominator then becomes
 \begin{equation}
 d = \int P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta)\, d\hat{z} \, d\hat{m}_B \, dz \, dm_B.  \label{eq:sel} 
@@ -1143,6 +1169,7 @@ a & 0 & 0 \\ b & c & 0 \\ d & e & f + g \\
 \end{pmatrix},
 \end{equation}
 where $g = \sqrt{f^2 + \sigma_e^2} - f$. This allows an easy update to the cholesky decomposition to add extra uncertainty to the independent color uncertainty. For both the {\gten} and {\celeven} models, we ran fits without the cholesky parametrisation to allow for extra correlated dispersion (instead of just dispersion on $c$), but find no decrease in bias or improved fit statistics, allowing us to use the more efficient cholesky parametrisation.
+
 
 
 \end{document}
