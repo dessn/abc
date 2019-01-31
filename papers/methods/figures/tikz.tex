@@ -26,25 +26,30 @@
 	\node[obs, right=0.6cm of obssum]  (mobs) {$\hat{m}$};
 	\node[obs, right=0.6cm of mobs]  (pobs) {$\hat{p}$};
 	% Latent nodes
-	\node[latent, above=of obssum] (sum) {$m_B, x_1, c$};
-	\node[det, above=of zobs] (z) {$z$};	
+	\node[det, above=of obssum, xshift=0.5cm] (sum) {$m_B, x_1, c$};
+	\node[det, above=of zobs] (z) {$z$};
+	\node[det, above=of mobs] (m) {$m$};
+	\node[det, above=of pobs, yshift=0.449cm] (p) {$p$};	
 	\node[det, above=of z] (mu) {$\mu$};
 	\node[latent, right=4.1cm of mu] (MBobs) {$M_B, x_1^*, c^*$};
 	% Survey nodes
-	\node[latent, above=of sum, yshift=1.6cm, xshift=1.4cm, text width=1.9cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c$ };
+	\node[latent, above=of sum, yshift=0.3cm, xshift=1.4cm, text width=1.85cm, align=center] (pop1) {$\langle x_1^i \rangle, \langle c^i \rangle,\sigma_{M_B}, $\\$ \sigma_{x_1}, \sigma_c, \alpha_c$ };
 
-	\node[latent, left=0.8cm of pop1, align=center] (kappa) {$\kappa_0, \kappa_1$};
+	\node[latent, left=1.3cm of pop1, align=center] (kappa) {$\kappa_0, \kappa_1$};
 	% Global nodes
-	\node[latent, above=2.3cm of mu]  (cosmo) {$\Omega_m, w$};
-	\node[latent, above=2.3cm of MBobs, text width=2cm, align=center]  (ab) {$\langle M_B \rangle, \alpha, \beta$, \\$\delta(0)$, $\delta(\infty)$};
-	\node[latent, right=0.7cm of cosmo, align=center]  (dz) {$\delta \mathcal{Z}_i, \delta S$};
+	\node[latent, above=2.1cm of mu]  (cosmo) {$\Omega_m, w$};
+	\node[latent, above=2.1cm of MBobs, xshift=0.8cm, align=center]  (ab) {$\langle M_B \rangle$};
+	\node[latent, right=0.1cm of cosmo, align=center]  (dz) {$\delta \mathcal{Z}_i$};
+	\node[latent, right=0.1cm of dz, align=center] (dd) {$\alpha, \beta, \delta(0)$, \\$\delta(\infty)$};
 	% Connect the nodes
-	\edge {sum} {obssum};
+	\edge {sum, dz, kappa} {obssum};
 	\edge {z} {zobs};
+	\edge {m} {mobs};
+	\edge {p} {pobs};
 	\edge {z,cosmo} {mu};
-	\edge {mu, pop1, ab} {MBobs};	
-	\edge {MBobs} {pobs, mobs};
-	\edge {dz, kappa, MBobs} {sum};
+	\edge {pop1, ab} {MBobs};	
+	\edge {mu, MBobs, m, p, dd} {sum};
+
 	% Plates
 	\plated[thick] {sn} {(obssum)(zobs)(mobs)(pobs)(sum)(z)(mu)(MBobs)} {$\forall\ \rm{SN}$} ;
 	\plated[thick] {survey} {(sn)(pop1)(kappa)} {\\$\forall\ \rm{Survey}$} ;
