@@ -23,13 +23,13 @@
 	% Obs nodes
 	\node[obs]  (obssum) {$\hat{m}_B, \hat{x}_1, \hat{c}, \hat{\mathcal{C}}_\eta^{-1}$};
 	\node[obs, left=0.8cm of obssum]  (zobs) {$\hat{z}$};
-	\node[obs, right=0.6cm of obssum]  (mobs) {$\hat{m}$};
+	\node[obs, right=0.6cm of obssum]  (mobs) {$\hat{{\rm mass}}$};
 	\node[obs, right=0.6cm of mobs]  (pobs) {$\hat{p}$};
 	% Latent nodes
 	\node[det, above=of obssum, xshift=1.2cm] (mb) {$m_B$};
 	\node[latent, left=of mb, xshift=0.1cm] (x1c) {$x_1, c$};
 	\node[det, above=of zobs] (z) {$z$};
-	\node[det, above=of mobs, yshift=-0.5cm] (m) {$m$};
+	\node[det, above=of mobs, yshift=-0.5cm] (m) {${\rm mass}$};
 	\node[det, above=of pobs, yshift=0.5cm] (p) {$p$};	
 	\node[det, above=of z] (mu) {$\mu$};
 	\node[latent, above=of p, yshift=-0.5cm] (MB) {$M_B$};
