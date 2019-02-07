@@ -605,11 +605,12 @@ and is incorporated into our likelihood. \added{ Note that the above efficiencie
 Having laid out each individual aspect of the model, the relationships between variables and our treatment of uncertainty, here we summarise the relationships in our model mathematically. In this summary of $P({\rm data} | \theta)$, we leave out sample selection for simplicity. Referring to  equation \eqref{eq:main}, the relationships with $P({\rm data} | \theta)$ are as follows:
 
 \begin{align}
-&P({\rm data}|\theta) = \notag \\
+&P({\rm data}|\theta) \propto \notag \\
 &\int\, d\mu\, d\eta\, dz \ P( \hat{\eta}, \hat{\mathcal{C}}_\eta^{-1} | \eta, \delta \mathcal{Z}_i, \kappa_0, \kappa_1) P(\hat{z}|z) \notag \\
-& P(\eta, \hat{m}, \hat{p} | \langle M_B \rangle, \langle x_1^i \rangle, \langle c^i \rangle, \mu, \delta(0), \delta(\infty), \sigma_{M_B}, \sigma_{x_1}, \sigma_c, \alpha, \beta, z) \notag \\
-& P(\mu |z, \Omega_m, w) 
+& P(\eta | \langle M_B \rangle, \langle x_1^i \rangle, \langle c^i \rangle, \mu, \delta(0), \delta(\infty), \sigma_{M_B}, \sigma_{x_1}, \sigma_c, \alpha, \beta, z, \hat{m}, \hat{p}) \notag \\
+& P(\mu |z, \Omega_m, w),
 \end{align}
+where $\hat{m}$ and $\hat{p}$ are found on the right-hand-side of the conditional probability because we take them as exact measurements and not dependent on a prior distribution.
 
 The denominator of equation \eqref{eq:main} is then given by either equation \eqref{eq:seldes} or \eqref{eq:sellow-z} depending on the survey, and similarly $P(S|{\rm data}, \theta)$ is given by equation \eqref{eq:selnorm} or \eqref{eq:selcdf} respectively. Combining all of these gives us our full model likelihood with selection effects accounted for.
 
