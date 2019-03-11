@@ -542,9 +542,14 @@ One large difference between traditional methods and BHM methods is that we trea
 \end{align}
 As our model so far describes components of a basic likelihood $P({\rm data}|\theta)$, and we wish to formulate a function $P(S|{\rm data},\theta)$ that describes the chance of an event being successfully observed, we rearrange the likelihood in terms of those functions and find
 \begin{align}
-\mathcal{L}(\theta; {\rm data}) &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, \label{eq:main}
+\mathcal{L}(\theta; {\rm data}) &= \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}, 
 \end{align}
-where the denominator represents an integral over all potential data $D$. This is derived in Appendix \ref{app:selection1}. \added{ To evaluate the effect of our selection effects, we need to evaluate both the selection effect terms in the numerator and the integral in the denominator. The numerator represents the probability we caught the supernova and it was selected into the cosmology sample. The integral represents our global selection efficiency at a location in parameter space, rather than the probability of our data being selected into our sample.} As $\theta$ represents the vector of all model parameters, and $D$ represents a vector of all observed variables, this is not a trivial integral. Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
+where the denominator represents an integral over all potential data $D$, \added{and $\theta$ represents top-level parameters. In the case that our selection effects are best charactersied by latent variables \textit{instead of} data, we can add them to our formulation and our likelihood becomes
+\begin{eqnarray}
+\mathcal{L}(\theta; {\rm data})&=& \frac{\int P(S|L,\theta) P({\rm data}|L) P(L|\theta)\, dL}{\iint P(S|L,\theta) P(L|\theta) dL},\label{eq:main}
+\end{eqnarray}
+where $L$ represents our latent parameters.}
+This is derived in Appendix \ref{app:selection1}. \added{ To evaluate the effect of our selection effects, we need to evaluate both the selection effect terms in the numerator and the integral in the denominator. The numerator represents the probability we caught the supernova and it was selected into the cosmology sample. The integral represents our global selection efficiency at a location in parameter space, rather than the probability of our data being selected into our sample.} As $\theta$ represents the vector of all \added{top-level model parameters, and $L$ represents a vector of all latent parameters, this is not a trivial integral.} Techniques to approximate this integral, such as Monte-Carlo integration or high-dimensional Gaussian processes failed to give tractable posterior surfaces that could be sampled efficiently by Hamiltonian Monte-Carlo, and post-fitting importance sampling failed due to high-dimensionality (a brief dismissal of many months of struggle). We therefore simplify the integral and approximate the selection effects from their full expression in all of $\theta$-space, to apparent magnitude and redshift space independently (not dependent on $x_1$ or $c$), such that the denominator of equation \eqref{eq:main}, denoted now $d$ for simplicity, is given as
 \begin{equation}
 d = \int  \left[ \int P(S|m_B) P(m_B | z, \theta)\, d m_B \right] P(S|z) P(z|\theta)\, dz, \label{eq:w1}
 \end{equation}
@@ -1051,11 +1056,11 @@ which is equal to the likelihood $\mathcal{L}$. \added{ At this point, our deriv
 \mathcal{L}(\theta; {\rm data})&=& \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S, D|\theta)\, dD} \\
 \mathcal{L}(\theta; {\rm data}) &=& \frac{P(S|{\rm data},\theta) P({\rm data}|\theta)}{\int P(S | D, \theta) P(D|\theta)\, dD}. \label{eq:app_main}
 \end{eqnarray}
-The second option, wherein selection effects can be more efficiently modelled with the inclusion of latent parameters (for example, in the case where we do not have direct access to the observables upon which our data selection is determined), we can introduce our latent parameters in addition to an integral over all possible data:
+The second option, wherein selection effects can be more computationally efficiently modelled with the inclusion of latent parameters (for example, in the case where we do not have direct access to the observables upon which our data selection is determined), we can introduce our latent parameters in addition to an integral over all possible data:
 \begin{eqnarray}
-\mathcal{L}(\theta; {\rm data})&=& \frac{\int P(S| L,\theta) P({\rm data}|L) P(L|\theta)\, dL}{\iint P(S|D,L,\theta)P(D|L,\theta) P(L|\theta)\, dD\, dL},\label{eq:latent}
+\mathcal{L}(\theta; {\rm data})&=& \frac{\int P(S|{\rm data}, L,\theta) P({\rm data}|L) P(L|\theta)\, dL}{\iint P(S|D,L,\theta)P(D|L,\theta) P(L|\theta)\, dD\, dL},\label{eq:latent}
 \end{eqnarray}
-where $L$ represents our latent parameters that model the true underlying values of our observables, such that our data is conditioned directly on them.
+where $L$ represents our latent parameters that model the true underlying values of our observables, such that our data is conditioned directly on them. In this formulation, the selection effects can depend both on data and latent variables.
 }
 
 
@@ -1067,16 +1072,19 @@ To turn the generalised equations from the previous sections into selection effe
 \begin{equation}
 d = \iint  P(S|D, L, \theta) P(D | L, \theta) P(L | \theta)\, dD\, dL.
 \end{equation}
-Here we can now move from the generic labels $D$ and $L$ to something specific to our model. In this case, $D$ would represent our observables, $\lbrace \hat{m}_B, \hat{x}_1, \hat{c}, \hat{z}, \hat{m} \rbrace$, and $L$ our latent parameters $\lbrace m_B, x_1, c, z\rbrace.$ We assume that our selection effects can be sufficiently encapsulated by latent parameters. That is, we simplify $P(S|D,L, \theta) \rightarrow P(S|L)$. Specifically, we assume that our selection effects can be quantified using the true apparent magnitude $m_B$ and redshift $z$, and due to this we will not write out the other parameters in our model for simplicity. If we did, we would simply find them integrated to unity. Note that this assumption does not capture biases engendered by
+In our formulation, we assume that our selection effects can be sufficiently encapsulated by latent parameters. That is, we simplify $P(S|D,L, \theta) \rightarrow P(S|L)$. This allows us to isolate our integral $\int P(D|L,\theta)$ in the above equation, integrate it to unity, and come to 
+\begin{equation}
+d = \int  P(S|L) P(L | \theta)\, dL.
+\end{equation}	
+Here we can now move from the generic label $L$ to something specific to our model. Specifically, we assume that our selection effects can be quantified using the true apparent magnitude $m_B$ and redshift $z$, and so $L \rightarrow \lbrace m_B, z\rbrace$, or formally $P(S|D, L, \theta) = P(S|z) P(S|m_B)$. We do not write out other latent parameters found in the model as they do not impact selection effects --- we would simply find them integrated to unity. Note that this assumption does not capture biases engendered by
 Poisson noise fluctuations.  
 We advocate that future analyses with
 higher statistical precision do use a precisely determined $P(S|D)$.
-Formally, we assume that $P(S|D, L, \theta) = P(S|z) P(S|m_B)$.}
-Writing out the relevant observables $\hat{m}_B$, $\hat{z}$ and latent parameters $m_B$ and $z$, our denominator then becomes
+Writing out the latent variables, our denominator becomes
 \begin{equation}
-d = \int P(S|z) P(S|m_B) P(\hat{z}|z) P(\hat{m}_B|m_B) P(z, m_B | \theta)\, d\hat{z} \, d\hat{m}_B \, dz \, dm_B.  \label{eq:sel} 
+d = \int P(S|z) P(S|m_B)P(z, m_B | \theta)\, d\hat{z} \, dz \, dm_B.  \label{eq:sel} 
 \end{equation}
-Due to our assumed perfect measurement of redshift, $P(\hat{z}|z) = \delta(\hat{z} - z)$. $P(\hat{m}_B | m_B)$ is a Gaussian due to our Gaussian model of summary statistics, and can be analytically integrated out, collapsing the integral over $\hat{m}_B$. Finally, we can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state
+We can express $P(z, m_B | \theta)$ as  $P(m_B | z, \theta) P(z | \theta)$, where the first term requires us to calculate the magnitude distribution of our underlying population at a given redshift, and the second term is dependent on survey geometry and supernovae rates. We can thus state}
 \begin{equation}
 d = \int \left[ \int P(S|m_B) P(m_B | z, \theta)\, dm_B \right] P(S|z)P(z|\theta)\, dz.
 \end{equation}
