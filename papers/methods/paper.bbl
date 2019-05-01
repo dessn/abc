@@ -56,9 +56,10 @@ Bernstein J.~P.,  et~al., 2012, \mn@doi [The Astrophysical Journal]
 Betoule M.,  et~al., 2014, \mn@doi [Astronomy {\&} Astrophysics]
   {10.1051/0004-6361/201423413}, 568, 32
 
-\bibitem[\protect\citeauthoryear{Brout et~al.,}{Brout
-  et~al.}{2018}]{Brout18SYS}
-Brout D.,  et~al., 2018, preprint (\mn@eprint {arXiv} {1811.02377})
+\bibitem[\protect\citeauthoryear{{Brout} et~al.,}{{Brout}
+  et~al.}{2019}]{Brout18SYS}
+{Brout} D.,  et~al., 2019, \mn@doi [\apj] {10.3847/1538-4357/ab08a0}, \href
+  {https://ui.adsabs.harvard.edu/abs/2019ApJ...874..150B} {874, 150}
 
 \bibitem[\protect\citeauthoryear{Carpenter et~al.,}{Carpenter
   et~al.}{2017}]{Carpenter2017}
@@ -92,8 +93,9 @@ D'Andrea C.~B.,  et~al., 2011, \mn@doi [The Astrophysical Journal]
   {10.1088/0004-637X/743/2/172}, 743, 172
 
 \bibitem[\protect\citeauthoryear{{DES Collaboration} et~al.,}{{DES
-  Collaboration} et~al.}{2018}]{DESKEY}
-{DES Collaboration} et~al., 2018, preprint (\mn@eprint {arXiv} {1811.02374})
+  Collaboration} et~al.}{2019}]{DESKEY}
+{DES Collaboration} et~al., 2019, \mn@doi [\apj] {10.3847/2041-8213/ab04fa},
+  \href {https://ui.adsabs.harvard.edu/abs/2019ApJ...872L..30A} {872, L30}
 
 \bibitem[\protect\citeauthoryear{Dilday et~al.,}{Dilday
   et~al.}{2008}]{Dilday2008}
@@ -215,9 +217,10 @@ Kessler R.,  et~al., 2009b, \mn@doi [Astrophysical Journal, Supplement Series]
 Kessler R.,  et~al., 2013b, \mn@doi [The Astrophysical Journal]
   {10.1088/0004-637X/764/1/48}, 764, 48
 
-\bibitem[\protect\citeauthoryear{Kessler et~al.,}{Kessler
-  et~al.}{2018}]{Kessler18}
-Kessler R.,  et~al., 2018, preprint (\mn@eprint {arXiv} {1811.02379})
+\bibitem[\protect\citeauthoryear{{Kessler} et~al.,}{{Kessler}
+  et~al.}{2019}]{Kessler18}
+{Kessler} R.,  et~al., 2019, \mn@doi [\mnras] {10.1093/mnras/stz463}, \href
+  {https://ui.adsabs.harvard.edu/abs/2019MNRAS.485.1171K} {485, 1171}
 
 \bibitem[\protect\citeauthoryear{Kowalski et~al.,}{Kowalski
   et~al.}{2008}]{Kowalski2008}
